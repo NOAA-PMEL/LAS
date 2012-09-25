@@ -109,6 +109,11 @@ public class MultiCallback implements RequestCallback {
 		ArrayList<String> callbackPair = new ArrayList<String>(2);
 		callbackPair.add(0, sourceName);
 		callbackPair.add(1, callbackObjectName);
+
+		// Don't bother adding duplicates
+		if (this.callbackPairs.contains(callbackPair))
+			return false;
+
 		return this.callbackPairs.add(callbackPair);
 	}
 

@@ -1634,7 +1634,7 @@ public class Correlation implements EntryPoint {
     }
 
     private ImageData scaleImage(Image image, double scaleToRatio) {
-        logger.info("enterring scaleImage with scaleToRatio:" + scaleToRatio);
+        logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
         Canvas canvasTmp = Canvas.createIfSupported();
         Context2d context = canvasTmp.getContext2d();
 
@@ -1740,7 +1740,7 @@ public class Correlation implements EntryPoint {
     }
 
     String getPlotWidth(IESafeImage plotImage) {
-        logger.fine("enterring getPlotWidth()");
+        logger.fine("entering getPlotWidth()");
         int antipadding = 0;// 100;
         String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
         if ( plotImage != null ) {
