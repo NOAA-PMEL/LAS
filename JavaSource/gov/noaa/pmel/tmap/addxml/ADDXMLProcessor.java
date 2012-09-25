@@ -134,7 +134,6 @@ import com.martiansoftware.jsap.JSAPResult;
  */
 public class ADDXMLProcessor {
 
-    private static final Logger log = LogManager.getLogger(ADDXMLProcessor.class);
     private static final String patterns[] = {
         "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
         "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
@@ -213,7 +212,7 @@ public class ADDXMLProcessor {
                     forceAxes.put(ax[a], new Boolean(true));
                 }
                 else {
-                    log.error("Ignoring axis " + ax[a] +
+                    System.err.println("Ignoring axis " + ax[a] +
                     " on the --arange option. Unknown axis.  Must be x,y,z or t.");
                 }
             }
@@ -228,7 +227,7 @@ public class ADDXMLProcessor {
                     group_type = grp[g];
                 }
                 else {
-                    log.error("Ignoring group with type " + grp[g] +
+                    System.err.println("Ignoring group with type " + grp[g] +
                     " on the --group_type option. Must be ensemble or time_series.");
                 }
             }
@@ -265,8 +264,8 @@ public class ADDXMLProcessor {
             try{
                 provider_class = loader.loadClass(provider);
             }catch(ClassNotFoundException ee){
-                log.error("Error loading authentication credentials provider class.");
-                log.error(ee.getMessage());
+                System.err.println("Error loading authentication credentials provider class.");
+                System.err.println(ee.getMessage());
                 System.exit(1);
             }
 
@@ -274,8 +273,8 @@ public class ADDXMLProcessor {
             try{
                 provider_obj = (LASCredentialsProvider)provider_class.newInstance();
             }catch(Exception ee){
-                log.error("Error creating authentication credentials provider object.");
-                log.error(ee.getMessage());
+                System.err.println("Error creating authentication credentials provider object.");
+                System.err.println(ee.getMessage());
                 System.exit(1);
             }
         }
@@ -323,20 +322,20 @@ public class ADDXMLProcessor {
         }
 
         if (version) {
-            log.error("Version: " + version_string);
+            System.err.println("Version: " + version_string);
         }
 
         if (data.length == 0 && thredds.length == 0) {
-            log.error("");
-            log.error("You must specify either");
-            log.error("\ta THREDDS catalog with the -t option or ");
-            log.error("\ta netCDF data source with the -n option.");
-            log.error("");
-            log.error("Usage: addXML.sh ");
-            log.error(command_parser.getUsage());
-            log.error("");
-            log.error("");
-            log.error(command_parser.getHelp());
+            System.err.println("");
+            System.err.println("You must specify either");
+            System.err.println("\ta THREDDS catalog with the -t option or ");
+            System.err.println("\ta netCDF data source with the -n option.");
+            System.err.println("");
+            System.err.println("Usage: addXML.sh ");
+            System.err.println(command_parser.getUsage());
+            System.err.println("");
+            System.err.println("");
+            System.err.println(command_parser.getHelp());
             System.exit(1);
         }
 
@@ -350,11 +349,11 @@ public class ADDXMLProcessor {
             }
             // Failed to read input XML.  Go on without it.
             catch (IOException ex) {
-                log.error(ex.getMessage());
+                System.err.println(ex.getMessage());
                 inputLasDoc = null;
             }
             catch (JDOMException ex) {
-                log.error(ex.getMessage());
+                System.err.println(ex.getMessage());
                 inputLasDoc = null;
             }
         }
@@ -534,13 +533,13 @@ public class ADDXMLProcessor {
         }
 
         if (numThredds == 0 && numNetcdf == 0) {
-            log.error("");
-            log.error("No grids were found in the input data sets.");
-            log.error(
+            System.err.println("");
+            System.err.println("No grids were found in the input data sets.");
+            System.err.println(
             "Check to see if the OPeNDAP servers being referenced are running.");
-            log.error(
+            System.err.println(
             "Verify that the netCDF files referenced are COARDS or CF compliant.");
-            log.error("");
+            System.err.println("");
         }
 
         if (inputLasDoc != null) {
@@ -572,7 +571,7 @@ public class ADDXMLProcessor {
                 show = true;
             }
             if (!catalog.check(buff, show)) {
-                log.error("Invalid catalog <" + data + ">\n" + buff.toString());
+                System.err.println("Invalid catalog <" + data + ">\n" + buff.toString());
             }
             else {
                 return createXMLfromTHREDDSCatalog(catalog);
@@ -589,7 +588,7 @@ public class ADDXMLProcessor {
       url = new URL(data);
          }
          catch (MalformedURLException ex) {
-      log.error(ex.getMessage()+" "+data);
+      System.err.println(ex.getMessage()+" "+data);
          }
          CatalogGen catGen = new CatalogGen(url);
          StringBuffer log = new StringBuffer();
@@ -677,7 +676,7 @@ public class ADDXMLProcessor {
                 countString = String.valueOf(fileCount);
             }
             else {
-                log.error("No more that 999 data sets to process.  Please.");
+                System.err.println("No more that 999 data sets to process.  Please.");
                 System.exit(1);
             }
         }
@@ -1039,7 +1038,7 @@ public class ADDXMLProcessor {
                      *
                      * Log the data set and move on...
                      */
-                    log.warn("Not enough metadata to create LAS configuration for "+threddsDataset.getName()+".  Skipping...");
+                    System.err.println("Not enough metadata to create LAS configuration for "+threddsDataset.getName()+".  Skipping...");
                 }
             }
         } else {
@@ -1056,7 +1055,7 @@ public class ADDXMLProcessor {
         Set AllAxesBeans = new HashSet();
 
         if (verbose) {
-            log.info("Processing UAF THREDDS dataset: " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" from "+threddsDataset.getParentCatalog().getUriString());
+            System.out.println("Processing UAF THREDDS dataset: " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" from "+threddsDataset.getParentCatalog().getUriString());
         }
 
         dataset.setName(threddsDataset.getFullName());
@@ -1093,7 +1092,7 @@ public class ADDXMLProcessor {
                                     las_var.setUnits("no units");
                                 }
                                 las_var.setUrl(threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+"#"+variable.getName());
-                                log.info("Processing UAF THREDDS variable: " + variable.getName());
+                                System.out.println("Processing UAF THREDDS variable: " + variable.getName());
 
                                 GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
                                 DateRange dateRange = threddsDataset.getTimeCoverage();
@@ -1244,8 +1243,8 @@ public class ADDXMLProcessor {
                                     GridCoordSys gcs = null;
 
                                     if ( readX || readY || readZ ) {
-                                        log.info("Problem found in " + threddsDataset.getParentCatalog().getUriString());
-                                        log.info("Unable to create LAS configuration for " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName() + " Read X=" + readX + " Read Y=" + readY + " Read Z=" + readZ);
+                                        System.out.println("Problem found in " + threddsDataset.getParentCatalog().getUriString());
+                                        System.out.println("Unable to create LAS configuration for " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName() + " Read X=" + readX + " Read Y=" + readY + " Read Z=" + readZ);
                                         return null;
                                     }
 
@@ -1257,7 +1256,7 @@ public class ADDXMLProcessor {
                                     AxisBean xAxis = new AxisBean();
 
                                     // Get the X Axis information...
-                                    log.info("Loading X from metadata: "+elementName);
+                                    System.out.println("Loading X from metadata: "+elementName);
                                     xAxis.setElement(elementName);
                                     grid_name.append("-x-axis");
                                     xAxis.setType("x");
@@ -1278,7 +1277,7 @@ public class ADDXMLProcessor {
                                     elementName = variable.getName()+"-"+id+"-y-axis";
                                     AxisBean yAxis = new AxisBean();
 
-                                    log.info("Loading Y from metadata: "+elementName);
+                                    System.out.println("Loading Y from metadata: "+elementName);
                                     // Get the Y Axis information...
                                     yAxis.setElement(elementName);
                                     grid_name.append("-y-axis");
@@ -1301,11 +1300,11 @@ public class ADDXMLProcessor {
                                         grid_name.append("-z-axis");
                                         if ( zvalues != null ) {
                                             if ( zvalues.equals("") ) {
-                                                log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
-                                                log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No z-axis values.");
+                                                System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                                                System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No z-axis values.");
                                                 return null;
                                             }
-                                            log.info("Loading Z from property metadata: "+elementName);
+                                            System.out.println("Loading Z from property metadata: "+elementName);
                                             zAxis.setElement(elementName);
                                             String zunits = z.getUnits();
                                             zAxis.setType("z");
@@ -1317,7 +1316,7 @@ public class ADDXMLProcessor {
                                             }
                                             zAxis.setV(zvs);
                                         } else {
-                                            log.info("Loading Z without property metadata: "+elementName);
+                                            System.out.println("Loading Z without property metadata: "+elementName);
                                             zAxis.setElement(elementName);
                                             double zsize = z.getSize();
                                             double zresolution = z.getResolution();
@@ -1392,7 +1391,7 @@ public class ADDXMLProcessor {
                                         }
 
 
-                                        log.info("Loading T from metadata: "+elementName);
+                                        System.out.println("Loading T from metadata: "+elementName);
                                         AxisBean tAxis = new AxisBean();
                                         if ( calendar != null ) {
                                             tAxis.setCalendar(calendar);
@@ -1403,7 +1402,6 @@ public class ADDXMLProcessor {
 
                                         ArangeBean tr = new ArangeBean();
                                         DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-                                        log.debug("Using start time: "+hoursfmt.print(metadata_sd));
                                         tr.setStart(hoursfmt.print(metadata_sd));
                                         double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
                                         long delta_millis = (long) dm;
@@ -1416,7 +1414,7 @@ public class ADDXMLProcessor {
                                             String[] v = new String[1];
                                             v[0] = fmt.print(metadata_sd);
                                             tAxis.setV(v);
-                                        } else if ( Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
+                                        } else if ( Integer.valueOf(timeCoverageNumberOfPoints) > 0 && Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
                                             tAxis.setArange(null);
                                             tAxis.setUnits("time");
                                             String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
@@ -1573,15 +1571,15 @@ public class ADDXMLProcessor {
 
                         
                     } else { // vars > 0
-                        log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
-                        log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
+                        System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                        System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
                         return null;
                     }
 
                 }// for outer variables container iterator
             } else { // outer variables list
-                log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
-                log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
+                System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
                 return null;
             }
         
@@ -1602,6 +1600,7 @@ public class ADDXMLProcessor {
         if ( tid != null ) {
             id = tid;
             id = id.replace("/", ".");
+            id = id.replace(":", ".");
             if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
             id = id.replaceAll(" ", "-"); 
         } else {
@@ -1622,7 +1621,7 @@ public class ADDXMLProcessor {
         UniqueVector AxisBeans = new UniqueVector();
 
         if (verbose) {
-            log.info("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + " with id: "+threddsDataset.getID()+" and parent "+threddsDataset.getParent().getCatalogUrl());
+            System.out.println("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + " with id: "+threddsDataset.getID()+" and parent "+threddsDataset.getParent().getCatalogUrl());
         }
 
         dataset.setName(threddsDataset.getFullName());
@@ -1659,7 +1658,7 @@ public class ADDXMLProcessor {
                             las_var.setUnits("no units");
                         }
                         las_var.setUrl(url+"#"+variable.getName());
-                        log.info("Processing ESG THREDDS variable: " + variable.getName());
+                        System.out.println("Processing ESG THREDDS variable: " + variable.getName());
 
                         GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
                         DateRange dateRange = threddsDataset.getTimeCoverage();
@@ -1733,7 +1732,7 @@ public class ADDXMLProcessor {
                                 AxisBean xAxis = new AxisBean();
                                 
                                 // Get the X Axis information...
-                                log.info("Loading X from metadata: "+elementName);
+                                System.out.println("Loading X from metadata: "+elementName);
                                 xAxis.setElement(elementName);
                                 grid_name.append("-x-axis");
                                 xAxis.setType("x");
@@ -1754,7 +1753,7 @@ public class ADDXMLProcessor {
                                 elementName = id+"-y-axis";
                                 AxisBean yAxis = new AxisBean();
                                 
-                                    log.info("Loading Y from metadata: "+elementName);
+                                    System.out.println("Loading Y from metadata: "+elementName);
                                     // Get the Y Axis information...
                                     yAxis.setElement(elementName);
                                     grid_name.append("-y-axis");
@@ -1777,7 +1776,7 @@ public class ADDXMLProcessor {
                                 if ( hasZ ) {
                                     grid_name.append("-z-axis");
                                     if ( zvalues != null ) {
-                                        log.info("Loading Z from property metadata: "+elementName);
+                                        System.out.println("Loading Z from property metadata: "+elementName);
                                         zAxis.setElement(elementName);
                                         String zunits = z.getUnits();
                                         zAxis.setType("z");
@@ -1790,7 +1789,7 @@ public class ADDXMLProcessor {
                                         }
                                         zAxis.setV(zvs);
                                     } else {
-                                        log.info("Loading Z without property metadata: "+elementName);
+                                        System.out.println("Loading Z without property metadata: "+elementName);
                                         zAxis.setElement(elementName);
                                         double zsize = z.getSize();
                                         double zresolution = z.getResolution();
@@ -1949,7 +1948,7 @@ public class ADDXMLProcessor {
                                 if ( metadata_sd != null ) {
                                     s = metadata_sd;
                                 }
-                                log.info("Loading T from metadata: "+elementName);
+                                System.out.println("Loading T from metadata: "+elementName);
                                 AxisBean tAxis = new AxisBean();
                                 if ( calendar_name != null ) {
                                     tAxis.setCalendar(calendar_name);
@@ -1960,7 +1959,6 @@ public class ADDXMLProcessor {
                                 tAxis.setUnits(tunits);
                                 ArangeBean tr = new ArangeBean();
                                 DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-                                log.debug("Using start time: "+fmt.print(s)+ " from input "+start_time);
                                 tr.setStart(fmt.print(s));
                                 tr.setStep(tdelta);
                                 tr.setSize(time_length);
@@ -2098,7 +2096,6 @@ public class ADDXMLProcessor {
         return topCB;
     }
     public static CategoryBean processUAFCategories(InvDataset ThreddsDataset) {
-        log.debug("Processing "+ThreddsDataset.getFullName());
         String tid = ThreddsDataset.getID();
         String id = fixid(ThreddsDataset);  
         String name = ThreddsDataset.getFullName();
@@ -2155,7 +2152,6 @@ public class ADDXMLProcessor {
      * @return CategoryBean
      */
     public static CategoryBean processCategories(InvDataset ThreddsDataset) {
-        log.debug("Processing "+ThreddsDataset.getFullName());
         CategoryBean cb = new CategoryBean();
         // Make any THREDDS documentation links into LAS contributor links.
         cb.setContributors(getContributors(ThreddsDataset));
@@ -2189,7 +2185,7 @@ public class ADDXMLProcessor {
                             Formatter error = new Formatter();
                             GridDataset gds = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);   
                             if ( gds == null ) {
-                                log.error("Unable to read dataset at "+url+" "+error.toString());
+                                System.err.println("Unable to read dataset at "+url+" "+error.toString());
                                 return null;
                             }
                             List<GridDatatype> grids = gds.getGrids();
@@ -2267,7 +2263,7 @@ public class ADDXMLProcessor {
         dataset.setCreator(ADDXMLProcessor.class.getName());
         String curl = DODSNetcdfFile.canonicalURL(url);
         if (verbose) {
-            log.info("Processing netCDF dataset: " + url);
+            System.out.println("Processing netCDF dataset: " + url);
         }
         Formatter error = new Formatter();
          
@@ -2287,7 +2283,6 @@ public class ADDXMLProcessor {
 
         }
         if (!match) {
-            log.debug("No match found for URL patterns.  Not icluding this data set.");
             return dagb;
         }
          try {
@@ -2303,11 +2298,11 @@ public class ADDXMLProcessor {
                 gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
             }
         } catch (IOException e) {
-            log.error("Unable to open dataset at "+DODSNetcdfFile.canonicalURL(url));
+            System.err.println("Unable to open dataset at "+DODSNetcdfFile.canonicalURL(url));
             return null;
         }
         if ( gridDs == null ) {
-            log.error("Unable to read dataset at "+url+" "+error.toString());
+            System.err.println("Unable to read dataset at "+url+" "+error.toString());
             return null;
         }
 
@@ -2344,7 +2339,6 @@ public class ADDXMLProcessor {
         if (name == null) {
             name = url;
         }
-        log.debug("TypedDatasetFactory message " + error.toString());
         String elementName;
         if ( esg ) {
             elementName = threddsDataset.getID();
@@ -2371,7 +2365,7 @@ public class ADDXMLProcessor {
         if (grids.size() == 0) {
             dataset.setComment(
                     "This data source has no lat/lon grids that follow a known convention.");
-            log.error("File parsed.  No Lat/Lon grids found.");
+            System.err.println("File parsed.  No Lat/Lon grids found.");
         }
         for (int i = 0; i < grids.size(); i++) {
             /*
@@ -2428,12 +2422,12 @@ public class ADDXMLProcessor {
             }
             grid_name = grid_name + "-" + xAxis.getShortName();
             if (verbose) {
-                log.info("\t Variable: " + geogrid.getName());
-                log.info("\t\t Longitude axis: ");
+                System.out.println("\t Variable: " + geogrid.getName());
+                System.out.println("\t\t Longitude axis: ");
             }
             GridAxisBeans.addUnique(xaxis);
             if (verbose) {
-                log.info(xaxis.toString());
+                System.out.println(xaxis.toString());
             }
 
             CoordinateAxis yAxis = gcs.getYHorizAxis();
@@ -2449,29 +2443,29 @@ public class ADDXMLProcessor {
 
             grid_name = grid_name + "-" + yAxis.getShortName();
             if (verbose) {
-                log.info("\t\t Latitude axis: ");
+                System.out.println("\t\t Latitude axis: ");
             }
 
             GridAxisBeans.addUnique(yaxis);
             if (verbose) {
-                log.info(yaxis.toString());
+                System.out.println(yaxis.toString());
             }
             if (gcs.hasVerticalAxis()) {
                 CoordinateAxis1D zAxis = gcs.getVerticalAxis();
                 grid_name = grid_name + "-" + zAxis.getShortName();
                 if (verbose) {
-                    log.info("\t\t Vertical axis: ");
+                    System.out.println("\t\t Vertical axis: ");
                 }
                 AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
                 GridAxisBeans.addUnique(zaxis);
                 if (verbose) {
-                    log.info(zaxis.toString());
+                    System.out.println(zaxis.toString());
                 }
 
             }
             else {
                 if (verbose) {
-                    log.info("\t\t No vertical axis");
+                    System.out.println("\t\t No vertical axis");
                 }
             }
 
@@ -2480,19 +2474,19 @@ public class ADDXMLProcessor {
             if (tAxis != null) {
                 grid_name = grid_name + "-" + tAxis.getShortName();
                 if (verbose) {
-                    log.info("\t\t Time axis: ");
+                    System.out.println("\t\t Time axis: ");
                 }
                 
                 AxisBean taxis = makeTimeAxis(tAxis, elementName);
                 if ( taxis != null ) {
                     GridAxisBeans.addUnique(taxis);
                     if (verbose) {
-                        log.info(taxis.toString());
+                        System.out.println(taxis.toString());
                     }
                 }
             }
             else {
-                log.error("\t\t No time axis");
+                System.err.println("\t\t No time axis");
             }
             
             grid.setElement(grid_name + "-" + elementName);
@@ -2503,13 +2497,13 @@ public class ADDXMLProcessor {
 
             if (verbose) {
                 if (proj instanceof LatLonProjection) {
-                    log.info("\t\t Grid has LatLonProjection.");
+                    System.out.println("\t\t Grid has LatLonProjection.");
                 }
                 else if (proj instanceof LambertConformal) {
-                    log.info("\t\t Grid has Lambert Conformal projection...");
+                    System.out.println("\t\t Grid has Lambert Conformal projection...");
                 }
                 else {
-                    log.info("\t\t Grid has unknown projection...");
+                    System.out.println("\t\t Grid has unknown projection...");
                 }
             }
 
@@ -2528,7 +2522,7 @@ public class ADDXMLProcessor {
         try {
             gridDs.close();
         } catch (IOException e) {
-            log.error("Unable to close "+url);
+            System.err.println("Unable to close "+url);
         }
         return dagb;
     }
@@ -2538,7 +2532,7 @@ public class ADDXMLProcessor {
             String url) {
         DatasetsGridsAxesBean beans = createBeansFromNetcdfDataset(url, false, null);
         if ( beans == null ) {
-            log.error("Unable to create XML for "+url);
+            System.err.println("Unable to create XML for "+url);
             return null;
         }
         DatasetBean dataset = (DatasetBean) beans.getDatasets().get(0);
@@ -2697,7 +2691,7 @@ public class ADDXMLProcessor {
                 fmt = DateTimeFormat.forPattern(format);
             } catch(IllegalArgumentException e) {
                 fmt = null;
-                log.error("Cannot parse supplied time format.  Will determine format instead.");
+                System.err.println("Cannot parse supplied time format.  Will determine format instead.");
             }
         }
         DateUnit dateUnit = null;
@@ -2708,11 +2702,11 @@ public class ADDXMLProcessor {
             dateUnit = new DateUnit(unitsString);
         } catch (Exception e) {
 
-            log.error("Cannot parse units string.");
+            System.err.println("Cannot parse units string.");
         }
 
         if (dateUnit == null) {
-            log.error("Not a date Unit String: " + unitsString);
+            System.err.println("Not a date Unit String: " + unitsString);
         }
 
         // This is the Joda Time Chronology that corresponds to the
@@ -2746,7 +2740,7 @@ public class ADDXMLProcessor {
             }
             if ( irregular ) {
 
-                log.info("Time axis is irregular");
+                System.out.println("Time axis is irregular");
                 fmt = DateTimeFormat.forPattern(patterns[4]);
                 int length = (int) axis.getSize();
                 // Get the entire span of time
@@ -2864,7 +2858,7 @@ public class ADDXMLProcessor {
                         arange.setStep(String.valueOf(step));
 
                     } else {
-                        log.error("Too many periods: " + periods);
+                        System.err.println("Too many periods: " + periods);
                         //Try just dumping out the formatted times
                         axisbean.setArange(null);
                         double t[] = axis.getCoordValues();
@@ -2997,7 +2991,7 @@ public class ADDXMLProcessor {
             long milli = Double.valueOf(d).longValue();
             period = new Period(milli);
         } else {
-            log.error("Could not figure out the base time interval for this units string. "+pstring+" does not appear to be year, month, week, day, hour, minute, second or milliseconds.");
+            System.err.println("Could not figure out the base time interval for this units string. "+pstring+" does not appear to be year, month, week, day, hour, minute, second or milliseconds.");
         }
 
         DateTime origin = getOrigin(dateUnit, chrono);
@@ -3033,17 +3027,17 @@ public class ADDXMLProcessor {
                 try {
                     origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(GregorianChronology.getInstanceUTC());
                 } catch ( UnsupportedOperationException  uoe2) {
-                    log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
                 } catch (IllegalArgumentException iae2 ) {
-                    log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
                 }
             } catch (IllegalArgumentException iae ) {
                 try {
                     origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(chrono);
                 } catch ( UnsupportedOperationException  uoe2) {
-                    log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
                 } catch (IllegalArgumentException iae2 ) {
-                    log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
                 }
             }
         }
@@ -3174,7 +3168,7 @@ public class ADDXMLProcessor {
             xmlout.close();
         }
         catch (java.io.IOException e) {
-            log.error(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -3195,7 +3189,7 @@ public class ADDXMLProcessor {
             xmlout.close();
         }
         catch (java.io.IOException e) {
-            log.error(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
     private static String encodeID (String in) {
@@ -3209,7 +3203,7 @@ public class ADDXMLProcessor {
                 hexEncode(result).substring(result.length / 2, result.length);
         }
         catch (NoSuchAlgorithmException e) {
-            log.error("Cannot create SHA-1 hash." + e.getMessage());
+            System.err.println("Cannot create SHA-1 hash." + e.getMessage());
             encoding = "id-12345";
         }
         return encoding;
