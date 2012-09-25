@@ -29,6 +29,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -603,6 +605,8 @@ public class UI extends BaseUI {
 
 	public ClickHandler tExternalOperationClickHandler = new ClickHandler() {
 
+        String spinImageURL = URLUtil.getImageURL() + "/mozilla_blu.gif";
+
 		@Override
 		public void onClick(ClickEvent event) {
 			OperationPushButton b = (OperationPushButton) event.getSource();
@@ -657,7 +661,21 @@ public class UI extends BaseUI {
 			optionsDialog.add(op);
 			optionsDialog.setPopupPosition(source.getAbsoluteLeft(),
 					source.getAbsoluteTop());
+			Image spinImage = new Image(spinImageURL);
+			spinImage.setAltText("Spinner");
+			if (op.isEmptyOps()) {
+				optionsDialog.setText("Loading...");
+				op.hideButtons();
+				op.add(spinImage);
+			}
 			optionsDialog.show();
+			if (op.isEmptyOps()) {
+				op.ok();
+			}else{
+				optionsDialog.setText("Set options for " + operation.getName());
+				op.showButtons();
+				op.remove(spinImage);
+			}
 		}
 	};
 

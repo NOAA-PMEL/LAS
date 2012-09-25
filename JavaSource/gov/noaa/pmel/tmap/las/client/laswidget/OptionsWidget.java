@@ -53,19 +53,19 @@ public class OptionsWidget extends VerticalPanel {
 	Map<String, String> callbackState = null;
 	boolean rpc = false;
 	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
-    private EventBus eventBus;
+    private EventBus eventBus = clientFactory.getEventBus();
+	private boolean isEmptyOps = false;
+	
 	public OptionsWidget() {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
 	public OptionsWidget(String opID) {
-	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		Util.getRPCService().getOptions(opID, optionsCallback);	
 	}
 	public OptionsWidget(String optionID, ClickListener okListener, ClickListener cancelListener) {
-	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
@@ -73,14 +73,12 @@ public class OptionsWidget extends VerticalPanel {
 		Util.getRPCService().getOptions(optionID, optionsCallback);	
 	}
 	public OptionsWidget(ClickListener okListener, ClickListener cancelListener) {
-	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
 		cancel.addClickListener(cancelListener);
 	}
 	public OptionsWidget(ClickListener listener) {
-	    eventBus = clientFactory.getEventBus();
 		ok.addClickListener(listener);
 		cancel.addClickListener(listener);
 		layout_grid.setWidget(0, 0, ok);
@@ -108,6 +106,7 @@ public class OptionsWidget extends VerticalPanel {
 		public void onSuccess(Object result) {
 			options = (OptionSerializable[]) result;
 			setOptions(options);
+			isEmptyOps = false;
 			rpc = false;
 			if ( callbackState != null ) {
 				restore(callbackState);
@@ -116,6 +115,7 @@ public class OptionsWidget extends VerticalPanel {
 		}
 		public void onFailure(Throwable e) {
 		    setOptions(new OptionSerializable[0]);
+			isEmptyOps = false;
 			Window.alert(e.toString());
 		}
 	};
@@ -224,6 +224,7 @@ public class OptionsWidget extends VerticalPanel {
 			}
 			add(option_layout);
 		}
+		isEmptyOps = (options==null) ? true: (options.length <= 0);
 		add(layout_grid);	
 	}
 	public void addOkHandler(ClickHandler handler) {
@@ -231,5 +232,25 @@ public class OptionsWidget extends VerticalPanel {
 	}
 	public void addCancelHandler(ClickHandler handler) {
 		cancel.addClickHandler(handler);
+	}
+
+	/**
+	 * 
+	 * @see com.google.gwt.user.client.ui.Button#click()
+	 */
+	public void ok() {
+		ok.click();
+	}
+	
+	public boolean isEmptyOps() {
+		return isEmptyOps ;
+	}
+	public void hideButtons() {
+		ok.setVisible(false);
+		cancel.setVisible(false);
+	}
+	public void showButtons() {
+		ok.setVisible(true);
+		cancel.setVisible(true);
 	}
 }
