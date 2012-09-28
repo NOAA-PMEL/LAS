@@ -215,12 +215,16 @@ public class OutputPanel extends Composite implements HasName {
 			}
 
 			if (isChangeDataset()) {
-				setVariable(nvar);
+				// In the case of where multiple variables are being used in
+				// a panel, we need to change the 1st UserList
+				setVariable(nvar, true);
 				setChangeDataset(false);
 
 			} else {
 				if (!nvar.getID().equals(var.getID())) {
-					setVariable(nvar);
+					// In the case of where multiple variables are being used in
+					// a panel, we need to change the 1st UserList
+					setVariable(nvar, true);
 				}
 			}
 
@@ -297,6 +301,7 @@ public class OutputPanel extends Composite implements HasName {
 				Object variableUserObject = item.getUserObject();
 				if (variableUserObject instanceof VariableSerializable) {
 					VariableSerializable variable = (VariableSerializable) variableUserObject;
+					// TODO: ***Remove extra variable UserLists?
 					applyVariableChange(variable, true);
 				}
 			}
@@ -1170,7 +1175,7 @@ public class OutputPanel extends Composite implements HasName {
 			String optionID, String view, boolean single,
 			String container_type, String tile_server,
 			boolean annotationsShowing) {
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.WARNING);
 		logger.info("OutputPanel constructor called with id:" + id);
 		this.ID = id;
 		this.comparePanel = comparePanel;
@@ -1244,40 +1249,18 @@ public class OutputPanel extends Composite implements HasName {
 								Object variableUserObject = variablesListBox
 										.getUserObject(selectedIndex);
 								if (variableUserObject instanceof VariableSerializable) {
-									// Update this OutputPanel's
-									// MultiVariableSelector only if the source
-									// is not of this OutputPanel
-									if (!isFromThisOutputPanel) {
-										// Vector<VariableSerializable>
-										// variables =
-										// variablesListBox.getVariables();
-										// // TODO: Make a higher level method
-										// or
-										// // use events
-										// outputControlPanel.getVariableControls().getMultiVariableSelector().setVariables(variables,
-										// selectedIndex);
-									}
-									if (isComparePanel()) {
-										eventBus.fireEventFromSource(
-												new VariableSelectionChangeEvent(),
-												variablesListBox);
-									} else {
 										if (isFromThisOutputPanel) {
-											// Update this OutputPanel's
-											// variable
+											// Update this OutputPanel's variable
 											VariableSerializable variable = (VariableSerializable) variableUserObject;
 											applyVariableChange(variable, false);
 											setChangeDataset(false);
-											// Update OutputPanels if update
-											// check box
-											// is checked
-											eventBus.fireEventFromSource(
-													new WidgetSelectionChangeEvent(
-															false),
-													variablesListBox);
 										}
-									}
 								}
+								// Update OutputPanels if update check box is
+								// checked
+								eventBus.fireEventFromSource(
+										new WidgetSelectionChangeEvent(false),
+										variablesListBox);
 							}
 						}
 					}
@@ -1327,8 +1310,8 @@ public class OutputPanel extends Composite implements HasName {
 			String nvarDSID = nvar.getDSID();
 			String nvarID = nvar.getID();
 			if (nvarDSID != null && nvarID != null && configCallback != null) {
-				Util.getRPCService().getConfig(null, nvarDSID, nvarID,
-						configCallback);
+					Util.getRPCService().getConfig(null, nvarDSID, nvarID,
+							configCallback);
 			}
 		}
 	}
@@ -1764,6 +1747,7 @@ public class OutputPanel extends Composite implements HasName {
 	}
 
 	private void drawToScreen(ImageData imageData) {
+		// TODO: ***Don't bother to use null imageData
 		if (frontCanvasContext != null) {
 			logger.severe("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
 			frontCanvasContext.putImageData(imageData, 0, 0);
@@ -2515,7 +2499,7 @@ public class OutputPanel extends Composite implements HasName {
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			if (image == null) {
-				logger.warning("image:null");
+				logger.severe("image:null");
 			} else {
 				logger.warning("image:" + image.toString());
 			}
@@ -2527,7 +2511,7 @@ public class OutputPanel extends Composite implements HasName {
 			logger.warning("dh:" + dh);
 			logger.warning("h:" + h);
 			if (imageData == null) {
-				logger.warning("imageData:null");
+				logger.severe("imageData:null");
 			} else {
 				logger.warning("imageData:" + imageData.toString());
 			}
@@ -3015,7 +2999,7 @@ public class OutputPanel extends Composite implements HasName {
 		currentURL = url;
 	}
 
-	public void setVariable(VariableSerializable v) {
+	public void setVariable(VariableSerializable v, boolean setFirstVariableSelector) {
 		GridSerializable oldgrid = null;
 		if (var != null) {
 			oldgrid = var.getGrid();
@@ -3023,9 +3007,15 @@ public class OutputPanel extends Composite implements HasName {
 		var = v;
 		datasetLabel.setText(var.getDSName() + ": " + var.getName());
 		getOutputControlPanel().getVariableControls().setVariable(var);
-		UserListBox box = getOutputControlPanel().getVariableControls()
-				.getMultiVariableSelector().getVariableSelector()
-				.getLatestListBox();
+		UserListBox box = null;
+		if (setFirstVariableSelector) {
+			box = getOutputControlPanel().getVariableControls()
+			.getMultiVariableSelector().getVariableSelector().getFirstListBox();
+		} else {
+			box = getOutputControlPanel().getVariableControls()
+					.getMultiVariableSelector().getVariableSelector()
+					.getLatestListBox();
+		}
 		int index = 0;
 		for (int vi = 0; vi < box.getVariables().size(); vi++) {
 			VariableSerializable vs = (VariableSerializable) box.getVariables()

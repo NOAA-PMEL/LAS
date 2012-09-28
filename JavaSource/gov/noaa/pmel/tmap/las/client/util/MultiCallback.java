@@ -35,7 +35,7 @@ public class MultiCallback implements RequestCallback {
 	public MultiCallback(RequestController controller, String url,
 			String firstSourceName, String firstCallbackName) {
 		super();
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.WARNING);
 		this.controller = controller;
 		this.url = url;
 		this.add(firstSourceName, firstCallbackName);
@@ -43,7 +43,7 @@ public class MultiCallback implements RequestCallback {
 
 	public MultiCallback(RequestController controller) {
 		super();
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.WARNING);
 		this.controller = controller;
 	}
 

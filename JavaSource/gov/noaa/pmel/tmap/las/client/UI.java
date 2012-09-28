@@ -292,7 +292,8 @@ public class UI extends BaseUI {
 							.equals(xVariable.getAttributes().get("grid_type"))) {
 				xVariable = xNewVariable;
 				xVariable.setGrid(grid);
-				xPanels.get(0).setVariable(xVariable);
+				// In the case of where multiple variables are being used in a panel, we need to change the 1st UserList?
+				xPanels.get(0).setVariable(xVariable, true);
 				eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			} else if (grid.getID().equals(xVariable.getGrid().getID())
 					&& !xNewVariable.getAttributes().get("grid_type")
@@ -301,7 +302,8 @@ public class UI extends BaseUI {
 				// operation with a new one
 				xVariable = xNewVariable;
 				xVariable.setGrid(grid);
-				xPanels.get(0).setVariable(xVariable);
+				// In the case of where multiple variables are being used in a panel, we need to change the 1st UserList?
+				xPanels.get(0).setVariable(xVariable, true);
 				ops = config.getOperations();
 				xOperationsWidget.setOperations(xVariable.getGrid()
 						.getIntervals(), xOperationID, xView, ops);
@@ -763,7 +765,7 @@ public class UI extends BaseUI {
 
 		@Override
 		public void onRequest(LASRequestEvent event) {
-			logger.setLevel(Level.ALL);
+			logger.setLevel(Level.OFF);
 			logger.info("onRequest(LASRequestEvent event) called.");
 			Object source = event.getSource();
 			if (source == null) {
@@ -1287,7 +1289,8 @@ public class UI extends BaseUI {
 
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
-			panel.setVariable(xVariable);
+			// In the case of where multiple variables are being used in a panel, we need to change the 1st UserList
+			panel.setVariable(xVariable, true);
 			panel.init(false, ops);
 		}
 
@@ -1370,7 +1373,7 @@ public class UI extends BaseUI {
 	 */
 	public void onModuleLoad() {
 		super.initialize();
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.OFF);
 
 		int col = 0;
 
@@ -2043,7 +2046,8 @@ public class UI extends BaseUI {
 		init();
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
-			panel.setVariable(xVariable);
+			// In the case of where multiple variables are being used in a panel, we need to change the 1st UserList?
+			panel.setVariable(xVariable, true);
 			panel.init(false, ops);
 			panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
 			panel.setOrthoRanges(xView, xOrtho);

@@ -16,9 +16,9 @@ public interface VariableSelector extends IsWidget {
 
     public interface Presenter {
 
-        VariableSelector init(String id);
-        
         UserListBox addUserListBox(UserListBox source, VariableSelector view);
+        
+        VariableSelector init(String id);
         
         void itemCountUpdated(int oldItemCount, int newItemCount, VariableSelector view);
 
@@ -34,9 +34,11 @@ public interface VariableSelector extends IsWidget {
 
     void addListBox(UserListBox newListBox);
 
-    int getItemCount();
-    
     UserListBox addUserListBox(UserListBox source, VariableSelector view);
+    
+    UserListBox getFirstListBox();
+
+    int getItemCount();
 
     UserListBox getLatestListBox();
 
@@ -46,18 +48,18 @@ public interface VariableSelector extends IsWidget {
 
     boolean isComparing();
 
+    void removeExtraListBoxes(boolean update_count);
+
     void removeListBox(UserListBox oldListBox);
 
     void removeListBoxesExceptFirst();
-
+    
     void setComparing(boolean comparing);
 
     void setPresenter(Presenter listener);
-    
-    void setVariables(Vector<VariableSerializable> variables, int selected);
 
     void setVariableMetadataView(VariableMetadataView variableMetadataView);
 
-    void removeExtraListBoxes(boolean update_count);
+	void setVariables(Vector<VariableSerializable> variables, int selected);
 
 }

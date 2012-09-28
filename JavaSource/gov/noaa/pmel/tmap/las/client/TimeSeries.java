@@ -47,7 +47,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * The OpenLaysers based Time Series UI.
+ * The OpenLayers based Time Series UI.
  */
 public class TimeSeries implements EntryPoint {
 
