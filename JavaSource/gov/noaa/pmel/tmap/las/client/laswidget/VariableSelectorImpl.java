@@ -293,5 +293,20 @@ public class VariableSelectorImpl extends VerticalPanel implements VariableSelec
     public UserListBox addUserListBox(UserListBox source, VariableSelector view) {
         return this.listener.addUserListBox(source, view);
     }
+
+	/**
+	 * @return the first (top-most) UserListBox
+	 */
+    @Override
+	public UserListBox getFirstListBox() {
+		return variablesListBox;
+	}
+
+	/**
+	 * @param variablesListBox the first (top-most) UserListBox to set
+	 */
+	public void setFirstListBox(UserListBox variablesListBox) {
+		this.variablesListBox = variablesListBox;
+	}
     
 }

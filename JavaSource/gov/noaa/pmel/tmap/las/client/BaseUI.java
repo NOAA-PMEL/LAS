@@ -579,7 +579,7 @@ public class BaseUI {
      * @wbp.parser.entryPoint
      */
     public void initialize() {
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.OFF);
         xTileServer = getTileServer();
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
