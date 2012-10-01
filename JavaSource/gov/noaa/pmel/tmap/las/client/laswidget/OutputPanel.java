@@ -301,7 +301,12 @@ public class OutputPanel extends Composite implements HasName {
 				Object variableUserObject = item.getUserObject();
 				if (variableUserObject instanceof VariableSerializable) {
 					VariableSerializable variable = (VariableSerializable) variableUserObject;
-					// TODO: ***Remove extra variable UserLists?
+					// Remove extra variable UserLists before
+					// applyVariableChange
+					// TODO: Replace this with a higher level method or use events
+					getOutputControlPanel().getVariableControls()
+							.getMultiVariableSelector().getVariableSelector()
+							.removeListBoxesExceptFirst();
 					applyVariableChange(variable, true);
 				}
 			}
@@ -1249,12 +1254,12 @@ public class OutputPanel extends Composite implements HasName {
 								Object variableUserObject = variablesListBox
 										.getUserObject(selectedIndex);
 								if (variableUserObject instanceof VariableSerializable) {
-										if (isFromThisOutputPanel) {
-											// Update this OutputPanel's variable
-											VariableSerializable variable = (VariableSerializable) variableUserObject;
-											applyVariableChange(variable, false);
-											setChangeDataset(false);
-										}
+									if (isFromThisOutputPanel) {
+										// Update this OutputPanel's variable
+										VariableSerializable variable = (VariableSerializable) variableUserObject;
+										applyVariableChange(variable, false);
+										setChangeDataset(false);
+									}
 								}
 								// Update OutputPanels if update check box is
 								// checked
@@ -1747,9 +1752,9 @@ public class OutputPanel extends Composite implements HasName {
 	}
 
 	private void drawToScreen(ImageData imageData) {
-		// TODO: ***Don't bother to use null imageData
-		if (frontCanvasContext != null) {
-			logger.severe("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
+		// Don't bother to use null imageData
+		if ((imageData != null) && (frontCanvasContext != null)) {
+			logger.info("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
 			frontCanvasContext.putImageData(imageData, 0, 0);
 		}
 	}
