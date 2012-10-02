@@ -739,12 +739,12 @@ public class UI extends BaseUI {
 				TreeItem item = event.getSelectedItem();
 				Object v = item.getUserObject();
 				if (v instanceof VariableSerializable) {
-					xNewVariable = (VariableSerializable) v;
-					// Remove extra variable UserLists before calling changeDataset()
+					// Remove extra variable UserLists first
 					// TODO: Replace this with a higher level method or use events
 					xPanels.get(0).getOutputControlPanel().getVariableControls()
 							.getMultiVariableSelector().getVariableSelector()
 							.removeListBoxesExceptFirst();
+					xNewVariable = (VariableSerializable) v;
 					changeDataset = true;
 					changeDataset();
 				}
