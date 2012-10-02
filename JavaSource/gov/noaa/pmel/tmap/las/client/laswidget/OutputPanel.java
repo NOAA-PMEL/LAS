@@ -3021,11 +3021,12 @@ public class OutputPanel extends Composite implements HasName {
 					.getMultiVariableSelector().getVariableSelector()
 					.getLatestListBox();
 		}
+		String varID = var.getID();
 		int index = 0;
-		for (int vi = 0; vi < box.getVariables().size(); vi++) {
-			VariableSerializable vs = (VariableSerializable) box.getVariables()
-					.get(vi);
-			if (vs.getID().equals(var.getID())) {
+		Vector<VariableSerializable> variables = box.getVariables();
+		for (int vi = 0; vi < variables.size(); vi++) {
+			VariableSerializable vs = (VariableSerializable) variables.get(vi);
+			if (vs.getID().equals(varID)) {
 				index = vi;
 			}
 		}
