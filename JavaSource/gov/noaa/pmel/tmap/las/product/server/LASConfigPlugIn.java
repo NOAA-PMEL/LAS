@@ -57,6 +57,9 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_LOCK_KEY = "lock";
 	public final static String LAS_SISTERS_CONFIG_FILENAME_KEY = "las_servers_filename";
 	public final static String LAS_VERSION_KEY = "las_version";
+	public static final String LAS_CONFIG_NOTFOUND_MESSAGE = "Server failed to get the LAS configuration. "
+			+ "It is likely that LAS was not configured and thus there is no tomcat6/content/LAS_WEBAPP_NAME/conf/server/las.xml file for the LAS WebApp. "
+			+ "Administrators can check for this problem by reading the log file, probably in tomcat6/content/baker/logs/las.log";
 	
 	/*
 	 * This is the key where we will store a boolean with the results of an F-TDS test.

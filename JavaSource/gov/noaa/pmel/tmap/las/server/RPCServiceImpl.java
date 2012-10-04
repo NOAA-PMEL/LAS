@@ -56,9 +56,23 @@ import org.jdom.JDOMException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
-    private static final LASProxy lasProxy = new LASProxy();
-    public HashMap<String, String> getPropertyGroup(String name) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+	private static final LASProxy lasProxy = new LASProxy();
+
+	/**
+	 * @return
+	 * @throws RPCException
+	 */
+	LASConfig getLASConfig() throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(
+				LASConfigPlugIn.LAS_CONFIG_KEY);
+		if (lasConfig == null) {
+			throw new RPCException(LASConfigPlugIn.LAS_CONFIG_NOTFOUND_MESSAGE);
+		}
+		return lasConfig;
+	}
+
+	public HashMap<String, String> getPropertyGroup(String name) throws RPCException {
+        LASConfig lasConfig = getLASConfig(); 
         HashMap<String, String> property_group;
         try {
             property_group = lasConfig.getGlobalPropertyGroupAsHashMap(name);
@@ -67,9 +81,10 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         }
         return property_group;
     }
+
     public TestSerializable[] getTestResults(String test_key) throws RPCException {
         LASTestResults testResults = new LASTestResults();
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         String test_output_file = lasConfig.getOutputDir()+File.separator+TestConstants.TEST_RESULTS_FILE;
         File c = new File(test_output_file);
         if ( c.exists() ) {
@@ -96,7 +111,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      * @throws RPCException 
      */
     public Map<String, String> getIDMap(String data_url) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+        LASConfig lasConfig = getLASConfig(); 
         try {
             return lasConfig.getIDMap(data_url);
         } catch ( JDOMException e ) {
@@ -110,7 +125,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      * 
      */
     public CategorySerializable[] getTimeSeries() throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+        LASConfig lasConfig = getLASConfig(); 
         
 
         CategorySerializable[] cats = null;
@@ -150,7 +165,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return wire_config;
     }
     public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         Variable variable = null;
         try {
             Dataset dataset = null;
@@ -196,7 +211,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         }
     }
     public DatasetSerializable getFullDataset(String id) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         try {
             return lasConfig.getFullDataset(id).getDatasetSerializable();
         } catch (JDOMException e) {
@@ -205,8 +220,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             throw new RPCException(e.getMessage());
         }
     }
-    public CategorySerializable[] getCategories(String id) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+
+	public CategorySerializable[] getCategories(String id) throws RPCException {
+		LASConfig lasConfig = getLASConfig();
         
         ArrayList<Category> categories = new ArrayList<Category>();
         if ( lasConfig.allowsSisters() ) {
@@ -336,7 +352,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return getGridSerializable(dsID, varID);
     }
     private GridSerializable getGridSerializable(String dsID, String varID) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         Grid grid = null;
         if ( lasConfig.allowsSisters() ) {
             try {
@@ -389,7 +405,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             String varid = LASConfig.getVarIDfromXPath(xpath[0]);
             return getOperations(view, dsid, varid);
         }
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         List<OperationSerializable> multi_variable_operations = new ArrayList<OperationSerializable>();
         if ( lasConfig.allowsSisters() ) {
 
@@ -474,7 +490,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return getOperationsSerialziable(view, dsID, varID);
     }
     private OperationSerializable[] getOperationsSerialziable(String view, String dsID, String varID) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         ArrayList<Operation> operations = new ArrayList<Operation>();
         OperationSerializable[] wireOps = null;
             try {
@@ -566,7 +582,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return getRegionsSerializable(dsID, varID);
     }
     private RegionSerializable[] getRegionsSerializable(String dsID, String varID) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         ArrayList<Region> regions = new ArrayList<Region>();
         RegionSerializable[] wire_regions = null;
         if ( lasConfig.allowsSisters() ) {
@@ -623,7 +639,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      * 
      */
     public OptionSerializable[] getOptions(String opid) throws RPCException {
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = getLASConfig();
         // The id is actually the name in the options section of the XML, but it's unique and functions as an id...
         ArrayList<Option> options = new ArrayList<Option>();
         OptionSerializable[] wireOptions;
@@ -692,14 +708,21 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      */
     public List<String> getTributaryServers() {
         List<String> wiretribs = new ArrayList<String>();
-        LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-        ArrayList<Tributary> tribs = lasConfig.getTributaries();
-        for (Iterator tribIt = tribs.iterator(); tribIt.hasNext();) {
-            Tributary tributary = (Tributary) tribIt.next();
-            String url = tributary.getURL()+"/auth.do";
-            wiretribs.add(url);
-        }
-        return wiretribs;
+        LASConfig lasConfig;
+		try {
+			lasConfig = getLASConfig();
+	        ArrayList<Tributary> tribs = lasConfig.getTributaries();
+	        for (Iterator<Tributary> tribIt = tribs.iterator(); tribIt.hasNext();) {
+	            Tributary tributary = (Tributary) tribIt.next();
+	            String url = tributary.getURL()+"/auth.do";
+	            wiretribs.add(url);
+	        }
+	        return wiretribs;
+		} catch (RPCException e) {
+			// Ignoring the exception since this method is deprecated anyway
+			e.printStackTrace();
+		}
+		return null;
     }
     @Override
     protected void checkPermutationStrongName() throws SecurityException {
