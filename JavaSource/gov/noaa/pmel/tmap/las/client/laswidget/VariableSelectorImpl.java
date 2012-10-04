@@ -15,6 +15,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
@@ -24,7 +25,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
  * Default implementation of {@link VariableSelector}.
  */
 // TODO: Move non-view logic to the activity presenter/listener
-public class VariableSelectorImpl extends VerticalPanel implements
+public class VariableSelectorImpl extends VerticalPanel implements HasName,
 		VariableSelector {
 	private static final AppConstants CONSTANTS = GWT
 			.create(AppConstants.class);
@@ -130,6 +131,9 @@ public class VariableSelectorImpl extends VerticalPanel implements
 		return listBoxes;
 	}
 
+	/**)
+	 * @see com.google.gwt.user.client.ui.HasName#getName()
+	 */
 	public String getName() {
 		return name;
 	}
@@ -253,6 +257,9 @@ public class VariableSelectorImpl extends VerticalPanel implements
 			if (variables != null) {
 				latestListBox.setAddButtonVisible(variables.size() > itemCount);
 			}
+			if(isComparing()){
+				latestListBox.setAddButtonVisible(false);
+			}
 		}
 		if (listener != null && update_count)
 			listener.itemCountUpdated(oldItemCount, itemCount, this);
@@ -299,6 +306,9 @@ public class VariableSelectorImpl extends VerticalPanel implements
 		this.comparing = comparing;
 	}
 
+	/**
+	 * @see com.google.gwt.user.client.ui.HasName#setName(java.lang.String)
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -325,6 +335,8 @@ public class VariableSelectorImpl extends VerticalPanel implements
 			// Avoid giving the user the ability to add more variableListBoxes
 			// than there are variables in the current data set.
 			variablesListBox.setAddButtonVisible(variables.size() > itemCount);
+		} else if(isComparing()){
+			variablesListBox.setAddButtonVisible(false);
 		}
 	}
 
