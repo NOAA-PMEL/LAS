@@ -436,7 +436,7 @@ public class BaseUI {
 
         int col = 0;
         int row = 0;
-        if ( xPanelCount == 1 ) {
+        if ( numPanels == 1 ) {
             applyButton.setText("Update Plot");
         } else {
             applyButton.setText("Update Plots");
