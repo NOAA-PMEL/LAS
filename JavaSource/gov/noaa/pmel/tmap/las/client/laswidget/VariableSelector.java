@@ -6,13 +6,14 @@ import java.util.Vector;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.IsWidget;
 
 /**
  * View base interface. Extends IsWidget so a view impl can easily provide its
  * container widget.
  */
-public interface VariableSelector extends IsWidget {
+public interface VariableSelector extends IsWidget, HasName {
 
     public interface Presenter {
 
