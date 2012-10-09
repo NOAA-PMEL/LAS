@@ -209,7 +209,7 @@ public class VariableSelectorImpl extends VerticalPanel implements HasName,
 				latestListBox.setRemoveButtonVisible(itemCount > 1);
 				Vector<VariableSerializable> variables = latestListBox
 						.getVariables();
-				if (variables != null) {// TODO: ***Is this causing #1365?
+				if (variables != null) {
 					latestListBox
 							.setAddButtonVisible(variables.size() > itemCount);
 				}
