@@ -21,8 +21,6 @@ IF `IS_ELEMENT_OF_STR (all_attrs, "ferret_definition") EQ 1` THEN
    DEFINE SYMBOL the_def= `($data_1_var).ferret_definition`
    LET bracket = `STRINDEX("($the_def)", "[") - 1`
    IF `bracket GT 0` THEN DEFINE SYMBOL orig_var_1 = `SUBSTRING("($the_def)", 1, bracket)`
-ELIF `IS_ELEMENT_OF_STR (all_attrs, "long_name") EQ 1` THEN
-   DEFINE SYMBOL orig_var_1 = `($data_1_var).long_name`
 ENDIF
 
 ! See if that variable had a modulo time axis
