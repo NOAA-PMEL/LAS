@@ -22,7 +22,7 @@ public class OperationsMenu extends Composite {
 	HorizontalPanel buttonBar;
 	OperationPushButton animationButton = new OperationPushButton("Animate");
 	OperationPushButton compareButton = new OperationPushButton("Compare");
-	OperationPushButton correlationButton = new OperationPushButton("Correlation");
+	OperationPushButton correlationButton = new OperationPushButton("Correlation Viewer");
 	OperationPushButton googleEarthButton = new OperationPushButton("Google Earth");
 	OperationPushButton showValuesButton = new OperationPushButton("Show Values");
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
