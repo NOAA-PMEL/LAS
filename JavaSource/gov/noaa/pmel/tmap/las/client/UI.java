@@ -1034,8 +1034,8 @@ public class UI extends BaseUI {
 			String p = compareMenu.getValue(compareMenu.getSelectedIndex());
 			init(Integer.valueOf(p), Constants.IMAGE);
 			// resize OutputPanel(s) according to the current Window size
-			logger.info("compareMenuChanged() calling resize(...)");
-			resize(Window.getClientWidth(), Window.getClientHeight());
+//			logger.info("compareMenuChanged() calling resize(...)");
+//			resize(Window.getClientWidth(), Window.getClientHeight());
 			String galleryHistory = getGalleryToken();
 			Map<String, String> galleryTokens = Util
 					.getTokenMap(galleryHistory);
@@ -1277,6 +1277,8 @@ public class UI extends BaseUI {
 		autoContourButton.setDown(false);
 		autoContourTextBox.setText("");
 		initPanels(true);
+		// Hide the plotImage so it won't look like it changed size later
+		xPanels.get(0).hidePlotImage(); 
 		int buttonIndex = getButtonIndex();
 		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
 		xButtonLayout.remove(compareButtons);

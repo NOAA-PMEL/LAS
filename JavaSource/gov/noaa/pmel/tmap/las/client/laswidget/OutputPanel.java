@@ -413,12 +413,12 @@ public class OutputPanel extends Composite implements HasName {
 
 		@Override
 		public void onLoad(LoadEvent event) {
-			frontCanvasContext.drawImage(
-					ImageElement.as(plotImage.getElement()), 0, 0);
 			// No need to call setPlotImageWidth as a controller
 			// that listens to the new
 			// StringValueChangeEvent(plotImage.getUrl()) will eventually
 			// do so
+//			frontCanvasContext.drawImage(
+//					ImageElement.as(plotImage.getElement()), 0, 0);
 			// setPlotImageWidth();
 			frontCanvas.addMouseDownHandler(new MouseDownHandler() {
 				@Override
@@ -2112,6 +2112,14 @@ public class OutputPanel extends Composite implements HasName {
 		plotImage.setVisible(false);
 	}
 
+	public void hidePlotImage() {
+		frontCanvas.setVisible(false);
+	}
+
+	public void showPlotImage() {
+		frontCanvas.setVisible(true);
+	}
+
 	private boolean hasViewAxes() {
 		if (view.contains("x")) {
 			if (!var.getGrid().hasX()) {
@@ -2204,7 +2212,7 @@ public class OutputPanel extends Composite implements HasName {
 
 		// setPlotImageWidth now sets the plotImage to the grid before any
 		// scaling so plotImage's imageElement will be valid
-		setPlotImageWidth();
+//		setPlotImageWidth();
 	}
 
 	/**
@@ -2959,6 +2967,7 @@ public class OutputPanel extends Composite implements HasName {
 				// imageElement will be valid
 				gridSetWidgetPlotImageAndHide();
 				scale(plotImage, imageScaleRatio);
+				showPlotImage();
 			}
 		} else {
 			setImageSize(fixedZoom);
