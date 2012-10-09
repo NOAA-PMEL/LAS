@@ -285,7 +285,7 @@ ELSE
    
    ! Dont use the palette coming in. Its for variable 0
       DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
+!      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
       DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
    ELSE
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
