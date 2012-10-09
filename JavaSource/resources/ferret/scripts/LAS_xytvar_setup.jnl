@@ -17,6 +17,28 @@
 PPL TICS .125,.25,.125,.25
 PPL axlabp,-1,-1
 
+
+! If they are not lon, lat, or time, put axis labels on the plot.
+! (easier to understand, e.g. SST as a fcn of AIRT)
+
+IF ($variable_0_lab"0|*>1") THEN 
+   DEFINE SYMBOL ax_label_x PPL XLAB ($variable_0_lab)
+   IF ($ferret_prop_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_x
+   IF ($ferret_prop_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_x
+   IF ($ferret_prop_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_x
+ENDIF
+IF ($variable_1_lab"0|*>1") THEN 
+   DEFINE SYMBOL ax_label_y PPL YLAB ($variable_1_lab)
+   IF ($ferret_plot_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_y
+   IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
+   IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
+ENDIF
+IF `($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1` THEN 
+   DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view
+   DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view2
+   SET VIEW full_view
+ENDIF
+
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
 
@@ -330,15 +352,17 @@ ENDIF  ! axes_already_defined, make the underlay plot.
 LET bvar = dep_var + indep_var
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
-IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1")` THEN
-   SHADE/NOKEY/NOLAB/PAL=white($pqual)/SET allmiss
-   ($special_label_x)
-   ($special_label_y)
+IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
+  ($ax_label_x"0|*>1") OR ($ax_label_y"0|*>1")` THEN
+   SHADE/NOKEY/PAL=white($pqual)/SET allmiss
+   ($ax_label_x)
+   ($ax_label_y)
    PPL SHADE
+   set view full_view2
+   SHADE/NOKEY/PAL=white($pqual)/NOAX/NOLAB allmiss
 ELSE
-   SHADE/NOKEY/NOLAB/PAL=white($pqual) allmiss
+   SHADE/NOKEY/PAL=white($pqual) allmiss
 ENDIF
-
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
    LABEL/NOUSER 0.2, 0.2, -1, 0, 0.12, @AS($put_label)
@@ -350,7 +374,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    SET VIEW ($view2)
    LET bvar = dep_var1 + indep_var1
    LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
-   SHADE/NOAX/NOKEY/NOLAB/PAL=white allmiss
+   SHADE/NOAX/NOKEY/PAL=white allmiss
    SET MODE/LAST nodata_lab
    EXIT/SCRIPT
 ENDIF
@@ -360,7 +384,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
       SET VIEW ($view2)
       LET bvar = dep_var1 + indep_var1
       LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
-      SHADE/NOAX/NOKEY/NOLAB/PAL=white allmiss
+      SHADE/NOAX/NOKEY/PAL=white allmiss
       SET MODE/LAST nodata_lab
       EXIT/SCRIPT
    ENDIF
@@ -376,8 +400,10 @@ IF `($ferret_prop_var"0|latitude>1|*>0") OR ($is_lat_prop"0|0|1|*>0")` THEN
    SET VIEW ($view2)
    LET bvar1 = dep_var1 + indep_var1
    LET allmiss1 = IF bvar THEN (`bvar1,RETURN=bad`)
-   SHADE/NOAX/NOKEY/NOLAB/PAL=white($pqual) allmiss1
+   SHADE/NOAX/NOKEY/PAL=white($pqual) allmiss1
+
 ENDIF
 
 SET MODE/LAST nodata_lab
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------
+
