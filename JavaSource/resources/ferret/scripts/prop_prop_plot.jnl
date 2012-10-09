@@ -20,6 +20,11 @@
 GO LAS_reset_gifname
 
 
+! For LAS v8.0 relese, dont take into account any of these Ferret properties.
+CANCEL SYMBOL ferret_*levels
+CANCEL SYMBOL ferret_palette
+
+
 set mode ver:always
 ! This may already have been set by e.g. Trajectory_correlation.jnl
 
