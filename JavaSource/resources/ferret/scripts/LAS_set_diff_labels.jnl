@@ -8,7 +8,8 @@
 ! Set the title and labels for a difference plot, reproducing the behavior
 ! of diff plots from old LAS
 ! 3/7/2007: ACM. Remove extra units labels. Make title smaller when it is 4- lines.
-!
+! 10/10/2012 Reverse the sense of the difference; ticket 1377
+
 ! Set upper-left labels, listing location normal to the plot
 ! Argumnent is the view of this plot: for a 2d xy plot, XY; for a time series plot T
 !
@@ -116,25 +117,25 @@ LET add_urls = 0
 
 IF `add_urls EQ 1` THEN
    DEFINE SYMBOL ferret_diff_title = \
-   @AC($ferret_title_0) from ($data_0_dataset_name)(1) \
-   <NL> minus  ($ipen)($ferret_title_1)) from ($data_1_dataset_name)(2)
+   @AC ($ferret_title_1)) from ($data_1_dataset_name)(2) \
+   <NL> minus  ($ipen)($ferret_title_0) from ($data_0_dataset_name)(1)
 ELSE
    DEFINE SYMBOL ferret_diff_title = \
-   @AC($ferret_title_0) (1) \
-   <NL> minus  ($ipen)($ferret_title_1)) (2)
+   @AC ($ferret_title_1)) (2) \
+   <NL> minus  ($ipen)($ferret_title_0) (1)
 ENDIF
 
 IF `STRCMP("($data_0_dataset_name)", "($data_1_dataset_name%99%)") NE 0` THEN
    DEFINE SYMBOL dataset_title_lab = \
     DATASETS: ($data_0_dataset_name)(1)  ($data_1_dataset_name)(2)
    IF ($ferret_annotations"0|*>1") THEN DEFINE SYMBOL dataset_title_lab = \
-    DATASETS: ($data_0_dataset_name) minus ($data_1_dataset_name)
+    DATASETS: ($data_1_dataset_name) minus ($data_0_dataset_name)
 ELSE
    DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
 ENDIF
 
 DEFINE SYMBOL variable_lab = \
-    Difference of ($ferret_title_0) minus ($ferret_title_1)
+    Difference of ($ferret_title_1) minus ($ferret_title_0)
 IF `STRCMP("($ferret_title_0)", "($ferret_title_1)") EQ 0` THEN \
    DEFINE SYMBOL variable_lab = Difference of ($ferret_title_0)
 
@@ -159,7 +160,7 @@ IF `STRLEN("($ferret_diff_title)") GT 150` THEN
     DEFINE SYMBOL lab_1 = ($ferret_title_1) \
     <NL>  from @AC($data_1_dataset_name)(2)
   ENDIF
-  DEFINE SYMBOL ferret_diff_title = ($lab_0)<NL>  minus  ($ipen)($lab_1)
+  DEFINE SYMBOL ferret_diff_title = ($lab_1)<NL>  minus  ($ipen)($lab_0)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
 ENDIF
 
@@ -175,7 +176,7 @@ IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
       DEFINE SYMBOL upper_left_($n_left_labels) = Longitude(1): ($longlab1) ($ipen)Longitude(2): ($longlab2)
       DEFINE SYMBOL longitude_lab = LONGITUDE(1): ($longlab1) Longitude(2): ($longlab2)
       IF `(STRCMP("($longlab1)", "($longlab2)") NE 0)` THEN 
-         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab1) minus ($longlab2)
+         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab2) minus ($longlab1)
       ELSE
          DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab1)
       ENDIF
@@ -192,7 +193,7 @@ IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
       DEFINE SYMBOL upper_left_($n_left_labels) = Latitude(1): ($latlab1) ($ipen)Latitude(2): ($latlab2)
       DEFINE SYMBOL latitude_lab = LATITUDE(1): ($latlab1) Latitude(2): ($latlab2)
       IF `(STRCMP("($latlab1)", "($latlab2)") NE 0)` THEN 
-         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab1) minus ($latlab2)	
+         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab2) minus ($latlab1)	
       ELSE
          DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab1)
       ENDIF
@@ -209,7 +210,7 @@ IF `STRINDEX("($plotshape)", "Z") EQ 0` THEN
       DEFINE SYMBOL upper_left_($n_left_labels) = DEPTH ($depthunits)(1): ($depthlab1) ($ipen)DEPTH ($depthunits)(2): ($depthlab2)
       DEFINE SYMBOL depth_lab = DEPTH ($depthunits)(1): ($depthlab1) DEPTH ($depthunits)(2): ($depthlab2)
       IF `(STRCMP("($depthlab1)", "($depthlab2)") NE 0)` THEN 
-         DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab1) minus ($depthlab2)
+         DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab2) minus ($depthlab1)
       ELSE
          DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab1)
       ENDIF
@@ -226,7 +227,7 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
       DEFINE SYMBOL upper_left_($n_left_labels) = Time(1): ($timelab1) ($ipen)Time(2): ($timelab2)
       DEFINE SYMBOL time_lab = Time(1): ($timelab1) Time(2): ($timelab2)
       IF `(STRCMP("($timelab1)", "($timelab2)") NE 0)` THEN 
-         DEFINE SYMBOL time_lab = TIME: ($timelab1) minus ($timelab2)	
+         DEFINE SYMBOL time_lab = TIME: ($timelab2) minus ($timelab1)
       ELSE
          DEFINE SYMBOL time_lab = TIME: ($timelab2)
       ENDIF
