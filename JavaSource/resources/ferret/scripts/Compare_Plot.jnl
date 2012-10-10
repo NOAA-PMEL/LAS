@@ -12,10 +12,11 @@
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
 
-! Ferret v6.7.1+ includes new palette no_white_greenpink_centered
-IF `($ferret_version"0") GT 6.7` THEN
-   DEFINE SYMBOL ferret_palette no_white_greenpink_centered 
-ELSE
+! New palette for difference plots. Added to the Ferret 
+! environment for Ferret v6.83+
+
+DEFINE SYMBOL ferret_palette no_white_greenpink_centered 
+IF `($ferret_version"0") GE 6.83` THEN
    DEFINE SYMBOL ferret_palette light_centered 
 ENDIF
 
