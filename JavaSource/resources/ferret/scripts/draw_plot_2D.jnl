@@ -59,7 +59,7 @@ GO LAS_open_window
 GO LAS_url_label 0
 
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
-IF ($plot_type"0|CONTOUR>0|*>1") THEN
+IF `($plot_type"0|CONTOUR>0|*>1") AND ($degenerate_2d"0|*>1") EQ 0` THEN
 IF ($ferret_annotations"0|*>1") THEN
    SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_var_0)
    CANCEL VIEW
