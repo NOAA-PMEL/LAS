@@ -34,7 +34,14 @@ IF `fland_area LT 0.005` THEN
 
    IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0` THEN
       USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+      
       DEFINE SYMBOL toponame = smith_sandwell_topo_v8_2
+
+      DEF SYM xlo_hack = `($xlo_hack)-1`
+      DEF SYM xhi_hack = `($xhi_hack)+1`
+      DEF SYM ylo_hack `MAX(($ylo_hack)-1, -90)`
+      DEF SYM yhi_hack `MIN(($yhi_hack)+1,  90)`
+      DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
    ELSE
       USE etopo05
       DEFINE SYMBOL toponame = etopo05
