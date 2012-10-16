@@ -303,7 +303,8 @@ public class OutputPanel extends Composite implements HasName {
 					VariableSerializable variable = (VariableSerializable) variableUserObject;
 					// Remove extra variable UserLists before
 					// applyVariableChange
-					// TODO: Replace this with a higher level method or use events
+					// TODO: Replace this with a higher level method or use
+					// events
 					getOutputControlPanel().getVariableControls()
 							.getMultiVariableSelector().getVariableSelector()
 							.removeListBoxesExceptFirst();
@@ -417,8 +418,8 @@ public class OutputPanel extends Composite implements HasName {
 			// that listens to the new
 			// StringValueChangeEvent(plotImage.getUrl()) will eventually
 			// do so
-//			frontCanvasContext.drawImage(
-//					ImageElement.as(plotImage.getElement()), 0, 0);
+			// frontCanvasContext.drawImage(
+			// ImageElement.as(plotImage.getElement()), 0, 0);
 			// setPlotImageWidth();
 			frontCanvas.addMouseDownHandler(new MouseDownHandler() {
 				@Override
@@ -1315,14 +1316,19 @@ public class OutputPanel extends Composite implements HasName {
 			String nvarDSID = nvar.getDSID();
 			String nvarID = nvar.getID();
 			if (nvarDSID != null && nvarID != null && configCallback != null) {
-					Util.getRPCService().getConfig(null, nvarDSID, nvarID,
-							configCallback);
+				Util.getRPCService().getConfig(null, nvarDSID, nvarID,
+						configCallback);
 			}
 		}
 	}
 
+	/**
+	 * @param options
+	 * @param switchAxis
+	 * @param forceLASRequest If true will force an {@link LASRequestEvent} request.
+	 */
 	public void computeDifference(Map<String, String> options,
-			boolean switchAxis, boolean force) {
+			boolean switchAxis, boolean forceLASRequest) {
 
 		// If the passed in variable is a vector, then the panel variable must
 		// also be a vector. Right?
@@ -1676,7 +1682,7 @@ public class OutputPanel extends Composite implements HasName {
 		String url = Util.getProductServer() + "?xml="
 				+ URL.encode(lasRequest.toString());
 
-		if (!url.equals(currentURL) || force) {// TODO: Why is url == currentURL
+		if (!url.equals(currentURL) || forceLASRequest) {// TODO: Why is url == currentURL
 												// when comparing to new data in
 												// main plot?
 
@@ -2150,7 +2156,20 @@ public class OutputPanel extends Composite implements HasName {
 		panelAxesWidgets.setOpen(false);
 	}
 
-	public void init(boolean usePanel, OperationSerializable[] ops) {
+	/**
+	 * Sets up this panel by making sure there is an eventBus and adds to it the
+	 * lasResponseEventHandler, sets the mapListener to the RefMap of
+	 * panelAxesWidgets, applies incoming operations, resets globalMin and
+	 * globalMax, using the current var resets datasetLabel's text, ngrid, ortho
+	 * (also using view), DataExtent of the RefMap of panelAxesWidgets, resets
+	 * compareAxis and axes of panelAxesWidgets, sets the panelAxesWidgets into
+	 * this panels DOM if this is not a single panel, and then computes
+	 * randomColor. The usePanel parameter is currently ignored.
+	 * 
+	 * @param usePanel
+	 * @param ops
+	 */
+	public void setupForCurrentVar(boolean usePanel, OperationSerializable[] ops) {
 		if (eventBus == null) {
 			eventBus = clientFactory.getEventBus();
 		}
@@ -2212,7 +2231,7 @@ public class OutputPanel extends Composite implements HasName {
 
 		// setPlotImageWidth now sets the plotImage to the grid before any
 		// scaling so plotImage's imageElement will be valid
-//		setPlotImageWidth();
+		// setPlotImageWidth();
 	}
 
 	/**
@@ -2245,9 +2264,10 @@ public class OutputPanel extends Composite implements HasName {
 	 * @param options
 	 * @param switchAxis
 	 * @param popup
+	 * @param forceLASRequest If true will force an {@link LASRequestEvent} request.
 	 */
 	public void refreshPlot(Map<String, String> options, boolean switchAxis,
-			boolean popup, boolean force) {
+			boolean popup, boolean forceLASRequest) {
 
 		if ((!var.isVector() && vizGalVariable.isVector())) {
 			Widget plotWidget = grid.getWidget(1, 0);
@@ -2376,7 +2396,7 @@ public class OutputPanel extends Composite implements HasName {
 		String url = Util.getProductServer() + "?xml="
 				+ URL.encode(lasRequest.toString());
 
-		if (!url.equals(currentURL) || force) {
+		if (!url.equals(currentURL) || forceLASRequest) {
 			if (updating) {
 				pending = true;
 
@@ -3013,7 +3033,8 @@ public class OutputPanel extends Composite implements HasName {
 		currentURL = url;
 	}
 
-	public void setVariable(VariableSerializable v, boolean setFirstVariableSelector) {
+	public void setVariable(VariableSerializable v,
+			boolean setFirstVariableSelector) {
 		GridSerializable oldgrid = null;
 		if (var != null) {
 			oldgrid = var.getGrid();
@@ -3024,7 +3045,8 @@ public class OutputPanel extends Composite implements HasName {
 		UserListBox box = null;
 		if (setFirstVariableSelector) {
 			box = getOutputControlPanel().getVariableControls()
-			.getMultiVariableSelector().getVariableSelector().getFirstListBox();
+					.getMultiVariableSelector().getVariableSelector()
+					.getFirstListBox();
 		} else {
 			box = getOutputControlPanel().getVariableControls()
 					.getMultiVariableSelector().getVariableSelector()
