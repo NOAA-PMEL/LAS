@@ -52,10 +52,7 @@ public class OutputControlPanelImpl extends Composite implements OutputControlPa
 
         setName(outputPanelID);
 
-        FlowPanel mainPanel = new FlowPanel();// DisclosurePanel("Output Controls");
-
-        opcLabel = new Label("Output Controls");
-        mainPanel.add(opcLabel);
+        FlowPanel mainPanel = new FlowPanel();
 
         HorizontalPanel horizontalPanel_0 = new HorizontalPanel();
         horizontalPanel_0.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
