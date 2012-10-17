@@ -542,6 +542,7 @@ public class BaseUI {
 				// couplings
 				OutputControlPanel outputControlPanel = panel
 						.getOutputControlPanel();
+				outputControlPanel.getDisplayButton().setVisible(numPanels>1);
 				VariableControls variableControls = outputControlPanel
 						.getVariableControls();
 				// VariableMetadataView variableMetadataView =
