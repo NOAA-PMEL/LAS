@@ -64,7 +64,7 @@ public class OutputControlPanelImpl extends Composite implements OutputControlPa
         datasetButton.setName(outputPanelID);
         horizontalPanel_0.add(datasetButton);
 
-        displayButton = new PushButton("Show Full Image");
+        displayButton = new PushButton("Enlarge Image");
         displayButton.setTitle("Show the plot's image at full size in a new window.");
         displayButton.addStyleDependentName("SMALLER");
         displayButton.addClickHandler(new ClickHandler() {
