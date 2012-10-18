@@ -515,6 +515,8 @@ public class OutputPanel extends Composite implements HasName {
 						// 0, 0);
 						frontCanvasContext.fillRect(startx, starty, currentx
 								- startx, currenty - starty);
+						frontCanvasContext.strokeRect(startx, starty, currentx
+								- startx, currenty - starty);
 						for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt
 								.hasNext();) {
 							Mouse mouse = mouseIt.next();
