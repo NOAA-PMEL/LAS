@@ -1045,11 +1045,17 @@ public class UI extends BaseUI {
 				// setupOutputPanels(numPanels, Constants.IMAGE) LAS should only
 				// call applyChange()
 				setupOutputPanels(numPanels, Constants.IMAGE);
+				// Reset only the new OutputPanels
+				if (p.equals("1")) {
+					xNewPanels.clear(); // The remaining main panel is not "new"
+					// Will not call refresh, just setup ONLY the main panel
+					setupMainPanel();
+				}
 				applyChange();
 			} else {
 				int numNewPanels = numPanels - oldNumPanels;
 				// Adding numNewPanels of new panels
-				
+
 				// The previous way of adding OutputPanels worked when we
 				// always wanted the same variable (and dataset) for all
 				// OutputPanels as the main/comparePanel,
@@ -1351,6 +1357,21 @@ public class UI extends BaseUI {
 		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
 	}
 
+	/**
+	 * Only sets up the main (upper-left) OutputPanel and does NOT refresh.
+	 */
+	private void setupMainPanel() {
+		xAnalysisWidget.setVisible(true);
+		autoContourButton.setDown(false);
+		autoContourTextBox.setText("");
+		// Hide the plotImage so it won't look like it changed size later
+		xPanels.get(0).hidePlotImage();
+		int buttonIndex = getButtonIndex();
+		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
+		xButtonLayout.remove(compareButtons);
+		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
+	}
+
 	private void setupPanelsAndRefreshNOforceLASRequest(
 			boolean resetOnlyNewPanels) {
 		setupPanelsAndRefresh(resetOnlyNewPanels, false);
@@ -1536,10 +1557,11 @@ public class UI extends BaseUI {
 		compareButtonsLayout.setWidget(0, col++, autoContourButton);
 		compareButtonsLayout.setWidget(0, col++, autoContourTextBox);
 
-		annotationsControl = new ToggleButton("Plot Info",
-				annotationsClickHandler);
+		annotationsControl = new ToggleButton("Show Annotations",
+				"Hide Annotations", annotationsClickHandler);
 		annotationsControl.setTitle("Plot Annotations/Info");
 		annotationsControl.addStyleDependentName("SMALLER");
+		annotationsControl.setValue(true, true);
 		xButtonLayout.setWidget(0, myButtonIndex++, annotationsControl);
 		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
 				false);

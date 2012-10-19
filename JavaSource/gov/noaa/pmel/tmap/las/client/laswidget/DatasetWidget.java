@@ -106,7 +106,12 @@ public class DatasetWidget extends Tree implements HasName {
      * Set up the tree and the associated RPC.
      */
     public void init() {
-        Util.getRPCService().getCategories(null, categoryCallback);
+        try {
+			Util.getRPCService().getCategories(null, categoryCallback);
+		} catch (RuntimeException e) {
+			// Catching this exception mainly to allow WindowBuilder to work without error
+			e.printStackTrace();
+		}
         addOpenHandler(open);
         addSelectionHandler(selection);
     }
