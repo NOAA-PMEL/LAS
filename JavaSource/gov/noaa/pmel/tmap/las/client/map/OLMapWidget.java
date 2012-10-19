@@ -599,14 +599,20 @@ public class OLMapWidget extends Composite {
 		this.map.addControl(modifyFeatureXY);
 		this.map.addControl(modifyFeatureLine);
 
-		drawRectangle.deactivate();
-		drawXLine.deactivate();
-		drawXPoint.deactivate();
-		drawYLine.deactivate();
-		drawYPoint.deactivate();
-		drawPoint.deactivate();
-		modifyFeatureXY.deactivate();
-		modifyFeatureLine.deactivate();
+		try {
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawXPoint.deactivate();
+			drawYLine.deactivate();
+			drawYPoint.deactivate();
+			drawPoint.deactivate();
+			modifyFeatureXY.deactivate();
+			modifyFeatureLine.deactivate();
+		} catch (RuntimeException e) {
+			// Catching this exception mainly to allow WindowBuilder to work
+			// with fewer errors
+			e.printStackTrace();
+		}
 
 		map.setCenter(new LonLat(0, 0), 0);
 		map.setOptions(wrapMapOptions);
