@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.CookiePopupPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.NavAxesGroup;
@@ -23,6 +24,7 @@ import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -39,6 +41,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -50,6 +53,7 @@ import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -96,24 +100,44 @@ public class BaseUI {
 		@Override
 		public void onClick(ClickEvent event) {
 			ToggleButton annotationsControl = (ToggleButton) event.getSource();
-			if (annotationsControl.isDown()) {
-				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-					OutputPanel panel = (OutputPanel) panelIt.next();
-					panel.setAnnotationsOpen(true);
-					// panel.setAnnotationsButtonDown(true);
-					annotationsControl.setDown(true);
-				}
-			} else {
-				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-					OutputPanel panel = (OutputPanel) panelIt.next();
-					panel.setAnnotationsOpen(false);
-					// panel.setAnnotationsButtonDown(false);
-					annotationsControl.setDown(false);
-				}
-			}
-
+			boolean showAnnotations = annotationsControl.isDown();
+			setAnnotationsMode(annotationsControl, showAnnotations);
 		}
 	};
+
+	/**
+	 * @param showAnnotations
+	 */
+	private void setAnnotationsMode(boolean showAnnotations) {
+		setAnnotationsMode(null, showAnnotations);
+	}
+
+	/**
+	 * @param annotationsControl
+	 * @param showAnnotations
+	 */
+	private void setAnnotationsMode(ToggleButton annotationsControl,
+			boolean showAnnotations) {
+		if (annotationsControl == null)
+			annotationsControl = this.annotationsControl;
+		setShowAnnotationsByDefault(showAnnotations);
+		if (showAnnotations) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(true);
+				// panel.setAnnotationsButtonDown(true);
+				annotationsControl.setDown(true);
+			}
+		} else {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(false);
+				// panel.setAnnotationsButtonDown(false);
+				annotationsControl.setDown(false);
+			}
+		}
+	}
+
 	// A "global" annotations toggle button. If you want it in your UI, place it
 	// somewhere in the layout.
 	// Having it in the superclass allows it to be toggled in the handler for
@@ -262,13 +286,13 @@ public class BaseUI {
 	 * xPanelTable
 	 **/
 	List<OutputPanel> xPanels = new ArrayList<OutputPanel>();
-	
+
 	/**
 	 * Layout container for the visualization panels for this UI. They are
 	 * listed in xPanels
 	 **/
 	FlexTable xPanelTable = new FlexTable();
-	
+
 	/**
 	 * Contains the visualization panels for this UI that have just been
 	 * created. This list is used and cleared out by the
@@ -542,7 +566,7 @@ public class BaseUI {
 				// couplings
 				OutputControlPanel outputControlPanel = panel
 						.getOutputControlPanel();
-				outputControlPanel.getDisplayButton().setVisible(numPanels>1);
+				outputControlPanel.getDisplayButton().setVisible(numPanels > 1);
 				VariableControls variableControls = outputControlPanel
 						.getVariableControls();
 				// VariableMetadataView variableMetadataView =
@@ -983,6 +1007,82 @@ public class BaseUI {
 		};
 		Util.getRPCService().getCategories(xVariable.getDSID(),
 				updateSubPanelVarsCallback);
+	}
+
+	Boolean showAnnotationsByDefault = true;
+	private boolean neverPromptedSaveShowAnnotationsCookie = true;
+
+	/**
+	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
+	 * cookie if it exists, sets to true otherwise.
+	 */
+	protected void setShowAnnotationsByDefault() {
+		String showAnnotationsByDefaultStr = Cookies
+				.getCookie("LAS.SHOWANNOTATIONS");
+		if (showAnnotationsByDefaultStr != null) {
+			showAnnotationsByDefault = showAnnotationsByDefaultStr
+					.equalsIgnoreCase("true");
+		} else {
+			showAnnotationsByDefault = true;
+		}
+	}
+
+	/**
+	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
+	 * cookie if it exists, sets to true otherwise. If the cookie doesn't
+	 * already exist the user is asked if they want to set the cookie.
+	 * 
+	 */
+	private void setShowAnnotationsByDefault(boolean showAnnotations) {
+		String showAnnotationsByDefaultStr = Cookies
+				.getCookie("LAS.SHOWANNOTATIONS");
+		if (showAnnotationsByDefaultStr != null) {
+			setShowAnnotationsCookie(showAnnotations);
+		} else {
+			if (neverPromptedSaveShowAnnotationsCookie) {
+				// Ask user if they want to set the cookie
+				final boolean showAnnotationsBool = showAnnotations;
+				ClickHandler yesClickHandler = new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						setShowAnnotationsCookie(showAnnotationsBool);
+						neverPromptedSaveShowAnnotationsCookie = false;
+					}
+				};
+				ClickHandler noClickHandler = new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						// TODO: *** expire existing cookie
+						neverPromptedSaveShowAnnotationsCookie = false;
+					}
+				};
+				CookiePopupPanel popupPanel = new CookiePopupPanel(
+						"Set a Browser Cookie?",
+						"Do you want to save this annotation visibility setting for your browser?",
+						yesClickHandler, noClickHandler);
+				if (annotationsControl != null) {
+					popupPanel.setPopupPosition(
+							annotationsControl.getAbsoluteLeft(),
+							annotationsControl.getAbsoluteTop());
+				}
+				popupPanel.show();
+			}
+		}
+		showAnnotationsByDefault = showAnnotations;
+	}
+
+	/**
+	 * Sets "LAS.SHOWANNOTATIONS" cookie to {@link showAnnotations} parameter
+	 * (expires in 2 weeks).
+	 * 
+	 * @param showAnnotations
+	 */
+	private void setShowAnnotationsCookie(final boolean showAnnotations) {
+		Date expires = new Date();
+		long nowLong = expires.getTime();
+		expires.setTime(nowLong + (1000 * 60 * 60 * 24 * 14)); // 2 weeks
+		String showAnnotationsStr = Boolean.toString(showAnnotations);
+		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr, expires);
 	}
 
 }
