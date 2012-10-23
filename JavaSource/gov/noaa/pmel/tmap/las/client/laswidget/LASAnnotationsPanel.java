@@ -22,6 +22,7 @@ import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
+import com.google.gwt.user.client.ui.InlineLabel;
 
 public class LASAnnotationsPanel extends Composite {
     private static final String LAB_TITLE = "dataset_title_lab";
@@ -52,10 +53,13 @@ public class LASAnnotationsPanel extends Composite {
     private int popupTop = -999;
 
     FlowPanel layoutPanel = new FlowPanel();
+    InlineLabel nlnlblPlotAnnotations = new InlineLabel("Plot Annotations:");
 
     public LASAnnotationsPanel() {
         super();
         initWidget(layoutPanel);
+        
+        layoutPanel.add(nlnlblPlotAnnotations);
 //        setWidth(CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH());
     }
 
@@ -71,6 +75,7 @@ public class LASAnnotationsPanel extends Composite {
     public void setAnnotationsHTML(String html) {
         HTML annotations = new HTML(html);
         layoutPanel.clear();
+        layoutPanel.add(nlnlblPlotAnnotations);
         layoutPanel.add(annotations);
 //        setWidth(CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH());
     }
@@ -149,6 +154,7 @@ public class LASAnnotationsPanel extends Composite {
 
             }
         }
+        layoutPanel.add(nlnlblPlotAnnotations);
         // Figure out what tables we have and put them in to the panel in an
         // order that makes sense.
         if ( tables.get(TYPE_VARIABLE) != null ) {
