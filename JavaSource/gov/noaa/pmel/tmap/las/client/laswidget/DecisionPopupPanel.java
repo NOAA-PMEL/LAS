@@ -7,9 +7,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-public class CookiePopupPanel extends PopupPanel {
+public class DecisionPopupPanel extends PopupPanel {
 
-	public CookiePopupPanel(String toolTip, String prompt,
+	public DecisionPopupPanel(String toolTip, String prompt,
 			ClickHandler yesClickHandler, ClickHandler noClickHandler) {
 		super(true);
 		setAnimationEnabled(true);

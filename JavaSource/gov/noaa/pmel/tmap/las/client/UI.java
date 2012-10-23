@@ -1343,7 +1343,6 @@ public class UI extends BaseUI {
 		compareButtonsLayout.setWidget(0, col++, autoContourButton);
 		compareButtonsLayout.setWidget(0, col++, autoContourTextBox);
 
-		setShowAnnotationsByDefault();
 		annotationsControl = new ToggleButton("Show Annotations",
 				"Hide Annotations", annotationsClickHandler);
 		annotationsControl.setTitle("Plot Annotations/Info");
