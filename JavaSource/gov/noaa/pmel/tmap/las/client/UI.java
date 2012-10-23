@@ -177,17 +177,15 @@ public class UI extends BaseUI {
 		}
 	};
 
-	boolean required_update = false;
 	/*
 	 * Button to set the contour levels automatically.
 	 */
 	ToggleButton autoContourButton;
 	TextBox autoContourTextBox;
-
 	FlexCellFormatter buttonFormatter;
-	FlexTable compareButtonsLayout = new FlexTable();
 
 	boolean changeDataset = false;
+	FlexTable compareButtonsLayout = new FlexTable();
 
 	/*
 	 * DEBUG TODO // decide
@@ -205,6 +203,7 @@ public class UI extends BaseUI {
 
 	// Sometimes you need to keep the current map selection values.
 	double[] cs = null;
+
 	/*
 	 * Button to make slide sorter compute differences
 	 */
@@ -256,7 +255,6 @@ public class UI extends BaseUI {
 		}
 
 	};
-
 	AsyncCallback<ConfigSerializable> getGridForChangeDatasetCallback = new AsyncCallback<ConfigSerializable>() {
 		@Override
 		public void onFailure(Throwable caught) {
@@ -337,6 +335,7 @@ public class UI extends BaseUI {
 	 * Global min and max for setting contour levels.
 	 */
 	double globalMin = 999999999.;
+
 	ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
 
 		@Override
@@ -348,7 +347,6 @@ public class UI extends BaseUI {
 		}
 
 	};
-
 	Map<String, String> historyOptions;
 
 	/*
@@ -523,6 +521,7 @@ public class UI extends BaseUI {
 			setupPanelsAndRefreshNOforceLASRequest(false);
 		}
 	};
+
 	AsyncCallback initVizGalForHistory = new AsyncCallback() {
 		@Override
 		public void onFailure(Throwable caught) {
@@ -544,11 +543,11 @@ public class UI extends BaseUI {
 					false));
 		}
 	};
-
 	private final Logger logger = Logger.getLogger(UI.class.getName());
 
 	// Keep track of the current operations
 	OperationSerializable[] ops;
+
 	Map<String, String> optionsMapComparePanel;
 	ClickHandler optionsOkHandler = new ClickHandler() {
 		@Override
@@ -556,6 +555,30 @@ public class UI extends BaseUI {
 			refresh(false, true, false);
 		}
 
+	};
+	private LASRequestEvent.Handler outputPanelRequestsHandler = new LASRequestEvent.Handler() {
+		private final Logger logger = Logger
+				.getLogger(LASRequestEvent.Handler.class.getName());
+		private OutputPanelRequestController oprController = new OutputPanelRequestController();
+
+		@Override
+		public void onRequest(LASRequestEvent event) {
+			logger.setLevel(Level.OFF);
+			logger.info("onRequest(LASRequestEvent event) called.");
+			Object source = event.getSource();
+			if (source == null) {
+				logger.warning("source == null");
+			} else {
+				String sourceString = source.toString();
+				if ((source instanceof OutputPanel)
+						|| (sourceString.contains(".OutputPanel$"))) {
+					oprController.process(event);
+				} else {
+					logger.warning("The source is NOT and instanceof OutputPanel. source:"
+							+ sourceString);
+				}
+			}
+		}
 	};
 	ClickHandler panelApplyButtonClick = new ClickHandler() {
 		@Override
@@ -598,6 +621,8 @@ public class UI extends BaseUI {
 			}
 		}
 	};
+	boolean required_update = false;
+
 	ClickHandler settingsButtonApplyHandler = new ClickHandler() {
 
 		@Override
@@ -682,11 +707,11 @@ public class UI extends BaseUI {
 			}
 		}
 	};
-
 	// Keep track of the time and Z set in the config properties.
 	String tInitialTime = null;
 	String tInitialZ = null;
 	Map<String, String> tokenMapComparePanel;
+
 	OperationsMenu tOperationsMenu = new OperationsMenu();
 
 	WidgetSelectionChangeEvent.Handler updateNeededEventHandler = new WidgetSelectionChangeEvent.Handler() {
@@ -754,7 +779,6 @@ public class UI extends BaseUI {
 			}
 		}
 	};
-
 	public ClickHandler xVizGalOperationsClickHandler = new ClickHandler() {
 
 		@Override
@@ -763,30 +787,6 @@ public class UI extends BaseUI {
 			if (sender instanceof OperationRadioButton) {
 				setupMenusForOperationChange();
 				applyChange();
-			}
-		}
-	};
-	private LASRequestEvent.Handler outputPanelRequestsHandler = new LASRequestEvent.Handler() {
-		private final Logger logger = Logger
-				.getLogger(LASRequestEvent.Handler.class.getName());
-		private OutputPanelRequestController oprController = new OutputPanelRequestController();
-
-		@Override
-		public void onRequest(LASRequestEvent event) {
-			logger.setLevel(Level.OFF);
-			logger.info("onRequest(LASRequestEvent event) called.");
-			Object source = event.getSource();
-			if (source == null) {
-				logger.warning("source == null");
-			} else {
-				String sourceString = source.toString();
-				if ((source instanceof OutputPanel)
-						|| (sourceString.contains(".OutputPanel$"))) {
-					oprController.process(event);
-				} else {
-					logger.warning("The source is NOT and instanceof OutputPanel. source:"
-							+ sourceString);
-				}
 			}
 		}
 	};
@@ -1277,220 +1277,6 @@ public class UI extends BaseUI {
 	}
 
 	/**
-	 * Sets up various Widgets based on state objects' values.
-	 * 
-	 * @return false if there are no axes orthogonal to the view on which the
-	 *         data can be compared.
-	 */
-	public boolean setupWidgets() {
-
-		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(),
-				xOperationID, xView, ops);
-		tOperationsMenu.setMenus(ops, xView);
-		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation()
-				.getOptionsID(), xOptionsButton.getState());
-		GridSerializable ds_grid = xVariable.getGrid();
-		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
-		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
-
-		double grid_south = Double.valueOf(ds_grid.getYAxis().getLo());
-		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
-
-		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis()
-				.getArangeSerializable().getStep()));
-		xAxesWidget.getRefMap().setTool(xView);
-		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north,
-				grid_west, grid_east, delta);
-
-		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
-
-		if (xOrtho.size() == 0) {
-			Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
-			return false;
-		} else {
-
-			int pos = 0;
-
-			xAxesWidget.init(xVariable.getGrid());
-			xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
-
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
-				panel.setOrthoRanges(xView, xOrtho);
-			}
-			return true;
-		}
-	}
-
-	/**
-	 * @param resetOnlyNewPanels
-	 */
-	private void setupPanelsAndRefreshNOforceLASRequestOFFanalysisWithCompareMenus(
-			boolean resetOnlyNewPanels) {
-		if (xAnalysisWidget.isActive()) {
-			xAnalysisWidget.setActive(false);
-		}
-		xAnalysisWidget.setVisible(false);
-		setupPanelsAndRefreshNOforceLASRequest(resetOnlyNewPanels);
-		int buttonIndex = getButtonIndex();
-		Widget tOpsMenu = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(tOpsMenu);
-		xButtonLayout.setWidget(0, buttonIndex, compareButtonsLayout);
-		xButtonLayout.getCellFormatter().setWidth(0, buttonIndex, "271");
-	}
-
-	/**
-	 * @param resetOnlyNewPanels
-	 */
-	private void setupMainPanelAndRefreshForceLASRequest(
-			boolean resetOnlyNewPanels) {
-		xAnalysisWidget.setVisible(true);
-		autoContourButton.setDown(false);
-		autoContourTextBox.setText("");
-		setupPanelsAndRefresh(resetOnlyNewPanels, true);
-		// Hide the plotImage so it won't look like it changed size later
-		xPanels.get(0).hidePlotImage();
-		int buttonIndex = getButtonIndex();
-		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(compareButtons);
-		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
-	}
-
-	/**
-	 * Only sets up the main (upper-left) OutputPanel and does NOT refresh.
-	 */
-	private void setupMainPanel() {
-		xAnalysisWidget.setVisible(true);
-		autoContourButton.setDown(false);
-		autoContourTextBox.setText("");
-		// Hide the plotImage so it won't look like it changed size later
-		xPanels.get(0).hidePlotImage();
-		int buttonIndex = getButtonIndex();
-		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(compareButtons);
-		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
-	}
-
-	private void setupPanelsAndRefreshNOforceLASRequest(
-			boolean resetOnlyNewPanels) {
-		setupPanelsAndRefresh(resetOnlyNewPanels, false);
-	}
-
-	// TODO: Augment to apply multiple variables/list boxes from the same data
-	// set
-	/**
-	 * Clears xOrtho, sets up each OutputPanel by: Setting the panel's selected
-	 * variable to xVariable and then passing in the current ops to the panel's
-	 * setupForCurrentVar method, sets panel and xAxesWidget axis ranges and
-	 * axes, calls panel.setMapTool(xView) and panel.setLatLon(...), and gives
-	 * each panel the same new instance of BaseUI.Mouse. If there is no initial
-	 * history and comparisonModeChange == false it calls refresh(false, true,
-	 * forceLASRequest).
-	 * 
-	 * @param resetOnlyNewPanels
-	 * @param forceLASRequest
-	 *            If true will force an {@link LASRequestEvent} request.
-	 */
-	private void setupPanelsAndRefresh(boolean resetOnlyNewPanels,
-			boolean forceLASRequest) {
-		xOrtho.clear();
-
-		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			OutputPanel panel = (OutputPanel) panelIt.next();
-			if (resetOnlyNewPanels) {
-				if (xNewPanels.contains(panel)) {
-					// In the case of where multiple variables are being used in
-					// a
-					// panel, we need to change the 1st UserList
-					panel.setVariable(xVariable, true);
-					panel.setupForCurrentVar(false, ops);
-				}
-			} else {
-				// Reset every panel
-
-				// In the case of where multiple variables are being used in a
-				// panel, we need to change the 1st UserList
-				panel.setVariable(xVariable, true);
-				panel.setupForCurrentVar(false, ops);
-			}
-		}
-
-		setupWidgets();
-
-		if (xTlo != null && !xTlo.equals("")) {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				if (xThi != null && !xThi.equals("")) {
-					panel.setAxisRangeValues("t", xTlo, xThi);
-				} else {
-					panel.setAxisRangeValues("t", xTlo, xTlo);
-				}
-			}
-			xAxesWidget.getTAxis().setLo(xTlo);
-			if (xThi != null && !xThi.equals("")) {
-				xAxesWidget.getTAxis().setHi(xThi);
-			} else {
-				xAxesWidget.getTAxis().setHi(xTlo);
-			}
-		}
-		if (xZlo != null && !xZlo.equals("")) {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				if (xZhi != null && !xZhi.equals("")) {
-					panel.setAxisRangeValues("z", xZlo, xZhi);
-				} else {
-					panel.setAxisRangeValues("z", xZlo, xZlo);
-				}
-			}
-			xAxesWidget.getZAxis().setLo(xZlo);
-			if (xZhi != null && !xZhi.equals("")) {
-				xAxesWidget.getZAxis().setHi(xZhi);
-			} else {
-				xAxesWidget.getZAxis().setHi(xZlo);
-			}
-		}
-
-		// If these limits are not the same as the dataBounds, then set them.
-		if (xXlo != null && !xXlo.equals("") && xXhi != null
-				&& !xXhi.equals("") && xYlo != null && !xYlo.equals("")
-				&& xYhi != null && !xYhi.equals("")) {
-			xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(xYlo),
-					Double.valueOf(xYhi), Double.valueOf(xXlo),
-					Double.valueOf(xXhi));
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setMapTool(xView);
-				panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
-			}
-		} else {
-			double tmp_xXlo = xAxesWidget.getRefMap().getXlo();
-			double tmp_xhi = xAxesWidget.getRefMap().getXhi();
-			double tmp_ylo = xAxesWidget.getRefMap().getYlo();
-			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setMapTool(xView);
-				panel.setLatLon(String.valueOf(tmp_ylo),
-						String.valueOf(tmp_yhi), String.valueOf(tmp_xXlo),
-						String.valueOf(tmp_xhi));
-			}
-		}
-		List<Mouse> mice = new ArrayList<Mouse>();
-		Mouse m = new Mouse();
-		mice.add(m);
-		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			OutputPanel p = (OutputPanel) panelIt.next();
-			p.setMouseMoves(mice);
-		}
-		// If there is no initial history, we're ready to go...
-		if ((initialHistory == null || initialHistory.equals(""))
-				&& !comparisonModeChange) {
-			refresh(false, true, forceLASRequest);
-		}
-	}
-
-	/**
 	 * @wbp.parser.entryPoint
 	 */
 	public void onModuleLoad() {
@@ -1784,20 +1570,6 @@ public class UI extends BaseUI {
 
 		History.newItem(historyToken.toString(), false);
 	}
-
-	// private void applyTokensToPanelModePanels(String[] settings) {
-	// /**
-	// * There are 5 sets of tokens.
-	// * <OL>
-	// * <LI>0. Gallery
-	// * <LI>1. Panel 0 (upper left) never in "panel" mode.
-	// * <LI>2. Panel 1 (upper right)
-	// * <LI>3. Panel 2 (lower left)
-	// * <LI>4. Panel 3 (lower right)
-	// * </OL>
-	// */
-	//
-	// }
 
 	/**
 	 * Sets the state of various UI Widgets, perhaps calls
@@ -2167,6 +1939,20 @@ public class UI extends BaseUI {
 
 	}
 
+	// private void applyTokensToPanelModePanels(String[] settings) {
+	// /**
+	// * There are 5 sets of tokens.
+	// * <OL>
+	// * <LI>0. Gallery
+	// * <LI>1. Panel 0 (upper left) never in "panel" mode.
+	// * <LI>2. Panel 1 (upper right)
+	// * <LI>3. Panel 2 (lower left)
+	// * <LI>4. Panel 3 (lower right)
+	// * </OL>
+	// */
+	//
+	// }
+
 	private void setupForNewGrid(GridSerializable grid) {
 		required_update = true;
 		xVariable.setGrid(grid);
@@ -2197,6 +1983,38 @@ public class UI extends BaseUI {
 
 		// Now that we have the grid, finish applying the changes.
 		finishApply();
+	}
+
+	/**
+	 * Only sets up the main (upper-left) OutputPanel and does NOT refresh.
+	 */
+	private void setupMainPanel() {
+		xAnalysisWidget.setVisible(true);
+		autoContourButton.setDown(false);
+		autoContourTextBox.setText("");
+		// Hide the plotImage so it won't look like it changed size later
+		xPanels.get(0).hidePlotImage();
+		int buttonIndex = getButtonIndex();
+		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
+		xButtonLayout.remove(compareButtons);
+		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
+	}
+
+	/**
+	 * @param resetOnlyNewPanels
+	 */
+	private void setupMainPanelAndRefreshForceLASRequest(
+			boolean resetOnlyNewPanels) {
+		xAnalysisWidget.setVisible(true);
+		autoContourButton.setDown(false);
+		autoContourTextBox.setText("");
+		setupPanelsAndRefresh(resetOnlyNewPanels, true);
+		// Hide the plotImage so it won't look like it changed size later
+		xPanels.get(0).hidePlotImage();
+		int buttonIndex = getButtonIndex();
+		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
+		xButtonLayout.remove(compareButtons);
+		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
 	}
 
 	private void setupMenusForOperationChange() {
@@ -2260,6 +2078,188 @@ public class UI extends BaseUI {
 			xAxesWidget.getRefMap().setTool(xView);
 		}
 		tOperationsMenu.enableByView(xView);
+	}
+
+	// TODO: Augment to apply multiple variables/list boxes from the same data
+	// set
+	/**
+	 * Clears xOrtho, sets up each OutputPanel by: Setting the panel's selected
+	 * variable to xVariable and then passing in the current ops to the panel's
+	 * setupForCurrentVar method, sets panel and xAxesWidget axis ranges and
+	 * axes, calls panel.setMapTool(xView) and panel.setLatLon(...), and gives
+	 * each panel the same new instance of BaseUI.Mouse. If there is no initial
+	 * history and comparisonModeChange == false it calls refresh(false, true,
+	 * forceLASRequest).
+	 * 
+	 * @param resetOnlyNewPanels
+	 * @param forceLASRequest
+	 *            If true will force an {@link LASRequestEvent} request.
+	 */
+	private void setupPanelsAndRefresh(boolean resetOnlyNewPanels,
+			boolean forceLASRequest) {
+		xOrtho.clear();
+
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			if (resetOnlyNewPanels) {
+				if (xNewPanels.contains(panel)) {
+					// In the case of where multiple variables are being used in
+					// a
+					// panel, we need to change the 1st UserList
+					panel.setVariable(xVariable, true);
+					panel.setupForCurrentVar(false, ops);
+				}
+			} else {
+				// Reset every panel
+
+				// In the case of where multiple variables are being used in a
+				// panel, we need to change the 1st UserList
+				panel.setVariable(xVariable, true);
+				panel.setupForCurrentVar(false, ops);
+			}
+		}
+
+		setupWidgets();
+
+		if (xTlo != null && !xTlo.equals("")) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				if (xThi != null && !xThi.equals("")) {
+					panel.setAxisRangeValues("t", xTlo, xThi);
+				} else {
+					panel.setAxisRangeValues("t", xTlo, xTlo);
+				}
+			}
+			xAxesWidget.getTAxis().setLo(xTlo);
+			if (xThi != null && !xThi.equals("")) {
+				xAxesWidget.getTAxis().setHi(xThi);
+			} else {
+				xAxesWidget.getTAxis().setHi(xTlo);
+			}
+		}
+		if (xZlo != null && !xZlo.equals("")) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				if (xZhi != null && !xZhi.equals("")) {
+					panel.setAxisRangeValues("z", xZlo, xZhi);
+				} else {
+					panel.setAxisRangeValues("z", xZlo, xZlo);
+				}
+			}
+			xAxesWidget.getZAxis().setLo(xZlo);
+			if (xZhi != null && !xZhi.equals("")) {
+				xAxesWidget.getZAxis().setHi(xZhi);
+			} else {
+				xAxesWidget.getZAxis().setHi(xZlo);
+			}
+		}
+
+		// If these limits are not the same as the dataBounds, then set them.
+		if (xXlo != null && !xXlo.equals("") && xXhi != null
+				&& !xXhi.equals("") && xYlo != null && !xYlo.equals("")
+				&& xYhi != null && !xYhi.equals("")) {
+			xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(xYlo),
+					Double.valueOf(xYhi), Double.valueOf(xXlo),
+					Double.valueOf(xXhi));
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setMapTool(xView);
+				panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
+			}
+		} else {
+			double tmp_xXlo = xAxesWidget.getRefMap().getXlo();
+			double tmp_xhi = xAxesWidget.getRefMap().getXhi();
+			double tmp_ylo = xAxesWidget.getRefMap().getYlo();
+			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setMapTool(xView);
+				panel.setLatLon(String.valueOf(tmp_ylo),
+						String.valueOf(tmp_yhi), String.valueOf(tmp_xXlo),
+						String.valueOf(tmp_xhi));
+			}
+		}
+		List<Mouse> mice = new ArrayList<Mouse>();
+		Mouse m = new Mouse();
+		mice.add(m);
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel p = (OutputPanel) panelIt.next();
+			p.setMouseMoves(mice);
+		}
+		// If there is no initial history, we're ready to go...
+		if ((initialHistory == null || initialHistory.equals(""))
+				&& !comparisonModeChange) {
+			refresh(false, true, forceLASRequest);
+		}
+	}
+
+	private void setupPanelsAndRefreshNOforceLASRequest(
+			boolean resetOnlyNewPanels) {
+		setupPanelsAndRefresh(resetOnlyNewPanels, false);
+	}
+
+	/**
+	 * @param resetOnlyNewPanels
+	 */
+	private void setupPanelsAndRefreshNOforceLASRequestOFFanalysisWithCompareMenus(
+			boolean resetOnlyNewPanels) {
+		if (xAnalysisWidget.isActive()) {
+			xAnalysisWidget.setActive(false);
+		}
+		xAnalysisWidget.setVisible(false);
+		setupPanelsAndRefreshNOforceLASRequest(resetOnlyNewPanels);
+		int buttonIndex = getButtonIndex();
+		Widget tOpsMenu = xButtonLayout.getWidget(0, buttonIndex);
+		xButtonLayout.remove(tOpsMenu);
+		xButtonLayout.setWidget(0, buttonIndex, compareButtonsLayout);
+		xButtonLayout.getCellFormatter().setWidth(0, buttonIndex, "271");
+	}
+
+	/**
+	 * Sets up various Widgets based on state objects' values.
+	 * 
+	 * @return false if there are no axes orthogonal to the view on which the
+	 *         data can be compared.
+	 */
+	public boolean setupWidgets() {
+
+		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(),
+				xOperationID, xView, ops);
+		tOperationsMenu.setMenus(ops, xView);
+		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation()
+				.getOptionsID(), xOptionsButton.getState());
+		GridSerializable ds_grid = xVariable.getGrid();
+		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
+		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
+
+		double grid_south = Double.valueOf(ds_grid.getYAxis().getLo());
+		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
+
+		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis()
+				.getArangeSerializable().getStep()));
+		xAxesWidget.getRefMap().setTool(xView);
+		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north,
+				grid_west, grid_east, delta);
+
+		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+
+		if (xOrtho.size() == 0) {
+			Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
+			return false;
+		} else {
+
+			int pos = 0;
+
+			xAxesWidget.init(xVariable.getGrid());
+			xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
+
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+				panel.setOrthoRanges(xView, xOrtho);
+			}
+			return true;
+		}
 	}
 
 	private void turnOffAnalysis() {

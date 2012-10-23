@@ -53,7 +53,6 @@ import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -73,8 +72,9 @@ public class BaseUI {
 			applyButton.addStyleDependentName("APPLY-NEEDED");
 		}
 
-		public void updateMap(double ylo, double yhi, double xlo, double xhi) {
-			xAxesWidget.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
+		public void setZ(double zlo, double zhi) {
+			xAxesWidget.getZAxis().setNearestLo(zlo);
+			xAxesWidget.getZAxis().setNearestHi(zhi);
 		}
 
 		public void updateLat(double ylo, double yhi) {
@@ -89,9 +89,8 @@ public class BaseUI {
 					xAxesWidget.getRefMap().getYhi(), xlo, xhi);
 		}
 
-		public void setZ(double zlo, double zhi) {
-			xAxesWidget.getZAxis().setNearestLo(zlo);
-			xAxesWidget.getZAxis().setNearestHi(zhi);
+		public void updateMap(double ylo, double yhi, double xlo, double xhi) {
+			xAxesWidget.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
 		}
 	}
 
@@ -105,52 +104,19 @@ public class BaseUI {
 		}
 	};
 
-	/**
-	 * @param showAnnotations
-	 */
-	private void setAnnotationsMode(boolean showAnnotations) {
-		setAnnotationsMode(null, showAnnotations);
-	}
-
-	/**
-	 * @param annotationsControl
-	 * @param showAnnotations
-	 */
-	private void setAnnotationsMode(ToggleButton annotationsControl,
-			boolean showAnnotations) {
-		if (annotationsControl == null)
-			annotationsControl = this.annotationsControl;
-		setShowAnnotationsByDefault(showAnnotations);
-		if (showAnnotations) {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setAnnotationsOpen(true);
-				// panel.setAnnotationsButtonDown(true);
-				annotationsControl.setDown(true);
-			}
-		} else {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setAnnotationsOpen(false);
-				// panel.setAnnotationsButtonDown(false);
-				annotationsControl.setDown(false);
-			}
-		}
-	}
-
 	// A "global" annotations toggle button. If you want it in your UI, place it
 	// somewhere in the layout.
 	// Having it in the superclass allows it to be toggled in the handler for
 	// any annotations button push.
 	ToggleButton annotationsControl = new ToggleButton();
+
 	/*
 	 * A global "apply" control
 	 */
 	AlertButton applyButton = new AlertButton("Update Plots", "APPLY-NEEDED");
+
 	ClientFactory clientFactory = GWT.create(ClientFactory.class);
-
 	EventBus eventBus = clientFactory.getEventBus();
-
 	private final Logger logger = Logger.getLogger(BaseUI.class.getName());
 
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
@@ -166,6 +132,10 @@ public class BaseUI {
 					new MapChangeEvent(ylo, yhi, xlo, xhi), xPanels.get(0));
 		}
 	};
+
+	private boolean neverPromptedSaveShowAnnotationsCookie = true;
+
+	Boolean showAnnotationsByDefault = true;
 	/*
 	 * Classes that extend BaseUI can keep track of xVariable's siblings
 	 */
@@ -230,15 +200,6 @@ public class BaseUI {
 					handlePanelShowHide();
 				}
 			});
-	PushButton xShowControls = new PushButton("Show Controls",
-			new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent event) {
-					handlePanelShowHide();
-				}
-			});
-
 	/**
 	 * Control widget that sets the size of the image in the panel. If set to
 	 * auto the panel resizes with the browser up to the size of the actual
@@ -256,8 +217,15 @@ public class BaseUI {
 	FlexTable xMainPanel = new FlexTable();
 
 	FlexCellFormatter xMainPanelCellFormatter;
+
 	// Left-side navigation widgets
 	FlexTable xNavigationControls = new FlexTable();
+	/**
+	 * Contains the visualization panels for this UI that have just been
+	 * created. This list is used and cleared out by the
+	 * {@link setupPanelsAndRefresh} method.
+	 **/
+	List<OutputPanel> xNewPanels = new ArrayList<OutputPanel>();
 
 	VariableSerializable xNewVariable;
 	String xOperationID;
@@ -293,21 +261,15 @@ public class BaseUI {
 	 **/
 	FlexTable xPanelTable = new FlexTable();
 
-	/**
-	 * Contains the visualization panels for this UI that have just been
-	 * created. This list is used and cleared out by the
-	 * {@link setupPanelsAndRefresh} method.
-	 **/
-	List<OutputPanel> xNewPanels = new ArrayList<OutputPanel>();
-
 	int xPanelWidth;
-
-	// Controls for the panel sizes and to hide and show the headers.
 
 	/*
 	 * Make an HTML only popup page that can be printed.
 	 */
 	PushButton xPrinterFriendlyButton;
+
+	// Controls for the panel sizes and to hide and show the headers.
+
 	/*
 	 * Keep track of the open handler so it can be removed
 	 */
@@ -324,6 +286,14 @@ public class BaseUI {
 	int xRightPad = 45;
 	// Disclosure panel to open and close all the left-hand controls
 	FlowPanel xSettingsHeader = new FlowPanel();// DisclosurePanel("General Controls");
+	PushButton xShowControls = new PushButton("Show Controls",
+			new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					handlePanelShowHide();
+				}
+			});
 	String xThi;
 
 	/*
@@ -473,180 +443,6 @@ public class BaseUI {
 		// resize OutputPanel(s) according to the current Window size
 		logger.info("handlePanelShowHide() calling resize(...)");
 		resize(Window.getClientWidth(), Window.getClientHeight());
-	}
-
-	/**
-	 * Sets up OutputPanel(s) by, based on numPanels, setting applyButton's text
-	 * to "Update Plot" or "Update Plots", removing OutputPanels or adding new
-	 * ones (using container_type and setting their widths). It then sets up the
-	 * xImageSize control widget that sets the size of the image in the panel.
-	 * 
-	 * @param numPanels
-	 * @param container_type
-	 */
-	public void setupOutputPanels(int numPanels, String container_type) {
-		xContainerType = container_type;
-
-		int col = 0;
-		int row = 0;
-		if (numPanels == 1) {
-			applyButton.setText("Update Plot");
-		} else {
-			applyButton.setText("Update Plots");
-		}
-
-		if (xPanelCount > numPanels) {
-			// Remove panels
-			for (int p = 0; p < numPanels; p++) {
-				if (p % 2 == 0) {
-					col++; // go to the next column
-				}
-				// If it's odd
-				if (p % 2 != 0) {
-					row++; // next row
-					col--; // previous column
-				}
-			}
-			for (int i = numPanels; i < xPanelCount; i++) {
-				OutputPanel panel = (OutputPanel) xPanelTable.getWidget(row,
-						col);
-				xPanelTable.remove(panel);
-				xPanels.remove(panel);
-				if (i % 2 == 0) {
-					col++; // go to the next column
-				}
-				// If it's odd
-				if (i % 2 != 0) {
-					row++; // next row
-					col--; // previous column
-				}
-			}
-		} else {
-			// Add new panels using current main state objects
-			for (int p = 0; p < xPanelCount; p++) {
-				if (p % 2 == 0) {
-					col++; // go to the next column
-				}
-				// If it's odd
-				if (p % 2 != 0) {
-					row++; // next row
-					col--; // previous column
-				}
-			}
-			for (int i = xPanelCount; i < numPanels; i++) {
-				String title = "Panel-" + i;
-				boolean compare_panel = false;
-				if (i == 0) {
-					compare_panel = true;
-					// Make sure main data set button has the same name for
-					// event filtering purposes
-					xDatasetButton.setName(title);
-				}
-
-				// DEBUG - pretending there is never single panel mode so the
-				// ortho axes always show up.
-				boolean singlePanel = false;
-				// boolean singlePanel = true;
-				// if ( numPanels > 1 ) {
-				// singlePanel = false;
-				// }
-
-				OutputPanel panel = new OutputPanel(title, compare_panel,
-						xOperationID, xOptionID, xView, singlePanel,
-						xContainerType, xTileServer,
-						annotationsControl.isDown());
-
-				xPanelTable.setWidget(row, col, panel);
-				xPanelTable.getFlexCellFormatter().setAlignment(row, col,
-						HasHorizontalAlignment.ALIGN_LEFT,
-						HasVerticalAlignment.ALIGN_TOP);
-				xPanels.add(panel);
-
-				// TODO: Utilize MVP design patterns to avoid such tight
-				// couplings
-				OutputControlPanel outputControlPanel = panel
-						.getOutputControlPanel();
-				outputControlPanel.getDisplayButton().setVisible(numPanels > 1);
-				VariableControls variableControls = outputControlPanel
-						.getVariableControls();
-				// VariableMetadataView variableMetadataView =
-				// variableControls.getVariableMetadataView();
-				if (xVariable != null) {
-					// Set the data set name in the OutputControlPanel's
-					// VariableControls
-					// TODO: Is there a better way of doing this?
-					// variableMetadataView.getBreadcrumbs().setValue(xVariable.getDSName(),
-					// compare_panel);
-
-					// Set the variables in this panel's
-					// OutputControlPanel's MultiVariableSelector
-					final MultiVariableSelector multiVariableSelector = variableControls
-							.getMultiVariableSelector();
-					if ((variables != null) && (variables.size() > 0)
-							&& (variables.indexOf(xVariable) >= 0)) {
-						multiVariableSelector.setVariables(variables,
-								variables.indexOf(xVariable));
-					} else {
-						// Update variables an then set the variables in this
-						// panels' OutputControlPanel's MultiVariableSelector
-						boolean mustUpdateVariablesFromServer = true;
-						if (!compare_panel) {
-							// First try to get the variables from the compare
-							// panel's MultiVariableSelector before bothering
-							// the server
-							OutputPanel comparePanel = (OutputPanel) xPanelTable
-									.getWidget(0, 0);
-							if (comparePanel != null) {
-								variables = comparePanel
-										.getOutputControlPanel()
-										.getVariableControls()
-										.getMultiVariableSelector()
-										.getVariables();
-								if ((variables != null)
-										&& (variables.size() > 0)
-										&& (variables.indexOf(xVariable) >= 0)) {
-									multiVariableSelector.setVariables(
-											variables,
-											variables.indexOf(xVariable));
-									mustUpdateVariablesFromServer = false;
-								}
-							}
-						}
-						if (mustUpdateVariablesFromServer)
-							updateVariablesFromServer(multiVariableSelector);
-					}
-				}
-
-				if (i % 2 == 0) {
-					col++; // go to the next column
-				}
-				// If it's odd
-				if (i % 2 != 0) {
-					row++; // next row
-					col--; // previous column
-				}
-
-				xPanelWidth = getPanelWidth(numPanels);
-				panel.setWidth(xPanelWidth);
-
-			}
-		}
-		xPanelCount = numPanels;
-		// if ( numPanels == 1 ) {
-		// xComparisonAxesSelector.setVisible(false);
-		// //xAxesWidget.setOrthoTitle("Other Axes");
-		// } else {
-		// xComparisonAxesSelector.setVisible(true);
-		// }
-		xImageSize.addItem("Auto", "auto");
-		xImageSize.addItem("100%", "100");
-		xImageSize.addItem(" 90%", "90");
-		xImageSize.addItem(" 80%", "80");
-		xImageSize.addItem(" 70%", "70");
-		xImageSize.addItem(" 60%", "60");
-		xImageSize.addItem(" 50%", "50");
-		xImageSize.addItem(" 40%", "40");
-		xImageSize.addItem(" 30%", "30");
 	}
 
 	/**
@@ -913,6 +709,39 @@ public class BaseUI {
 		}
 	}
 
+	/**
+	 * @param showAnnotations
+	 */
+	private void setAnnotationsMode(boolean showAnnotations) {
+		setAnnotationsMode(null, showAnnotations);
+	}
+
+	/**
+	 * @param annotationsControl
+	 * @param showAnnotations
+	 */
+	private void setAnnotationsMode(ToggleButton annotationsControl,
+			boolean showAnnotations) {
+		if (annotationsControl == null)
+			annotationsControl = this.annotationsControl;
+		setShowAnnotationsByDefault(showAnnotations);
+		if (showAnnotations) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(true);
+				// panel.setAnnotationsButtonDown(true);
+				annotationsControl.setDown(true);
+			}
+		} else {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(false);
+				// panel.setAnnotationsButtonDown(false);
+				annotationsControl.setDown(false);
+			}
+		}
+	}
+
 	private void setCurrentURL(String url) {
 		for (int i = 0; i < xPanelCount; i++) {
 			OutputPanel panel = xPanels.get(i);
@@ -962,6 +791,257 @@ public class BaseUI {
 	}
 
 	/**
+	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
+	 * cookie if it exists, sets to true otherwise.
+	 */
+	protected void setShowAnnotationsByDefault() {
+		String showAnnotationsByDefaultStr = Cookies
+				.getCookie("LAS.SHOWANNOTATIONS");
+		if (showAnnotationsByDefaultStr != null) {
+			showAnnotationsByDefault = showAnnotationsByDefaultStr
+					.equalsIgnoreCase("true");
+		} else {
+			showAnnotationsByDefault = true;
+		}
+	}
+
+	/**
+	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
+	 * cookie if it exists, sets to true otherwise. If the cookie doesn't
+	 * already exist the user is asked if they want to set the cookie.
+	 * 
+	 */
+	private void setShowAnnotationsByDefault(boolean showAnnotations) {
+		String showAnnotationsByDefaultStr = Cookies
+				.getCookie("LAS.SHOWANNOTATIONS");
+		if (showAnnotationsByDefaultStr != null) {
+			setShowAnnotationsCookie(showAnnotations, 2);
+		} else {
+			if (neverPromptedSaveShowAnnotationsCookie) {
+				// Ask user if they want to set the cookie
+				final boolean showAnnotationsBool = showAnnotations;
+				ClickHandler yesClickHandler = new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						setShowAnnotationsCookie(showAnnotationsBool, 2);
+						neverPromptedSaveShowAnnotationsCookie = false;
+					}
+				};
+				ClickHandler noClickHandler = new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						// Set immediately expiring cookie
+						setShowAnnotationsCookie(showAnnotationsBool, 0);
+						neverPromptedSaveShowAnnotationsCookie = false;
+					}
+				};
+				CookiePopupPanel popupPanel = new CookiePopupPanel(
+						"Set a Browser Cookie?",
+						"Do you want to save this annotation visibility setting for your browser?",
+						yesClickHandler, noClickHandler);
+				if (annotationsControl != null) {
+					popupPanel.setPopupPosition(
+							annotationsControl.getAbsoluteLeft(),
+							annotationsControl.getAbsoluteTop());
+				}
+				popupPanel.show();
+			}
+		}
+		showAnnotationsByDefault = showAnnotations;
+	}
+
+	/**
+	 * Sets "LAS.SHOWANNOTATIONS" cookie to {@link showAnnotations} parameter
+	 * (expires in {@link weeks} time).
+	 * 
+	 * @param showAnnotations
+	 * @param weeks
+	 */
+	private void setShowAnnotationsCookie(final boolean showAnnotations,
+			long weeks) {
+		Date expires = new Date();
+		long nowLong = expires.getTime();
+		long future = 1000 * 60 * 60 * 24 * 7 * weeks;
+		expires.setTime(nowLong + future);
+		String showAnnotationsStr = Boolean.toString(showAnnotations);
+		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr, expires);
+	}
+
+	/**
+	 * Sets up OutputPanel(s) by, based on numPanels, setting applyButton's text
+	 * to "Update Plot" or "Update Plots", removing OutputPanels or adding new
+	 * ones (using container_type and setting their widths). It then sets up the
+	 * xImageSize control widget that sets the size of the image in the panel.
+	 * 
+	 * @param numPanels
+	 * @param container_type
+	 */
+	public void setupOutputPanels(int numPanels, String container_type) {
+		xContainerType = container_type;
+
+		int col = 0;
+		int row = 0;
+		if (numPanels == 1) {
+			applyButton.setText("Update Plot");
+		} else {
+			applyButton.setText("Update Plots");
+		}
+
+		if (xPanelCount > numPanels) {
+			// Remove panels
+			for (int p = 0; p < numPanels; p++) {
+				if (p % 2 == 0) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if (p % 2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
+			}
+			for (int i = numPanels; i < xPanelCount; i++) {
+				OutputPanel panel = (OutputPanel) xPanelTable.getWidget(row,
+						col);
+				xPanelTable.remove(panel);
+				xPanels.remove(panel);
+				if (i % 2 == 0) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if (i % 2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
+			}
+		} else {
+			// Add new panels using current main state objects
+			for (int p = 0; p < xPanelCount; p++) {
+				if (p % 2 == 0) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if (p % 2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
+			}
+			for (int i = xPanelCount; i < numPanels; i++) {
+				String title = "Panel-" + i;
+				boolean compare_panel = false;
+				if (i == 0) {
+					compare_panel = true;
+					// Make sure main data set button has the same name for
+					// event filtering purposes
+					xDatasetButton.setName(title);
+				}
+
+				// DEBUG - pretending there is never single panel mode so the
+				// ortho axes always show up.
+				boolean singlePanel = false;
+				// boolean singlePanel = true;
+				// if ( numPanels > 1 ) {
+				// singlePanel = false;
+				// }
+
+				OutputPanel panel = new OutputPanel(title, compare_panel,
+						xOperationID, xOptionID, xView, singlePanel,
+						xContainerType, xTileServer,
+						annotationsControl.isDown());
+
+				xPanelTable.setWidget(row, col, panel);
+				xPanelTable.getFlexCellFormatter().setAlignment(row, col,
+						HasHorizontalAlignment.ALIGN_LEFT,
+						HasVerticalAlignment.ALIGN_TOP);
+				xPanels.add(panel);
+
+				// TODO: Utilize MVP design patterns to avoid such tight
+				// couplings
+				OutputControlPanel outputControlPanel = panel
+						.getOutputControlPanel();
+				outputControlPanel.getDisplayButton().setVisible(numPanels > 1);
+				VariableControls variableControls = outputControlPanel
+						.getVariableControls();
+				// VariableMetadataView variableMetadataView =
+				// variableControls.getVariableMetadataView();
+				if (xVariable != null) {
+					// Set the data set name in the OutputControlPanel's
+					// VariableControls
+					// TODO: Is there a better way of doing this?
+					// variableMetadataView.getBreadcrumbs().setValue(xVariable.getDSName(),
+					// compare_panel);
+
+					// Set the variables in this panel's
+					// OutputControlPanel's MultiVariableSelector
+					final MultiVariableSelector multiVariableSelector = variableControls
+							.getMultiVariableSelector();
+					if ((variables != null) && (variables.size() > 0)
+							&& (variables.indexOf(xVariable) >= 0)) {
+						multiVariableSelector.setVariables(variables,
+								variables.indexOf(xVariable));
+					} else {
+						// Update variables an then set the variables in this
+						// panels' OutputControlPanel's MultiVariableSelector
+						boolean mustUpdateVariablesFromServer = true;
+						if (!compare_panel) {
+							// First try to get the variables from the compare
+							// panel's MultiVariableSelector before bothering
+							// the server
+							OutputPanel comparePanel = (OutputPanel) xPanelTable
+									.getWidget(0, 0);
+							if (comparePanel != null) {
+								variables = comparePanel
+										.getOutputControlPanel()
+										.getVariableControls()
+										.getMultiVariableSelector()
+										.getVariables();
+								if ((variables != null)
+										&& (variables.size() > 0)
+										&& (variables.indexOf(xVariable) >= 0)) {
+									multiVariableSelector.setVariables(
+											variables,
+											variables.indexOf(xVariable));
+									mustUpdateVariablesFromServer = false;
+								}
+							}
+						}
+						if (mustUpdateVariablesFromServer)
+							updateVariablesFromServer(multiVariableSelector);
+					}
+				}
+
+				if (i % 2 == 0) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if (i % 2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
+
+				xPanelWidth = getPanelWidth(numPanels);
+				panel.setWidth(xPanelWidth);
+
+			}
+		}
+		xPanelCount = numPanels;
+		// if ( numPanels == 1 ) {
+		// xComparisonAxesSelector.setVisible(false);
+		// //xAxesWidget.setOrthoTitle("Other Axes");
+		// } else {
+		// xComparisonAxesSelector.setVisible(true);
+		// }
+		xImageSize.addItem("Auto", "auto");
+		xImageSize.addItem("100%", "100");
+		xImageSize.addItem(" 90%", "90");
+		xImageSize.addItem(" 80%", "80");
+		xImageSize.addItem(" 70%", "70");
+		xImageSize.addItem(" 60%", "60");
+		xImageSize.addItem(" 50%", "50");
+		xImageSize.addItem(" 40%", "40");
+		xImageSize.addItem(" 30%", "30");
+	}
+
+	/**
 	 * @param multiVariableSelector
 	 */
 	void updateVariablesFromServer(
@@ -1007,82 +1087,6 @@ public class BaseUI {
 		};
 		Util.getRPCService().getCategories(xVariable.getDSID(),
 				updateSubPanelVarsCallback);
-	}
-
-	Boolean showAnnotationsByDefault = true;
-	private boolean neverPromptedSaveShowAnnotationsCookie = true;
-
-	/**
-	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
-	 * cookie if it exists, sets to true otherwise.
-	 */
-	protected void setShowAnnotationsByDefault() {
-		String showAnnotationsByDefaultStr = Cookies
-				.getCookie("LAS.SHOWANNOTATIONS");
-		if (showAnnotationsByDefaultStr != null) {
-			showAnnotationsByDefault = showAnnotationsByDefaultStr
-					.equalsIgnoreCase("true");
-		} else {
-			showAnnotationsByDefault = true;
-		}
-	}
-
-	/**
-	 * Sets {@link showAnnotationsByDefault} using the "LAS.SHOWANNOTATIONS"
-	 * cookie if it exists, sets to true otherwise. If the cookie doesn't
-	 * already exist the user is asked if they want to set the cookie.
-	 * 
-	 */
-	private void setShowAnnotationsByDefault(boolean showAnnotations) {
-		String showAnnotationsByDefaultStr = Cookies
-				.getCookie("LAS.SHOWANNOTATIONS");
-		if (showAnnotationsByDefaultStr != null) {
-			setShowAnnotationsCookie(showAnnotations);
-		} else {
-			if (neverPromptedSaveShowAnnotationsCookie) {
-				// Ask user if they want to set the cookie
-				final boolean showAnnotationsBool = showAnnotations;
-				ClickHandler yesClickHandler = new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						setShowAnnotationsCookie(showAnnotationsBool);
-						neverPromptedSaveShowAnnotationsCookie = false;
-					}
-				};
-				ClickHandler noClickHandler = new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						// TODO: *** expire existing cookie
-						neverPromptedSaveShowAnnotationsCookie = false;
-					}
-				};
-				CookiePopupPanel popupPanel = new CookiePopupPanel(
-						"Set a Browser Cookie?",
-						"Do you want to save this annotation visibility setting for your browser?",
-						yesClickHandler, noClickHandler);
-				if (annotationsControl != null) {
-					popupPanel.setPopupPosition(
-							annotationsControl.getAbsoluteLeft(),
-							annotationsControl.getAbsoluteTop());
-				}
-				popupPanel.show();
-			}
-		}
-		showAnnotationsByDefault = showAnnotations;
-	}
-
-	/**
-	 * Sets "LAS.SHOWANNOTATIONS" cookie to {@link showAnnotations} parameter
-	 * (expires in 2 weeks).
-	 * 
-	 * @param showAnnotations
-	 */
-	private void setShowAnnotationsCookie(final boolean showAnnotations) {
-		Date expires = new Date();
-		long nowLong = expires.getTime();
-		expires.setTime(nowLong + (1000 * 60 * 60 * 24 * 14)); // 2 weeks
-		String showAnnotationsStr = Boolean.toString(showAnnotations);
-		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr, expires);
 	}
 
 }
