@@ -67,6 +67,9 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class BaseUI {
+	private static final AppConstants CONSTANTS = GWT
+			.create(AppConstants.class);
+
 	public class Mouse {
 		public void applyNeeded() {
 			applyButton.addStyleDependentName("APPLY-NEEDED");
@@ -815,7 +818,7 @@ public class BaseUI {
 		String showAnnotationsByDefaultStr = Cookies
 				.getCookie("LAS.SHOWANNOTATIONS");
 		if (showAnnotationsByDefaultStr != null) {
-			setShowAnnotationsCookie(showAnnotations);
+			Cookies.setCookie(CONSTANTS.SHOWANNOTATIONS(), Boolean.toString(showAnnotations));
 		} else {
 			if (neverPromptedSaveShowAnnotationsCookie) {
 				// Ask user if they want to set the cookie
@@ -823,19 +826,20 @@ public class BaseUI {
 				ClickHandler yesClickHandler = new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						setShowAnnotationsCookie(showAnnotationsBool);
+						Cookies.setCookie(CONSTANTS.SHOWANNOTATIONS(), Boolean.toString(showAnnotationsBool));
 						neverPromptedSaveShowAnnotationsCookie = false;
 					}
 				};
 				ClickHandler noClickHandler = new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
+						Cookies.removeCookie(CONSTANTS.SHOWANNOTATIONS());
 						neverPromptedSaveShowAnnotationsCookie = false;
 					}
 				};
 				CookiePopupPanel popupPanel = new CookiePopupPanel(
-						"Set a Browser Cookie?",
-						"Do you want to save this annotation visibility setting for your browser?",
+						"Set a Browser Session Cookie?",
+						"Do you want to save this annotation visibility setting for your browser's session?",
 						yesClickHandler, noClickHandler);
 				if (annotationsControl != null) {
 					popupPanel.setPopupPosition(
@@ -846,16 +850,6 @@ public class BaseUI {
 			}
 		}
 		showAnnotationsByDefault = showAnnotations;
-	}
-
-	/**
-	 * Sets "LAS.SHOWANNOTATIONS" session cookie to {@link showAnnotations} parameter.
-	 * 
-	 * @param showAnnotations
-	 */
-	private void setShowAnnotationsCookie(final boolean showAnnotations) {
-		String showAnnotationsStr = Boolean.toString(showAnnotations);
-		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr);
 	}
 
 	/**
