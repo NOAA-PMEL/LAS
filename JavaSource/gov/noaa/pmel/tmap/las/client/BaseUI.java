@@ -815,7 +815,7 @@ public class BaseUI {
 		String showAnnotationsByDefaultStr = Cookies
 				.getCookie("LAS.SHOWANNOTATIONS");
 		if (showAnnotationsByDefaultStr != null) {
-			setShowAnnotationsCookie(showAnnotations, 2);
+			setShowAnnotationsCookie(showAnnotations);
 		} else {
 			if (neverPromptedSaveShowAnnotationsCookie) {
 				// Ask user if they want to set the cookie
@@ -823,15 +823,13 @@ public class BaseUI {
 				ClickHandler yesClickHandler = new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						setShowAnnotationsCookie(showAnnotationsBool, 2);
+						setShowAnnotationsCookie(showAnnotationsBool);
 						neverPromptedSaveShowAnnotationsCookie = false;
 					}
 				};
 				ClickHandler noClickHandler = new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
-						// Set immediately expiring cookie
-						setShowAnnotationsCookie(showAnnotationsBool, 0);
 						neverPromptedSaveShowAnnotationsCookie = false;
 					}
 				};
@@ -851,20 +849,13 @@ public class BaseUI {
 	}
 
 	/**
-	 * Sets "LAS.SHOWANNOTATIONS" cookie to {@link showAnnotations} parameter
-	 * (expires in {@link weeks} time).
+	 * Sets "LAS.SHOWANNOTATIONS" session cookie to {@link showAnnotations} parameter.
 	 * 
 	 * @param showAnnotations
-	 * @param weeks
 	 */
-	private void setShowAnnotationsCookie(final boolean showAnnotations,
-			long weeks) {
-		Date expires = new Date();
-		long nowLong = expires.getTime();
-		long future = 1000 * 60 * 60 * 24 * 7 * weeks;
-		expires.setTime(nowLong + future);
+	private void setShowAnnotationsCookie(final boolean showAnnotations) {
 		String showAnnotationsStr = Boolean.toString(showAnnotations);
-		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr, expires);
+		Cookies.setCookie("LAS.SHOWANNOTATIONS", showAnnotationsStr);
 	}
 
 	/**
