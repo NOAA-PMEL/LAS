@@ -14,6 +14,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.PlainToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -98,7 +99,8 @@ public class BaseUI {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			ToggleButton annotationsControl = (ToggleButton) event.getSource();
+			PlainToggleButton annotationsControl = (PlainToggleButton) event
+					.getSource();
 			boolean showAnnotations = annotationsControl.isDown();
 			setAnnotationsMode(annotationsControl, showAnnotations);
 		}
@@ -108,7 +110,7 @@ public class BaseUI {
 	// somewhere in the layout.
 	// Having it in the superclass allows it to be toggled in the handler for
 	// any annotations button push.
-	ToggleButton annotationsControl = new ToggleButton();
+	PlainToggleButton annotationsControl = new PlainToggleButton();
 
 	/*
 	 * A global "apply" control
@@ -189,10 +191,9 @@ public class BaseUI {
 
 	String xDSID;
 
-	// Top level buttons to hide/show every control.
-	PushButton xHideControls = new PushButton("Hide Controls",
-			new ClickHandler() {
-
+	// Top level button to hide/show every control.
+	PlainToggleButton xToggleControls = new PlainToggleButton("Hide Controls",
+			"Show Controls", new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
 					handlePanelShowHide();
@@ -284,14 +285,6 @@ public class BaseUI {
 	int xRightPad = 45;
 	// Disclosure panel to open and close all the left-hand controls
 	FlowPanel xSettingsHeader = new FlowPanel();// DisclosurePanel("General Controls");
-	PushButton xShowControls = new PushButton("Show Controls",
-			new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent event) {
-					handlePanelShowHide();
-				}
-			});
 	String xThi;
 
 	/*
@@ -411,9 +404,6 @@ public class BaseUI {
 
 	public void handlePanelShowHide() {
 		if (xPanelHeaderHidden) {
-			// Hide xShowControls button and show the xHideControls button
-			xShowControls.setVisible(false);
-			xHideControls.setVisible(true);
 			// for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			// OutputPanel panel = (OutputPanel) panelIt.next();
 			// panel.show();
@@ -424,9 +414,6 @@ public class BaseUI {
 			// Show the controls and wait for event notification to resize
 			eventBus.fireEventFromSource(new ControlVisibilityEvent(true), this);
 		} else {
-			// Hide xHideControls button and show the xShowControls button
-			xHideControls.setVisible(false);
-			xShowControls.setVisible(true);
 			// for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			// OutputPanel panel = (OutputPanel) panelIt.next();
 			// panel.hide();
@@ -434,7 +421,7 @@ public class BaseUI {
 			xMainPanelCellFormatter.setVisible(1, 0, false);
 			// Must flip this flag BEFORE firing events
 			xPanelHeaderHidden = !xPanelHeaderHidden;
-			// Hide the controls and wait for event notification to resize
+			// Hide the controls
 			eventBus.fireEventFromSource(new ControlVisibilityEvent(false),
 					this);
 		}
@@ -513,9 +500,7 @@ public class BaseUI {
 		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
 
-		xHideControls.addStyleDependentName("SMALLER");
-		xShowControls.addStyleDependentName("SMALLER");
-		xShowControls.setVisible(false);
+		xToggleControls.addStyleDependentName("SMALLER");
 
 		xDatasetButton.ensureDebugId("xDatasetButton");
 
@@ -555,10 +540,7 @@ public class BaseUI {
 		applyButton.addStyleDependentName("SMALLER");
 		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
 		// Other buttons have their style handled in the widget itself.
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xShowControls);
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xHideControls);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xToggleControls);
 		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
 				false);
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, applyButton);
@@ -718,7 +700,7 @@ public class BaseUI {
 	 * @param annotationsControl
 	 * @param showAnnotations
 	 */
-	private void setAnnotationsMode(ToggleButton annotationsControl,
+	private void setAnnotationsMode(PlainToggleButton annotationsControl,
 			boolean showAnnotations) {
 		if (annotationsControl == null)
 			annotationsControl = this.annotationsControl;
