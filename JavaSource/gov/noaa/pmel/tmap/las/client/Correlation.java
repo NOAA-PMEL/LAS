@@ -498,7 +498,7 @@ public class Correlation implements EntryPoint {
         RootPanel.get("space_time_constraints").add(spaceTimeConstraints);
         lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
         lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
-        lasAnnotationsPanel.setTitle("Plot Annotations");
+        
         lasAnnotationsPanel.setError("Click \"Update plot\" to refresh the plot.&nbsp;");
         ok = new PushButton("Ok");
         ok.addClickHandler(new ClickHandler() {
@@ -582,7 +582,7 @@ public class Correlation implements EntryPoint {
         boolean contained = true;
         setConstraints();
         update.removeStyleDependentName("APPLY-NEEDED");
-        lasAnnotationsPanel.setTitle("Plot Annotations");
+        
         lasAnnotationsPanel.setError("Fetching plot annotations...");
 
         spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
@@ -1849,7 +1849,7 @@ public class Correlation implements EntryPoint {
                 currentURL = currentURL + "&cancel=true";
                 RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, currentURL);
                 try {
-                    lasAnnotationsPanel.setTitle("Plot Annotations");
+                    
                     lasAnnotationsPanel.setError("Fetching plot annotations...");
                     sendRequest.sendRequest(null, lasRequestCallback);
                 } catch ( RequestException e ) {
