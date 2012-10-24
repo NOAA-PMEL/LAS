@@ -144,7 +144,7 @@ public class OutputPanel extends Composite implements HasName {
 				RequestBuilder sendRequest = new RequestBuilder(
 						RequestBuilder.GET, currentURL);
 				try {
-					lasAnnotationsPanel.setTitle("Plot Annotations");
+					
 					lasAnnotationsPanel
 							.setError("Fetching plot annotations...");
 					updating = true;
@@ -2429,7 +2429,7 @@ public class OutputPanel extends Composite implements HasName {
 				// RequestBuilder sendRequest = new
 				// RequestBuilder(RequestBuilder.GET, url);
 				try {
-					lasAnnotationsPanel.setTitle("Plot Annotations");
+					
 					lasAnnotationsPanel
 							.setError("Fetching plot annotations...");
 					updating = true;

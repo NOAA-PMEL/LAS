@@ -54,6 +54,8 @@ public class LASAnnotationsButton extends Composite {
 	private static final String TYPE_ORTHOGONAL_AXES = "orthogonal_axes";
 	private static final String TYPE_LAS = "las";
 	private static final String TYPE_NOTES = "notes";
+	private static final String DEFAULT_UP_TOOLTIP = "Click to show the annotations of the plots.";
+	private static final String DEFAULT_DOWN_TOOLTIP = "Click to hide the annotations of the plots.";
 	private int popupLeft = -999;
 	private int popupTop = -999;
 	ToggleButton annotationsButton;
@@ -69,13 +71,15 @@ public class LASAnnotationsButton extends Composite {
 					public void onClick(ClickEvent event) {
 						if ( annotationsButton.isDown() ) {	
 							setOpen(true);
+							annotationsButton.setTitle(DEFAULT_UP_TOOLTIP);
 						} else {
 							setOpen(false);
+							annotationsButton.setTitle(DEFAULT_DOWN_TOOLTIP);
 						}						
 					}
 			
 		});
-		annotationsButton.setTitle("Plot Annotations");
+		annotationsButton.setTitle(DEFAULT_UP_TOOLTIP);
 		annotationsButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		annotationsButton.addStyleDependentName("WIDTH");
 		initWidget(annotationsButton);
