@@ -4,10 +4,12 @@ import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 
@@ -20,22 +22,25 @@ import com.google.gwt.place.shared.PlaceController;
  */
 public interface ClientFactory {
 
-    EventBus getEventBus();
+	EventBus getEventBus();
 
-    HelpMenuBar getHelpMenuBar();
+	HelpMenuBar getHelpMenuBar();
 
-    // PlaceController getPlaceController();
-    public InteractiveDownloadDataView getInteractiveDownloadDataView();
+	// PlaceController getPlaceController();
+	public InteractiveDownloadDataView getInteractiveDownloadDataView();
 
-    MultiVariableSelector getMultiVariableSelector(String id);
+	MultiVariableSelector getMultiVariableSelector(String id);
 
-    OutputControlPanel getOutputControlPanel(String id);
+	OutputControlPanel getOutputControlPanel(String id);
 
-    VariableControls getVariableControls(String id);
+	VariableControls getVariableControls(String id);
 
-    VariableMetadataView getVariableMetadataView(String id);
+	VariableMetadataView getVariableMetadataView(String id);
 
-    VariableSelector getVariableSelectorView(String id);
+	VariableSelector getVariableSelectorView(String id);
 
-    ActionsMenuBar getActionsMenuBar(String id);
+	ActionsMenuBar getActionsMenuBar(String id);
+
+	ToggleButton getToggleButton(String upText, String downText,
+			ClickHandler handler);
 }

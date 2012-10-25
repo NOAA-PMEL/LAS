@@ -14,7 +14,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
-import gov.noaa.pmel.tmap.las.client.laswidget.PlainToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -99,18 +98,10 @@ public class BaseUI {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			PlainToggleButton annotationsControl = (PlainToggleButton) event
-					.getSource();
 			boolean showAnnotations = annotationsControl.isDown();
 			setAnnotationsMode(annotationsControl, showAnnotations);
 		}
 	};
-
-	// A "global" annotations toggle button. If you want it in your UI, place it
-	// somewhere in the layout.
-	// Having it in the superclass allows it to be toggled in the handler for
-	// any annotations button push.
-	PlainToggleButton annotationsControl = new PlainToggleButton();
 
 	/*
 	 * A global "apply" control
@@ -120,6 +111,13 @@ public class BaseUI {
 	ClientFactory clientFactory = GWT.create(ClientFactory.class);
 	EventBus eventBus = clientFactory.getEventBus();
 	private final Logger logger = Logger.getLogger(BaseUI.class.getName());
+
+	// A "global" annotations toggle button. If you want it in your UI, place it
+	// somewhere in the layout.
+	// Having it in the superclass allows it to be toggled in the handler for
+	// any annotations button push.
+	ToggleButton annotationsControl = new ToggleButton("Annotations",
+			"Annotations", annotationsClickHandler);
 
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 
@@ -192,8 +190,8 @@ public class BaseUI {
 	String xDSID;
 
 	// Top level button to hide/show every control.
-	PlainToggleButton xToggleControls = new PlainToggleButton("Hide Controls",
-			"Show Controls", new ClickHandler() {
+	ToggleButton xToggleControls = new ToggleButton("Controls", "Controls",
+			new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
 					handlePanelShowHide();
@@ -700,7 +698,7 @@ public class BaseUI {
 	 * @param annotationsControl
 	 * @param showAnnotations
 	 */
-	private void setAnnotationsMode(PlainToggleButton annotationsControl,
+	private void setAnnotationsMode(ToggleButton annotationsControl,
 			boolean showAnnotations) {
 		if (annotationsControl == null)
 			annotationsControl = this.annotationsControl;
