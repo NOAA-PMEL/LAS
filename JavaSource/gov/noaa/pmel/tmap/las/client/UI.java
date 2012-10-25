@@ -18,7 +18,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
-import gov.noaa.pmel.tmap.las.client.laswidget.PlainToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
@@ -1344,11 +1343,11 @@ public class UI extends BaseUI {
 		compareButtonsLayout.setWidget(0, col++, autoContourButton);
 		compareButtonsLayout.setWidget(0, col++, autoContourTextBox);
 
-		annotationsControl = new PlainToggleButton("Show Annotations",
-				"Hide Annotations", annotationsClickHandler);
+		annotationsControl = new ToggleButton("Annotations", "Annotations",
+				annotationsClickHandler);
 		annotationsControl.setTitle("Plot Annotations/Info");
 		annotationsControl.addStyleDependentName("SMALLER");
-//		annotationsControl.setValue(showAnnotationsByDefault, true);
+		// annotationsControl.setValue(showAnnotationsByDefault, true);
 		annotationsControl.setDown(showAnnotationsByDefault);
 		xButtonLayout.setWidget(0, myButtonIndex++, annotationsControl);
 		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
