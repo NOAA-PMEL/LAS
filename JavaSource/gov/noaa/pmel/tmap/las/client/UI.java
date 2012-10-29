@@ -1345,7 +1345,11 @@ public class UI extends BaseUI {
 
 		annotationsControl = new ToggleButton("Annotations", "Annotations",
 				annotationsClickHandler);
-		annotationsControl.setTitle(ANNOTATIONS_CONTROL_DOWN_TOOLTIP);
+		if (showAnnotationsByDefault) {
+			annotationsControl.setTitle(ANNOTATIONS_CONTROL_DOWN_TOOLTIP);
+		} else {
+			annotationsControl.setTitle(ANNOTATIONS_CONTROL_UP_TOOLTIP);
+		}
 		annotationsControl.addStyleDependentName("SMALLER");
 		// annotationsControl.setValue(showAnnotationsByDefault, true);
 		annotationsControl.setDown(showAnnotationsByDefault);
