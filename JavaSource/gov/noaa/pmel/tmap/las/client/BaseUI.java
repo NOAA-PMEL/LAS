@@ -118,6 +118,8 @@ public class BaseUI {
 	// any annotations button push.
 	ToggleButton annotationsControl = new ToggleButton("Annotations",
 			"Annotations", annotationsClickHandler);
+	static final String ANNOTATIONS_CONTROL_UP_TOOLTIP = "Click to show the annotations of the plots.";
+	static final String ANNOTATIONS_CONTROL_DOWN_TOOLTIP = "Click to hide the annotations of the plots.";
 
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 
@@ -197,6 +199,9 @@ public class BaseUI {
 					handlePanelShowHide();
 				}
 			});
+	static final String XTOGGLE_CONTROL_UP_TOOLTIP = "Click to hide the controls.";
+	static final String XTOGGLE_CONTROL_DOWN_TOOLTIP = "Click to show the controls.";
+
 	/**
 	 * Control widget that sets the size of the image in the panel. If set to
 	 * auto the panel resizes with the browser up to the size of the actual
@@ -407,6 +412,7 @@ public class BaseUI {
 			// panel.show();
 			// }
 			xMainPanelCellFormatter.setVisible(1, 0, true);
+			xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
 			// Must flip this flag BEFORE firing events
 			xPanelHeaderHidden = !xPanelHeaderHidden;
 			// Show the controls and wait for event notification to resize
@@ -417,6 +423,7 @@ public class BaseUI {
 			// panel.hide();
 			// }
 			xMainPanelCellFormatter.setVisible(1, 0, false);
+			xToggleControls.setTitle(XTOGGLE_CONTROL_DOWN_TOOLTIP);
 			// Must flip this flag BEFORE firing events
 			xPanelHeaderHidden = !xPanelHeaderHidden;
 			// Hide the controls
@@ -499,6 +506,7 @@ public class BaseUI {
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
 
 		xToggleControls.addStyleDependentName("SMALLER");
+		xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
 
 		xDatasetButton.ensureDebugId("xDatasetButton");
 
@@ -708,6 +716,7 @@ public class BaseUI {
 				panel.setAnnotationsOpen(true);
 				// panel.setAnnotationsButtonDown(true);
 				annotationsControl.setDown(true);
+				annotationsControl.setTitle(ANNOTATIONS_CONTROL_DOWN_TOOLTIP);
 			}
 		} else {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -715,6 +724,7 @@ public class BaseUI {
 				panel.setAnnotationsOpen(false);
 				// panel.setAnnotationsButtonDown(false);
 				annotationsControl.setDown(false);
+				annotationsControl.setTitle(ANNOTATIONS_CONTROL_UP_TOOLTIP);
 			}
 		}
 	}

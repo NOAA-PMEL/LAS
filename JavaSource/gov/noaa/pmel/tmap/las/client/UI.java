@@ -1345,7 +1345,7 @@ public class UI extends BaseUI {
 
 		annotationsControl = new ToggleButton("Annotations", "Annotations",
 				annotationsClickHandler);
-		annotationsControl.setTitle("Plot Annotations/Info");
+		annotationsControl.setTitle(ANNOTATIONS_CONTROL_DOWN_TOOLTIP);
 		annotationsControl.addStyleDependentName("SMALLER");
 		// annotationsControl.setValue(showAnnotationsByDefault, true);
 		annotationsControl.setDown(showAnnotationsByDefault);
