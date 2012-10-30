@@ -698,7 +698,7 @@ public class BaseUI {
 	/**
 	 * @param showAnnotations
 	 */
-	private void setAnnotationsMode(boolean showAnnotations) {
+	protected void setAnnotationsMode(boolean showAnnotations) {
 		setAnnotationsMode(null, showAnnotations);
 	}
 

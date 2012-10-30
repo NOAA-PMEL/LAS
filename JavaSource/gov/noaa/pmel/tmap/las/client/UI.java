@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.OperationChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
@@ -12,6 +13,7 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
@@ -1133,6 +1135,7 @@ public class UI extends BaseUI {
 				eventBus.fireEvent(new ComparisonModeChangeEvent(true));
 			}
 			eventBus.fireEvent(new WidgetSelectionChangeEvent(true, false, true));
+			synchAnnotationsMode();
 		} catch (NumberFormatException nfe) {
 			nfe.printStackTrace();
 		}
@@ -1353,6 +1356,23 @@ public class UI extends BaseUI {
 		annotationsControl.addStyleDependentName("SMALLER");
 		// annotationsControl.setValue(showAnnotationsByDefault, true);
 		annotationsControl.setDown(showAnnotationsByDefault);
+		// Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
+		eventBus.addHandler(StringValueChangeEvent.TYPE,
+				new StringValueChangeEvent.Handler() {
+					@Override
+					public void onValueChange(StringValueChangeEvent event) {
+						Object source = event.getSource();
+						if ((source != null)
+								&& (source instanceof LASAnnotationsPanel)) {
+							String open = event.getValue();
+							boolean isOpen = Boolean.parseBoolean(open);
+							if (!isOpen) {
+								synchAnnotationsMode();
+							}
+						}
+					}
+				});
+
 		xButtonLayout.setWidget(0, myButtonIndex++, annotationsControl);
 		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
 				false);
@@ -1493,6 +1513,23 @@ public class UI extends BaseUI {
 			}
 		}
 		History.addValueChangeHandler(historyHandler);
+	}
+
+	/**
+	 * A LASAnnotationsPanel closed, so check if they are all now closed and
+	 * call {@link setAnnotationsMode(boolean showAnnotations)} appropriately.
+	 */
+	protected void synchAnnotationsMode() {
+		boolean allInvisible = true;
+		for (Iterator<OutputPanel> panelIt = xPanels.iterator(); panelIt
+				.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			if (panel.isAnnotationsPanelVisible()) {
+				allInvisible = false;
+			}
+		}
+		if (allInvisible)
+			setAnnotationsMode(false);
 	}
 
 	private void popHistory(String historyToken) {
