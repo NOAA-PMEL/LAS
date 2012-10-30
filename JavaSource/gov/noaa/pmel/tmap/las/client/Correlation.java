@@ -296,7 +296,7 @@ public class Correlation implements EntryPoint {
 			}
 
 		});
-		annotationsButton.setTitle("Plot Info/Annotations");
+		annotationsButton.setTitle("Click to show/hide the annotations of the plot.");
 		annotationsButton.addStyleDependentName("SMALLER");
 		annotationsButton.setDown(true);
 		spinImage = new HTML("<img src=\"" + spinImageURL
