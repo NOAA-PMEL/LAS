@@ -12,7 +12,6 @@ import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.OperationChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
-import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
@@ -58,12 +57,10 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
@@ -76,7 +73,6 @@ import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -144,7 +140,7 @@ public class OutputPanel extends Composite implements HasName {
 				RequestBuilder sendRequest = new RequestBuilder(
 						RequestBuilder.GET, currentURL);
 				try {
-					
+
 					lasAnnotationsPanel
 							.setError("Fetching plot annotations...");
 					updating = true;
@@ -1327,7 +1323,8 @@ public class OutputPanel extends Composite implements HasName {
 	/**
 	 * @param options
 	 * @param switchAxis
-	 * @param forceLASRequest If true will force an {@link LASRequestEvent} request.
+	 * @param forceLASRequest
+	 *            If true will force an {@link LASRequestEvent} request.
 	 */
 	public void computeDifference(Map<String, String> options,
 			boolean switchAxis, boolean forceLASRequest) {
@@ -1684,9 +1681,10 @@ public class OutputPanel extends Composite implements HasName {
 		String url = Util.getProductServer() + "?xml="
 				+ URL.encode(lasRequest.toString());
 
-		if (!url.equals(currentURL) || forceLASRequest) {// TODO: Why is url == currentURL
-												// when comparing to new data in
-												// main plot?
+		if (!url.equals(currentURL) || forceLASRequest) {// TODO: Why is url ==
+															// currentURL
+			// when comparing to new data in
+			// main plot?
 
 			if (updating) {
 				pending = true;
@@ -2266,7 +2264,8 @@ public class OutputPanel extends Composite implements HasName {
 	 * @param options
 	 * @param switchAxis
 	 * @param popup
-	 * @param forceLASRequest If true will force an {@link LASRequestEvent} request.
+	 * @param forceLASRequest
+	 *            If true will force an {@link LASRequestEvent} request.
 	 */
 	public void refreshPlot(Map<String, String> options, boolean switchAxis,
 			boolean popup, boolean forceLASRequest) {
@@ -2429,7 +2428,7 @@ public class OutputPanel extends Composite implements HasName {
 				// RequestBuilder sendRequest = new
 				// RequestBuilder(RequestBuilder.GET, url);
 				try {
-					
+
 					lasAnnotationsPanel
 							.setError("Fetching plot annotations...");
 					updating = true;
@@ -3175,6 +3174,13 @@ public class OutputPanel extends Composite implements HasName {
 		}
 		this.showOrthoAxes(view, ortho, aAxis);
 		panelAxesWidgets.getRefMap().resizeMap();
+	}
+
+	public boolean isAnnotationsPanelVisible() {
+		if (lasAnnotationsPanel != null) {
+			return lasAnnotationsPanel.isVisible();
+		}
+		return false;
 	}
 
 }
