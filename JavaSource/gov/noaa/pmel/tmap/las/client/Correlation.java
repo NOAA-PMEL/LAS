@@ -288,17 +288,18 @@ public class Correlation implements EntryPoint {
 		reset.setTitle("Reset time to the full range.");
 		String spinImageURL = URLUtil.getImageURL() + "/mozilla_blu.gif";
 
-		annotationsButton = new ToggleButton("Plot Info", new ClickHandler() {
+		annotationsButton = new ToggleButton("Annotations", new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				lasAnnotationsPanel.setVisible(annotationsButton.isDown());
+				showAnnotations(annotationsButton.isDown());
 			}
 
 		});
-		annotationsButton.setTitle("Click to show/hide the annotations of the plot.");
 		annotationsButton.addStyleDependentName("SMALLER");
-		annotationsButton.setDown(true);
+		showAnnotations(true);
+		annotationsButton
+				.setTitle("Click to hide the annotations of the plot.");
 		spinImage = new HTML("<img src=\"" + spinImageURL
 				+ "\" alt=\"Spinner\"/>");
 		spin = new PopupPanel();
@@ -596,7 +597,7 @@ public class Correlation implements EntryPoint {
 	 * {@link annotationsButton} down state is set appropriately.
 	 */
 	protected void synchAnnotationsMode() {
-		annotationsButton.setDown(lasAnnotationsPanel.isVisible());
+		showAnnotations(lasAnnotationsPanel.isVisible());
 	}
 
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
@@ -2075,6 +2076,21 @@ public class Correlation implements EntryPoint {
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param down
+	 */
+	void showAnnotations(boolean down) {
+		annotationsButton.setDown(down);
+		lasAnnotationsPanel.setVisible(down);
+		if (down) {
+			annotationsButton
+					.setTitle("Click to hide the annotations of the plot.");
+		} else {
+			annotationsButton
+					.setTitle("Click to show the annotations of the plot.");
 		}
 	}
 

@@ -39,7 +39,7 @@ text-align:left;
 }
 </style>
   </head>
-  <div style="background-color:#FFF;border:2px solid black;padding:4px"
+  <div style="background-color:#FFF;padding:4px">
   <body >
      <table width="100%">
       
