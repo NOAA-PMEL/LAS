@@ -30,6 +30,7 @@ import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
+import com.google.gwt.user.client.ui.FlowPanel;
 
 public class LASAnnotationsPanel extends Composite {
 	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
@@ -63,6 +64,9 @@ public class LASAnnotationsPanel extends Composite {
 	private int popupTop = -999;
 
 	private static final String DEFAULT_TOOLTIP = "These are annotations of the associated plot.";
+	private static final String DEFAULT_CLOSE_BUTTON_TOOLTIP = "Click to close this annotation panel.";
+
+	DockPanel borderPanel = new DockPanel();
 
 	DockPanel layoutPanel = new DockPanel();
 
@@ -70,16 +74,21 @@ public class LASAnnotationsPanel extends Composite {
 
 	public LASAnnotationsPanel() {
 		super();
-		initWidget(layoutPanel);
+		layoutPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+		borderPanel.add(layoutPanel, DockPanel.CENTER);
+		layoutPanel.setSize("100%", "100%");
+		initWidget(borderPanel);
+		borderPanel.setBorderWidth(1);
+		layoutPanel.setBorderWidth(0);
 		// setWidth(CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH());
 		layoutPanel.setTitle(DEFAULT_TOOLTIP);
+		closeButton.setTitle(DEFAULT_CLOSE_BUTTON_TOOLTIP);
+		closeButton.getElement().getStyle().setProperty("textAlign", "center");
 		closeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				setOpenAndPublish(false);
 			}
 		});
-
-		closeButton.setFocus(false);
 		layoutPanel.add(closeButton, DockPanel.EAST);
 		layoutPanel.setCellHeight(closeButton, "1em");
 		layoutPanel.setCellWidth(closeButton, "1em");
@@ -93,7 +102,7 @@ public class LASAnnotationsPanel extends Composite {
 		try {
 			sendRequest.sendRequest(null, annotationsHTMLCallback);
 		} catch (RequestException e) {
-
+			e.printStackTrace();
 		}
 	}
 
@@ -234,33 +243,14 @@ public class LASAnnotationsPanel extends Composite {
 		popupLeft = left;
 	}
 
-	/**
-	 * Sets the width of the main sub-panel ignoring the width of the
-	 * closeButton.
-	 * 
-	 * @param width
-	 */
+	  /**
+	   * Sets the object's width. This width does not include decorations such as
+	   * border, margin, and padding.
+	   * 
+	   * @param width the object's new width, in CSS units (e.g. "10px", "1em")
+	   */
 	public void setPopupWidth(String width) {
-		int closeButtonWidth = closeButton.getOffsetWidth();
-		layoutPanel.setWidth(width);
-		int widthInt = layoutPanel.getOffsetWidth();
-		if (width.endsWith("px")) {
-			try {
-				widthInt = Integer.parseInt(width.substring(0,
-						width.length() - 2));
-			} catch (NumberFormatException nfe) {
-				nfe.printStackTrace();
-			}
-		} else if (width.endsWith("em")) {
-			widthInt = layoutPanel.getOffsetWidth();
-		} else {
-			try {
-				widthInt = Integer.parseInt(width);
-			} catch (NumberFormatException nfe) {
-				nfe.printStackTrace();
-			}
-		}
-		setWidth((widthInt + closeButtonWidth) + "px");
+		setWidth(width);
 	}
 
 	/**
