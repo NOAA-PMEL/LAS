@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
@@ -1125,6 +1126,10 @@ public class UI extends BaseUI {
 				required_update = true;
 				xNewPanels.clear();
 			}
+			// Hide or show controls in panels (because we might have made new
+			// panels)
+			eventBus.fireEventFromSource(new ControlVisibilityEvent(
+					!xPanelHeaderHidden), this);
 			if (p.equals("1")) {
 				// Fire a ComparisonModeChangeEvent so listeners know the
 				// app has left comparison mode
