@@ -601,7 +601,7 @@ public class BaseUI {
 				new StringValueChangeEvent.Handler() {
 					@Override
 					public void onValueChange(StringValueChangeEvent event) {
-						logger.info("*** BaseUI's onValueChange called with StringValueChangeEvent event:"
+						logger.info("BaseUI's onValueChange called with StringValueChangeEvent event:"
 								+ event);
 						Object source = event.getSource();
 						if ((source != null) && (source instanceof HasName)) {
@@ -652,7 +652,7 @@ public class BaseUI {
 	 * @param windowHeight
 	 */
 	void resize(int windowWidth, int windowHeight) {
-		logger.info("*** resize(int " + windowWidth + ", int " + windowHeight
+		logger.info("resize(int " + windowWidth + ", int " + windowHeight
 				+ ") called");
 		if (xPanelCount > 1) {
 			resizeOutputPanels();

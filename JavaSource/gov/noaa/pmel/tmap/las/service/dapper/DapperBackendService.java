@@ -251,7 +251,7 @@ public class DapperBackendService extends BackendService {
     public static void main(String args[]) throws Exception {
 
         //get the requestXml
-        String2.log("\n*** DapperBackendService");
+        String2.log("\nDapperBackendService");
         long time = System.currentTimeMillis();
         String requestXml = testRequestXml;
         boolean doStandardTest = true;

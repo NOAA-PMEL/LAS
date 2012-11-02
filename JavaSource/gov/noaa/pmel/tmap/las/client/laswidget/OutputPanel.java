@@ -1179,7 +1179,7 @@ public class OutputPanel extends Composite implements HasName {
 			String optionID, String view, boolean single,
 			String container_type, String tile_server,
 			boolean annotationsShowing) {
-		logger.setLevel(Level.WARNING);
+		logger.setLevel(Level.OFF);
 		logger.info("OutputPanel constructor called with id:" + id);
 		this.ID = id;
 		this.comparePanel = comparePanel;

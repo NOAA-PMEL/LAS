@@ -58,6 +58,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ChangeListener;
@@ -253,7 +254,10 @@ public class UI extends BaseUI {
 			}
 			setupPanelsAndRefreshNOforceLASRequest(false);
 			if (initialHistory != null && !initialHistory.equals("")) {
-				popHistory(initialHistory);
+				logger.setLevel(Level.ALL);
+				logger.info("getGridCallback.onSuccess(ConfigSerializable config) calling popHistory(false, initialHistory)");
+				logger.setLevel(Level.OFF);
+				popHistory(false, initialHistory);
 			}
 		}
 
@@ -345,7 +349,10 @@ public class UI extends BaseUI {
 		public void onValueChange(ValueChangeEvent<String> event) {
 
 			String tokens = event.getValue();
-			popHistory(tokens);
+			logger.setLevel(Level.ALL);
+			logger.info("historyHandler.onValueChange(ValueChangeEvent<String> event) calling popHistory(false, initialHistory)");
+			logger.setLevel(Level.OFF);
+			popHistory(true, tokens);
 
 		}
 
@@ -482,7 +489,7 @@ public class UI extends BaseUI {
 				if (xView == null) {
 					xView = "xy";
 				}
-				required_update = true;
+				setUpdateRequired(true);
 				Util.getRPCService().getCategories(xDSID,
 						initFromDatasetAndVariable);
 			} else {
@@ -624,7 +631,7 @@ public class UI extends BaseUI {
 			}
 		}
 	};
-	boolean required_update = false;
+	private boolean required_update = false;
 
 	ClickHandler settingsButtonApplyHandler = new ClickHandler() {
 
@@ -722,8 +729,9 @@ public class UI extends BaseUI {
 		@Override
 		public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
 
-			if (applyButton.getCheckBoxValue() || event.isAuto()
-					|| required_update) {
+			if (applyButton.getCheckBoxValue() 
+					|| event.isAuto()
+					|| isUpdateRequired()) {
 				refresh(false, event.isPushHistory(), event.isForce());
 			}
 
@@ -793,6 +801,7 @@ public class UI extends BaseUI {
 			}
 		}
 	};
+	private Timer noLongerRequireUpdateTimer;
 
 	public void applyChange() {
 		if (changeDataset) {
@@ -1123,7 +1132,7 @@ public class UI extends BaseUI {
 					}
 				}
 				comparisonModeChange = false;
-				required_update = true;
+				setUpdateRequired(true);
 				xNewPanels.clear();
 			}
 			// Hide or show controls in panels (because we might have made new
@@ -1139,6 +1148,9 @@ public class UI extends BaseUI {
 				// app has gone into comparison mode
 				eventBus.fireEvent(new ComparisonModeChangeEvent(true));
 			}
+			// Request that the plot refresh happen automatically, don't force
+			// panels to update if they don't need to, and do add to the history
+			// stack.
 			eventBus.fireEvent(new WidgetSelectionChangeEvent(true, false, true));
 			synchAnnotationsMode();
 		} catch (NumberFormatException nfe) {
@@ -1490,7 +1502,7 @@ public class UI extends BaseUI {
 			xView = tokenMap.get("view");
 		}
 		if (xDataURL != null) {
-			required_update = true;
+			setUpdateRequired(true);
 			if (xOperationID == null) {
 				xOperationID = "Plot_2D_XY_zoom";
 			}
@@ -1502,7 +1514,7 @@ public class UI extends BaseUI {
 			// These can come from the initial history or from the dsid=??? and
 			// optionally the varid=??? query parameters.
 			if (xDSID != null) {
-				required_update = true;
+				setUpdateRequired(true);
 				// Supply some reasonable defaults and go...
 				if (xOperationID == null) {
 					xOperationID = "Plot_2D_XY_zoom";
@@ -1537,9 +1549,9 @@ public class UI extends BaseUI {
 			setAnnotationsMode(false);
 	}
 
-	private void popHistory(String historyToken) {
+	private void popHistory(boolean shouldAutoRefresh, String historyToken) {
 		if (!historyToken.equals("")) {
-			required_update = true;
+			setUpdateRequired(true);
 			// First split out the panel history
 			String[] settings = historyToken.split("token");
 
@@ -1582,10 +1594,11 @@ public class UI extends BaseUI {
 				// variable.
 
 				applyTokens(settings);
-				// Automatically fire the update, don't force panels to update
-				// if they don't need to and don't add to the history stack.
-				eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false,
-						false));
+				// Don't request that the plot refresh happen automatically,
+				// don't force panels to update if they don't need to, and don't
+				// add to the history stack.
+				eventBus.fireEvent(new WidgetSelectionChangeEvent(
+						shouldAutoRefresh, false, false));
 			} else {
 				historyString = historyToken;
 				historyTokens = tokenMap;
@@ -1621,8 +1634,9 @@ public class UI extends BaseUI {
 	 * Sets the state of various UI Widgets, perhaps calls
 	 * comparePanel.refreshPlot(options, false, true, forceLASRequest),
 	 * panel.computeDifference(options, switchAxis, forceLASRequest), and/or
-	 * panel.refreshPlot(options, switchAxis, true, forceLASRequest), and then
-	 * finally calls resize(Window.getClientWidth(), Window.getClientHeight().
+	 * panel.refreshPlot(options, switchAxis, true, forceLASRequest), pushes
+	 * history if it exits, and then finally calls
+	 * resize(Window.getClientWidth(), Window.getClientHeight().
 	 * 
 	 * @param switchAxis
 	 * @param history
@@ -1736,13 +1750,97 @@ public class UI extends BaseUI {
 		}
 		tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy"));
 		if (history) {
+			logger.setLevel(Level.ALL);
+			logger.info("refresh calling pushHistory()");
+			logger.setLevel(Level.OFF);
 			pushHistory();
 		}
 		// resize OutputPanel(s) according to the current Window size
 		logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
 		resize(Window.getClientWidth(), Window.getClientHeight());
 
-		required_update = false;
+		// required_update = false;
+		setUpdateRequired(false);
+	}
+
+	/**
+	 * @return true if updates are currently required, false if they are not
+	 */
+	boolean isUpdateRequired() {
+		logger.setLevel(Level.ALL);
+		logger.info("isUpdateRequired() returning required_update:"
+				+ required_update);
+		logger.setLevel(Level.OFF);
+		return required_update;
+	}
+
+	/**
+	 * Sets whether updates are required or not. Attempts to set that state to
+	 * false will be delayed about 5 seconds to allow the UI finish any
+	 * {@link History} related actions it might still be doing. Attempts to set
+	 * the state to true while a false state setting timer is running will
+	 * cancel the timer. Attempts to set the state to false while a false state
+	 * setting timer is running will be ignored.
+	 * 
+	 * @param shouldUpdateBeRequired
+	 *            the new boolean state to set
+	 */
+	void setUpdateRequired(boolean shouldUpdateBeRequired) {
+		logger.setLevel(Level.ALL);
+		logger.info("setUpdateRequired called with shouldUpdateBeRequired:"
+				+ shouldUpdateBeRequired);
+		if (shouldUpdateBeRequired) {
+			if (noLongerRequireUpdateTimer != null) {
+				logger.warning("noLongerRequireUpdateTimer:"
+						+ noLongerRequireUpdateTimer);
+				// Then a noLongerRequireUpdateTimer is running and needs to be
+				// cancelled (so updates are not halted) and nulled
+				noLongerRequireUpdateTimer.cancel();
+				noLongerRequireUpdateTimer = null;
+				// Now after this method sets required_update = true,
+				// noLongerRequireUpdateTimer will not be set to false before
+				// the History related actions are complete
+				logger.info("noLongerRequireUpdateTimer cancelled and nulled");
+			}
+			required_update = true;
+			logger.info("required_update set to:" + required_update);
+		} else {
+			if (noLongerRequireUpdateTimer == null) {
+				// There is no other noLongerRequireUpdateTimer, so it's safe to
+				// make one
+				noLongerRequireUpdateTimer = new Timer() {
+					private final Logger logger = Logger.getLogger(Timer.class
+							.getName());
+
+					@Override
+					public void run() {
+						logger.setLevel(Level.ALL);
+						if (noLongerRequireUpdateTimer != null) {
+							// Then the field was not cancelled and nulled by a
+							// new setUpdateRequired(true) call that is likely
+							// History related
+							required_update = false;
+							logger.info("run(): required_update set to:"
+									+ required_update);
+							noLongerRequireUpdateTimer = null;
+							logger.info("run(): noLongerRequireUpdateTimer nulled");
+						} else {
+							logger.severe("run(): noLongerRequireUpdateTimer IS null, even though run was called on this:"
+									+ this);
+						}
+						// logger.setLevel(Level.OFF);
+					}
+				};
+				// Schedule the timer to run once in 5 seconds.
+				noLongerRequireUpdateTimer.schedule(5000);
+				logger.info("Made and scheduled noLongerRequireUpdateTimer:"
+						+ noLongerRequireUpdateTimer);
+			} else {
+				logger.warning("noLongerRequireUpdateTimer:"
+						+ noLongerRequireUpdateTimer);
+			}
+		}
+		logger.setLevel(Level.OFF);
 	}
 
 	private void setAnalysisAxes(String v) {
@@ -2000,7 +2098,7 @@ public class UI extends BaseUI {
 	// }
 
 	private void setupForNewGrid(GridSerializable grid) {
-		required_update = true;
+		setUpdateRequired(true);
 		xVariable.setGrid(grid);
 		xAnalysisWidget.setAnalysisAxes(grid);
 		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(),

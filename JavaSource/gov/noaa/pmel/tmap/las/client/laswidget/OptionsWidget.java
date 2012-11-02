@@ -40,109 +40,124 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * A widget that will pull down the options for a particular operation and will return a map of the current state.
+ * A widget that will pull down the options for a particular operation and will
+ * return a map of the current state.
+ * 
  * @author rhs
- *
+ * 
  */
 public class OptionsWidget extends VerticalPanel {
 	OptionSerializable[] options;
 	Button ok = new Button("OK");
 	Button cancel = new Button("Cancel");
-	Grid layout_grid = new Grid(1,2);
+	Grid layout_grid = new Grid(1, 2);
 	List<Widget> widgets = new ArrayList<Widget>();
 	Map<String, String> callbackState = null;
 	boolean rpc = false;
 	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
-    private EventBus eventBus = clientFactory.getEventBus();
+	private EventBus eventBus = clientFactory.getEventBus();
 	private boolean isEmptyOps = false;
-	
+
 	public OptionsWidget() {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
+
 	public OptionsWidget(String opID) {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
-		Util.getRPCService().getOptions(opID, optionsCallback);	
+		Util.getRPCService().getOptions(opID, optionsCallback);
 	}
-	public OptionsWidget(String optionID, ClickListener okListener, ClickListener cancelListener) {
+
+	public OptionsWidget(String optionID, ClickListener okListener,
+			ClickListener cancelListener) {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
 		cancel.addClickListener(cancelListener);
-		Util.getRPCService().getOptions(optionID, optionsCallback);	
+		Util.getRPCService().getOptions(optionID, optionsCallback);
 	}
+
 	public OptionsWidget(ClickListener okListener, ClickListener cancelListener) {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
 		cancel.addClickListener(cancelListener);
 	}
+
 	public OptionsWidget(ClickListener listener) {
 		ok.addClickListener(listener);
 		cancel.addClickListener(listener);
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
-	
+
 	public void setOptions(String id) {
 		callbackState = null;
-		if ( id != null && !id.equals("") ) {
-		    rpc = true;
-		    Util.getRPCService().getOptions(id, optionsCallback);
+		if (id != null && !id.equals("")) {
+			rpc = true;
+			Util.getRPCService().getOptions(id, optionsCallback);
 		} else {
-		    // If there are no options, show the OK and Cancel buttons.
-		    setOptions(new OptionSerializable[0]);
+			// If there are no options, show the OK and Cancel buttons.
+			setOptions(new OptionSerializable[0]);
 		}
 	}
-	public void setOptions(String id, Map<String, String> options ) {
+
+	public void setOptions(String id, Map<String, String> options) {
 		callbackState = options;
-		if ( id != null && !id.equals("") ) {
-		    rpc = true;
-		    Util.getRPCService().getOptions(id, optionsCallback);
+		if (id != null && !id.equals("")) {
+			rpc = true;
+			Util.getRPCService().getOptions(id, optionsCallback);
 		}
 	}
+
 	AsyncCallback optionsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			options = (OptionSerializable[]) result;
 			setOptions(options);
 			isEmptyOps = false;
 			rpc = false;
-			if ( callbackState != null ) {
+			if (callbackState != null) {
 				restore(callbackState);
 			}
-			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false, false, false), OptionsWidget.this);
+			// Don't request that the plot refresh happen automatically, don't
+			// force panels to update if they don't need to and don't add to the
+			// history stack.
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false,
+					false, false), OptionsWidget.this);
 		}
+
 		public void onFailure(Throwable e) {
-		    setOptions(new OptionSerializable[0]);
+			setOptions(new OptionSerializable[0]);
 			isEmptyOps = false;
 			Window.alert(e.toString());
 		}
 	};
+
 	public void restore(Map<String, String> state) {
-	    if ( rpc ) {
-	        callbackState = state;
-	        return;
-	    }
+		if (rpc) {
+			callbackState = state;
+			return;
+		}
 		for (Iterator widIt = widgets.iterator(); widIt.hasNext();) {
 			Widget w = (Widget) widIt.next();
-			if ( w instanceof TextBox ) {
+			if (w instanceof TextBox) {
 				TextBox t = (TextBox) w;
 				String value = state.get(t.getName());
-				if ( value != null && !value.equals("") ) {
+				if (value != null && !value.equals("")) {
 					t.setText(value);
 				}
-				if ( value != null && value.equals("reset") ) {
+				if (value != null && value.equals("reset")) {
 					t.setText("");
 				}
-			} else if ( w instanceof ListBox ) {
+			} else if (w instanceof ListBox) {
 				ListBox l = (ListBox) w;
 				String value = state.get(l.getName());
-				if (value != null && !value.equals("") ) {
+				if (value != null && !value.equals("")) {
 					int count = l.getItemCount();
-					for (int i = 0; i < count; i++ ) {
+					for (int i = 0; i < count; i++) {
 						String item_value = l.getValue(i);
-						if ( item_value.equals(value) ) {
+						if (item_value.equals(value)) {
 							l.setSelectedIndex(i);
 						}
 					}
@@ -150,26 +165,29 @@ public class OptionsWidget extends VerticalPanel {
 			}
 		}
 	}
+
 	public Map<String, String> getState() {
 		Map<String, String> state = new HashMap<String, String>();
 		for (Iterator widIt = widgets.iterator(); widIt.hasNext();) {
 			Widget w = (Widget) widIt.next();
-			if ( w instanceof TextBox ) {
+			if (w instanceof TextBox) {
 				TextBox t = (TextBox) w;
-				if ( t.getText() != null && !t.getText().equals("") ) {
+				if (t.getText() != null && !t.getText().equals("")) {
 					state.put(t.getName(), t.getText());
 				}
-			} else if ( w instanceof ListBox ) {
+			} else if (w instanceof ListBox) {
 				ListBox l = (ListBox) w;
 				state.put(l.getName(), l.getValue(l.getSelectedIndex()));
 			}
 		}
 		return state;
 	}
+
 	public HandlerRegistration addOkClickHandler(ClickHandler handler) {
-	    ok.ensureDebugId("ok");
+		ok.ensureDebugId("ok");
 		return ok.addClickHandler(handler);
 	}
+
 	public void setOptions(OptionSerializable[] op) {
 		options = op;
 		clear();
@@ -187,24 +205,24 @@ public class OptionsWidget extends VerticalPanel {
 					helpup.add(html);
 					helpup.center();
 				}
-				
+
 			});
-			Grid option_layout = new Grid(1,2);
+			Grid option_layout = new Grid(1, 2);
 			option_layout.setWidget(0, 0, help);
-			
-			if ( opt.getType().equals("textfield") ) {
-				Grid box = new Grid(1,2);
+
+			if (opt.getType().equals("textfield")) {
+				Grid box = new Grid(1, 2);
 				Label label = new Label(opt.getTitle());
 				TextBox textbox = new TextBox();
 				textbox.setName(opt.getName());
 				box.setWidget(0, 0, label);
-				box.setWidget(0, 1, textbox);	
+				box.setWidget(0, 1, textbox);
 				widgets.add(textbox);
 				option_layout.setWidget(0, 1, box);
 			} else {
 				Label label = new Label(opt.getTitle());
 				ListBox menu = new ListBox();
-				Grid box = new Grid(1,2);
+				Grid box = new Grid(1, 2);
 				Map<String, String> items = opt.getMenu();
 				Vector keys = new Vector(items.keySet());
 				keys.remove("default");
@@ -224,12 +242,14 @@ public class OptionsWidget extends VerticalPanel {
 			}
 			add(option_layout);
 		}
-		isEmptyOps = (options==null) ? true: (options.length <= 0);
-		add(layout_grid);	
+		isEmptyOps = (options == null) ? true : (options.length <= 0);
+		add(layout_grid);
 	}
+
 	public void addOkHandler(ClickHandler handler) {
 		ok.addClickHandler(handler);
 	}
+
 	public void addCancelHandler(ClickHandler handler) {
 		cancel.addClickHandler(handler);
 	}
@@ -241,14 +261,16 @@ public class OptionsWidget extends VerticalPanel {
 	public void ok() {
 		ok.click();
 	}
-	
+
 	public boolean isEmptyOps() {
-		return isEmptyOps ;
+		return isEmptyOps;
 	}
+
 	public void hideButtons() {
 		ok.setVisible(false);
 		cancel.setVisible(false);
 	}
+
 	public void showButtons() {
 		ok.setVisible(true);
 		cancel.setVisible(true);
