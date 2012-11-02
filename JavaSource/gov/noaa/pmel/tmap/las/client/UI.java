@@ -295,7 +295,11 @@ public class UI extends BaseUI {
 			if (grid.getID().equals(xVariable.getGrid().getID())
 					&& xNewVariable.getAttributes().get("grid_type")
 							.equals(xVariable.getAttributes().get("grid_type"))) {
+				logger.setLevel(Level.ALL);
+				logger.warning("getGridForChangeVariableCallback.onSuccess changing xVariable:"
+						+ xVariable + " to xNewVariable:" + xNewVariable);
 				xVariable = xNewVariable;
+				logger.setLevel(Level.OFF);
 				xVariable.setGrid(grid);
 				// In the case of where multiple variables are being used in a
 				// panel, we need to change the 1st UserList?
@@ -407,7 +411,15 @@ public class UI extends BaseUI {
 						for (int i = 0; i < vars.length; i++) {
 							variables.add(vars[i]);
 							if (vars[i].getID().equals(xVarID)) {
+								logger.setLevel(Level.ALL);
+								logger.warning("initFromDatasetAndVariable.onSuccess changing xVariable:"
+										+ xVariable
+										+ " to vars["
+										+ i
+										+ "]:"
+										+ vars[i]);
 								xVariable = vars[i];
+								logger.setLevel(Level.OFF);
 								// View is null to get all operations
 								Util.getRPCService().getConfig(null,
 										xVariable.getDSID(), xVariable.getID(),
@@ -618,7 +630,15 @@ public class UI extends BaseUI {
 					Vector<VariableSerializable> vars = cats[0]
 							.getDatasetSerializable()
 							.getVariablesSerializableAsVector();
-					xVariable = cats[0].getVariable(historyTokens.get("varid"));
+					logger.setLevel(Level.ALL);
+					VariableSerializable catsVariable = cats[0]
+							.getVariable(historyTokens.get("varid"));
+					logger.warning("requestGridForHistory.onSuccess changing xVariable:"
+							+ xVariable
+							+ " to cats[0].getVariable(historyTokens.get(\"varid\")):"
+							+ catsVariable);
+					xVariable = catsVariable;
+					logger.setLevel(Level.OFF);
 					xPanels.get(0).getOutputControlPanel()
 							.getVariableControls().getMultiVariableSelector()
 							.setVariables(vars, vars.indexOf(xVariable));
@@ -780,9 +800,14 @@ public class UI extends BaseUI {
 					// Remove extra variable UserLists first
 					// TODO: Replace this with a higher level method or use
 					// events
-					xPanels.get(0).getOutputControlPanel()
-							.getVariableControls().getMultiVariableSelector()
-							.getVariableSelector().removeListBoxesExceptFirst();
+					if (xPanels.size() > 0) {
+						OutputPanel outputPanel = xPanels.get(0);
+						VariableSelector variableSelector = outputPanel
+								.getOutputControlPanel().getVariableControls()
+								.getMultiVariableSelector()
+								.getVariableSelector();
+						variableSelector.removeListBoxesExceptFirst();
+					}
 					xNewVariable = (VariableSerializable) v;
 					changeDataset = true;
 					changeDataset();
@@ -1002,8 +1027,12 @@ public class UI extends BaseUI {
 	}
 
 	public void changeDataset() {
+		logger.setLevel(Level.ALL);
 		logger.info("changeDataset() called");
+		logger.warning("Changing xVariable:" + xVariable + " to xNewVariable:"
+				+ xNewVariable);
 		xVariable = xNewVariable;
+		logger.setLevel(Level.OFF);
 		if (xVariable.isVector() || xVariable.isScattered()) {
 			autoContourTextBox.setText("");
 			autoContourButton.setDown(false);
@@ -1609,6 +1638,7 @@ public class UI extends BaseUI {
 	}
 
 	private void pushHistory() {
+		logger.warning("pushHistory() called");
 		// First token collection is the gallery settings (mostly in the header
 		// of the UI)
 		StringBuilder historyToken = new StringBuilder();
@@ -1627,7 +1657,10 @@ public class UI extends BaseUI {
 			historyToken.append("token" + panel.getHistoryToken());
 		}
 
-		History.newItem(historyToken.toString(), false);
+		String historyTokenString = historyToken.toString();
+		logger.warning("pushHistory() calling History.newItem with historyTokenString:\n"
+				+ historyTokenString);
+		History.newItem(historyTokenString, false);
 	}
 
 	/**
@@ -1752,8 +1785,8 @@ public class UI extends BaseUI {
 		if (history) {
 			logger.setLevel(Level.ALL);
 			logger.info("refresh calling pushHistory()");
-			logger.setLevel(Level.OFF);
 			pushHistory();
+			logger.setLevel(Level.OFF);
 		}
 		// resize OutputPanel(s) according to the current Window size
 		logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
