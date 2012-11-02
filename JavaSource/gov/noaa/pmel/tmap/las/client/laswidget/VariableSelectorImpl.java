@@ -48,7 +48,7 @@ public class VariableSelectorImpl extends VerticalPanel implements HasName,
 	 * @wbp.parser.constructor
 	 */
 	public VariableSelectorImpl(String id) {
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.OFF);
 		setName(id);
 		setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		setComparing(!isOnComparePanel());

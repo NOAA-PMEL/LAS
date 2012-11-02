@@ -7,7 +7,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * This event should be fired by any widget whose change affects the contents of
  * the plots so that either the button to update can change state to alert the
  * user or the auto update can fire. If the auto boolean is set, the element 
- * firing the event request that the plot refresh happen now automatcially.
+ * firing the event request that the plot refresh happen now automatically.
  * 
  * @author rhs
  * 
