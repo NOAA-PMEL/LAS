@@ -109,13 +109,19 @@ IF `STRINDEX("($shape)", "L") GT 0` THEN
 
 ENDIF
 
-! If the variable has no missing or _FillValue attribute, it's assumed to be NaN.
-! Set it to a known value, matching whats in the LAS compare scripts.
+! If the variable has no missing or _FillValue attribute, Ferret assumes it is NaN.
+! Set the variable that the F-TDS var is based on, to handle the Ferret default
+! missing flag.
 
 LET attlist = ($3).attnames
 IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
-   SET VAR/BAD=-9999999 $3
-   DEFINE ATT/OUTPUT $3._FillValue = -9999999
+   DEFINE SYMBOL base_name = $3
+   LET loc_regrid = STRINDEX("($3)", "_1_regrid")
+   LET loc_transf = STRINDEX("($3)", "_1_transformed")
+   IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_regrid-1)`
+   IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_transf-1)`
+   SET VAR/NAME=temporary_get_datavar ($base_name)
+   LET ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
 ENDIF
 
 ! All the region information has been gathered. Now write the file.  
