@@ -16,6 +16,9 @@
 ! TODO: When there's going to be a transformation or something, then these 
 ! calculations may not be sufficient. Might be better done by the transform script.
 
+! May be reset later.
+LET las_plotvar = ($ferret_plot_var) 
+ 
 
 ! Ferret property subsample_t can be set to zero or false and
 ! prevent subsampling in time.
