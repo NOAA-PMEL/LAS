@@ -27,6 +27,7 @@
 LET memsize = 0.5* 1.e6
 
 IF `($FERRET_VERSION"0") GE 6.2` THEN KEYMARK 1  ! annotate plot keys with the min and max
+IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with Ferret property
 
 ! Make sure its a 2D plot operation.
 
