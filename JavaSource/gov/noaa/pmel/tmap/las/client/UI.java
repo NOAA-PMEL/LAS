@@ -11,6 +11,7 @@ import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
@@ -348,16 +349,17 @@ public class UI extends BaseUI {
 	double globalMin = 999999999.;
 
 	ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
-
+		/**
+		 * Reloads the browser window at the new URL.
+		 * 
+		 * @param historyValueChangeEvent
+		 */
 		@Override
-		public void onValueChange(ValueChangeEvent<String> event) {
-
-			String tokens = event.getValue();
-			logger.setLevel(Level.ALL);
-			logger.info("historyHandler.onValueChange(ValueChangeEvent<String> event) calling popHistory(false, initialHistory)");
-			logger.setLevel(Level.OFF);
-			popHistory(true, tokens);
-
+		public void onValueChange(
+				ValueChangeEvent<String> historyValueChangeEvent) {
+			// The only safe way to react to a History change under the current
+			// architecture is to reload the page
+			Window.Location.reload();
 		}
 
 	};
@@ -827,6 +829,7 @@ public class UI extends BaseUI {
 		}
 	};
 	private Timer noLongerRequireUpdateTimer;
+	protected boolean loadingModule = true;
 
 	public void applyChange() {
 		if (changeDataset) {
@@ -846,12 +849,15 @@ public class UI extends BaseUI {
 		if (tokenMap.containsKey("panelHeaderHidden")) {
 			boolean new_panelHeaderHidden = Boolean.valueOf(
 					tokenMap.get("panelHeaderHidden")).booleanValue();
+			// If the new state should be different, handle it.
+			// otherwise ignore it.
 			if (new_panelHeaderHidden != xPanelHeaderHidden) {
-				// If the new state should be different, handle it. Otherwise
-				// ignore it.
-				// handlePanelShowHide();
+				handlePanelShowHide();
 			}
 		}
+		
+		// TODO: ***Save plot annotation visibility state in History
+		
 		if (tokenMap.containsKey("differences")) {
 			boolean new_difference = Boolean.valueOf(
 					tokenMap.get("differences")).booleanValue();
@@ -1329,6 +1335,7 @@ public class UI extends BaseUI {
 	 * @wbp.parser.entryPoint
 	 */
 	public void onModuleLoad() {
+		initialHistory = getAnchor();
 		super.initialize();
 		logger.setLevel(Level.OFF);
 
@@ -1341,8 +1348,6 @@ public class UI extends BaseUI {
 		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
 				false);
 		vVizGalPanel.setWidget(1, 0, xMainPanel);
-
-		initialHistory = getAnchor();
 
 		addApplyHandler(settingsButtonApplyHandler);
 
@@ -1508,6 +1513,59 @@ public class UI extends BaseUI {
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		// RootPanel.get("PLOT_LINK").setVisible(false);
 
+		// Listen for ControlVisibilityEvents
+		Handler controlVisibilityEventHandler = new ControlVisibilityEvent.Handler() {
+			@Override
+			public void onVisibilityUpdate(ControlVisibilityEvent event) {
+				// Makes sure xPanelHeaderHidden changes are saved in the
+				// browser History ONLY when needed
+				logger.setLevel(Level.ALL);
+				logger.warning("controlVisibilityEventHandler.onVisibilityUpdate(ControlVisibilityEvent event) called");
+				String historyTokenString = getHistoryTokenString();
+				logger.warning("historyTokenString:" + historyTokenString);
+				if (historyTokenString != null) {
+					String[] settings = historyTokenString.split("token");
+					HashMap<String, String> tokenMap = Util
+							.getTokenMap(settings[0]);
+					String panelHeaderHiddenString = tokenMap
+							.get("panelHeaderHidden");
+					boolean panelHeaderHidden = Boolean
+							.parseBoolean(panelHeaderHiddenString);
+					logger.info("panelHeaderHiddenString:"
+							+ panelHeaderHiddenString);
+					String currentAnchor = getAnchor();
+					settings = currentAnchor.split("token");
+					tokenMap = Util.getTokenMap(settings[0]);
+					String anchorPanelHeaderHiddenString = tokenMap
+							.get("panelHeaderHidden");
+					boolean anchorPanelHeaderHidden = Boolean
+							.parseBoolean(anchorPanelHeaderHiddenString);
+					logger.info("anchorPanelHeaderHiddenString:"
+							+ anchorPanelHeaderHiddenString);
+					if (anchorPanelHeaderHidden == panelHeaderHidden) {
+						logger.warning("panelHeaderHiddenString == anchorPanelHeaderHiddenString:"
+								+ anchorPanelHeaderHiddenString);
+					} else {
+						if (loadingModule) {
+							// Don't change the browser History when loading
+							// module/app for the first time
+							logger.severe("panelHeaderHidden in browser History doesn't need updating since loadingModule == true");
+						} else {
+							// Browser History needs to be updated
+							logger.warning("historyTokenString != hash:"
+									+ currentAnchor);
+							logger.severe("panelHeaderHidden in browser History needs updating since loadingModule == false");
+							logger.severe("Calling History.newItem(historyTokenString, false);");
+							History.newItem(historyTokenString, false);
+						}
+					}
+					logger.severe("Setting loadingModule = false");
+					loadingModule = false;
+				}
+				logger.setLevel(Level.OFF);
+			}
+		};
+
 		// Set the required handlers
 		eventBus.addHandler(SelectionEvent.getType(),
 				xVisGalDatasetSelectionHandler);
@@ -1517,6 +1575,8 @@ public class UI extends BaseUI {
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
 		addPanelMapChangeHandler(mapListener);
+		eventBus.addHandler(ControlVisibilityEvent.TYPE,
+				controlVisibilityEventHandler);
 
 		// Initialize the gallery with an asynchronous call to the server to get
 		// variable needed.
@@ -1529,6 +1589,20 @@ public class UI extends BaseUI {
 			tokenMap = Util.getTokenMap(settings[1]);
 			xOperationID = tokenMap.get("operation_id");
 			xView = tokenMap.get("view");
+			String panelHeaderHiddenString = tokenMap.get("panelHeaderHidden");
+			boolean panelHeaderHidden = Boolean
+					.parseBoolean(panelHeaderHiddenString);
+			Level level = Level.INFO;
+			if (!panelHeaderHidden)
+				level = Level.SEVERE;
+			logger.log(level, "panelHeaderHiddenString:"
+					+ panelHeaderHiddenString);
+			if (panelHeaderHidden != xPanelHeaderHidden) {
+				logger.log(level,
+						"Toggling xPanelHeaderHidden because panelHeaderHidden != xPanelHeaderHidden:"
+								+ xPanelHeaderHidden);
+				handlePanelShowHide();
+			}
 		}
 		if (xDataURL != null) {
 			setUpdateRequired(true);
@@ -1639,6 +1713,16 @@ public class UI extends BaseUI {
 
 	private void pushHistory() {
 		logger.warning("pushHistory() called");
+		String historyTokenString = getHistoryTokenString();
+		logger.severe("pushHistory() calling History.newItem with historyTokenString:\n"
+				+ historyTokenString);
+		History.newItem(historyTokenString, false);
+	}
+
+	/**
+	 * @return a token String for adding to the browser {@link History}
+	 */
+	String getHistoryTokenString() {
 		// First token collection is the gallery settings (mostly in the header
 		// of the UI)
 		StringBuilder historyToken = new StringBuilder();
@@ -1658,9 +1742,7 @@ public class UI extends BaseUI {
 		}
 
 		String historyTokenString = historyToken.toString();
-		logger.warning("pushHistory() calling History.newItem with historyTokenString:\n"
-				+ historyTokenString);
-		History.newItem(historyTokenString, false);
+		return historyTokenString;
 	}
 
 	/**
@@ -1809,11 +1891,11 @@ public class UI extends BaseUI {
 
 	/**
 	 * Sets whether updates are required or not. Attempts to set that state to
-	 * false will be delayed about 5 seconds to allow the UI finish any
-	 * {@link History} related actions it might still be doing. Attempts to set
-	 * the state to true while a false state setting timer is running will
-	 * cancel the timer. Attempts to set the state to false while a false state
-	 * setting timer is running will be ignored.
+	 * false will be delayed to allow the UI finish any {@link History} related
+	 * actions it might still be doing. Attempts to set the state to true while
+	 * a false state setting timer is running will cancel the timer. Attempts to
+	 * set the state to false while a false state setting timer is running will
+	 * be ignored.
 	 * 
 	 * @param shouldUpdateBeRequired
 	 *            the new boolean state to set
@@ -1857,6 +1939,8 @@ public class UI extends BaseUI {
 									+ required_update);
 							noLongerRequireUpdateTimer = null;
 							logger.info("run(): noLongerRequireUpdateTimer nulled");
+							logger.severe("Setting loadingModule = false");
+							loadingModule = false;
 						} else {
 							logger.severe("run(): noLongerRequireUpdateTimer IS null, even though run was called on this:"
 									+ this);
@@ -1864,8 +1948,8 @@ public class UI extends BaseUI {
 						// logger.setLevel(Level.OFF);
 					}
 				};
-				// Schedule the timer to run once in 5 seconds.
-				noLongerRequireUpdateTimer.schedule(5000);
+				// Schedule the timer to run once later.
+				noLongerRequireUpdateTimer.schedule(1000);
 				logger.info("Made and scheduled noLongerRequireUpdateTimer:"
 						+ noLongerRequireUpdateTimer);
 			} else {
