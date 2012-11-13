@@ -855,9 +855,9 @@ public class UI extends BaseUI {
 				handlePanelShowHide();
 			}
 		}
-		
+
 		// TODO: ***Save plot annotation visibility state in History
-		
+
 		if (tokenMap.containsKey("differences")) {
 			boolean new_difference = Boolean.valueOf(
 					tokenMap.get("differences")).booleanValue();
@@ -1187,7 +1187,7 @@ public class UI extends BaseUI {
 			// panels to update if they don't need to, and do add to the history
 			// stack.
 			eventBus.fireEvent(new WidgetSelectionChangeEvent(true, false, true));
-			synchAnnotationsMode();
+			setAnnotationsMode(annotationsControl.isDown());
 		} catch (NumberFormatException nfe) {
 			nfe.printStackTrace();
 		}
@@ -1417,9 +1417,7 @@ public class UI extends BaseUI {
 								&& (source instanceof LASAnnotationsPanel)) {
 							String open = event.getValue();
 							boolean isOpen = Boolean.parseBoolean(open);
-							if (!isOpen) {
-								synchAnnotationsMode();
-							}
+							setAnnotationsMode(isOpen);
 						}
 					}
 				});
@@ -1633,23 +1631,6 @@ public class UI extends BaseUI {
 			}
 		}
 		History.addValueChangeHandler(historyHandler);
-	}
-
-	/**
-	 * A LASAnnotationsPanel closed, so check if they are all now closed and
-	 * call {@link setAnnotationsMode(boolean showAnnotations)} appropriately.
-	 */
-	protected void synchAnnotationsMode() {
-		boolean allInvisible = true;
-		for (Iterator<OutputPanel> panelIt = xPanels.iterator(); panelIt
-				.hasNext();) {
-			OutputPanel panel = (OutputPanel) panelIt.next();
-			if (panel.isAnnotationsPanelVisible()) {
-				allInvisible = false;
-			}
-		}
-		if (allInvisible)
-			setAnnotationsMode(false);
 	}
 
 	private void popHistory(boolean shouldAutoRefresh, String historyToken) {
