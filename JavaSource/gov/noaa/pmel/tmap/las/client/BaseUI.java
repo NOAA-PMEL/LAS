@@ -642,7 +642,7 @@ public class BaseUI {
 			if (panelIt.hasNext())
 				urlfrag.append("&");
 		}
-		Window.open(urlfrag.toString(), "print", null);
+		Window.open(urlfrag.toString(), "_new", null);
 	}
 
 	/**
