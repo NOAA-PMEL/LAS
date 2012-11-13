@@ -634,7 +634,7 @@ public class Correlation implements EntryPoint {
 		StringBuilder urlfrag = new StringBuilder(URLUtil.getBaseURL()
 				+ "getAnnotations.do?template=image_w_annotations.vm&");
 		urlfrag.append(printURL);
-		Window.open(urlfrag.toString(), "print", null);
+		Window.open(urlfrag.toString(), "_blank", null);
 	}
 
 	private void updatePlot(boolean addHistory) {

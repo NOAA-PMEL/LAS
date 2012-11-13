@@ -2814,7 +2814,7 @@ public class OutputPanel extends Composite implements HasName {
 			@Override
 			public void onClick(ClickEvent event) {
 
-				Window.open(url, "plot", "");
+				Window.open(url, "_blank", "");
 
 			}
 
