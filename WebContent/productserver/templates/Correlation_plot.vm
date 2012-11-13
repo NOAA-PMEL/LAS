@@ -58,7 +58,7 @@
   <!-- to create a completely dynamic UI.        -->
   <!--                                           -->
   <body>
-  #parse ("productserver/templates/V7UIHeader.vm")
+  #parse ("productserver/templates/CVHeader.vm")
   <table class="allBorder" >
   <tr>
   <td style="vertical-align:top;" id="leftPadding">

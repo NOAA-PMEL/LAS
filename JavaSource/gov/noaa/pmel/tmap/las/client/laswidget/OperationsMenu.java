@@ -22,7 +22,7 @@ public class OperationsMenu extends Composite {
 	HorizontalPanel buttonBar;
 	OperationPushButton animationButton = new OperationPushButton("Animate");
 	OperationPushButton compareButton = new OperationPushButton("Compare");
-	OperationPushButton correlationButton = new OperationPushButton("Correlation Viewer (Beta)");
+	OperationPushButton correlationButton = new OperationPushButton("Correlation Viewer");
 	OperationPushButton googleEarthButton = new OperationPushButton("Google Earth");
 	OperationPushButton showValuesButton = new OperationPushButton("Show Values");
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
@@ -39,6 +39,7 @@ public class OperationsMenu extends Composite {
         animationButton.addStyleDependentName("SMALLER");
         compareButton.addStyleDependentName("SMALLER");
         correlationButton.addStyleDependentName("SMALLER");
+        correlationButton.setTitle("Click to open the Beta version of the Correlation Viewer");
         googleEarthButton.addStyleDependentName("SMALLER");
         showValuesButton.addStyleDependentName("SMALLER");
         exportToDesktopButton.addStyleDependentName("SMALLER");
