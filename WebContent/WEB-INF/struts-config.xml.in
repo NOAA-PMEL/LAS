@@ -97,6 +97,7 @@
           </action>
           <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
 	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
+	           <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
 	      </action>
           <action path="/getUI7"  type="gov.noaa.pmel.tmap.las.ui.GetUI7">
 	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
