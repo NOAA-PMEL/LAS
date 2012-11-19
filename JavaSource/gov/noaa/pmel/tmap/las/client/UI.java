@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
+import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
@@ -11,7 +12,6 @@ import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
-import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
@@ -1422,9 +1422,7 @@ public class UI extends BaseUI {
 					}
 				});
 
-		xButtonLayout.setWidget(0, myButtonIndex++, annotationsControl);
-		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
-				false);
+		xDisplayControls.setWidget(1, 1, annotationsControl);
 
 		compareMenu.addStyleDependentName("SMALLER");
 		compareMenu.addItem("One Plot", "1");
@@ -1503,11 +1501,9 @@ public class UI extends BaseUI {
 						}
 					}
 				});
-		xButtonLayout.setWidget(0, myButtonIndex++, compareMenu);
-		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
-				false);
+		xDisplayControls.setWidget(1, 0, compareMenu);
 
-		RootPanel.get("vizGal").add(xButtonLayout);
+		// RootPanel.get("vizGal").add(xButtonLayout);
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		// RootPanel.get("PLOT_LINK").setVisible(false);
 
