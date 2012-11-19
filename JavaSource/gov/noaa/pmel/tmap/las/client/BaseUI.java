@@ -563,7 +563,7 @@ public class BaseUI {
 		xMainPanel.setWidget(0, 0, xButtonLayout);
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDisplayControls);
 		xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1,
-				"201");
+				"268");
 		xDisplayControls.setWidget(0, 0, xDatasetButton);
 		xDisplayControls.setWidget(0, 1, applyButton);
 		xDisplayControls.setWidget(0, 2, xToggleControls);
@@ -584,15 +584,14 @@ public class BaseUI {
 		xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
 		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
 		// Other buttons have their style handled in the widget itself.
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++,
-				xOtherControls);
-		xButtonLayout.getCellFormatter().setWordWrap(0,
-				xButtonLayoutIndex - 1, false);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOtherControls);
+		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
+				false);
 		xOtherControls.setWidget(0, xOtherControlsIndex++,
 				xPrinterFriendlyButton);
 		xOtherControls.getCellFormatter().setWordWrap(0,
 				xOtherControlsIndex - 1, false);
-//		xButtonLayout.addStyleName("HEADER-WIDTH");
+		// xButtonLayout.addStyleName("HEADER-WIDTH");
 		setTopLeftAlignment(xButtonLayout);
 		// xMainPanel.setWidget(0, 1, xButtonLayout);
 		xMainPanel.getCellFormatter().setWordWrap(0, 0, false);
