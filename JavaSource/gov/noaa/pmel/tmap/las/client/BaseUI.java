@@ -163,7 +163,9 @@ public class BaseUI {
 	 */
 	FlexTable xButtonLayout = new FlexTable();
 	FlexTable xDisplayControls = new FlexTable();
+	FlexTable xOtherControls = new FlexTable();
 	private int xButtonLayoutIndex = 0;
+	private int xOtherControlsIndex = 0;
 	ClickHandler xButtonOpenHandler = new ClickHandler() {
 
 		@Override
@@ -358,6 +360,7 @@ public class BaseUI {
 
 	public void addMenuButtons(Widget buttons) {
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, buttons);
+		setTopLeftAlignment(xButtonLayout);
 	}
 
 	public void addPanelMapChangeHandler(MapSelectionChangeListener handler) {
@@ -376,7 +379,7 @@ public class BaseUI {
 	}
 
 	protected int getButtonIndex() {
-		return xButtonLayoutIndex;
+		return xOtherControlsIndex;
 	}
 
 	public int getPanelWidth(int count) {
@@ -556,13 +559,14 @@ public class BaseUI {
 			}
 
 		});
-		xDisplayControls.setBorderWidth(1);
 
 		xMainPanel.setWidget(0, 0, xButtonLayout);
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDisplayControls);
-		xDisplayControls.setWidget(0, 1, xDatasetButton);
-		xDisplayControls.setWidget(0, 2, applyButton);
-		xDisplayControls.setWidget(0, 3, xToggleControls);
+		xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1,
+				"201");
+		xDisplayControls.setWidget(0, 0, xDatasetButton);
+		xDisplayControls.setWidget(0, 1, applyButton);
+		xDisplayControls.setWidget(0, 2, xToggleControls);
 		// xDisplayControls.getCellFormatter().setHeight(0, 2, "18");
 		// xDisplayControls.getCellFormatter().setWidth(0, 2, "18");
 		// xButtonLayout.setWidget(1, 1, annotationsControl);
@@ -580,11 +584,16 @@ public class BaseUI {
 		xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
 		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
 		// Other buttons have their style handled in the widget itself.
-		xButtonLayout
-				.setWidget(0, xButtonLayoutIndex++, xPrinterFriendlyButton);
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
-		xButtonLayout.addStyleName("HEADER-WIDTH");
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++,
+				xOtherControls);
+		xButtonLayout.getCellFormatter().setWordWrap(0,
+				xButtonLayoutIndex - 1, false);
+		xOtherControls.setWidget(0, xOtherControlsIndex++,
+				xPrinterFriendlyButton);
+		xOtherControls.getCellFormatter().setWordWrap(0,
+				xOtherControlsIndex - 1, false);
+//		xButtonLayout.addStyleName("HEADER-WIDTH");
+		setTopLeftAlignment(xButtonLayout);
 		// xMainPanel.setWidget(0, 1, xButtonLayout);
 		xMainPanel.getCellFormatter().setWordWrap(0, 0, false);
 		xMainPanel.setWidget(1, 0, xNavigationControls);
@@ -644,6 +653,39 @@ public class BaseUI {
 						}
 					}
 				});
+	}
+
+	/**
+	 * @param flexTable
+	 * 
+	 */
+	void setTopLeftAlignment(FlexTable flexTable) {
+		if (flexTable != null) {
+			int rows = flexTable.getRowCount();
+			for (int row = 0; row < rows; row++) {
+				int cellCount = flexTable.getCellCount(row);
+				for (int col = 0; col < cellCount; col++) {
+					if (flexTable.isCellPresent(row, col)) {
+						flexTable.getCellFormatter().setHorizontalAlignment(
+								row, col, HasHorizontalAlignment.ALIGN_LEFT);
+						flexTable.getCellFormatter().setVerticalAlignment(row,
+								col, HasVerticalAlignment.ALIGN_TOP);
+						Widget widget = flexTable.getWidget(row, col);
+						if ((widget != null)
+								&& (widget.getClass().getName()
+										.equals("FlexTable"))) {
+							try {
+								setTopLeftAlignment((FlexTable) widget);
+							} catch (Exception e) {
+								logger.log(Level.SEVERE,
+										e.getLocalizedMessage(), e);
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void printerFriendly() {

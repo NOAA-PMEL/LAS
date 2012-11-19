@@ -751,8 +751,7 @@ public class UI extends BaseUI {
 		@Override
 		public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
 
-			if (applyButton.getCheckBoxValue() 
-					|| event.isAuto()
+			if (applyButton.getCheckBoxValue() || event.isAuto()
 					|| isUpdateRequired()) {
 				refresh(false, event.isPushHistory(), event.isForce());
 			}
@@ -1344,9 +1343,10 @@ public class UI extends BaseUI {
 		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
 		// addMenuButtons(compareButtonsLayout);
 		int myButtonIndex = getButtonIndex();
-		xButtonLayout.setWidget(0, myButtonIndex++, tOperationsMenu);
-		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
+		xOtherControls.setWidget(0, myButtonIndex++, tOperationsMenu);
+		xOtherControls.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
 				false);
+		setTopLeftAlignment(xButtonLayout);
 		vVizGalPanel.setWidget(1, 0, xMainPanel);
 
 		addApplyHandler(settingsButtonApplyHandler);
@@ -2233,9 +2233,10 @@ public class UI extends BaseUI {
 		// Hide the plotImage so it won't look like it changed size later
 		xPanels.get(0).hidePlotImage();
 		int buttonIndex = getButtonIndex();
-		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(compareButtons);
-		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
+		Widget compareButtons = xOtherControls.getWidget(0, buttonIndex);
+		xOtherControls.remove(compareButtons);
+		xOtherControls.setWidget(0, buttonIndex, tOperationsMenu);
+		setTopLeftAlignment(xButtonLayout);
 	}
 
 	/**
@@ -2250,9 +2251,10 @@ public class UI extends BaseUI {
 		// Hide the plotImage so it won't look like it changed size later
 		xPanels.get(0).hidePlotImage();
 		int buttonIndex = getButtonIndex();
-		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(compareButtons);
-		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
+		Widget compareButtons = xOtherControls.getWidget(0, buttonIndex);
+		xOtherControls.remove(compareButtons);
+		xOtherControls.setWidget(0, buttonIndex, tOperationsMenu);
+		setTopLeftAlignment(xButtonLayout);
 	}
 
 	private void setupMenusForOperationChange() {
@@ -2447,10 +2449,11 @@ public class UI extends BaseUI {
 		xAnalysisWidget.setVisible(false);
 		setupPanelsAndRefreshNOforceLASRequest(resetOnlyNewPanels);
 		int buttonIndex = getButtonIndex();
-		Widget tOpsMenu = xButtonLayout.getWidget(0, buttonIndex);
-		xButtonLayout.remove(tOpsMenu);
-		xButtonLayout.setWidget(0, buttonIndex, compareButtonsLayout);
-		xButtonLayout.getCellFormatter().setWidth(0, buttonIndex, "271");
+		Widget tOpsMenu = xOtherControls.getWidget(0, buttonIndex);
+		xOtherControls.remove(tOpsMenu);
+		xOtherControls.setWidget(0, buttonIndex, compareButtonsLayout);
+//		xOtherControls.getCellFormatter().setWidth(0, buttonIndex, "271");
+		setTopLeftAlignment(xButtonLayout);
 	}
 
 	/**
