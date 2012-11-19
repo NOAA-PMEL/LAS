@@ -1,20 +1,19 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
-import com.google.gwt.event.dom.client.ChangeHandler;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 
 public class NavAxesGroup extends Composite {
+	private final Logger logger = Logger.getLogger(NavAxesGroup.class.getName());
 	OLMapWidget refMap;
 	DateTimeWidget dateTimeWidget;
 	AxisWidget zWidget;
@@ -37,6 +36,7 @@ public class NavAxesGroup extends Composite {
 		axesLayout.setWidget(0, 0, message);
 		axesLayout.setWidget(1, 0, refMap);
 		axesPanel = new FlowPanel();//new DisclosurePanel(title);
+		axesPanel.ensureDebugId("axesPanel");
 		axesPanel.add(axesLayout);
 		axesPanel.setVisible(true);//.setOpen(true);
 		message.addStyleName("TinyBlue");
@@ -64,7 +64,9 @@ public class NavAxesGroup extends Composite {
 			dateTimeWidget.setVisible(false);
 		}
 		axesLayout.setWidget(2, 0, zWidget);
+		dateTimeWidget.ensureDebugId("dateTimeWidget");
 		axesLayout.setWidget(3, 0, dateTimeWidget);
+		logger.warning("axesLayout:"+axesLayout.toString());
 		if ( grid.hasX() && grid.hasY() ) {
 			refMap.setDataExtent(Double.valueOf(grid.getYAxis().getLo()), 
 					             Double.valueOf(grid.getYAxis().getHi()), 

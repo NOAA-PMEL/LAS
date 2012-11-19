@@ -162,6 +162,7 @@ public class BaseUI {
 	 * Button layout for the required button controls for any UI
 	 */
 	FlexTable xButtonLayout = new FlexTable();
+	FlexTable xDisplayControls = new FlexTable();
 	private int xButtonLayoutIndex = 0;
 	ClickHandler xButtonOpenHandler = new ClickHandler() {
 
@@ -192,7 +193,7 @@ public class BaseUI {
 	String xDSID;
 
 	// Top level button to hide/show every control.
-	ToggleButton xToggleControls = new ToggleButton("Controls", "Controls",
+	ToggleButton xToggleControls = new ToggleButton("<", ">",
 			new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -478,6 +479,8 @@ public class BaseUI {
 
 		xAxesWidget = new NavAxesGroup("Plot Coordinates", xControlsWidthPx,
 				xTileServer);
+		xAxesWidget.ensureDebugId("xAxesWidget");
+		xNavigationControls.ensureDebugId("xNavigationControls");
 
 		xAxesWidget.getRefMap().setMapListener(mapListener);
 
@@ -486,11 +489,11 @@ public class BaseUI {
 
 		xButtonLayoutIndex = 0;
 		xMainPanelCellFormatter = xMainPanel.getFlexCellFormatter();
-		xMainPanelCellFormatter.setColSpan(0, 0, 2);
 		xMainPanelCellFormatter.setVerticalAlignment(1, 0,
 				HasVerticalAlignment.ALIGN_TOP);
 		xMainPanelCellFormatter.setVerticalAlignment(1, 1,
 				HasVerticalAlignment.ALIGN_TOP);
+		xMainPanel.getFlexCellFormatter().setColSpan(0, 0, 3);
 
 		int navControlIndex = 0;
 		xNavigationControls.setWidget(navControlIndex++, 0, xSettingsHeader);
@@ -504,8 +507,19 @@ public class BaseUI {
 		// xComparisonAxesSelector);
 		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
-
-		xToggleControls.addStyleDependentName("SMALLER");
+		// Image hideControlsImage = new
+		// Image("JavaScript/frameworks/OpenLayers/img/.svn/text-base/west-mini.png.svn-base");
+		// hideControlsImage.setSize("18", "18");
+		// Image showControlsImage = new
+		// Image("JavaScript/frameworks/OpenLayers/img/.svn/text-base/east-mini.png.svn-base");
+		// showControlsImage.setSize("18", "18");
+		// xToggleControls.getUpFace().setImage(hideControlsImage);
+		// xToggleControls.getUpDisabledFace().setImage(hideControlsImage);
+		// xToggleControls.getUpHoveringFace().setImage(hideControlsImage);
+		// xToggleControls.getDownFace().setImage(showControlsImage);
+		// xToggleControls.getDownDisabledFace().setImage(showControlsImage);
+		// xToggleControls.getDownHoveringFace().setImage(showControlsImage);
+		// xToggleControls.addStyleDependentName("SMALLER");
 		xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
 
 		xDatasetButton.ensureDebugId("xDatasetButton");
@@ -542,32 +556,36 @@ public class BaseUI {
 			}
 
 		});
+		xDisplayControls.setBorderWidth(1);
+
+		xMainPanel.setWidget(0, 0, xButtonLayout);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDisplayControls);
+		xDisplayControls.setWidget(0, 1, xDatasetButton);
+		xDisplayControls.setWidget(0, 2, applyButton);
+		xDisplayControls.setWidget(0, 3, xToggleControls);
+		// xDisplayControls.getCellFormatter().setHeight(0, 2, "18");
+		// xDisplayControls.getCellFormatter().setWidth(0, 2, "18");
+		// xButtonLayout.setWidget(1, 1, annotationsControl);
+
+		// Make it visible only if it has a handler attached.
+		applyButton.setVisible(false);
 
 		applyButton.addStyleDependentName("SMALLER");
+
+		xDatasetButton.ensureDebugId("xDatasetButton");
+
+		// This is all to get around the fact that the OpenLayers map is always
+		// in front.
+		xDatasetButton.addOpenClickHandler(xButtonOpenHandler);
+		xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
 		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
 		// Other buttons have their style handled in the widget itself.
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xToggleControls);
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, applyButton);
-		xButtonLayout.getCellFormatter().setHeight(0, xButtonLayoutIndex - 1,
-				"23");
-		xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1,
-				"90");
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDatasetButton);
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOptionsButton);
-		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
-				false);
 		xButtonLayout
 				.setWidget(0, xButtonLayoutIndex++, xPrinterFriendlyButton);
 		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
 				false);
 		xButtonLayout.addStyleName("HEADER-WIDTH");
-		xMainPanel.setWidget(0, 0, xButtonLayout);
+		// xMainPanel.setWidget(0, 1, xButtonLayout);
 		xMainPanel.getCellFormatter().setWordWrap(0, 0, false);
 		xMainPanel.setWidget(1, 0, xNavigationControls);
 		xMainPanel.getCellFormatter().setWidth(1, 0, "260px");
