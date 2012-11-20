@@ -550,6 +550,8 @@ public class BaseUI {
 		xESGFSearchButton.addCloseHandler(xButtonCloseHandler);
 		
 		xESGFSearchButton.addOpenClickHandler(xButtonOpenHandler);
+		
+		xESGFSearchButton.setVisible(false);
 
 		xOptionsClickHandler = new ClickHandler() {
 
