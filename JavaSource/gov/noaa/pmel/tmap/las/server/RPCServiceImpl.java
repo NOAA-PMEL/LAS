@@ -523,7 +523,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         int k=0;
         for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
             Operation op = (Operation) opsIt.next();
-            if ( !op.getID().contains("climate_analysis") || include_climate_analysis ) {
+            if ( !op.getID().toLowerCase().contains("climate_analysis") || include_climate_analysis ) {
                 wireOps[k] = op.getOperationSerializable();
                 k++;
             }
