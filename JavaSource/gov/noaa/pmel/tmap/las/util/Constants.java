@@ -46,4 +46,8 @@ public class Constants {
 	public static final String DOWNLOAD_OP_ID = "Interactive_Download"; // The id of the interactive download operation.
 	public static final String ANIMATION_OP_ID = "Animation";
 	
+	public static final String SEARCH_URL="http://pcmdi9.llnl.gov/esg-search/search";
+	public static final String ESGF_REPLICAS = "false";
+    //public static final String SEARCH_URL="http://esg-datanode.jpl.nasa.gov/esg-search/search";
+	
 }

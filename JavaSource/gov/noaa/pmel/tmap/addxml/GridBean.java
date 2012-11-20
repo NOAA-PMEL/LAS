@@ -30,17 +30,31 @@ public class GridBean extends LasBean{
 	public Vector getAxes() {
 		return axes;
 	}
-
+    public Element toXml(boolean seven) {
+        Element grid;
+        if ( seven ) {
+            grid = new Element("grid");
+            grid.setAttribute("ID", this.getElement());
+        } else {
+            grid = new Element(this.getElement());
+        }
+        Iterator ait = axes.iterator();
+        while (ait.hasNext()) {
+            AxisBean ab = (AxisBean)ait.next();
+            if ( seven ) {
+                 Element a = new Element("axis");
+                 a.setAttribute("IDREF", ab.getElement());
+                 grid.addContent(a);
+            } else {
+                Element link = new Element("link");
+                link.setAttribute("match","/lasdata/axes/"+ab.getElement());
+                grid.addContent(link);
+            }
+        }
+        return grid;
+    }
 	public Element toXml() {
-		Element grid = new Element(this.getElement());
-		Iterator ait = axes.iterator();
-		while (ait.hasNext()) {
-			AxisBean ab = (AxisBean)ait.next();
-			Element link = new Element("link");
-			link.setAttribute("match","/lasdata/axes/"+ab.getElement());
-			grid.addContent(link);
-		}
-		return grid;
+		return toXml(false);
 	}
 
 	@Override

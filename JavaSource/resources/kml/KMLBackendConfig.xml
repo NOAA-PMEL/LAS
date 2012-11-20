@@ -1,0 +1,3 @@
+<servers>
+   <server http_base_url = "http://gazelle.weathertopconsulting.com:8282/baker/output"/>
+</servers>

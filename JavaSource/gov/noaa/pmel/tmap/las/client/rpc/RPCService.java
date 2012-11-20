@@ -8,6 +8,8 @@ import java.util.Map;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
@@ -41,4 +43,10 @@ public interface RPCService extends RemoteService {
 	public Map<String, String> getIDMap(String data_url) throws RPCException;
 	public TestSerializable[] getTestResults(String test_key) throws RPCException;
 	public DatasetSerializable getFullDataset(String id) throws RPCException;
+	/*
+	 * Everything below is of the ESGF search interface.
+	 */
+	public List<FacetSerializable> getFacets() throws RPCException;
+	public List<ESGFDatasetSerializable> getESGFDatasets(String query) throws RPCException;
+	public String addESGFDataset(String id) throws RPCException;
 }

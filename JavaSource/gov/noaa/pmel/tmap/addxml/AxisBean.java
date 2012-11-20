@@ -107,51 +107,59 @@ public class AxisBean extends LasBean {
 	public ArangeBean getArange() {
 		return arange;
 	}
-
+    public Element toXml(boolean seven) {
+        Element axis;
+        if ( seven ) {
+            axis = new Element("axis");
+            axis.setAttribute("ID", this.getElement());
+        } else {
+            axis = new Element(this.getElement());
+        }
+        if ( this.type == null ) {
+            System.err.println("Axis has no identifying type.  Setting to 'q'.  Check output.");
+            this.type = "q";
+        }
+        axis.setAttribute("type", this.type);
+        if ( this.units == null ) {
+            System.err.println("Axis has no units.  Setting units to 'none'.  Check output.");
+            this.units = "none";
+        }
+        if ( isModulo() ) {
+            axis.setAttribute("modulo", "true");
+        }
+        axis.setAttribute("units", this.units);
+        if ( calendar != null && !calendar.equals("") ) {
+            axis.setAttribute("calendar", calendar);
+        }
+        if (arange != null) {
+            Element arangeElement = new Element("arange");
+            if ( this.arange.getStart() == null ) {
+                System.err.println("Axis has no start value.  Setting to 1.  Check output.");
+                this.arange.setStart("1");
+            }
+            arangeElement.setAttribute("start", this.arange.getStart());
+            if ( this.arange.getSize() == null ) {
+                System.err.println("Axis has no size value.  Setting to 1.  Check output.");
+                this.arange.setSize("1");
+            }
+            arangeElement.setAttribute("size", this.arange.getSize());
+            if ( this.arange.getStep() == null ) {
+                System.err.println("Axis has no step value.  Setting to 1.  Check output.");
+                this.arange.setStep("1");
+            }
+            arangeElement.setAttribute("step", this.arange.getStep());
+            axis.addContent(arangeElement);
+        } else {
+            for (int vit = 0; vit < v.length; vit++) {
+                Element vElement = new Element("v");
+                vElement.addContent(String.valueOf(v[vit]));
+                axis.addContent(vElement);
+            }
+        }
+        return axis;
+    }
 	public Element toXml() {
-		Element axis = new Element(this.getElement());
-		if ( this.type == null ) {
-			System.err.println("Axis has no identifying type.  Setting to 'q'.  Check output.");
-			this.type = "q";
-		}
-		axis.setAttribute("type", this.type);
-		if ( this.units == null ) {
-			System.err.println("Axis has no units.  Setting units to 'none'.  Check output.");
-			this.units = "none";
-		}
-		if ( isModulo() ) {
-			axis.setAttribute("modulo", "true");
-		}
-		axis.setAttribute("units", this.units);
-		if ( calendar != null && !calendar.equals("") ) {
-			axis.setAttribute("calendar", calendar);
-		}
-		if (arange != null) {
-			Element arangeElement = new Element("arange");
-			if ( this.arange.getStart() == null ) {
-				System.err.println("Axis has no start value.  Setting to 1.  Check output.");
-				this.arange.setStart("1");
-			}
-			arangeElement.setAttribute("start", this.arange.getStart());
-			if ( this.arange.getSize() == null ) {
-				System.err.println("Axis has no size value.  Setting to 1.  Check output.");
-				this.arange.setSize("1");
-			}
-			arangeElement.setAttribute("size", this.arange.getSize());
-			if ( this.arange.getStep() == null ) {
-				System.err.println("Axis has no step value.  Setting to 1.  Check output.");
-				this.arange.setStep("1");
-			}
-			arangeElement.setAttribute("step", this.arange.getStep());
-			axis.addContent(arangeElement);
-		} else {
-			for (int vit = 0; vit < v.length; vit++) {
-				Element vElement = new Element("v");
-				vElement.addContent(String.valueOf(v[vit]));
-				axis.addContent(vElement);
-			}
-		}
-		return axis;
+		return toXml(false);
 	}
 
 	public String toString() {

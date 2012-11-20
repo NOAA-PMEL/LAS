@@ -91,7 +91,8 @@ public class NavAxesGroup extends Composite {
     	axesPanel.setVisible(false);//.setOpen(false);
     }
     public void restorePanels() {
-    	axesPanel.setVisible(axesPanelIsOpen);//.setOpen(axesPanelIsOpen);
+        // There is no option for it to have been open or closed as it was when it was in a disclosure panel so in method it should always be set it visible.
+    	axesPanel.setVisible(true);//.setOpen(axesPanelIsOpen);
     }
     public void setRange(String type, boolean range) {
 		// Does not apply to x and y
