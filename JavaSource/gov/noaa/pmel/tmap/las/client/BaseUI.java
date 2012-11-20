@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.ESGFSearchButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.NavAxesGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
@@ -292,6 +293,11 @@ public class BaseUI {
 	// Disclosure panel to open and close all the left-hand controls
 	FlowPanel xSettingsHeader = new FlowPanel();// DisclosurePanel("General Controls");
 	String xThi;
+	
+	/*
+	 * Keep track of any incoming ESGF catagory ids. 
+	 */
+	String[] xCatIDs;
 
 	/*
 	 * Get a tile server from the native JavaScript and use it if it has been
@@ -339,7 +345,9 @@ public class BaseUI {
 	String xZhi;
 
 	String xZlo;
-
+	
+	ESGFSearchButton xESGFSearchButton;
+	
 	public native void activateNativeHooks()/*-{
 											var localObject = this;
 											$wnd.updateMapSelection = function(slat, nlat, wlon, elon) {
@@ -479,6 +487,8 @@ public class BaseUI {
 		xZhi = Util.getParameterString("zhi");
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
+		
+		xCatIDs = Util.getParameterStrings("catid");
 
 		xAxesWidget = new NavAxesGroup("Plot Coordinates", xControlsWidthPx,
 				xTileServer);
@@ -535,6 +545,11 @@ public class BaseUI {
 		xOptionsButton.addOpenClickHandler(xButtonOpenHandler);
 		xOptionsButton.addCloseClickHandler(xButtonCloseHandler);
 		xOptionsButton.ensureDebugId("xOptionsButton");
+		
+		xESGFSearchButton = new ESGFSearchButton();
+		xESGFSearchButton.addCloseHandler(xButtonCloseHandler);
+		
+		xESGFSearchButton.addOpenClickHandler(xButtonOpenHandler);
 
 		xOptionsClickHandler = new ClickHandler() {
 
@@ -587,6 +602,7 @@ public class BaseUI {
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOtherControls);
 		xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1,
 				false);
+
 		xOtherControls.setWidget(0, xOtherControlsIndex++,
 				xPrinterFriendlyButton);
 		xOtherControls.getCellFormatter().setWordWrap(0,
@@ -594,6 +610,7 @@ public class BaseUI {
 		// xButtonLayout.addStyleName("HEADER-WIDTH");
 		setTopLeftAlignment(xButtonLayout);
 		// xMainPanel.setWidget(0, 1, xButtonLayout);
+
 		xMainPanel.getCellFormatter().setWordWrap(0, 0, false);
 		xMainPanel.setWidget(1, 0, xNavigationControls);
 		xMainPanel.getCellFormatter().setWidth(1, 0, "260px");
