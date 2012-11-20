@@ -1423,6 +1423,8 @@ public class UI extends BaseUI {
 				});
 
 		xDisplayControls.setWidget(1, 1, annotationsControl);
+		
+		xDisplayControls.setWidget(2, 0, xESGFSearchButton);
 
 		compareMenu.addStyleDependentName("SMALLER");
 		compareMenu.addItem("One Plot", "1");
@@ -1574,6 +1576,9 @@ public class UI extends BaseUI {
 
 		// Initialize the gallery with an asynchronous call to the server to get
 		// variable needed.
+		if ( xCatIDs != null && xCatIDs.length > 0 ) {
+		    xESGFSearchButton.setVisible(true);
+		}
 		if (initialHistory != null && !initialHistory.equals("")
 				&& xDataURL == null) {
 			String[] settings = initialHistory.split("token");

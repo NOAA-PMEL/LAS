@@ -119,7 +119,8 @@ public class RequestInputFilter implements Filter {
                 "zhi",
                 "tlo",
                 "thi",
-		"xpath"
+		"xpath",
+		"gwt.codesvr"
     };
     private final static Set<String> LAS_PARAMETERS = new HashSet<String>(Arrays.asList(p));
 	

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent;
+import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
@@ -18,6 +21,7 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -40,9 +44,31 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * {@link gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton}
  */
 public class DatasetWidget extends Tree implements HasName {
+    ClientFactory clientFactory = GWT.create(ClientFactory.class);
+    EventBus eventBus = clientFactory.getEventBus();
+    TreeItem saveSelection;
     public DatasetWidget() {
         super();
+        eventBus.addHandler(ESGFDatasetAddedEvent.TYPE, esgfDatasetAddedHandler);
     }
+    
+    private Handler esgfDatasetAddedHandler = new Handler() {
+
+        @Override
+        public void onESGFDatasetAdded(ESGFDatasetAddedEvent event) {
+            saveSelection = currentlySelected;
+            
+            // This will cause the result to be added to the top of the tree...
+            currentlySelected = null;
+            
+            // Clear the tree to re-add all the datasets in this session.
+            clear();
+            
+            Util.getRPCService().getCategories(null, categoryCallback);
+            
+        }
+        
+    };
 
     public static final String LOADING = "Loading...";
 
@@ -179,6 +205,10 @@ public class DatasetWidget extends Tree implements HasName {
                         }
                     }
                 }
+            }
+            if ( saveSelection != null ) {
+                currentlySelected = saveSelection;
+                saveSelection = null;
             }
         }
 

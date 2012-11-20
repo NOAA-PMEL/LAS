@@ -6,6 +6,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -85,7 +86,14 @@ public class Util {
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();
 		List param = parameters.get(name);
 		if ( param != null ) {
-			return (String[]) param.toArray();
+		    int i = 0;
+		    String[] ps = new String[param.size()];
+		    for ( Iterator paramIt = param.iterator(); paramIt.hasNext(); ) {
+                String p = (String) paramIt.next();
+                ps[i] = p;
+                i++;
+            }
+			return ps;
 		}
 		return null;
 	}

@@ -53,6 +53,7 @@ import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -778,26 +779,20 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
-    /**
-     * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
-     * @throws JDOMException
-     * @throws UnsupportedEncodingException
-     *
-     */
-    public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
-    	/*
-    	 * 
-    	 * 
-    	 * if ( variable.getAttributeValue("grid_type") != null && variable.getAttributeValue("grid_type").equals("vector")) {
-510	                                List<Element> compositeVars = variable.getChildren("variable");
-511	                                if ( compositeVars.size() > 0 ) {
-512	                                        String VARID = compositeVars.get(0).getAttributeValue("IDREF");
-513	                                        Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
-514	                                        Element gridE = new Element("grid");
-515	                                        gridE.setAttribute("IDREF", grid.getID());
-516	                                        variable.addContent(gridE);
-517	                                        setPointsAndIntervals(variable, grid);
-    	 */
+    public void convertToSeven(boolean force) throws JDOMException, UnsupportedEncodingException {
+        /*
+         * 
+         * 
+         * if ( variable.getAttributeValue("grid_type") != null && variable.getAttributeValue("grid_type").equals("vector")) {
+510                                 List<Element> compositeVars = variable.getChildren("variable");
+511                                 if ( compositeVars.size() > 0 ) {
+512                                         String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+513                                         Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+514                                         Element gridE = new Element("grid");
+515                                         gridE.setAttribute("IDREF", grid.getID());
+516                                         variable.addContent(gridE);
+517                                         setPointsAndIntervals(variable, grid);
+         */
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
 
@@ -809,7 +804,7 @@ public class LASConfig extends LASDocument {
         List<String> duplicateGrids = new ArrayList<String>();
         List<String> duplicateAxes = new ArrayList<String>();
 
-        if ( version != null && version.contains("7.") && !allowsSisters()) {
+        if ( !force && version != null && version.contains("7.") && !allowsSisters()) {
             return;
         }
         root.setAttribute("version", "7.0");
@@ -828,101 +823,101 @@ public class LASConfig extends LASDocument {
                      */
 
                     if ( !dataset.getName().equals("properties") &&
-                    	 !dataset.getName().equals("documentation") &&
-                    	 !dataset.getName().equals("contributor")) {
-                    	// If the ID is null convert it, otherwise leave it along...
-                    	if ( dataset.getAttributeValue("ID") == null ) {
-                    		String ID = dataset.getName();
-                    		// Mark the duplicates (process the any way so they can be removed by ID reference.
-                    		if ( !datasetsProcessed.contains(ID) ) {
-                    			datasetsProcessed.add(ID);
-                    		} else {
-                    			duplicateDatasets.add(ID);
-                    		}
-                    		dataset.setName("dataset");
-                    		if ( allowsSisters() ) ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
-                    		dataset.setAttribute("ID", ID);
-                    		// Technically, I think there's only one of these per dataset,
-                    		// but you can't be sure so loop over all you can find.
-                    		List variablesParents = dataset.getChildren();
-                    		List<Element> compositeElements = new ArrayList<Element>();
-                    		for (Iterator varsIt = variablesParents.iterator(); varsIt.hasNext();) {
-                    			Element variablesElement = (Element) varsIt.next();
+                         !dataset.getName().equals("documentation") &&
+                         !dataset.getName().equals("contributor")) {
+                        // If the ID is null convert it, otherwise leave it along...
+                        if ( dataset.getAttributeValue("ID") == null ) {
+                            String ID = dataset.getName();
+                            // Mark the duplicates (process the any way so they can be removed by ID reference.
+                            if ( !datasetsProcessed.contains(ID) ) {
+                                datasetsProcessed.add(ID);
+                            } else {
+                                duplicateDatasets.add(ID);
+                            }
+                            dataset.setName("dataset");
+                            if ( allowsSisters() && !ID.contains(Constants.NAME_SPACE_SPARATOR)) ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
+                            dataset.setAttribute("ID", ID);
+                            // Technically, I think there's only one of these per dataset,
+                            // but you can't be sure so loop over all you can find.
+                            List variablesParents = dataset.getChildren();
+                            List<Element> compositeElements = new ArrayList<Element>();
+                            for (Iterator varsIt = variablesParents.iterator(); varsIt.hasNext();) {
+                                Element variablesElement = (Element) varsIt.next();
 
-                    			if ( !variablesElement.getName().equals("properties") &&
-                    					!variablesElement.getName().equals("documentation") &&
-                    					!variablesElement.getName().equals("contributor") ) {
-                    				boolean composite = false;
-                    				List variables = variablesElement.getChildren();
-                    				Element cprops = null;
-                    				if ( variablesElement.getName().equals("composite") ) {
-                    					composite = true;
-                    					cprops = variablesElement.getChild("properties");
-                    					if (cprops != null) {
-            								cprops.setContent(LASDocument.convertProperties(cprops));
-            							}
-                    				}
-                    				for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-                    					Element var = (Element) varIt.next();
-                    					// If it has an id assume it's already converted to 7.
-                    					if ( var.getAttributeValue("ID") == null ) {
-                    						if ( !var.getName().equals("properties") &&
-                    								!var.getName().equals("documentation") &&
-                    								!var.getName().equals("contributor") &&
-                    								!var.getName().equals("member")) {
-                    							String VID = var.getName();
-                    							var.setName("variable");
-                    							var.setAttribute("ID", VID);
-                    							if ( composite ) {
-                    								var.setAttribute("grid_type", "vector");
-                    								List<Element> varRef = var.getChildren("link");
-                    								for (Iterator varRefIt = varRef.iterator(); varRefIt.hasNext();) {
-                    									Element element = (Element) varRefIt.next();
-                    									String VARID = element.getAttributeValue("match");
-                    									VARID = VARID.substring(VARID.lastIndexOf("/")+1);
-                    									element.setName("variable");
-                    									element.removeAttribute("match");
-                    									element.setAttribute("IDREF", VARID);
-                    								}
-                    								compositeElements.add(var);
-                    							} else {
-                    								Element grid = var.getChild("link");
-                    								String GID = grid.getAttributeValue("match");
-                    								String[] parts = GID.split("/");
-                    								GID = parts[3];
-                    								grid.setName("grid");
-                    								grid.removeAttribute("match");
-                    								grid.setAttribute("IDREF", GID);
-                    							}
-                    							// Convert any properties.
-                    							Element vprops = var.getChild("properties");
-                    							if (vprops != null) {
-                    								vprops.setContent(LASDocument.convertProperties(vprops));
-                    							}
-                    						}
-                    					} else if ( var.getName().equals("properties") ){
-                    						var.setContent(LASDocument.convertProperties(var));
-                    					}
-                    				}
-                    				if ( composite ) {
-                    					Element firstVariablesElement = dataset.getChild("variables");
-                    					for (Iterator compIt = compositeElements.iterator(); compIt.hasNext();) {
-                    						Element compVar = (Element) compIt.next();
-                    						firstVariablesElement.addContent(compVar.detach());
-                    					}
-                    				}
-                    			} else if ( variablesElement.getName().equals("properties") ) {
-                    				variablesElement.setContent(LASDocument.convertProperties(variablesElement));
-                    			}
-                    		}
-                    	} else {
-                    		if ( !datasetsProcessed.contains(dataset.getAttributeValue("ID"))) {
-                    			datasetsProcessed.add(dataset.getAttributeValue("ID"));
-                    		} else {
-                    			duplicateDatasets.add(dataset.getAttributeValue("ID"));
-                    		}
+                                if ( !variablesElement.getName().equals("properties") &&
+                                        !variablesElement.getName().equals("documentation") &&
+                                        !variablesElement.getName().equals("contributor") ) {
+                                    boolean composite = false;
+                                    List variables = variablesElement.getChildren();
+                                    Element cprops = null;
+                                    if ( variablesElement.getName().equals("composite") ) {
+                                        composite = true;
+                                        cprops = variablesElement.getChild("properties");
+                                        if (cprops != null) {
+                                            cprops.setContent(LASDocument.convertProperties(cprops));
+                                        }
+                                    }
+                                    for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+                                        Element var = (Element) varIt.next();
+                                        // If it has an id assume it's already converted to 7.
+                                        if ( var.getAttributeValue("ID") == null ) {
+                                            if ( !var.getName().equals("properties") &&
+                                                    !var.getName().equals("documentation") &&
+                                                    !var.getName().equals("contributor") &&
+                                                    !var.getName().equals("member")) {
+                                                String VID = var.getName();
+                                                var.setName("variable");
+                                                var.setAttribute("ID", VID);
+                                                if ( composite ) {
+                                                    var.setAttribute("grid_type", "vector");
+                                                    List<Element> varRef = var.getChildren("link");
+                                                    for (Iterator varRefIt = varRef.iterator(); varRefIt.hasNext();) {
+                                                        Element element = (Element) varRefIt.next();
+                                                        String VARID = element.getAttributeValue("match");
+                                                        VARID = VARID.substring(VARID.lastIndexOf("/")+1);
+                                                        element.setName("variable");
+                                                        element.removeAttribute("match");
+                                                        element.setAttribute("IDREF", VARID);
+                                                    }
+                                                    compositeElements.add(var);
+                                                } else {
+                                                    Element grid = var.getChild("link");
+                                                    String GID = grid.getAttributeValue("match");
+                                                    String[] parts = GID.split("/");
+                                                    GID = parts[3];
+                                                    grid.setName("grid");
+                                                    grid.removeAttribute("match");
+                                                    grid.setAttribute("IDREF", GID);
+                                                }
+                                                // Convert any properties.
+                                                Element vprops = var.getChild("properties");
+                                                if (vprops != null) {
+                                                    vprops.setContent(LASDocument.convertProperties(vprops));
+                                                }
+                                            }
+                                        } else if ( var.getName().equals("properties") ){
+                                            var.setContent(LASDocument.convertProperties(var));
+                                        }
+                                    }
+                                    if ( composite ) {
+                                        Element firstVariablesElement = dataset.getChild("variables");
+                                        for (Iterator compIt = compositeElements.iterator(); compIt.hasNext();) {
+                                            Element compVar = (Element) compIt.next();
+                                            firstVariablesElement.addContent(compVar.detach());
+                                        }
+                                    }
+                                } else if ( variablesElement.getName().equals("properties") ) {
+                                    variablesElement.setContent(LASDocument.convertProperties(variablesElement));
+                                }
+                            }
+                        } else {
+                            if ( !datasetsProcessed.contains(dataset.getAttributeValue("ID"))) {
+                                datasetsProcessed.add(dataset.getAttributeValue("ID"));
+                            } else {
+                                duplicateDatasets.add(dataset.getAttributeValue("ID"));
+                            }
 
-                    	}
+                        }
                     } else if ( dataset.getName().equals("properties") ) {
                         dataset.setContent(LASDocument.convertProperties(dataset));
                     }
@@ -933,79 +928,79 @@ public class LASConfig extends LASDocument {
                     Element grid = (Element) gridsIt.next();
                     // If it has no ID assume it needs to be converted.  Otherwise ignore it.
                     if ( grid.getAttributeValue("ID") == null ) {
-                    	String GID = grid.getName();
-                    	if ( !gridsProcessed.contains(GID) ) {
-                    		gridsProcessed.add(GID);
-                    	} else {
-                    		duplicateGrids.add(GID);
-                    	}
-                    	grid.setName("grid");
-                    	grid.setAttribute("ID", GID);
-                    	List axesrefs = grid.getChildren();
-                    	for (Iterator axisIt = axesrefs.iterator(); axisIt.hasNext();) {
-                    		Element axis = (Element) axisIt.next();
-                    		String AID = axis.getAttributeValue("match");
-                    		axis.setName("axis");
-                    		String[] parts = AID.split("/");
-                    		AID = parts[3];
-                    		axis.setAttribute("IDREF", AID);
-                    		axis.removeAttribute("match");
-                    	}
+                        String GID = grid.getName();
+                        if ( !gridsProcessed.contains(GID) ) {
+                            gridsProcessed.add(GID);
+                        } else {
+                            duplicateGrids.add(GID);
+                        }
+                        grid.setName("grid");
+                        grid.setAttribute("ID", GID);
+                        List axesrefs = grid.getChildren();
+                        for (Iterator axisIt = axesrefs.iterator(); axisIt.hasNext();) {
+                            Element axis = (Element) axisIt.next();
+                            String AID = axis.getAttributeValue("match");
+                            axis.setName("axis");
+                            String[] parts = AID.split("/");
+                            AID = parts[3];
+                            axis.setAttribute("IDREF", AID);
+                            axis.removeAttribute("match");
+                        }
                     } else {
-                    	if ( !gridsProcessed.contains(grid.getAttributeValue("ID") ) ) {
-                    		gridsProcessed.add(grid.getAttributeValue("ID"));
-                    	} else {
-                    		duplicateGrids.add(grid.getAttributeValue("ID"));
-                    	}
+                        if ( !gridsProcessed.contains(grid.getAttributeValue("ID") ) ) {
+                            gridsProcessed.add(grid.getAttributeValue("ID"));
+                        } else {
+                            duplicateGrids.add(grid.getAttributeValue("ID"));
+                        }
                     }
                 }
             } else if (child.getName().equalsIgnoreCase("axes")) {
                 List axes = child.getChildren();
                 for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
-                	Element axis = (Element) axesIt.next();
-                	// If it does not have an ID assume it needs to be converted. Otherwise, ignore it.
-                	if ( axis.getAttributeValue("ID") == null ) {
-                		if ( !axis.getName().equals("properties")) {
-                			String AID = axis.getName();
-                			if ( !axesProcessed.contains(AID) ) {
-                				axesProcessed.add(AID);
-                			} else {
-                				duplicateAxes.add(AID);
-                			}
-                			axis.setName("axis");
-                			axis.setAttribute("ID", AID);
-                			List v = axis.getChildren("v");
-                			boolean warn = false;
-                			if ( v != null && axis.getAttributeValue("type").equals("t") ) {
-                				for (Iterator vIt = v.iterator(); vIt.hasNext();) {
-                					Element ve = (Element) vIt.next();
-                					String value = ve.getTextTrim();
-                					if ( value.equalsIgnoreCase("jan") || value.equalsIgnoreCase("feb") ||
-                							value.equalsIgnoreCase("mar") || value.equalsIgnoreCase("apr") ||
-                							value.equalsIgnoreCase("may") || value.equalsIgnoreCase("jun") ||
-                							value.equalsIgnoreCase("jul") || value.equalsIgnoreCase("aug") ||
-                							value.equalsIgnoreCase("sep") || value.equalsIgnoreCase("oct") ||
-                							value.equalsIgnoreCase("nov") || value.equalsIgnoreCase("dec") ) {
+                    Element axis = (Element) axesIt.next();
+                    // If it does not have an ID assume it needs to be converted. Otherwise, ignore it.
+                    if ( axis.getAttributeValue("ID") == null ) {
+                        if ( !axis.getName().equals("properties")) {
+                            String AID = axis.getName();
+                            if ( !axesProcessed.contains(AID) ) {
+                                axesProcessed.add(AID);
+                            } else {
+                                duplicateAxes.add(AID);
+                            }
+                            axis.setName("axis");
+                            axis.setAttribute("ID", AID);
+                            List v = axis.getChildren("v");
+                            boolean warn = false;
+                            if ( v != null && axis.getAttributeValue("type").equals("t") ) {
+                                for (Iterator vIt = v.iterator(); vIt.hasNext();) {
+                                    Element ve = (Element) vIt.next();
+                                    String value = ve.getTextTrim();
+                                    if ( value.equalsIgnoreCase("jan") || value.equalsIgnoreCase("feb") ||
+                                            value.equalsIgnoreCase("mar") || value.equalsIgnoreCase("apr") ||
+                                            value.equalsIgnoreCase("may") || value.equalsIgnoreCase("jun") ||
+                                            value.equalsIgnoreCase("jul") || value.equalsIgnoreCase("aug") ||
+                                            value.equalsIgnoreCase("sep") || value.equalsIgnoreCase("oct") ||
+                                            value.equalsIgnoreCase("nov") || value.equalsIgnoreCase("dec") ) {
 
-                						ve.setAttribute("label", value);
-                						ve.setText("15-"+value);
-                						warn = true;
-                					}
-                				}
-                				if ( warn ) {
-                					log.warn("Converted <v>Jan</v> syntax to <v label=\"Jan\">15-Jan</v> syntax for axis "+AID);
-                				}
-                			}
-                		}
-                	} else if ( axis.getName().equals("properties")) {
+                                        ve.setAttribute("label", value);
+                                        ve.setText("15-"+value);
+                                        warn = true;
+                                    }
+                                }
+                                if ( warn ) {
+                                    log.warn("Converted <v>Jan</v> syntax to <v label=\"Jan\">15-Jan</v> syntax for axis "+AID);
+                                }
+                            }
+                        }
+                    } else if ( axis.getName().equals("properties")) {
                         axis.setContent(LASDocument.convertProperties(axis));
-                	} else {
-                		if ( !axesProcessed.contains(axis.getAttributeValue("ID")) ) {
-                			axesProcessed.add(axis.getAttributeValue("ID"));
-                		} else {
-                			duplicateAxes.add(axis.getAttributeValue("ID"));
-                		}
-                	}
+                    } else {
+                        if ( !axesProcessed.contains(axis.getAttributeValue("ID")) ) {
+                            axesProcessed.add(axis.getAttributeValue("ID"));
+                        } else {
+                            duplicateAxes.add(axis.getAttributeValue("ID"));
+                        }
+                    }
                 }
             } else if ( child.getName().equalsIgnoreCase("properties")) {
                 child.setContent(LASDocument.convertProperties(child));
@@ -1017,56 +1012,65 @@ public class LASConfig extends LASDocument {
         }
         Element serversE = root.getChild("las_servers");
         if ( serversE != null ) {
-        	List las_serverElements = serversE.getChildren("las_server");
-        	for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
-        		Element las_server = (Element) lsIt.next();
-        		String url = las_server.getAttributeValue("url");
-        		if ( url == null ) {
-        			log.warn("<las_server> configured without a url attribute.");
-        		} else {
-        			String ID = las_server.getAttributeValue("ID");
-        			if ( ID == null ) {
-        				ID = JDOMUtils.MD5Encode(url);
-        				las_server.setAttribute("ID", ID);
-        			}
-        		}
-        	}
+            List las_serverElements = serversE.getChildren("las_server");
+            for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
+                Element las_server = (Element) lsIt.next();
+                String url = las_server.getAttributeValue("url");
+                if ( url == null ) {
+                    log.warn("<las_server> configured without a url attribute.");
+                } else {
+                    String ID = las_server.getAttributeValue("ID");
+                    if ( ID == null ) {
+                        ID = JDOMUtils.MD5Encode(url);
+                        las_server.setAttribute("ID", ID);
+                    }
+                }
+            }
         }
         // Remove duplicates.
         for (Iterator dupsIt = duplicateDatasets.iterator(); dupsIt.hasNext();) {
-			String ID = (String) dupsIt.next();
-			Element dup = getDatasetElement(ID);
-			Element parent = dup.getParentElement();
-			Element grandparent = parent.getParentElement();
-			parent.removeContent(dup);
-			if ( parent.getChildren().size() == 0 ) {
-				grandparent.removeContent(parent);
-			}
-			log.warn("Removed duplicate data set with ID="+ID);
-		}
+            String ID = (String) dupsIt.next();
+            Element dup = getDatasetElement(ID);
+            Element parent = dup.getParentElement();
+            Element grandparent = parent.getParentElement();
+            parent.removeContent(dup);
+            if ( parent.getChildren().size() == 0 ) {
+                grandparent.removeContent(parent);
+            }
+            log.warn("Removed duplicate data set with ID="+ID);
+        }
         for (Iterator dupsGit = duplicateGrids.iterator(); dupsGit.hasNext(); ) {
-        	String ID = (String) dupsGit.next();
-        	Element dup = getGridElement(ID);
-        	Element parent = dup.getParentElement();
-        	Element grandparent = parent.getParentElement();
-        	parent.removeContent(dup);
-        	log.warn("Removed duplicate grid with ID="+ID);
-        	if ( parent.getChildren().size() == 0 ) {
-        		grandparent.removeContent(parent);
-        	}
+            String ID = (String) dupsGit.next();
+            Element dup = getGridElement(ID);
+            Element parent = dup.getParentElement();
+            Element grandparent = parent.getParentElement();
+            parent.removeContent(dup);
+            log.warn("Removed duplicate grid with ID="+ID);
+            if ( parent.getChildren().size() == 0 ) {
+                grandparent.removeContent(parent);
+            }
         }
         for (Iterator dupsAit = duplicateAxes.iterator(); dupsAit
-				.hasNext();) {
-			String ID = (String) dupsAit.next();
-			Element dup = getAxisElement(ID);
-			Element parent = dup.getParentElement();
-			Element grandparent = parent.getParentElement();
-			parent.removeContent(dup);
-			log.warn("Removed duplicate axis with ID="+ID);
-			if ( parent.getChildren().size() == 0 ) {
-				grandparent.removeContent(parent);
-			}
-		}
+                .hasNext();) {
+            String ID = (String) dupsAit.next();
+            Element dup = getAxisElement(ID);
+            Element parent = dup.getParentElement();
+            Element grandparent = parent.getParentElement();
+            parent.removeContent(dup);
+            log.warn("Removed duplicate axis with ID="+ID);
+            if ( parent.getChildren().size() == 0 ) {
+                grandparent.removeContent(parent);
+            }
+        }
+    }
+    /**
+     * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
+     * @throws JDOMException
+     * @throws UnsupportedEncodingException
+     *
+     */
+    public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
+        convertToSeven(false);
     }
     /**
      * Helper method to recursively extract the options.
@@ -1489,7 +1493,15 @@ public class LASConfig extends LASDocument {
                     container_dataset = new Element("dataset");
                 }
                 category.addContent(container_dataset);
-                categories.add(new Category(category));
+                if ( dataset != null ) {
+                    if ( category.getAttribute("name") == null && dataset.getAttributeValue("name") != null ) {
+                        category.setAttribute("name", dataset.getAttributeValue("name"));
+                    }
+                    if ( category.getAttribute("ID") == null && dataset.getAttributeValue("ID") != null ) {
+                        category.setAttribute("ID", dataset.getAttributeValue("ID"));
+                    }
+                    categories.add(new Category(category));
+                }
             }
             
         }
@@ -1930,9 +1942,10 @@ public class LASConfig extends LASDocument {
      */
     public Dataset getDataset(String dsID) throws JDOMException, LASException {
     	String xpathValue = "/lasdata/datasets/dataset[@ID='"+dsID+"']";
-    	Element ds = (Element) getElementByXPath(xpathValue).clone();
+    	Element ads = (Element) getElementByXPath(xpathValue);
     	Dataset dataset;
-    	if ( ds != null ) {
+    	if ( ads != null ) {
+    	    Element ds = (Element) ads.clone();
     		dataset = new Dataset(ds);
     	} else {
     		return null;
@@ -5174,5 +5187,143 @@ public class LASConfig extends LASDocument {
         ptinv.put("intervals", intervals);
         return ptinv;
         
+    }
+    public String addDataset(String id) throws JDOMException, HttpException, IOException, LASException {
+        String master_id;
+        String key = null;
+        if ( id.contains(Constants.NAME_SPACE_SPARATOR) ) {
+            String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
+
+            key = parts[0];
+            master_id = parts[1];
+        } else {
+            master_id = id;
+        }
+
+        if ( master_id.endsWith("aggregation") ) {
+            // Hack off three
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+        } else if ( master_id.contains("aggregation") ) {
+            // Hack off four
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+        }  else {
+            // Hack off the version 
+            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        lasProxy.executeGetMethodAndStreamResult(Constants.SEARCH_URL+"?replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id, stream);
+        Document doc = new Document();
+
+        JDOMUtils.XML2JDOM(stream.toString(), doc);
+        Element root = doc.getRootElement();
+        Element result = root.getChild("result");
+        String catalog = null;
+        String LAS = null;
+        if ( result != null ) {
+            String number = result.getAttributeValue("numFound");
+            if ( !number.equals("0") ) {
+                List<Element> results = result.getChildren("doc");
+                Element solrDoc = results.get(0);
+                if ( solrDoc != null ) {
+                    List<Element> arrays = solrDoc.getChildren("arr");
+                    for ( Iterator arrE = arrays.iterator(); arrE.hasNext(); ) {
+                        Element arr = (Element) arrE.next();
+                        if ( arr.getAttributeValue("name").equals("url")) {
+                            List<Element> strs = arr.getChildren("str");
+                            for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                Element str = (Element) strIt.next();
+                                String txt = str.getTextTrim();
+                                if ( txt.contains("|Catalog") ) {
+                                    catalog = txt.substring(0, txt.indexOf("#"));
+                                    System.out.println(catalog);
+                                }
+                                if ( txt.contains("|LAS") ) {
+                                    LAS = txt.substring(0, txt.indexOf("|"));
+                                    LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }                
+        }
+        if ( key == null && LAS != null ) {
+            key = JDOMUtils.MD5Encode(LAS);
+        }
+        if ( LAS == null ) {
+            // No remote LAS, use the local LAS to plot this data.
+            key = getBaseServerURLKey();
+        }
+        InvCatalogFactory factory = new InvCatalogFactory("default", false);
+        InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
+        Vector dagbs = ADDXMLProcessor.processESGDatasets(invCatalog);
+        // There's only going to be one...
+        String key_id = null;
+        Dataset ds = null;
+        for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
+            DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
+            Vector datasets = dagb.getDatasets();
+            for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
+                DatasetBean db = (DatasetBean) dsIt.next();
+                String e = db.getElement();
+                e = key+Constants.NAME_SPACE_SPARATOR+e;
+                db.setElement(e);
+                key_id = e;
+                Element dataset = db.toXml(true);
+                Element dsE = getRootElement().getChild("datasets");
+
+                if ( dsE == null ) {
+                    dsE = new Element("datasets");
+                    getRootElement().addContent(dsE);
+                } 
+
+                ds = getDataset(key_id);
+                
+                // Add only if it doesn't exist already...
+
+                if ( ds == null ) {
+
+                    dsE.addContent(dataset);
+
+                }
+
+
+            }
+       
+            // Add only if it doesn't exist already...
+            if ( ds == null ) {
+                Vector grids = dagb.getGrids();
+                for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
+                    GridBean gb = (GridBean) gIt.next();
+                    Element grid = gb.toXml(true);
+                    Element gsE = getRootElement().getChild("grids");
+                    if ( gsE == null ) {
+                        gsE = new Element("grids");
+                        getRootElement().addContent(gsE);
+                    }
+                    gsE.addContent(grid);
+                }
+
+                Vector axes = dagb.getAxes();
+                for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
+                    AxisBean ab = (AxisBean) aIt.next();
+                    Element axis = ab.toXml(true);
+                    Element asE = getRootElement().getChild("axes");
+                    if ( asE == null ) {
+                        asE = new Element("axes");
+                        getRootElement().addContent(asE);
+                    }
+                    asE.addContent(axis);
+                }
+            }
+        }
+            
+        return key_id;
     }
 }

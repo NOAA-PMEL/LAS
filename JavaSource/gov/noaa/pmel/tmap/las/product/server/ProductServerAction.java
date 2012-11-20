@@ -16,7 +16,11 @@ import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.service.ProductLocalService;
 import gov.noaa.pmel.tmap.las.service.ProductWebService;
+import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.util.Constants;
+import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Institution;
+import gov.noaa.pmel.tmap.las.util.Tributary;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,10 +37,13 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -70,7 +77,8 @@ import com.sun.rowset.WebRowSetImpl;
  */
 public final class ProductServerAction extends LASAction {
     private static Logger log = LogManager.getLogger(ProductServerAction.class.getName());
-    
+    private static LASProxy lasProxy= new LASProxy();
+
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,
             HttpServletRequest request,
@@ -274,28 +282,52 @@ public final class ProductServerAction extends LASAction {
         	lasRequest.setProperty("las", "debug", "false");
         }
         
-        // If this is a request from a confluence server that contains references to remote data sets,
-        // augment the local configuration with the the remote config.
-        
-        String remote_las = request.getParameter("remote_las");
-        if ( remote_las != null ) {
-        	try {
-				lasConfig.addRemoteVariables(JSESSIONID, lasRequest);
-			} catch (HttpException e) {
-				 logerror(request, "Could not get remote data set definitions.", e);
-		         return mapping.findForward("error");
-			} catch (IOException e) {
-				 logerror(request, "Could not get remote data set definitions.", e);
-		         return mapping.findForward("error");
-			} catch (JDOMException e) {
-				logerror(request, "Could not get remote data set definitions.", e);
-		        return mapping.findForward("error");
-			} catch (LASException e) {
-				logerror(request, "Could not get remote data set definitions.", e);
-		        return mapping.findForward("error");
-			}
+        // If this is a request from a constellation of servers that are in ESGF mode
+        //    1. If it's all local, make sure the data sets are configured and proceed
+        //    2. If a single remote server, send the request to that server.
+        //    3. If it's a mix, get the remote configurations and proceed.
+        if ( lasConfig.pruneCategories() ) {
+            try {
+                ArrayList<String> request_ids = lasRequest.getDatasetIDs();
+                // Add the data sets if they are not already in the config
+                for ( int i = 0; i < request_ids.size(); i++ ) {
+                    String rid = request_ids.get(i);
+                    Dataset d = lasConfig.getDataset(rid);
+                    if ( d == null ) {
+                        lasConfig.addDataset(rid);
+                    }
+                }
+//                // If the request is entirely remote, make it here and return the result.
+//                Set<String> idset = new HashSet<String>();
+//                idset.addAll(request_ids);
+//
+//                if ( idset.size() == 1 ) {
+//                    String request_id = idset.iterator().next();
+//                    if ( !request_id.contains(lasConfig.getBaseServerURLKey())) {
+//                        String[] parts = request_id.split(Constants.NAME_SPACE_SPARATOR);
+//                        String remotekey = parts[0];
+//                        Tributary trib = lasConfig.getTributary(remotekey);
+//                        String remote_las_request = trib.getURL()+"/ProductServer.do?"+"xml="+lasRequest.toEncodedURLString();
+//                        lasProxy.executeGetMethodAndStreamResult(remote_las_request, response);
+//                    }
+//                }
+            } catch ( UnsupportedEncodingException e ) {
+                logerror(request, "Error creating the product request.", e);
+                return mapping.findForward("error");
+            } catch ( JDOMException e ) {
+                logerror(request, "Error creating the product request.", e);
+                return mapping.findForward("error");
+            } catch ( LASException e ) {
+                logerror(request, "Error creating the product request.", e);
+                return mapping.findForward("error");
+            } catch ( HttpException e ) {
+                logerror(request, "Error creating the product request.", e);
+                return mapping.findForward("error");
+            } catch ( IOException e ) {
+                logerror(request, "Error creating the product request.", e);
+                return mapping.findForward("error");
+            }
         }
-        
         
         // Report logging level only for "debug" and "trace" levels.
         log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for "+log.getName());

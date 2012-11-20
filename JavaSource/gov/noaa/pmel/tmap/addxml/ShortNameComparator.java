@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.addxml;
 
 import java.util.Comparator;
 
-public class ShortNameComparitor implements Comparator<VariableBean> {
+public class ShortNameComparator implements Comparator<VariableBean> {
 
 	@Override
 	public int compare(VariableBean o1, VariableBean o2) {

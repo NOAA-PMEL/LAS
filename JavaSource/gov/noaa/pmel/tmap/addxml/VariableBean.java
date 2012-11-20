@@ -72,35 +72,70 @@ public class VariableBean extends LasBean {
 		groupMap.put(name, value);
 		properties.put(group, groupMap);
 	}
+    public Element toXml(boolean seven) {
+        Element variable;
 
+        if ( seven ) {
+            variable = new Element("variable");
+            variable.setAttribute("ID", this.getElement());
+        } else {
+            variable = new Element(this.getElement());
+        }
+        variable.setAttribute("name", name);
+        variable.setAttribute("units", units);
+        if ( url != null && url != "" ) {
+            variable.setAttribute("url", url);
+        }
+        if ( seven ) {
+            Element g = new Element("grid");
+            g.setAttribute("IDREF", grid.getElement());
+            variable.addContent(0, g);
+        } else {
+            Element link = new Element("link");
+            link.setAttribute("match", "/lasdata/grids/"+grid.getElement());
+            variable.addContent(link);
+        }
+        if ( properties.size() > 0 ) {
+                Element propertiesE = new Element("properties");
+                if ( seven ) {
+                    for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
+                        String group = (String) groupsIt.next();
+                        HashMap<String, String> groupMap = properties.get(group);
+                        Element groupE = new Element("property_group");
+                        groupE.setAttribute("type", group);
+                        for (Iterator nameIt = groupMap.keySet().iterator(); nameIt.hasNext();) {
+                            Element prop = new Element("property");
+                            String name = (String) nameIt.next();
+                            String value = groupMap.get(name);
+                            Element n = new Element("name");
+                            n.setText(name);
+                            Element v = new Element("value");
+                            v.setText(value);
+                            prop.addContent(n);
+                            prop.addContent(v);
+                            groupE.addContent(prop);
+                        }
+                    }
+                } else {
+                    for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
+                        String group = (String) groupsIt.next();
+                        HashMap<String, String> groupMap = properties.get(group);
+                        Element groupE = new Element(group);
+                        for (Iterator nameIt = groupMap.keySet().iterator(); nameIt.hasNext();) {
+                            String name = (String) nameIt.next();
+                            String value = groupMap.get(name);
+                            Element n = new Element(name);
+                            n.setText(value);
+                            groupE.addContent(n);
+                        }
+                    }
+                }
+            variable.addContent(propertiesE);
+        }
+        return variable;
+    }
 	public Element toXml() {
-		Element variable = new Element(this.getElement());
-		variable.setAttribute("name", name);
-		variable.setAttribute("units", units);
-		if ( url != null && url != "" ) {
-			variable.setAttribute("url", url);
-		}
-		Element link = new Element("link");
-		link.setAttribute("match", "/lasdata/grids/"+grid.getElement());
-		variable.addContent(link);
-		if ( properties.size() > 0 ) {
-			Element propertiesE = new Element("properties");
-			for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
-				String group = (String) groupsIt.next();
-				Element groupE = new Element(group);
-				HashMap<String, String> groupMap = properties.get(group);
-				for (Iterator propIt = groupMap.keySet().iterator(); propIt.hasNext();) {
-					String name = (String) propIt.next();
-					String value = groupMap.get(name);
-					Element nameE = new Element(name);
-					nameE.setText(value);
-					groupE.addContent(nameE);
-				}
-				propertiesE.addContent(groupE);
-			}
-			variable.addContent(propertiesE);
-		}
-		return variable;
+		return toXml(false);
 	}
 
 	@Override

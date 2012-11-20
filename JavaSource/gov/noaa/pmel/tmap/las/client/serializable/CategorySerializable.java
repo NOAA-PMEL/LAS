@@ -11,6 +11,7 @@ package gov.noaa.pmel.tmap.las.client.serializable;
 
 
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -142,4 +143,7 @@ public class CategorySerializable extends Serializable implements IsSerializable
 		}
 		return doc;
 	}
+    public void sortVariables() {
+        Arrays.sort(datasetSerializable.getVariablesSerializable(), new VariableNameComparator());
+    }
 }

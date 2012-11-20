@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 
@@ -33,4 +35,10 @@ public interface RPCServiceAsync {
 	public void getIDMap(String data_url, AsyncCallback<Map<String, String>> callback);
 	public void getTestResults(String test_key, AsyncCallback<TestSerializable[]> callback);
 	public void getFullDataset(String id, AsyncCallback datasetCallback);
+	/*
+	 * Everything below this is for the ESGF serach interface.
+	 */
+	public void getFacets(AsyncCallback<List<FacetSerializable>> facetCallback);
+	public void getESGFDatasets(String query, AsyncCallback<List<ESGFDatasetSerializable>> esgfDatasetCallback);
+	public void addESGFDataset(String id, AsyncCallback<String> addESGFDatasetCallback);
 }

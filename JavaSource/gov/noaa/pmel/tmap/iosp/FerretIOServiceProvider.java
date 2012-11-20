@@ -524,7 +524,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		log.debug("Attempting to open data file: " + filename);
 		NetcdfFile nds = null;
 		try {
-			nds = NetcdfFile.open(filename, null);
+			nds = NetcdfDataset.open(filename, null);
 			log.debug("Attempting to find variable : " + readname);
 			Variable v = nds.findVariable(readname);
 			if (readname.equals("COORDS")) {

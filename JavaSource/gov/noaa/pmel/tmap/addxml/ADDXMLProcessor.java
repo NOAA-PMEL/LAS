@@ -148,7 +148,7 @@ public class ADDXMLProcessor {
     // Constants
     private static final String Z_VALUES = "updownValues";
     private static final String ZVALUES = "zvalues";
-
+    private static final String ESGF_Z_VALUES = "z_values";
 
     private static boolean verbose;
     private static boolean generate_names;
@@ -1657,7 +1657,12 @@ public class ADDXMLProcessor {
 
                         VariableBean las_var = new VariableBean();
                         las_var.setElement(threddsDataset.getID()+"-"+variable.getName());
-                        las_var.setName(variable.getName());
+                        String vname = variable.getDescription();
+                        if ( vname != null && vname.length() > 0 ) {
+                            las_var.setName(vname);
+                        } else {
+                            las_var.setName(variable.getName());
+                        }
                         if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
                             las_var.setUnits(variable.getUnits());
                         } else {
@@ -1709,7 +1714,7 @@ public class ADDXMLProcessor {
                                 double zresolution = z.getResolution();
                                 double zstart = z.getStart();
                                 try {
-                                    zvalues = threddsDataset.findProperty(Z_VALUES);
+                                    zvalues = threddsDataset.findProperty(ESGF_Z_VALUES);
                                 } catch (Exception e) {
                                     try {
                                         zvalues = threddsDataset.findProperty(ZVALUES);
@@ -2157,7 +2162,8 @@ public class ADDXMLProcessor {
     public static CategoryBean processUAFCategories(InvDataset ThreddsDataset) {
         String tid = ThreddsDataset.getID();
         String id = fixid(ThreddsDataset);  
-        String name = ThreddsDataset.getFullName();
+        //String name = ThreddsDataset.getFullName();
+        String name  = ThreddsDataset.getName();
         CategoryBean category = makeParent(ThreddsDataset);
         category.setName(name);
         category.setID(id);

@@ -27,6 +27,8 @@ public class OperationsMenu extends Composite {
 	OperationPushButton showValuesButton = new OperationPushButton("Show Values");
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
+	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
+
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
 	boolean hasCorrelation = false;
@@ -45,12 +47,15 @@ public class OperationsMenu extends Composite {
         exportToDesktopButton.addStyleDependentName("SMALLER");
         saveAsButton.addStyleDependentName("SMALLER");
         saveAsButton.ensureDebugId("saveAsButton");
+        climateAnalysis.addStyleDependentName("SMALLER");
 		buttonBar.add(animationButton);
 		buttonBar.add(correlationButton);
 		buttonBar.add(googleEarthButton);
 		buttonBar.add(showValuesButton);
 		buttonBar.add(exportToDesktopButton);
 		buttonBar.add(saveAsButton);
+		buttonBar.add(climateAnalysis);
+		climateAnalysis.setVisible(false);
 		initWidget(buttonBar);
 		buttonBar.setSize("100%", "100%");
 	}
@@ -62,6 +67,8 @@ public class OperationsMenu extends Composite {
 		exportToDesktopButton.setEnabled(false);
 		saveAsButton.setEnabled(false);
 		correlationButton.setEnabled(false);
+	    climateAnalysis.setEnabled(false);
+
     }
 	public void setMenus(OperationSerializable[] ops, String view) {
 		turnOffButtons();
@@ -144,6 +151,16 @@ public class OperationsMenu extends Composite {
 							}
 						}
 					}
+				} else if ( category.equals("climate_analysis") ) {
+				    if ( op_view.equals(view) ) {
+				        if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
+                            if ( op.getName().toLowerCase().contains("climate analysis") ) {
+                                climateAnalysis.setOperation(op);
+                                climateAnalysis.setVisible(true);
+                                climateAnalysis.setEnabled(true);
+                            }
+				        }
+				    }
 				}
 			}
 		}
@@ -157,6 +174,7 @@ public class OperationsMenu extends Composite {
         showValuesButton.addClickHandler(clickHandler);
         saveAsButton.addClickHandler(clickHandler);
         exportToDesktopButton.addClickHandler(clickHandler);
+        climateAnalysis.addClickHandler(clickHandler);
     }
     public void setGoogleEarthButtonEnabled(boolean enable) {
         googleEarthButton.setEnabled(enable);
@@ -200,6 +218,11 @@ public class OperationsMenu extends Composite {
             correlationButton.setEnabled(true);
         } else {
             correlationButton.setEnabled(false);
+        }
+        if ( climateAnalysis.getOperation().getViews().contains(view) ) {
+            climateAnalysis.setEnabled(true);
+        } else {
+            climateAnalysis.setEnabled(false);
         }
         
     }
