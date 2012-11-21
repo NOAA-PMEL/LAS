@@ -91,7 +91,7 @@ import com.google.gwt.xml.client.XMLParser;
  * 
  */
 public class Correlation implements EntryPoint {
-	Logger logger = Logger.getLogger("Correlation");
+	Logger logger = Logger.getLogger(Correlation.class.getName());
 	private static final AppConstants CONSTANTS = GWT
 			.create(AppConstants.class);
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
@@ -1018,9 +1018,11 @@ public class Correlation implements EntryPoint {
 											@Override
 											public void onMouseDown(
 													MouseDownEvent event) {
+												logger.setLevel(Level.ALL);
 
 												startx = event.getX();
 												starty = event.getY();
+												logger.info("(startx, starty):("+startx+", "+starty+")");
 												if (startx > x_offset_from_left
 														&& starty > y_offset_from_top
 														&& startx < x_offset_from_left
@@ -1033,15 +1035,23 @@ public class Correlation implements EntryPoint {
 													// 0, 0);
 													scale(image,
 															imageScaleRatio);
+													double scaled_x_per_pixel = x_per_pixel
+															/ imageScaleRatio;
+													double scaled_y_per_pixel = y_per_pixel
+															/ imageScaleRatio;
 													world_startx = x_axis_lower_left
-															+ (startx - x_offset_from_left)
-															* x_per_pixel;
+															+ (startx - x_offset_from_left
+																	* imageScaleRatio)
+															* scaled_x_per_pixel;
 													world_starty = y_axis_lower_left
-															+ ((y_image_size - starty) - y_offset_from_bottom)
-															* y_per_pixel;
+															+ ((y_image_size * imageScaleRatio - starty) - y_offset_from_bottom
+																	* imageScaleRatio)
+															* scaled_y_per_pixel;
 
 													world_endx = world_startx;
 													world_endy = world_starty;
+													logger.info("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
+													logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
 
 													setTextValues();
 													xVariableConstraint
@@ -1050,6 +1060,7 @@ public class Correlation implements EntryPoint {
 															.setApply(true);
 
 												}
+												logger.setLevel(Level.OFF);
 											}
 										});
 								frontCanvas
@@ -1058,6 +1069,7 @@ public class Correlation implements EntryPoint {
 											@Override
 											public void onMouseMove(
 													MouseMoveEvent event) {
+												logger.setLevel(Level.ALL);
 												int currentx = event.getX();
 												int currenty = event.getY();
 												// If you drag it out, we'll
@@ -1073,14 +1085,20 @@ public class Correlation implements EntryPoint {
 													draw = false;
 													endx = currentx;
 													endy = currenty;
+													logger.info("(endx, endy):("+endx+", "+endy+")");
 												}
 												if (draw) {
+													double scaled_x_per_pixel = x_per_pixel
+															/ imageScaleRatio;
+													double scaled_y_per_pixel = y_per_pixel
+															/ imageScaleRatio;
 													world_endx = x_axis_lower_left
-															+ (currentx - x_offset_from_left)
-															* x_per_pixel;
+															+ (currentx - x_offset_from_left
+																	* imageScaleRatio) * scaled_x_per_pixel;
 													world_endy = y_axis_lower_left
-															+ ((y_image_size - currenty) - y_offset_from_bottom)
-															* y_per_pixel;
+															+ ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom
+																	* imageScaleRatio) * scaled_y_per_pixel;
+													logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
 													setTextValues();
 													logger.info("randomColor.value():"
 															+ randomColor
@@ -1100,6 +1118,7 @@ public class Correlation implements EntryPoint {
 																	currenty
 																			- starty);
 												}
+												logger.setLevel(Level.OFF);
 											}
 										});
 								outputPanel.setWidget(1, 0, frontCanvas);
@@ -1112,15 +1131,17 @@ public class Correlation implements EntryPoint {
 
 							@Override
 							public void onMouseUp(MouseUpEvent event) {
+								logger.setLevel(Level.ALL);
 								// If we're still drawing when the mouse goes
 								// up, record the position.
 								if (draw) {
 									endx = event.getX();
 									endy = event.getY();
+									logger.info("(endx, endy):("+endx+", "+endy+")");
 								}
 								draw = false;
 								setConstraints();
-
+								logger.setLevel(Level.OFF);
 							}
 						});
 					} else {
@@ -1146,10 +1167,14 @@ public class Correlation implements EntryPoint {
 
 					}
 				}
+				logger.info("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
+				logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
 				world_startx = x_axis_lower_left;
 				world_endx = x_axis_upper_right;
 				world_starty = y_axis_lower_left;
 				world_endy = y_axis_upper_right;
+				logger.warning("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
+				logger.warning("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
 				setTextValues();
 				printURL = Util.getAnnotationsFrag(annourl, imageurl);
 			}
