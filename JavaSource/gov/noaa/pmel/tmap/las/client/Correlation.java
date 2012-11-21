@@ -69,7 +69,6 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
@@ -147,6 +146,7 @@ public class Correlation implements EntryPoint {
 	int endx;
 	int endy;
 	boolean draw = false;
+	IESafeImage plotImage;
 	Context2d frontCanvasContext;
 	Canvas frontCanvas;
 	CssColor randomColor;
@@ -218,7 +218,7 @@ public class Correlation implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 
 		ClientFactory cf = GWT.create(ClientFactory.class);
 		eventBus = cf.getEventBus();
@@ -980,22 +980,22 @@ public class Correlation implements EntryPoint {
 					}
 				}
 				if (!imageurl.equals("")) {
-					final IESafeImage image = new IESafeImage(imageurl);
+					plotImage = new IESafeImage(imageurl);
 					x_per_pixel = (x_axis_upper_right - x_axis_lower_left)
 							/ Double.valueOf(x_plot_size);
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)
 							/ Double.valueOf(y_plot_size);
 
 					if (frontCanvas != null) {
-						outputPanel.setWidget(2, 0, image);
-						image.setVisible(false);
-						image.addLoadHandler(new LoadHandler() {
+						outputPanel.setWidget(2, 0, plotImage);
+						plotImage.setVisible(false);
+						plotImage.addLoadHandler(new LoadHandler() {
 
 							@Override
 							public void onLoad(LoadEvent event) {
 								logger.info("image onLoad called");
-								int width = image.getWidth();
-								int height = image.getHeight();
+								int width = plotImage.getWidth();
+								int height = plotImage.getHeight();
 								// Set global maximums
 								image_w = width;
 								logger.info("image_w:" + image_w);
@@ -1010,8 +1010,8 @@ public class Correlation implements EntryPoint {
 								frontCanvas.setCoordinateSpaceHeight(height);
 								frontCanvas.setCoordinateSpaceWidth(width);
 								frontCanvasContext.drawImage(
-										ImageElement.as(image.getElement()), 0,
-										0);
+										ImageElement.as(plotImage.getElement()),
+										0, 0);
 								frontCanvas
 										.addMouseDownHandler(new MouseDownHandler() {
 
@@ -1022,7 +1022,10 @@ public class Correlation implements EntryPoint {
 
 												startx = event.getX();
 												starty = event.getY();
-												logger.info("(startx, starty):("+startx+", "+starty+")");
+												logger.info("(startx, starty):("
+														+ startx
+														+ ", "
+														+ starty + ")");
 												if (startx > x_offset_from_left
 														&& starty > y_offset_from_top
 														&& startx < x_offset_from_left
@@ -1033,8 +1036,7 @@ public class Correlation implements EntryPoint {
 													draw = true;
 													// frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
 													// 0, 0);
-													scale(image,
-															imageScaleRatio);
+													drawToScreenScaled(imageScaleRatio);
 													double scaled_x_per_pixel = x_per_pixel
 															/ imageScaleRatio;
 													double scaled_y_per_pixel = y_per_pixel
@@ -1044,14 +1046,22 @@ public class Correlation implements EntryPoint {
 																	* imageScaleRatio)
 															* scaled_x_per_pixel;
 													world_starty = y_axis_lower_left
-															+ ((y_image_size * imageScaleRatio - starty) - y_offset_from_bottom
+															+ ((y_image_size
+																	* imageScaleRatio - starty) - y_offset_from_bottom
 																	* imageScaleRatio)
 															* scaled_y_per_pixel;
 
 													world_endx = world_startx;
 													world_endy = world_starty;
-													logger.info("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
-													logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
+													logger.info("(world_startx, world_starty):("
+															+ world_startx
+															+ ", "
+															+ world_starty
+															+ ")");
+													logger.info("(world_endx, world_endy):("
+															+ world_endx
+															+ ", "
+															+ world_endy + ")");
 
 													setTextValues();
 													xVariableConstraint
@@ -1060,7 +1070,7 @@ public class Correlation implements EntryPoint {
 															.setApply(true);
 
 												}
-												logger.setLevel(Level.OFF);
+												logger.setLevel(Level.ALL);
 											}
 										});
 								frontCanvas
@@ -1085,7 +1095,10 @@ public class Correlation implements EntryPoint {
 													draw = false;
 													endx = currentx;
 													endy = currenty;
-													logger.info("(endx, endy):("+endx+", "+endy+")");
+													logger.info("(endx, endy):("
+															+ endx
+															+ ", "
+															+ endy + ")");
 												}
 												if (draw) {
 													double scaled_x_per_pixel = x_per_pixel
@@ -1094,11 +1107,17 @@ public class Correlation implements EntryPoint {
 															/ imageScaleRatio;
 													world_endx = x_axis_lower_left
 															+ (currentx - x_offset_from_left
-																	* imageScaleRatio) * scaled_x_per_pixel;
+																	* imageScaleRatio)
+															* scaled_x_per_pixel;
 													world_endy = y_axis_lower_left
-															+ ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom
-																	* imageScaleRatio) * scaled_y_per_pixel;
-													logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
+															+ ((y_image_size
+																	* imageScaleRatio - currenty) - y_offset_from_bottom
+																	* imageScaleRatio)
+															* scaled_y_per_pixel;
+													logger.info("(world_endx, world_endy):("
+															+ world_endx
+															+ ", "
+															+ world_endy + ")");
 													setTextValues();
 													logger.info("randomColor.value():"
 															+ randomColor
@@ -1107,8 +1126,7 @@ public class Correlation implements EntryPoint {
 															.setFillStyle(randomColor);
 													// frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
 													// 0, 0);
-													scale(image,
-															imageScaleRatio);
+													drawToScreenScaled(imageScaleRatio);
 													frontCanvasContext
 															.strokeRect(
 																	startx,
@@ -1118,7 +1136,7 @@ public class Correlation implements EntryPoint {
 																	currenty
 																			- starty);
 												}
-												logger.setLevel(Level.OFF);
+												logger.setLevel(Level.ALL);
 											}
 										});
 								outputPanel.setWidget(1, 0, frontCanvas);
@@ -1137,24 +1155,25 @@ public class Correlation implements EntryPoint {
 								if (draw) {
 									endx = event.getX();
 									endy = event.getY();
-									logger.info("(endx, endy):("+endx+", "+endy+")");
+									logger.info("(endx, endy):(" + endx + ", "
+											+ endy + ")");
 								}
 								draw = false;
 								setConstraints();
-								logger.setLevel(Level.OFF);
+								logger.setLevel(Level.ALL);
 							}
 						});
 					} else {
 						// Browser cannot handle a canvas tag, so just put up
 						// the image.
-						outputPanel.setWidget(1, 0, image);
-						image.addLoadHandler(new LoadHandler() {
+						outputPanel.setWidget(1, 0, plotImage);
+						plotImage.addLoadHandler(new LoadHandler() {
 
 							@Override
 							public void onLoad(LoadEvent event) {
 								resize(Window.getClientWidth(),
 										Window.getClientHeight());
-								String w = image.getWidth() - 18 + "px";
+								String w = plotImage.getWidth() - 18 + "px";
 								lasAnnotationsPanel.setPopupLeft(outputPanel
 										.getAbsoluteLeft());
 								lasAnnotationsPanel.setPopupTop(outputPanel
@@ -1167,14 +1186,18 @@ public class Correlation implements EntryPoint {
 
 					}
 				}
-				logger.info("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
-				logger.info("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
+				logger.info("(world_startx, world_starty):(" + world_startx
+						+ ", " + world_starty + ")");
+				logger.info("(world_endx, world_endy):(" + world_endx + ", "
+						+ world_endy + ")");
 				world_startx = x_axis_lower_left;
 				world_endx = x_axis_upper_right;
 				world_starty = y_axis_lower_left;
 				world_endy = y_axis_upper_right;
-				logger.warning("(world_startx, world_starty):("+world_startx+", "+world_starty+")");
-				logger.warning("(world_endx, world_endy):("+world_endx+", "+world_endy+")");
+				logger.warning("(world_startx, world_starty):(" + world_startx
+						+ ", " + world_starty + ")");
+				logger.warning("(world_endx, world_endy):(" + world_endx + ", "
+						+ world_endy + ")");
 				setTextValues();
 				printURL = Util.getAnnotationsFrag(annourl, imageurl);
 			}
@@ -1861,10 +1884,11 @@ public class Correlation implements EntryPoint {
 	}
 
 	/**
-	 * @param plotImage
+	 * uses {@link plotImage}
+	 * 
 	 * @param newPlotImageWidth
 	 */
-	void setPlotWidth(IESafeImage plotImage, int newPlotImageWidth) {
+	void setPlotWidth(int newPlotImageWidth) {
 		autoZoom = true;
 		int pwidth = Math.max(newPlotImageWidth, image_w_min);
 		if (autoZoom) {
@@ -1880,7 +1904,7 @@ public class Correlation implements EntryPoint {
 				// imageElement will be valid
 				outputPanel.setWidget(2, 0, plotImage);
 				plotImage.setVisible(false);
-				scale(plotImage, imageScaleRatio);
+				drawToScreenScaled(imageScaleRatio);
 			}
 		} else {
 			setImageSize(fixedZoom);
@@ -1888,9 +1912,9 @@ public class Correlation implements EntryPoint {
 		if (spin.isVisible()) {
 			spinSetPopupPositionCenter(plotImage);
 		}
-		outputPanel.setWidth(getPlotWidth(plotImage));
+		outputPanel.setWidth(getPlotWidth());
 		// Piggy back setting the annotations width onto this method.
-		lasAnnotationsPanel.setPopupWidth(getPlotWidth(plotImage));
+		lasAnnotationsPanel.setPopupWidth(getPlotWidth());
 	}
 
 	/**
@@ -1908,22 +1932,22 @@ public class Correlation implements EntryPoint {
 		spin.setPopupPosition(left, top);
 	}
 
-	private void scale(Image img, double scaleRatio) {
-		ImageData scaledImage = scaleImage(img, scaleRatio);
+	private void drawToScreenScaled(double scaleRatio) {
+		ImageData scaledImage = scaleImage(scaleRatio);
 		drawToScreen(scaledImage);
 	}
 
-	private ImageData scaleImage(Image image, double scaleToRatio) {
+	private ImageData scaleImage(double scaleToRatio) {
 		logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
 		Canvas canvasTmp = Canvas.createIfSupported();
 		Context2d context = canvasTmp.getContext2d();
 
-		int imageHeight = image.getHeight();
+		int imageHeight = plotImage.getHeight();
 		if (imageHeight <= 0) {
 			logger.warning("imageHeight:" + imageHeight);
 		}
 		double ch = (imageHeight * scaleToRatio);
-		int imageWidth = image.getWidth();
+		int imageWidth = plotImage.getWidth();
 		if (imageWidth <= 0) {
 			logger.warning("imageWidth:" + imageWidth);
 		}
@@ -1933,7 +1957,7 @@ public class Correlation implements EntryPoint {
 		canvasTmp.setCoordinateSpaceWidth((int) cw);
 
 		// TODO: make a temp imageElement?
-		ImageElement imageElement = ImageElement.as(image.getElement());
+		ImageElement imageElement = ImageElement.as(plotImage.getElement());
 
 		// s = source
 		// d = destination
@@ -1973,10 +1997,10 @@ public class Correlation implements EntryPoint {
 			imageData = context.getImageData(0, 0, w, h);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			if (image == null) {
+			if (plotImage == null) {
 				logger.warning("image:null");
 			} else {
-				logger.warning("image:" + image.toString());
+				logger.warning("image:" + plotImage.toString());
 			}
 			logger.warning("scaleToRatio:" + scaleToRatio);
 			logger.warning("ch:" + ch);
@@ -2017,7 +2041,7 @@ public class Correlation implements EntryPoint {
 		autoZoom = false;
 	}
 
-	String getPlotWidth(IESafeImage plotImage) {
+	String getPlotWidth() {
 		logger.fine("entering getPlotWidth()");
 		int antipadding = 0;// 100;
 		String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
@@ -2039,7 +2063,7 @@ public class Correlation implements EntryPoint {
 		autoZoom = true;
 		pwidth = (int) ((image_w / image_h) * Double
 				.valueOf(newPlotImageHeight));
-		setPlotWidth(plotImage, pwidth);
+		setPlotWidth(pwidth);
 	}
 
 	/**
@@ -2063,7 +2087,7 @@ public class Correlation implements EntryPoint {
 				int plotImageWidth = plotImage.getWidth();
 				logger.info("plotImageWidth=" + plotImageWidth);
 				if (newPlotImageWidth != plotImageWidth) {
-					setPlotWidth(plotImage, newPlotImageWidth);
+					setPlotWidth(newPlotImageWidth);
 					// Check that height is still small enough
 					int newPlotImageHeight = windowHeight - topAndBottomPadding
 							- lasAnnotationsPanel.getOffsetHeight();
@@ -2093,7 +2117,7 @@ public class Correlation implements EntryPoint {
 						plotImageWidth = plotImage.getWidth();
 						logger.info("plotImageWidth=" + plotImageWidth);
 						if (newPlotImageWidth < plotImageWidth) {
-							setPlotWidth(plotImage, newPlotImageWidth);
+							setPlotWidth(newPlotImageWidth);
 						}
 					}
 				}
