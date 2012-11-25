@@ -26,6 +26,7 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASJDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
+import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
@@ -77,6 +78,13 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			throw new RPCException(LASConfigPlugIn.LAS_CONFIG_NOTFOUND_MESSAGE);
 		}
 		return lasConfig;
+	}
+	ServerConfig getServerConfig() throws RPCException {
+	    ServerConfig serverConfig = (ServerConfig) getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
+	    if ( serverConfig == null ) {
+	        throw new RPCException(LASConfigPlugIn.LAS_CONFIG_NOTFOUND_MESSAGE);
+	    }
+	    return serverConfig;
 	}
 
 	public HashMap<String, String> getPropertyGroup(String name) throws RPCException {
@@ -685,6 +693,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     }
     public String addESGFDataset(String id) throws RPCException {
         LASConfig lasConfig = getLASConfig();
+        ServerConfig serverConfig = getServerConfig();
         String keyid = null;
         try {
             keyid = lasConfig.addDataset(id);
@@ -692,6 +701,10 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             lasConfig.mergeProperites();
             lasConfig.addIntervalsAndPoints();    
             lasConfig.addGridType();
+            String fds_base = serverConfig.getFTDSBase();
+            String fds_dir = serverConfig.getFTDSDir();
+            lasConfig.addFDS(fds_base, fds_dir);
+            
             HttpServletRequest request = this.getThreadLocalRequest();
             String [] catids = (String[]) request.getSession().getAttribute("catid");
             boolean add = true;          
