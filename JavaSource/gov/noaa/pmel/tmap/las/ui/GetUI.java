@@ -9,10 +9,12 @@ import gov.noaa.pmel.tmap.addxml.AxisBean;
 import gov.noaa.pmel.tmap.addxml.DatasetBean;
 import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
+import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Constants;
@@ -73,6 +75,7 @@ public class GetUI extends ConfigService {
         ServletContext context = (ServletContext) servlet.getServletContext();
         String query = request.getQueryString();
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        ServerConfig serverConfig = (ServerConfig) servlet.getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");
         if ( cat_ids != null ) {
             
@@ -88,6 +91,9 @@ public class GetUI extends ConfigService {
                 lasConfig.mergeProperites();
                 lasConfig.addIntervalsAndPoints();    
                 lasConfig.addGridType();
+                String fds_base = serverConfig.getFTDSBase();
+                String fds_dir = serverConfig.getFTDSDir();
+                lasConfig.addFDS(fds_base, fds_dir);
             } catch (Exception e) {
                 String las_message = "Unable to initialize UI from the catid values provided.";
                 LASBackendResponse lasBackendResponse = new LASBackendResponse();
