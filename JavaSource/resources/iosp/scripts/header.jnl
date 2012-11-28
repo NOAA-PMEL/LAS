@@ -19,11 +19,13 @@ DEFINE SYMBOL output_xml_file = $2
 LET nvars = ..nvars
 let varnames = ..varnames
 REPEAT/I=1:`nvars` ( \
- DEFINE SYMBOl varn = `varnames`; \
- let attnames = ($varn).attnames; \
- IF `is_element_of_str(attnames, "add_offset")   GT 0` THEN cancel attribute ($varn).add_offset;\
- IF `is_element_of_str(attnames, "scale_factor") GT 0` THEN cancel attribute ($varn).scale_factor;\
- )
+ DEFINE SYMBOl ii = `i`; \
+ DEFINE SYMBOl varn = `varnames[i=($ii)]`; \
+ IF `STRINDEX("($varn)", "_bnds") EQ 0` THEN; \
+ LET attnames = ($varn).attnames; \
+ IF `is_element_of_str(attnames, "add_offset")   GT 0` THEN cancel attribute ($varn).add_offset; \
+ IF `is_element_of_str(attnames, "scale_factor") GT 0` THEN cancel attribute ($varn).scale_factor; \
+ ENDIF )
 
 say/quiet/outfile="($output_xml_file)"/clobber <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 say/quiet/outfile="($output_xml_file)"/append <data>
