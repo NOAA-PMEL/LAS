@@ -55,10 +55,11 @@ IF `STRCMP("($axname)", "L") EQ 0` THEN LET its_pseudoname = 1
 
 IF `its_pseudoname` then
    LET nvars = `..nvars`
-   REPEAT/RANGE=1:`nvars`/name=m (LET vname = ..varnames[i=`m`];  \
+   REPEAT/RANGE=1:`nvars`/name=q (\
+      DEFINE SYMBOL qq = `q`; LET vname = ..varnames[i=($qq)];  \
       DEFINE SYMBOL myvar = `vname`;  \
       DEFINE SYMBOL itsax = `($myvar), RETURN=($3)axis` ; \
-      IF `STRCMP("($itsax)", "NORMAL" ) NE 0` THEN EXIT/LOOP)
+      IF `STRINDEX("($itsax)", "NORMAL" ) NE 0` THEN EXIT/LOOP)
 ELSE
    DEFINE SYMBOL myvar = $3
 ENDIF
