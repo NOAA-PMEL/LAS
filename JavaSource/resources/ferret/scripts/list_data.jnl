@@ -26,8 +26,10 @@ DEFINE SYMBOL frmt ($frmt)/($ferret_format%format=cdf|txt>heading|cdf>format=cdf
 IF ($ferret_format%0|asc>1|*>0) THEN
   DEFINE SYMBOL frmt ($frmt)/format=(5G12.5)
   
-  IF ($ferret_data_format"0|tsv>1|csv>1|asc>1|*>0") THEN DEFINE SYMBOL frmt ($frmt) = ($frmt)/($ferret_data_format"|tsv>format=tab|csv>format=comma|asc>heading=enhanced")
-
+  IF ($ferret_data_format"0|tsv>1|csv>1|asc>1|*>0") THEN 
+     DEFINE SYMBOL frmt ($frmt) = ($frmt)/($ferret_data_format"|tsv>format=tab|csv>format=comma|asc>heading=enhanced")
+     SET LIST/PREC=6
+   ENDIF
 ENDIF
 
 CANCEL MODE INTERPOLATE  ! important when evaluating the size limits

@@ -17,6 +17,8 @@
 
 DEFINE SYMBOL var_num = $1
 
+SET LIST/PREC=6
+
 ! Cannot list out a pseudo-variable, e.g. Z. In the initialization,
 ! check for pseutonames. If the variable name is a pseudo-var name, 
 ! write out name_1 e.g. Z_1 with all the same attributes.
@@ -115,7 +117,6 @@ SET data ($data_num)
 ! to index space.
 
 IF ($region_x"0|*>1") THEN
-   IF `($region_y_range"0|0|*>1") GT 0` THEN
       LET the_coords = x[gx=($data_var),($region_x)]
       DEFINE SYMBOL user_istart `the_coords,RETURN=istart`
       DEFINE SYMBOL user_iend `the_coords,RETURN=iend`
@@ -134,40 +135,22 @@ IF ($region_x"0|*>1") THEN
      DEFINE SYMBOL iend `the_coords,RETURN=iend`
      DEFINE SYMBOL isize `the_coords,RETURN=isize`
 
-   ELSE  ! range is 0
-      DEFINE SYMBOL imin 1
-      DEFINE SYMBOL imax 1
-      DEFINE SYMBOL isize 1
-   ENDIF 
-
 ENDIF  ! region_x
 
 ! Now get the start, stop and size information for other dimensions.
 
 IF ($region_y"0|*>1") THEN
-   IF `($region_y_range"0|0|*>1") GT 0` THEN
       LET the_coords = y[gy=($data_var),($region_y)]
       DEFINE SYMBOL jmin `the_coords,RETURN=jstart`
       DEFINE SYMBOL jmax `the_coords,RETURN=jend`
       DEFINE SYMBOL jsize `the_coords,RETURN=jsize`
-   ELSE  ! range is 0
-      DEFINE SYMBOL jmin 1
-      DEFINE SYMBOL jmax 1
-      DEFINE SYMBOL jsize 1
-   ENDIF 
 ENDIF  ! region_y
 
 IF ($region_z"0|*>1") THEN
-   IF `($region_z_range"0|0|*>1") GT 0` THEN
       LET the_coords = z[gz=($data_var),($region_z)]
       DEFINE SYMBOL kmin `the_coords,RETURN=kstart`
       DEFINE SYMBOL kmax `the_coords,RETURN=kend`
       DEFINE SYMBOL ksize `the_coords,RETURN=ksize`
-   ELSE  ! range is 0
-      DEFINE SYMBOL kmin 1
-      DEFINE SYMBOL kmax 1 
-      DEFINE SYMBOL ksize 1
-   ENDIF
 ENDIF  ! region_z
 
 IF ($region_t"0|*>1") THEN
