@@ -35,7 +35,6 @@
 !      DEFINE SYMBOL reset_gifname = 1
 !   ENDIF
 !ENDIF
-!pause
 
 IF ($native_curvilinear_xy"0|*>1") THEN  ! see LAS_transforms.jnl   
    GO get_curv_coord_bbox
