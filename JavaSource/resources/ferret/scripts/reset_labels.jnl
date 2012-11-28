@@ -20,7 +20,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
       IF `($ferret_key_annotate"1") EQ 0` THEN keymark 0
    ENDIF
 ENDIF
-pause
+
 IF `($data_count"1") EQ 1` THEN
    IF ($labnum_x"0|*>1") THEN 
       DEFINE SYMBOL longitude_lab ($lab($labnum_x))
