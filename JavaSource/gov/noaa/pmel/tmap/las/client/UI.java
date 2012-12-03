@@ -1422,9 +1422,12 @@ public class UI extends BaseUI {
 					}
 				});
 
-		xDisplayControls.setWidget(1, 1, annotationsControl);
+		xDisplayControls.setWidget(1, 1, annotationsControl);		
 		
-		xDisplayControls.setWidget(2, 0, xESGFSearchButton);
+		xDisplayControls.setWidget(2, 0, xOptionsButton);
+		
+	    xDisplayControls.setWidget(2, 1, xESGFSearchButton);
+
 
 		compareMenu.addStyleDependentName("SMALLER");
 		compareMenu.addItem("One Plot", "1");
