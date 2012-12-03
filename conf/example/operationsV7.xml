@@ -1788,7 +1788,7 @@ streamable="true" mime_type="application/postscript"/> -->
     		<grid_type name="regular" />
     	</grid_types>
     </operation>
-    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="3">
+    <operation default="false" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="3">
                <response ID="PlotResp" type="HTML" index="1">
                     <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
                     <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
