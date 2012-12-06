@@ -4718,7 +4718,7 @@ public class LASConfig extends LASDocument {
 					String url = catalogs.get(name);
 					InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
 					System.out.println("Processing datasets for "+name);
-					beans.addAll(myAddXML.processESGDatasets(catalog));
+					beans.addAll(myAddXML.processESGDatasets(new HashSet<String>(), catalog));
 				}
 			} else {
 				
@@ -5225,6 +5225,7 @@ public class LASConfig extends LASDocument {
         Element result = root.getChild("result");
         String catalog = null;
         String LAS = null;
+        Set<String> time_freqs = new HashSet<String>();
         if ( result != null ) {
             String number = result.getAttributeValue("numFound");
             if ( !number.equals("0") ) {
@@ -5248,6 +5249,13 @@ public class LASConfig extends LASDocument {
                                     LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
                                 }
                             }
+                        } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
+                            List<Element> strs = arr.getChildren("str");
+                            for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                Element str = (Element) strIt.next();
+                                String txt = str.getTextTrim();
+                                time_freqs.add(txt);
+                            }
                         }
                     }
                 }
@@ -5262,7 +5270,7 @@ public class LASConfig extends LASDocument {
         }
         InvCatalogFactory factory = new InvCatalogFactory("default", false);
         InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-        Vector dagbs = ADDXMLProcessor.processESGDatasets(invCatalog);
+        Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
         // There's only going to be one...
         String key_id = null;
         Dataset ds = null;
