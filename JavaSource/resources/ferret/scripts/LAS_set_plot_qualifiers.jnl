@@ -150,9 +150,10 @@ IF ($line_drawn) THEN
       ENDIF
    ENDIF
 
-   IF `($ferret_annotations"0|*>1") AND ($data_count) EQ 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOYADJUST
+   IF `($ferret_annotations"0|*>1") AND ($data_count) EQ 1 AND ($twoDplot"0|*>1") EQ 0` \
+   THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOYADJUST
 
-ENDIF  ! end of options for oneDplot, vector plots
+ENDIF  ! end of options for plots drawn with lines
 
 
 ! ---------------- All oneD plots, settings for option to 
