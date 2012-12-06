@@ -945,7 +945,7 @@ public class ADDXMLProcessor {
         }
         return hasData;
     }
-    public static Vector processESGDatasets(InvCatalog subCatalog) {
+    public static Vector processESGDatasets(Set<String> time_freqs, InvCatalog subCatalog) {
 
         Vector beans = new Vector();
         DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
@@ -972,7 +972,7 @@ public class ADDXMLProcessor {
                             url = access.getStandardUrlName();
                         }
                     }
-                    DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(subDataset, url, allGrids, allAxes);
+                    DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(time_freqs, subDataset, url, allGrids, allAxes);
                     if ( dgab != null ) {
                         for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
                             DatasetBean dsb = (DatasetBean) dsit.next();
@@ -995,7 +995,7 @@ public class ADDXMLProcessor {
                                     url = access.getStandardUrlName();
                                 }
                             }
-                            DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url, allGrids, allAxes);
+                            DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(time_freqs, grandChild, url, allGrids, allAxes);
                             if ( dgab != null ) {
                                 for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
                                     DatasetBean dsb = (DatasetBean) dsit.next();
@@ -1060,6 +1060,8 @@ public class ADDXMLProcessor {
         UniqueVector GridBeans = new UniqueVector();
         Set AllAxesBeans = new HashSet();
 
+        if ( threddsDataset.getName().toLowerCase().contains("fmrc") || threddsDataset.getName().toLowerCase().contains("forecast model run collection") ) return dgab;
+        
         if (verbose) {
             System.out.println("Processing UAF THREDDS dataset: " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" from "+threddsDataset.getParentCatalog().getUriString());
         }
@@ -1622,7 +1624,7 @@ public class ADDXMLProcessor {
         return id;
     }
 
-    private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(InvDataset threddsDataset, String url, Vector allGrids, Vector allAxes) {
+    private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(Set<String> time_freqs, InvDataset threddsDataset, String url, Vector allGrids, Vector allAxes) {
         DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
         Vector DatasetBeans = new Vector();
         DatasetBean dataset = new DatasetBean();
@@ -1817,13 +1819,44 @@ public class ADDXMLProcessor {
                             String calendar = threddsDataset.findProperty("calendar");
                             String tdelta = "1";
                             String tunits = "month";
-                            if ( time_delta != null && time_delta.contains(" ") ) {
-                                String[] time_parts = time_delta.split("\\s+");
-                                tdelta = time_parts[0];
-                                tunits = time_parts[1];
+                            String tclimo = "false";
+                            if ( time_freqs.size() == 1 ) {
+                                String units = time_freqs.iterator().next();
+                                if ( units.equalsIgnoreCase("3hr") ) {
+                                    tdelta = "3";
+                                    tunits = "hour";
+                                } else if ( units.equalsIgnoreCase("6hr") ) {
+                                    tdelta = "6";
+                                    tunits = "hour";
+                                } else if ( units.equalsIgnoreCase("day") ) {
+                                    tdelta = "1";
+                                    tunits = "day";
+                                } else if ( units.equalsIgnoreCase("mon") ) {
+                                    tdelta = "1";
+                                    tunits = "month";
+                                } else if ( units.equalsIgnoreCase("monclim") ) {
+                                    tdelta = "1";
+                                    tunits = "month";
+                                    tclimo = "true";
+                                } else if ( units.equalsIgnoreCase("monthly") ) {
+                                    tdelta = "1";
+                                    tunits = "month";
+                                } else if ( units.equalsIgnoreCase("monthly_mean") ) {
+                                    tdelta = "1";
+                                    tunits = "month";
+                                } else if ( units.equalsIgnoreCase("yr") ) {
+                                    tdelta = "1";
+                                    tunits = "year";
+                                }
+                            } else {
+
+                                if ( time_delta != null && time_delta.contains(" ") ) {
+                                    String[] time_parts = time_delta.split("\\s+");
+                                    tdelta = time_parts[0];
+                                    tunits = time_parts[1];
+                                }
+
                             }
-
-
                             String calendar_name = null;
                             // Use this chronology and the UTC Time Zone
                             Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
@@ -1966,6 +1999,9 @@ public class ADDXMLProcessor {
                             tr.setStart(fmt.print(s));
                             tr.setStep(tdelta);
                             tr.setSize(time_length);
+                            if ( tclimo.equals("true") ) {
+                                tAxis.setModulo(true);
+                            }
                             tAxis.setArange(tr);
                             axisBeans.add(tAxis);
 

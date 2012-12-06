@@ -2,8 +2,10 @@ package gov.noaa.pmel.tmap.las.esgf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.httpclient.HttpException;
@@ -15,6 +17,7 @@ import org.jdom.output.XMLOutputter;
 
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
+import visad.data.in.TimeFactorer;
 
 
 import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
@@ -70,6 +73,7 @@ public class GetCategory {
             Element result = root.getChild("result");
             String catalog = null;
             String LAS = null;
+            Set<String> time_freqs = new HashSet<String>();
             if ( result != null ) {
                 String number = result.getAttributeValue("numFound");
                 if ( !number.equals("0") ) {
@@ -92,6 +96,13 @@ public class GetCategory {
                                         LAS = txt.substring(0, txt.indexOf("|"));
                                     }
                                 }
+                            } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
+                                List<Element> strs = arr.getChildren("str");
+                                for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                    Element str = (Element) strIt.next();
+                                    String txt = str.getTextTrim();
+                                    time_freqs.add(txt);
+                                }
                             }
                         }
                     }
@@ -99,7 +110,7 @@ public class GetCategory {
             }
             InvCatalogFactory factory = new InvCatalogFactory("default", false);
             InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-            Vector dagbs = ADDXMLProcessor.processESGDatasets(invCatalog);
+            Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
             for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
                 DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
                 //TODO we need to convert7
