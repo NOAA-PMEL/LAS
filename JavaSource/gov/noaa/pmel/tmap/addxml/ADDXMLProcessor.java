@@ -1307,11 +1307,7 @@ public class ADDXMLProcessor {
                                     if ( hasZ ) {
                                         grid_name.append("-z-axis");
                                         if ( zvalues != null ) {
-                                            if ( zvalues.equals("") || zvalues.toUpperCase().contains("NULL") ) {
-                                                System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
-                                                System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No z-axis values.");
-                                                return null;
-                                            }
+                                            
                                             System.out.println("Loading Z from property metadata: "+elementName);
                                             zAxis.setElement(elementName);
                                             String zunits = z.getUnits();
