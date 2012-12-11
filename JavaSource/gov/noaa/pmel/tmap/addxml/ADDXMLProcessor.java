@@ -2240,7 +2240,7 @@ public class ADDXMLProcessor {
             for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
                 InvDataset subDataset = (InvDataset) subDatasetsIt.next();
                 // Process the sub-categories
-                if (!subDataset.getName().contains("automated cleaning process") && !subDataset.getName().toLowerCase().contains("forecast model run collection")) {
+                if (!subDataset.getName().contains("automated cleaning process") ) {
                     CategoryBean subCat = processUAFCategories(subDataset);
                     if ( !subCat.equals(category) && (subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) ) {
                         subCats.add(subCat);
