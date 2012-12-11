@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -169,7 +170,8 @@ public class ADDXMLProcessor {
     private static boolean esg = false;
     private static boolean uaf = false;
     private static int limit = 0;
-    private static String[] regex;
+    private static String[] clregex;
+    private static List<String> regex = new ArrayList<String>();
 
     public ADDXMLProcessor() {
         
@@ -195,7 +197,31 @@ public class ADDXMLProcessor {
             limit = Integer.valueOf(l);
         }
 
-        regex = command_parameters.getStringArray("in_regex");
+        clregex = command_parameters.getStringArray("in_regex");
+        for ( int i = 0; i < clregex.length; i++ ) {
+            regex.add(clregex[i]);
+        }
+        URL skipFile = ClassLoader.getSystemResource("skip.xml");
+        if ( skipFile != null ) {
+            Document skipdoc = new Document();
+            try {
+                JDOMUtils.XML2JDOM(new File(skipFile.getFile()), skipdoc);
+            } catch ( IOException e ) {
+                System.err.println("Failed reading skip file. "+e);
+            } catch ( JDOMException e ) {
+                System.err.println("Failed reading skip file. "+e);
+            }
+
+            Element skip = skipdoc.getRootElement();
+            List<Element> regexEls = skip.getChildren("regex");
+            for ( Iterator rIt = regexEls.iterator(); rIt.hasNext(); ) {
+                Element rx = (Element) rIt.next();
+                String value = rx.getAttributeValue("value");
+                if ( value != null ) {
+                    regex.add(value);
+                }
+            }
+        }
         String[] data = command_parameters.getStringArray("in_netcdf");
         String[] thredds = command_parameters.getStringArray("in_thredds");
         String in_xml = command_parameters.getString("in_xml");
@@ -2368,13 +2394,13 @@ public class ADDXMLProcessor {
         
         // Check if the URL matches the regexs on input if supplied.
         boolean match = true;
-        if ( regex != null && regex.length > 0 ) {
+        if ( regex != null && regex.size() > 0 ) {
             match = false;
             
-            for (int i = 0; i < regex.length; i++) {
-                String rx = regex[i];
-                if ( regex[i].startsWith( "\"" ) && regex[i].endsWith( "\"" ) )
-                      rx = regex[i].substring( 1, regex[i].length( ) - 1 ); 
+            for (int i = 0; i < regex.size(); i++) {
+                String rx = regex.get(i);
+                if ( rx.startsWith( "\"" ) && rx.endsWith( "\"" ) )
+                      rx = regex.get(i).substring( 1, regex.get(i).length( ) - 1 ); 
                 match = match || Pattern.matches(rx, curl);
             }
 
@@ -2826,12 +2852,22 @@ public class ADDXMLProcessor {
         }
 
         if (axis.getSize() >= 2.) {
+            arange.setSize(String.valueOf(axis.getSize()));
             // Only do this if the user specified the axis was irregular, meaning the axis span high frequency
             // and irregular like a time series from a sensor that reports often but at irregular intervals.
             double t0 = axis.getCoordValue(0);
             double t1 = axis.getCoordValue(1);
             DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
             DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+            if ( t0 < -1000 && t1 >= 0 ) {
+                // This start time looks suspicious, let's leave it out...
+                t0 = axis.getCoordValue(1);
+                t1 = axis.getCoordValue(2);
+                jodaDate1 = makeDate(t0, dateUnit, chrono);
+                jodaDate2 = makeDate(t1, dateUnit, chrono);
+                arange.setSize(String.valueOf(axis.getSize() - 1));
+            }
+            
             if ( Math.abs(jodaDate2.getMillis() - jodaDate1.getMillis()) < 3600*1000 ) {
                 irregular = true;
             }
@@ -2971,6 +3007,9 @@ public class ADDXMLProcessor {
                     }
                 }
                 Boolean forceAxis = (Boolean) forceAxes.get("t");
+                if ( forceAxis == null ) {
+                    forceAxis = true;
+                }
                 String units = axisbean.getUnits();
                 if ( (axis.isRegular() || axisbean.getUnits().equals("month")) ||
                         forceAxis.booleanValue()) {
@@ -2984,7 +3023,7 @@ public class ADDXMLProcessor {
                     if (fmt == null ) {
                         fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
                     }
-                    arange.setSize(String.valueOf(axis.getSize()));
+                    
                     String str = fmt.print(jodaDate1.withZone(DateTimeZone.UTC));
 
                     if ( str.startsWith("-") ) {
@@ -3356,7 +3395,7 @@ public class ADDXMLProcessor {
 
         String regexOption = options.get("regex");
         if ( regexOption != null && !regexOption.equals("") ) {
-            regex = new String[]{"regexOption"};
+            clregex = new String[]{"regexOption"};
         }
         
         String units_formatOption = options.get("units_format");
@@ -3442,7 +3481,7 @@ public class ADDXMLProcessor {
         return forceAxes;
     }
     public void setRegex(String[] regex) {
-        this.regex = regex;
+        this.clregex = regex;
     }
     public void setForceAxes(HashMap<String, Boolean> forceAxes) {
         forceAxes = forceAxes;
