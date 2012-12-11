@@ -1087,6 +1087,10 @@ public class ADDXMLProcessor {
         Set AllAxesBeans = new HashSet();
 
         if ( threddsDataset.getName().toLowerCase().contains("fmrc") || threddsDataset.getName().toLowerCase().contains("forecast model run collection") ) return dgab;
+        if ( skip(threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName() ) ) {
+            System.out.println("Skipping "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" because it matches a regular expression in the skip.xml file.");
+            return dgab;
+        }
         
         if (verbose) {
             System.out.println("Processing UAF THREDDS dataset: " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" from "+threddsDataset.getParentCatalog().getUriString());
@@ -2392,22 +2396,11 @@ public class ADDXMLProcessor {
          
         GridDataset gridDs = null;
         
-        // Check if the URL matches the regexs on input if supplied.
-        boolean match = true;
-        if ( regex != null && regex.size() > 0 ) {
-            match = false;
-            
-            for (int i = 0; i < regex.size(); i++) {
-                String rx = regex.get(i);
-                if ( rx.startsWith( "\"" ) && rx.endsWith( "\"" ) )
-                      rx = regex.get(i).substring( 1, regex.get(i).length( ) - 1 ); 
-                match = match || Pattern.matches(rx, curl);
-            }
-
-        }
-        if (!match) {
+       
+        if (skip(curl)) {
+            System.out.println("Skipping "+curl);
             return dagb;
-        }
+        } 
          try {
              ClassLoader loader = ADDXMLProcessor.class.getClassLoader();
              System.out.println(loader.getResource("org/slf4j/spi/LocationAwareLogger.class"));
@@ -2648,6 +2641,23 @@ public class ADDXMLProcessor {
             System.err.println("Unable to close "+url);
         }
         return dagb;
+    }
+
+    private static boolean skip(String curl) {
+        // Check if the URL matches the regexs on input if supplied.
+        boolean match = true;
+        if ( regex != null && regex.size() > 0 ) {
+            match = false;
+            
+            for (int i = 0; i < regex.size(); i++) {
+                String rx = regex.get(i);
+                if ( rx.startsWith( "\"" ) && rx.endsWith( "\"" ) )
+                      rx = regex.get(i).substring( 1, regex.get(i).length( ) - 1 ); 
+                match = match || Pattern.matches(rx, curl);
+            }
+
+        }
+        return match;
     }
 
     public org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset
