@@ -75,6 +75,8 @@ ELSE
    DEFINE SYMBOL dataset_url_($num)_lab = DATA SET: ($data_$1_dataset_url)
 ENDIF
 
+IF `($num) EQ 0` THEN DEFINE SYMBOL dataset_url_lab = ($dataset_url_($num)_lab)
+
 IF `($num) GT 0` THEN
  ! For annotations, without the (1) and (2)
  
@@ -280,4 +282,3 @@ IF `got_dataset_label EQ 0` THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_url_label.jnl-------------------------- 
-
