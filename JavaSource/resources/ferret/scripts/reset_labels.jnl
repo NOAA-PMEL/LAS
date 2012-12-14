@@ -38,6 +38,9 @@ IF `($data_count"1") EQ 1` THEN
    IF ($labnum_calend"0|*>1") THEN
       DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
    ENDIF
+   IF ($labnum_year"0|*>1") THEN
+      DEFINE SYMBOL year_lab ($lab($labnum_year))
+   ENDIF
 ENDIF
 
 
