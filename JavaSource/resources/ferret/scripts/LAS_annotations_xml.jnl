@@ -8,9 +8,11 @@
 IF `STRCMP("($dataset_url_lab%0)", "($dataset_title_lab%99%)") EQ 0` THEN CAN SYM dataset_url_lab
 
 ! If the url-label doesnt really contain a url, get rid of it.
+
 IF ($dataset_title_lab%0|*>1%) THEN
   IF `STRINDEX("($dataset_url_lab%0%)", "http") EQ 0` THEN CANCEL SYMBOL dataset_url_lab
 ENDIF
+
 
 ! IF there is a dataset-difference title, use it.
 IF ($ferret_diff_list_title"0|*>1") THEN DEFINE SYMBOL dataset_title_lab = ($ferret_diff_list_title)
@@ -48,6 +50,7 @@ IF ($las_ferret_header_label"0|*>1") THEN
 ENDIF
 
 ! Other notes that may have been set up
+
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
    go write_to_xml

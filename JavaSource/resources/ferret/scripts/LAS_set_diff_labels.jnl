@@ -82,6 +82,7 @@ ENDIF
 	 LET llen = STRLEN("($lab($labnum_t))")
 	 DEFINE SYMBOL timelab1 = `SUBSTRING("($lab($labnum_t))", nc+1, llen-nc)`
    ENDIF
+   IF ($labnum_year"0|*>1") THEN DEFINE SYMBOL year_lab1 ($lab($labnum_year))
 
 ($plt_command)/SET ($test_plot_2)
    IF ($labnum_x"0|*>1") THEN
@@ -107,6 +108,7 @@ ENDIF
 	 LET llen = STRLEN("($lab($labnum_t))")
 	 DEFINE SYMBOL timelab2 = `SUBSTRING("($lab($labnum_t))", nc+1, llen-nc)`
    ENDIF
+   IF ($labnum_year"0|*>1") THEN DEFINE SYMBOL year_lab2 ($lab($labnum_year))
 
 LET add_urls = 1
 IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0
@@ -235,6 +237,14 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = TIME(2): ($timelab2)
       DEFINE SYMBOL time_lab = TIME: ($timelab2)
+   ENDIF
+ENDIF
+
+IF ($year_lab1"0|*>1") THEN
+   IF `STRCMP("($year_lab1)", "($year_lab1)") EQ 0` THEN
+      DEFINE SYMBOL year_lab = ($year_lab1)
+   ELSE
+      DEFINE SYMBOL year_lab = ($year_lab2) minus ($year_lab1)  ! shouldnt happen
    ENDIF
 ENDIF
 

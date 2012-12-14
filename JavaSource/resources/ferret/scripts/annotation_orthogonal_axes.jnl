@@ -40,5 +40,14 @@ IF ($time_lab%0|*>1%) THEN
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
 ENDIF
+
+IF ($year_lab"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="year_label">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($year_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml;
+ENDIF
+
 DEFINE SYMBOL out = </annotation_group>
 GO write_to_xml
