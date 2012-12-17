@@ -1599,7 +1599,14 @@ public class ADDXMLProcessor {
                                     }
 
                                     las_var.setGrid(grid);
-                                    dataset.addVariable(las_var);
+                                    boolean contains = false;
+                                    for (Iterator invarsIt = dataset.getVariables().iterator(); invarsIt.hasNext();) {
+										VariableBean vbean = (VariableBean) invarsIt.next();
+										if ( vbean.getName().equals(las_var.getName())) contains = true;
+									}
+                                    if ( !contains ) {
+                                    	dataset.addVariable(las_var);
+                                    }
 
 
                                 } // coverage != null
@@ -2645,7 +2652,7 @@ public class ADDXMLProcessor {
 
     private static boolean skip(String curl) {
         // Check if the URL matches the regexs on input if supplied.
-        boolean match = true;
+        boolean match = false;
         if ( regex != null && regex.size() > 0 ) {
             match = false;
             
