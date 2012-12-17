@@ -1602,7 +1602,7 @@ public class ADDXMLProcessor {
                                     boolean contains = false;
                                     for (Iterator invarsIt = dataset.getVariables().iterator(); invarsIt.hasNext();) {
 										VariableBean vbean = (VariableBean) invarsIt.next();
-										if ( vbean.getName().equals(las_var.getName())) contains = true;
+										if ( vbean.getElement().equals(las_var.getElement())) contains = true;
 									}
                                     if ( !contains ) {
                                     	dataset.addVariable(las_var);
@@ -2240,7 +2240,7 @@ public class ADDXMLProcessor {
             FilterBean filter = new FilterBean();
             filter.setAction("apply-dataset");
             String tag = fixid(ThreddsDataset);
-            filter.setContainstag(tag);
+            filter.setEqualstag(tag);
             category.addFilter(filter);
         } else {
             Vector subCats = new Vector();
