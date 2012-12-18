@@ -1111,7 +1111,7 @@ public class ADDXMLProcessor {
                     
                     Variables vars_container = (Variables) varlistIt.next();
                     List<Variable> vars = vars_container.getVariableList();
-                    if ( vars.size() > 0 ) {
+                    if ( vars.size() > 0 && vars_container.getVocabulary().equals("netCDF_contents")) {
                         for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
                             Variable variable = (Variable) varIt.next();
                             if ( !variable.getVocabularyName().equalsIgnoreCase("time") &&
