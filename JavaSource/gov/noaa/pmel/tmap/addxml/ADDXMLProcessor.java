@@ -1614,7 +1614,7 @@ public class ADDXMLProcessor {
                         } // for variables;
 
                         
-                    } else { // vars > 0
+                    } else if ( vars.size() == 0 && vars_container.getVocabulary().equals("netCDF_contents") ) {
                         System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
                         System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
                         return null;
