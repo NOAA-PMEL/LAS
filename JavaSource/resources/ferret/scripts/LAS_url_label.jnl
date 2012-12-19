@@ -14,12 +14,9 @@ IF `($n_right_labels"0") EQ 0` THEN DEFINE SYMBOL n_right_labels = 0
 ! dataset if that attrib exists)
 
 
-! Add the dataset ID to annotations
-IF ($data_0_dataset_ID"0|*>1") THEN DEFINE SYMBOL dataset_ID_lab ($data_0_dataset_ID)
+DEFINE SYMBOL num ($1"0")
 
 LET got_dataset_label = 0
-
-DEFINE SYMBOL num ($1"0")
 
 IF `got_dataset_label EQ 0` THEN
    IF `($data_$1_dataset_id"0|*>1")+($data_$1_dataset_name"0|*>1") GT 0` THEN \
