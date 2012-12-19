@@ -219,7 +219,7 @@ public class OperationsMenu extends Composite {
         } else {
             correlationButton.setEnabled(false);
         }
-        if ( climateAnalysis.getOperation().getViews().contains(view) ) {
+        if ( climateAnalysis != null && climateAnalysis.getOperation() != null && climateAnalysis.getOperation().getViews().contains(view) ) {
             climateAnalysis.setEnabled(true);
         } else {
             climateAnalysis.setEnabled(false);

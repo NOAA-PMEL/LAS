@@ -487,56 +487,62 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return getOperationsSerialziable(view, dsID, varID);
     }
     private OperationSerializable[] getOperationsSerialziable(String view, String dsID, String varID) throws RPCException {
-        LASConfig lasConfig = getLASConfig();
+    	LASConfig lasConfig = getLASConfig();
 
-        // Remove the climate analysis if it is not an ESGF session.
-        HttpServletRequest request = this.getThreadLocalRequest();
-        String [] catids = (String[]) request.getSession().getAttribute("catid");
-        boolean include_climate_analysis = false;
-        if ( catids != null && catids.length > 0 ) {
-            include_climate_analysis = true;
-        }
-        
-        ArrayList<Operation> operations = new ArrayList<Operation>();
-        OperationSerializable[] wireOps = null;
-            try {
+    	// Remove the climate analysis if it is not an ESGF session.
+    	HttpServletRequest request = this.getThreadLocalRequest();
+    	String [] catids = (String[]) request.getSession().getAttribute("catid");
+    	boolean include_climate_analysis = false;
+    	if ( catids != null && catids.length > 0 ) {
+    		include_climate_analysis = true;
+    	}
+
+    	ArrayList<Operation> operations = new ArrayList<Operation>();
+    	OperationSerializable[] wireOps = null;
+    	try {
 
 
-                if ( dsID != null ) {
-                    
-                    operations = lasConfig.getOperations(view, dsID, varID);
-                    
-                    if ( operations.size() <= 0 ) {
-                        throw new RPCException("No operations found.");
-                    } else {
-                        // Check to see if there's something in there.
-                        Operation op = operations.get(0);
-                        String id = op.getID();
-                        if ( id == null || id.equals("") ) {
-                            throw new RPCException("No operations found.");
-                        }
-                    }
+    		if ( dsID != null ) {
 
-                }
-            } catch (JDOMException e) {
-                throw new RPCException(e.getMessage());
-            } catch (RPCException e) {
-                throw new RPCException(e.getMessage());
-            }
-        if ( include_climate_analysis ) {
-            wireOps = new OperationSerializable[operations.size()];
-        } else {
-            wireOps = new OperationSerializable[operations.size()-1];
-        }
-        int k=0;
-        for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
-            Operation op = (Operation) opsIt.next();
-            if ( !op.getID().toLowerCase().contains("climate_analysis") || include_climate_analysis ) {
-                wireOps[k] = op.getOperationSerializable();
-                k++;
-            }
-        }
-        return wireOps;
+    			operations = lasConfig.getOperations(view, dsID, varID);
+
+    			if ( operations.size() <= 0 ) {
+    				throw new RPCException("No operations found.");
+    			} else {
+    				// Check to see if there's something in there.
+    				Operation op = operations.get(0);
+    				String id = op.getID();
+    				if ( id == null || id.equals("") ) {
+    					throw new RPCException("No operations found.");
+    				}
+    			}
+
+    		}
+    	} catch (JDOMException e) {
+    		throw new RPCException(e.getMessage());
+    	} catch (RPCException e) {
+    		throw new RPCException(e.getMessage());
+    	}
+    	if ( !include_climate_analysis ) {
+    		Operation remove = null;
+    		for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
+    			Operation op = (Operation) opsIt.next();
+    			if ( op.getID().toLowerCase().contains("climate_analysis") ) {
+    				remove = op;
+    			}
+    		}
+    		if ( remove != null ) {
+    			operations.remove(remove);
+    		}
+    	}
+    	int k=0;
+    	wireOps = new OperationSerializable[operations.size()];
+    	for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
+    		Operation op = (Operation) opsIt.next();
+    		wireOps[k] = op.getOperationSerializable();
+    		k++;
+    	}
+    	return wireOps;
     }
     public RegionSerializable[] getRegions(String dsID, String varID) throws RPCException {
         return getRegionsSerializable(dsID, varID);
