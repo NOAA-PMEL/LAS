@@ -57,7 +57,7 @@ public class OptionsWidget extends VerticalPanel {
 	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
 	private EventBus eventBus = clientFactory.getEventBus();
 	private boolean isEmptyOps = false;
-
+    private boolean fireEvent;
 	public OptionsWidget() {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
@@ -92,7 +92,8 @@ public class OptionsWidget extends VerticalPanel {
 		layout_grid.setWidget(0, 1, cancel);
 	}
 
-	public void setOptions(String id) {
+	public void setOptions(String id, boolean event) {
+		fireEvent = event;
 		callbackState = null;
 		if (id != null && !id.equals("")) {
 			rpc = true;
@@ -104,6 +105,8 @@ public class OptionsWidget extends VerticalPanel {
 	}
 
 	public void setOptions(String id, Map<String, String> options) {
+		// Only happens for internal operations.
+		fireEvent = true;
 		callbackState = options;
 		if (id != null && !id.equals("")) {
 			rpc = true;
@@ -123,8 +126,11 @@ public class OptionsWidget extends VerticalPanel {
 			// Don't request that the plot refresh happen automatically, don't
 			// force panels to update if they don't need to and don't add to the
 			// history stack.
-			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false,
-					false, false), OptionsWidget.this);
+			
+			// Do not fire this event for "external" operations buttons.
+			if ( fireEvent ) {
+				eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false, false, false), OptionsWidget.this);
+			}
 		}
 
 		public void onFailure(Throwable e) {

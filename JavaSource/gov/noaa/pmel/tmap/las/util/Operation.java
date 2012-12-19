@@ -125,4 +125,16 @@ public class Operation extends Container implements OperationInterface {
     	}
     	return views;
     }
+    @Override
+    public boolean equals(Object o) {
+    	if ( o instanceof Operation ) {
+    		Operation oo = (Operation) o;
+    		if ( oo.getID().equals(this.getID()) ) {
+    			return true;
+    		} else {
+    			return false;
+    		}
+    	}
+    	return false;
+    }
 }

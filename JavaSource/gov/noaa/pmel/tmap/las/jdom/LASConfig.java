@@ -2679,7 +2679,8 @@ public class LASConfig extends LASDocument {
 						} else {
 							match = ifmenu_view.equals(view);
 						}
-						if (match) {
+						// If the incoming view is null, we want them all.
+						if (match || view == null ) {
 							String ops_menu_ref = ifmenu
 							.getAttributeValue("href");
 
@@ -2700,7 +2701,10 @@ public class LASConfig extends LASDocument {
 										+ opID + "']");
 								if ( opE != null ) {
 									Operation op = new Operation(opE);
-									operations.add(op);
+									if ( !operations.contains(op) ) {
+										// Keep the collection unique
+										operations.add(op);
+									}
 								} else {
 									log.warn("Operation "+opID+" from default "+ui_default+" not found in configuration.");
 								}
