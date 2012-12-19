@@ -282,6 +282,8 @@ IF `STRINDEX("($shapevar)", "T") GT 0` THEN
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
 
+DEFINE SYMBOL vsizxyz = ($vsiz)
+
 LET isqr = INT(($vsiz)^0.5)
 
 DEFINE AXIS/y=1:`isqr`:1 yshortaxis
@@ -310,8 +312,8 @@ LET last = var1d
 IF `ipts GT 10` THEN LET last = var1d[i=`ipts-10`:`ipts`]
 IF  `last[i=@min] EQ 0 AND last[i=@max] EQ 0` THEN 
    LET fsiz = `ipts-($vsizxyz)`
+   IF `fsiz LT 1` THEN LET fsiz = ipts
    LET fix1d = var1d[i=1:`fsiz`]
-
 
    LET isqr = INT(fsiz^0.5)
 
