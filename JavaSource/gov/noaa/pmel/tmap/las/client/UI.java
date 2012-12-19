@@ -1230,7 +1230,6 @@ public class UI extends BaseUI {
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
         if (xOrtho.size() == 0) {
-            Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
             return false;
         } else {
 
@@ -2059,7 +2058,10 @@ public class UI extends BaseUI {
             }
         }
 
-        setupWidgets();
+        boolean hasOrtho = setupWidgets();
+        if ( xPanelCount > 1 && !hasOrtho ) {
+            Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
+        }
 
         if (xTlo != null && !xTlo.equals("")) {
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
