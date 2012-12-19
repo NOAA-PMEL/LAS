@@ -13,6 +13,10 @@ IF `($n_right_labels"0") EQ 0` THEN DEFINE SYMBOL n_right_labels = 0
 ! (addXML gets this from the title attribute from the original dataset
 ! dataset if that attrib exists)
 
+
+! Add the dataset ID to annotations
+IF ($data_0_dataset_ID"0|*>1") THEN DEFINE SYMBOL dataset_ID_lab ($data_0_dataset_ID)
+
 LET got_dataset_label = 0
 
 DEFINE SYMBOL num ($1"0")
@@ -75,7 +79,11 @@ ELSE
    DEFINE SYMBOL dataset_url_($num)_lab = DATA SET: ($data_$1_dataset_url)
 ENDIF
 
-IF `($num) EQ 0` THEN DEFINE SYMBOL dataset_url_lab = ($dataset_url_($num)_lab)
+IF `($num) EQ 0` THEN 
+   DEFINE SYMBOL dataset_url_lab = ($dataset_url_($num)_lab)
+   IF `STRINDEX("($dataset_url_lab)", "http") EQ 0` THEN \
+    DEFINE SYMBOL dataset_url_lab = ($data_0_ftds_url)
+ENDIF
 
 IF `($num) GT 0` THEN
  ! For annotations, without the (1) and (2)
@@ -118,6 +126,8 @@ ELSE
    IF `($dataset_url_0_lab"0|*>1")` THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab)
 ENDIF
 
+
+
 IF ($data_0_dataset_institution"0|*>1") THEN
 
    IF `($num) GT 1` THEN
@@ -131,6 +141,7 @@ IF ($data_0_dataset_institution"0|*>1") THEN
    ENDIF
 
 ENDIF
+
 
 ! If the dataset name or URL and is really long, split into multiple lines.
 ! Split if longer than 50, but if really long, use fewer 80-character lines.
