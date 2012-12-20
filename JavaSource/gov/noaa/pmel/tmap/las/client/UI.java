@@ -2058,10 +2058,7 @@ public class UI extends BaseUI {
             }
         }
 
-        boolean hasOrtho = setupWidgets();
-        if ( xPanelCount > 1 && !hasOrtho ) {
-            Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
-        }
+       setupWidgets();
 
         if (xTlo != null && !xTlo.equals("")) {
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
