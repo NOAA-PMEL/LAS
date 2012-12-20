@@ -1649,7 +1649,7 @@ public class ADDXMLProcessor {
             id = id.replaceAll(" ", "-"); 
         } else {
             try {
-                id = "data-"+JDOMUtils.MD5Encode(t.getFullName());
+                id = "data-"+JDOMUtils.MD5Encode(t.getFullName())+String.valueOf(Math.random());
             } catch (UnsupportedEncodingException e) {
                 id = "data-"+String.valueOf(Math.random());
             }
@@ -2297,11 +2297,9 @@ public class ADDXMLProcessor {
         else {
             cb.setName("THREDDS Dataset");
         }
-        String id = ThreddsDataset.getID();
-        if ( id != null && !id.equals("") ) {
-            id = id.replace("/", ".");
-            cb.setID(id);
-        }
+        String id = fixid(ThreddsDataset);
+        cb.setID(id);
+        
         if (ThreddsDataset.hasAccess()) {
             String url = "empty";
             InvAccess access = null;
