@@ -35,6 +35,7 @@ public class LASAnnotations extends LASDocument {
 	private static final String TYPE_DATASET_URL = "dataset_url";
 	private static final String TYPE_VARIABLE_TITLE = "variable_title";
 	private static final String TYPE_DATASET_TITLE = "dataset_title";
+	private static final String TYPE_DATASET_ID = "dataset_ID";
 	private static final String TYPE_HEADER = "header";
 	
 	private static final long serialVersionUID = 5934613476516539108L;
@@ -52,6 +53,9 @@ public class LASAnnotations extends LASDocument {
     }
     public List<String> getDatasetTitles() {
     	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_DATASET_TITLE);
+    }
+    public List<String> getDatasetIDs() {
+        return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_DATASET_ID);
     }
 //    public List<String> getVariableTitles() {
 //    	List<String> titles = new ArrayList<String>();
@@ -173,7 +177,7 @@ public class LASAnnotations extends LASDocument {
 			for (Iterator annIt = annotations.iterator(); annIt.hasNext();) {
 				Element annotation = (Element) annIt.next();
 				String value = getValue(annotation);
-				if ( value != null ) {
+				if ( value != null && !values.contains(value) ) {
 					values.add(value);
 				}
 			}
