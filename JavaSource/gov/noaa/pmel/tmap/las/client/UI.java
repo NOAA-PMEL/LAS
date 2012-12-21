@@ -68,6 +68,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -436,11 +437,7 @@ public class UI extends BaseUI {
     boolean changeDataset = false;
 
     FlexTable compareButtonsLayout = new FlexTable();
-    /*
-     * DEBUG TODO // decide
-     */
-    ListBox compareMenu = new ListBox();
-
+    
     /**
      * Set if the init will be the result of a comparison mode change.
      */
@@ -748,7 +745,7 @@ public class UI extends BaseUI {
      * The main panel for this UI, has custom vizGal Buttons and the BaseUI main
      * panel
      */
-    FlexTable vVizGalPanel = new FlexTable();
+    HorizontalPanel vVizGalPanel = new HorizontalPanel();
     SelectionHandler<TreeItem> xVisGalDatasetSelectionHandler = new SelectionHandler<TreeItem>() {
         @Override
         public void onSelection(SelectionEvent<TreeItem> event) {
@@ -890,7 +887,9 @@ public class UI extends BaseUI {
         xOtherControls.setWidget(0, myButtonIndex++, tOperationsMenu);
         xOtherControls.getCellFormatter().setWordWrap(0, myButtonIndex - 1, false);
         setTopLeftAlignment(xButtonLayout);
-        vVizGalPanel.setWidget(1, 0, xMainPanel);
+        vVizGalPanel.add(xLeftPanel);
+        vVizGalPanel.add(xRightPanel);
+        //vVizGalPanel.setWidget(1, 0, xMainPanel);
 
         addApplyHandler(settingsButtonApplyHandler);
 

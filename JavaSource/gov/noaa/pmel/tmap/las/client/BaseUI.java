@@ -54,6 +54,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -74,6 +75,10 @@ public class BaseUI {
     static final String XTOGGLE_CONTROL_DOWN_TOOLTIP = "Click to show the controls.";
 
     static final String XTOGGLE_CONTROL_UP_TOOLTIP = "Click to hide the controls.";
+    
+    VerticalPanel xLeftPanel = new VerticalPanel();
+    VerticalPanel xRightPanel = new VerticalPanel();
+    ListBox compareMenu = new ListBox();
     public ClickHandler annotationsClickHandler = new ClickHandler() {
 
         @Override
@@ -185,11 +190,6 @@ public class BaseUI {
 
     Label xImageSizeLabel = new Label("Image zoom: ");
 
-    // Main panel, contains the navigation controls, and the results panel
-    FlexTable xMainPanel = new FlexTable();
-
-    FlexCellFormatter xMainPanelCellFormatter;
-
     // Left-side navigation widgets
     FlexTable xNavigationControls = new FlexTable();
 
@@ -257,7 +257,7 @@ public class BaseUI {
     // The default handler when OK is clicked. Everybody has to implement their
     // own.
     HandlerRegistration xRegisterOptionsHandler;
-    int xRightPad = 45;
+    int xRightPad = 70;
     // Disclosure panel to open and close all the left-hand controls
     FlowPanel xSettingsHeader = new FlowPanel();// DisclosurePanel("General Controls");
     String xThi;
@@ -375,22 +375,29 @@ public class BaseUI {
 
     public void handlePanelShowHide() {
         if (xPanelHeaderHidden) {
-            // for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-            // OutputPanel panel = (OutputPanel) panelIt.next();
-            // panel.show();
-            // }
-            xMainPanelCellFormatter.setVisible(1, 0, true);
+            xNavigationControls.setVisible(true);
+            xDatasetButton.setVisible(true);
+            applyButton.setVisible(true);
+            annotationsControl.setVisible(true);
+            xOptionsButton.setVisible(true);
+            compareMenu.setVisible(true);
+            if (xCatIDs != null && xCatIDs.length > 0) {
+                xESGFSearchButton.setVisible(true);
+            }
             xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
             // Must flip this flag BEFORE firing events
             xPanelHeaderHidden = !xPanelHeaderHidden;
             // Show the controls and wait for event notification to resize
             eventBus.fireEventFromSource(new ControlVisibilityEvent(true), this);
         } else {
-            // for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-            // OutputPanel panel = (OutputPanel) panelIt.next();
-            // panel.hide();
-            // }
-            xMainPanelCellFormatter.setVisible(1, 0, false);
+           
+            xNavigationControls.setVisible(false);
+            xDatasetButton.setVisible(false);
+            applyButton.setVisible(false);
+            annotationsControl.setVisible(false);
+            xOptionsButton.setVisible(false);
+            xESGFSearchButton.setVisible(false);
+            compareMenu.setVisible(false);
             xToggleControls.setTitle(XTOGGLE_CONTROL_DOWN_TOOLTIP);
             // Must flip this flag BEFORE firing events
             xPanelHeaderHidden = !xPanelHeaderHidden;
@@ -451,40 +458,18 @@ public class BaseUI {
 
         xAxesWidget.getRefMap().setMapListener(mapListener);
 
-        // xComparisonAxesSelector = new
-        // ComparisonAxisSelector(xControlsWidthPx);
-
         xButtonLayoutIndex = 0;
-        xMainPanelCellFormatter = xMainPanel.getFlexCellFormatter();
-        xMainPanelCellFormatter.setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        xMainPanelCellFormatter.setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
-        xMainPanel.getFlexCellFormatter().setColSpan(0, 0, 3);
-
+ 
         int navControlIndex = 0;
         xNavigationControls.setWidget(navControlIndex++, 0, xSettingsHeader);
 
         // Make it visible only if it has a handler attached.
         applyButton.setVisible(false);
 
-        // This are bumped down one for the grow shrink experiment...
         xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
-        // xNavigationControls.setWidget(navControlIndex++, 0,
-        // xComparisonAxesSelector);
         xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
         xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
-        // Image hideControlsImage = new
-        // Image("JavaScript/frameworks/OpenLayers/img/.svn/text-base/west-mini.png.svn-base");
-        // hideControlsImage.setSize("18", "18");
-        // Image showControlsImage = new
-        // Image("JavaScript/frameworks/OpenLayers/img/.svn/text-base/east-mini.png.svn-base");
-        // showControlsImage.setSize("18", "18");
-        // xToggleControls.getUpFace().setImage(hideControlsImage);
-        // xToggleControls.getUpDisabledFace().setImage(hideControlsImage);
-        // xToggleControls.getUpHoveringFace().setImage(hideControlsImage);
-        // xToggleControls.getDownFace().setImage(showControlsImage);
-        // xToggleControls.getDownDisabledFace().setImage(showControlsImage);
-        // xToggleControls.getDownHoveringFace().setImage(showControlsImage);
-        // xToggleControls.addStyleDependentName("SMALLER");
+
         xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
 
         xDatasetButton.ensureDebugId("xDatasetButton");
@@ -528,7 +513,7 @@ public class BaseUI {
 
         });
 
-        xMainPanel.setWidget(0, 0, xButtonLayout);
+        xLeftPanel.add(xButtonLayout);
         xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDisplayControls);
         xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1, "268");
         xDisplayControls.setWidget(0, 0, xDatasetButton);
@@ -551,27 +536,20 @@ public class BaseUI {
         xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
         xPrinterFriendlyButton.addStyleDependentName("SMALLER");
         // Other buttons have their style handled in the widget itself.
-        xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOtherControls);
+        //xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOtherControls);
+        xRightPanel.add(xOtherControls);
         xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1, false);
 
         xOtherControls.setWidget(0, xOtherControlsIndex++, xPrinterFriendlyButton);
         xOtherControls.getCellFormatter().setWordWrap(0, xOtherControlsIndex - 1, false);
         // xButtonLayout.addStyleName("HEADER-WIDTH");
         setTopLeftAlignment(xButtonLayout);
-        // xMainPanel.setWidget(0, 1, xButtonLayout);
 
-        xMainPanel.getCellFormatter().setWordWrap(0, 0, false);
-        xMainPanel.setWidget(1, 0, xNavigationControls);
-        xMainPanel.getCellFormatter().setWidth(1, 0, "260px");
+        
+        xLeftPanel.add(xNavigationControls);
         xPanelTable.getFlexCellFormatter().setAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER, HasVerticalAlignment.ALIGN_TOP);
-        xMainPanel.setWidget(1, 1, xPanelTable);
-        xMainPanel.getCellFormatter().setHorizontalAlignment(1, 1, HasHorizontalAlignment.ALIGN_LEFT);
-        xMainPanel.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
-        xMainPanel.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-        xMainPanel.getCellFormatter().setHorizontalAlignment(1, 0, HasHorizontalAlignment.ALIGN_LEFT);
-        xMainPanel.getCellFormatter().setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_LEFT);
-        xMainPanel.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-
+        xRightPanel.add(xPanelTable);
+        
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
