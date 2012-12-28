@@ -173,7 +173,7 @@ public class OutputPanel extends Composite implements HasName {
                     Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
                     nvar = cats[0].getVariable(historyTokenMap.get("varid"));
                     getOutputControlPanel().getVariableControls().getMultiVariableSelector().setVariables(vars, vars.indexOf(nvar));
-                    if (nvar.getDSID().equals(panelVar.getDSID())) {
+                    if (panelVar != null && nvar != null && nvar.getDSID().equals(panelVar.getDSID())) {
                         setChangeDataset(false);
                     } else {
                         setChangeDataset(true);
@@ -2326,7 +2326,7 @@ public class OutputPanel extends Composite implements HasName {
         this.comparePanelState = comparePanelState;
         logger.info("comparePanelState:" + comparePanelState);
     }
-
+    
     public void setWidth(int width) {
         logger.info("setWidth(int width) called with width:" + width);
         this.setPanelWidth(width);
