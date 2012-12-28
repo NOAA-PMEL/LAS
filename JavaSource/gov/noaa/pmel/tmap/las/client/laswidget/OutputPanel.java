@@ -17,6 +17,7 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -2229,7 +2230,16 @@ public class OutputPanel extends Composite implements HasName {
         double grid_south = Double.valueOf(ds_grid.getYAxis().getLo());
         double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
 
-        double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
+        double delta = 1.d;
+
+        ArangeSerializable arange = ds_grid.getXAxis().getArangeSerializable();
+        if ( arange != null ) {
+            String step = arange.getStep();
+            if ( step != null ) {
+                delta = Math.abs(Double.valueOf(step));
+            }
+        }
+        
         panelAxesWidgets.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 
         if (ds_grid.getTAxis() != null) {
