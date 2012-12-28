@@ -1527,9 +1527,8 @@ public class UI extends BaseUI {
                         compareMenuChanged();
                     }
                 }
+                // Set the state of the system...
             }
-
-            // Process everything that applies to the gallery
 
             HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
 
@@ -1662,6 +1661,7 @@ public class UI extends BaseUI {
 
                 comparePanel.setAnalysis(analysis);
                 comparePanel.setFillLevels(autoContourTextBox.getText());
+                comparePanel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
                 comparePanel.refreshPlot(options, false, true, forceLASRequest);
                 for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                     OutputPanel panel = (OutputPanel) panelIt.next();
