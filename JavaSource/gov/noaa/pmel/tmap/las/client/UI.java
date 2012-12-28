@@ -26,6 +26,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -1221,8 +1222,16 @@ public class UI extends BaseUI {
 
         double grid_south = Double.valueOf(ds_grid.getYAxis().getLo());
         double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
+        
+        double delta = 1.d;
 
-        double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
+        ArangeSerializable arange = ds_grid.getXAxis().getArangeSerializable();
+        if ( arange != null ) {
+            String step = arange.getStep();
+            if ( step != null ) {
+                delta = Math.abs(Double.valueOf(step));
+            }
+        }
         xAxesWidget.getRefMap().setTool(xView);
         xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 
