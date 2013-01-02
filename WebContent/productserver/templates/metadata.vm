@@ -34,7 +34,7 @@
       #set($did = $dataset.getID())
    #end
    <h2>$dset.name
-   #if ( $dset.doc != "null" && $dset.doc != "" )
+   #if ( $dset.doc != "null" && "$!dset.doc" != "" )
       (<a href="$dset.doc">More info...</a>)
    #end
    </h2>

@@ -17,7 +17,7 @@
 #foreach ($dsID in $dsIDs)
    #set($dataset = $las_config.getDataset($dsID))
    <h2>$dataset.name
-   #if ( $dataset.doc != "null" && $dataset.doc != "" )
+   #if ( $dataset.doc != "null" && "$!dataset.doc" != "" )
       (<a href="$dataset.doc">More info...</a>)
    #end
    </h2>
