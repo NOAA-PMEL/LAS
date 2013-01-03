@@ -210,6 +210,14 @@ public class DateTimeWidget extends Composite {
 				init(lo_date, hi_date, tAxis.getRenderString(), tAxis.getCalendar(), tAxis.isClimatology());
 			}
 		}
+		String display_hi = tAxis.getAttributes().get("display_hi");
+        String display_lo = tAxis.getAttributes().get("display_lo");
+        if ( display_hi != null ) {
+            setHi(display_hi);
+        }
+        if ( display_lo != null ) {
+            setLo(display_lo);
+        }
 			
 	}
 	public void reinit() {
