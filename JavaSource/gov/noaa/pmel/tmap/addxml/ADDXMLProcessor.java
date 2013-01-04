@@ -1425,12 +1425,13 @@ public class ADDXMLProcessor {
                                         }
 
 
-                                        System.out.println("Loading T from metadata: "+elementName);
+                                        
                                         AxisBean tAxis = new AxisBean();
                                         if ( calendar != null ) {
                                             tAxis.setCalendar(calendar);
                                         }
                                         tAxis.setElement(variable.getName()+"-"+id+"-t-axis");
+                                        System.out.println("Loading T from metadata: "+variable.getName()+"-"+id+"-t-axis");
                                         grid_name.append("-t-axis");
                                         tAxis.setType("t");
 
@@ -2236,12 +2237,18 @@ public class ADDXMLProcessor {
         CategoryBean category = makeParent(ThreddsDataset);
         category.setName(name);
         category.setID(id);
+
+
         if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
-            FilterBean filter = new FilterBean();
-            filter.setAction("apply-dataset");
-            String tag = fixid(ThreddsDataset);
-            filter.setEqualstag(tag);
-            category.addFilter(filter);
+            String url = ThreddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName();
+            String curl = DODSNetcdfFile.canonicalURL(url);
+            if ( !skip(curl) ) {
+                FilterBean filter = new FilterBean();
+                filter.setAction("apply-dataset");
+                String tag = fixid(ThreddsDataset);
+                filter.setEqualstag(tag);
+                category.addFilter(filter);
+            }
         } else {
             Vector subCats = new Vector();
             for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
