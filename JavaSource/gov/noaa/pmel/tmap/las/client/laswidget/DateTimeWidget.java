@@ -430,7 +430,9 @@ public class DateTimeWidget extends Composite {
 			start = lo.getDayOfMonth();
 			end = maxDays(year, month);
 			
-		} else if ( hi_year == year && hi_month == month ) {
+		}
+		// If it starts and ends in the same month replace with the day of the high month.
+		if ( hi_year == year && hi_month == month ) {
 			end = hi.getDayOfMonth();
 		}
 		for ( int i = start; i <= end; i++) {
