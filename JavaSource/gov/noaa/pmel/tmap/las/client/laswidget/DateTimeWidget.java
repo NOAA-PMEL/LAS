@@ -565,7 +565,7 @@ public class DateTimeWidget extends Composite {
 		if ( isMenu ) {
 			for(int d = 0; d < lo_day.getItemCount(); d++) {
 				String value = lo_day.getValue(d);
-				if ( value.equals(tlo) ) {
+				if ( value.equalsIgnoreCase(tlo) ) {
 					lo_day.setSelectedIndex(d);
 					loDayChange();
 				}
@@ -638,7 +638,7 @@ public class DateTimeWidget extends Composite {
 		if ( isMenu ) {
 			for(int d = 0; d < hi_day.getItemCount(); d++) {
 				String value = hi_day.getValue(d);
-				if ( value.equals(thi) ) {
+				if ( value.equalsIgnoreCase(thi) ) {
 					hi_day.setSelectedIndex(d);
 				}
 			}
