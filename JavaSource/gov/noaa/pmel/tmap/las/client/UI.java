@@ -262,6 +262,27 @@ public class UI extends BaseUI {
                     // the Window name but IE respects only a narrow list of
                     // valid
                     // Window name parameters. Weusijana, 07/06/2012.
+                    if ( xAnalysisWidget.isActive() ) {
+                        AnalysisSerializable analysis = xAnalysisWidget.getAnalysisSerializable();
+                        if (analysis.isActive("t")) {
+                            analysis.getAxes().get("t").setLo(xAxesWidget.getTAxis().getFerretDateLo());
+                            analysis.getAxes().get("t").setHi(xAxesWidget.getTAxis().getFerretDateHi());
+                        }
+                        if (analysis.isActive("z")) {
+                            analysis.getAxes().get("z").setLo(xAxesWidget.getZAxis().getLo());
+                            analysis.getAxes().get("z").setHi(xAxesWidget.getZAxis().getHi());
+                        }
+                        if (analysis.isActive("y")) {
+                            analysis.getAxes().get("y").setLo(String.valueOf(xAxesWidget.getRefMap().getYlo()));
+                            analysis.getAxes().get("y").setHi(String.valueOf(xAxesWidget.getRefMap().getYhi()));
+                        }
+                        if (analysis.isActive("x")) {
+                            analysis.getAxes().get("x").setLo(String.valueOf(xAxesWidget.getRefMap().getXlo()));
+                            analysis.getAxes().get("x").setHi(String.valueOf(xAxesWidget.getRefMap().getXhi()));
+                        }
+                        analysis.setLabel(xVariable.getName());
+                        lasRequest.setAnalysis(analysis, 0);
+                    }
                     Window.open(Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString()), "_blank", features);
                     optionsDialog.hide();
                 }
