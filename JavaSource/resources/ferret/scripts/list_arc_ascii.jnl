@@ -4,6 +4,9 @@
 ! 8/ 9/2007 ACM Check that just one variable has been chosen.
 !       TODO    Find out if Arc-ascii allows for multi-variable files and
 !               if so how is that organized.
+! 1/ 1/2013 ACM The data is at grid cell centers. List the xllcenter
+!               and yllcenter in the header (See ticket 1488, per 
+!               conversation with Murray Brown.)
 !
 ! Description: create Arcinfo GIS output of regular grids
 
@@ -115,9 +118,9 @@ LET jend `j[gy=($ferret_list_var),y=($region_y_hi)]`
 LET Ni = `($ferret_list_var),RETURN=isize`
 LET Nj = `($ferret_list_var),RETURN=jsize`
 
-! lower cell bounds arrays
-LET xbounds = xboxlo[gx=expr]
-LET ybounds = yboxlo[gy=expr]
+! lower cell center arrays
+LET xcenter = x[gx=expr]
+LET ycenter = y[gy=expr]
 
 ! size of grid cells
 
@@ -187,27 +190,20 @@ LET jend `j[gy=expr,y=($region_y_hi)]`
 LET Ni = `($ferret_list_var),RETURN=isize`
 LET Nj = `($ferret_list_var),RETURN=jsize`
 
-! lower cell bounds arrays
-LET xbounds = xboxlo[gx=expr]
-LET ybounds = yboxlo[gy=expr]
+! lower cell center 
+LET xcenter = x[gx=expr]
+LET ycenter = y[gy=expr]
 
-! lower cell bounds of grid
+! lower cell center of grid
 ! Make sure West long is < 0, change both hi & lo if xlo is > 180
-LET slon = xbounds[i=`istart`]
+LET slon = xcenter[i=`istart`]
 IF `slon GT 180` THEN
-  LET xlo = xbounds[x=($region_x_lo)] - 360
+  LET xlo = xcenter[x=($region_x_lo)] - 360
 ELSE
-  LET xlo = xbounds[x=($region_x_lo)]
+  LET xlo = xcenter[x=($region_x_lo)]
 ENDIF
-LET ylo = ybounds[y=($region_y_lo)]
+LET ylo = ycenter[y=($region_y_lo)]
 list xlo, ylo
-
-! If the region_x_lo is at a cell boundary, return that boundary as the lower cell limit.
-LET cell_diff = ABS(xlo-($region_x_lo))
-IF `(ABS(cell_diff - xcell_size)/xcell_size) LT 1.e-5` THEN LET xlo = `xlo + xcell_size`
-
-LET cell_diff = ABS(ylo-($region_y_lo))
-IF `(ABS(cell_diff - xcell_size)/xcell_size) LT 1.e-5` THEN LET ylo = `ylo + ycell_size`
 
 SET MODE/LAST LAT
 SET MODE/LAST LON
@@ -215,8 +211,8 @@ SET MODE/LAST LON
 ! make a heading as in this example
 !	ncols 359
 !	nrows 180
-!	xllcorner -89.54166   !!?? corner or center ??
-!	yllcorner 0.4583334
+!	xllcenter -89.54166  
+!	yllcenter 0.4583334
 !	cellsize 1.
 !       nodata -9.9999998E+33
 
@@ -253,9 +249,9 @@ SET LIST/PREC=9
 DEFINE SYMBOL xlo = `xlo`
 DEFINE SYMBOL ylo = `ylo`
 
-LET aout = "xllcorner ($xlo)"
+LET aout = "xllcenter ($xlo)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
-LET aout = "yllcorner ($ylo)"
+LET aout = "yllcenter ($ylo)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
 DEFINE SYMBOL cellsize `cell_size`
