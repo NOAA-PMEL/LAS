@@ -1,8 +1,21 @@
+! regularize.jnl
+! For regridding variables on possibly irregular rectilinear
+! XY grids to a regular XY grid at the resolution of one of
+! the ETOPO datasets.
+
+! Regrid all the variables having XY axes to the same output 
+! grid. If the grids are sub-global define a grid that is a 
+! subset of the chosen ETOPO dataset that spans the intput grids.
 
 LET rfile_names = ..varnames[d=1]
 LET n2dvars = ..nvars[d=1]
 
 ! Determine the approximate grid resolution of the input grid
+
+! Get the min and max longitudes and latitudes for variables having
+! xy grids. Check for degenerate grids, insisting on > 1 points in x 
+! and y. It looks like `var,return=shape` will not list these axis
+! directions anyway.
 
 LET nx = 0
 LET xs = 720
@@ -20,12 +33,18 @@ DEF SYM nn = `nv` ;\
 DEF SYM vn = `rfile_names[i=($nn)]` ;\
 DEF SYM vshape = `($vn),RETURN=shape` ;\
 IF `STRINDEX("($vshape)", "XY") GT 0` THEN ;\ 
-LET nx = MAX(`nx`,`($vn),RETURN=isize`) ;\
+LET ix = `($vn),RETURN=isize`;\
+LET jy = `($vn),RETURN=jsize`;\
+IF `ix GT 1` THEN;\
+LET nx = MAX(`nx`,`ix`) ;\
 LET xs = MIN(`xs`,`($vn),RETURN=xstart`) ;\
 LET xe = MAX(`xe`,`($vn),RETURN=xend`) ;\
-LET ny = MAX(`ny`,`($vn),RETURN=jsize`) ;\
+ENDIF;\
+IF `jy GT 1` THEN;\
+LET ny = MAX(`ny`,`jy`) ;\
 LET ys = MIN(`ys`,`($vn),RETURN=ystart`) ;\
 LET ye = MAX(`ye`,`($vn),RETURN=yend`) ;\
+ENDIF;\
 ENDIF)
 
 ! Restore the default
@@ -41,9 +60,12 @@ IF `ny GT 1` THEN LET dy = (ye - ys)/ (ny-1)
 LET deltaxy = 1.
 DEF SYM etoposet = 60
 
-! approximate the etopo grids. Should these be OR rather than AND?
+! approximate the etopo grids. (Should these be OR, or AND?)
 IF `dx GT 0 AND dy GT 0` THEN
-   IF `dx GE 1 OR dy GE 1` THEN 
+   IF `dx GE 2 OR dy GE 2` THEN 
+      LET deltaxy = 2.
+      DEF SYM etoposet = 120
+   IF `dx LT 2 AND dy LT 2` THEN 
       LET deltaxy = 1.
       DEF SYM etoposet = 60
    ENDIF
@@ -65,6 +87,7 @@ IF `dx GT 0 AND dy GT 0` THEN
    ENDIF
 ENDIF
 
+! Keep within -90:90
 IF `ys-deltaxy LT -90` THEN LET ys = -90+deltaxy
 IF `ye+deltaxy GT  90` THEN LET ye =  90-deltaxy
 
