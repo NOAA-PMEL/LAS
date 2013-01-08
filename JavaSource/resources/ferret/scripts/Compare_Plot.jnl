@@ -17,9 +17,9 @@ GO LAS_reset_gifname
 
 DEFINE SYMBOL ferret_palette no_white_greenpink_centered 
 
-! IF `($ferret_version"0") GE 6.83` THEN
-!    DEFINE SYMBOL ferret_palette light_centered 
-! ENDIF
+IF `($ferret_version"0") GE 6.83` THEN
+   DEFINE SYMBOL ferret_palette centered_diff 
+ENDIF
 
 IF `STRLEN("($ferret_view)") EQ 2` THEN 
    DEFINE SYMBOL s1 = `SUBSTRING ( "($ferret_view)", 1, 1)`
