@@ -1641,6 +1641,9 @@ public class ADDXMLProcessor {
     }
     private static String fixid(InvDataset t) {
         String tid = t.getID();
+        return fixid(tid, t.getFullName());
+    }
+    public static String fixid(String tid, String name) {
         String id;
         if ( tid != null ) {
             id = tid;
@@ -1649,15 +1652,15 @@ public class ADDXMLProcessor {
             if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
             id = id.replaceAll(" ", "-"); 
         } else {
+            // This should never happen in the UAF case since the cleaner should have assigned the ID already.
             try {
-                id = "data-"+JDOMUtils.MD5Encode(t.getFullName())+String.valueOf(Math.random());
+                id = "data-"+JDOMUtils.MD5Encode(name)+String.valueOf(Math.random());
             } catch (UnsupportedEncodingException e) {
                 id = "data-"+String.valueOf(Math.random());
             }
         }
         return id;
     }
-
     private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(Set<String> time_freqs, InvDataset threddsDataset, String url, Vector allGrids, Vector allAxes) {
         DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
         Vector DatasetBeans = new Vector();
