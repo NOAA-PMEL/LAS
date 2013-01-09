@@ -1,13 +1,12 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
-import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 /**
  * A GWT EntryPoint class for testing the GWT implementation of the data time widgets.
  * TODO: Add no leap, all leap and 360-day calendars.  Consider GODA Time or others for implementation.
@@ -21,6 +20,8 @@ public class DateWidgetTest implements EntryPoint {
     DateTimeWidget dateWidget3;
     DateTimeWidget dateWidget4;
     DateTimeWidget dateWidget5;
+    DateTimeWidget dateWidget6;
+
 	public void onModuleLoad() {
 		dateWidget = new DateTimeWidget();
 		TimeAxisSerializable taxis = new TimeAxisSerializable();
@@ -35,6 +36,12 @@ public class DateWidgetTest implements EntryPoint {
 		dateWidget.init(taxis, true);
 		main.add(new Label("Proleptic Gregorian from 1991-03-14 12:00 to 2010-11-10 15:00 every 3 hours"));
 		main.add(dateWidget);
+		dateWidget6 = new DateTimeWidget();
+		taxis.setLo("1991-03-14 12:00");
+	    taxis.setHi("1991-03-25 18:00");
+		dateWidget6.init(taxis, true);
+        main.add(new Label("Proleptic Gregorian from 1991-03-14 12:00 to 1991-03-25 18:00 every 3 hours"));
+        main.add(dateWidget6);
 		dateWidget2 = new DateTimeWidget();
 		taxis.setMinuteInterval(6*60d);
 		dateWidget2.init(taxis, true);
