@@ -39,12 +39,12 @@ public class OperationsMenu extends Composite {
 		buttonBar.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         turnOffButtons();
         animationButton.addStyleDependentName("SMALLER");
-        animationButton.setTitle("Interactive interface to making a sequence of plots over time.");
+        animationButton.setTitle("Interactive interface for making a sequence of plots over time.");
         compareButton.addStyleDependentName("SMALLER");
         correlationButton.addStyleDependentName("SMALLER");
         correlationButton.setTitle("Beta interface to make a scatter plot of a property vs. another property.");
         googleEarthButton.addStyleDependentName("SMALLER");
-        googleEarthButton.setTitle("View a plot of data drapped over the globe using Google Earth.");
+        googleEarthButton.setTitle("View a plot of data draped over the globe using Google Earth.");
         showValuesButton.addStyleDependentName("SMALLER");
         showValuesButton.setTitle("Look at the data values in a new window.");
         exportToDesktopButton.addStyleDependentName("SMALLER");
