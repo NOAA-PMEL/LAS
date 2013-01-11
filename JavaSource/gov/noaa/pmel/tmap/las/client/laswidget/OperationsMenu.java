@@ -51,7 +51,7 @@ public class OperationsMenu extends Composite {
         exportToDesktopButton.setTitle("Get a few lines of native script for various analysis packages.");
         saveAsButton.addStyleDependentName("SMALLER");
         saveAsButton.ensureDebugId("saveAsButton");
-        saveAsButton.setTitle("Save data in various text formats.");
+        saveAsButton.setTitle("Save data in various text and binary formats.");
         climateAnalysis.addStyleDependentName("SMALLER");
         climateAnalysis.setTitle("Perform time average spectrum and other advanced analysis.");
 		buttonBar.add(animationButton);
