@@ -1712,7 +1712,14 @@ public class Correlation implements EntryPoint {
 				yVariableConstraint.setActive(true);
 			}
 		}
-		if (vc != null && !vc.equals("")) {
+		String count = lasRequest.getProperty("data", "count");
+		int c = 2;
+		try {
+		    c = Integer.valueOf(count);
+		} catch (Exception e) {
+		    // Pretend it's 2.
+		}
+		if (vc != null && !vc.equals("") && c >= 3 ) {
 			colorVariables.setSelectedVariable(vc);
 			colorCheckBox.setValue(true);
 			colorVariables.setEnabled(true);
