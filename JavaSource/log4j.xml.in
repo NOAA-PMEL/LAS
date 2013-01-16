@@ -24,12 +24,12 @@
         <level value="info" />
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="org.apache.commons.httpclient">
-        <level value="info" />
+    <logger name="org.apache">
+        <level value="ERROR" />
         <appender-ref ref="STDOUT" />
     </logger>
     <logger name="httpclient">
-        <level value="info" />
+        <level value="ERROR" />
         <appender-ref ref="STDOUT" />
     </logger>
   <logger name="gov.noaa.pmel.tmap.las" additivity="false">
