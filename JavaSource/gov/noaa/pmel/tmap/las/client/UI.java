@@ -1297,6 +1297,7 @@ public class UI extends BaseUI {
         }
 
         xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
+        // Now set view axis from history tokens.
         for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panelIt.next();
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
@@ -1523,6 +1524,7 @@ public class UI extends BaseUI {
     }
 
     private void popHistory(boolean shouldAutoRefresh, String historyToken) {
+        historyToken = URL.decode(historyToken);
         if (!historyToken.equals("")) {
             setUpdateRequired(true);
             // First split out the panel history
