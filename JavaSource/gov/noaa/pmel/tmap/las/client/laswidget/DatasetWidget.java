@@ -205,9 +205,7 @@ public class DatasetWidget extends Tree implements HasName {
                                 VariableSerializable[] vars = ds.getVariablesSerializable();
                                 loadItem(item, vars);
                             }
-                        } else {
-                            Window.alert("Empty category.");
-                        }
+                        } 
                     }
                 }
             } else {
