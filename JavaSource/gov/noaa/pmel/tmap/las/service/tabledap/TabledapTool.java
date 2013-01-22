@@ -19,10 +19,12 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASTabledapBackendConfig;  
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
+import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +58,8 @@ import org.jdom.Element;
  *
  */
 public class TabledapTool extends TemplateTool {
+    
+    LASProxy lasProxy = new LASProxy();
 
     LASTabledapBackendConfig tabledapBackendConfig;  //force its compilation
     
@@ -187,8 +191,9 @@ public class TabledapTool extends TemplateTool {
             if (yhi.length() > 0) query.append("&latitude<=" + yhi);
             if (zlo.length() > 0) query.append("&altitude>=" + zlo);
             if (zhi.length() > 0) query.append("&altitude<=" + zhi);
-            if (tlo.length() > 0) query.append("&time>=" + tlo);
-            if (thi.length() > 0) query.append("&time<=" + thi);
+            // DEBUG HACK BUG IN TABLEDAB that disallows time constraints.
+//            if (tlo.length() > 0) query.append("&time>=" + tlo);
+//            if (thi.length() > 0) query.append("&time<=" + thi);
 
             //store constraint in debug file
             causeOfError = "Could not create constraint expression in " + constraintFileName + ": ";
@@ -199,14 +204,16 @@ public class TabledapTool extends TemplateTool {
 
             //get the data   
             causeOfError = "Could not convert the data source to a netCDF file: ";   
-            String dsUrl = url + id + "?";  //don't include ".dods"; readOpendapSequence does that
-            Table data = new Table();
+            String dsUrl = url + id + ".ncCF?";  //don't include ".dods"; readOpendapSequence does that
+//            Table data = new Table();
             if (xlo.length() > 0 && xhi.length() > 0 && 
                 String2.parseDouble(xhi) < String2.parseDouble(xlo)) {
                 //split lon needs 2 queries; take care of >xlo
                 //look at diagram in class javadoc above to understand this
                 try {
-                    data.readOpendapSequence(dsUrl + query.toString() + "&longitude>=" + xlo);  //errors are common
+                    String firstUrl = dsUrl + query.toString() + "&longitude>=" + xlo;
+                    lasProxy.executeGetMethodAndSaveResult(firstUrl, new File(netcdfFilename), null);
+                    // Stream the netCDF file, instead of reading the sequence... data.readOpendapSequence(dsUrl + query.toString() + "&longitude>=" + xlo);  //errors are common
                 } catch (Exception e) {
                     causeOfError = "Data source error: " + e.toString();
                     throw e;
@@ -219,65 +226,67 @@ public class TabledapTool extends TemplateTool {
             }
             //do the main data query
             //xlo and/or xhi may be specified, but they aren't xhi<xlo
-            Table tTable = data;
-            if (data.nColumns() > 0) //put in temp table if already data in 'data'
-                tTable = new Table();
-            if (xlo.length() > 0) query.append("&longitude>=" + xlo);
+//            Table tTable = data;
+//            if (data.nColumns() > 0) //put in temp table if already data in 'data'
+//                tTable = new Table();
+//            if (xlo.length() > 0) query.append("&longitude>=" + xlo);
             if (xhi.length() > 0) query.append("&longitude<=" + xhi);
             try {
-                data.readOpendapSequence(dsUrl + query.toString());  //errors are common
+                String secondUrl = dsUrl + URLEncoder.encode(query.toString(), "UTF-8");
+                lasProxy.executeGetMethodAndSaveResult(secondUrl, new File(netcdfFilename), null);
+                //data.readOpendapSequence(dsUrl + query.toString());  //errors are common
             } catch (Exception e) {
                 causeOfError = "Data source error: " + e.toString();
                 throw e;
             }
-            if (tTable != data) {
-                data.append(tTable); //they should have the same columns
-                tTable = null;
-            }
+//            if (tTable != data) {
+//                data.append(tTable); //they should have the same columns
+//                tTable = null;
+//            }
 
             //was the request canceled?
             if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
                 return lasBackendResponse;
             
             //make table with 1 mv row if no results were returned
-            log.debug("found nRows=" + data.nRows());
-            if (data.nRows() == 0) { //possibly no columns, too
-
-                //if no columns, create them
-                causeOfError = "Could not create empty table: ";
-                if (data.nColumns() == 0) { 
-                    ArrayList varNames = lasBackendRequest.getVariables();
-                    for (int col = 0; col < varNames.size(); col++)
-                        data.addColumn(varNames.get(col).toString(), new DoubleArray()); //lame to assume all are doubles
-                }
-
-                //add a row of missing values
-                for (int col = 0; col < data.nColumns(); col++) 
-                    data.getColumn(col).addString(""); //represents missing value
-            } 
-
-            //convert from Tabledap-style file to LAS Intermediate File-style
-            int lonCol  = data.findColumnNumber("longitude"); //names are standardized in tabledap
-            int latCol  = data.findColumnNumber("latitude");
-            int altCol  = data.findColumnNumber("altitude");
-            int timeCol = data.findColumnNumber("time");
-            // //for now, I'm leaving alt as alt, not converting to depth
-            //if (altCol >= 0) {
-            //    data.setColumnName(altCol, "depth");
-            //    data.getColumn(altCol).scaleAddOffset(-1, 0); //altitude -> depth (metadata changed below)
-            //}
-            data.globalAttributes().set("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0");
-            //log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
-
-            //setActualRangeAndBoundingBox
-            //(since attributes and data were grabbed via opendap, raw bounding box is for entire dataset)
-            data.setActualRangeAndBoundingBox(lonCol, latCol, -1, altCol, timeCol, "Time");
-
-            causeOfError = "Could not write netCDF file to disk: ";
-            data.saveAsFlatNc(netcdfFilename, "row", false); //false because mv's are already sourceMissingValues
-
-            // The service just wrote the file to the requested location so
-            // copy the response element from the request to the response.
+//            log.debug("found nRows=" + data.nRows());
+//            if (data.nRows() == 0) { //possibly no columns, too
+//
+//                //if no columns, create them
+//                causeOfError = "Could not create empty table: ";
+//                if (data.nColumns() == 0) { 
+//                    ArrayList varNames = lasBackendRequest.getVariables();
+//                    for (int col = 0; col < varNames.size(); col++)
+//                        data.addColumn(varNames.get(col).toString(), new DoubleArray()); //lame to assume all are doubles
+//                }
+//
+//                //add a row of missing values
+//                for (int col = 0; col < data.nColumns(); col++) 
+//                    data.getColumn(col).addString(""); //represents missing value
+//            } 
+//
+//            //convert from Tabledap-style file to LAS Intermediate File-style
+//            int lonCol  = data.findColumnNumber("longitude"); //names are standardized in tabledap
+//            int latCol  = data.findColumnNumber("latitude");
+//            int altCol  = data.findColumnNumber("altitude");
+//            int timeCol = data.findColumnNumber("time");
+//            // //for now, I'm leaving alt as alt, not converting to depth
+//            //if (altCol >= 0) {
+//            //    data.setColumnName(altCol, "depth");
+//            //    data.getColumn(altCol).scaleAddOffset(-1, 0); //altitude -> depth (metadata changed below)
+//            //}
+//            data.globalAttributes().set("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0");
+//            //log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
+//
+//            //setActualRangeAndBoundingBox
+//            //(since attributes and data were grabbed via opendap, raw bounding box is for entire dataset)
+//            data.setActualRangeAndBoundingBox(lonCol, latCol, -1, altCol, timeCol, "Time");
+//
+//            causeOfError = "Could not write netCDF file to disk: ";
+//            data.saveAsFlatNc(netcdfFilename, "row", false); //false because mv's are already sourceMissingValues
+//
+//            // The service just wrote the file to the requested location so
+//            // copy the response element from the request to the response.
             causeOfError = "Failed to set response element: ";
             lasBackendResponse.addResponseFromRequest(lasBackendRequest);
 

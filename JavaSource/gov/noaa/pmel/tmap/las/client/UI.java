@@ -786,7 +786,16 @@ public class UI extends BaseUI {
                         variableSelector.removeListBoxesExceptFirst();
                     }
                     xNewVariable = (VariableSerializable) v;
-                    changeDataset = true;
+                    changeDataset = true;                 
+                    // Build the variables list from the selected item.
+                    TreeItem parent = item.getParentItem();
+                    for ( int i = 0; i < parent.getChildCount(); i++ ) {
+                        TreeItem child = parent.getChild(i);
+                        Object userObject = child.getUserObject();
+                        if ( (userObject != null) && (userObject instanceof VariableSerializable) ) {
+                            variables.add((VariableSerializable) userObject);
+                        }
+                    }
                     changeDataset();
                 }
             }

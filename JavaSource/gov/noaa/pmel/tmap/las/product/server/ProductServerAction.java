@@ -243,8 +243,10 @@ public final class ProductServerAction extends LASAction {
         }
         
         lasRequest.setProperty("product_server", "version", version);
-        
-        if ( lasRequest.isAnalysisRequest() ) {
+        String[] catids = (String[]) request.getSession().getAttribute("catid");
+        boolean check = true;
+        if ( catids != null && catids.length > 0 ) check = false;
+        if ( lasRequest.isAnalysisRequest() && check) {
         	// This request will require F-TDS...
         	// If it's marked as down, test it...
         	if ( !ftds_up ) {

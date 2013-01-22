@@ -157,7 +157,10 @@ public class DatasetWidget extends Tree implements HasName {
                 if ( currentlySelected == null ) {
                     for ( int i = 0; i < cats.length; i++ ) {
                         CategorySerializable cat = cats[i];
-                        if ( applyFilters(cat) ) {
+                        String children = cat.getAttributes().get("children");
+                        boolean empty = false;
+                        if ( children != null && children.equals("none") ) empty = true;
+                        if ( applyFilters(cat) && !empty ) {
                             TreeItem item = new TreeItem();
                             item.addItem(DatasetWidget.LOADING);
                             InnerItem inner = new InnerItem(cat);
@@ -184,7 +187,7 @@ public class DatasetWidget extends Tree implements HasName {
                             if ( i > 0 ) {
                                 currentlySelected.addItem(item);
                             }
-                        } else {
+                        } else if ( cat.isVariableChildren() ) {
                             // Must have variable children...
                             TreeItem item = currentlySelected.getChild(0);
                             if ( cat.hasMultipleDatasets() ) {
@@ -202,8 +205,16 @@ public class DatasetWidget extends Tree implements HasName {
                                 VariableSerializable[] vars = ds.getVariablesSerializable();
                                 loadItem(item, vars);
                             }
+                        } else {
+                            Window.alert("Empty category.");
                         }
                     }
+                }
+            } else {
+                // A category was selected, but it came back empty...
+                if ( currentlySelected != null ) {
+                    TreeItem item = currentlySelected.getChild(0);
+                    item.setText("Empty Category");
                 }
             }
             if ( saveSelection != null ) {
