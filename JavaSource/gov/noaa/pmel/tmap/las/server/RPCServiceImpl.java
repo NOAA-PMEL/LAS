@@ -658,12 +658,16 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     public List<FacetSerializable> getFacets() throws RPCException {
         try {
             List<FacetSerializable> facets = new ArrayList<FacetSerializable>();
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            lasProxy.executeGetMethodAndStreamResult(Constants.SEARCH_URL+"?limit=0&facets=project,institute,model,submodel,instrument,experiment_family,experiment,subexperiment,time_frequency,product,realm,variable,variable_long_name,cmip_table,cf_standard_name,ensemble,data_node", stream);
-            ESGFSearchDocument doc = new ESGFSearchDocument();
-            JDOMUtils.XML2JDOM(stream.toString(), doc);
-            if ( doc.getStatus() == 0 ) {
-                facets = doc.getFacets();
+            for (int i = 0; i < Constants.SEARCH_URL.length; i++) {
+                String search_base = Constants.SEARCH_URL[i];
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                lasProxy.executeGetMethodAndStreamResult(search_base+"?limit=0&facets=project,institute,model,submodel,instrument,experiment_family,experiment,subexperiment,time_frequency,product,realm,variable,variable_long_name,cmip_table,cf_standard_name,ensemble,data_node", stream);
+                ESGFSearchDocument doc = new ESGFSearchDocument();
+                JDOMUtils.XML2JDOM(stream.toString(), doc);
+                if ( doc.getStatus() == 0 ) {
+                    facets = doc.getFacets();
+                    return facets;
+                }
             }
             return facets;
         } catch ( HttpException e ) {
@@ -681,13 +685,19 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     public List<ESGFDatasetSerializable> getESGFDatasets(String query) throws RPCException {
         List<ESGFDatasetSerializable> datasets = new ArrayList<ESGFDatasetSerializable>();
         try {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            lasProxy.executeGetMethodAndStreamResult(Constants.SEARCH_URL+"?"+query, stream);
-            ESGFSearchDocument doc = new ESGFSearchDocument();
-            JDOMUtils.XML2JDOM(stream.toString(), doc);
-            if ( doc.getStatus() == 0 ) {
-                datasets = doc.getDatasets();
+            for (int i = 0; i < Constants.SEARCH_URL.length; i++) {
+
+                String search_base = Constants.SEARCH_URL[i];
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                lasProxy.executeGetMethodAndStreamResult(search_base+"?"+query, stream);
+                ESGFSearchDocument doc = new ESGFSearchDocument();
+                JDOMUtils.XML2JDOM(stream.toString(), doc);
+                if ( doc.getStatus() == 0 ) {
+                    datasets = doc.getDatasets();
+                    return datasets;
+                }
             }
+            return datasets;
         } catch ( HttpException e ) {
             throw new RPCException(e.getMessage());
         } catch ( IOException e ) {
@@ -695,7 +705,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         } catch ( JDOMException e ) {
             throw new RPCException(e.getMessage());
         }
-        return datasets;
     }
     public String addESGFDataset(String id) throws RPCException {
         LASConfig lasConfig = getLASConfig();
@@ -707,9 +716,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             lasConfig.mergeProperites();
             lasConfig.addIntervalsAndPoints();    
             lasConfig.addGridType();
-            String fds_base = serverConfig.getFTDSBase();
-            String fds_dir = serverConfig.getFTDSDir();
-            lasConfig.addFDS(fds_base, fds_dir);
             
             HttpServletRequest request = this.getThreadLocalRequest();
             String [] catids = (String[]) request.getSession().getAttribute("catid");

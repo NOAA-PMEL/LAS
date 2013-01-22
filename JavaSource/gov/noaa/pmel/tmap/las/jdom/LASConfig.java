@@ -1389,9 +1389,15 @@ public class LASConfig extends LASDocument {
                         	}
                             category_container.setAttribute("children", "variables");
                         } else {
-                            category_container.setAttribute("children", "categories");
+                            if ( category.getChild("category") != null ) {
+                                category_container.setAttribute("children", "categories");
+                            } else {
+                                category_container.setAttribute("children", "none");
+                            }
                         }
-                        categories.add(new Category(category_container));
+                        if ( category_container.getAttributeValue("children") != null && !category_container.getAttributeValue("children").equals("none") ) {
+                            categories.add(new Category(category_container));
+                        }
                     }
                 }
             } else {
@@ -1442,9 +1448,15 @@ public class LASConfig extends LASDocument {
                         	}
                             cat_nokids.setAttribute("children", "variables");
                         } else {
-                            cat_nokids.setAttribute("children", "categories");
+                            if ( cat.getChild("category") != null ) {
+                                cat_nokids.setAttribute("children", "categories");
+                            } else {
+                                cat_nokids.setAttribute("children", "none");
+                            }
                         }
-                        categories.add(new Category(cat_nokids));
+                        if ( cat_nokids.getAttributeValue("children") != null && !cat_nokids.getAttributeValue("children").equals("none") ) {
+                            categories.add(new Category(cat_nokids));
+                        }
                     }
                 }
 
@@ -1461,19 +1473,22 @@ public class LASConfig extends LASDocument {
                          * is a getDataset call...
                          */
                         List<Dataset> datasets = getDataset(filter);
-                        for ( int i = 0; i < datasets.size(); i++ ) {
-                        	Dataset dataset = datasets.get(i);
-                        	if ( dataset != null && dataset.getVariables().size() > 0) {
-                        		category_container.addContent(dataset.getElement());
-                        		category_container.setAttribute("children", "variables");
-                        	} else if ( dataset != null && dataset.getElement().getChild("variables") != null ) {
-                        		// Somebody put in a data set with no variables.  Why?  I don't know, but they did.
-                        		category_container.addContent(dataset.getElement());
-                        		category_container.setAttribute("children", "variables");
-                        	}
+                        // If no data sets match, don't add the category... prevent the endless category.
+                        if ( datasets.size() > 0 ) {
+                            for ( int i = 0; i < datasets.size(); i++ ) {
+                                Dataset dataset = datasets.get(i);
+                                if ( dataset != null && dataset.getVariables().size() > 0) {
+                                    category_container.addContent(dataset.getElement());
+                                    category_container.setAttribute("children", "variables");
+                                } else if ( dataset != null && dataset.getElement().getChild("variables") != null ) {
+                                    // Somebody put in a data set with no variables.  Why?  I don't know, but they did.
+                                    category_container.addContent(dataset.getElement());
+                                    category_container.setAttribute("children", "variables");
+                                }
+                            }
+                            categories.add(new Category(category_container));
                         }
                     }
-                    categories.add(new Category(category_container));
                 }
             } else {
                 // This config has no "categories", just datasets and variables.  Use them.
@@ -1697,6 +1712,9 @@ public class LASConfig extends LASDocument {
 
         String name_contains = filter.getAttributeValue("contains");
         String name_equals = filter.getAttributeValue("equals");
+        if ( name_equals == null ) {
+            name_equals = filter.getAttributeValue("name-equals");
+        }
         String tag_contains = filter.getAttributeValue("contains-tag");
         String tag_equals = filter.getAttributeValue("equals-tag");
 
@@ -5219,123 +5237,155 @@ public class LASConfig extends LASDocument {
             // Hack off the version 
             master_id = master_id.substring(0, master_id.lastIndexOf("."));
         }
+        
+        for (int i = 0; i < Constants.SEARCH_URL.length; i++) {
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        lasProxy.executeGetMethodAndStreamResult(Constants.SEARCH_URL+"?replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id, stream);
-        Document doc = new Document();
+            String search_base = Constants.SEARCH_URL[i];
 
-        JDOMUtils.XML2JDOM(stream.toString(), doc);
-        Element root = doc.getRootElement();
-        Element result = root.getChild("result");
-        String catalog = null;
-        String LAS = null;
-        Set<String> time_freqs = new HashSet<String>();
-        if ( result != null ) {
-            String number = result.getAttributeValue("numFound");
-            if ( !number.equals("0") ) {
-                List<Element> results = result.getChildren("doc");
-                Element solrDoc = results.get(0);
-                if ( solrDoc != null ) {
-                    List<Element> arrays = solrDoc.getChildren("arr");
-                    for ( Iterator arrE = arrays.iterator(); arrE.hasNext(); ) {
-                        Element arr = (Element) arrE.next();
-                        if ( arr.getAttributeValue("name").equals("url")) {
-                            List<Element> strs = arr.getChildren("str");
-                            for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
-                                Element str = (Element) strIt.next();
-                                String txt = str.getTextTrim();
-                                if ( txt.contains("|Catalog") ) {
-                                    catalog = txt.substring(0, txt.indexOf("#"));
-                                    System.out.println(catalog);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            String search = search_base+"?access=LAS&replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id;
+            lasProxy.executeGetMethodAndStreamResult(search, stream);
+            Document doc = new Document();
+
+            JDOMUtils.XML2JDOM(stream.toString(), doc);
+            Element root = doc.getRootElement();
+            Element result = root.getChild("result");
+            String catalog = null;
+            String LAS = null;
+            Set<String> time_freqs = new HashSet<String>();
+            if ( result != null ) {
+                String number = result.getAttributeValue("numFound");
+                if ( !number.equals("0") ) {
+                    List<Element> results = result.getChildren("doc");
+                    Element solrDoc = results.get(0);
+                    if ( solrDoc != null ) {
+                        List<Element> arrays = solrDoc.getChildren("arr");
+                        for ( Iterator arrE = arrays.iterator(); arrE.hasNext(); ) {
+                            Element arr = (Element) arrE.next();
+                            if ( arr.getAttributeValue("name").equals("url")) {
+                                List<Element> strs = arr.getChildren("str");
+                                for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                    Element str = (Element) strIt.next();
+                                    String txt = str.getTextTrim();
+                                    if ( txt.contains("|Catalog") ) {
+                                        catalog = txt.substring(0, txt.indexOf("#"));
+                                        System.out.println(catalog);
+                                    }
+                                    if ( txt.contains("|LAS") ) {
+                                        LAS = txt.substring(0, txt.indexOf("|"));
+                                        LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
+                                    }
                                 }
-                                if ( txt.contains("|LAS") ) {
-                                    LAS = txt.substring(0, txt.indexOf("|"));
-                                    LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
+                            } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
+                                List<Element> strs = arr.getChildren("str");
+                                for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                    Element str = (Element) strIt.next();
+                                    String txt = str.getTextTrim();
+                                    time_freqs.add(txt);
                                 }
-                            }
-                        } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
-                            List<Element> strs = arr.getChildren("str");
-                            for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
-                                Element str = (Element) strIt.next();
-                                String txt = str.getTextTrim();
-                                time_freqs.add(txt);
                             }
                         }
                     }
-                }
-            }                
-        }
-        if ( key == null && LAS != null ) {
-            key = JDOMUtils.MD5Encode(LAS);
-        }
-        if ( LAS == null ) {
-            // No remote LAS, use the local LAS to plot this data.
-            key = getBaseServerURLKey();
-        }
-        InvCatalogFactory factory = new InvCatalogFactory("default", false);
-        InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-        Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
-        // There's only going to be one...
-        String key_id = null;
-        Dataset ds = null;
-        for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
-            DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
-            Vector datasets = dagb.getDatasets();
-            for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
-                DatasetBean db = (DatasetBean) dsIt.next();
-                String e = db.getElement();
-                e = key+Constants.NAME_SPACE_SPARATOR+e;
-                db.setElement(e);
-                key_id = e;
-                Element dataset = db.toXml(true);
-                Element dsE = getRootElement().getChild("datasets");
+                    if ( key == null && LAS != null ) {
+                        key = JDOMUtils.MD5Encode(LAS);
+                    }
+                    if ( LAS == null ) {
+                        // No remote LAS, use the local LAS to plot this data.
+                        key = getBaseServerURLKey();
+                    }
+                    InvCatalogFactory factory = new InvCatalogFactory("default", false);
+                    InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
+                    Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
+                    // There's only going to be one...
+                    String key_id = null;
+                    Dataset ds = null;
+                    for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
+                        DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
+                        Vector datasets = dagb.getDatasets();
+                        for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
+                            DatasetBean db = (DatasetBean) dsIt.next();
+                            String e = db.getElement();
+                            e = key+Constants.NAME_SPACE_SPARATOR+e;
+                            db.setElement(e);
+                            key_id = e;
+                            Element dataset = db.toXml(true);
+                            // Add the ftds_url attribute to the data set as a reference to the F-TDS co-located with the data.
+//                            dataset.setAttribute("ftds_url", dataset.getAttributeValue("url"));
+                            
+                            Element variables = dataset.getChild("variables");
+                            if ( variables != null ) {
+                                List<Element> vars = variables.getChildren("variable");
+                                if ( vars != null ) {
+                                    for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                                        Element variable = (Element) varIt.next();
+                                        String url = variable.getAttributeValue("url");
+                                        if ( url != null ) {
+                                            String ftds_url = url.substring(0, url.lastIndexOf("#"));
+                                            variable.setAttribute("ftds_url", ftds_url);
+                                        }
+                                    }
+                                }
+                            }
 
-                if ( dsE == null ) {
-                    dsE = new Element("datasets");
-                    getRootElement().addContent(dsE);
+                            Element dsE = getRootElement().getChild("datasets");
+
+                            if ( dsE == null ) {
+                                dsE = new Element("datasets");
+                                getRootElement().addContent(dsE);
+                            } 
+
+                            ds = getDataset(key_id);
+
+                            // Add only if it doesn't exist already...
+
+                            if ( ds == null ) {
+
+                                dsE.addContent(dataset);
+
+                            }
+
+
+                        }
+
+                        // Add only if it doesn't exist already...
+                        if ( ds == null ) {
+                            Vector grids = dagb.getGrids();
+                            for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
+                                GridBean gb = (GridBean) gIt.next();
+                                Element grid = gb.toXml(true);
+                                Element gsE = getRootElement().getChild("grids");
+                                if ( gsE == null ) {
+                                    gsE = new Element("grids");
+                                    getRootElement().addContent(gsE);
+                                }
+                                gsE.addContent(grid);
+                            }
+
+                            Vector axes = dagb.getAxes();
+                            for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
+                                AxisBean ab = (AxisBean) aIt.next();
+                                Element axis = ab.toXml(true);
+                                Element asE = getRootElement().getChild("axes");
+                                if ( asE == null ) {
+                                    asE = new Element("axes");
+                                    getRootElement().addContent(asE);
+                                }
+                                asE.addContent(axis);
+                            }
+                        }
+                    }
+                    //TODO: DEBUG
+                    //DEBUG DEBUG DEBUG...
+                    File v7 = new File(this.getOutputDir()+"/lasV7.xml");
+                    try {
+                        this.write(v7);
+                    } catch (Exception e) {
+                        //log.error("Cannot write out new Version 7.0 las.xml file.", e);
+                    }
+                    return key_id;
                 } 
-
-                ds = getDataset(key_id);
-                
-                // Add only if it doesn't exist already...
-
-                if ( ds == null ) {
-
-                    dsE.addContent(dataset);
-
-                }
-
-
-            }
-       
-            // Add only if it doesn't exist already...
-            if ( ds == null ) {
-                Vector grids = dagb.getGrids();
-                for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
-                    GridBean gb = (GridBean) gIt.next();
-                    Element grid = gb.toXml(true);
-                    Element gsE = getRootElement().getChild("grids");
-                    if ( gsE == null ) {
-                        gsE = new Element("grids");
-                        getRootElement().addContent(gsE);
-                    }
-                    gsE.addContent(grid);
-                }
-
-                Vector axes = dagb.getAxes();
-                for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
-                    AxisBean ab = (AxisBean) aIt.next();
-                    Element axis = ab.toXml(true);
-                    Element asE = getRootElement().getChild("axes");
-                    if ( asE == null ) {
-                        asE = new Element("axes");
-                        getRootElement().addContent(asE);
-                    }
-                    asE.addContent(axis);
-                }
             }
         }
-            
-        return key_id;
+        return null;
     }
 }

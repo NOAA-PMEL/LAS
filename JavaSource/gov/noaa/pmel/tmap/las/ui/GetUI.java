@@ -80,20 +80,29 @@ public class GetUI extends ConfigService {
         if ( cat_ids != null ) {
             
             try {
+                
+                int found = 0;
                 for ( int i = 0; i < cat_ids.length; i++ ) {
                     //TODO session management probably by adding the JSESSIONID to the data set.
                     String key_id = lasConfig.addDataset(cat_ids[i]);
-                    if ( !key_id.equals(cat_ids[i]) ) {
-                        cat_ids[i] = key_id;
+                    if ( key_id != null ) {
+                        found++;
+                        if (!key_id.equals(cat_ids[i]) ) {
+                            cat_ids[i] = key_id;
+                        }
                     }
                 }
-                lasConfig.convertToSeven(true);
-                lasConfig.mergeProperites();
-                lasConfig.addIntervalsAndPoints();    
-                lasConfig.addGridType();
-                String fds_base = serverConfig.getFTDSBase();
-                String fds_dir = serverConfig.getFTDSDir();
-                lasConfig.addFDS(fds_base, fds_dir);
+                if ( found > 0 ) {
+                    lasConfig.convertToSeven(true);
+                    lasConfig.mergeProperites();
+                    lasConfig.addIntervalsAndPoints();    
+                    lasConfig.addGridType();
+                    //                String fds_base = serverConfig.getFTDSBase();
+                    //                String fds_dir = serverConfig.getFTDSDir();
+                    //                lasConfig.addFDS(fds_base, fds_dir);
+                } else {
+                    throw new Exception("Search did not return any information for the requested data set.");
+                }
             } catch (Exception e) {
                 String las_message = "Unable to initialize UI from the catid values provided.";
                 LASBackendResponse lasBackendResponse = new LASBackendResponse();
