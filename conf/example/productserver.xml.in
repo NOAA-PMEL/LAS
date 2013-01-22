@@ -8,6 +8,7 @@
 		<service name="drds" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDRDSBackend" method="getProduct"/>
 		<service name="dapper" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDapperBackend" method="getProduct"/>
 		<service name="obis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASObisBackend" method="getProduct"/>
+		<service name="tabledap" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASTabledapBackend" method="getProduct"/>
 		<service name="iobis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASIobisBackend" method="getProduct"/>
 		<service name="kml" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASKMLBackend" method="mapScaleToKML"/>
 		<service name="fregrid" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFregridBackend" method="getProduct"/>
