@@ -23,7 +23,6 @@ import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.ui.IESafeImage;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -486,14 +485,17 @@ public class OutputPanel extends Composite implements HasName {
 
                     if (!imageurl.equals("")) {
                         currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                        plotImage = new IESafeImage(imageurl);
+                        plotImage = new Image();
                         x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                         y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
                         if (frontCanvas != null) {
-                            gridSetWidgetPlotImageAndHide();
+                            
                             plotImage.addLoadHandler(imageLoadHandler);
                             plotImage.addErrorHandler(imageErrorHandler);
+                            plotImage.setUrl(imageurl);
+                            grid.setWidget(2, 0, plotImage);
+                            plotImage.setVisible(false);
                             frontCanvas.addMouseUpHandler(new MouseUpHandler() {
 
                                 @Override
@@ -1730,16 +1732,6 @@ public class OutputPanel extends Composite implements HasName {
         return panelAxesWidgets.getZAxis().getLo();
     }
 
-    /**
-     * Sets the plotImage to the grid (in a cell that is not used for anything)
-     * and makes it invisible so plotImage's imageElement will be valid. Usually
-     * done just before scaling and drawing plotImage.
-     */
-    public void gridSetWidgetPlotImageAndHide() {
-        grid.setWidget(2, 0, plotImage);
-        plotImage.setVisible(false);
-    }
-
     public void hide() {
         grid.setVisible(false);
         grid.getCellFormatter().setHeight(0, 0, "1px");
@@ -2165,7 +2157,8 @@ public class OutputPanel extends Composite implements HasName {
             if (plotImage != null) {
                 // set the plotImage to the grid before scaling so plotImage's
                 // imageElement will be valid
-                gridSetWidgetPlotImageAndHide();
+                grid.setWidget(2, 0, plotImage);
+                plotImage.setVisible(false);
                 scale(plotImage, imageScaleRatio);
                 showPlotImage();
             }
