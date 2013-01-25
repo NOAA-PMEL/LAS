@@ -20,6 +20,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class DatasetSerializable extends Serializable implements IsSerializable {
 
+    String CATID;
+    public void setCATID(String catid) {
+        CATID = catid;
+    }
+    public String getCATID() {
+        return CATID;
+    }
      VariableSerializable[] variablesSerializable;
 	/**
 	 * 

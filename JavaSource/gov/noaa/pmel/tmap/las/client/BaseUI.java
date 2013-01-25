@@ -175,6 +175,7 @@ public class BaseUI {
 
     FlexTable xDisplayControls = new FlexTable();
 
+    String xCATID;
     String xDSID;
     ESGFSearchButton xESGFSearchButton;
     /**
@@ -418,6 +419,9 @@ public class BaseUI {
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
         // string if they are null.
+        if ( xCATID == null ) {
+            xCATID = Util.getParameterString("catid");
+        }
         if (xDSID == null) {
             xDSID = Util.getParameterString("dsid");
         }
