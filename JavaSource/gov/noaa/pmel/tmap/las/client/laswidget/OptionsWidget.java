@@ -129,7 +129,7 @@ public class OptionsWidget extends VerticalPanel {
 			
 			// Do not fire this event for "external" operations buttons.
 			if ( fireEvent ) {
-				eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false, false, false), OptionsWidget.this);
+				eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false, false, true), OptionsWidget.this);
 			}
 		}
 

@@ -150,10 +150,10 @@ public class UI extends BaseUI {
 
         @Override
         public void onSuccess(Map<String, String> ids) {
-
+            xCATID = ids.get("catid");
             xDSID = ids.get("dsid");
             xVarID = ids.get("varid");
-            Util.getRPCService().getCategories(xDSID, initFromDatasetAndVariable);
+            Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
         }
 
     };
@@ -171,7 +171,9 @@ public class UI extends BaseUI {
             for (Iterator nameIt = product_server.keySet().iterator(); nameIt.hasNext();) {
                 String name = (String) nameIt.next();
                 String value = product_server.get(name);
-                if (name.equals(Constants.DEFAULT_DSID)) {
+                if (name.equals(Constants.DEFAULT_CATID)) {
+                    xCATID = value;
+                } else if ( name.equals(Constants.DEFAULT_DSID) ) {
                     xDSID = value;
                 } else if (name.equals(Constants.DEFAULT_VARID)) {
                     xVarID = value;
@@ -188,7 +190,7 @@ public class UI extends BaseUI {
                 }
             }
 
-            if (xDSID != null) {
+            if (xDSID != null || xCATID != null) {
 
                 // Supply some reasonable defaults and go...
                 if (xOperationID == null) {
@@ -198,7 +200,10 @@ public class UI extends BaseUI {
                     xView = "xy";
                 }
                 setUpdateRequired(true);
-                Util.getRPCService().getCategories(xDSID, initFromDatasetAndVariable);
+                if ( xCATID == null ) {
+                    xCATID = xDSID;
+                }
+                Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
             } else {
                 // Set some default values...
                 xView = "xy";
@@ -1129,6 +1134,7 @@ public class UI extends BaseUI {
         if (initialHistory != null && !initialHistory.equals("") && xDataURL == null) {
             String[] settings = initialHistory.split("token");
             HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+            xCATID = tokenMap.get("xCATID");
             xDSID = tokenMap.get("xDSID");
             xVarID = tokenMap.get("varid");
             tokenMap = Util.getTokenMap(settings[1]);
@@ -1157,7 +1163,10 @@ public class UI extends BaseUI {
         } else {
             // These can come from the initial history or from the dsid=??? and
             // optionally the varid=??? query parameters.
-            if (xDSID != null) {
+            if (xDSID != null || xCATID != null) {
+                if ( xDSID == null ) {
+                    xDSID = xCATID;
+                }
                 setUpdateRequired(true);
                 // Supply some reasonable defaults and go...
                 if (xOperationID == null) {
@@ -1166,7 +1175,7 @@ public class UI extends BaseUI {
                 if (xView == null) {
                     xView = "xy";
                 }
-                Util.getRPCService().getCategories(xDSID, initFromDatasetAndVariable);
+                Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
             } else {
                 Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);
             }
@@ -1491,6 +1500,7 @@ public class UI extends BaseUI {
         if (xPanels.get(0).getMax() > -99999999.) {
             historyToken.append(";globalMax=" + xPanels.get(0).getMax());
         }
+        historyToken.append(";xCATID=" + xVariable.getCATID());
         historyToken.append(";xDSID=" + xVariable.getDSID());
         historyToken.append(";varid=" + xVariable.getID());
 
@@ -1582,7 +1592,7 @@ public class UI extends BaseUI {
             } else {
                 historyString = historyToken;
                 historyTokens = tokenMap;
-                Util.getRPCService().getCategories(tokenMap.get("xDSID"), requestGridForHistory);
+                Util.getRPCService().getCategories(tokenMap.get("xCATID"), requestGridForHistory);
             }
         }
     }

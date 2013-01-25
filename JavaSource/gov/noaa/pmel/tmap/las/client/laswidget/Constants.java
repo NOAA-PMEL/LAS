@@ -5,7 +5,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
  *
  */
 public class Constants {
-
+    public static final String DEFAULT_CATID = "default_catid";
 	public static final String DEFAULT_DSID = "default_dsid";
 	public static final String DEFAULT_VARID = "default_varid";
 	public static final String DEFAULT_OP = "default_operation";

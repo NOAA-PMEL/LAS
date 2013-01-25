@@ -274,7 +274,8 @@ public class LASConfig extends LASDocument {
     			if ( !url.equals("") ) {
     				if ( url.startsWith(data_url) || url.endsWith(data_url) ) {
     				    Map<String, String> ids = new HashMap<String, String>();
-    				    ids.put("dsid", category.getID());
+    				    ids.put("catid", category.getID());
+    				    ids.put("dsid", variable.getDSID());
     				    ids.put("varid", variable.getID());
     					return ids;
     				}
@@ -1382,6 +1383,7 @@ public class LASConfig extends LASDocument {
                         	List<Dataset> datasets = getDataset(filter);
                         	if ( datasets != null && datasets.size() > 0 ) {
                         		Dataset dataset = datasets.get(0);
+                        		dataset.setAttribute("catid", category_container.getAttributeValue("ID"));
                         	    category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
                         	    if ( dataset.getAttributeValue("doc") != null &&  !dataset.getAttributeValue("doc").equals("")) {
                         	    	category_container.setAttribute("doc", dataset.getAttributeValue("doc"));
@@ -1442,6 +1444,7 @@ public class LASConfig extends LASDocument {
                         		// Add only if the filter returns a dataset.  It's possible to create
                         		// a filter that returns an empty list.
                         	    cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	    dataset.setAttribute("catid", cat_nokids.getAttributeValue("ID"));
                         	    if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
                         	    	cat_nokids.setAttribute("doc", dataset.getAttributeValue("doc"));
                         	    }
@@ -1477,6 +1480,7 @@ public class LASConfig extends LASDocument {
                         if ( datasets.size() > 0 ) {
                             for ( int i = 0; i < datasets.size(); i++ ) {
                                 Dataset dataset = datasets.get(i);
+                                dataset.setAttribute("catid", category_container.getAttributeValue("ID"));
                                 if ( dataset != null && dataset.getVariables().size() > 0) {
                                     category_container.addContent(dataset.getElement());
                                     category_container.setAttribute("children", "variables");
@@ -1500,6 +1504,8 @@ public class LASConfig extends LASDocument {
                     category.setAttribute("name", container_dataset.getAttributeValue("name"));
                     category.setAttribute("children", "variables");
                     category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
+                    category.setAttribute("ID", dataset.getAttributeValue("ID"));
+                    dataset.setAttribute("catid", category.getAttributeValue("ID"));
                     if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
                     	category.setAttribute("doc", dataset.getAttributeValue("doc"));
                     }
@@ -1515,6 +1521,7 @@ public class LASConfig extends LASDocument {
                     if ( category.getAttribute("ID") == null && dataset.getAttributeValue("ID") != null ) {
                         category.setAttribute("ID", dataset.getAttributeValue("ID"));
                     }
+                    dataset.setAttribute("catid", category.getAttributeValue("ID"));
                     categories.add(new Category(category));
                 }
             }
@@ -1877,7 +1884,9 @@ public class LASConfig extends LASDocument {
         	if ( ds_novars.getAttributeValue("doc") != null && !ds_novars.getAttributeValue("doc").equals("") ) {
         		ds_novars.setAttribute("doc", ds_novars.getAttributeValue("doc"));
         	}
+        	ds_novars.setAttribute("catid", ds_novars.getAttributeValue("ID"));
         	Category ds = new Category(ds_novars);
+        	
         	datasets.add(ds);
         }
         return datasets;
@@ -1972,7 +1981,7 @@ public class LASConfig extends LASDocument {
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Variable var = (Variable) varIt.next();
-			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), var.getDSID(), dataset.getName());
 			clones.add(clone_var);
 		}
 		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
@@ -3728,7 +3737,7 @@ public class LASConfig extends LASDocument {
                 List vars = variablesElement.getChildren("variable");
                 for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
                     Element variable = (Element) varIt.next();
-                    Variable var = new Variable(variable, dsID, dataset.getAttributeValue("name"));
+                    Variable var = new Variable(variable, dsID, dsID, dataset.getAttributeValue("name"));
                     variables.add(var);
                 }
             }
@@ -4872,7 +4881,7 @@ public class LASConfig extends LASDocument {
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Variable var = (Variable) varIt.next();
-			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), var.getDSID(), dataset.getName());
 			clones.add(clone_var);
 		}
 		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
@@ -4896,7 +4905,7 @@ public class LASConfig extends LASDocument {
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Variable var = (Variable) varIt.next();
-			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), var.getDSID(), dataset.getName());
 			clones.add(clone_var);
 		}
 		dataset.setVariables(clones);
