@@ -1013,8 +1013,11 @@ public class OutputPanel extends Composite implements HasName {
         // plotImage = new Image();
         // Also init the front canvas and context
         frontCanvas = Canvas.createIfSupported();
-        frontCanvasContext = frontCanvas.getContext2d();
-
+        if ( frontCanvas != null ) {
+            frontCanvasContext = frontCanvas.getContext2d();
+        } else {
+            Window.alert("Your browser does not support drawing on the plot image for zooming.");
+        }
         messagePanel = new MessagePanel();
 
         grid = new FlexTable();
