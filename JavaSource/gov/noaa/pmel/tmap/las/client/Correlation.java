@@ -758,7 +758,11 @@ public class Correlation implements EntryPoint {
 		lasRequest.setProperty("ferret", "annotations", "file");
 
 		frontCanvas = Canvas.createIfSupported();
-		frontCanvasContext = frontCanvas.getContext2d();
+		if ( frontCanvas != null ) {
+		    frontCanvasContext = frontCanvas.getContext2d();
+		} else {
+		    Window.alert("Your browser does not support drawing on the plot image for zooming.");
+		}
 
 		String url = Util.getProductServer() + "?xml="
 				+ URL.encode(lasRequest.toString());
