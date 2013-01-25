@@ -29,6 +29,9 @@ public class Dataset extends Container implements DatasetInterface {
     public String getDoc() {
     	return element.getAttributeValue("doc");
     }
+    public String getCATID() {
+        return element.getAttributeValue("catid");
+    }
     public void setVariables(ArrayList<Variable> variables) {
     	element.removeChild("variables");
     	Element varsE = new Element("variables");
@@ -46,7 +49,7 @@ public class Dataset extends Container implements DatasetInterface {
     		if ( variables != null ) {
     			for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
     				Element var = (Element) varIt.next();
-    				Variable v = new Variable(var, getID(), getName());
+    				Variable v = new Variable(var, getCATID(), getID(), getName());
     				vars.add(v);
     			}
     		}
@@ -59,7 +62,7 @@ public class Dataset extends Container implements DatasetInterface {
     	int i = 0;
     	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Element var = (Element) varIt.next();
-			Variable v = new Variable(var, getID(), getName());
+			Variable v = new Variable(var, getCATID(), getID(), getName());
 			vs[i] = v.getVariableSerializable();
 		    i++;	
 		}
@@ -83,6 +86,7 @@ public class Dataset extends Container implements DatasetInterface {
 			if ( variable.getID().equals(varid) ) {
 				variable.setDSID(getID());
 				variable.setDSName(getName());
+				variable.setCATID(getCATID());
 				return variable;
 			}
 		}

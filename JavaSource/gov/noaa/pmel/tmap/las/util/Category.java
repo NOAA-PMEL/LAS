@@ -144,6 +144,7 @@ public class Category extends Container implements CategoryInterface {
 		Dataset ds = new Dataset (dataset);
 		datasetSerializable.setName(ds.getName());
 		datasetSerializable.setID(ds.getID());
+		datasetSerializable.setCATID(getID());
 		datasetSerializable.setAttributes(ds.getAttributesAsMap());
 		datasetSerializable.setProperties(ds.getPropertiesAsMap());
 		datasetSerializable.setVariablesSerializable(ds.getVariablesSerializable());
