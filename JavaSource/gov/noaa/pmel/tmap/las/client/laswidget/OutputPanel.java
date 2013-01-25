@@ -1491,6 +1491,7 @@ public class OutputPanel extends Composite implements HasName {
         if (wantT) {
             token.append(";tlo=" + panelAxesWidgets.getTAxis().getFerretDateLo() + ";thi=" + panelAxesWidgets.getTAxis().getFerretDateHi());
         }
+        token.append(";catid="+panelVar.getCATID());
         token.append(";dsid=" + panelVar.getDSID());
         token.append(";varid=" + panelVar.getID());
         // Add additional variables to the mix.
@@ -2003,10 +2004,11 @@ public class OutputPanel extends Composite implements HasName {
         historyOptionsMap = optionsMap;
 
         String tokvarid = tokenMap.get("varid");
+        String tokcatid = tokenMap.get("catid");
         String tokdsid = tokenMap.get("dsid");
         if (!tokvarid.equals(panelVar.getID()) || !tokdsid.equals(panelVar.getDSID())) {
             waitingForHistory = true;
-            Util.getRPCService().getCategories(tokdsid, historyDatasetCallback);
+            Util.getRPCService().getCategories(tokcatid, historyDatasetCallback);
         } else {
             setExtraVariables();
             setOrthogonalAxesValues();
