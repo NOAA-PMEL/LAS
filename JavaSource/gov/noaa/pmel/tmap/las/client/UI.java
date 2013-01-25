@@ -552,7 +552,7 @@ public class UI extends BaseUI {
                 // In the case of where multiple variables are being used in a
                 // panel, we need to change the 1st UserList?
                 xPanels.get(0).setVariable(xVariable, true);
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, true));
             } else if (grid.getID().equals(xVariable.getGrid().getID()) && !xNewVariable.getAttributes().get("grid_type").equals(xVariable.getAttributes().get("grid_type"))) {
                 // Requires new operations, will likely replace the current
                 // operation with a new one
@@ -571,7 +571,7 @@ public class UI extends BaseUI {
                     OutputPanel p = (OutputPanel) panelIt.next();
                     p.setOperation(xOperationID, xView);
                 }
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, true));
             } else {
                 // Not enough is the same. Pretend like it's a brand new data
                 // set.
@@ -598,9 +598,11 @@ public class UI extends BaseUI {
          */
         @Override
         public void onValueChange(ValueChangeEvent<String> historyValueChangeEvent) {
+            String historyToken = historyValueChangeEvent.getValue();
+            popHistory(true, historyToken);
             // The only safe way to react to a History change under the current
             // architecture is to reload the page
-            Window.Location.reload();
+            // Really? Window.Location.reload();
         }
 
     };
