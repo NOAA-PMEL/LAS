@@ -20,13 +20,15 @@ public class Variable extends Container implements VariableInterface {
     
     String dsid;
     String DSName;
+    String catid;
     
     public Variable(Element variable, String dsid) {
         super(variable);
         setDSID(dsid);
     }
-    public Variable(Element variable, String dsid, String DSName) {
+    public Variable(Element variable, String catid, String dsid, String DSName) {
         super(variable);
+        setCATID(catid);
         setDSID(dsid);
         setDSName(DSName);
     }
@@ -42,12 +44,19 @@ public class Variable extends Container implements VariableInterface {
     public String getDSID() {
         return dsid;
     }
+    public String getCATID() {
+        return catid;
+    }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#setDSID(java.lang.String)
      */
     public void setDSID(String dsid) {
         this.dsid = dsid;
         element.setAttribute("dsid", dsid);
+    }
+    public void setCATID(String catid) {
+        this.catid = catid;
+        element.setAttribute("catid", catid);
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getGridID()
@@ -81,6 +90,7 @@ public class Variable extends Container implements VariableInterface {
     	VariableSerializable variableSerializable = new VariableSerializable();
     	variableSerializable.setName(getName());
     	variableSerializable.setID(getID());
+    	variableSerializable.setCATID(getCATID());
     	variableSerializable.setDSID(getDSID());
     	variableSerializable.setDSName(getDSName());
     	variableSerializable.setAttributes(getAttributesAsMap());
