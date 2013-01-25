@@ -212,7 +212,7 @@ public class DatasetWidget extends Tree implements HasName {
                 // A category was selected, but it came back empty...
                 if ( currentlySelected != null ) {
                     TreeItem item = currentlySelected.getChild(0);
-                    item.setText("Empty Category");
+                    item.setText("No data sets found.");
                 }
             }
             if ( saveSelection != null ) {
