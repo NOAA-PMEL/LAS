@@ -1016,7 +1016,12 @@ public class OutputPanel extends Composite implements HasName {
         if ( frontCanvas != null ) {
             frontCanvasContext = frontCanvas.getContext2d();
         } else {
-            Window.alert("Your browser does not support drawing on the plot image for zooming.");
+            if ( isComparePanel() ) {
+            Window.alert("You are accessing this site with an older, no longer supported browser."+
+                         "Some or all features of this site will not work correctly using your browser."+
+                         "Recommended browsers include these or higher versions of these:"+
+                         "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
+            }
         }
         messagePanel = new MessagePanel();
 
