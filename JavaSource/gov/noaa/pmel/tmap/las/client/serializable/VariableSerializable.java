@@ -20,7 +20,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  */
 public class VariableSerializable extends Serializable implements IsSerializable {
-   
+    String CATID;
     String DSID;
     String DSName;
     GridSerializable grid;
@@ -35,10 +35,24 @@ public class VariableSerializable extends Serializable implements IsSerializable
 		// TODO Auto-generated constructor stub
 	}
 	/**
+	 * 
+	 * @return The category id of the category hosting this data set that is hosting this variable.
+	 */
+	public String getCATID() {
+        return CATID;
+    }
+	/**
 	 * @return the dSID
 	 */
 	public String getDSID() {
 		return DSID;
+	}
+	/**
+	 * Set the category ID of the category hosting the data set that is hosting this variable.
+	 * @param catid
+	 */
+	public void setCATID(String catid) {
+	    CATID = catid;
 	}
 	/**
 	 * @param dsid the dSID to set
@@ -46,6 +60,7 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	public void setDSID(String dsid) {
 		DSID = dsid;
 	}
+	
 	/**
 	 * @return the dSName
 	 */
