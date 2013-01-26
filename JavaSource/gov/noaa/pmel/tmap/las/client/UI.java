@@ -1494,10 +1494,10 @@ public class UI extends BaseUI {
         historyToken.append(";differences=" + differenceButton.isDown());
 
         historyToken.append(";autoContour=" + autoContourButton.isDown());
-        if (xPanels.get(0).getMin() < 99999999.) {
+        if (xPanels.get(0).getMin() < 9999999.) {
             historyToken.append(";globalMin=" + xPanels.get(0).getMin());
         }
-        if (xPanels.get(0).getMax() > -99999999.) {
+        if (xPanels.get(0).getMax() > -9999999.) {
             historyToken.append(";globalMax=" + xPanels.get(0).getMax());
         }
         historyToken.append(";xCATID=" + xVariable.getCATID());
@@ -1601,7 +1601,9 @@ public class UI extends BaseUI {
         logger.warning("pushHistory() called");
         String historyTokenString = getHistoryTokenString();
         logger.severe("pushHistory() calling History.newItem with historyTokenString:\n" + historyTokenString);
-        History.newItem(historyTokenString, false);
+        if ( initialHistory == null ) {
+            History.newItem(historyTokenString, false);
+        }
     }
 
     /**
@@ -1647,9 +1649,7 @@ public class UI extends BaseUI {
         OutputPanel comparePanel = getComparePanel();
 
         Map<String, String> options = null;
-        if (initialHistory != null) {
-            initialHistory = null;
-        }
+        
         if (historyOptions != null) {
             options = historyOptions;
             historyOptions = null;
@@ -1756,6 +1756,9 @@ public class UI extends BaseUI {
             logger.info("refresh calling pushHistory()");
             pushHistory();
             logger.setLevel(Level.OFF);
+        }
+        if (initialHistory != null) {
+            initialHistory = null;
         }
         // resize OutputPanel(s) according to the current Window size
         logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
