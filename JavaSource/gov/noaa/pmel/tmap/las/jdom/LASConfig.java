@@ -1505,7 +1505,7 @@ public class LASConfig extends LASDocument {
                     category.setAttribute("children", "variables");
                     category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
                     category.setAttribute("ID", dataset.getAttributeValue("ID"));
-                    dataset.setAttribute("catid", category.getAttributeValue("ID"));
+                    container_dataset.setAttribute("catid", category.getAttributeValue("ID"));
                     if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
                     	category.setAttribute("doc", dataset.getAttributeValue("doc"));
                     }
@@ -1521,7 +1521,6 @@ public class LASConfig extends LASDocument {
                     if ( category.getAttribute("ID") == null && dataset.getAttributeValue("ID") != null ) {
                         category.setAttribute("ID", dataset.getAttributeValue("ID"));
                     }
-                    dataset.setAttribute("catid", category.getAttributeValue("ID"));
                     categories.add(new Category(category));
                 }
             }
