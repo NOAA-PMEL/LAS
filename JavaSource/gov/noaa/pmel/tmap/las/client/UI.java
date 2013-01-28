@@ -59,6 +59,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -1125,7 +1126,8 @@ public class UI extends BaseUI {
 
         // Initialize the gallery with an asynchronous call to the server to get
         // variable needed.
-        if (xCatIDs != null && xCatIDs.length > 0) {
+        String profile = DOM.getElementProperty(DOM.getElementById("las-profile"), "content");
+        if (profile != null && profile.equals("LAS-ESGF")) {
             xESGFSearchButton.setVisible(true);
         }
         if (initialHistory != null && !initialHistory.equals("") && xDataURL == null) {

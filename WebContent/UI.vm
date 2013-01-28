@@ -13,6 +13,8 @@
 <html>
   <head>
     <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta content="LAS" name="LAS-Profile" id="las-profile" />
+    
     <meta http-equiv="X-UA-Compatible" content="IE=9">
     <!--                                           -->
     <!-- Any title is fine                         -->

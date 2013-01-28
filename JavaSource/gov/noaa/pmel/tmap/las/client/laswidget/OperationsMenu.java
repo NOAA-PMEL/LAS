@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -225,10 +226,15 @@ public class OperationsMenu extends Composite {
         } else {
             correlationButton.setEnabled(false);
         }
-        if ( climateAnalysis != null && climateAnalysis.getOperation() != null && climateAnalysis.getOperation().getViews().contains(view) ) {
-            climateAnalysis.setEnabled(true);
+        String profile = DOM.getElementProperty(DOM.getElementById("las-profile"), "content");
+        if (profile != null && profile.equals("LAS-ESGF")) {
+            if ( climateAnalysis != null && climateAnalysis.getOperation() != null && climateAnalysis.getOperation().getViews().contains(view) ) {
+                climateAnalysis.setEnabled(true);
+            } else {
+                climateAnalysis.setVisible(false);
+            }
         } else {
-            climateAnalysis.setEnabled(false);
+            climateAnalysis.setVisible(false);
         }
         
     }
