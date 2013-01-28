@@ -237,7 +237,18 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         }
     }
 
-	public CategorySerializable[] getCategories(String id) throws RPCException {
+	public CategorySerializable[] getCategories(String catid, String dsid) throws RPCException {
+	    String id = null;
+	    if ( catid == null && dsid == null ) {
+	        id = null;
+	    } else if ( catid == null && dsid != null ) {
+	        id = dsid;
+	    } else if ( catid != null && dsid == null ) {
+	        id = catid;
+	    } else if ( catid != null && dsid != null ) {
+	        id = catid;
+	    }
+	    
 		LASConfig lasConfig = getLASConfig();
         
         ArrayList<Category> categories = new ArrayList<Category>();
