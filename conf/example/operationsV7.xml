@@ -1,5 +1,5 @@
 <operations>
-        <operation name="Climate Analysis" ID="Climate_Analysis" private="false"
+        <operation name="Climate Analysis" ID="Climate_Analysis" private="true"
                 service_action="" default="true" category="climate_analysis" output_template="Climate_Analysis">
                 <response ID="PlotResp" type="HTML" index="1">
                         <result type="cancel" ID="cancel" />
