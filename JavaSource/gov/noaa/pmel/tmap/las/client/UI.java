@@ -1968,8 +1968,6 @@ public class UI extends BaseUI {
         xAnalysisWidget.setVisible(true);
         autoContourButton.setDown(false);
         autoContourTextBox.setText("");
-        // Hide the plotImage so it won't look like it changed size later
-        xPanels.get(0).hidePlotImage();
         int buttonIndex = getButtonIndex();
         Widget compareButtons = xOtherControls.getWidget(0, buttonIndex);
         xOtherControls.remove(compareButtons);
@@ -1985,8 +1983,6 @@ public class UI extends BaseUI {
         autoContourButton.setDown(false);
         autoContourTextBox.setText("");
         setupPanelsAndRefresh(resetOnlyNewPanels, true);
-        // Hide the plotImage so it won't look like it changed size later
-        xPanels.get(0).hidePlotImage();
         int buttonIndex = getButtonIndex();
         Widget compareButtons = xOtherControls.getWidget(0, buttonIndex);
         xOtherControls.remove(compareButtons);

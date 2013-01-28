@@ -1747,10 +1747,6 @@ public class OutputPanel extends Composite implements HasName {
         panelAxesWidgets.setOpen(false);
     }
 
-    public void hidePlotImage() {
-        frontCanvas.setVisible(false);
-    }
-
     public boolean isAnnotationsPanelVisible() {
         if (lasAnnotationsPanel != null) {
             return lasAnnotationsPanel.isVisible();
@@ -2170,7 +2166,6 @@ public class OutputPanel extends Composite implements HasName {
                 grid.setWidget(2, 0, plotImage);
                 plotImage.setVisible(false);
                 scale(plotImage, imageScaleRatio);
-                showPlotImage();
             }
         } else {
             setImageSize(fixedZoom);
@@ -2369,10 +2364,6 @@ public class OutputPanel extends Composite implements HasName {
 
     public void showOrthoAxes(String view, List<String> ortho, String analysis) {
         panelAxesWidgets.showOrthoAxes(view, ortho, analysis, isComparePanel());
-    }
-
-    public void showPlotImage() {
-        frontCanvas.setVisible(true);
     }
 
     /**
