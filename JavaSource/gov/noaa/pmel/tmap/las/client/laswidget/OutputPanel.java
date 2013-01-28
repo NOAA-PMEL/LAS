@@ -2008,7 +2008,7 @@ public class OutputPanel extends Composite implements HasName {
         String tokdsid = tokenMap.get("dsid");
         if (!tokvarid.equals(panelVar.getID()) || !tokdsid.equals(panelVar.getDSID())) {
             waitingForHistory = true;
-            Util.getRPCService().getCategories(tokcatid, historyDatasetCallback);
+            Util.getRPCService().getCategories(tokcatid, tokdsid, historyDatasetCallback);
         } else {
             setExtraVariables();
             setOrthogonalAxesValues();

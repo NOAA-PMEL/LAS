@@ -64,7 +64,7 @@ public class DatasetWidget extends Tree implements HasName {
             // Clear the tree to re-add all the datasets in this session.
             clear();
             
-            Util.getRPCService().getCategories(null, categoryCallback);
+            Util.getRPCService().getCategories(null, null, categoryCallback);
             
         }
         
@@ -107,7 +107,7 @@ public class DatasetWidget extends Tree implements HasName {
             currentlySelected = item;
             if ( item.getChild(0).getText().equals(DatasetWidget.LOADING) ) {
                 CategorySerializable cat = (CategorySerializable) item.getUserObject();
-                Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+                Util.getRPCService().getCategories(cat.getID(), null, categoryCallback);
             }
         }
 
@@ -122,7 +122,7 @@ public class DatasetWidget extends Tree implements HasName {
             TreeItem child = item.getChild(0);
             if ( child != null && child.getText().equals(DatasetWidget.LOADING) ) {
                 CategorySerializable cat = (CategorySerializable) item.getUserObject();
-                Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+                Util.getRPCService().getCategories(cat.getID(), null, categoryCallback);
             }
         }
 
@@ -133,7 +133,7 @@ public class DatasetWidget extends Tree implements HasName {
      */
     public void init() {
         try {
-			Util.getRPCService().getCategories(null, categoryCallback);
+			Util.getRPCService().getCategories(null, null, categoryCallback);
 		} catch (RuntimeException e) {
 			// Catching this exception mainly to allow WindowBuilder to work without error
 			e.printStackTrace();

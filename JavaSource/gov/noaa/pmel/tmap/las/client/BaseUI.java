@@ -968,7 +968,7 @@ public class BaseUI {
                 }
             }
         };
-        Util.getRPCService().getCategories(xVariable.getDSID(), updateSubPanelVarsCallback);
+        Util.getRPCService().getCategories(null, xVariable.getDSID(), updateSubPanelVarsCallback);
     }
 
     public class Mouse {
