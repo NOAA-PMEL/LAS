@@ -153,7 +153,7 @@ public class UI extends BaseUI {
             xCATID = ids.get("catid");
             xDSID = ids.get("dsid");
             xVarID = ids.get("varid");
-            Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
+            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
         }
 
     };
@@ -200,10 +200,7 @@ public class UI extends BaseUI {
                     xView = "xy";
                 }
                 setUpdateRequired(true);
-                if ( xCATID == null ) {
-                    xCATID = xDSID;
-                }
-                Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
+                Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
             } else {
                 // Set some default values...
                 xView = "xy";
@@ -1164,9 +1161,7 @@ public class UI extends BaseUI {
             // These can come from the initial history or from the dsid=??? and
             // optionally the varid=??? query parameters.
             if (xDSID != null || xCATID != null) {
-                if ( xDSID == null ) {
-                    xDSID = xCATID;
-                }
+                
                 setUpdateRequired(true);
                 // Supply some reasonable defaults and go...
                 if (xOperationID == null) {
@@ -1175,7 +1170,7 @@ public class UI extends BaseUI {
                 if (xView == null) {
                     xView = "xy";
                 }
-                Util.getRPCService().getCategories(xCATID, initFromDatasetAndVariable);
+                Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
             } else {
                 Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);
             }
@@ -1592,7 +1587,7 @@ public class UI extends BaseUI {
             } else {
                 historyString = historyToken;
                 historyTokens = tokenMap;
-                Util.getRPCService().getCategories(tokenMap.get("xCATID"), requestGridForHistory);
+                Util.getRPCService().getCategories(tokenMap.get("xCATID"), tokenMap.get("xDSID"), requestGridForHistory);
             }
         }
     }

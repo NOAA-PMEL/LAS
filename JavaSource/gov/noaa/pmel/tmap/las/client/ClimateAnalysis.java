@@ -194,7 +194,7 @@ public class ClimateAnalysis implements EntryPoint {
 				// Category children, open it up.
 				
 				// Variable children, dagnabit.  We need the variable, so let's go get it.
-				Util.getRPCService().getCategories(c.getID(), categoryCallback);
+				Util.getRPCService().getCategories(c.getID(), null, categoryCallback);
 			}
 		}
 		
