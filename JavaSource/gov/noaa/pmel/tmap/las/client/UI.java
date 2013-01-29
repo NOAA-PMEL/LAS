@@ -286,7 +286,7 @@ public class UI extends BaseUI {
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
-                    Window.open(Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString()), "_blank", features);
+                    Window.open(Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString())+"&catid="+xVariable.getCATID(), "_blank", features);
                     optionsDialog.hide();
                 }
             });

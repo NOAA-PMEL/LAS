@@ -16,6 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  *
  */
 public interface RPCServiceAsync {
+    public void getCategoryWithGrids(String catid, String dsid, AsyncCallback categoryCallback);
 	public void getCategories(String catid, String dsid, AsyncCallback categoryCallback);
 	public void getVariable(String dsid, String varid, AsyncCallback getVariableCallback);
     public void getGrid(String dsid, String varid, AsyncCallback gridCallback);

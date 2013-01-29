@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
  *
  */
 public interface RPCService extends RemoteService {
+    public CategorySerializable getCategoryWithGrids(String catid, String dsid) throws RPCException;
 	public CategorySerializable[] getCategories(String catid, String dsid) throws RPCException;
 	public VariableSerializable getVariable(String dsid, String varid) throws RPCException;
 	public GridSerializable getGrid(String dsID, String varID) throws RPCException;
