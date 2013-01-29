@@ -236,7 +236,32 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             throw new RPCException(e.getMessage());
         }
     }
-
+    public CategorySerializable getCategoryWithGrids(String catid, String dsid) throws RPCException {
+        String id = null;
+        if ( catid == null && dsid == null ) {
+            id = null;
+        } else if ( catid == null && dsid != null ) {
+            id = dsid;
+        } else if ( catid != null && dsid == null ) {
+            id = catid;
+        } else if ( catid != null && dsid != null ) {
+            id = catid;
+        }
+        CategorySerializable[] cats = getCategories(id);
+        if ( cats.length != 1 ) {
+            throw new RPCException("Cound not get a single category with this ID");
+        }
+        CategorySerializable cat = cats[0];
+        if ( !cat.isCategoryChildren() ) {
+            DatasetSerializable dataset = cat.getDatasetSerializable();
+            VariableSerializable[] vars = dataset.getVariablesSerializable();
+            for (int i = 0; i < vars.length; i++) {
+                GridSerializable wire_grid = getGridSerializable(dsid, vars[i].getID());
+                vars[i].setGrid(wire_grid);
+            }
+        }
+        return cat;
+    }
 	public CategorySerializable[] getCategories(String catid, String dsid) throws RPCException {
 	    String id = null;
 	    if ( catid == null && dsid == null ) {
@@ -248,6 +273,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	    } else if ( catid != null && dsid != null ) {
 	        id = catid;
 	    }
+	    return getCategories(id);
+	}
+    private CategorySerializable[] getCategories(String id) throws RPCException {
 	    
 		LASConfig lasConfig = getLASConfig();
         

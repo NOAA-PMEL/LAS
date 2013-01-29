@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableListBox;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -395,6 +396,7 @@ public class Correlation implements EntryPoint {
 
 		});
 		update.addClickHandler(updateClick);
+		String catid = Util.getParameterString("catid");
 		String xml = Util.getParameterString("xml");
 		if (xml != null && !xml.equals("")) {
 			xml = URL.decode(xml);
@@ -417,7 +419,7 @@ public class Correlation implements EntryPoint {
 			yhi = lasRequest.getRangeHi("y", 0);
 			tlo = lasRequest.getRangeLo("t", 0);
 			thi = lasRequest.getRangeHi("t", 0);
-			Util.getRPCService().getFullDataset(dsid, datasetCallback);
+			Util.getRPCService().getCategoryWithGrids(catid, dsid, datasetCallback);
 		} else {
 
 		}
@@ -1240,245 +1242,257 @@ public class Correlation implements EntryPoint {
 		}
 	}
 
-	AsyncCallback<DatasetSerializable> datasetCallback = new AsyncCallback<DatasetSerializable>() {
+	AsyncCallback<CategorySerializable> datasetCallback = new AsyncCallback<CategorySerializable>() {
 
-		@Override
-		public void onFailure(Throwable caught) {
+	    @Override
+	    public void onFailure(Throwable caught) {
 
-			Window.alert("Could not get the variables list from the server.");
+	        Window.alert("Could not get the variables list from the server.");
 
-		}
+	    }
 
-		@Override
-		public void onSuccess(DatasetSerializable result) {
-			VariableSerializable variables[] = result
-					.getVariablesSerializable();
-			int index = -1;
-			int time_index = -1;
-			constraintsLayout.setHeader("Add a variable constraint...");
-			for (int i = 0; i < variables.length; i++) {
-				if (!variables[i].getAttributes().get("grid_type")
-						.equals("vector")) {
-					xDatasetVariables.put(variables[i].getID(), variables[i]);
-					xVariables.addItem(variables[i]);
-					yVariables.addItem(variables[i]);
-					colorVariables.addItem(variables[i]);
-					if (!variables[i].getName().toLowerCase()
-							.equals("latitude")
-							&& !variables[i].getName().toLowerCase()
-									.equals("longitude")
-							&& !variables[i].getName().toLowerCase()
-									.equals("time")) {
-						constraintsLayout.addItem(variables[i]);
-					}
-					if (variables[i].getID().equals(varid)) {
-						index = i;
-					}
-					if (variables[i].getName().toLowerCase().contains("time")) {
-						time_index = i;
-					}
-				}
-			}
-			if (index > 0) {
-				yVariables.setSelectedIndex(index);
-			}
-			if (time_index > 0) {
-				xVariables.setSelectedIndex(time_index);
-			}
-			String grid_type = xVariables.getVariable(0).getAttributes()
-					.get("grid_type");
-			if (grid_type.equals("regular")) {
-				operationID = "prop_prop_plot";
-			} else if (grid_type.equals("trajectory")) {
-				operationID = "Trajectory_correlation_plot";
-			}
+	    @Override
+	    public void onSuccess(CategorySerializable cat) {
+	        VariableSerializable[] variables = null;
+	        if (cat != null && cat.isVariableChildren()) {
+	            DatasetSerializable ds = cat.getDatasetSerializable();
+	            variables = ds.getVariablesSerializable();
+	        } else {
+	            Window.alert("Could not get the variables list from the server.");
 
-			VariableSerializable varY = yVariables.getVariable(yVariables
-					.getSelectedIndex());
-			constraintsLayout.addWidgetForY(yVariableConstraint);
-			if (varY.getName().toLowerCase().equals("latitude")) {
-				yVariableConstraint.setVariable(varY);
-				yVariableConstraint.setActive(false);
-				yVariableConstraint.setVisible(false);
-			} else if (varY.getName().toLowerCase().equals("longitude")) {
-				yVariableConstraint.setVariable(varY);
-				yVariableConstraint.setActive(false);
-				yVariableConstraint.setVisible(false);
-			} else if (varY.getName().toLowerCase().equals("time")) {
-				yVariableConstraint.setVariable(varY);
-				yVariableConstraint.setActive(false);
-				yVariableConstraint.setVisible(false);
-			} else {
-				yVariableConstraint.setVariable(varY);
-				yVariableConstraint.setVisible(true);
-			}
+	        }
 
-			VariableSerializable varX = xVariables.getVariable(xVariables
-					.getSelectedIndex());
-			constraintsLayout.addWidgetForX(xVariableConstraint);
-			if (varX.getName().toLowerCase().equals("latitude")) {
-				xVariableConstraint.setVariable(varX);
-				xVariableConstraint.setActive(false);
-				xVariableConstraint.setVisible(false);
-			} else if (varX.getName().toLowerCase().equals("longitude")) {
-				xVariableConstraint.setVariable(varX);
-				xVariableConstraint.setActive(false);
-				xVariableConstraint.setVisible(false);
-			} else if (varX.getName().toLowerCase().equals("time")) {
-				xVariableConstraint.setVariable(varX);
-				xVariableConstraint.setActive(false);
-				xVariableConstraint.setVisible(false);
-			} else {
-				xVariableConstraint.setVariable(varX);
-				xVariableConstraint.setVisible(true);
-			}
+	        if ( variables == null ) {
+	            Window.alert("Could not get the variables list from the server.");
+	        } else {
 
-			GridSerializable grid = varX.getGrid();
-			mapConstraint.setTool("xy");
-			mapConstraint.setDataExtent(
-					Double.valueOf(grid.getYAxis().getLo()),
-					Double.valueOf(grid.getYAxis().getHi()),
-					Double.valueOf(grid.getXAxis().getLo()),
-					Double.valueOf(grid.getXAxis().getHi()), 1.0);
-			if (xlo != null && xhi != null && ylo != null && yhi != null) {
-				mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-						Double.valueOf(yhi), Double.valueOf(xlo),
-						Double.valueOf(xhi));
-			}
-			if (grid.hasT()) {
-				timeConstraint.init(grid.getTAxis(), true);
-				if (tlo != null) {
-					timeConstraint.setLo(tlo);
-				}
-				if (thi != null) {
-					timeConstraint.setHi(thi);
-				}
-				timeConstraint.setVisible(true);
-			} else {
-				timeConstraint.setVisible(false);
-			}
+	            int index = -1;
+	            int time_index = -1;
+	            constraintsLayout.setHeader("Add a variable constraint...");
+	            for (int i = 0; i < variables.length; i++) {
+	                if (!variables[i].getAttributes().get("grid_type")
+	                        .equals("vector")) {
+	                    xDatasetVariables.put(variables[i].getID(), variables[i]);
+	                    xVariables.addItem(variables[i]);
+	                    yVariables.addItem(variables[i]);
+	                    colorVariables.addItem(variables[i]);
+	                    if (!variables[i].getName().toLowerCase()
+	                            .equals("latitude")
+	                            && !variables[i].getName().toLowerCase()
+	                            .equals("longitude")
+	                            && !variables[i].getName().toLowerCase()
+	                            .equals("time")) {
+	                        constraintsLayout.addItem(variables[i]);
+	                    }
+	                    if (variables[i].getID().equals(varid)) {
+	                        index = i;
+	                    }
+	                    if (variables[i].getName().toLowerCase().contains("time")) {
+	                        time_index = i;
+	                    }
+	                }
+	            }
+	            if (index > 0) {
+	                yVariables.setSelectedIndex(index);
+	            }
+	            if (time_index > 0) {
+	                xVariables.setSelectedIndex(time_index);
+	            }
+	            String grid_type = xVariables.getVariable(0).getAttributes()
+	                    .get("grid_type");
+	            if (grid_type.equals("regular")) {
+	                operationID = "prop_prop_plot";
+	            } else if (grid_type.equals("trajectory")) {
+	                operationID = "Trajectory_correlation_plot";
+	            }
 
-			if (grid.hasZ()) {
-				zAxisWidget.init(grid.getZAxis());
-				zAxisWidget.setVisible(true);
-				zAxisWidget.setRange(true);
-			} else {
-				zAxisWidget.setVisible(false);
-			}
+	            VariableSerializable varY = yVariables.getVariable(yVariables
+	                    .getSelectedIndex());
+	            constraintsLayout.addWidgetForY(yVariableConstraint);
+	            if (varY.getName().toLowerCase().equals("latitude")) {
+	                yVariableConstraint.setVariable(varY);
+	                yVariableConstraint.setActive(false);
+	                yVariableConstraint.setVisible(false);
+	            } else if (varY.getName().toLowerCase().equals("longitude")) {
+	                yVariableConstraint.setVariable(varY);
+	                yVariableConstraint.setActive(false);
+	                yVariableConstraint.setVisible(false);
+	            } else if (varY.getName().toLowerCase().equals("time")) {
+	                yVariableConstraint.setVariable(varY);
+	                yVariableConstraint.setActive(false);
+	                yVariableConstraint.setVisible(false);
+	            } else {
+	                yVariableConstraint.setVariable(varY);
+	                yVariableConstraint.setVisible(true);
+	            }
 
-			if (zlo != null && zhi != null) {
-				zAxisWidget.setLo(zlo);
-				zAxisWidget.setHi(zhi);
-			}
+	            VariableSerializable varX = xVariables.getVariable(xVariables
+	                    .getSelectedIndex());
+	            constraintsLayout.addWidgetForX(xVariableConstraint);
+	            if (varX.getName().toLowerCase().equals("latitude")) {
+	                xVariableConstraint.setVariable(varX);
+	                xVariableConstraint.setActive(false);
+	                xVariableConstraint.setVisible(false);
+	            } else if (varX.getName().toLowerCase().equals("longitude")) {
+	                xVariableConstraint.setVariable(varX);
+	                xVariableConstraint.setActive(false);
+	                xVariableConstraint.setVisible(false);
+	            } else if (varX.getName().toLowerCase().equals("time")) {
+	                xVariableConstraint.setVariable(varX);
+	                xVariableConstraint.setActive(false);
+	                xVariableConstraint.setVisible(false);
+	            } else {
+	                xVariableConstraint.setVariable(varX);
+	                xVariableConstraint.setVisible(true);
+	            }
 
-			setVariables();
-			List<Map<String, String>> vcs = lasRequest.getVariableConstraints();
-			for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
-				Map<String, String> con = (Map<String, String>) vcIt.next();
-				String varid = con.get("varID");
-				String op = con.get("op");
-				String value = con.get("value");
-				String id = con.get("id");
-				String plotv = plotVariable(varid);
-				VariableSerializable v = xDatasetVariables.get(varid);
-				if (v != null && v.getName().toLowerCase().equals("latitude")) {
-					if (op.equals("gt") || op.equals("ge")) {
-						mapConstraint.setCurrentSelection(
-								Double.valueOf(value), Double.valueOf(yhi),
-								Double.valueOf(xlo), Double.valueOf(xhi));
-					} else if (op.equals("eq")) {
-						mapConstraint.setCurrentSelection(
-								Double.valueOf(value), Double.valueOf(value),
-								Double.valueOf(xlo), Double.valueOf(xhi));
-					} else {
-						mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-								Double.valueOf(value), Double.valueOf(xlo),
-								Double.valueOf(xhi));
-					}
-				} else if (v != null
-						&& v.getName().toLowerCase().equals("longitude")) {
-					if (op.equals("gt") || op.equals("ge")) {
-						mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-								Double.valueOf(yhi), Double.valueOf(value),
-								Double.valueOf(xhi));
-					} else if (op.equals("eq")) {
-						mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-								Double.valueOf(yhi), Double.valueOf(value),
-								Double.valueOf(value));
-					} else {
-						mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-								Double.valueOf(yhi), Double.valueOf(xlo),
-								Double.valueOf(value));
-					}
-				} else if (v != null
-						&& v.getName().toLowerCase().equals("time")) {
-					if (op.equals("gt") || op.equals("ge")) {
-						timeConstraint.setLo(value);
-					} else if (op.equals("eq")) {
-						timeConstraint.setLo(value);
-						timeConstraint.setHi(value);
-					} else {
-						timeConstraint.setHi(value);
-					}
-				} else if (v != null && plotv.equals("x")) {
-					xVariableConstraint.setApply(true);
-					if (op.equals("gt") || op.equals("ge")) {
-						xVariableConstraint.setMin(value);
-					} else if (op.equals("eq")) {
-						xVariableConstraint.setMin(value);
-						xVariableConstraint.setMax(value);
-					} else {
-						xVariableConstraint.setMax(value);
-					}
-					constraintsLayout.setVisible(true);
+	            GridSerializable grid = varX.getGrid();
+	            mapConstraint.setTool("xy");
+	            mapConstraint.setDataExtent(
+	                    Double.valueOf(grid.getYAxis().getLo()),
+	                    Double.valueOf(grid.getYAxis().getHi()),
+	                    Double.valueOf(grid.getXAxis().getLo()),
+	                    Double.valueOf(grid.getXAxis().getHi()), 1.0);
+	            if (xlo != null && xhi != null && ylo != null && yhi != null) {
+	                mapConstraint.setCurrentSelection(Double.valueOf(ylo),
+	                        Double.valueOf(yhi), Double.valueOf(xlo),
+	                        Double.valueOf(xhi));
+	            }
+	            if (grid.hasT()) {
+	                timeConstraint.init(grid.getTAxis(), true);
+	                if (tlo != null) {
+	                    timeConstraint.setLo(tlo);
+	                }
+	                if (thi != null) {
+	                    timeConstraint.setHi(thi);
+	                }
+	                timeConstraint.setVisible(true);
+	            } else {
+	                timeConstraint.setVisible(false);
+	            }
 
-				} else if (plotv.equals("y")) {
-					yVariableConstraint.setApply(true);
-					if (op.equals("gt") || op.equals("ge")) {
-						yVariableConstraint.setMin(value);
-					} else if (op.equals("eq")) {
-						yVariableConstraint.setMin(value);
-						yVariableConstraint.setMax(value);
-					} else {
-						yVariableConstraint.setMax(value);
-					}
-					constraintsLayout.setVisible(true);
+	            if (grid.hasZ()) {
+	                zAxisWidget.init(grid.getZAxis());
+	                zAxisWidget.setVisible(true);
+	                zAxisWidget.setRange(true);
+	            } else {
+	                zAxisWidget.setVisible(false);
+	            }
 
-				} else {
-					VariableConstraintWidget c = new VariableConstraintWidget(
-							true);
-					c.addRemoveHandler(new ClickHandler() {
+	            if (zlo != null && zhi != null) {
+	                zAxisWidget.setLo(zlo);
+	                zAxisWidget.setHi(zhi);
+	            }
 
-						@Override
-						public void onClick(ClickEvent event) {
-							removeHandlerHelper(event);
-						}
+	            setVariables();
+	            List<Map<String, String>> vcs = lasRequest.getVariableConstraints();
+	            for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
+	                Map<String, String> con = (Map<String, String>) vcIt.next();
+	                String varid = con.get("varID");
+	                String op = con.get("op");
+	                String value = con.get("value");
+	                String id = con.get("id");
+	                String plotv = plotVariable(varid);
+	                VariableSerializable v = xDatasetVariables.get(varid);
+	                if (v != null && v.getName().toLowerCase().equals("latitude")) {
+	                    if (op.equals("gt") || op.equals("ge")) {
+	                        mapConstraint.setCurrentSelection(
+	                                Double.valueOf(value), Double.valueOf(yhi),
+	                                Double.valueOf(xlo), Double.valueOf(xhi));
+	                    } else if (op.equals("eq")) {
+	                        mapConstraint.setCurrentSelection(
+	                                Double.valueOf(value), Double.valueOf(value),
+	                                Double.valueOf(xlo), Double.valueOf(xhi));
+	                    } else {
+	                        mapConstraint.setCurrentSelection(Double.valueOf(ylo),
+	                                Double.valueOf(value), Double.valueOf(xlo),
+	                                Double.valueOf(xhi));
+	                    }
+	                } else if (v != null
+	                        && v.getName().toLowerCase().equals("longitude")) {
+	                    if (op.equals("gt") || op.equals("ge")) {
+	                        mapConstraint.setCurrentSelection(Double.valueOf(ylo),
+	                                Double.valueOf(yhi), Double.valueOf(value),
+	                                Double.valueOf(xhi));
+	                    } else if (op.equals("eq")) {
+	                        mapConstraint.setCurrentSelection(Double.valueOf(ylo),
+	                                Double.valueOf(yhi), Double.valueOf(value),
+	                                Double.valueOf(value));
+	                    } else {
+	                        mapConstraint.setCurrentSelection(Double.valueOf(ylo),
+	                                Double.valueOf(yhi), Double.valueOf(xlo),
+	                                Double.valueOf(value));
+	                    }
+	                } else if (v != null
+	                        && v.getName().toLowerCase().equals("time")) {
+	                    if (op.equals("gt") || op.equals("ge")) {
+	                        timeConstraint.setLo(value);
+	                    } else if (op.equals("eq")) {
+	                        timeConstraint.setLo(value);
+	                        timeConstraint.setHi(value);
+	                    } else {
+	                        timeConstraint.setHi(value);
+	                    }
+	                } else if (v != null && plotv.equals("x")) {
+	                    xVariableConstraint.setApply(true);
+	                    if (op.equals("gt") || op.equals("ge")) {
+	                        xVariableConstraint.setMin(value);
+	                    } else if (op.equals("eq")) {
+	                        xVariableConstraint.setMin(value);
+	                        xVariableConstraint.setMax(value);
+	                    } else {
+	                        xVariableConstraint.setMax(value);
+	                    }
+	                    constraintsLayout.setVisible(true);
 
-					});
-					c.addApplyHandler(applyHandler);
-					c.addChangeHandler(constraintChange);
+	                } else if (plotv.equals("y")) {
+	                    yVariableConstraint.setApply(true);
+	                    if (op.equals("gt") || op.equals("ge")) {
+	                        yVariableConstraint.setMin(value);
+	                    } else if (op.equals("eq")) {
+	                        yVariableConstraint.setMin(value);
+	                        yVariableConstraint.setMax(value);
+	                    } else {
+	                        yVariableConstraint.setMax(value);
+	                    }
+	                    constraintsLayout.setVisible(true);
 
-					if (v != null) {
-						c.setVariable(v);
-						c.setApply(true);
-						if (op.equals("gt") || op.equals("ge")) {
-							c.setMin(value);
-						} else if (op.equals("eq")) {
-							c.setMin(value);
-							c.setMax(value);
-						} else {
-							c.setMax(value);
-						}
-					}
-					constraintsLayout.addWidget(c);
-				}
-				setConstraints();
-			}
-			// The request is now set up like a property-property plot request,
-			// so save it.
-			initialState = new LASRequest(lasRequest.toString());
-			updatePlot(true);
-		}
+	                } else {
+	                    VariableConstraintWidget c = new VariableConstraintWidget(
+	                            true);
+	                    c.addRemoveHandler(new ClickHandler() {
+
+	                        @Override
+	                        public void onClick(ClickEvent event) {
+	                            removeHandlerHelper(event);
+	                        }
+
+	                    });
+	                    c.addApplyHandler(applyHandler);
+	                    c.addChangeHandler(constraintChange);
+
+	                    if (v != null) {
+	                        c.setVariable(v);
+	                        c.setApply(true);
+	                        if (op.equals("gt") || op.equals("ge")) {
+	                            c.setMin(value);
+	                        } else if (op.equals("eq")) {
+	                            c.setMin(value);
+	                            c.setMax(value);
+	                        } else {
+	                            c.setMax(value);
+	                        }
+	                    }
+	                    constraintsLayout.addWidget(c);
+	                }
+	                setConstraints();
+	            }
+	            // The request is now set up like a property-property plot request,
+	            // so save it.
+	            initialState = new LASRequest(lasRequest.toString());
+	            updatePlot(true);
+	        }
+	    }
 	};
 
 	private int getNumber(Node firstChild) {
