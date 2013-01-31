@@ -2,7 +2,8 @@
 <html>
 <!-- LAS SERVER OK -->
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=productserver/templates/Correlation_plot.vm?xml=$las_request.toEncodedURLString()"> 
+#set($id = $request.getParameter("catid"))
+<META http-equiv="refresh" content="0;URL=productserver/templates/Correlation_plot.vm?catid=$id&xml=$las_request.toEncodedURLString()"> 
 </head>
 <body>
 </body>
