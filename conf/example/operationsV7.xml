@@ -591,7 +591,6 @@ streamable="true" mime_type="application/postscript"/> -->
               <result type="debug" ID="debug" file_suffix=".txt"/>
           </response>
           <region>
-            <intervals name="xyt" />
             <intervals name="xy" />
           </region>
           <grid_types>
