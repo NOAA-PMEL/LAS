@@ -1938,6 +1938,7 @@ public class LASConfig extends LASDocument {
             	}
             }
         	Dataset ds = new Dataset(ds_novars);
+                ds.setAttribute("catid", ds.getID());
         	datasets.add(ds);
         }
         return datasets;
