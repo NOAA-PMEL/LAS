@@ -189,8 +189,8 @@ public class OperationsMenu extends Composite {
     public void setCorrelationButtonEnabled(boolean b) {
         correlationButton.setEnabled(b);
     }
-    public void enableByView(String view) {
-        if ( animationButton.getOperation().getViews().contains(view) ) {
+    public void enableByView(String view, boolean hasT) {
+        if ( animationButton.getOperation().getViews().contains(view) && hasT ) {
             animationButton.setEnabled(true);
         } else {
             animationButton.setEnabled(false);
@@ -237,8 +237,5 @@ public class OperationsMenu extends Composite {
             climateAnalysis.setVisible(false);
         }
         
-    }
-    public void setAnimateButtonEnabled(boolean b) {
-        animationButton.setEnabled(b);
     }
 }

@@ -1933,11 +1933,6 @@ public class UI extends BaseUI {
     private void setupForNewGrid(GridSerializable grid) {
         setUpdateRequired(true);
         xVariable.setGrid(grid);
-        if ( grid.hasT() ) {
-            tOperationsMenu.setAnimateButtonEnabled(true);
-        } else {
-            tOperationsMenu.setAnimateButtonEnabled(false);
-        }
         xAnalysisWidget.setAnalysisAxes(grid);
         xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
         xOperationID = xOperationsWidget.getCurrentOperation().getID();
@@ -2054,7 +2049,7 @@ public class UI extends BaseUI {
         } else {
             xAxesWidget.getRefMap().setTool(xView);
         }
-        tOperationsMenu.enableByView(xView);
+        tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
     }
 
     // private void applyTokensToPanelModePanels(String[] settings) {
@@ -2200,7 +2195,6 @@ public class UI extends BaseUI {
     private void turnOffAnalysis() {
         logger.info("turnOffAnalysis() called");
         xAnalysisWidget.setActive(false);
-        tOperationsMenu.setCorrelationButtonEnabled(true);
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();
             panel.setAnalysis(null);
@@ -2208,6 +2202,8 @@ public class UI extends BaseUI {
         xOperationID = ops[0].getID();
         xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), ops[0].getID(), xView, ops);
         tOperationsMenu.setMenus(ops, xView);
+        tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
+        tOperationsMenu.setCorrelationButtonEnabled(true);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
         xAxesWidget.showViewAxes(xView, xOrtho, null);
