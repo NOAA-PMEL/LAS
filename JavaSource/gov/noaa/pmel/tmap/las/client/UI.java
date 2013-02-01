@@ -1933,6 +1933,11 @@ public class UI extends BaseUI {
     private void setupForNewGrid(GridSerializable grid) {
         setUpdateRequired(true);
         xVariable.setGrid(grid);
+        if ( grid.hasT() ) {
+            tOperationsMenu.setAnimateButtonEnabled(true);
+        } else {
+            tOperationsMenu.setAnimateButtonEnabled(false);
+        }
         xAnalysisWidget.setAnalysisAxes(grid);
         xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
         xOperationID = xOperationsWidget.getCurrentOperation().getID();
