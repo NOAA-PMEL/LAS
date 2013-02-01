@@ -238,4 +238,7 @@ public class OperationsMenu extends Composite {
         }
         
     }
+    public void setAnimateButtonEnabled(boolean b) {
+        animationButton.setEnabled(b);
+    }
 }
