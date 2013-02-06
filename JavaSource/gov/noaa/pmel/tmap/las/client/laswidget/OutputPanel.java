@@ -2440,21 +2440,37 @@ public class OutputPanel extends Composite implements HasName {
         if (view.contains("x")) {
             if (!panelVar.getGrid().hasX()) {
                 return false;
+            } else {
+                if ( panelVar.getGrid().getXAxis().isOne() ) {
+                    return false;
+                }
             }
         }
         if (view.contains("y")) {
             if (!panelVar.getGrid().hasY()) {
                 return false;
+            } else {
+                if ( panelVar.getGrid().getYAxis().isOne() ) {
+                    return false;
+                }
             }
         }
         if (view.contains("z")) {
             if (!panelVar.getGrid().hasZ()) {
                 return false;
+            } else {
+                if ( panelVar.getGrid().getZAxis().isOne() ) {
+                    return false;
+                }
             }
         }
         if (view.contains("t")) {
             if (!panelVar.getGrid().hasT()) {
                 return false;
+            } else {
+                if ( panelVar.getGrid().getTAxis().isOne() ) {
+                    return false;
+                }
             }
         }
         return true;
