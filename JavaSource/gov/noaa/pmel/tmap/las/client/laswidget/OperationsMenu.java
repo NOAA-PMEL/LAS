@@ -190,38 +190,38 @@ public class OperationsMenu extends Composite {
         correlationButton.setEnabled(b);
     }
     public void enableByView(String view, boolean hasT) {
-        if ( animationButton.getOperation().getViews().contains(view) && hasT ) {
+        if ( animationButton.getOperation() != null && animationButton.getOperation().getViews().contains(view) && hasT ) {
             animationButton.setEnabled(true);
         } else {
             animationButton.setEnabled(false);
         }
-        if ( compareButton.getOperation().getViews().contains(view) ) {
+        if ( compareButton.getOperation() != null && compareButton.getOperation().getViews().contains(view) ) {
             compareButton.setEnabled(true);
         } else {
             compareButton.setEnabled(false);
         }
-        if ( googleEarthButton.getOperation().getViews().contains(view) ) {
+        if ( googleEarthButton.getOperation() != null && googleEarthButton.getOperation().getViews().contains(view) ) {
             googleEarthButton.setEnabled(true);
         } else {
             googleEarthButton.setEnabled(false);
         }
-        if ( showValuesButton.getOperation().getViews().contains(view) ) {
+        if ( showValuesButton.getOperation() != null && showValuesButton.getOperation().getViews().contains(view) ) {
             showValuesButton.setEnabled(true);
         } else {
             showValuesButton.setEnabled(false);
         }
-        if ( exportToDesktopButton.getOperation().getViews().contains(view) ) {
+        if ( exportToDesktopButton.getOperation() != null && exportToDesktopButton.getOperation().getViews().contains(view) ) {
             exportToDesktopButton.setEnabled(true);
 
         } else {
             exportToDesktopButton.setEnabled(false);
         }
-        if ( saveAsButton.getOperation().getViews().contains(view) ) {
+        if ( saveAsButton.getOperation() != null && saveAsButton.getOperation().getViews().contains(view) ) {
             saveAsButton.setEnabled(true);
         } else {
             saveAsButton.setEnabled(false);
         }
-        if ( correlationButton.getOperation().getViews().contains(view) ) {
+        if ( correlationButton.getOperation() != null && correlationButton.getOperation().getViews().contains(view) ) {
             correlationButton.setEnabled(true);
         } else {
             correlationButton.setEnabled(false);
