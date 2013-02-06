@@ -97,5 +97,15 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	public void setUnits(String units) {
 		this.units = units;
 	}
+    public boolean isOne() {
+        if ( values != null && values.length == 1 ) {
+            return true;
+        } else {
+            if ( getHi().equals(getLo())) {
+                return true;
+            }
+        }
+        return false;
+    }
 	
 }
