@@ -36,6 +36,7 @@
    <ui_timeout>20</ui_timeout>
    <ps_timeout>3600</ps_timeout>
    <use_cache>true</use_cache>
+   <default_catid>ocean_atlas_subset</default_catid>
    <default_dsid>ocean_atlas_subset</default_dsid>
    <default_varid>TEMP-ocean_atlas_subset</default_varid>
    <default_operation>Plot_2D_XY_zoom</default_operation>
