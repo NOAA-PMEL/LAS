@@ -42,4 +42,5 @@ public interface RPCServiceAsync {
 	public void getFacets(AsyncCallback<List<FacetSerializable>> facetCallback);
 	public void getESGFDatasets(String query, AsyncCallback<List<ESGFDatasetSerializable>> esgfDatasetCallback);
 	public void addESGFDataset(String id, AsyncCallback<String> addESGFDatasetCallback);
+    public void addESGFDatasets(List<String> ncats, AsyncCallback<String[]> addESGFDatasetsCallback);
 }
