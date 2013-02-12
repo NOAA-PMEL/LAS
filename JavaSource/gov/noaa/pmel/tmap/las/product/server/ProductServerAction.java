@@ -17,10 +17,7 @@ import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.service.ProductLocalService;
 import gov.noaa.pmel.tmap.las.service.ProductWebService;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
-import gov.noaa.pmel.tmap.las.util.Constants;
-import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Institution;
-import gov.noaa.pmel.tmap.las.util.Tributary;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,15 +32,9 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -54,7 +45,6 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;

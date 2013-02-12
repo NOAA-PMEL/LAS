@@ -10,56 +10,43 @@ import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.FacetMember;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.SerializableNameComparator;
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-
 import gov.noaa.pmel.tmap.las.client.util.Util;
-import gov.noaa.pmel.tmap.las.confluence.Confluence;
 import gov.noaa.pmel.tmap.las.jdom.ESGFSearchDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASJDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
-import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.Dataset;
-import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
 import gov.noaa.pmel.tmap.las.util.Region;
 import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
-import gov.noaa.pmel.tmap.las.util.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.httpclient.HttpException;
-import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
