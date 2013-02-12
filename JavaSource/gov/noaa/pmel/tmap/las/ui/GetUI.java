@@ -11,6 +11,9 @@ import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -73,7 +76,7 @@ public class GetUI extends ConfigService {
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
         ServletContext context = (ServletContext) servlet.getServletContext();
-        String query = request.getQueryString();
+        StringBuilder query = new StringBuilder();
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         ServerConfig serverConfig = (ServerConfig) servlet.getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");
@@ -101,7 +104,7 @@ public class GetUI extends ConfigService {
                     //                String fds_dir = serverConfig.getFTDSDir();
                     //                lasConfig.addFDS(fds_base, fds_dir);
                 } else {
-                    throw new Exception("Search did not return any information for the requested data set.");
+                   throw new Exception("Search did not return any information for the requested data set.");
                 }
             } catch (Exception e) {
                 String las_message = "Unable to initialize UI from the catid values provided.";
@@ -117,19 +120,42 @@ public class GetUI extends ConfigService {
                 }           
                 return mapping.findForward("error");
             }
+           
             request.getSession().setAttribute("catid", cat_ids);
+            
+            Map<String, String[]> qp = request.getParameterMap();
+            for (Iterator qpIt = qp.keySet().iterator(); qpIt.hasNext();) {
+                String param = (String) qpIt.next();
+                String[] value = qp.get(param);
+                if ( !param.equals("catid") ) {
+                    for (int i = 0; i < value.length; i++) {
+                        query.append(param+"="+value[i]);
+                    }
+                }
+                if ( qpIt.hasNext() ) {
+                    query.append("&");
+                }
+            }
+            for (int i = 0; i < cat_ids.length; i++) {
+                query.append("catid="+cat_ids[i]);
+                if ( i < cat_ids.length - 1 ) {
+                    query.append("&");
+                }
+            }
             
             String auto = request.getParameter("auto");
             if ( auto != null && auto.equals("true") ) {
-                Dataset dataset = lasConfig.getFullDataset(cat_ids[0]);
-                List<Variable> vars = dataset.getVariables();
-                if ( vars != null && vars.size() > 0 ) {
-                    query = query + "&dsid="+dataset.getID()+"&varid="+vars.get(0).getID();
+                CategorySerializable category = lasConfig.getCategorySerializableWithGrids(cat_ids[0], cat_ids[0]);
+                DatasetSerializable dataset = category.getDatasetSerializable();
+                VariableSerializable[] vars = dataset.getVariablesSerializable();
+                if ( vars != null && vars.length > 0 ) {
+                    query.append("&dsid="+dataset.getID()+"&varid="+vars[0].getID());
                 }
             }
         }
+        if ( query.length() > 0 ) query.insert(0, "?");
         // forward to the UI
-        response.sendRedirect("UI.vm?"+query);
+        response.sendRedirect("UI.vm"+query.toString());
         return null;
         //return new ActionForward("/UI.vm?"+query, true);
 

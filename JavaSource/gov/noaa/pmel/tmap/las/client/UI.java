@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
+import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
@@ -90,6 +91,21 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class UI extends BaseUI {
+    public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+           Window.alert("Could not add data sets to start this LAS session.");
+            
+        }
+
+        @Override
+        public void onSuccess(String[] result) {
+            eventBus.fireEvent(new ESGFDatasetAddedEvent());
+            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
+        }
+        
+    };
     public AsyncCallback initFromDatasetAndVariable = new AsyncCallback() {
 
         @Override
@@ -286,7 +302,7 @@ public class UI extends BaseUI {
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
-                    Window.open(Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString())+"&catid="+xVariable.getCATID(), "_blank", features);
+                    Window.open(Util.getProductServer() + "?catid="+xVariable.getCATID()+"&xml=" + URL.encode(lasRequest.toString()), "_blank", features);
                     optionsDialog.hide();
                 }
             });
@@ -1127,16 +1143,21 @@ public class UI extends BaseUI {
         // Initialize the gallery with an asynchronous call to the server to get
         // variable needed.
         String profile = DOM.getElementProperty(DOM.getElementById("las-profile"), "content");
-        if (profile != null && profile.equals("LAS-ESGF")) {
+        if (profile != null && profile.equals(Constants.PROFILE_ESGF)) {
             xESGFSearchButton.setVisible(true);
         }
         if (initialHistory != null && !initialHistory.equals("") && xDataURL == null) {
             String[] settings = initialHistory.split("token");
-            HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+            List<Map<String, String>> tokens = new ArrayList<Map<String, String>>();
+            for (int i = 0; i < settings.length; i++) {
+                HashMap<String, String> tokenMap = Util.getTokenMap(settings[i]);
+                tokens.add(tokenMap);
+            }
+            HashMap<String, String> tokenMap = (HashMap<String, String>) tokens.get(0);
             xCATID = tokenMap.get("xCATID");
             xDSID = tokenMap.get("xDSID");
             xVarID = tokenMap.get("varid");
-            tokenMap = Util.getTokenMap(settings[1]);
+            tokenMap = (HashMap<String, String>) tokens.get(1);
             xOperationID = tokenMap.get("operation_id");
             xView = tokenMap.get("view");
             String panelHeaderHiddenString = tokenMap.get("panelHeaderHidden");
@@ -1148,6 +1169,20 @@ public class UI extends BaseUI {
             if (panelHeaderHidden != xPanelHeaderHidden) {
                 logger.log(level, "Toggling xPanelHeaderHidden because panelHeaderHidden != xPanelHeaderHidden:" + xPanelHeaderHidden);
                 handlePanelShowHide();
+            }
+            if ( profile.equals(Constants.PROFILE_ESGF) ) {
+                List<String> ncats = new ArrayList<String>();
+                if ( xCATID != null && !xCATID.equals("") ) {
+                    ncats.add(xCATID);
+                }
+                for (int i = 0; i < tokens.size(); i++) {
+                    HashMap<String, String> map = (HashMap<String, String>) tokens.get(i);
+                    String cid = map.get("catid");
+                    if ( cid != null && !cid.equals("") && !ncats.contains(cid) ) {
+                        ncats.add(cid);
+                    }
+                }
+                Util.getRPCService().addESGFDatasets(ncats, addESGFDatasetsCallback);
             }
         }
         if (xDataURL != null) {

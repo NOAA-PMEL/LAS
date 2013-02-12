@@ -27,6 +27,7 @@ import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import gov.noaa.pmel.tmap.las.product.server.Cache;
@@ -39,6 +40,7 @@ import gov.noaa.pmel.tmap.las.util.Arange;
 import gov.noaa.pmel.tmap.las.util.Axis;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
+import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.DataConstraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.EnsembleMember;
@@ -65,6 +67,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,6 +77,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -88,6 +93,7 @@ import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.Parent;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 import org.joda.time.DateTime;
@@ -371,58 +377,63 @@ public class LASConfig extends LASDocument {
                     List variables = variablesE.getChildren("variable");
                     for (Iterator varsIt = variables.iterator(); varsIt.hasNext();) {
                         Element variable = (Element) varsIt.next();
-                        String varID = variable.getAttributeValue("ID");
-                        String var = getVariableName(dsID,varID);
-                        String grid_type = variable.getAttributeValue("grid_type");
-                        if ( grid_type.equals("regular") ) {
-                            datadir = new File(fds_dir+dsID);
-                            if ( !datadir.exists() ) {
-                                boolean success = datadir.mkdirs();
-                                if ( !success ) {
-                                    log.warn("No T-FDS directory for "+dsID);
+                        if ( variable.getAttributeValue("ftds_url") == null ) {
+                            String varID = variable.getAttributeValue("ID");
+                            String var = getVariableName(dsID,varID);
+                            String grid_type = variable.getAttributeValue("grid_type");
+                            if ( grid_type.equals("regular") ) {
+                                datadir = new File(fds_dir+dsID);
+                                if ( !datadir.exists() ) {
+                                    boolean success = datadir.mkdirs();
+                                    if ( !success ) {
+                                        log.warn("No T-FDS directory for "+dsID);
+                                    }
                                 }
-                            }
-                            String url = getDataObjectURL(variable);
-                            String init = getVariablePropertyValue(variable,"ferret","init_script");
-                            String key;
-                            if ( init != null && !init.equals("") ) {
-                                key = url+"_"+init+"_"+var;
-                            } else {
-                                key = url;
-                            }
-                            if ( key.startsWith("http://") ) {
-                                key = key.substring(6,key.length());
-                            }
-                            key = key.replaceAll("/","_");
-                            key = key.replaceAll(":","_");
-
-                            if ( key.startsWith("_") ) {
-                            	key = key.substring(1,key.length());
-                            }
-
-                            if ( !jnls.containsKey(key) ) {
-                                StringBuffer jnl = new StringBuffer();
+                                String url = getDataObjectURL(variable);
+                                String init = getVariablePropertyValue(variable,"ferret","init_script");
+                                String key;
                                 if ( init != null && !init.equals("") ) {
-                                	jnl.append("DEFINE SYMBOL data_url \\\""+url+"\\\"\n");
-                                	jnl.append("DEFINE SYMBOL data_var "+var+"\n");
-                                    jnl.append("GO "+init+"\n");
-                                    jnls.put(key, jnl.toString());
+                                    key = url+"_"+init+"_"+var;
                                 } else {
-                                    jnl.append("USE \""+url+"\"\n");
-                                    jnls.put(key, jnl.toString());
+                                    key = url;
+                                }
+                                if ( key.startsWith("http://") ) {
+                                    key = key.substring(6,key.length());
+                                }
+                                key = key.replaceAll("/","_");
+                                key = key.replaceAll(":","_");
+
+                                if ( key.startsWith("_") ) {
+                                    key = key.substring(1,key.length());
+                                }
+
+                                if ( !jnls.containsKey(key) ) {
+                                    StringBuffer jnl = new StringBuffer();
+                                    if ( init != null && !init.equals("") ) {
+                                        jnl.append("DEFINE SYMBOL data_url \\\""+url+"\\\"\n");
+                                        jnl.append("DEFINE SYMBOL data_var "+var+"\n");
+                                        jnl.append("GO "+init+"\n");
+                                        jnls.put(key, jnl.toString());
+                                    } else {
+                                        jnl.append("USE \""+url+"\"\n");
+                                        jnls.put(key, jnl.toString());
+                                    }
+                                }
+
+                                variable.setAttribute("ftds_url", fds_base+dsID+"/data_"+key+".jnl");
+
+
+                                // HACK -- also adds the grid to a composite variable...
+                            } else if ( grid_type.equals("vector") ) {
+                                List<Element> compositeVars = variable.getChildren("variable");
+                                if ( compositeVars.size() > 0 ) {
+                                    String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+                                    Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+                                    Element gridE = new Element("grid");
+                                    gridE.setAttribute("IDREF", grid.getID());
+                                    variable.addContent(gridE);
                                 }
                             }
-                            variable.setAttribute("ftds_url", fds_base+dsID+"/data_"+key+".jnl");
-                        // HACK -- also adds the grid to a composite variable...
-                        } else if ( grid_type.equals("vector") ) {
-                        	List<Element> compositeVars = variable.getChildren("variable");
-                        	if ( compositeVars.size() > 0 ) {
-                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
-                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
-                        		Element gridE = new Element("grid");
-                        		gridE.setAttribute("IDREF", grid.getID());
-                        		variable.addContent(gridE);
-                        	}
                         }
                     }
                 }
@@ -431,10 +442,10 @@ public class LASConfig extends LASDocument {
                     int index=0;
                     String fds_temp = null;
                     if ( fds_dir.endsWith("/") ) {
-                    	fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/"));
-                    	fds_temp = fds_temp.substring(0, fds_temp.lastIndexOf("/")) + File.separator+ "temp";
+                        fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/"));
+                        fds_temp = fds_temp.substring(0, fds_temp.lastIndexOf("/")) + File.separator+ "temp";
                     } else {
-                    	fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/")) + File.separator + "temp";
+                        fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/")) + File.separator + "temp";
                     }
                     List<File> headers = (List<File>) FileUtils.listFiles(new File(fds_temp), new String[]{"xml"}, true);
                     Set<File> remove = new HashSet<File>();
@@ -447,23 +458,23 @@ public class LASConfig extends LASDocument {
                         data_script.close();
                         index++;
                         for (Iterator headerIt = headers.iterator(); headerIt.hasNext();) {
-							File header = (File) headerIt.next();
-							LineIterator it = FileUtils.lineIterator(header);
-					        try{
-					            while (it.hasNext()){
-					                String line = it.nextLine();
-					                if(line.contains(file)){
-					                    remove.add(header);
-					                }
-					            }
-					         }
-					         finally {LineIterator.closeQuietly(it);}
-						}
+                            File header = (File) headerIt.next();
+                            LineIterator it = FileUtils.lineIterator(header);
+                            try{
+                                while (it.hasNext()){
+                                    String line = it.nextLine();
+                                    if(line.contains(file)){
+                                        remove.add(header);
+                                    }
+                                }
+                            }
+                            finally {LineIterator.closeQuietly(it);}
+                        }
                     }
                     for (Iterator removeIt = remove.iterator(); removeIt.hasNext();) {
-						File file = (File) removeIt.next();
-						FileUtils.deleteQuietly(new File(file.getParent()));
-					}
+                        File file = (File) removeIt.next();
+                        FileUtils.deleteQuietly(new File(file.getParent()));
+                    }
                 }
             }
         }
@@ -1938,7 +1949,7 @@ public class LASConfig extends LASDocument {
             	}
             }
         	Dataset ds = new Dataset(ds_novars);
-                ds.setAttribute("catid", ds.getID());
+        	ds.setAttribute("catid", ds.getID());
         	datasets.add(ds);
         }
         return datasets;
@@ -4809,6 +4820,17 @@ public class LASConfig extends LASDocument {
 		}
 		return tributaries;
 	}
+	public ArrayList<Tributary> getTributaries(String attribute, String value) {
+	    ArrayList<Tributary> tributaries = getTributaries();
+	    ArrayList<Tributary> filteredList = new ArrayList<Tributary>();
+	    for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
+            Tributary tributary = (Tributary) tribIt.next();
+            if ( tributary.getAttributesAsMap().containsKey(attribute) && tributary.getAttributesAsMap().get(attribute).contains(value) ) {
+                filteredList.add(tributary);
+            }
+        }
+	    return filteredList;
+	}
 	public Tributary getTributary(String key) {
 		List servers = getRootElement().getChildren("las_servers");
 		for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
@@ -4876,22 +4898,25 @@ public class LASConfig extends LASDocument {
 	    return getBaseServerURLKey()+Constants.NAME_SPACE_SPARATOR+"Top_of_"+getBaseServerURLKey();
 	}
 	public ArrayList<Variable> getFullVariables(String dsID) throws JDOMException, LASException {
-		Dataset dataset = getDataset(dsID);
-		ArrayList<Variable> variables = getVariables(dsID);
-		ArrayList<Variable> clones = new ArrayList<Variable>();
-		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-			Variable var = (Variable) varIt.next();
-			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), var.getDSID(), dataset.getName());
-			clones.add(clone_var);
-		}
-		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
-			Variable var = (Variable) cloneIt.next();
-			Element varE = (Element) var.getElement();
-			varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
-			Grid grid = getGrid(var.getDSID(), var.getID());
-			varE.addContent((Element)grid.getElement().clone());
-		}
-		return clones;
+	    Dataset dataset = getDataset(dsID);
+	    ArrayList<Variable> clones = new ArrayList<Variable>();
+
+	    if ( dataset != null ) {
+	        ArrayList<Variable> variables = getVariables(dsID);
+	        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+	            Variable var = (Variable) varIt.next();
+	            Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), var.getDSID(), dataset.getName());
+	            clones.add(clone_var);
+	        }
+	        for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
+	            Variable var = (Variable) cloneIt.next();
+	            Element varE = (Element) var.getElement();
+	            varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
+	            Grid grid = getGrid(var.getDSID(), var.getID());
+	            varE.addContent((Element)grid.getElement().clone());
+	        }
+	    }
+	    return clones;
 	}
 	public Dataset getFullDataset(String dsID) throws JDOMException, LASException {
 		Dataset dataset = getDataset(dsID);
@@ -5222,6 +5247,9 @@ public class LASConfig extends LASDocument {
     public String addDataset(String id) throws JDOMException, HttpException, IOException, LASException {
         String master_id;
         String key = null;
+        DateTime now = new DateTime();
+        DateTimeFormatter longfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+        String time_added = longfmt.print(now);
         if ( id.contains(Constants.NAME_SPACE_SPARATOR) ) {
             String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
 
@@ -5246,155 +5274,365 @@ public class LASConfig extends LASDocument {
             // Hack off the version 
             master_id = master_id.substring(0, master_id.lastIndexOf("."));
         }
-        
-        for (int i = 0; i < Constants.SEARCH_URL.length; i++) {
 
-            String search_base = Constants.SEARCH_URL[i];
+
+        List<Tributary> tribs = getTributaries();
+        boolean do_search;
+        for (Iterator iterator = tribs.iterator(); iterator.hasNext();) {
+            Tributary tributary = (Tributary) iterator.next();
+            String search_base = tributary.getURL().replace("las", "esg-search/search");
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             String search = search_base+"?access=LAS&replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id;
-            lasProxy.executeGetMethodAndStreamResult(search, stream);
-            Document doc = new Document();
+            do_search = true;
+            try {
+                lasProxy.executeGetMethodAndStreamResult(search, stream);
+            } catch (Exception e) {
+                // Go on to the next search URL
+                do_search = false;
+            }
+            if ( do_search ) {
+                Document doc = new Document();
 
-            JDOMUtils.XML2JDOM(stream.toString(), doc);
-            Element root = doc.getRootElement();
-            Element result = root.getChild("result");
-            String catalog = null;
-            String LAS = null;
-            Set<String> time_freqs = new HashSet<String>();
-            if ( result != null ) {
-                String number = result.getAttributeValue("numFound");
-                if ( !number.equals("0") ) {
-                    List<Element> results = result.getChildren("doc");
-                    Element solrDoc = results.get(0);
-                    if ( solrDoc != null ) {
-                        List<Element> arrays = solrDoc.getChildren("arr");
-                        for ( Iterator arrE = arrays.iterator(); arrE.hasNext(); ) {
-                            Element arr = (Element) arrE.next();
-                            if ( arr.getAttributeValue("name").equals("url")) {
-                                List<Element> strs = arr.getChildren("str");
-                                for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
-                                    Element str = (Element) strIt.next();
-                                    String txt = str.getTextTrim();
-                                    if ( txt.contains("|Catalog") ) {
-                                        catalog = txt.substring(0, txt.indexOf("#"));
-                                        System.out.println(catalog);
+                JDOMUtils.XML2JDOM(stream.toString(), doc);
+                Element root = doc.getRootElement();
+                Element result = root.getChild("result");
+                String catalog = null;
+                String LAS = null;
+                Set<String> time_freqs = new HashSet<String>();
+                if ( result != null ) {
+                    String number = result.getAttributeValue("numFound");
+                    if ( !number.equals("0") ) {
+                        List<Element> results = result.getChildren("doc");
+                        Element solrDoc = results.get(0);
+                        if ( solrDoc != null ) {
+                            List<Element> arrays = solrDoc.getChildren("arr");
+                            for ( Iterator arrE = arrays.iterator(); arrE.hasNext(); ) {
+                                Element arr = (Element) arrE.next();
+                                if ( arr.getAttributeValue("name").equals("url")) {
+                                    List<Element> strs = arr.getChildren("str");
+                                    for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                        Element str = (Element) strIt.next();
+                                        String txt = str.getTextTrim();
+                                        if ( txt.contains("|Catalog") ) {
+                                            catalog = txt.substring(0, txt.indexOf("#"));
+                                            System.out.println(catalog);
+                                        }
+                                        if ( txt.contains("|LAS") ) {
+                                            LAS = txt.substring(0, txt.indexOf("|"));
+                                            LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
+                                        }
                                     }
-                                    if ( txt.contains("|LAS") ) {
-                                        LAS = txt.substring(0, txt.indexOf("|"));
-                                        LAS = LAS.substring(0, LAS.indexOf("/getUI.do"));
+                                } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
+                                    List<Element> strs = arr.getChildren("str");
+                                    for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
+                                        Element str = (Element) strIt.next();
+                                        String txt = str.getTextTrim();
+                                        time_freqs.add(txt);
                                     }
-                                }
-                            } else if ( arr.getAttributeValue("name").equals("time_frequency") ) {
-                                List<Element> strs = arr.getChildren("str");
-                                for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
-                                    Element str = (Element) strIt.next();
-                                    String txt = str.getTextTrim();
-                                    time_freqs.add(txt);
                                 }
                             }
                         }
-                    }
-                    if ( key == null && LAS != null ) {
-                        key = JDOMUtils.MD5Encode(LAS);
-                    }
-                    if ( LAS == null ) {
-                        // No remote LAS, use the local LAS to plot this data.
-                        key = getBaseServerURLKey();
-                    }
-                    InvCatalogFactory factory = new InvCatalogFactory("default", false);
-                    InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-                    Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
-                    // There's only going to be one...
-                    String key_id = null;
-                    Dataset ds = null;
-                    for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
-                        DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
-                        Vector datasets = dagb.getDatasets();
-                        for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
-                            DatasetBean db = (DatasetBean) dsIt.next();
-                            String e = db.getElement();
-                            e = key+Constants.NAME_SPACE_SPARATOR+e;
-                            db.setElement(e);
-                            key_id = e;
-                            Element dataset = db.toXml(true);
-                            // Add the ftds_url attribute to the data set as a reference to the F-TDS co-located with the data.
-//                            dataset.setAttribute("ftds_url", dataset.getAttributeValue("url"));
-                            
-                            Element variables = dataset.getChild("variables");
-                            if ( variables != null ) {
-                                List<Element> vars = variables.getChildren("variable");
-                                if ( vars != null ) {
-                                    for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                                        Element variable = (Element) varIt.next();
-                                        String url = variable.getAttributeValue("url");
-                                        if ( url != null ) {
-                                            String ftds_url = url.substring(0, url.lastIndexOf("#"));
-                                            variable.setAttribute("ftds_url", ftds_url);
+                        if ( key == null && LAS != null ) {
+                            key = JDOMUtils.MD5Encode(LAS);
+                        }
+                        if ( LAS == null ) {
+                            // No remote LAS, use the local LAS to plot this data.
+                            key = getBaseServerURLKey();
+                        }
+                        InvCatalogFactory factory = new InvCatalogFactory("default", false);
+                        InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
+                        Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
+                        // There's only going to be one...
+                        String key_id = null;
+                        Dataset ds = null;
+                        for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
+                            DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
+                            Vector datasets = dagb.getDatasets();
+                            for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
+                                DatasetBean db = (DatasetBean) dsIt.next();
+                                String e = db.getElement();
+                                e = key+Constants.NAME_SPACE_SPARATOR+e;
+                                db.setElement(e);
+                                key_id = e;
+                                
+                                Element dataset = db.toXml(true);
+                                dataset.setAttribute("date", time_added);
+                                Element variables = dataset.getChild("variables");
+                                if ( variables != null ) {
+                                    List<Element> vars = variables.getChildren("variable");
+                                    if ( vars != null ) {
+                                        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                                            Element variable = (Element) varIt.next();
+                                            String varid = variable.getAttributeValue("ID");
+                                            String url = variable.getAttributeValue("url");
+                                            if ( url != null ) {
+                                                String ftds_url = url.substring(0, url.lastIndexOf("#"));
+                                                variable.setAttribute("ftds_url", ftds_url);
+                                            }
                                         }
                                     }
                                 }
+                                Element dsE = getRootElement().getChild("datasets");
+
+                                if ( dsE == null ) {
+                                    dsE = new Element("datasets");
+                                    getRootElement().addContent(dsE);
+                                } 
+
+                                ds = getDataset(key_id);
+
+                                // Add only if it doesn't exist already...
+
+                                if ( ds == null ) {
+
+                                    dsE.addContent(dataset);
+
+                                }
                             }
-
-                            Element dsE = getRootElement().getChild("datasets");
-
-                            if ( dsE == null ) {
-                                dsE = new Element("datasets");
-                                getRootElement().addContent(dsE);
-                            } 
-
-                            ds = getDataset(key_id);
 
                             // Add only if it doesn't exist already...
-
                             if ( ds == null ) {
+                                Vector grids = dagb.getGrids();
+                                for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
+                                    GridBean gb = (GridBean) gIt.next();
+                                    Element grid = gb.toXml(true);
+                                    Element gsE = getRootElement().getChild("grids");
+                                    if ( gsE == null ) {
+                                        gsE = new Element("grids");
+                                        getRootElement().addContent(gsE);
+                                    }
+                                    gsE.addContent(grid);
+                                }
 
-                                dsE.addContent(dataset);
-
+                                Vector axes = dagb.getAxes();
+                                for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
+                                    AxisBean ab = (AxisBean) aIt.next();
+                                    Element axis = ab.toXml(true);
+                                    Element asE = getRootElement().getChild("axes");
+                                    if ( asE == null ) {
+                                        asE = new Element("axes");
+                                        getRootElement().addContent(asE);
+                                    }
+                                    asE.addContent(axis);
+                                }
+                            } else {
+                                ds.setAttribute("date", time_added);
                             }
-
 
                         }
-
-                        // Add only if it doesn't exist already...
-                        if ( ds == null ) {
-                            Vector grids = dagb.getGrids();
-                            for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
-                                GridBean gb = (GridBean) gIt.next();
-                                Element grid = gb.toXml(true);
-                                Element gsE = getRootElement().getChild("grids");
-                                if ( gsE == null ) {
-                                    gsE = new Element("grids");
-                                    getRootElement().addContent(gsE);
-                                }
-                                gsE.addContent(grid);
-                            }
-
-                            Vector axes = dagb.getAxes();
-                            for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
-                                AxisBean ab = (AxisBean) aIt.next();
-                                Element axis = ab.toXml(true);
-                                Element asE = getRootElement().getChild("axes");
-                                if ( asE == null ) {
-                                    asE = new Element("axes");
-                                    getRootElement().addContent(asE);
-                                }
-                                asE.addContent(axis);
-                            }
+                        
+                        DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+                        File v7 = new File(getOutputDir()+"/"+format.print(new DateTime())+"lasV7.xml");
+                        try {
+                            write(v7);
+                        } catch (Exception e) {
+                            log.error("Cannot write out new Version 7.0 las.xml file.", e);
                         }
-                    }
-                    //TODO: DEBUG
-                    //DEBUG DEBUG DEBUG...
-                    File v7 = new File(this.getOutputDir()+"/lasV7.xml");
-                    try {
-                        this.write(v7);
-                    } catch (Exception e) {
-                        //log.error("Cannot write out new Version 7.0 las.xml file.", e);
-                    }
-                    return key_id;
-                } 
-            }
+                        return key_id;
+                    } 
+                }
+            } // do_search
         }
         return null;
+    }
+    public CategorySerializable getCategorySerializableWithGrids(String catid, String dsid) throws LASException {
+        try {
+            CategorySerializable[] cats = getCategoriesSerializable(new String[]{catid});
+            if ( cats.length != 1 ) {
+                throw new RPCException("Cound not get a single category with this ID");
+            }
+            CategorySerializable cat = cats[0];
+            if ( !cat.isCategoryChildren() ) {
+                DatasetSerializable dataset = cat.getDatasetSerializable();
+                VariableSerializable[] vars = dataset.getVariablesSerializable();
+                for (int i = 0; i < vars.length; i++) {
+                    GridSerializable wire_grid = getGridSerializable(dsid, vars[i].getID());
+                    vars[i].setGrid(wire_grid);
+                }
+            }
+            return cat;
+        } catch (Exception e) {
+            throw new LASException(e.getMessage());
+        }
+    }
+    public CategorySerializable[] getCategoriesSerializable(String[] ids) throws LASException {
+        ArrayList<Category> categories = new ArrayList<Category>();
+        if ( this.allowsSisters() ) {
+            try {
+                if ( ids == null ) {
+                    
+                    // This is the inital top level request for a regular LAS.
+                    Category local_cat = new Category(this.getTitle(), this.getTopLevelCategoryID()); 
+                    // Do the local top level category
+                    ArrayList<Category> local_cats = this.getCategories(null);
+                    for (Iterator catIt = local_cats.iterator(); catIt.hasNext();) {
+                        Category category = (Category) catIt.next();
+                        local_cat.addCategory(category);
+                    }
+                    categories.add(local_cat);
+                    // Do the remote categories...
+
+                    ArrayList<Tributary> tributaries = this.getTributaries();
+                    for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
+                        Tributary tributary = (Tributary) tribIt.next();
+                        Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
+                        server_cat.setAttribute("remote_las", tributary.getURL()+Constants.GET_AUTH);
+                        String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
+                        String catxml = lasProxy.executeGetMethodAndReturnResult(url);
+                        ArrayList<Category> trib_cats = LASJDOMUtils.getCategories(catxml);
+                        for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
+                            Category category = (Category) tribCatsIt.next();
+                            server_cat.addCategory(category);
+                        }
+                        categories.add(server_cat);
+                    }
+                } else if ( ids.length > 1 ) {
+                    // This is the inital category set from and ESGF request.
+                    for ( int i = 0; i < ids.length; i++ ) {
+                        categories.addAll(this.getCategories(ids[i]));
+                    }
+                } else if ( ids.length == 1) {
+                    // This is a particular ID
+                    if ( this.pruneCategories() ) {
+                        // This is the ESGF case... 
+                        
+                        categories = this.getCategories(ids[0]);
+                        
+                    } else {
+                        // This is the non-ESGF case...
+                        if ( !ids[0].contains(Constants.NAME_SPACE_SPARATOR) || this.isLocal(ids[0]) ) {
+                            // Handle the case where we're getting the local top level catagories
+                            if ( ids[0].equals(this.getTopLevelCategoryID()) ) {
+                                categories = this.getCategories(null);
+                            } else {
+                                categories = this.getCategories(ids[0]);
+                            }
+                        } else {
+                            String[] parts = ids[0].split(Constants.NAME_SPACE_SPARATOR);
+                            String server_key = null;
+                            if ( parts != null ) {
+                                server_key = parts[0];
+                                if ( server_key != null ) {
+                                    Tributary trib = this.getTributary(server_key);
+                                    String las_url = trib.getURL() + Constants.GET_CATEGORIES + "?format=xml&catid="+ids[0];
+                                    String catxml = lasProxy.executeGetMethodAndReturnResult(las_url);
+                                    ArrayList<Category> trib_cats = LASJDOMUtils.getCategories(catxml);
+                                    for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
+                                        Category category = (Category) tribCatsIt.next();
+                                        categories.add(category);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            } catch (JDOMException e) {
+                throw new LASException(e.getMessage());
+            } catch (LASException e) {
+                throw new LASException(e.getMessage());
+            } catch (UnsupportedEncodingException e) {
+                throw new LASException(e.getMessage());
+            } catch (HttpException e) {
+                throw new LASException(e.getMessage());
+            } catch (IOException e) {
+                throw new LASException(e.getMessage());
+            }
+        } else {
+            try {
+                categories = this.getCategories(ids[0]);
+            } catch (JDOMException e) {
+                throw new LASException(e.getMessage());
+            } catch (LASException e) {
+                throw new LASException(e.getMessage());
+            }
+        }
+        
+        Collections.sort(categories, new ContainerComparator("name"));
+
+        
+        CategorySerializable[] cats = new CategorySerializable[categories.size()];
+
+        for (int i = 0; i < cats.length; i++) {
+            cats[i] = categories.get(i).getCategorySerializable();
+        }
+        for ( int i = 0; i < cats.length; i++ ) {
+            if ( cats[i].isVariableChildren() ) {
+                cats[i].sortVariables();
+            }
+        }
+        return cats;    
+    }
+    public GridSerializable getGridSerializable(String dsID, String varID) throws LASException {
+        Grid grid = null;
+        
+        try {
+            grid = this.getGrid(dsID, varID);
+        } catch (JDOMException e) {
+            throw new LASException(e.getMessage());
+        } catch (LASException e) {
+            throw new LASException(e.getMessage());
+        }
+    
+    if ( grid != null ) {
+        return grid.getGridSerializable();
+    } else {
+        return null;
+    }
+    }
+ 
+    public void removeOldDatasets(DateTime then) throws Exception {
+        // "/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']"
+       
+            DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+            List<Dataset> all = getDatasets(true);
+            Set<String> toRemove = new HashSet<String>();
+            for (Iterator allIt = all.iterator(); allIt.hasNext();) {
+                Dataset dataset = (Dataset) allIt.next();
+                String date_added = dataset.getAttributeValue("date");
+                if ( date_added != null && !date_added.equals("") ) {
+                    DateTime date = format.parseDateTime(date_added);
+                    if ( date.isBefore(then) ) {
+                        toRemove.add("/lasdata/datasets/dataset[@ID='"+dataset.getID()+"']");
+                        List<Variable> variables = dataset.getVariables();
+                        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+                            Variable variable = (Variable) varIt.next();
+                            
+                            Grid grid = variable.getGrid();
+                            toRemove.add("/lasdata/grids/grid[@ID='"+grid.getID()+"']");
+                            List<Axis> axes = grid.getAxes();
+                            for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
+                                Axis axis = (Axis) axisIt.next();
+                                toRemove.add("/lasdata/axes/axis[@ID='"+axis.getID()+"']");
+                            }
+                            TimeAxis taxis = grid.getTime();
+                            if ( taxis != null ) {
+                                toRemove.add("/lasdata/axes/axis[@ID='"+taxis.getID()+"']");
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (Iterator idIt = toRemove.iterator(); idIt.hasNext();) {
+                String xpath = (String) idIt.next();
+                Element element = null;
+                element = getElementByXPath(xpath);
+                if ( element != null ) {
+                    Parent p = element.getParent();
+
+                    p.removeContent(element);
+                } else {
+                    System.out.println("Could not find "+xpath);
+                }
+
+            }    
+            File v7 = new File(getOutputDir()+"/"+format.print(new DateTime())+"lasV7.xml");
+            try {
+                write(v7);
+            } catch (Exception e) {
+                log.error("Cannot write out new Version 7.0 las.xml file.", e);
+            }
     }
 }

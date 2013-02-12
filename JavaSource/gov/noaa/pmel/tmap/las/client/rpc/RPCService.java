@@ -50,4 +50,5 @@ public interface RPCService extends RemoteService {
 	public List<FacetSerializable> getFacets() throws RPCException;
 	public List<ESGFDatasetSerializable> getESGFDatasets(String query) throws RPCException;
 	public String addESGFDataset(String id) throws RPCException;
+    public String[] addESGFDatasets(List<String> ncats) throws RPCException;
 }

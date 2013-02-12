@@ -283,54 +283,7 @@ public final class ProductServerAction extends LASAction {
         	request.setAttribute("debug", "false");
         	lasRequest.setProperty("las", "debug", "false");
         }
-        
-        // If this is a request from a constellation of servers that are in ESGF mode
-        //    1. If it's all local, make sure the data sets are configured and proceed
-        //    2. If a single remote server, send the request to that server.
-        //    3. If it's a mix, get the remote configurations and proceed.
-        if ( lasConfig.pruneCategories() ) {
-            try {
-                ArrayList<String> request_ids = lasRequest.getDatasetIDs();
-                // Add the data sets if they are not already in the config
-                for ( int i = 0; i < request_ids.size(); i++ ) {
-                    String rid = request_ids.get(i);
-                    Dataset d = lasConfig.getDataset(rid);
-                    if ( d == null ) {
-                        lasConfig.addDataset(rid);
-                    }
-                }
-//                // If the request is entirely remote, make it here and return the result.
-//                Set<String> idset = new HashSet<String>();
-//                idset.addAll(request_ids);
-//
-//                if ( idset.size() == 1 ) {
-//                    String request_id = idset.iterator().next();
-//                    if ( !request_id.contains(lasConfig.getBaseServerURLKey())) {
-//                        String[] parts = request_id.split(Constants.NAME_SPACE_SPARATOR);
-//                        String remotekey = parts[0];
-//                        Tributary trib = lasConfig.getTributary(remotekey);
-//                        String remote_las_request = trib.getURL()+"/ProductServer.do?"+"xml="+lasRequest.toEncodedURLString();
-//                        lasProxy.executeGetMethodAndStreamResult(remote_las_request, response);
-//                    }
-//                }
-            } catch ( UnsupportedEncodingException e ) {
-                logerror(request, "Error creating the product request.", e);
-                return mapping.findForward("error");
-            } catch ( JDOMException e ) {
-                logerror(request, "Error creating the product request.", e);
-                return mapping.findForward("error");
-            } catch ( LASException e ) {
-                logerror(request, "Error creating the product request.", e);
-                return mapping.findForward("error");
-            } catch ( HttpException e ) {
-                logerror(request, "Error creating the product request.", e);
-                return mapping.findForward("error");
-            } catch ( IOException e ) {
-                logerror(request, "Error creating the product request.", e);
-                return mapping.findForward("error");
-            }
-        }
-        
+
         // Report logging level only for "debug" and "trace" levels.
         log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for "+log.getName());
         //debug
