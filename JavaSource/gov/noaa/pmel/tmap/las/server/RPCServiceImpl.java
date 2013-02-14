@@ -690,7 +690,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             HttpServletRequest request = this.getThreadLocalRequest();
             String [] catids = (String[]) request.getSession().getAttribute("catid");
             boolean add = true;          
-            if ( catids != null ) {
+            if ( catids != null && keyid != null) {
                 for ( int i = 0; i < catids.length; i++ ) {
                     if ( keyid.equals(catids[i]) ) {
                         add = false;

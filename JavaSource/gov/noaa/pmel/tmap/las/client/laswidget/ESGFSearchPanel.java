@@ -96,7 +96,7 @@ public class ESGFSearchPanel extends Composite {
                             spinLabel.setText("Searching...");
                             spin.show();
                             offset=0;
-                            Util.getRPCService().getESGFDatasets(getQuery()+"&limit="+limit+"&offset="+offset, datasetCallback);
+                            Util.getRPCService().getESGFDatasets(getQuery()+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
                         }
                     });
                     activeTextPanel.clear();
@@ -105,7 +105,7 @@ public class ESGFSearchPanel extends Composite {
                 offset = 0;
                 spinLabel.setText("Searching...");
                 spin.show();
-                Util.getRPCService().getESGFDatasets(query+"&limit="+limit+"&offset="+offset, datasetCallback);
+                Util.getRPCService().getESGFDatasets(query+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
             }
             
         });
@@ -183,7 +183,7 @@ public class ESGFSearchPanel extends Composite {
         } else {
             spinLabel.setText("Searching...");
             spin.show();
-            Util.getRPCService().getESGFDatasets(query+"&limit="+limit+"&offset="+offset, datasetCallback);
+            Util.getRPCService().getESGFDatasets(query+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
         }
     }
 
@@ -197,7 +197,7 @@ public class ESGFSearchPanel extends Composite {
         } else {
             spinLabel.setText("Searching...");
             spin.show();
-            Util.getRPCService().getESGFDatasets(query+"&limit="+limit+"&offset="+offset, datasetCallback);
+            Util.getRPCService().getESGFDatasets(query+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
         }
     }
 
@@ -305,7 +305,7 @@ public class ESGFSearchPanel extends Composite {
                             offset = offset - limit;
                             spinLabel.setText("Getting previous list...");
                             spin.show();
-                            Util.getRPCService().getESGFDatasets(query+"&limit="+limit+"&offset="+offset, datasetCallback);
+                            Util.getRPCService().getESGFDatasets(query+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
 
                         }
 
@@ -331,7 +331,7 @@ public class ESGFSearchPanel extends Composite {
                             offset = end;
                             spinLabel.setText("Getting next list...");
                             spin.show();
-                            Util.getRPCService().getESGFDatasets(query+"&limit="+limit+"&offset="+offset, datasetCallback);
+                            Util.getRPCService().getESGFDatasets(query+"&access=LAS&limit="+limit+"&offset="+offset, datasetCallback);
 
                         }
 

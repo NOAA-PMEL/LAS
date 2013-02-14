@@ -5291,17 +5291,31 @@ public class LASConfig extends LASDocument {
         }
 
 
-        List<Tributary> tribs = getTributaries();
+        String search = getGlobalPropertyValue("product_server", "esgf_search_url");
+        List<Tributary> tribs = new ArrayList<Tributary>();
+        if ( search != null && !search.equals("") ) {
+            if ( search.contains(",") ) {
+                String endings[] = search.split(",");
+                for (int i = 0; i < endings.length; i++) {
+                    tribs.addAll(getTributaries("url", endings[i].trim()));
+                }
+            } else {
+                tribs.addAll(getTributaries("url", search));
+            }
+        } else {
+            tribs.addAll(getTributaries("url", "gov"));
+            tribs.addAll(getTributaries("url", "edu"));
+        }
         boolean do_search;
         for (Iterator iterator = tribs.iterator(); iterator.hasNext();) {
             Tributary tributary = (Tributary) iterator.next();
             String search_base = tributary.getURL().replace("las", "esg-search/search");
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            String search = search_base+"?access=LAS&replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id;
+            String searchurl = search_base+"?access=LAS&replica="+Constants.ESGF_REPLICAS+"&master_id="+master_id;
             do_search = true;
             try {
-                lasProxy.executeGetMethodAndStreamResult(search, stream);
+                lasProxy.executeGetMethodAndStreamResult(searchurl, stream);
             } catch (Exception e) {
                 // Go on to the next search URL
                 do_search = false;
