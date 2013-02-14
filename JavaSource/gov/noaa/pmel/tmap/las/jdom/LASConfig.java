@@ -931,7 +931,11 @@ public class LASConfig extends LASDocument {
 
                         }
                     } else if ( dataset.getName().equals("properties") ) {
-                        dataset.setContent(LASDocument.convertProperties(dataset));
+                        List<Element> propertyList = dataset.getChildren("property_group");
+                        // If this has already been done there will be "property" element children.  Don't do it again.
+                        if ( propertyList == null || propertyList.size() <= 0 ) {
+                            dataset.setContent(LASDocument.convertProperties(dataset));
+                        }
                     }
                 }
             } else if ( child.getName().equalsIgnoreCase("grids")) {
@@ -1015,7 +1019,11 @@ public class LASConfig extends LASDocument {
                     }
                 }
             } else if ( child.getName().equalsIgnoreCase("properties")) {
-                child.setContent(LASDocument.convertProperties(child));
+                List<Element> propertyList = child.getChildren("property_group");
+                // If this has already been done there will be "property" element children.  Don't do it again.
+                if ( propertyList == null || propertyList.size() <= 0 ) {
+                    child.setContent(LASDocument.convertProperties(child));
+                }
             } else if ( child.getName().equalsIgnoreCase("las_categories") ) {
                 List categories = child.getChildren("category");
                 setIDs(categories);
@@ -2145,19 +2153,22 @@ public class LASConfig extends LASDocument {
      */
     public String getGlobalPropertyValue(String group, String name) {
         String value = "";
-        Element properties = getRootElement().getChild("properties");
-        if (properties != null) {
-            List groups = properties.getChildren("property_group");
-            for (Iterator groupsIt = groups.iterator(); groupsIt.hasNext();) {
-                Element property_group = (Element) groupsIt.next();
-                if ( property_group.getAttributeValue("type").equals(group)) {
-                    List props = property_group.getChildren("property");
-                    for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
-                        Element property = (Element) propsIt.next();
-                        String pname = property.getChildTextNormalize("name");
-                        String pvalue = property.getChildTextNormalize("value");
-                        if ( pname.equals(name) ) {
-                            return pvalue;
+        List<Element> propList = getRootElement().getChildren("properties");
+        for (Iterator propIt = propList.iterator(); propIt.hasNext();) {
+            Element properties = (Element) propIt.next();
+            if (properties != null) {
+                List groups = properties.getChildren("property_group");
+                for (Iterator groupsIt = groups.iterator(); groupsIt.hasNext();) {
+                    Element property_group = (Element) groupsIt.next();
+                    if ( property_group.getAttributeValue("type").equals(group)) {
+                        List props = property_group.getChildren("property");
+                        for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
+                            Element property = (Element) propsIt.next();
+                            String pname = property.getChildTextNormalize("name");
+                            String pvalue = property.getChildTextNormalize("value");
+                            if ( pname.equals(name) ) {
+                                return pvalue;
+                            }
                         }
                     }
                 }
@@ -2167,25 +2178,29 @@ public class LASConfig extends LASDocument {
     }
 
     public HashMap<String, String> getGlobalPropertyGroupAsHashMap(String name) throws LASException {
-    	HashMap<String, String> property_group_hash = new HashMap<String, String>();
-    	Element properties = getRootElement().getChild("properties");
-        if (properties != null) {
-            List groups = properties.getChildren("property_group");
-            for (Iterator groupsIt = groups.iterator(); groupsIt.hasNext();) {
-                Element property_group = (Element) groupsIt.next();
-                if ( property_group.getAttributeValue("type").equals(name)) {
-                    List props = property_group.getChildren("property");
-                    for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
-                        Element property = (Element) propsIt.next();
-                        String pname = property.getChildTextNormalize("name");
-                        String pvalue = property.getChildTextNormalize("value");
-                        property_group_hash.put(pname, pvalue);
+        HashMap<String, String> property_group_hash = new HashMap<String, String>();
+        List<Element> propList = getRootElement().getChildren("properties");
+        for (Iterator propIt = propList.iterator(); propIt.hasNext();) {
+            Element properties = (Element) propIt.next();
+            if (properties != null) {
+                List groups = properties.getChildren("property_group");
+                for (Iterator groupsIt = groups.iterator(); groupsIt.hasNext();) {
+                    Element property_group = (Element) groupsIt.next();
+                    if ( property_group.getAttributeValue("type").equals(name)) {
+                        List props = property_group.getChildren("property");
+                        for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
+                            Element property = (Element) propsIt.next();
+                            String pname = property.getChildTextNormalize("name");
+                            String pvalue = property.getChildTextNormalize("value");
+                            property_group_hash.put(pname, pvalue);
+                        }
                     }
                 }
             }
         }
-    	return property_group_hash;
+        return property_group_hash;
     }
+
 
     /**
      * Get the grid of a variable from its XPath

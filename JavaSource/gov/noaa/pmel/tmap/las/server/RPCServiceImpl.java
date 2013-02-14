@@ -581,7 +581,21 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         try {
             List<FacetSerializable> facets = new ArrayList<FacetSerializable>();
             LASConfig lasConfig = getLASConfig();
-            List<Tributary> tribs = lasConfig.getTributaries("url", "gov");
+            String search = lasConfig.getGlobalPropertyValue("product_server", "esgf_search_url");
+            List<Tributary> tribs = new ArrayList<Tributary>();
+            if ( search != null && !search.equals("") ) {
+                if ( search.contains(",") ) {
+                    String endings[] = search.split(",");
+                    for (int i = 0; i < endings.length; i++) {
+                        tribs.addAll(lasConfig.getTributaries("url", endings[i].trim()));
+                    }
+                } else {
+                    tribs.addAll(lasConfig.getTributaries("url", search));
+                }
+            } else {
+                tribs.addAll(lasConfig.getTributaries("url", "gov"));
+                tribs.addAll(lasConfig.getTributaries("url", "edu"));
+            }
             for (Iterator iterator = tribs.iterator(); iterator.hasNext();) {
                 Tributary tributary = (Tributary) iterator.next();
                 String search_base = tributary.getURL().replace("las", "esg-search/search");
@@ -619,7 +633,21 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         
         try {
             LASConfig lasConfig = getLASConfig();
-            List<Tributary> tribs = lasConfig.getTributaries("url", "gov");
+            String search = lasConfig.getGlobalPropertyValue("product_server", "esgf_search_url");
+            List<Tributary> tribs = new ArrayList<Tributary>();
+            if ( search != null && !search.equals("") ) {
+                if ( search.contains(",") ) {
+                    String endings[] = search.split(",");
+                    for (int i = 0; i < endings.length; i++) {
+                        tribs.addAll(lasConfig.getTributaries("url", endings[i].trim()));
+                    }
+                } else {
+                    tribs.addAll(lasConfig.getTributaries("url", search));
+                }
+            } else {
+                tribs.addAll(lasConfig.getTributaries("url", "gov"));
+                tribs.addAll(lasConfig.getTributaries("url", "edu"));
+            }
             for (Iterator iterator = tribs.iterator(); iterator.hasNext();) {
                 Tributary tributary = (Tributary) iterator.next();
                 String search_base = tributary.getURL().replace("las", "esg-search/search");

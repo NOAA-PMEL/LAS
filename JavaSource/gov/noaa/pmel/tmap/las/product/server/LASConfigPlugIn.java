@@ -591,14 +591,12 @@ public class LASConfigPlugIn implements PlugIn {
 	    String age_string = "168";
 	    String ivunits = "hours";
 	    String time = "00:01";
-        try {
-            interval_string = lasConfig.getProperty("product_server", "clean_interval");
-            ivunits = lasConfig.getProperty("product_server", "clean_units");
-            age_string = lasConfig.getProperty("product_server", "clean_age");
-            time = lasConfig.getProperty("product_server", "clean_time");
-        } catch (LASException e) {
-           // Don't care... just use the defaults.
-        }
+	    
+	    interval_string = lasConfig.getGlobalPropertyValue("product_server", "clean_interval");
+	    ivunits = lasConfig.getGlobalPropertyValue("product_server", "clean_units");
+	    age_string = lasConfig.getGlobalPropertyValue("product_server", "clean_age");
+	    time = lasConfig.getGlobalPropertyValue("product_server", "clean_time");
+
         if ( interval_string.equals("") ) {
             interval_string = "24";
         }
