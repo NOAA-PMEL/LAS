@@ -1,10 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
-import java.io.UnsupportedEncodingException;
-
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.util.Constants;
-
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ESGFDatasetSerializable implements IsSerializable {
