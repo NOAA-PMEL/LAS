@@ -109,12 +109,15 @@ public class ESGFSearchPanel extends Composite {
             }
             
         });
-        Label title = new Label("Search the ESGF Data Collection");
+        HTML title = new HTML("Search the ESGF Data Collection");
+        HTML instructions = new HTML("After searching, click the data set name to add it to the session. See all the data sets you've added by clicking the Data Set button above");
         northPanel.add(title);
+        northPanel.add(instructions);
         northPanel.add(activePanel);
         northPanel.add(new InlineLabel("   "));
         northPanel.add(activeTextPanel);
         northPanel.add(new HTML("<HR>"));
+        northPanel.setStyleDependentName("allBoarder", true);
         facets.setSize("200px", "820px");
         datasetPanel.setWidth("650px");
         datasetPanel.setVerticalAlignment(VerticalPanel.ALIGN_TOP);
@@ -249,7 +252,14 @@ public class ESGFSearchPanel extends Composite {
             
             spin.hide();
             eventBus.fireEvent(new ESGFDatasetAddedEvent());
-            
+            for ( int i = 0; i < datasetPanel.getWidgetCount(); i++) {
+                HorizontalPanel entry = (HorizontalPanel) datasetPanel.getWidget(i);
+                if ( entry.getWidgetCount() == 1 && entry.getElement().getId().equals(id)) {
+                    String added = "&nbsp;&nbsp(Data set ready.)";
+                    HTML addedlabel = new HTML(added);
+                    entry.add(addedlabel);
+                }
+            }
         }
         
     };
@@ -270,8 +280,18 @@ public class ESGFSearchPanel extends Composite {
             for ( Iterator datasetIt = datasets.iterator(); datasetIt.hasNext(); ) {
                 ESGFDatasetSerializable esgfDatasetSerializable = (ESGFDatasetSerializable) datasetIt.next();
                 int position = esgfDatasetSerializable.getPosition()+1;
-                Anchor dataset = new Anchor(position+". " +esgfDatasetSerializable.getName());
                 final String id = esgfDatasetSerializable.getId();
+
+                HorizontalPanel entry = new HorizontalPanel();
+                Anchor dataset = new Anchor(position+". " +esgfDatasetSerializable.getName());
+                entry.getElement().setId(esgfDatasetSerializable.getLASID());
+              
+                entry.add(dataset);
+                if ( esgfDatasetSerializable.isAlreadyAdded() ) {
+                    String added = "&nbsp;&nbsp(Data set ready.)";
+                    HTML addedlabel = new HTML(added);
+                    entry.add(addedlabel);
+                }
                 dataset.addClickHandler(new ClickHandler(){
 
                     @Override
@@ -284,7 +304,7 @@ public class ESGFSearchPanel extends Composite {
                     }
 
                 });
-                datasetPanel.add(dataset);
+                datasetPanel.add(entry);
             }
             if ( datasets.size() > 0 ) {
                 final int start = datasets.get(0).getPosition();
