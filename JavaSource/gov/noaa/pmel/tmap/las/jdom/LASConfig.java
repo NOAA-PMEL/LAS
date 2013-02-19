@@ -5450,14 +5450,6 @@ public class LASConfig extends LASDocument {
                             }
 
                         }
-                        
-                        DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-                        File v7 = new File(getOutputDir()+"/"+format.print(new DateTime())+"lasV7.xml");
-                        try {
-                            write(v7);
-                        } catch (Exception e) {
-                            log.error("Cannot write out new Version 7.0 las.xml file.", e);
-                        }
                         return key_id;
                     } 
                 }
