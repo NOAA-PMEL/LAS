@@ -4,7 +4,9 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetMember;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
+import gov.noaa.pmel.tmap.las.util.Constants;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -75,7 +77,15 @@ public class ESGFSearchDocument extends LASDocument {
                     String[] parts = idnode.split("\\|");
                     String id = parts[0];
                     String node = parts[1];
-                    ESGFDatasetSerializable dataset = new ESGFDatasetSerializable(name, id, node, numFound, position);
+                    String las = "http://"+node+"/las";
+                    String key = "";
+                    try {
+                        key = JDOMUtils.MD5Encode(las);
+                    } catch (UnsupportedEncodingException e) {
+                        // bummer
+                    }
+                    String LASID = key+Constants.NAME_SPACE_SPARATOR+id;
+                    ESGFDatasetSerializable dataset = new ESGFDatasetSerializable(name, id, node, numFound, position, LASID, false);
                     datasets.add(dataset);
                     position++;
                 }

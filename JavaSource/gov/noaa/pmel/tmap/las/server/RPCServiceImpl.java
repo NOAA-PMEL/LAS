@@ -657,7 +657,15 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 JDOMUtils.XML2JDOM(stream.toString(), doc);
                 if ( doc.getStatus() == 0 ) {
                     datasets = doc.getDatasets();
-                    return datasets;
+                }
+            }
+            for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
+                ESGFDatasetSerializable esgfDatasetSerializable = (ESGFDatasetSerializable) datasetsIt.next();
+                Dataset d = lasConfig.getDataset(esgfDatasetSerializable.getLASID());
+                if ( d != null ) {
+                    esgfDatasetSerializable.setAlreadyAdded(true);
+                } else {
+                    esgfDatasetSerializable.setAlreadyAdded(false);
                 }
             }
             return datasets;
@@ -666,6 +674,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         } catch ( IOException e ) {
             throw new RPCException(e.getMessage());
         } catch ( JDOMException e ) {
+            throw new RPCException(e.getMessage());
+        } catch (LASException e) {
             throw new RPCException(e.getMessage());
         }
     }
