@@ -462,8 +462,8 @@ public class DateTimeWidget extends Composite {
 //		DateTime startDate = new DateTime(year, start, 1, 0, 0, DateTimeZone.UTC).withChronology(chrono);
 //		DateTime endDate = new DateTime(year, end, 1, 0, 0, DateTimeZone.UTC).withChronology(chrono);
 		
-		DateTime startDate = lo.withYear(year).withMonthOfYear(start).withDayOfMonth(1);
-		DateTime endDate = hi.withYear(year).withMonthOfYear(end).withDayOfMonth(1);
+		DateTime startDate = lo.withYear(year).withMonthOfYear(start).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0);
+		DateTime endDate = hi.withYear(year).withMonthOfYear(end).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0);
 		
 		
 		while (startDate.isBefore(endDate.getMillis()) || startDate.equals(endDate)) {
