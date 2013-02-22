@@ -82,7 +82,7 @@ ENDIF   ! degenerated to a point.
 IF `STRLEN("($varshape)") EQ 1` THEN
   DEFINE SYMBOL ferret_contour_style = raster
   DEFINE SYMBOL degenerate_2d = 1
-ENDIFgop
+ENDIF
 
 ! Issue error messages if the xyz ranges are 0. Note region_t_range is not defined.
 
