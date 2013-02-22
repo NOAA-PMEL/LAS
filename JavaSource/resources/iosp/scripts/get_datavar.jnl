@@ -26,6 +26,10 @@ SET DATA/SAVE
 ! The IOSP will supply an integer value for this argument.
 SET DATA ($2)
 
+! Write data as single-precision floats
+SET VAR/OUTTYPE=float $3
+
+
 ! Write output in original upper-or lower-case spelling of variables
 ! and axis names
 
@@ -125,7 +129,6 @@ IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
 ENDIF
 
 ! All the region information has been gathered. Now write the file.  
-SET VAR/OUTTYPE=float $3
 SAVE/FILE="$1"/CLOBBER $3[($region_full)]
 
 ! Done writing data variable. Clean up.
