@@ -120,8 +120,8 @@ ENDIF
 DEFINE SYMBOL ferret_diff_var = ($ferret_var_1) - ($ferret_var_0)
 
 IF ($native_curvilinear_xy"0|*>1") THEN 
-  DEFINE SYMBOL ferret_diff_var = ($ferret_plot_base_var_1)) - ( ($ferret_plot_base_var_0)  , xcoord, ycoord
-  DEFINE SYMBOL ferret_diff_var_m360 = ($ferret_plot_base_var_1)) - ( ($ferret_plot_base_var_0) , xcoord-360, ycoord
+  DEFINE SYMBOL ferret_diff_var = ($ferret_plot_base_var_1) -  ($ferret_plot_base_var_0)  , xcoord, ycoord
+  DEFINE SYMBOL ferret_diff_var_m360 = ($ferret_plot_base_var_1) -  ($ferret_plot_base_var_0) , xcoord-360, ycoord
 ENDIF
 
 ! Use Ferret properties to set up the plot qualifiers
