@@ -128,7 +128,8 @@ IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
    LET ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
 ENDIF
 
-! All the region information has been gathered. Now write the file.  
+! All the region information has been gathered. Now write the file. 
+SET VAR/OUTTYPE=float $3
 SAVE/FILE="$1"/CLOBBER $3[($region_full)]
 
 ! Done writing data variable. Clean up.
