@@ -26,6 +26,14 @@ SET DATA/SAVE
 ! The IOSP will supply an integer value for this argument.
 SET DATA ($2)
 
+! Always write data with Ferret default bad-flag.
+! The attributes come from the header.xml so
+! do not need to give the new definition attributes
+! such as units.
+
+SET VAR/NAME=$3_in $3
+LET $3 = MISSING($3_in,  -1.E34)
+
 ! Write data as single-precision floats
 SET VAR/OUTTYPE=float $3
 
