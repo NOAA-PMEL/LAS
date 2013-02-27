@@ -5,6 +5,11 @@
 !  7/2007 ACM test to see if the axis name is a pseudo-variable name. If so, then find a variable
 !             in the dataset which has that axis, and use it to define the coordinates
 !
+!  2/2013 ACM If the dataset has an axis with an axis direction of M or N, handle that. For instance
+!             bnds:cartesian_axis = "N" ;  
+!	      may be intended for No direction, but 6D Ferret interprets it as the N direction. 
+
+!
 ! Issues a command to SAVE/FILE=$1/CLOBBER data from a coordinate variable in dataset according 
 ! to indices and strides given as arguments. Assumes the dataset has already been opened.
 !
@@ -52,6 +57,8 @@ IF `STRCMP("($axname)", "I") EQ 0` THEN LET its_pseudoname = 1
 IF `STRCMP("($axname)", "J") EQ 0` THEN LET its_pseudoname = 1
 IF `STRCMP("($axname)", "K") EQ 0` THEN LET its_pseudoname = 1
 IF `STRCMP("($axname)", "L") EQ 0` THEN LET its_pseudoname = 1
+IF `STRCMP("($axname)", "M") EQ 0` THEN LET its_pseudoname = 1
+IF `STRCMP("($axname)", "N") EQ 0` THEN LET its_pseudoname = 1
 
 IF `its_pseudoname` then
    LET nvars = `..nvars`
@@ -73,28 +80,39 @@ IF `STRINDEX("($shape)", "I") GT 0` THEN
    LET COORDS = x[gx=($myvar)]
    SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[i=`lo_index_1`:`hi_index_1`:`stride_1`]
-ENDIF
 
-IF `STRINDEX("($shape)", "J") GT 0` THEN
+ELIF `STRINDEX("($shape)", "J") GT 0` THEN
 ! write the coordinates as Y coordinates.
    LET COORDS = y[gy=($myvar)]
    SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[j=`lo_index_1`:`hi_index_1`:`stride_1`]
-ENDIF
 
-IF `STRINDEX("($shape)", "K") GT 0` THEN
+ELIF `STRINDEX("($shape)", "K") GT 0` THEN
 ! write the coordinates as Y coordinates.
    LET COORDS = z[gz=($myvar)]
    SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[k=`lo_index_1`:`hi_index_1`:`stride_1`]
-ENDIF
 
-IF `STRINDEX("($shape)", "L") GT 0` THEN
+ELIF `STRINDEX("($shape)", "L") GT 0` THEN
 
-! write the coordinates as Y coordinates.
+! write the coordinates as T coordinates.
    LET COORDS = t[gt=($myvar)]
    SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[l=`lo_index_1`:`hi_index_1`:`stride_1`]
+
+ELIF `STRINDEX("($shape)", "M") GT 0` THEN
+
+! write the coordinates as T coordinates.
+   LET COORDS = _e[ge=($myvar)]
+   SET VAR/outtype=float coords
+   SAVE/FILE="$1"/CLOBBER COORDS[m=`lo_index_1`:`hi_index_1`:`stride_1`]
+
+ELIF `STRINDEX("($shape)", "N") GT 0` THEN
+
+! write the coordinates as F coordinates.
+   LET COORDS = _f[gf=($myvar)]
+   SET VAR/outtype=float coords
+   SAVE/FILE="$1"/CLOBBER COORDS[n=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 ! Done writing data variable. exit
