@@ -488,9 +488,8 @@ public final class ProductServerAction extends LASAction {
                         productServerRunner.setBatch(true);
                         
                         long timeout = productServerRunner.getProgressTimeout()*1000;
-                        System.err.println("productServerRunner.getProgressTimeout()*1000:"+timeout);
+                        
                         String ui_timeout_string = lasRequest.getProperty("product_server", "ui_timeout");
-                        System.err.println("lasRequest.getProperty(\"product_server\", \"ui_timeout\"):"+ui_timeout_string);
                         long ui_timeout = -999;
                         if ( ui_timeout_string != null && !ui_timeout_string.equals("") ) {
                         	 ui_timeout = Long.valueOf(ui_timeout_string);
@@ -504,7 +503,6 @@ public final class ProductServerAction extends LASAction {
                             // Timeout set in the request.
                             long to = Math.max(timeout, 2000);
                            
-                            System.err.println("Calling productServerRunner.join(to); with to:"+to);
                             productServerRunner.join(to);
                             
                         } else {
