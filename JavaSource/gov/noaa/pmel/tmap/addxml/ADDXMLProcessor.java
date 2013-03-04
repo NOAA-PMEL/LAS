@@ -97,6 +97,7 @@ import thredds.catalog.ThreddsMetadata.Range;
 import thredds.catalog.ThreddsMetadata.Variable;
 import thredds.catalog.ThreddsMetadata.Variables;
 import ucar.nc2.Attribute;
+import ucar.nc2.VariableSimpleIF;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
@@ -105,12 +106,24 @@ import ucar.nc2.dataset.CoordinateAxis2D;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.dt.GridDatatype;
+import ucar.nc2.dt.PointObsDataset;
+import ucar.nc2.dt.TrajectoryObsDataset;
+import ucar.nc2.dt.TrajectoryObsDatatype;
+import ucar.nc2.dt.TypedDatasetFactory;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
+import ucar.nc2.ft.FeatureDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
+import ucar.nc2.ft.NestedPointFeatureCollection;
+import ucar.nc2.ft.NestedPointFeatureCollectionIterator;
+import ucar.nc2.ft.PointFeatureCollection;
+import ucar.nc2.ft.PointFeatureCollectionIterator;
+import ucar.nc2.ft.TrajectoryFeature;
+import ucar.nc2.ft.TrajectoryFeatureCollection;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
+import ucar.unidata.geoloc.LatLonRect;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
@@ -2389,7 +2402,7 @@ public class ADDXMLProcessor {
     public static DatasetsGridsAxesBean createBeansFromNetcdfDataset(
             String url, boolean esg, InvDataset threddsDataset) {
 
-        
+
         DatasetsGridsAxesBean dagb = new DatasetsGridsAxesBean();
         Vector DatasetBeans = new Vector();
         DatasetBean dataset = new DatasetBean();
@@ -2408,252 +2421,298 @@ public class ADDXMLProcessor {
             System.out.println("Processing netCDF dataset: " + url);
         }
         Formatter error = new Formatter();
-         
+
         GridDataset gridDs = null;
-        
-       
+        TrajectoryObsDataset pointData = null;
+
         if (skip(curl)) {
             System.out.println("Skipping "+curl);
             return dagb;
         } 
-         try {
-             ClassLoader loader = ADDXMLProcessor.class.getClassLoader();
-             System.out.println(loader.getResource("org/slf4j/spi/LocationAwareLogger.class"));
-             System.out.println(loader.getResource("org/apache/commons/logging/impl/SLF4JLocationAwareLog.class"));
-             System.out.println(loader.getResource("opendap/dap/BaseType.class"));
-
-             
-             
+        try {
+            //             
+            // Wondering where a particular class is coming from because there are muliple dependencies in multiple jars?
+            // Use the class loader to find out...
+                         ClassLoader loader = ADDXMLProcessor.class.getClassLoader();
+                         System.out.println(loader.getResource("org/slf4j/spi/LocationAwareLogger.class"));
+                         System.out.println(loader.getResource("org/apache/commons/logging/impl/SLF4JLocationAwareLog.class"));
+                         System.out.println(loader.getResource("opendap/dap/BaseType.class"));
+            //
+            //             
+            //             
             gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
             if ( gridDs == null ) {
                 gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
             }
+
+            if ( gridDs == null ) {
+                pointData = (TrajectoryObsDataset) FeatureDatasetFactoryManager.open(FeatureType.TRAJECTORY, curl, null, error);
+            }
+
+
         } catch (IOException e) {
             System.err.println("Unable to open dataset at "+DODSNetcdfFile.canonicalURL(url));
             return null;
         }
-        if ( gridDs == null ) {
+
+        if ( gridDs == null && pointData == null ) {
             System.err.println("Unable to read dataset at "+url+" "+error.toString());
             return null;
         }
-
-        String name = null;
-        if ( esg ) {
-            name = threddsDataset.getFullName();
-        } else {
-            Attribute nameAttribute = null;
-            if (global_title_attribute == null) {
-                nameAttribute = gridDs.findGlobalAttributeIgnoreCase("long_name");
-                if (nameAttribute == null) {
-                    nameAttribute = gridDs.findGlobalAttributeIgnoreCase("title");
-                }
-            }
-            else {
-                nameAttribute = gridDs.findGlobalAttributeIgnoreCase(global_title_attribute);
-            }
-
-
-            if (nameAttribute != null) {
-                if (nameAttribute.isString()) {
-                    name = nameAttribute.getStringValue();
-                }
-            }
-
-            if ( threddsDataset != null ) {
-                if ( name == null ) {
-                    name = threddsDataset.getFullName();
-                }
-            }
-        }
-
-        //new GridDataset(ncds);
-        if (name == null) {
-            name = url;
-        }
-        String elementName;
-        if ( esg ) {
-            elementName = threddsDataset.getID();
-        } else {
-            if ( threddsDataset != null && threddsDataset.getID() != null && !threddsDataset.getID().equals("") ) {
-                elementName = threddsDataset.getID();
-                elementName = elementName.replace("/", ".");
-                if ( Pattern.matches("^[0-9].*", elementName) ) elementName = "dataset-" + elementName;
-                elementName = elementName.replaceAll(" ", "-");
-            } else {
-                elementName = encodeID(url);
-            }
-        }
-       
-        dataset.setName(name);
-        dataset.setElement(elementName);
-        dataset.setUrl(url);
-
-        List<GridDatatype> grids = new ArrayList();
         if ( gridDs != null ) {
-            grids = gridDs.getGrids();
-        }
-
-        if (grids.size() == 0) {
-            dataset.setComment(
-                    "This data source has no lat/lon grids that follow a known convention.");
-            System.err.println("File parsed.  No Lat/Lon grids found.");
-        }
-        for (int i = 0; i < grids.size(); i++) {
-            /*
-             * A GridDataset can contain one or more GeoGrid objects each
-             * potentially defined on its own axes.
-             *
-             * A Java netCDF GeoGrid contains the same information the combination
-             * of an LAS variable, grid, and assoicated axes.
-             *
-             * To make the resulting XML fragment as compact as possible,
-             * this code attempts to get the smallest set of LAS grids
-             * necessary.
-             */
-
-            UniqueVector GridAxisBeans = new UniqueVector();
-
-            GridDatatype geogrid = grids.get(i);
-
-            VariableBean variable = new VariableBean();
-            variable.setUrl("#" + geogrid.getName());
-            if (!geogrid.getDescription().equals(geogrid.getName())) {
-                variable.setName(geogrid.getDescription());
-            }
-            else {
-                variable.setName(geogrid.getName());
-            }
-            String gn = geogrid.getName();
-                        
-            if ( Pattern.matches("^[0-9].*", gn) ) gn = "variable" + gn;
-            gn = gn.replaceAll(" ", "-");
-            variable.setElement(gn + "-" + elementName);
-            if ( geogrid.getUnitsString() != null && !geogrid.getUnitsString().equals("") ) {
-                variable.setUnits(geogrid.getUnitsString());
+            String name = null;
+            if ( esg ) {
+                name = threddsDataset.getFullName();
             } else {
-                variable.setUnits("no units");
-            }
-
-            GridCoordSys gcs = (GridCoordSys) geogrid.getCoordinateSystem();
-
-            GridBean grid = new GridBean();
-
-            String grid_name = "grid";
-            CoordinateAxis xAxis = gcs.getXHorizAxis();
-            AxisBean xaxis;
-            if ( xAxis instanceof CoordinateAxis1D ) {
-                CoordinateAxis1D x = (CoordinateAxis1D) gcs.getXHorizAxis();
-                xaxis = makeGeoAxis(x, "x", elementName);
-            } else {
-                CoordinateAxis2D x = (CoordinateAxis2D) gcs.getXHorizAxis();
-                xaxis = makeGeoAxisFrom2D(x, "x", elementName);
-                variable.setProperty("ferret", "curvi_coord_lon", x.getName());
-                variable.setProperty("ferret", "curv_lon_min", String.valueOf(x.getMinValue()));
-                variable.setProperty("ferret", "curv_lon_max", String.valueOf(x.getMaxValue()));
-            }
-            grid_name = grid_name + "-" + xAxis.getShortName();
-            if (verbose) {
-                System.out.println("\t Variable: " + geogrid.getName());
-                System.out.println("\t\t Longitude axis: ");
-            }
-            GridAxisBeans.addUnique(xaxis);
-            if (verbose) {
-                System.out.println(xaxis.toString());
-            }
-
-            CoordinateAxis yAxis = gcs.getYHorizAxis();
-            AxisBean yaxis;
-            if ( yAxis instanceof CoordinateAxis1D ) {
-                CoordinateAxis1D y = (CoordinateAxis1D) gcs.getYHorizAxis();
-                yaxis = makeGeoAxis(y, "y", elementName);
-            } else {
-                CoordinateAxis2D y = (CoordinateAxis2D) gcs.getYHorizAxis();
-                yaxis = makeGeoAxisFrom2D(y, "y", elementName);
-                variable.setProperty("ferret", "curvi_coord_lat", y.getName());
-            }
-
-            grid_name = grid_name + "-" + yAxis.getShortName();
-            if (verbose) {
-                System.out.println("\t\t Latitude axis: ");
-            }
-
-            GridAxisBeans.addUnique(yaxis);
-            if (verbose) {
-                System.out.println(yaxis.toString());
-            }
-            if (gcs.hasVerticalAxis()) {
-                CoordinateAxis1D zAxis = gcs.getVerticalAxis();
-                grid_name = grid_name + "-" + zAxis.getShortName();
-                if (verbose) {
-                    System.out.println("\t\t Vertical axis: ");
+                Attribute nameAttribute = null;
+                if (global_title_attribute == null) {
+                    nameAttribute = gridDs.findGlobalAttributeIgnoreCase("long_name");
+                    if (nameAttribute == null) {
+                        nameAttribute = gridDs.findGlobalAttributeIgnoreCase("title");
+                    }
                 }
-                AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
-                GridAxisBeans.addUnique(zaxis);
-                if (verbose) {
-                    System.out.println(zaxis.toString());
+                else {
+                    nameAttribute = gridDs.findGlobalAttributeIgnoreCase(global_title_attribute);
                 }
 
-            }
-            else {
-                if (verbose) {
-                    System.out.println("\t\t No vertical axis");
-                }
-            }
 
-            CoordinateAxis1DTime tAxis = gcs.getTimeAxis1D();
-
-            if (tAxis != null) {
-                grid_name = grid_name + "-" + tAxis.getShortName();
-                if (verbose) {
-                    System.out.println("\t\t Time axis: ");
+                if (nameAttribute != null) {
+                    if (nameAttribute.isString()) {
+                        name = nameAttribute.getStringValue();
+                    }
                 }
-                
-                AxisBean taxis = makeTimeAxis(tAxis, elementName);
-                if ( taxis != null ) {
-                    GridAxisBeans.addUnique(taxis);
-                    if (verbose) {
-                        System.out.println(taxis.toString());
+
+                if ( threddsDataset != null ) {
+                    if ( name == null ) {
+                        name = threddsDataset.getFullName();
                     }
                 }
             }
-            else {
-                System.err.println("\t\t No time axis");
-            }
-            
-            grid.setElement(grid_name + "-" + elementName);
-            grid.setAxes(GridAxisBeans);
-            variable.setGrid(grid);
-            dataset.addVariable(variable);
-            ProjectionImpl proj = geogrid.getProjection();
 
-            if (verbose) {
-                if (proj instanceof LatLonProjection) {
-                    System.out.println("\t\t Grid has LatLonProjection.");
+            //new GridDataset(ncds);
+            if (name == null) {
+                name = url;
+            }
+            String elementName;
+            if ( esg ) {
+                elementName = threddsDataset.getID();
+            } else {
+                if ( threddsDataset != null && threddsDataset.getID() != null && !threddsDataset.getID().equals("") ) {
+                    elementName = threddsDataset.getID();
+                    elementName = elementName.replace("/", ".");
+                    if ( Pattern.matches("^[0-9].*", elementName) ) elementName = "dataset-" + elementName;
+                    elementName = elementName.replaceAll(" ", "-");
+                } else {
+                    elementName = encodeID(url);
                 }
-                else if (proj instanceof LambertConformal) {
-                    System.out.println("\t\t Grid has Lambert Conformal projection...");
+            }
+
+            dataset.setName(name);
+            dataset.setElement(elementName);
+            dataset.setUrl(url);
+
+            List<GridDatatype> grids = new ArrayList();
+            if ( gridDs != null ) {
+                grids = gridDs.getGrids();
+            }
+
+            if (grids.size() == 0) {
+                dataset.setComment(
+                        "This data source has no lat/lon grids that follow a known convention.");
+                System.err.println("File parsed.  No Lat/Lon grids found.");
+            }
+            for (int i = 0; i < grids.size(); i++) {
+                /*
+                 * A GridDataset can contain one or more GeoGrid objects each
+                 * potentially defined on its own axes.
+                 *
+                 * A Java netCDF GeoGrid contains the same information the combination
+                 * of an LAS variable, grid, and assoicated axes.
+                 *
+                 * To make the resulting XML fragment as compact as possible,
+                 * this code attempts to get the smallest set of LAS grids
+                 * necessary.
+                 */
+
+                UniqueVector GridAxisBeans = new UniqueVector();
+
+                GridDatatype geogrid = grids.get(i);
+
+                VariableBean variable = new VariableBean();
+                variable.setUrl("#" + geogrid.getName());
+                if (!geogrid.getDescription().equals(geogrid.getName())) {
+                    variable.setName(geogrid.getDescription());
                 }
                 else {
-                    System.out.println("\t\t Grid has unknown projection...");
+                    variable.setName(geogrid.getName());
                 }
-            }
+                String gn = geogrid.getName();
 
-            // Add the axis beans for this grid to the list of axis in this data source.
-            for (Iterator abit = GridAxisBeans.iterator(); abit.hasNext(); ) {
-                AxisBean ab = (AxisBean)abit.next();
-                AxisBeans.addUnique(ab);
-            }
-            GridBeans.addUnique(grid);
+                if ( Pattern.matches("^[0-9].*", gn) ) gn = "variable" + gn;
+                gn = gn.replaceAll(" ", "-");
+                variable.setElement(gn + "-" + elementName);
+                if ( geogrid.getUnitsString() != null && !geogrid.getUnitsString().equals("") ) {
+                    variable.setUnits(geogrid.getUnitsString());
+                } else {
+                    variable.setUnits("no units");
+                }
 
-        } // Loop over Grids
-        DatasetBeans.add(dataset);
-        dagb.setDatasets(DatasetBeans);
-        dagb.setGrids(GridBeans);
-        dagb.setAxes(AxisBeans);
-        try {
-            gridDs.close();
-        } catch (IOException e) {
-            System.err.println("Unable to close "+url);
+                GridCoordSys gcs = (GridCoordSys) geogrid.getCoordinateSystem();
+
+                GridBean grid = new GridBean();
+
+                String grid_name = "grid";
+                CoordinateAxis xAxis = gcs.getXHorizAxis();
+                AxisBean xaxis;
+                if ( xAxis instanceof CoordinateAxis1D ) {
+                    CoordinateAxis1D x = (CoordinateAxis1D) gcs.getXHorizAxis();
+                    xaxis = makeGeoAxis(x, "x", elementName);
+                } else {
+                    CoordinateAxis2D x = (CoordinateAxis2D) gcs.getXHorizAxis();
+                    xaxis = makeGeoAxisFrom2D(x, "x", elementName);
+                    variable.setProperty("ferret", "curvi_coord_lon", x.getName());
+                    variable.setProperty("ferret", "curv_lon_min", String.valueOf(x.getMinValue()));
+                    variable.setProperty("ferret", "curv_lon_max", String.valueOf(x.getMaxValue()));
+                }
+                grid_name = grid_name + "-" + xAxis.getShortName();
+                if (verbose) {
+                    System.out.println("\t Variable: " + geogrid.getName());
+                    System.out.println("\t\t Longitude axis: ");
+                }
+                GridAxisBeans.addUnique(xaxis);
+                if (verbose) {
+                    System.out.println(xaxis.toString());
+                }
+
+                CoordinateAxis yAxis = gcs.getYHorizAxis();
+                AxisBean yaxis;
+                if ( yAxis instanceof CoordinateAxis1D ) {
+                    CoordinateAxis1D y = (CoordinateAxis1D) gcs.getYHorizAxis();
+                    yaxis = makeGeoAxis(y, "y", elementName);
+                } else {
+                    CoordinateAxis2D y = (CoordinateAxis2D) gcs.getYHorizAxis();
+                    yaxis = makeGeoAxisFrom2D(y, "y", elementName);
+                    variable.setProperty("ferret", "curvi_coord_lat", y.getName());
+                }
+
+                grid_name = grid_name + "-" + yAxis.getShortName();
+                if (verbose) {
+                    System.out.println("\t\t Latitude axis: ");
+                }
+
+                GridAxisBeans.addUnique(yaxis);
+                if (verbose) {
+                    System.out.println(yaxis.toString());
+                }
+                if (gcs.hasVerticalAxis()) {
+                    CoordinateAxis1D zAxis = gcs.getVerticalAxis();
+                    grid_name = grid_name + "-" + zAxis.getShortName();
+                    if (verbose) {
+                        System.out.println("\t\t Vertical axis: ");
+                    }
+                    AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
+                    GridAxisBeans.addUnique(zaxis);
+                    if (verbose) {
+                        System.out.println(zaxis.toString());
+                    }
+
+                }
+                else {
+                    if (verbose) {
+                        System.out.println("\t\t No vertical axis");
+                    }
+                }
+
+                CoordinateAxis1DTime tAxis = gcs.getTimeAxis1D();
+
+                if (tAxis != null) {
+                    grid_name = grid_name + "-" + tAxis.getShortName();
+                    if (verbose) {
+                        System.out.println("\t\t Time axis: ");
+                    }
+
+                    AxisBean taxis = makeTimeAxis(tAxis, elementName);
+                    if ( taxis != null ) {
+                        GridAxisBeans.addUnique(taxis);
+                        if (verbose) {
+                            System.out.println(taxis.toString());
+                        }
+                    }
+                }
+                else {
+                    if (verbose) {
+                       System.out.println("\t\t No time axis");
+                    }
+                }
+
+                grid.setElement(grid_name + "-" + elementName);
+                grid.setAxes(GridAxisBeans);
+                variable.setGrid(grid);
+                dataset.addVariable(variable);
+                ProjectionImpl proj = geogrid.getProjection();
+
+                if (verbose) {
+                    if (proj instanceof LatLonProjection) {
+                        System.out.println("\t\t Grid has LatLonProjection.");
+                    }
+                    else if (proj instanceof LambertConformal) {
+                        System.out.println("\t\t Grid has Lambert Conformal projection...");
+                    }
+                    else {
+                        System.out.println("\t\t Grid has unknown projection...");
+                    }
+                }
+
+                // Add the axis beans for this grid to the list of axis in this data source.
+                for (Iterator abit = GridAxisBeans.iterator(); abit.hasNext(); ) {
+                    AxisBean ab = (AxisBean)abit.next();
+                    AxisBeans.addUnique(ab);
+                }
+                GridBeans.addUnique(grid);
+
+            } // Loop over Grids
+            DatasetBeans.add(dataset);
+            dagb.setDatasets(DatasetBeans);
+            dagb.setGrids(GridBeans);
+            dagb.setAxes(AxisBeans);
+            try {
+                gridDs.close();
+            } catch (IOException e) {
+                System.err.println("Unable to close "+url);
+            }
+        } else if ( pointData != null ) {
+            
+            System.out.println(pointData.getDescription());
+
+            List<VariableSimpleIF> vars =  pointData.getDataVariables();
+            
+            
+                            for (Iterator iterator = vars.iterator(); iterator.hasNext();) {
+                                VariableSimpleIF variableSimpleIF = (VariableSimpleIF) iterator.next();
+                                if ( variableSimpleIF instanceof ucar.nc2.Variable ) {
+                                    ucar.nc2.Variable v = (ucar.nc2.Variable) variableSimpleIF;
+                                    
+                                    System.out.println("Found variable "+v.getShortName()+" : "+v.getFullName());
+                                }
+                            }
+            
+//            for ( Iterator it = trajDs.getTrajectories().iterator(); it.hasNext(); ) {
+//                TrajectoryObsDatatype traj = (TrajectoryObsDatatype) it.next();
+//                LatLonRect bb = traj.getBoundingBox();
+//                System.out.println("Data bounded by: "+bb);
+//                List<VariableSimpleIF> vars = traj.getDataVariables();
+//
+//
+//                for (Iterator iterator = vars.iterator(); iterator.hasNext();) {
+//                    VariableSimpleIF variableSimpleIF = (VariableSimpleIF) iterator.next();
+//                    if ( variableSimpleIF instanceof ucar.nc2.Variable ) {
+//                        ucar.nc2.Variable v = (ucar.nc2.Variable) variableSimpleIF;
+//                        System.out.println("Found variable "+v.getShortName()+" : "+v.getFullName());
+//                    } else {
+//                        System.out.println("Found variable "+variableSimpleIF.getName());
+//                    }
+//                }
+//            }
         }
         return dagb;
     }
@@ -2892,7 +2951,7 @@ public class ADDXMLProcessor {
                 jodaDate2 = makeDate(t1, dateUnit, chrono);
                 arange.setSize(String.valueOf(axis.getSize() - 1));
             }
-            
+
             if ( Math.abs(jodaDate2.getMillis() - jodaDate1.getMillis()) < 3600*1000 ) {
                 irregular = true;
             }
@@ -2915,9 +2974,9 @@ public class ADDXMLProcessor {
                 arange.setSize(String.valueOf(hrs));
                 arange.setStart(fmt.print(jodaDate1.withZone(DateTimeZone.UTC)));
                 if(setEnd){
-                	double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
-                	DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
-                	arange.setEnd(fmt.print(jodaDate3.withZone(DateTimeZone.UTC)));
+                    double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
+                    DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
+                    arange.setEnd(fmt.print(jodaDate3.withZone(DateTimeZone.UTC)));
                 }
                 arange.setStep("1");
                 axisbean.setUnits("hour");
@@ -3048,7 +3107,7 @@ public class ADDXMLProcessor {
                     if (fmt == null ) {
                         fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
                     }
-                    
+
                     String str = fmt.print(jodaDate1.withZone(DateTimeZone.UTC));
 
                     if ( str.startsWith("-") ) {
@@ -3059,9 +3118,9 @@ public class ADDXMLProcessor {
                     }
                     arange.setStart(str);
                     if(setEnd){
-                    	double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
-                    	DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
-                    	String str3 = fmt.print(jodaDate3.withZone(DateTimeZone.UTC));
+                        double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
+                        DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
+                        String str3 = fmt.print(jodaDate3.withZone(DateTimeZone.UTC));
 
                         if ( str.startsWith("-") ) {
 
@@ -3074,7 +3133,6 @@ public class ADDXMLProcessor {
                 }
                 else {
                     // Layout the time axis using "v" elements.
-
                     axisbean.setArange(null);
                     double t[] = axis.getCoordValues();
                     String ts[] = new String[t.length];
@@ -3088,9 +3146,21 @@ public class ADDXMLProcessor {
             }
         }
         else {
-            axisbean = null;
-        }
+            axisbean.setArange(null);
+            if ( axis.getSize() > 0 ) {
 
+                double t[] = axis.getCoordValues();
+                String ts[] = new String[t.length];
+                // We don't know what these times look like.  Use a format with everything.
+
+                for (int i = 0; i < t.length; i++) {
+                    DateTime dt = makeDate(t[i], dateUnit, chrono);
+                    ts[i] = ferret_time_formatter.print(dt.withZone(DateTimeZone.UTC));
+                }
+
+                axisbean.setV(ts);        
+            }
+        }
         return axisbean;
     }
     private static DateTime makeDate(double d, DateUnit dateUnit, Chronology chrono) {

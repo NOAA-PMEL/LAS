@@ -81,48 +81,48 @@ public class GetUI extends ConfigService {
         ServerConfig serverConfig = (ServerConfig) servlet.getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");
         if ( cat_ids != null ) {
-            
-            try {
-                
-                int found = 0;
-                for ( int i = 0; i < cat_ids.length; i++ ) {
-                    //TODO session management probably by adding the JSESSIONID to the data set.
-                    String key_id = lasConfig.addDataset(cat_ids[i]);
-                    if ( key_id != null ) {
-                        found++;
-                        if (!key_id.equals(cat_ids[i]) ) {
-                            cat_ids[i] = key_id;
+            if ( lasConfig.pruneCategories() ) {
+                try {
+
+                    int found = 0;
+                    for ( int i = 0; i < cat_ids.length; i++ ) {
+                        String key_id = lasConfig.addDataset(cat_ids[i]);
+                        if ( key_id != null ) {
+                            found++;
+                            if (!key_id.equals(cat_ids[i]) ) {
+                                cat_ids[i] = key_id;
+                            }
                         }
                     }
+                    if ( found > 0 ) {
+                        lasConfig.convertToSeven(true);
+                        lasConfig.mergeProperites();
+                        lasConfig.addIntervalsAndPoints();    
+                        lasConfig.addGridType();
+                        //                String fds_base = serverConfig.getFTDSBase();
+                        //                String fds_dir = serverConfig.getFTDSDir();
+                        //                lasConfig.addFDS(fds_base, fds_dir);
+                    } else {
+                        throw new Exception("Search did not return any information for the requested data set.");
+                    }
+                } catch (Exception e) {
+                    String las_message = "Unable to initialize UI from the catid values provided.";
+                    LASBackendResponse lasBackendResponse = new LASBackendResponse();
+                    lasBackendResponse.setError("las_message", las_message);
+                    lasBackendResponse.addError("exception_message", e.toString());
+                    request.setAttribute("las_response", lasBackendResponse);
+                    StackTraceElement[] trace =  e.getStackTrace();
+                    log.error(las_message);
+                    log.error(e.toString());
+                    if ( trace.length > 0 ) {
+                        log.error(trace[0].toString());
+                    }           
+                    return mapping.findForward("error");
                 }
-                if ( found > 0 ) {
-                    lasConfig.convertToSeven(true);
-                    lasConfig.mergeProperites();
-                    lasConfig.addIntervalsAndPoints();    
-                    lasConfig.addGridType();
-                    //                String fds_base = serverConfig.getFTDSBase();
-                    //                String fds_dir = serverConfig.getFTDSDir();
-                    //                lasConfig.addFDS(fds_base, fds_dir);
-                } else {
-                   throw new Exception("Search did not return any information for the requested data set.");
-                }
-            } catch (Exception e) {
-                String las_message = "Unable to initialize UI from the catid values provided.";
-                LASBackendResponse lasBackendResponse = new LASBackendResponse();
-                lasBackendResponse.setError("las_message", las_message);
-                lasBackendResponse.addError("exception_message", e.toString());
-                request.setAttribute("las_response", lasBackendResponse);
-                StackTraceElement[] trace =  e.getStackTrace();
-                log.error(las_message);
-                log.error(e.toString());
-                if ( trace.length > 0 ) {
-                    log.error(trace[0].toString());
-                }           
-                return mapping.findForward("error");
+
+                request.getSession().setAttribute("catid", cat_ids);
             }
-           
-            request.getSession().setAttribute("catid", cat_ids);
-            
+
             Map<String, String[]> qp = request.getParameterMap();
             for (Iterator qpIt = qp.keySet().iterator(); qpIt.hasNext();) {
                 String param = (String) qpIt.next();
@@ -142,7 +142,7 @@ public class GetUI extends ConfigService {
                     query.append("&");
                 }
             }
-            
+
             String auto = request.getParameter("auto");
             if ( auto != null && auto.equals("true") ) {
                 CategorySerializable category = lasConfig.getCategorySerializableWithGrids(cat_ids[0], cat_ids[0]);
@@ -157,8 +157,6 @@ public class GetUI extends ConfigService {
         // forward to the UI
         response.sendRedirect("UI.vm"+query.toString());
         return null;
-        //return new ActionForward("/UI.vm?"+query, true);
-
     }
 
 }
