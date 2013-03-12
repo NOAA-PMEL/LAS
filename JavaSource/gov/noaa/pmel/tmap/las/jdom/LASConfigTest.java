@@ -77,7 +77,11 @@ public class LASConfigTest extends TestCase {
 			
 			e.printStackTrace();
 			fail();
-		}
+		} catch (LASException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            fail();
+        }
         
       
             try {

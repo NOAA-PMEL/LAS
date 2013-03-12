@@ -531,85 +531,161 @@ public class LASConfig extends LASDocument {
  			List gridElements = grids.getChildren("grid");
  			for (Iterator gridIt = gridElements.iterator(); gridIt.hasNext();) {
  				Element gridElement = (Element) gridIt.next();
- 				Grid g = getGridById(gridElement.getAttributeValue("ID"));
- 				setPointsAndIntervals(g);
+ 				List<Element> gridAxes = new ArrayList<Element>();
+ 				List<Element> axes = gridElement.getChildren("axis");
+ 				List<String> ids = new ArrayList<String>();
+ 				for (Iterator iterator = axes.iterator(); iterator.hasNext();) {
+                    Element element = (Element) iterator.next();
+                    ids.add(element.getAttributeValue("IDREF"));
+                }
+ 				List<Element> allAxes = getRootElement().getChildren("axes");
+ 				for (Iterator allAxIt = allAxes.iterator(); allAxIt.hasNext();) {
+                    Element ax = (Element) allAxIt.next();
+                    List<Element> allAxis = ax.getChildren("axis");
+                    for (Iterator allAxisIt = allAxis.iterator(); allAxisIt.hasNext();) {
+                        Element axis = (Element) allAxisIt.next();
+                        if ( ids.contains(axis.getAttributeValue("ID"))) {
+                            gridAxes.add(axis);
+                        }
+                    }
+                }
+ 				String[] intervals = {"","","",""};
+ 		        String[] points = {"","","",""};
+ 		        for (Iterator gridAxesIt = gridAxes.iterator(); gridAxesIt.hasNext();) {
+ 		            Element axis = (Element) gridAxesIt.next();
+ 		            int size;
+
+
+
+ 		            String type = axis.getAttributeValue("type");
+ 		            Element arange = axis.getChild("arange");
+
+ 		            if ( arange != null ) {
+ 		                size = Integer.valueOf(arange.getAttributeValue("size")).intValue();
+ 		            } else {
+ 		                List v = axis.getChildren("v");
+ 		                size = v.size();
+ 		            }
+ 		            // The axis defintions can come in any order but
+ 		            // we want this string orders XYZT
+ 		            if ( size == 1 ) {
+ 		                if ( type.equals("x") ) {
+ 		                    points[0] = type;
+ 		                } else if ( type.equals("y") ) {
+ 		                    points[1] = type;
+ 		                } else if ( type.equals("z") ) {
+ 		                    points[2] = type;
+ 		                } else if ( type.equals("t") ) {
+ 		                    points[3] = type;
+ 		                }
+ 		            } else if ( size > 1 ) {
+ 		                if ( type.equals("x") ) {
+ 		                    points[0] = type;
+ 		                    intervals[0] = type;
+ 		                } else if ( type.equals("y") ) {
+ 		                    points[1] = type;
+ 		                    intervals[1] = type;
+ 		                } else if ( type.equals("z") ) {
+ 		                    points[2] = type;
+ 		                    intervals[2] = type;
+ 		                } else if ( type.equals("t") ) {
+ 		                    points[3] = type;
+ 		                    intervals[3] = type;
+ 		                }
+ 		            }
+
+ 		            
+ 		        }
+ 		        
+ 		        // Set these on the original element, not the cloned grid with filled in axes.
+                String existingPoints = gridElement.getAttributeValue("points");
+                String existingIntervals = gridElement.getAttributeValue("intervals");
+                // Set them only if they don't already exist in the variable definition.
+                if ( existingPoints == null ) {
+                    gridElement.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+                }
+                if ( existingIntervals == null ) {
+                    gridElement.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+                }
+// 				Grid g = getGridById(gridElement.getAttributeValue("ID"));
+// 				setPointsAndIntervals(g, gridElement);
  			}
  		}
     }
-    private void setPointsAndIntervals(Grid grid) throws JDOMException {
-    	Element gridE = getElementByXPath("/lasdata/grids/grid[@ID='"+grid.getID()+"']");
-    	List<Axis> axes = grid.getAxes();
-    	String[] intervals = {"","","",""};
-    	String[] points = {"","","",""};
-    	int size;
-    	if ( grid.hasT() ) {
-    		TimeAxis taxis = grid.getTime();
-    		Arange arange = taxis.getArange();
-
-    		if ( arange != null ) {
-    			size = Integer.valueOf(arange.getSize()).intValue();
-    		} else {
-    			List v = taxis.getVerticies();
-    			size = v.size();
-    		}
-    		if ( size == 1 ) {
-    			points[3] = "t";
-    		} else if ( size > 1 ) {
-    			points[3] = "t";
-    			intervals[3] = "t";
-    		}
-    	}
-
-    	for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
-    		Axis axis = (Axis) axesIt.next();
-    		String type = axis.getType();
-    		Arange arange = axis.getArange();
-
-    		if ( arange != null ) {
-    			size = Integer.valueOf(arange.getSize()).intValue();
-    		} else {
-    			List v = axis.getVerticies();
-    			size = v.size();
-    		}
-    		// The axis defintions can come in any order but
-    		// we want this string orders XYZT
-    		if ( size == 1 ) {
-    			if ( type.equals("x") ) {
-    				points[0] = type;
-    			} else if ( type.equals("y") ) {
-    				points[1] = type;
-    			} else if ( type.equals("z") ) {
-    				points[2] = type;
-    			} else if ( type.equals("t") ) {
-    				points[3] = type;
-    			}
-    		} else if ( size > 1 ) {
-    			if ( type.equals("x") ) {
-    				points[0] = type;
-    				intervals[0] = type;
-    			} else if ( type.equals("y") ) {
-    				points[1] = type;
-    				intervals[1] = type;
-    			} else if ( type.equals("z") ) {
-    				points[2] = type;
-    				intervals[2] = type;
-    			} else if ( type.equals("t") ) {
-    				points[3] = type;
-    				intervals[3] = type;
-    			}
-    		}
-    	}
-    	// Set these on the original element, not the cloned grid with filled in axes.
-    	String existingPoints = gridE.getAttributeValue("points");
-    	String existingIntervals = gridE.getAttributeValue("intervals");
-    	// Set them only if they don't already exist in the variable definition.
-    	if ( existingPoints == null ) {
-    		gridE.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
-    	}
-    	if ( existingIntervals == null ) {
-    		gridE.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
-    	}
-    }
+//    private void setPointsAndIntervals(Grid grid, Element gridE) throws JDOMException {
+//        
+//    	List<Axis> axes = grid.getAxes();
+//    	String[] intervals = {"","","",""};
+//    	String[] points = {"","","",""};
+//    	int size;
+//    	if ( grid.hasT() ) {
+//    		TimeAxis taxis = grid.getTime();
+//    		Arange arange = taxis.getArange();
+//
+//    		if ( arange != null ) {
+//    			size = Integer.valueOf(arange.getSize()).intValue();
+//    		} else {
+//    			List v = taxis.getVerticies();
+//    			size = v.size();
+//    		}
+//    		if ( size == 1 ) {
+//    			points[3] = "t";
+//    		} else if ( size > 1 ) {
+//    			points[3] = "t";
+//    			intervals[3] = "t";
+//    		}
+//    	}
+//
+//    	for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
+//    		Axis axis = (Axis) axesIt.next();
+//    		String type = axis.getType();
+//    		Arange arange = axis.getArange();
+//
+//    		if ( arange != null ) {
+//    			size = Integer.valueOf(arange.getSize()).intValue();
+//    		} else {
+//    			List v = axis.getVerticies();
+//    			size = v.size();
+//    		}
+//    		// The axis defintions can come in any order but
+//    		// we want this string orders XYZT
+//    		if ( size == 1 ) {
+//    			if ( type.equals("x") ) {
+//    				points[0] = type;
+//    			} else if ( type.equals("y") ) {
+//    				points[1] = type;
+//    			} else if ( type.equals("z") ) {
+//    				points[2] = type;
+//    			} else if ( type.equals("t") ) {
+//    				points[3] = type;
+//    			}
+//    		} else if ( size > 1 ) {
+//    			if ( type.equals("x") ) {
+//    				points[0] = type;
+//    				intervals[0] = type;
+//    			} else if ( type.equals("y") ) {
+//    				points[1] = type;
+//    				intervals[1] = type;
+//    			} else if ( type.equals("z") ) {
+//    				points[2] = type;
+//    				intervals[2] = type;
+//    			} else if ( type.equals("t") ) {
+//    				points[3] = type;
+//    				intervals[3] = type;
+//    			}
+//    		}
+//    	}
+//    	// Set these on the original element, not the cloned grid with filled in axes.
+//    	String existingPoints = gridE.getAttributeValue("points");
+//    	String existingIntervals = gridE.getAttributeValue("intervals");
+//    	// Set them only if they don't already exist in the variable definition.
+//    	if ( existingPoints == null ) {
+//    		gridE.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+//    	}
+//    	if ( existingIntervals == null ) {
+//    		gridE.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+//    	}
+//    }
 
     /**
      * Create all the extra fancy attributes for a time axis so the DateWidgets can be initialized.
@@ -791,7 +867,7 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
-    public void convertToSeven(boolean force) throws JDOMException, UnsupportedEncodingException {
+    public void convertToSeven(boolean force) throws JDOMException, UnsupportedEncodingException, LASException {
         /*
          * 
          * 
@@ -985,6 +1061,9 @@ public class LASConfig extends LASDocument {
                             }
                             axis.setName("axis");
                             axis.setAttribute("ID", AID);
+                            if ( axis.getAttributeValue("type").equals("t") ) {
+                              addTimeAxisAttributes(axis);
+                            }
                             List v = axis.getChildren("v");
                             boolean warn = false;
                             if ( v != null && axis.getAttributeValue("type").equals("t") ) {
@@ -1087,9 +1166,10 @@ public class LASConfig extends LASDocument {
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
      * @throws JDOMException
      * @throws UnsupportedEncodingException
+     * @throws LASException 
      *
      */
-    public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
+    public void convertToSeven() throws JDOMException, UnsupportedEncodingException, LASException {
         convertToSeven(false);
     }
     /**
@@ -2245,14 +2325,7 @@ public class LASConfig extends LASDocument {
     		String axisID = axis_ref.getAttributeValue("IDREF");
     		Element axisE = (Element) getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']").clone();
     		String type = axisE.getAttributeValue("type");
-    		if ( type.equals("x") || type.equals("y") || type.equals("z") ) {
-    			axes_list.add(axisE);
-    		} else if (type.equals("t") ) {
-    			addTimeAxisAttributes(axisE);
-    			axes_list.add(axisE);
-    		} else if ( type.equals("e") ) {
-    			axes_list.add(axisE);
-    		}
+    		axes_list.add(axisE);
     	}
     	// Replace the references with the actual axis definition.
     	if ( gridE != null ) {
