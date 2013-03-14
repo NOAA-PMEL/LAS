@@ -1094,6 +1094,14 @@ public class ADDXMLProcessor {
     private static DatasetsGridsAxesBean createBeansFromUAFThreddsMetadata(InvDataset threddsDataset) {
         
         DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
+        
+        String scan = threddsDataset.findProperty("LAS_scan");
+        if ( scan != null && Boolean.valueOf(scan).booleanValue() ) {
+            forceAxes.put("t", new Boolean(true));
+            dgab = createBeansFromThreddsDataset(threddsDataset, threddsDataset.getAccess(ServiceType.OPENDAP));
+            return dgab;
+        }
+        
         Vector DatasetBeans = new Vector();
         DatasetBean dataset = new DatasetBean();
         UniqueVector GridBeans = new UniqueVector();
@@ -2631,7 +2639,12 @@ public class ADDXMLProcessor {
                         System.out.println("\t\t Time axis: ");
                     }
 
-                    AxisBean taxis = makeTimeAxis(tAxis, elementName);
+                    AxisBean taxis = null;
+                    try {
+                        taxis = makeTimeAxis(tAxis, elementName);
+                    } catch (Exception e) {
+                        return dagb;
+                    }
                     if ( taxis != null ) {
                         GridAxisBeans.addUnique(taxis);
                         if (verbose) {
