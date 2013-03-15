@@ -49,13 +49,51 @@ public class LASDocument extends Document {
     public LASDocument(Element dsE) {
 		super(dsE);
 	}
-	public Element getElementByXPath(String xpathValue) throws JDOMException {
+    public Element getElementByXPath(String xpathValue) throws JDOMException {
         // E.g. xpathValue="/lasdata/operations/operation[@ID='Plot']"
-        Object jdomO = this;
-        XPath xpath = XPath.newInstance(xpathValue);
-        return (Element) xpath.selectSingleNode(jdomO);   
+
+        String[] elements = xpathValue.split("/");
+        if ( xpathValue.contains("datasets") || xpathValue.contains("variables") || xpathValue.contains("grids") || xpathValue.contains("axes") || xpathValue.contains("operations")) {
+            if ( elements.length == 4 ) {
+                String type = elements[2];
+                String id = elements[3];
+                id = id.substring(id.indexOf("@ID='")+5, id.length()-2);
+                return getByID(type, getRootElement(), id);
+            } else if (elements.length == 6 ) {
+                String type = elements[2];
+                String id = elements[3];
+                id = id.substring(id.indexOf("@ID='")+5, id.length()-2);
+                Element parent = getByID(type, getRootElement(), id);
+                type = elements[4];
+                id = elements[5];
+                id = id.substring(id.indexOf("@ID='")+5, id.length()-2);
+                return getByID(type, parent, id);
+            } else {
+                // Do the old style xpath search...
+                Object jdomO = this;
+                XPath xpath = XPath.newInstance(xpathValue);
+                return (Element) xpath.selectSingleNode(jdomO);   
+            }
+        }else {
+            Object jdomO = this;
+            XPath xpath = XPath.newInstance(xpathValue);
+            return (Element) xpath.selectSingleNode(jdomO);   
+        }
     }
-    
+    private Element getByID (String type, Element element, String id) {
+        List typeElement = element.getChildren(type);
+        for (Iterator typeIt = typeElement.iterator(); typeIt.hasNext();) {
+            Element typeE = (Element) typeIt.next();
+            List children = typeE.getChildren();
+            for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+                Element child = (Element) childIt.next();
+                if ( child.getAttributeValue("ID") != null && child.getAttributeValue("ID").equals(id) ) {
+                    return child;
+                }
+            }    
+        }
+        return null;
+    }
     public String toCompactString() {
         Format format = Format.getCompactFormat();
         format.setOmitDeclaration(true);

@@ -80,6 +80,8 @@ public class GetUI extends ConfigService {
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         ServerConfig serverConfig = (ServerConfig) servlet.getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");
+        String data_url = request.getParameter("data_url");
+
         if ( cat_ids != null ) {
             if ( lasConfig.pruneCategories() ) {
                 try {
@@ -144,14 +146,18 @@ public class GetUI extends ConfigService {
             }
 
             String auto = request.getParameter("auto");
-            if ( auto != null && auto.equals("true") ) {
+            if ( auto != null && auto.equals("true") && cat_ids.length > 0 ) {
                 CategorySerializable category = lasConfig.getCategorySerializableWithGrids(cat_ids[0], cat_ids[0]);
                 DatasetSerializable dataset = category.getDatasetSerializable();
                 VariableSerializable[] vars = dataset.getVariablesSerializable();
                 if ( vars != null && vars.length > 0 ) {
                     query.append("&dsid="+dataset.getID()+"&varid="+vars[0].getID());
                 }
-            }
+            } 
+        }
+        if ( data_url != null && !data_url.equals("") ) {
+            String ids = lasConfig.getIDs(data_url);
+            query.append(ids);
         }
         if ( query.length() > 0 ) query.insert(0, "?");
         // forward to the UI
