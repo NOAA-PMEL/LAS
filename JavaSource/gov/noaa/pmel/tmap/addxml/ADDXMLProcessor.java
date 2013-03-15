@@ -2445,10 +2445,12 @@ public class ADDXMLProcessor {
             //             
             // Wondering where a particular class is coming from because there are muliple dependencies in multiple jars?
             // Use the class loader to find out...
+            /*
                          ClassLoader loader = ADDXMLProcessor.class.getClassLoader();
                          System.out.println(loader.getResource("org/slf4j/spi/LocationAwareLogger.class"));
                          System.out.println(loader.getResource("org/apache/commons/logging/impl/SLF4JLocationAwareLog.class"));
                          System.out.println(loader.getResource("opendap/dap/BaseType.class"));
+                         */
             //
             //             
             //             
