@@ -1087,7 +1087,11 @@ public class ADDXMLProcessor {
                 }
             }
         } else {
-            dgab = createBeansFromNetcdfDataset(url, false, null);
+            if ( uaf ) {
+                dgab = createBeansFromNetcdfDataset(url, false, threddsDataset);
+            } else {
+                dgab = createBeansFromNetcdfDataset(url, false, null);
+            }
         }
         return dgab;
     }
@@ -2514,7 +2518,9 @@ public class ADDXMLProcessor {
                     elementName = encodeID(url);
                 }
             }
-
+            if ( uaf ) {
+                elementName = fixid(threddsDataset);
+            }
             dataset.setName(name);
             dataset.setElement(elementName);
             dataset.setUrl(url);
