@@ -16,6 +16,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,17 +60,45 @@ public class FerretDataSource implements DatasetSource {
         
         String data_path = fiosp.getDataDir();
         
-        jnl.append("use \""+base+"\"\n");
         
         if ( expressions.size() == 2 ) {
             if ( !expressions.get(0).trim().equals("") ) {
+                List<String> expression_one = new ArrayList<String>();
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) { 
-                	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                	int ds = i + 2;
-                	jnl.append("use \""+dataURL+"\"\n");
+                    String [] cmds;
+                    if ( urls[i].contains("_cr_") ) {
+                        cmds = urls[i].split("_cr_");
+                        for (int j = 0; j < cmds.length; j++) {
+                            expression_one.add(cmds[j]);
+                        }
+                    } else if ( urls[i].contains(";") ) {
+                        cmds = urls[i].split(";");
+                        for (int j = 0; j < cmds.length; j++) {
+                            expression_one.add(cmds[j]);
+                        }
+                    } else {
+                        expression_one.add(urls[i]);
+                    }
+                }
+                for ( int i = 0; i < expression_one.size(); i++ ) { 
+                	String dataURL = URLDecoder.decode(expression_one.get(i), "UTF-8");
+                	if ( FerretCommands.containsCommand(dataURL) ) {
+                	    // This is actually a command, not a data URL.  Treat it as such...
+                	    if ( !FerretCommands.containsForbiddenCommand(dataURL) ) {
+                	        jnl.append(dataURL+"\n");
+                	    }
+                	} else {
+                	    if ( !FerretCommands.containsForbiddenCommand(dataURL) ) {
+                	        int ds = i + 2;
+                	        jnl.append("use \""+dataURL+"\"\n");
+                	    }
+                	}
                 }
             }
+            // Everything in the first bracket goes before the dataset.
+            jnl.append("use \""+base+"\"\n");
+
             if ( !expressions.get(1).trim().equals("") ) {
                 String expr_two =  expressions.get(1);
                 String [] cmds;
@@ -89,8 +119,17 @@ public class FerretDataSource implements DatasetSource {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) {
                 	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                        int ds = i + 2;
-                	jnl.append("use \""+dataURL+"\"\n");
+                	if ( FerretCommands.containsCommand(dataURL) ) {
+                        // This is actually a command, not a data URL.  Treat it as such...
+                        if ( !FerretCommands.containsForbiddenCommand(dataURL) ) {
+                            jnl.append(dataURL+"\n");
+                        }
+                    } else {
+                        if ( !FerretCommands.containsForbiddenCommand(dataURL) ) {
+                            int ds = i + 2;
+                            jnl.append("use \""+dataURL+"\"\n");
+                        }
+                    }
                 }
             }
         } else if ( expressions.size() == 0 ) {
