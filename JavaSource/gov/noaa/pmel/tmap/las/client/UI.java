@@ -519,9 +519,10 @@ public class UI extends BaseUI {
             ops = config.getOperations();
             xVariable.setGrid(grid);
             xAnalysisWidget.setAnalysisAxes(grid);
-            if (xPanels == null || xPanels.size() == 0) {
-                UI.super.setupOutputPanels(1, Constants.IMAGE);
-            }
+//            if (xPanels == null || xPanels.size() == 0) {
+//                UI.super.setupOutputPanels(1, Constants.IMAGE);
+//            }
+            setupForNewGrid(grid);
             setupPanelsAndRefreshNOforceLASRequest(false);
             if (initialHistory != null && !initialHistory.equals("")) {
                 logger.setLevel(Level.ALL);
