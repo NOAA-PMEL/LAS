@@ -3,6 +3,7 @@
 ! 
 ! Author: ansley 
 ! Date: 2011/05/16
+!  3/20/2013 fix the listing when the data uses an init script
 !
 ! Called by list_data.jnl 
 ! Write csv data: date/time, X, Y, Z, var1, var2, ...
@@ -23,12 +24,8 @@ IF ($constraint_($num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi 
 REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
   GO LAS_initialize_region ($var_num); \
   GO LAS_initialize_data ($var_num);\
-  SET VAR/NAME=($data_($var_num)_var)_in ($data_($var_num)_var);\
-  DEFINE SYMBOL data_($var_num)_var_orig ($data_($var_num)_var);\
-  DEFINE SYMBOL data_($var_num)_var ($data_($var_num)_var)_in;\
-  GO LAS_initialize_data ($var_num);\
   DEFINE SYMBOL ferret_plot_var_($var_num) =($ferret_plot_var); \
-  LET ferret_list_var_($var_num) = XSEQUENCE(($ferret_plot_var)); \
+  LET/TITLE="`($ferret_plot_var),RETURN=title`"/UNITS="`($ferret_plot_var),RETURN=units`" ferret_list_var_($var_num) = XSEQUENCE(($ferret_plot_var)); \
   DEFINE SYMBOL ferret_list_var_($var_num) = ferret_list_var_($var_num); \
   DEFINE SYMBOL size_($var_num)= `($ferret_list_var_($var_num)),return=isize`); \
   IF `($var_num) GT 0` THEN if `($size_($var_num)) NE ($size_0)` THEN MESSAGE/ERROR ERROR: Variables different sizes;\
@@ -169,14 +166,18 @@ IF `STRINDEX("($ferret_view)", "t") GT 0` THEN
    DEFINE SYMBOL tlist = datetime, time,
 ENDIF
 
-LET/units="($data_($var_num)_units)"/TITLE="`($data_0_var),RETURN=title`" ($data_0_var_orig) = ($ferret_list_var_($var_num))
-DEFINE SYMBOL vars_out = ($tlist) ($xlist) ($ylist) ($zlist) ($data_0_var_orig)
+LET/units="($data_($var_num)_units)"/TITLE="`($data_0_var),RETURN=title`" ($DATA_ORIG_VAR)_ = ($ferret_list_var_($var_num))
+DEFINE SYMBOL data_var_out = ($DATA_ORIG_VAR)_
+
+DEFINE SYMBOL vars_out = ($tlist) ($xlist) ($ylist) ($zlist) ($data_var_out)
+
 
 IF `($data_count"1") GT 1` THEN
    REPEAT/RANGE=1:`($data_count"1")-1`/NAME=outvar \
       (DEFINE SYMBOL var_num = `outvar`; \
-      LET/units="($data_($var_num)_units)"/TITLE="`($data_($var_num)_var),RETURN=title`"  ($data_($var_num)_var_orig) = ($ferret_list_var_($var_num)); \
-      DEFINE SYMBOL vars_out = ($vars_out), ($data_($var_num)_var_orig) )
+      LET/units="($data_($var_num)_units)"/TITLE="`($data_($var_num)_var),RETURN=title`" ($DATA_ORIG_VAR)_ = ($ferret_list_var_($var_num)); \
+      DEFINE SYMBOL data_var_out = ($DATA_ORIG_VAR)_; \
+      DEFINE SYMBOL vars_out = ($vars_out), ($data_var_out)
 ENDIF
 
 LET ndims = `STRLEN("($ferret_view)")`
