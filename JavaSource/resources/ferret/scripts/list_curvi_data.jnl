@@ -8,6 +8,10 @@
 !             Previously tried to append to the existing history attribute but if that
 !             contained special characters such as ; Ferret had parsing problems.
 !
+! 20-Mar-2013 Fix LAS ticket 1511. Keep axis names in their original form, no upcase,
+!             and don't rename them according to the subset. 
+!             Also write the URL of the original dataset.
+!
 ! List a variable with its curviliear coordinate data to a netCDF file.
 ! Based on list_data.jnl
 
@@ -109,13 +113,13 @@ IF `($ferret_coordinates_done"0|*>1") EQ 0` THEN
    
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN 
       LET var_coord_note = "Listing Curvilinear Coordinate Fields Then Data Field"
-      LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_coord_note
+      LIST($listqual)/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_coord_note
    ENDIF
    
    DEFINE SYMBOL ferret_list_xcoords ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
    DEFINE SYMBOL ferret_list_ycoords ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-   LIST/APPEND/FILE/($frmt) ($ferret_list_xcoords)
-   LIST/APPEND/FILE/($frmt) ($ferret_list_ycoords)
+   LIST($listqual)/APPEND/FILE/($frmt) ($ferret_list_xcoords)
+   LIST($listqual)/APPEND/FILE/($frmt) ($ferret_list_ycoords)
 
    DEFINE SYMBOL ferret_coordinates_done = 1
 ENDIF
@@ -138,10 +142,10 @@ IF `size LE max_size` THEN
    DEFINE SYMBOL ferret_list_var ($data_($var_num)_var)
 
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
-      IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+      IF ($var_history"0|*>1") THEN LIST($listqual)/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
    ENDIF
 
-   LIST/APPEND/FILE/($frmt) ($data_($var_num)_var)
+   LIST($listqual)/APPEND/FILE/($frmt) ($data_($var_num)_var)
 ELSE
 
    DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num)]
@@ -165,11 +169,11 @@ ELSE
    LET ltop = MIN(l+lchunk-1, ($lmax) )
 
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
-      IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+      IF ($var_history"0|*>1") THEN LIST($listqual)/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
    ENDIF
 
      ! ... netCDF output in chunks
-   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/I=($clon_imin):($clon_imax) ($data_($var_num)_var); CANC MEM/ALL)
+   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST($listqual)/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/I=($clon_imin):($clon_imax) ($data_($var_num)_var); CANC MEM/ALL)
 
 ENDIF
 
