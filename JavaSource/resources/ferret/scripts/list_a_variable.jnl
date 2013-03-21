@@ -8,6 +8,9 @@
 !             Previously tried to append to the existing history attribute but if that
 !             contained special characters such as ; Ferret had parsing problems.
 !             Also changes to output of transformed variables.
+! 20-Mar-2013 Fix LAS ticket 1511. Keep axis names in their original form, no upcase,
+!             and don't rename them according to the subset. 
+!             Also write the URL of the original dataset.
 !
 ! Called by list_data.jnl Initialize and write a single variable, appending 
 ! it to the ascii or netCDF output file.
@@ -57,20 +60,26 @@ LET its_curvi = `( ($ferret_curvi_coord_lat"0|*>1) + STRINDEX("($ferret_view)", 
 
 IF ($constraint_($num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi = 0
 
-IF `its_curvi` THEN
-   GO list_curvi_data.jnl
-   EXIT/SCRIPT
-ENDIF
-
 ! Write all global attributes that came in from the input dataset 
 ! TODO: When we get to listing comparisions, will need to decide what to
 !       do, list global attrs of both files?
 
 IF `($ferret_version) GT 6.19` THEN
 IF `STRINDEX( "($result_ferret_listing_type)", "netcdf" ) NE 0` THEN
-   DEFINE ATT/OUTPUT ..FERRET_comment = "File written via LAS. Attributes are inherited from originating dataset"
+   IF `STRINDEX("($data_($num)_url)", "http") NE 0` THEN
+     DEFINE ATT/OUTPUT ..FERRET_comment = "File written via LAS. Attributes are inherited from originating dataset, at ($data_($num)_url)" 
+   ELSE
+     DEFINE ATT/OUTPUT ..FERRET_comment = "File written via LAS. Attributes are inherited from originating dataset, at ($data_($num)_ftds_url)"
+   ENDIF
    SET ATT/OUTPUT=all .
+   CANCEL MODE UPCASE_OUTPUT
+   DEFINE SYMBOL listqual = ($listqual)/KEEP_AXIS
 ENDIF
+ENDIF
+
+IF `its_curvi` THEN
+   GO list_curvi_data.jnl
+   EXIT/SCRIPT
 ENDIF
 
 ! Set up a history attribute for the variable, and a text variable with
@@ -241,23 +250,23 @@ IF `size LE max_size` THEN
       !SET ATT/OUTPUT=all ($data_dup_varname)
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN
-         IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+         IF ($var_history"0|*>1") THEN LIST($listqual)/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
       ENDIF
 
-      LIST/APPEND/FILE/($frmt) ($data_dup_varname)
+      LIST($listqual)/APPEND/FILE/($frmt) ($data_dup_varname)
 
    ELSE
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
-         IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+         IF ($var_history"0|*>1") THEN LIST($listqual)/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
       ENDIF
 
 !      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num)\
 !       /units="`($ferret_list_var),RETURN=units`"\
 !       /BAD=`($ferret_list_var),RETURN=bad` f_plot_var = ($ferret_list_var)
-!      LIST/APPEND/FILE/($frmt) f_plot_var
+!      LIST($listqual)/APPEND/FILE/($frmt) f_plot_var
 
-      LIST/APPEND/FILE/($frmt) ($ferret_list_var)
+      LIST($listqual)/APPEND/FILE/($frmt) ($ferret_list_var)
 
    ENDIF
 
@@ -301,15 +310,15 @@ ELSE
            DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
            SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
 
-           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST/APPEND/FILE/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST($listqual)/APPEND/FILE/KEEP_AX/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
 
         ELSE
      ! ... netCDF output in chunks
-           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST($listqual)/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
         ENDIF
      ELSE
      ! ... netCDF output in chunks
-        REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_x_var); CANC MEM/ALL)
+        REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST($listqual)/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_x_var); CANC MEM/ALL)
      ENDIF
 
    ELSE
@@ -321,9 +330,9 @@ ELSE
    !     axis of the output (e.g. in an XYZT output the Y axis is #2 by dflt)
    !     and forbid chunking along either axis of this plane -- 
 
-     IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FILE="($result_ferret_listing_filename)" var_hist
+     IF ($var_history"0|*>1") THEN LIST($listqual)/APPEND/NOHEAD/FILE="($result_ferret_listing_filename)" var_hist
 
-     REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop` ($ferret_x_var); CANC MEM/ALL)
+     REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST($listqual)/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop` ($ferret_x_var); CANC MEM/ALL)
    ENDIF
    SET REGION save
 
