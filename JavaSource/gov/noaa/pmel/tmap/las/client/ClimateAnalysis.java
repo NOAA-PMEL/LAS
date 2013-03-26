@@ -30,12 +30,14 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Label;
@@ -71,9 +73,17 @@ public class ClimateAnalysis implements EntryPoint {
 	Set<Integer> set = new HashSet<Integer>();
 	PacificRegionsByVariable xRegions = new PacificRegionsByVariable();
 	EventBus eventBus;
+	RootPanel xRegionLabel;
+	RootPanel xTimeTitle;
+	HTML timeTitle3 = new HTML("<h3>Step 3: Select the Year Range to be compared.</h3>");
+    HTML timeTitle4 = new HTML("<h3>Step 4: Select the Year Range to be compared.</h3>");
 	@Override
 	public void onModuleLoad() {	
 	
+	    xRegionLabel = RootPanel.get("regionTitle");
+	    xTimeTitle = RootPanel.get("timeTitle");
+	    xTimeTitle.clear();
+        xTimeTitle.add(timeTitle4);
 	    ClientFactory cf = GWT.create(ClientFactory.class);
 	    eventBus = cf.getEventBus();
 	    eventBus.addHandler(WidgetSelectionChangeEvent.TYPE, new WidgetSelectionChangeEvent.Handler() {
@@ -97,16 +107,52 @@ public class ClimateAnalysis implements EntryPoint {
 		xSubmit.setWidth("80px");
 		RootPanel.get("Submit").add(xSubmit);
 		xAnalysisType.setVisibleItemCount(1);
-		xAnalysisType.addItem("Time Averaged Spectrum", "tave_spectrum");
-		xAnalysisType.addClickHandler(new ClickHandler(){
+		String tave_spectrum = DOM.getElementProperty(DOM.getElementById("analysis-tave_spectrum"), "content");
+		if ( tave_spectrum != null && tave_spectrum.equals("tave_spectrum") ) {
+		    xAnalysisType.addItem("Time Averaged Spectrum", "tave_spectrum");
+		    xAnalysisType.addClickHandler(new ClickHandler(){
 
-			@Override
-			public void onClick(ClickEvent arg0) {
-				set.add(1);
-				setBackground(2);
-			}
-			
-		});
+		        @Override
+		        public void onClick(ClickEvent arg0) {
+		            set.add(1);
+		            setBackground(2);
+		        }
+
+		    });
+		} else {
+		    xRegions.setVisible(false);
+            xRegionLabel.setVisible(false);
+            xTimeTitle.clear();
+            xTimeTitle.add(timeTitle3);
+		}
+		String cdb_zonal = DOM.getElementProperty(DOM.getElementById("analysis-cdb_zonal"), "content");
+		if ( cdb_zonal != null && cdb_zonal.equals("cdb_zonal") ) {
+		    xAnalysisType.addItem("CDB Zonal", "cdb_zonal");
+		    xAnalysisType.addChangeHandler(new ChangeHandler() {
+
+		        @Override
+		        public void onChange(ChangeEvent event) {
+		            String analysisType = xAnalysisType.getValue(xAnalysisType.getSelectedIndex());
+		            if (analysisType.equals("tave_spectrum") ) {
+		                xRegions.setVisible(true);
+		                xRegionLabel.setVisible(true);
+		                xTimeTitle.clear();
+		                xTimeTitle.add(timeTitle4);
+		            } else {
+		                xRegions.setVisible(false);
+		                xRegionLabel.setVisible(false);
+		                xTimeTitle.clear();
+		                xTimeTitle.add(timeTitle3);
+		            }
+		        }
+		    });
+		}
+
+		if ( xAnalysisType.getItemCount() == 0 ) {
+		    HTML no = new HTML("<h3>No analysis configured for this server.</h3>");
+		    xTimeTitle.clear();
+		    xTimeTitle.add(no);
+		}
 		RootPanel.get("AnalysisType").add(xAnalysisType);
 		RootPanel.get("Regions").add(xRegions);
 		xDatasetWidget.addFilter(cimp5filter);
