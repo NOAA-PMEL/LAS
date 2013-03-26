@@ -1062,7 +1062,7 @@ public class LASConfig extends LASDocument {
                             axis.setName("axis");
                             axis.setAttribute("ID", AID);
                             if ( axis.getAttributeValue("type").equals("t") ) {
-                              addTimeAxisAttributes(axis);
+                                addTimeAxisAttributes(axis);
                             }
                             List v = axis.getChildren("v");
                             boolean warn = false;
@@ -1087,9 +1087,10 @@ public class LASConfig extends LASDocument {
                                 }
                             }
                         }
-                    } else if ( axis.getName().equals("properties")) {
-                        axis.setContent(LASDocument.convertProperties(axis));
                     } else {
+                        if ( axis.getAttributeValue("type").equals("t") ) {
+                            addTimeAxisAttributes(axis);
+                        }
                         if ( !axesProcessed.contains(axis.getAttributeValue("ID")) ) {
                             axesProcessed.add(axis.getAttributeValue("ID"));
                         } else {

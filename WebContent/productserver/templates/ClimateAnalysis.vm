@@ -14,6 +14,9 @@
   <head>
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta http-equiv="X-UA-Compatible" content="IE=9">
+    <meta content="tave_spectrum" name="Analysis Time Averaged Spectrum" id="analysis-tave_spectrum" />
+    <meta content="cdb_zonal" name="CDB Zonal" id="analysis-cdb_zonal" />
+    
 
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <!--                                           -->
@@ -73,11 +76,11 @@
   <div id="AnalysisType"></div>
   </div>
   <div id="RegionSelection">
-  <h3>Step 3: Select the Variables and/or Regions.</h3>
+  <h3 id="regionTitle">Step 3: Select the Variables and/or Regions.</h3>
   <div id="Regions"></div>
   </div>
   <div id="DateSelection">
-  <h3>Step 3: Select the Year Range to be compared.</h3>
+  <div id="timeTitle"></div>
   <table padding="8px" border="1">
   <tr><th>Year range for the first data set.</th><th>Year range for the second data set.</th></tr>
   <tr><td><div id="DateRange"></div></td><td><div id="DateRange2"></div></td></tr>
