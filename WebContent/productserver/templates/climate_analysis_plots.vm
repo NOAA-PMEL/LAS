@@ -22,7 +22,7 @@ $las_response.toString()
     #set($parts = $result.getFile().split("/"))
 
     <h1>CMIP5 Climate Analysis</h1>
-    #set($titles = $parts[9].split("Vs"))
+    #set($titles = $parts[8].split("Vs"))
     <h2>Comparing $titles[0] vs $titles[1]</h2>
     <h3>$parts[15] $parts[12] $parts[13]</h3> 
 
@@ -32,15 +32,15 @@ $las_response.toString()
     #foreach ($result in $results)
         #if ( $result.getFile().endsWith("gz") )
             #set($p = $result.getFile().split("/"))
-            #if( $region != $p[16] )
+            #if( $region != $p[15] )
                 $ul
-                #set($region = $p[16])
+                #set($region = $p[15])
                 <li><strong>$region</strong></li>
                 <ul>
                 #set($ul="</ul>")
             #end
                 <li>
-                <a href="$result.getURL()">$p[17]</a>
+                <a href="$result.getURL()">$p[16]</a>
                </li>
         #end
     #end
@@ -51,7 +51,7 @@ $las_response.toString()
         #if ( $result.getFile().endsWith("nc") )
             #set($p = $result.getFile().split("/"))
             <li>
-            <a href="$result.getURL()">$p[18]</a>
+            <a href="$result.getURL()">$p[17]</a>
             </li>
         #end
     #end
