@@ -8,7 +8,7 @@
 #set($time=$las_config.getGrid($dsid,$varid).getTime());
 #set($tlo=$time.getLo())
 #set($thi=$time.getHi())
-<META http-equiv="refresh" content="0;URL=productserver/templates/ClimateAnalysis.vm?gwt.codesvr=127.0.0.1:9997&xml=$las_request.toEncodedURLString()&dsname=$name&thi=$thi&tlo=$tlo"> 
+<META http-equiv="refresh" content="0;URL=productserver/templates/ClimateAnalysis.vm?xml=$las_request.toEncodedURLString()&dsname=$name&thi=$thi&tlo=$tlo"> 
 </head>
 <body>
 </body>
