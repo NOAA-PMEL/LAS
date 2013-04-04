@@ -281,6 +281,34 @@ public class LASRequest {
         Element args = getArgsElement();
         args.appendChild(constraint);
     }
+    
+    /**
+     * Add a constraint.  
+     * @param lhs
+     * @param op
+     * @param rhs
+     */
+    public void addConstraint(String lhs, String op, String rhs, String cid) {
+        Element constraint = document.createElement("constraint");
+        constraint.setAttribute("type", "text");
+        if ( cid != null ) {
+            constraint.setAttribute("id", cid);
+        }
+        Element v1 = document.createElement("v");
+        Text lhsT = document.createTextNode(lhs);
+        Text opT = document.createTextNode(op);
+        Element v2 = document.createElement("v");
+        Text rhsT = document.createTextNode(rhs);
+        Element v3 = document.createElement("v");
+        v1.appendChild(lhsT);
+        v2.appendChild(opT);
+        v3.appendChild(rhsT);
+        constraint.appendChild(v1);
+        constraint.appendChild(v2);
+        constraint.appendChild(v3);
+        Element args = getArgsElement();
+        args.appendChild(constraint);
+    }
 
     /**
      * Removes all Constraint elements defined in the <args> section of the

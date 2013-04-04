@@ -14,6 +14,7 @@ import org.gwttime.time.DateTime;
 import org.gwttime.time.DateTimeZone;
 import org.gwttime.time.format.DateTimeFormat;
 import org.gwttime.time.format.DateTimeFormatter;
+import org.gwttime.time.format.ISODateTimeFormat;
 import org.gwttime.time.chrono.GregorianChronology;
 import org.gwttime.time.chrono.JulianChronology;
 
@@ -48,6 +49,7 @@ public class DateTimeWidget extends Composite {
 	private DateTimeFormatter shortFerretForm;
 	private DateTimeFormatter mediumFerretForm;
 	private DateTimeFormatter longFerretForm; 
+	private DateTimeFormatter isoForm;
 	
 	DateTime lo;
 	DateTime hi;
@@ -221,6 +223,7 @@ public class DateTimeWidget extends Composite {
 			
 	}
 	public void reinit() {
+
 		if ( isMenu ) {
 			lo_day.setSelectedIndex(0);
 			hi_day.setSelectedIndex(hi_day.getItemCount() - 1);
@@ -263,7 +266,7 @@ public class DateTimeWidget extends Composite {
 		shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
 		mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
 		longFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
-
+        isoForm = ISODateTimeFormat.dateTime().withChronology(chrono).withZone(DateTimeZone.UTC);;
 	}
 	public void init(String lo_date, String hi_date, String render,  String calendar, boolean climo) {
 		init(lo_date, hi_date, -1, render, calendar, climo);
@@ -494,6 +497,52 @@ public class DateTimeWidget extends Composite {
 
 	public void setVisible(boolean b) {
 		dateTimeWidget.setVisible(b);
+	}
+	public String getISODateLo() {
+	    String lo = getFerretDateLo();
+	    DateTime dtlo;
+	    try {
+	        dtlo = shortFerretForm.parseDateTime(lo);
+	    } catch (Exception e) {
+	        try {
+	            dtlo = mediumFerretForm.parseDateTime(lo);
+	        } catch ( Exception e2 ) {
+	            try {
+	                dtlo = longFerretForm.parseDateTime(lo);
+	            } catch (Exception e3) {
+	                // punt
+	                return "";
+	            }
+	        }
+	    }
+	    try {
+	        return isoForm.print(dtlo.getMillis());
+	    } catch (Exception e) {
+	        return "";
+	    }
+	}
+	public String getISODateHi() {
+	    String hi = getFerretDateHi();
+        DateTime dthi;
+        try {
+            dthi = shortFerretForm.parseDateTime(hi);
+        } catch (Exception e) {
+            try {
+                dthi = mediumFerretForm.parseDateTime(hi);
+            } catch ( Exception e2 ) {
+                try {
+                    dthi = longFerretForm.parseDateTime(hi);
+                } catch (Exception e3) {
+                    // punt
+                    return "";
+                }
+            }
+        }
+        try {
+            return isoForm.print(dthi.getMillis());
+        } catch (Exception e) {
+            return "";
+        }
 	}
 	public String getFerretDateLo() {
 		StringBuffer date = new StringBuffer();
@@ -895,8 +944,8 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loYearChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	private void loYearChange() {
@@ -911,8 +960,8 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent event) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loMonthChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}	
 	};
 	private void loMonthChange() {
@@ -929,8 +978,8 @@ public class DateTimeWidget extends Composite {
 
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loDayChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	private void loDayChange() {
@@ -953,15 +1002,15 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loHourHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			checkRangeEndHour();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	public ChangeHandler hiYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiYearChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	private void hiYearChange() {
@@ -976,8 +1025,8 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler hiMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiMonthChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}	
 	};
 	private void hiMonthChange() {
@@ -992,8 +1041,8 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler hiDayHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiDayChange();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	private void hiDayChange() {

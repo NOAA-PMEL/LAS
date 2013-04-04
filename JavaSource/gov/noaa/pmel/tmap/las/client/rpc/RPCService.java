@@ -44,6 +44,12 @@ public interface RPCService extends RemoteService {
 	public Map<String, String> getIDMap(String data_url) throws RPCException;
 	public TestSerializable[] getTestResults(String test_key) throws RPCException;
 	public DatasetSerializable getFullDataset(String id) throws RPCException;
+	
+	/*
+     * These are services that must attach to an ERDDAP server
+     */
+    public Map<String, String> getERDDAPOuterSequenceVariables(String dsid, String varid) throws RPCException;
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt) throws RPCException;
 	/*
 	 * Everything below is of the ESGF search interface.
 	 */

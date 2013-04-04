@@ -37,6 +37,11 @@ public interface RPCServiceAsync {
 	public void getTestResults(String test_key, AsyncCallback<TestSerializable[]> callback);
 	public void getFullDataset(String id, AsyncCallback datasetCallback);
 	/*
+	 * These are services that must attach to an ERDDAP server
+	 */
+	public void getERDDAPOuterSequenceVariables(String dsid, String varid, AsyncCallback<Map<String, String>> outerSequencVariableCallback);
+	public void getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
+	/*
 	 * Everything below this is for the ESGF serach interface.
 	 */
 	public void getFacets(AsyncCallback<List<FacetSerializable>> facetCallback);

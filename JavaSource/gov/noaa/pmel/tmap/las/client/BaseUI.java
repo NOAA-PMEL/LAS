@@ -993,4 +993,13 @@ public class BaseUI {
             xAxesWidget.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
         }
     }
+    protected String getAnchor() {
+        String url = Window.Location.getHref();
+        if (url.contains("#")) {
+            return url.substring(url.indexOf("#") + 1, url.length());
+        } else {
+            return "";
+        }
+
+    }
 }

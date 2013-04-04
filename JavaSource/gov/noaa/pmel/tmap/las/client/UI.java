@@ -23,6 +23,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.TrajectoryOuterSequenceConstraint;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
@@ -46,6 +47,8 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import sun.awt.X11.XConstants;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -91,12 +94,13 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class UI extends BaseUI {
+    TrajectoryOuterSequenceConstraint xTrajectoryConstraint = new TrajectoryOuterSequenceConstraint();
     public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
 
         @Override
         public void onFailure(Throwable caught) {
-           Window.alert("Could not add data sets to start this LAS session.");
-            
+            Window.alert("Could not add data sets to start this LAS session.");
+
         }
 
         @Override
@@ -104,7 +108,7 @@ public class UI extends BaseUI {
             eventBus.fireEvent(new ESGFDatasetAddedEvent());
             Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
         }
-        
+
     };
     public AsyncCallback initFromDatasetAndVariable = new AsyncCallback() {
 
@@ -115,7 +119,7 @@ public class UI extends BaseUI {
             xOperationID = "Plot_2D_XY_zoom";
             xOptionID = "Options_2D_image_contour_xy_7";
             Window.alert("Please choose a data set.");
-        }
+        } TrajectoryOuterSequenceConstraint constraint = new TrajectoryOuterSequenceConstraint();
 
         @Override
         public void onSuccess(Object result) {
@@ -132,7 +136,7 @@ public class UI extends BaseUI {
                         xOptionID = "Options_2D_image_contour_xy_7";
                         Window.alert("Please choose a data set.");
                     } else if ((firstCategorySerializable != null) && (firstCategorySerializable.isVariableChildren())) {
-                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable();
+                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable(); TrajectoryOuterSequenceConstraint constraint = new TrajectoryOuterSequenceConstraint();
                         VariableSerializable[] vars = ds.getVariablesSerializable();
                         variables = new Vector<VariableSerializable>();
                         if (xVarID == null) {
@@ -190,7 +194,7 @@ public class UI extends BaseUI {
                 String value = product_server.get(name);
                 if (name.equals(Constants.DEFAULT_CATID)) {
                     xCATID = value;
-                } else if ( name.equals(Constants.DEFAULT_DSID) ) {
+                } else if (name.equals(Constants.DEFAULT_DSID)) {
                     xDSID = value;
                 } else if (name.equals(Constants.DEFAULT_VARID)) {
                     xVarID = value;
@@ -281,7 +285,7 @@ public class UI extends BaseUI {
                     // the Window name but IE respects only a narrow list of
                     // valid
                     // Window name parameters. Weusijana, 07/06/2012.
-                    if ( xAnalysisWidget.isActive() ) {
+                    if (xAnalysisWidget.isActive()) {
                         AnalysisSerializable analysis = xAnalysisWidget.getAnalysisSerializable();
                         if (analysis.isActive("t")) {
                             analysis.getAxes().get("t").setLo(xAxesWidget.getTAxis().getFerretDateLo());
@@ -302,7 +306,7 @@ public class UI extends BaseUI {
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
-                    Window.open(Util.getProductServer() + "?catid="+xVariable.getCATID()+"&xml=" + URL.encode(lasRequest.toString()), "_blank", features);
+                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), "_blank", features);
                     optionsDialog.hide();
                 }
             });
@@ -478,7 +482,7 @@ public class UI extends BaseUI {
     boolean changeDataset = false;
 
     FlexTable compareButtonsLayout = new FlexTable();
-    
+
     /**
      * Set if the init will be the result of a comparison mode change.
      */
@@ -519,9 +523,9 @@ public class UI extends BaseUI {
             ops = config.getOperations();
             xVariable.setGrid(grid);
             xAnalysisWidget.setAnalysisAxes(grid);
-//            if (xPanels == null || xPanels.size() == 0) {
-//                UI.super.setupOutputPanels(1, Constants.IMAGE);
-//            }
+            // if (xPanels == null || xPanels.size() == 0) {
+            // UI.super.setupOutputPanels(1, Constants.IMAGE);
+            // }
             setupForNewGrid(grid);
             setupPanelsAndRefreshNOforceLASRequest(false);
             if (initialHistory != null && !initialHistory.equals("")) {
@@ -653,7 +657,7 @@ public class UI extends BaseUI {
             ops = config.getOperations();
 
             xVariable.setGrid(grid);
-            if (xVariable.isVector() || xVariable.isScattered()) {
+            if (xVariable.isVector() || xVariable.isDescrete() ) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -773,7 +777,7 @@ public class UI extends BaseUI {
                 UserListBox lb = (UserListBox) source;
                 VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
                 xNewVariable = v;
-                if (v.isVector() || v.isScattered()) {
+                if (v.isVector() || v.isDescrete()) {
                     lb.setAddButtonEnabled(false);
                 } else {
                     lb.setAddButtonEnabled(true);
@@ -806,13 +810,13 @@ public class UI extends BaseUI {
                         variableSelector.removeListBoxesExceptFirst();
                     }
                     xNewVariable = (VariableSerializable) v;
-                    changeDataset = true;                 
+                    changeDataset = true;
                     // Build the variables list from the selected item.
                     TreeItem parent = item.getParentItem();
-                    for ( int i = 0; i < parent.getChildCount(); i++ ) {
+                    for (int i = 0; i < parent.getChildCount(); i++) {
                         TreeItem child = parent.getChild(i);
                         Object userObject = child.getUserObject();
-                        if ( (userObject != null) && (userObject instanceof VariableSerializable) ) {
+                        if ((userObject != null) && (userObject instanceof VariableSerializable)) {
                             variables.add((VariableSerializable) userObject);
                         }
                     }
@@ -839,9 +843,8 @@ public class UI extends BaseUI {
         logger.setLevel(Level.ALL);
         logger.info("changeDataset() called");
         logger.warning("Changing xVariable:" + xVariable + " to xNewVariable:" + xNewVariable);
-        xVariable = xNewVariable;
         logger.setLevel(Level.OFF);
-        if (xVariable.isVector() || xVariable.isScattered()) {
+        if (xNewVariable.isVector() || xNewVariable.isDescrete()) {
             autoContourTextBox.setText("");
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
@@ -860,20 +863,39 @@ public class UI extends BaseUI {
 
         // Since we are changing data sets, go to the default plot and view.
 
-        if (xOperationID == null || xOperationID.equals("")) {
+        if (xOperationID == null || xOperationID.equals("") || xVariable.getAttributes().get("grid_type") != xNewVariable.getAttributes().get("grid_type") ) {
             if (xNewVariable.getAttributes().get("grid_type").equals("regular")) {
                 xOperationID = "Plot_2D_XY_zoom";
+                xTrajectoryConstraint.setActive(false);
+                xLeftPanel.remove(xTrajectoryConstraint);
             } else if (xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
-            } else if (xNewVariable.isScattered()) {
-                xOperationID = "Insitu_extract_location_value_plot";
+                xTrajectoryConstraint.setActive(false);
+                xLeftPanel.remove(xTrajectoryConstraint);
+            } else if (xNewVariable.isDescrete()) {
+                if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+                    xOperationID = "Trajectory Plot";
+                    if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
+                        xTrajectoryConstraint.setActive(true);
+                        xLeftPanel.add(xTrajectoryConstraint);
+                        xTrajectoryConstraint.init(xNewVariable.getDSID(), xNewVariable.getID());
+                    }
+                } else {
+                    xOperationID = "Insitu_extract_location_value_plot";
+                    xTrajectoryConstraint.setActive(false);
+                    xLeftPanel.remove(xTrajectoryConstraint);
+                }
             } else {
                 xOperationID = "Insitu_extract_location_value_plot";
+                xTrajectoryConstraint.setActive(false);
+                xLeftPanel.remove(xTrajectoryConstraint);
             }
         }
         if (xView == null || xView.equals("")) {
             xView = "xy";
         }
+        xVariable = xNewVariable;
+
         // Get all the config info. View is null to get all operations.
         Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
 
@@ -918,7 +940,27 @@ public class UI extends BaseUI {
                 panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
             }
         }
-
+        // Initialize the state of the trajectory constraint with the current view ranges.
+        // T is always a range.
+        
+        xTrajectoryConstraint.setXlo(xAxesWidget.getRefMap().getXlo());
+        xTrajectoryConstraint.setXhi(xAxesWidget.getRefMap().getXhi());
+        xTrajectoryConstraint.setYlo(xAxesWidget.getRefMap().getYlo());
+        xTrajectoryConstraint.setYhi(xAxesWidget.getRefMap().getYhi());
+        if ( xVariable.getGrid().hasZ() ) {
+            xTrajectoryConstraint.setZlo(xAxesWidget.getZAxis().getLo());
+            xTrajectoryConstraint.setZhi(xAxesWidget.getZAxis().getHi());
+        } else {
+            xTrajectoryConstraint.setZlo(null);
+            xTrajectoryConstraint.setZhi(null);
+        }
+        if ( xVariable.getGrid().hasT() ) {
+            xTrajectoryConstraint.setTlo(xAxesWidget.getTAxis().getISODateLo());
+            xTrajectoryConstraint.setThi(xAxesWidget.getTAxis().getISODateHi());
+        } else {
+            xTrajectoryConstraint.setTlo(null);
+            xTrajectoryConstraint.setThi(null);
+        }
         refresh(false, true, false);
     }
 
@@ -940,7 +982,7 @@ public class UI extends BaseUI {
         setTopLeftAlignment(xButtonLayout);
         vVizGalPanel.add(xLeftPanel);
         vVizGalPanel.add(xRightPanel);
-        //vVizGalPanel.setWidget(1, 0, xMainPanel);
+        // vVizGalPanel.setWidget(1, 0, xMainPanel);
 
         addApplyHandler(settingsButtonApplyHandler);
 
@@ -1171,15 +1213,15 @@ public class UI extends BaseUI {
                 logger.log(level, "Toggling xPanelHeaderHidden because panelHeaderHidden != xPanelHeaderHidden:" + xPanelHeaderHidden);
                 handlePanelShowHide();
             }
-            if ( profile.equals(Constants.PROFILE_ESGF) ) {
+            if (profile.equals(Constants.PROFILE_ESGF)) {
                 List<String> ncats = new ArrayList<String>();
-                if ( xCATID != null && !xCATID.equals("") ) {
+                if (xCATID != null && !xCATID.equals("")) {
                     ncats.add(xCATID);
                 }
                 for (int i = 0; i < tokens.size(); i++) {
                     HashMap<String, String> map = (HashMap<String, String>) tokens.get(i);
                     String cid = map.get("catid");
-                    if ( cid != null && !cid.equals("") && !ncats.contains(cid) ) {
+                    if (cid != null && !cid.equals("") && !ncats.contains(cid)) {
                         ncats.add(cid);
                     }
                 }
@@ -1199,7 +1241,7 @@ public class UI extends BaseUI {
             // These can come from the initial history or from the dsid=??? and
             // optionally the varid=??? query parameters.
             if (xDSID != null || xCATID != null) {
-                
+
                 setUpdateRequired(true);
                 // Supply some reasonable defaults and go...
                 if (xOperationID == null) {
@@ -1294,13 +1336,13 @@ public class UI extends BaseUI {
 
         double grid_south = Double.valueOf(ds_grid.getYAxis().getLo());
         double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
-        
+
         double delta = 1.d;
 
         ArangeSerializable arange = ds_grid.getXAxis().getArangeSerializable();
-        if ( arange != null ) {
+        if (arange != null) {
             String step = arange.getStep();
-            if ( step != null ) {
+            if (step != null) {
                 delta = Math.abs(Double.valueOf(step));
             }
         }
@@ -1413,7 +1455,7 @@ public class UI extends BaseUI {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonVisible(false);
         }
 
-        if (xVariable.isVector() || xVariable.isScattered()) {
+        if (xVariable.isVector() || xVariable.isDescrete()) {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(false);
         } else {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(true);
@@ -1508,16 +1550,6 @@ public class UI extends BaseUI {
             aAxis = xAnalysisWidget.getAnalysisAxis();
         }
         return aAxis;
-    }
-
-    private String getAnchor() {
-        String url = Window.Location.getHref();
-        if (url.contains("#")) {
-            return url.substring(url.indexOf("#") + 1, url.length());
-        } else {
-            return "";
-        }
-
     }
 
     private String getGalleryToken() {
@@ -1634,7 +1666,7 @@ public class UI extends BaseUI {
         logger.warning("pushHistory() called");
         String historyTokenString = getHistoryTokenString();
         logger.severe("pushHistory() calling History.newItem with historyTokenString:\n" + historyTokenString);
-        if ( initialHistory == null ) {
+        if (initialHistory == null) {
             History.newItem(historyTokenString, false);
         }
     }
@@ -1682,7 +1714,7 @@ public class UI extends BaseUI {
         OutputPanel comparePanel = getComparePanel();
 
         Map<String, String> options = null;
-        
+
         if (historyOptions != null) {
             options = historyOptions;
             historyOptions = null;
@@ -1696,14 +1728,13 @@ public class UI extends BaseUI {
 
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
-                if ( !panel.isComparePanel() ) {
+                if (!panel.isComparePanel()) {
                     vector = vector || panel.getVariable().isVector();
-                    scattered = scattered || panel.getVariable().isScattered();
+                    scattered = scattered || panel.getVariable().isDescrete();
                 }
             }
-            
-            if ( (!xVariable.isVector() && vector) || (!xVariable.isScattered() && scattered) ||
-                   xVariable.isVector() && !vector  || ( xVariable.isScattered() && !scattered) ) {
+
+            if ((!xVariable.isVector() && vector) || (!xVariable.isDescrete() && scattered) || xVariable.isVector() && !vector || (xVariable.isDescrete() && !scattered)) {
                 if (!xView.equals("xy")) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(false);
@@ -1753,7 +1784,7 @@ public class UI extends BaseUI {
                 }
             }
         } else {
-            if (xVariable.isVector() || xVariable.isScattered()) {
+            if (xVariable.isVector() || xVariable.isDescrete()) {
                 if (!xView.equals("xy")) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(false);
@@ -1780,6 +1811,8 @@ public class UI extends BaseUI {
                     analysis.setLabel(xVariable.getName());
                 }
                 panel.setAnalysis(analysis);
+                // This list will be empty if nothing is active...
+                panel.setConstraints(xTrajectoryConstraint.getConstraints());
                 panel.refreshPlot(options, switchAxis, true, forceLASRequest);
             }
         }
@@ -2043,7 +2076,7 @@ public class UI extends BaseUI {
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), operationChangeOptions);
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
-        if (xVariable.isVector() || xVariable.isScattered()) {
+        if (xVariable.isVector() || xVariable.isDescrete()) {
             if (!xView.equals("xy")) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(false);
@@ -2062,7 +2095,7 @@ public class UI extends BaseUI {
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
         } else {
-            if (xVariable.isVector() || xVariable.isScattered()) {
+            if (xVariable.isVector() || xVariable.isDescrete()) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -2140,7 +2173,7 @@ public class UI extends BaseUI {
             }
         }
 
-       setupWidgets();
+        setupWidgets();
 
         if (xTlo != null && !xTlo.equals("")) {
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
