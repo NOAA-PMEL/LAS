@@ -104,4 +104,7 @@ public class TrajectoryOuterSequenceConstraintPanel extends Composite {
         constraint.append("\"");
         return constraint.toString();
     }
+    public boolean hasConstraints() {
+        return activeConstraints.size() > 0;
+    }
 }

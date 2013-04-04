@@ -89,11 +89,14 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                     zhi = z.getHi();
                 }
                 outerSequenceVariableValue.clear();
-                outerSequenceVariableValue.addItem(LOADING);
                 int index = outerSequenceVariable.getSelectedIndex();
                 if ( index > 0 ) {
+                    outerSequenceVariableValue.addItem(LOADING);
                     String variableName = outerSequenceVariable.getItemText(index);
                     Util.getRPCService().getERDDAPOuterSequenceValues(dsid, varid, variableName, getXYZT(), outerSequenceValuesCallback);
+                } else {
+                    outerSequenceVariableValue.addItem(PICK);
+                    outerSequenceVariableValue.addItem(APPEAR);
                 }
             }
         });
@@ -106,11 +109,14 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                 ylo = event.getYlo();
                 yhi = event.getYhi();
                 outerSequenceVariableValue.clear();
-                outerSequenceVariableValue.addItem(LOADING);
                 int index = outerSequenceVariable.getSelectedIndex();
                 if ( index > 0 ) {
+                    outerSequenceVariableValue.addItem(LOADING);
                     String variableName = outerSequenceVariable.getItemText(index);
                     Util.getRPCService().getERDDAPOuterSequenceValues(dsid, varid, variableName, getXYZT(), outerSequenceValuesCallback);
+                } else {
+                    outerSequenceVariableValue.addItem(PICK);
+                    outerSequenceVariableValue.addItem(APPEAR);
                 }
             }
             
@@ -210,9 +216,9 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                     if ( constraint == null ) {
                         constraint = new TrajectoryOuterSequenceConstraintPanel(longname, value);
                         activeConstraints.add(constraint);
-                        eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
                     }
                     constraint.addConstraint(constraintValue);
+                    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
                 }
             }
         }
@@ -242,26 +248,26 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
         if ( xlo != null ) {
             xyzt.put("xlo", String.valueOf(xlo));
         }
-        if ( ylo != null ) {
-            xyzt.put("ylo", String.valueOf(ylo));
-        }
-        if ( zlo != null ) {
-            xyzt.put("zlo", zlo);
-        }
-        if ( tlo != null ) {
-            xyzt.put("tlo", String.valueOf(tlo));
-        }
         if ( xhi != null ) {
             xyzt.put("xhi", String.valueOf(xhi));
+        }
+        if ( ylo != null ) {
+            xyzt.put("ylo", String.valueOf(ylo));
         }
         if ( yhi != null ) {
             xyzt.put("yhi", String.valueOf(yhi));
         }
+        if ( zlo != null ) {
+            xyzt.put("zlo", zlo);
+        }
         if ( zhi != null ) {
             xyzt.put("zhi", zhi);
         }
+        if ( tlo != null ) {
+            xyzt.put("tlo", tlo);
+        }
         if ( thi != null ) {
-            xyzt.put("thi", String.valueOf(thi));
+            xyzt.put("thi", thi);
         }
         return xyzt;
     }
@@ -285,12 +291,14 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
         if ( isActive() ) {
             for (Iterator acIt = activeConstraints.iterator(); acIt.hasNext();) {
                 TrajectoryOuterSequenceConstraintPanel toscp = (TrajectoryOuterSequenceConstraintPanel) acIt.next();
-                ConstraintSerializable constraint = new ConstraintSerializable();
-                constraint.setId(toscp.getName());
-                constraint.setLhs(toscp.getValue());
-                constraint.setOp("like");
-                constraint.setRhs(toscp.getConstraintExpression());
-                constraints.add(constraint);
+                if ( toscp.hasConstraints() ) {
+                    ConstraintSerializable constraint = new ConstraintSerializable();
+                    constraint.setId(toscp.getName());
+                    constraint.setLhs(toscp.getValue());
+                    constraint.setOp("like");
+                    constraint.setRhs(toscp.getConstraintExpression());
+                    constraints.add(constraint);
+                }
             }
         }
         return constraints;
