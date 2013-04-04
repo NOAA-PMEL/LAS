@@ -216,9 +216,9 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                     if ( constraint == null ) {
                         constraint = new TrajectoryOuterSequenceConstraintPanel(longname, value);
                         activeConstraints.add(constraint);
+                        eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
                     }
                     constraint.addConstraint(constraintValue);
-                    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
                 }
             }
         }
