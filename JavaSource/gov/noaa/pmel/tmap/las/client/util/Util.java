@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.util;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.event.RPCSendEvent;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -77,7 +76,6 @@ public class Util {
 		return optionsMap;
 	}
 	public static RPCServiceAsync getRPCService() {
-	    eventBus.fireEvent(new RPCSendEvent());
 		RPCServiceAsync rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
 		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;        
 		ClientFactory clientFactory = GWT.create(ClientFactory.class);
