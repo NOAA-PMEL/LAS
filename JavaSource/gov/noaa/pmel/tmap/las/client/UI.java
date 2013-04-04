@@ -941,25 +941,32 @@ public class UI extends BaseUI {
             }
         }
         // Initialize the state of the trajectory constraint with the current view ranges.
-        // T is always a range.
-        
-        xTrajectoryConstraint.setXlo(xAxesWidget.getRefMap().getXlo());
-        xTrajectoryConstraint.setXhi(xAxesWidget.getRefMap().getXhi());
-        xTrajectoryConstraint.setYlo(xAxesWidget.getRefMap().getYlo());
-        xTrajectoryConstraint.setYhi(xAxesWidget.getRefMap().getYhi());
-        if ( xVariable.getGrid().hasZ() ) {
-            xTrajectoryConstraint.setZlo(xAxesWidget.getZAxis().getLo());
-            xTrajectoryConstraint.setZhi(xAxesWidget.getZAxis().getHi());
-        } else {
-            xTrajectoryConstraint.setZlo(null);
-            xTrajectoryConstraint.setZhi(null);
+
+        if ( xView.contains("x") ) {
+            xTrajectoryConstraint.setXlo(xAxesWidget.getRefMap().getXlo());
+            xTrajectoryConstraint.setXhi(xAxesWidget.getRefMap().getXhi());
         }
-        if ( xVariable.getGrid().hasT() ) {
-            xTrajectoryConstraint.setTlo(xAxesWidget.getTAxis().getISODateLo());
-            xTrajectoryConstraint.setThi(xAxesWidget.getTAxis().getISODateHi());
-        } else {
-            xTrajectoryConstraint.setTlo(null);
-            xTrajectoryConstraint.setThi(null);
+        if ( xView.contains("y") ) {
+            xTrajectoryConstraint.setYlo(xAxesWidget.getRefMap().getYlo());
+            xTrajectoryConstraint.setYhi(xAxesWidget.getRefMap().getYhi());
+        }
+        if ( xView.contains("z") ) {
+            if ( xVariable.getGrid().hasZ() ) {
+                xTrajectoryConstraint.setZlo(xAxesWidget.getZAxis().getLo());
+                xTrajectoryConstraint.setZhi(xAxesWidget.getZAxis().getHi());
+            } else {
+                xTrajectoryConstraint.setZlo(null);
+                xTrajectoryConstraint.setZhi(null);
+            }
+        }
+        if ( xView.contains("t") ) {
+            if ( xVariable.getGrid().hasT() ) {
+                xTrajectoryConstraint.setTlo(xAxesWidget.getTAxis().getISODateLo());
+                xTrajectoryConstraint.setThi(xAxesWidget.getTAxis().getISODateHi());
+            } else {
+                xTrajectoryConstraint.setTlo(null);
+                xTrajectoryConstraint.setThi(null);
+            }
         }
         refresh(false, true, false);
     }
