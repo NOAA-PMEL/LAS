@@ -19,6 +19,13 @@
 	margin: 1px;
 	padding: 1px;
 }
+.gwt-Anchor-PADDING {
+	padding-right: 8px;
+}
+
+.gwt-Label-PADDING {
+	padding: 4px;
+}
 
 .OL_MAP-ToggleButton-WIDTH {
 	margin: 0;
