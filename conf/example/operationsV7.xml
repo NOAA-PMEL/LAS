@@ -198,6 +198,7 @@
 			<service>ferret</service>
 		</operation>
 		<region>
+			<intervals name="xy" type="Maps" title="Latitude-Longitude" />
 			<intervals name="xyt" type="Maps" title="Latitude-Longitude" />
 		</region>
 	</operation>
