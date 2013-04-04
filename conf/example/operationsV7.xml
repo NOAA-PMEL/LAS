@@ -42,7 +42,7 @@
                 <result type="netCDF" ID="netcdf" file_suffix=".nc" />
                 <result type="cancel" ID="cancel" />
             </response>
-            <service>database</service>
+            <service>extract</service>
         </operation>
         <operation name="ASCII file" chained="true"
         ID="Trajectory_Data_Extract_File" output_template="ascii"
@@ -92,7 +92,7 @@
                 <result type="webrowset" ID="icon_webrowset" file_suffix=".xml" />
 				<result type="cancel" ID="cancel" />
 			</response>
-			<service>database</service>
+			<service>extract</service>
 		</operation>
 		<operation name="NetCDF file"
         ID="Trajectory_Data_Extract_netCDF" output_template="netcdf"
@@ -173,7 +173,7 @@
 				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
 				<result type="cancel" ID="cancel" />
 			</response>
-			<service>database</service>
+			<service>extract</service>
 		</operation>
 		<operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly"
 			output_template="output" service_action="Trajectory_2D_poly">
@@ -233,7 +233,7 @@
                     <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
 		     <result type="cancel" ID="cancel" />
                </response>
-               <service>database</service>
+               <service>extract</service>
 	        <properties>
                   <property_group type="backend_request">
                      <property>
