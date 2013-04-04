@@ -1,18 +1,17 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.RemoveConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
-import gov.noaa.pmel.tmap.las.client.event.RPCReceiveEvent;
-import gov.noaa.pmel.tmap.las.client.event.RemoveConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
-import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
-import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -25,7 +24,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class TrajectoryOuterSequenceConstraint extends Composite {
     
@@ -164,13 +162,11 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
 
         @Override
         public void onFailure(Throwable caught) {
-            eventBus.fireEvent(new RPCReceiveEvent());
             Window.alert("Failed to get variables for constraints.");
         }
 
         @Override
         public void onSuccess(Map<String,String> result) {
-            eventBus.fireEvent(new RPCReceiveEvent());
             for (Iterator resultIt = result.keySet().iterator(); resultIt.hasNext();) {
                 String value = (String) resultIt.next();
                 String long_name = result.get(value);
@@ -188,7 +184,6 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
 
         @Override
         public void onSuccess(Map<String, String> result) {
-            eventBus.fireEvent(new RPCReceiveEvent());
             outerSequenceVariableValue.clear();
             outerSequenceVariableValue.setVisibleItemCount(Math.min(result.keySet().size(), 30));
             for (Iterator resultIt = result.keySet().iterator(); resultIt.hasNext();) {
