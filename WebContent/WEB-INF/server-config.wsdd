@@ -31,6 +31,11 @@
   <parameter name="allowedMethods" value="getVersion"/>
   <parameter name="className" value="org.apache.axis.Version"/>
  </service>
+  <service name="LASExtractService" provider="java:RPC">
+  <parameter name="allowedMethods" value="*"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.extract.ExtractBackendService"/>
+  <parameter name="scope" value="Application"/>
+ </service>
  <service name="LASDatabaseBackend" provider="java:RPC">
   <parameter name="allowedMethods" value="*"/>
   <parameter name="className" value="gov.noaa.pmel.tmap.las.service.database.DatabaseBackendService"/>
@@ -64,6 +69,11 @@
  <service name="LASObisBackend" provider="java:RPC">
   <parameter name="allowedMethods" value="getProduct"/>
   <parameter name="className" value="gov.noaa.pmel.tmap.las.service.obis.ObisBackendService"/>
+  <parameter name="scope" value="Application"/>
+ </service>
+ <service name="LASTabledapBackend" provider="java:RPC">
+  <parameter name="allowedMethods" value="getProduct"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.tabledap.TabledapBackendService"/>
   <parameter name="scope" value="Application"/>
  </service>
  <service name="LASIobisBackend" provider="java:RPC">
