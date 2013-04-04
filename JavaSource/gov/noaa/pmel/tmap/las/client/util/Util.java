@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.util;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.RPCSendEvent;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -11,10 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class Util {
+    static ClientFactory clientFactory = GWT.create(ClientFactory.class);
+    static EventBus eventBus = clientFactory.getEventBus();
 	public static String getVariableXPATH(String dsid, String varid) {
 		return "/lasdata/datasets/"+dsid+"/variables/"+varid;
 	}
@@ -50,7 +55,8 @@ public class Util {
 				String value = parts[1];
 				if ( !value.contains("ferret_") ) {
 					tokenMap.put(name, value);
-				}
+				}       ClientFactory clientFactory = GWT.create(ClientFactory.class);
+		        EventBus eventBus = clientFactory.getEventBus();
 			}
 		}
 		return tokenMap;
@@ -71,8 +77,11 @@ public class Util {
 		return optionsMap;
 	}
 	public static RPCServiceAsync getRPCService() {
+	    eventBus.fireEvent(new RPCSendEvent());
 		RPCServiceAsync rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
-		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
+		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;        
+		ClientFactory clientFactory = GWT.create(ClientFactory.class);
+        EventBus eventBus = clientFactory.getEventBus();
 		String rpcURL = "";
 		String base_path = URLUtil.getBaseURL();
 		rpcURL = base_path + "rpc";

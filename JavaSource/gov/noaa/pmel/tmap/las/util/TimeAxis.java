@@ -149,7 +149,6 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
     	t.setType(getType());
 		t.setID(getID());
 		t.setHi(getHi());
-		t.setID(getID());
 		t.setLo(getLo());
 		t.setName(getName());
 		t.setAttributes(getAttributesAsMap());

@@ -20,6 +20,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -98,6 +99,8 @@ public class OutputPanel extends Composite implements HasName {
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 
     private static final Logger logger = Logger.getLogger(OutputPanel.class.getName());
+    
+    
 
     public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
 
@@ -214,6 +217,9 @@ public class OutputPanel extends Composite implements HasName {
         }
 
     };
+    
+    List<ConstraintSerializable> constraints = null;
+
     protected String axisHorizontal;
 
     protected String axisVertical;
@@ -1671,6 +1677,10 @@ public class OutputPanel extends Composite implements HasName {
         if (containerType.equals(Constants.IMAGE)) {
             lasRequest.setProperty("las", "output_type", "xml");
         }
+        for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
+            ConstraintSerializable constraint = (ConstraintSerializable) constraintIt.next();
+            lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+        }
         return lasRequest;
     }
 
@@ -2128,7 +2138,7 @@ public class OutputPanel extends Composite implements HasName {
 
     public void setOrthoRanges(String xView, List<String> xOrtho) {
         boolean range = false;
-        if (panelVar != null && panelVar.getGrid() != null && panelVar.isScattered()) {
+        if (panelVar != null && panelVar.getGrid() != null && panelVar.isDescrete()) {
             range = true;
         }
         for (Iterator<String> oIt = xOrtho.iterator(); oIt.hasNext();) {
@@ -2848,6 +2858,10 @@ public class OutputPanel extends Composite implements HasName {
         }
         this.showOrthoAxes(view, ortho, aAxis);
         panelAxesWidgets.getRefMap().resizeMap();
+    }
+    
+    public void setConstraints(List<ConstraintSerializable> constraints) {
+        this.constraints = constraints;
     }
 
 }

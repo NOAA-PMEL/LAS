@@ -37,18 +37,32 @@ import gov.noaa.pmel.tmap.las.util.Variable;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import opendap.dap.Attribute;
+import opendap.dap.AttributeTable;
+import opendap.dap.DAP2Exception;
+import opendap.dap.DAS;
+
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.io.IOUtils;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -410,15 +424,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     }
     private OperationSerializable[] getOperationsSerialziable(String view, String dsID, String varID) throws RPCException {
     	LASConfig lasConfig = getLASConfig();
-
-    	// Remove the climate analysis if it is not an ESGF session.
-    	HttpServletRequest request = this.getThreadLocalRequest();
-    	String [] catids = (String[]) request.getSession().getAttribute("catid");
-    	boolean include_climate_analysis = false;
-    	if ( catids != null && catids.length > 0 ) {
-    		include_climate_analysis = true;
-    	}
-
     	ArrayList<Operation> operations = new ArrayList<Operation>();
     	OperationSerializable[] wireOps = null;
     	try {
@@ -445,18 +450,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     	} catch (RPCException e) {
     		throw new RPCException(e.getMessage());
     	}
-    	if ( !include_climate_analysis ) {
-    		Operation remove = null;
-    		for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
-    			Operation op = (Operation) opsIt.next();
-    			if ( op.getID().toLowerCase().contains("climate_analysis") ) {
-    				remove = op;
-    			}
-    		}
-    		if ( remove != null ) {
-    			operations.remove(remove);
-    		}
-    	}
+    	
     	int k=0;
     	wireOps = new OperationSerializable[operations.size()];
     	for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
@@ -754,6 +748,123 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     @Override
     protected void checkPermutationStrongName() throws SecurityException {
         // we are going to completely forego this check...
+    }
+    @Override
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt) throws RPCException {
+        Map<String, String> outerSequenceValues = new TreeMap<String, String>();
+        InputStream jsonStream;
+        try {
+            LASConfig lasConfig = getLASConfig();
+            Dataset dataset = lasConfig.getDataset(dsid);
+            String url = lasConfig.getDataAccessURL(dsid, varid, false);
+            Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
+            String id = props.get("tabledap_access").get("id");
+            url = url + id+".json?"+variable+"&distinct()";
+            for (Iterator keyIt = xyzt.keySet().iterator(); keyIt.hasNext();) {
+                String key = (String) keyIt.next();
+                String value = xyzt.get(key);
+                String param = null;
+                String op = null;
+                if ( key.equals("xlo") ) {
+                    param = props.get("tabledap_access").get("longitude");
+                    op = ">=";
+                } else if ( key.equals("xhi") ) {
+                    param = props.get("tabledap_access").get("longitude");
+                    op = "<=";
+                } else if ( key.equals("ylo") ) {
+                    param = props.get("tabledap_access").get("latitude");
+                    op = ">=";
+                } else if ( key.equals("yhi") ) {
+                    param = props.get("tabledap_access").get("latitude");
+                    op = "<=";
+                } else if ( key.equals("zlo") ) {
+                    param = props.get("tabledap_access").get("altitude");
+                    op = ">=";
+                } else if ( key.equals("zhi") ) {
+                    param = props.get("tabledap_access").get("atltitude");
+                    op = "<=";
+                } else if ( key.equals("tlo") ) {
+                    param = props.get("tabledap_access").get("time");
+                    op = ">=";
+                } else if ( key.equals("thi" ) ) {
+                    param = props.get("tabledap_access").get("time");
+                    op = "<=";
+                }
+                if ( param != null && op != null ) {
+                    url = url + "&" + param + op + xyzt.get(key);
+                }
+            }
+            jsonStream = new URL(url).openStream();
+            String jsonText = IOUtils.toString(jsonStream);
+            JSONObject json = new JSONObject(jsonText);
+            JSONArray v = json.getJSONObject("table").getJSONArray("rows");
+            for (int i = 0; i < v.length(); i++) {
+                JSONArray s = v.getJSONArray(i);
+                String t = s.getString(0);
+                outerSequenceValues.put(t, t);
+            }
+        } catch (MalformedURLException e) {
+            throw new RPCException(e.getMessage());
+        } catch (IOException e) {
+            throw new RPCException(e.getMessage());
+        } catch (JSONException e) {
+            throw new RPCException(e.getMessage());
+        } catch (JDOMException e) {
+            throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        }
+       
+        return outerSequenceValues;
+    }
+    @Override
+    public Map<String, String> getERDDAPOuterSequenceVariables(String dsid, String varid) throws RPCException {
+        Map<String, String> osv = new TreeMap<String, String>();
+        DAS das = new DAS();
+        InputStream input;
+        
+        try {
+            LASConfig lasConfig = getLASConfig();
+            Dataset dataset = lasConfig.getDataset(dsid);
+            String url = lasConfig.getDataAccessURL(dsid, varid, false);
+            Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
+            String id = props.get("tabledap_access").get("id");
+            url = url + id;
+            input = new URL(url+".das").openStream();
+            das.parse(input);
+            AttributeTable variableAttributes = das.getAttributeTable("s");
+            AttributeTable global = das.getAttributeTable("NC_GLOBAL");
+            Attribute cdm_trajectory_variables_attribute = global.getAttribute("cdm_trajectory_variables");
+            if ( cdm_trajectory_variables_attribute != null ) {
+                Iterator<String> trajectory_variables_attribute_values = cdm_trajectory_variables_attribute.getValuesIterator();
+                if ( trajectory_variables_attribute_values.hasNext() ) {
+                    // Work with the first value...
+                    String trajectory_variables_value = trajectory_variables_attribute_values.next();
+                    String[] trajector_variables = trajectory_variables_value.split(",");
+                    for (int i = 0; i < trajector_variables.length; i++) {
+                        String variable = trajector_variables[i].trim();
+                        Attribute tva = variableAttributes.getAttribute(variable);
+                        //TODO null check eah of thses.
+                        String long_name = tva.getContainer().getAttribute("long_name").getValueAt(0);
+                        osv.put(variable, long_name);
+                    }
+                }
+            } else {
+                throw new RPCException("No cdm_trajectory_variables GLOBAL attribute found in the data source.");
+            }
+            // There will be only one value
+        } catch (MalformedURLException e) {
+            throw new RPCException(e.getMessage());
+        } catch (IOException e) {
+            throw new RPCException(e.getMessage());
+        } catch (DAP2Exception e) {
+            throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        } catch (JDOMException e) {
+            throw new RPCException(e.getMessage());
+        } 
+        return osv;
     }
    
 }

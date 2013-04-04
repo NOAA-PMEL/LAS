@@ -55,6 +55,8 @@ public class Constraint {
             opString = ">";
         } else if (op.equals("ge")) {
             opString = ">=";
+        } else if ( op.equals("like") ) {
+            opString = "=~";
         }
         return opString;
     }
@@ -72,5 +74,9 @@ public class Constraint {
             constraintString = constraintString + lhs+getOpAsSymbol()+"\""+rhs+"\"";
         }
         return constraintString;
+    }
+    public String getAsERDDAPString() {
+        // Even stuff that looks like a number has to be enclosed in quotes for ERDDAP variables that come is a list of distinct values.
+        return lhs+getOpAsSymbol()+rhs;
     }
 }
