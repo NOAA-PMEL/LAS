@@ -42,6 +42,7 @@ ENDIF
 DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)]($expr2)
 DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num)]($expr2)
 DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2)
+DEFINE SYMBOL variable_lab ($expr1) ($variable_lab) ($expr2)
 
 DEFINE SYMBOL ferret_xyz_var = ($expr1)($data_var)[d=($data_num),($region_xyz)]($expr2)
 DEFINE SYMBOL ferret_t_var = ($expr1)($data_var)[d=($data_num),($region_t)]($expr2)
