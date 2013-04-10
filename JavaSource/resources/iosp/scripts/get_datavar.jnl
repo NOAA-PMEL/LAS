@@ -26,18 +26,6 @@ SET DATA/SAVE
 ! The IOSP will supply an integer value for this argument.
 SET DATA ($2)
 
-! Always write data with Ferret default bad-flag.
-! The attributes come from the header.xml so
-! do not need to give the new definition attributes
-! such as units.
-
-SET VAR/NAME=$3_in $3
-LET $3 = MISSING($3_in,  -1.E34)
-
-! Write data as single-precision floats
-SET VAR/OUTTYPE=float $3
-
-
 ! Write output in original upper-or lower-case spelling of variables
 ! and axis names
 
@@ -136,7 +124,7 @@ IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
    LET ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
 ENDIF
 
-! All the region information has been gathered. Now write the file. 
+! All the region information has been gathered. Now write the file.  
 SET VAR/OUTTYPE=float $3
 SAVE/FILE="$1"/CLOBBER $3[($region_full)]
 
