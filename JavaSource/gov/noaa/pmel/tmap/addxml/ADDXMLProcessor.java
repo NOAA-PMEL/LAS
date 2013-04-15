@@ -1148,9 +1148,9 @@ public class ADDXMLProcessor {
                                 UniqueVector AxisBeans = new UniqueVector();
                                 VariableBean las_var = new VariableBean();
                                 las_var.setElement(id+"-"+variable.getName());
-                                String des = variable.getDescription();
-                                if ( des != null ) {
-                                    las_var.setName(variable.getDescription());
+                                String vocab = variable.getVocabularyName();
+                                if ( vocab != null ) {
+                                    las_var.setName(vocab);
                                 } else {
                                     las_var.setName(variable.getName());
                                 }
