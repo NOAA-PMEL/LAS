@@ -1148,7 +1148,12 @@ public class ADDXMLProcessor {
                                 UniqueVector AxisBeans = new UniqueVector();
                                 VariableBean las_var = new VariableBean();
                                 las_var.setElement(id+"-"+variable.getName());
-                                las_var.setName(variable.getDescription());
+                                String des = variable.getDescription();
+                                if ( des != null ) {
+                                    las_var.setName(variable.getDescription());
+                                } else {
+                                    las_var.setName(variable.getName());
+                                }
                                 if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
                                     las_var.setUnits(variable.getUnits());
                                 } else {
