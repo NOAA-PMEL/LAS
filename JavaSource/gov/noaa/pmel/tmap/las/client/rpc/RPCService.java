@@ -8,6 +8,7 @@ import java.util.Map;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -49,7 +50,8 @@ public interface RPCService extends RemoteService {
      * These are services that must attach to an ERDDAP server
      */
     public Map<String, String> getERDDAPOuterSequenceVariables(String dsid, String varid) throws RPCException;
-    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt) throws RPCException;
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key, Map<String, String> xyzt) throws RPCException;
+    public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws RPCException;
 	/*
 	 * Everything below is of the ESGF search interface.
 	 */
