@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ConstraintSerializable implements IsSerializable {
     String lhs;
-    String op;
+    String op;  // should be one of gt, ge, eq, lt, le
     String rhs;
     String id;
     public ConstraintSerializable() {

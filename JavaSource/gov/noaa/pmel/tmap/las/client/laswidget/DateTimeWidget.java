@@ -221,6 +221,7 @@ public class DateTimeWidget extends Composite {
             setLo(display_lo);
         }
 			
+       
 	}
 	public void reinit() {
 
@@ -359,10 +360,12 @@ public class DateTimeWidget extends Composite {
 			for ( int i = 0; i < 5; i++ ) {
 				cellFormatter.setVisible(1, i, true);
 			}
+			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
 		} else {
 			for ( int i = 0; i < 5; i++ ) {
 				cellFormatter.setVisible(1, i, false);
 			}
+            dateTimeWidget.setWidget(0, 0, d_label);
 		}
 	}
 

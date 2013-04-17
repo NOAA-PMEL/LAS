@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -750,16 +751,21 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         // we are going to completely forego this check...
     }
     @Override
-    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt) throws RPCException {
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, Map<String, String> xyzt) throws RPCException {
         Map<String, String> outerSequenceValues = new TreeMap<String, String>();
         InputStream jsonStream;
         try {
             LASConfig lasConfig = getLASConfig();
             Dataset dataset = lasConfig.getDataset(dsid);
             String url = lasConfig.getDataAccessURL(dsid, varid, false);
+            String shortname = lasConfig.getVariableName(dsid, varid);
             Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
             String id = props.get("tabledap_access").get("id");
-            url = url + id+".json?"+variable+"&distinct()";
+            if ( shortname.equals(key_variable) ) {
+                url = url + id+".json?"+shortname+"&distinct()";
+            } else {
+                url = url + id+".json?"+key_variable+","+shortname+"&distinct()";
+            }
             for (Iterator keyIt = xyzt.keySet().iterator(); keyIt.hasNext();) {
                 String key = (String) keyIt.next();
                 String value = xyzt.get(key);
@@ -801,7 +807,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             for (int i = 0; i < v.length(); i++) {
                 JSONArray s = v.getJSONArray(i);
                 String t = s.getString(0);
-                outerSequenceValues.put(t, t);
+                if ( shortname.equals(key_variable) ) {
+                    outerSequenceValues.put(t,t);
+                } else {
+                    String u = s.getString(1);
+                    outerSequenceValues.put(t, u);
+                }
             }
         } catch (MalformedURLException e) {
             throw new RPCException(e.getMessage());
@@ -844,7 +855,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                     for (int i = 0; i < trajector_variables.length; i++) {
                         String variable = trajector_variables[i].trim();
                         Attribute tva = variableAttributes.getAttribute(variable);
-                        //TODO null check eah of thses.
+                        //TODO null check each of these.
                         String long_name = tva.getContainer().getAttribute("long_name").getValueAt(0);
                         osv.put(variable, long_name);
                     }
@@ -865,6 +876,17 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             throw new RPCException(e.getMessage());
         } 
         return osv;
+    }
+    @Override
+    public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws RPCException {
+        LASConfig lasConfig = getLASConfig();
+        try {
+            return lasConfig.getERDDAPConstraintGroups(dsid);
+        } catch (JDOMException e) {
+           throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        }
     }
    
 }

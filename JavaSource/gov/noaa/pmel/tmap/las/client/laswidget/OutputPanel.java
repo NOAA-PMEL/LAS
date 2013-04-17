@@ -535,6 +535,7 @@ public class OutputPanel extends Composite implements HasName {
                             // setPlotImageWidth();
                         }
                         logger.info("onResponseReceived firing StringValueChangeEvent");
+                        // N.B. Applications that use the output panel must handle the image URL event to resize the window.
                         eventBus.fireEventFromSource(new StringValueChangeEvent(imageurl), thisOutputPanel);
                     }
                     world_startx = x_axis_lower_left;
@@ -580,12 +581,15 @@ public class OutputPanel extends Composite implements HasName {
 
         @Override
         public void onMapSelectionChange(MapChangeEvent event) {
-            OutputPanel p = (OutputPanel) event.getSource();
-            if (p.isComparePanel() && !isComparePanel()) {
-                if (view.contains("x") && !view.contains("y")) {
-                    panelAxesWidgets.getRefMap().setCurrentSelection(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), event.getXlo(), event.getXhi());
-                } else if (!view.contains("x") && view.contains("y")) {
-                    panelAxesWidgets.getRefMap().setCurrentSelection(event.getYlo(), event.getYhi(), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
+            Object object = event.getSource();
+            if ( object instanceof OutputPanel ) {
+                OutputPanel p = (OutputPanel) object;
+                if (p.isComparePanel() && !isComparePanel()) {
+                    if (view.contains("x") && !view.contains("y")) {
+                        panelAxesWidgets.getRefMap().setCurrentSelection(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), event.getXlo(), event.getXhi());
+                    } else if (!view.contains("x") && view.contains("y")) {
+                        panelAxesWidgets.getRefMap().setCurrentSelection(event.getYlo(), event.getYhi(), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
+                    }
                 }
             }
         }
@@ -1677,9 +1681,11 @@ public class OutputPanel extends Composite implements HasName {
         if (containerType.equals(Constants.IMAGE)) {
             lasRequest.setProperty("las", "output_type", "xml");
         }
-        for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
-            ConstraintSerializable constraint = (ConstraintSerializable) constraintIt.next();
-            lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+        if ( constraints != null ) {
+            for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
+                ConstraintSerializable constraint = (ConstraintSerializable) constraintIt.next();
+                lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+            }
         }
         return lasRequest;
     }
@@ -1695,6 +1701,9 @@ public class OutputPanel extends Composite implements HasName {
         return t.toString();
     }
 
+    public AxesWidgetGroup getAxesWidgets() {
+        return panelAxesWidgets;
+    }
     public String getThi() {
         return panelAxesWidgets.getTAxis().getFerretDateHi();
     }

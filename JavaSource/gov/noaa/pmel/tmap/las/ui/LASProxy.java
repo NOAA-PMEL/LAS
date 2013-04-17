@@ -44,7 +44,7 @@ public class LASProxy {
 
 				log.error("HttpGet Error Code: "+rc);
 				if ( response == null ) {
-					throw new IOException("Unable to execute method.  RC="+rc);
+					throw new IOException(method.getResponseBodyAsString());
 				} else {
 					response.sendError(rc);
 				}

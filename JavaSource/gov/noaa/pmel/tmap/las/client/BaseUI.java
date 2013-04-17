@@ -113,7 +113,7 @@ public class BaseUI {
     /*
      * A global "apply" control
      */
-    AlertButton applyButton = new AlertButton("Update Plots", "APPLY-NEEDED");
+    AlertButton applyButton = new AlertButton("Update Plots", Constants.UPDATE_NEEDED);
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
     Boolean showAnnotationsByDefault = true;
