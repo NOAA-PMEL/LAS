@@ -1,23 +1,15 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.DateWidgetTest;
-import gov.noaa.pmel.tmap.las.client.event.AddDateTimeConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.AddMapConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.GridChangeEvent;
-import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
-import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
-import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -30,7 +22,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
