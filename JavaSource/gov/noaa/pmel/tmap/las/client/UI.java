@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
@@ -47,8 +48,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import sun.awt.X11.XConstants;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -94,7 +93,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class UI extends BaseUI {
-    TrajectoryOuterSequenceConstraint xTrajectoryConstraint = new TrajectoryOuterSequenceConstraint();
+    ConstraintWidgetGroup xTrajectoryConstraint = new ConstraintWidgetGroup();
     public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
 
         @Override
@@ -878,7 +877,7 @@ public class UI extends BaseUI {
                     if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
                         xTrajectoryConstraint.setActive(true);
                         xLeftPanel.add(xTrajectoryConstraint);
-                        xTrajectoryConstraint.init(xNewVariable.getDSID(), xNewVariable.getID());
+                        xTrajectoryConstraint.init(xNewVariable.getDSID());
                     }
                 } else {
                     xOperationID = "Insitu_extract_location_value_plot";
@@ -940,34 +939,7 @@ public class UI extends BaseUI {
                 panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
             }
         }
-        // Initialize the state of the trajectory constraint with the current view ranges.
-
-        if ( xView.contains("x") ) {
-            xTrajectoryConstraint.setXlo(xAxesWidget.getRefMap().getXlo());
-            xTrajectoryConstraint.setXhi(xAxesWidget.getRefMap().getXhi());
-        }
-        if ( xView.contains("y") ) {
-            xTrajectoryConstraint.setYlo(xAxesWidget.getRefMap().getYlo());
-            xTrajectoryConstraint.setYhi(xAxesWidget.getRefMap().getYhi());
-        }
-        if ( xView.contains("z") ) {
-            if ( xVariable.getGrid().hasZ() ) {
-                xTrajectoryConstraint.setZlo(xAxesWidget.getZAxis().getLo());
-                xTrajectoryConstraint.setZhi(xAxesWidget.getZAxis().getHi());
-            } else {
-                xTrajectoryConstraint.setZlo(null);
-                xTrajectoryConstraint.setZhi(null);
-            }
-        }
-        if ( xView.contains("t") ) {
-            if ( xVariable.getGrid().hasT() ) {
-                xTrajectoryConstraint.setTlo(xAxesWidget.getTAxis().getISODateLo());
-                xTrajectoryConstraint.setThi(xAxesWidget.getTAxis().getISODateHi());
-            } else {
-                xTrajectoryConstraint.setTlo(null);
-                xTrajectoryConstraint.setThi(null);
-            }
-        }
+        
         refresh(false, true, false);
     }
 

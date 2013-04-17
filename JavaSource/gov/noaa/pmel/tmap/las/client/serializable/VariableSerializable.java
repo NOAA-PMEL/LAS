@@ -23,6 +23,7 @@ public class VariableSerializable extends Serializable implements IsSerializable
     String CATID;
     String DSID;
     String DSName;
+    String shortname;
     GridSerializable grid;
     List<String> components;
 	boolean vector;
@@ -100,4 +101,11 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	public boolean isDescrete() {
 	    return !getAttributes().get("grid_type").equals("regular");
 	}
+    public String getShortname() {
+        return shortname;
+    }
+    public void setShortname(String shortname) {
+        this.shortname = shortname;
+    }
+	
 }

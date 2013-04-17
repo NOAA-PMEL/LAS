@@ -3,7 +3,6 @@
  */
 package gov.noaa.pmel.tmap.las.service.extract;
 
-import gov.noaa.pfel.coastwatch.pointdata.Table;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
@@ -12,23 +11,19 @@ import gov.noaa.pmel.tmap.las.service.TemplateTool;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
-import com.cohort.array.DoubleArray;
 import com.cohort.util.Calendar2;
 import com.cohort.util.MustBe;
 import com.cohort.util.String2;
@@ -211,6 +206,8 @@ public class TabledapTool extends TemplateTool {
             String dsUrl = url + id + ".ncCF?";  //don't include ".dods"; readOpendapSequence does that
             File part1 = new File(netcdfFilename+".part1");
 //            Table data = new Table();
+            DateTime dt = new DateTime();
+            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
             if (xlo.length() > 0 && xhi.length() > 0 && 
                 String2.parseDouble(xhi) < String2.parseDouble(xlo)) {
                 //split lon needs 2 queries; take care of >xlo
@@ -218,7 +215,11 @@ public class TabledapTool extends TemplateTool {
                 try {
                     String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
                     String firstUrl = dsUrl + q  + "&longitude>=" + xlo;
+                    dt = new DateTime();
+                    System.out.println("{TableDapTool starting file pull for part 1 at "+fmt.print(dt));
                     lasProxy.executeGetMethodAndSaveResult(firstUrl, part1, null);
+                    dt = new DateTime();
+                    System.out.println("{TableDapTool finished file pull for part 1 at "+fmt.print(dt));
                 } catch (Exception e) {
                     causeOfError = "Data source error: " + e.toString();
                     throw e;
@@ -240,7 +241,11 @@ public class TabledapTool extends TemplateTool {
             try {
                 String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
                 String secondUrl = dsUrl + q;
+                dt = new DateTime();
+                System.out.println("{TableDapTool starting file pull for part 2 at "+fmt.print(dt));
                 lasProxy.executeGetMethodAndSaveResult(secondUrl, part2, null);
+                dt = new DateTime();
+                System.out.println("{TableDapTool finished file pull for part 2 at "+fmt.print(dt));
             } catch (Exception e) {
                 causeOfError = "Data source error: " + e.toString();
                 throw e;
@@ -253,6 +258,8 @@ public class TabledapTool extends TemplateTool {
             
             // If there is only one file, rename it and get on your with life.
             if ( part1.exists() && part1.length() > 0 ) {
+                dt = new DateTime();
+                System.out.println("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
                 //TODO Combine the files.
             } else {
                 part2.renameTo(new File(netcdfFilename));

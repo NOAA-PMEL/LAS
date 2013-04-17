@@ -44,9 +44,7 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
     String varid = "";
     
     private static String CREATE = "Create a constraint on ...";
-    private static String PICK = "Choose a variable to constrain,";
-    private static String APPEAR = "the values will appear here.";
-    private static String LOADING = "Loading values from the server...";
+    
     
     // Keep constraints on x, y, z and t to limit the selections to the current region.
     String tlo;
@@ -66,8 +64,8 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
         mainPanel.add(new Label("The choices in the second menu are restricted to those values which are available given the current X, Y, Z and T ranges."));
         mainPanel.add(activeConstraints);
         outerSequenceVariable.addItem(CREATE);
-        outerSequenceVariableValue.addItem(PICK);
-        outerSequenceVariableValue.addItem(APPEAR);
+        outerSequenceVariableValue.addItem(Constants.PICK);
+        outerSequenceVariableValue.addItem(Constants.APPEAR);
         listPanel.add(outerSequenceVariable);
         listPanel.add(outerSequenceVariableValue);
         outerSequenceVariableValue.setVisibleItemCount(30);
@@ -91,12 +89,12 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                 outerSequenceVariableValue.clear();
                 int index = outerSequenceVariable.getSelectedIndex();
                 if ( index > 0 ) {
-                    outerSequenceVariableValue.addItem(LOADING);
+                    outerSequenceVariableValue.addItem(Constants.LOADING);
                     String variableName = outerSequenceVariable.getItemText(index);
                     Util.getRPCService().getERDDAPOuterSequenceValues(dsid, varid, variableName, getXYZT(), outerSequenceValuesCallback);
                 } else {
-                    outerSequenceVariableValue.addItem(PICK);
-                    outerSequenceVariableValue.addItem(APPEAR);
+                    outerSequenceVariableValue.addItem(Constants.PICK);
+                    outerSequenceVariableValue.addItem(Constants.APPEAR);
                 }
             }
         });
@@ -111,12 +109,12 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                 outerSequenceVariableValue.clear();
                 int index = outerSequenceVariable.getSelectedIndex();
                 if ( index > 0 ) {
-                    outerSequenceVariableValue.addItem(LOADING);
+                    outerSequenceVariableValue.addItem(Constants.LOADING);
                     String variableName = outerSequenceVariable.getItemText(index);
                     Util.getRPCService().getERDDAPOuterSequenceValues(dsid, varid, variableName, getXYZT(), outerSequenceValuesCallback);
                 } else {
-                    outerSequenceVariableValue.addItem(PICK);
-                    outerSequenceVariableValue.addItem(APPEAR);
+                    outerSequenceVariableValue.addItem(Constants.PICK);
+                    outerSequenceVariableValue.addItem(Constants.APPEAR);
                 }
             }
             
@@ -238,7 +236,7 @@ public class TrajectoryOuterSequenceConstraint extends Composite {
                     activeConstraints.add(p);
                 }
                 outerSequenceVariableValue.clear();
-                outerSequenceVariableValue.addItem(LOADING);
+                outerSequenceVariableValue.addItem(Constants.LOADING);
                 Util.getRPCService().getERDDAPOuterSequenceValues(dsid, varid, variableName, getXYZT(), outerSequenceValuesCallback);
             }
         }      

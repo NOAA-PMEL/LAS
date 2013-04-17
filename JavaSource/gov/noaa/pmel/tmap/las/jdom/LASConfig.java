@@ -26,6 +26,8 @@ import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -75,6 +77,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -934,7 +937,8 @@ public class LASConfig extends LASDocument {
 
                                 if ( !variablesElement.getName().equals("properties") &&
                                         !variablesElement.getName().equals("documentation") &&
-                                        !variablesElement.getName().equals("contributor") ) {
+                                        !variablesElement.getName().equals("contributor") && 
+                                        !variablesElement.getName().equals("constraints")) {
                                     boolean composite = false;
                                     List variables = variablesElement.getChildren();
                                     Element cprops = null;
@@ -5676,7 +5680,78 @@ public class LASConfig extends LASDocument {
         return null;
     }
     }
- 
+    public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws JDOMException, LASException {
+        List<ERDDAPConstraintGroup> groups = new ArrayList<ERDDAPConstraintGroup>();
+        
+        Element dataset = getDatasetElement(dsid);
+        Element constraintsE = dataset.getChild("constraints");
+        if ( constraintsE != null ) {
+            List groupElements = constraintsE.getChildren("constraint_group");
+            for (Iterator groupElement = groupElements.iterator(); groupElement.hasNext();) {
+                Element cg = (Element) groupElement.next();
+                ERDDAPConstraintGroup constraintGroup = new ERDDAPConstraintGroup();
+                constraintGroup.setDsid(dsid);
+                String groupName = cg.getAttributeValue("name");
+                if ( groupName != null ) {
+                    constraintGroup.setName(groupName);
+                }
+                String groupType = cg.getAttributeValue("type");
+                if ( groupType != null ) {
+                    constraintGroup.setType(groupType);
+                }
+                if ( groupType != null && groupType.equals("selection") ) {
+                    // Should only be one constraint with multiple variables and one key.
+                    ERDDAPConstraint constraint = new ERDDAPConstraint();
+                    Element cE = cg.getChild("constraint");
+                    String cName = cg.getAttributeValue("name");
+                    if ( cName != null ) {
+                        constraint.setName(cName);
+                    }
+                    List vars = cE.getChildren("variable");
+                    List<VariableSerializable> variables = new ArrayList<VariableSerializable>();
+                    for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                        Element variable = (Element) varIt.next();
+                        String IDREF = variable.getAttributeValue("IDREF");
+                        VariableSerializable var = getVariable(dsid, IDREF).getVariableSerializable();
+                        String shortname = getVariableName(dsid, IDREF);
+                        var.setShortname(shortname);
+                        variables.add(var);  
+                    }
+                    constraint.setVariables(variables);
+                    Element keyE = cE.getChild("key");
+                    String key = keyE.getTextNormalize();
+                    constraint.setKey(key);
+                    constraintGroup.add(constraint);
+                } else {
+                    List constraints = cg.getChildren("constraint");
+                    for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
+                        ERDDAPConstraint constraint = new ERDDAPConstraint();
+                        Element c = (Element) cIt.next();
+                        String widget = c.getAttributeValue("widget");
+                        constraint.setWidget(widget);
+                        if ( widget.equals("list") ) {
+                            List<VariableSerializable> variables = new ArrayList<VariableSerializable>();
+                            Element variable = c.getChild("variable");
+                            String IDREF = variable.getAttributeValue("IDREF");
+                            VariableSerializable var = getVariable(dsid, IDREF).getVariableSerializable();
+                            String shortname = getVariableName(dsid, IDREF);
+                            var.setShortname(shortname);
+                            variables.add(var);
+                            constraint.setVariables(variables);
+                        }
+                        constraintGroup.add(constraint);
+                        Element keyE = c.getChild("key");
+                        if ( keyE != null ) {
+                            String key = keyE.getTextNormalize();
+                            constraint.setKey(key);
+                        }
+                    }
+                }
+                groups.add(constraintGroup);
+            }
+        }
+        return groups;
+    }
     public void removeOldDatasets(DateTime then) throws Exception {
         // "/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']"
        
