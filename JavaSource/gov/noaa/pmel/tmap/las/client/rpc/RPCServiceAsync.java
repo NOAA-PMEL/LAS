@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
@@ -40,7 +41,8 @@ public interface RPCServiceAsync {
 	 * These are services that must attach to an ERDDAP server
 	 */
 	public void getERDDAPOuterSequenceVariables(String dsid, String varid, AsyncCallback<Map<String, String>> outerSequencVariableCallback);
-	public void getERDDAPOuterSequenceValues(String dsid, String varid, String variable, Map<String, String> xyzt, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
+	public void getERDDAPOuterSequenceValues(String dsid, String varid, String key, Map<String, String> xyzt, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
+	public void getERDDAPConstraintGroups(String dsid, AsyncCallback<List<ERDDAPConstraintGroup>> constraints);
 	/*
 	 * Everything below this is for the ESGF serach interface.
 	 */
