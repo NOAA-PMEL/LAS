@@ -6,6 +6,11 @@
 ! Save any levels symbols from the plot thats been drawn,
 ! so they can be output to the result map file.
 
+IF ($ferret_land_script"0|*>1") THEN
+   GO ($ferret_land_script)
+   EXIT/SCRIPT
+ENDIF
+
 IF ($LEV_NUM"0|*>1") THEN
    IF ($LEV_OPNLEVS"0|*>1") THEN DEFINE SYMBOL SAVE_OPNLEVS = ($LEV_OPNLEVS)
    IF ($LEV_MIN"0|*>1") THEN DEFINE SYMBOL SAVE_MINLEV = ($LEV_MIN)
