@@ -30,7 +30,7 @@ public class SubsetConstraintPanel extends Composite {
     // Current selection values
     ListBox valuesList = new ListBox();
 
-    HorizontalPanel mainPanel  = new HorizontalPanel();
+    VerticalPanel mainPanel  = new VerticalPanel();
     HorizontalPanel rightPanel = new HorizontalPanel();
     
     VerticalPanel radioButtonGroup = new VerticalPanel();  
@@ -45,7 +45,8 @@ public class SubsetConstraintPanel extends Composite {
     public SubsetConstraintPanel(ERDDAPConstraintGroup constraintGroup) {
         
         this.constraintGroup = constraintGroup;
-        valuesList.setVisibleItemCount(25);
+        valuesList.setVisibleItemCount(10);
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-12+"px");
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -104,7 +105,7 @@ public class SubsetConstraintPanel extends Composite {
         @Override
         public void onSuccess(Map<String, String> result) {
             valuesList.clear();
-            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 25));
+            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
                 String key_value = (String) rIt.next();
                 String value = (String) result.get(key_value);

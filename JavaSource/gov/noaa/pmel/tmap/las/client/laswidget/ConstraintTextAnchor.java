@@ -12,8 +12,11 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.shared.DirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 
-public class ConstraintTextAnchor extends Anchor {
+public class ConstraintTextAnchor extends Composite {
     String variable;
     String value;
     String key;
@@ -24,9 +27,10 @@ public class ConstraintTextAnchor extends Anchor {
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
     
+    Anchor a = new Anchor();
+    FlowPanel p = new FlowPanel();
     
     public ConstraintTextAnchor(String variable, String value, String key, String keyValue, String op) {
-        super();
         this.variable = variable;
         this.value = value;
         this.key = key;
@@ -38,9 +42,11 @@ public class ConstraintTextAnchor extends Anchor {
         } else {
             anchor_text = "(x) "+variable+" = "+value + " with " + key + " = " + keyValue;
         }
-        setText(anchor_text);
-        addStyleDependentName("PADDING");
-        addClickHandler(new ClickHandler() {
+       
+        a.setText(anchor_text);
+        a.addStyleDependentName("CONSTRAINT");
+        
+        a.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -48,6 +54,8 @@ public class ConstraintTextAnchor extends Anchor {
             }
             
         });
+        p.add(a);
+        initWidget(p);
     }
 
 

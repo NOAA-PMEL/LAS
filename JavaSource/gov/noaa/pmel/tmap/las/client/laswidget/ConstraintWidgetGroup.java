@@ -19,19 +19,20 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ConstraintWidgetGroup extends Composite {
@@ -39,8 +40,9 @@ public class ConstraintWidgetGroup extends Composite {
     boolean active = false;
     VerticalPanel mainPanel = new VerticalPanel();
     HorizontalPanel interiorPanel = new HorizontalPanel();
+    ScrollPanel scrollPanel = new ScrollPanel();
     FlowPanel displayPanel = new FlowPanel();
-    TabPanel tabPanel = new TabPanel();
+    StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
     
 
     OLMapWidget refMap = new OLMapWidget();
@@ -58,8 +60,7 @@ public class ConstraintWidgetGroup extends Composite {
 
     public ConstraintWidgetGroup() {
         mainPanel.add(new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied."));
-        tabPanel.setHeight("150px");
-        tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+        constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
@@ -93,8 +94,13 @@ public class ConstraintWidgetGroup extends Composite {
             }
             
         });
-        mainPanel.add(displayPanel);
-        interiorPanel.add(tabPanel);
+        scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
+        scrollPanel.add(displayPanel);
+        displayPanel.addStyleDependentName("BORDER-TOP");
+        displayPanel.setSize(Constants.CONTROLS_WIDTH+"px", "150px");
+        mainPanel.add(scrollPanel);
+        constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
+        interiorPanel.add(constraintPanel);
         interiorPanel.add(refMap);
         interiorPanel.add(dateTimeWidget);
         mainPanel.add(interiorPanel);
@@ -152,17 +158,17 @@ public class ConstraintWidgetGroup extends Composite {
             interiorPanel.remove(dateTimeWidget);
         }
         
-        tabPanel.clear();
+        constraintPanel.clear();
 
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
             if ( erddapConstraintGroup.getType().equals("selection") ) {
-                tabPanel.add(new SelectionConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName());
+                constraintPanel.add(new SelectionConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName(), 30);
             } else {
-                tabPanel.add(new SubsetConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName());
+                constraintPanel.add(new SubsetConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName(), 30);
             }
         }
-        tabPanel.selectTab(0);
+        constraintPanel.showWidget(0);
         eventBus.addHandler(AddSelectionConstraintEvent.TYPE, new AddSelectionConstraintEvent.Handler() {
 
             @Override
