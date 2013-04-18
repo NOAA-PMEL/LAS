@@ -19,6 +19,23 @@
 	margin: 1px;
 	padding: 1px;
 }
+/*
+.gwt-Anchor-CONSTRAINT:link    {color:#900B09; background-color:transparent}
+.gwt-Anchor-CONSTRAINT:visited {color:#900B09; background-color:transparent}
+.gwt-Anchor-CONSTRAINT:active  {color:#FF0000; background-color:transparent}
+*/
+.gwt-Anchor-CONSTRAINT:hover { background-color:#ECECEC; color:red; text-decoration:underline; }
+
+.gwt-Anchor-CONSTRAINT {
+	cursor: pointer;
+}
+
+.gwt-ListBox-PADDING {
+	padding: 3px;
+}
+.gwt-RadioButton-PADDING {
+	padding: 4px;
+}
 .gwt-Anchor-PADDING {
 	padding-right: 8px;
 }
@@ -82,6 +99,13 @@
 	overflow: auto;
 }
 
+.gwt-VerticalPanel-BORDER {
+	align: top;
+	border-top: 1px solid blue;
+	border-left: 1px solid blue;
+	border-right: 1px solid blue;
+	border-bottom: 1px solid blue;
+}
 .allBorder {
 	border-top: 1px solid blue;
 	border-left: 1px solid blue;
