@@ -65,7 +65,7 @@ can data etopo$5"60|0>60|1>40|2>20|3>20|4>20|5>20|*>60" ! => needs to be checked
 IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
   GO LAS_fland 
 ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
-  GO land 
+  GO LAS_land 
 ENDIF
 
 set mode/last verify
