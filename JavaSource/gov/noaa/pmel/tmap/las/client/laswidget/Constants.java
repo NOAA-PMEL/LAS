@@ -28,10 +28,11 @@ public class Constants {
     public static final String DEFAULT_VECTOR_OP = "Plot_vector";
     
     public static final String PROFILE_ESGF = "LAS-ESGF";
+    public static final double CONTROLS_WIDTH = 280.;
     
-    public static String PICK = "Choose a variable to constrain,";
-    public static String APPEAR = "the values will appear here.";
-    public static String LOADING = "Loading values from the server...";
+    public static String PICK = "Choose variable from the group above,";
+    public static String APPEAR = "then a value from the list that appears here.";
+    public static String LOADING = "Loading values from server...";
     
     public static String UPDATE_NEEDED = "APPLY_NEEDED";
 }

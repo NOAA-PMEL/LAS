@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class SelectionConstraintPanel extends Composite {
     
     
-    HorizontalPanel mainPanel  = new HorizontalPanel();
+    VerticalPanel mainPanel  = new VerticalPanel();
 
     // Selection variables...
     VerticalPanel variablesRadioGroup = new VerticalPanel();
@@ -64,7 +64,7 @@ public class SelectionConstraintPanel extends Composite {
         @Override
         public void onSuccess(Map<String, String> result) {
             valuesList.clear();
-            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 25));
+            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
                 String key_value = (String) rIt.next();
                 String value = (String) result.get(key_value);
@@ -76,7 +76,7 @@ public class SelectionConstraintPanel extends Composite {
     
     
     public SelectionConstraintPanel(ERDDAPConstraintGroup constraintGroup) {
-        valuesList.setVisibleItemCount(25);
+        valuesList.setVisibleItemCount(10);
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -97,6 +97,7 @@ public class SelectionConstraintPanel extends Composite {
             final String id = variable.getID();
             String name = variable.getName();
             RadioButton button = new RadioButton("selection_variable", name);
+            button.addStyleDependentName("PADDING");
             button.addClickHandler(new ClickHandler() {
 
                 @Override
@@ -115,8 +116,9 @@ public class SelectionConstraintPanel extends Composite {
         valuesList.addItem(Constants.APPEAR);
         
         mainPanel.add(variablesRadioGroup);
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-10+"px");
+        valuesList.addStyleDependentName("PADDING");
         mainPanel.add(valuesList);
-        mainPanel.setHeight("150px");
         initWidget(mainPanel);
     }
     private String getShortName(String name) {

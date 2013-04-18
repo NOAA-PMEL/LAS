@@ -221,8 +221,13 @@ public class TabledapTool extends TemplateTool {
                     dt = new DateTime();
                     System.out.println("{TableDapTool finished file pull for part 1 at "+fmt.print(dt));
                 } catch (Exception e) {
-                    causeOfError = "Data source error: " + e.toString();
-                    throw e;
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    causeOfError = "Data source error: " + message;
+                    throw new Exception(message);
                 }
                 xlo = ""; //it has been taken care of
 
@@ -247,8 +252,13 @@ public class TabledapTool extends TemplateTool {
                 dt = new DateTime();
                 System.out.println("{TableDapTool finished file pull for part 2 at "+fmt.print(dt));
             } catch (Exception e) {
-                causeOfError = "Data source error: " + e.toString();
-                throw e;
+                String message = e.getMessage();
+                if ( e.getMessage().contains("com.cohort") ) {
+                    message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                    message = message.substring(0, message.indexOf(")"));
+                }
+                causeOfError = "Data source error: " + message;
+                throw new Exception(message);
             }
             
             
