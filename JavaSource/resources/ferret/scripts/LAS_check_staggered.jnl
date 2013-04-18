@@ -47,7 +47,7 @@ IF `($ferret_staggered_grid"0|default>1|*>1") GT 0` THEN
    ENDIF
 
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = "Regridded from Staggered Grid" 
+   DEFINE SYMBOL upper_left_($n_left_labels) = Regridded from Staggered Grid
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
    DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
 ENDIF
