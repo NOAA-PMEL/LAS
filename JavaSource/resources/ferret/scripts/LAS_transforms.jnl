@@ -41,6 +41,7 @@ DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 0
 GO LAS_get_coords_att
 
 IF ($ferret_curvi_coord_lat"0|*>1") THEN DEFINE SYMBOL do_curvi_xy = 1
+IF ($ferret_curvi_coord_lat"0|*>1") THEN DEFINE SYMBOL native_curvilinear_xy = 1
 IF ($ferret_thk_var"0|*>1") THEN  DEFINE SYMBOL do_hybrid_z = 1
 IF `($do_curvi_xy) + ($do_hybrid_z) EQ 2` THEN DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 1
 

@@ -65,6 +65,9 @@ IF ($ferret_curv_lon_min"0|*>1") THEN
    LET ndel_y = del_y
    IF `ncurv_y GT 6` THEN LET ndel_y = 5*del_y
 
+   LET ndel_x = `0.1*ABS(($ferret_curv_lon_min) - ($ferret_curv_lon_max))`
+   LET ndel_y = `0.1*ABS(($ferret_curv_lat_min) - ($ferret_curv_lat_max))`
+
    IF `(MAX((xlodiff), (xhidiff)) LT ndel_x) AND\ 
        (MAX((ylodiff), (yhidiff)) LT ndel_y)` THEN
       LET clon_imin = 1
