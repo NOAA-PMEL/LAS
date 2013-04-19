@@ -97,7 +97,7 @@ public class ConstraintWidgetGroup extends Composite {
         scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
         scrollPanel.add(displayPanel);
         displayPanel.addStyleDependentName("BORDER-TOP");
-        displayPanel.setSize(Constants.CONTROLS_WIDTH+"px", "150px");
+        displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
         mainPanel.add(scrollPanel);
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
         interiorPanel.add(constraintPanel);
