@@ -118,7 +118,7 @@ public class UI extends BaseUI {
             xOperationID = "Plot_2D_XY_zoom";
             xOptionID = "Options_2D_image_contour_xy_7";
             Window.alert("Please choose a data set.");
-        } TrajectoryOuterSequenceConstraint constraint = new TrajectoryOuterSequenceConstraint();
+        } 
 
         @Override
         public void onSuccess(Object result) {
@@ -135,7 +135,7 @@ public class UI extends BaseUI {
                         xOptionID = "Options_2D_image_contour_xy_7";
                         Window.alert("Please choose a data set.");
                     } else if ((firstCategorySerializable != null) && (firstCategorySerializable.isVariableChildren())) {
-                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable(); TrajectoryOuterSequenceConstraint constraint = new TrajectoryOuterSequenceConstraint();
+                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable();
                         VariableSerializable[] vars = ds.getVariablesSerializable();
                         variables = new Vector<VariableSerializable>();
                         if (xVarID == null) {
@@ -877,7 +877,6 @@ public class UI extends BaseUI {
                     if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
                         xTrajectoryConstraint.setActive(true);
                         xLeftPanel.add(xTrajectoryConstraint);
-                        xTrajectoryConstraint.init(xNewVariable.getDSID());
                     }
                 } else {
                     xOperationID = "Insitu_extract_location_value_plot";
@@ -889,6 +888,10 @@ public class UI extends BaseUI {
                 xTrajectoryConstraint.setActive(false);
                 xLeftPanel.remove(xTrajectoryConstraint);
             }
+        }
+        // Regardless, if it's a trajectory we need to change the widget values.
+        if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
+            xTrajectoryConstraint.init(xNewVariable.getDSID());
         }
         if (xView == null || xView.equals("")) {
             xView = "xy";
