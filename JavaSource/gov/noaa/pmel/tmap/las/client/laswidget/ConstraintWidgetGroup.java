@@ -59,7 +59,7 @@ public class ConstraintWidgetGroup extends Composite {
     List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
 
     public ConstraintWidgetGroup() {
-        mainPanel.add(new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied."));
+        
         constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
             @Override
@@ -94,16 +94,19 @@ public class ConstraintWidgetGroup extends Composite {
             }
             
         });
-        scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
-        scrollPanel.add(displayPanel);
-        displayPanel.addStyleDependentName("BORDER-TOP");
-        displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
-        mainPanel.add(scrollPanel);
+       
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
         interiorPanel.add(constraintPanel);
         interiorPanel.add(refMap);
         interiorPanel.add(dateTimeWidget);
         mainPanel.add(interiorPanel);
+        scrollPanel.addStyleName("allBorder");
+        scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
+        scrollPanel.add(displayPanel);
+        displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
+        mainPanel.add(new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied."));
+        mainPanel.add(scrollPanel);
+        
         eventBus.addHandler(MapChangeEvent.TYPE, new MapChangeEvent.Handler() {
 
             @Override
