@@ -901,7 +901,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     }
     @Override
     public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws RPCException {
-        return getERDDAPConstraintGroups(dsid);
+        LASConfig lasConfig = getLASConfig();
+        try {
+            return lasConfig.getERDDAPConstraintGroups(dsid);
+        } catch (JDOMException e) {
+           throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        }
     }
    
 }
