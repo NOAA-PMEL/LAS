@@ -43,23 +43,18 @@ public class ConstraintWidgetGroup extends Composite {
     ScrollPanel scrollPanel = new ScrollPanel();
     FlowPanel displayPanel = new FlowPanel();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
-    
-
-    OLMapWidget refMap = new OLMapWidget();
-    DateTimeWidget dateTimeWidget = new DateTimeWidget();
-
 
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
 
     // The selection state
     List<ConstraintTextAnchor> selectionState = new ArrayList<ConstraintTextAnchor>();
-    
+
     // The subset state
     List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
 
     public ConstraintWidgetGroup() {
-        
+
         constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
             @Override
@@ -90,15 +85,13 @@ public class ConstraintWidgetGroup extends Composite {
                         displayPanel.add(anchor);
                     }
                 }
-                
+
             }
-            
+
         });
-       
+
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
         interiorPanel.add(constraintPanel);
-        interiorPanel.add(refMap);
-        interiorPanel.add(dateTimeWidget);
         mainPanel.add(interiorPanel);
         scrollPanel.addStyleName("allBorder");
         scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
@@ -106,34 +99,7 @@ public class ConstraintWidgetGroup extends Composite {
         displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
         mainPanel.add(new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied."));
         mainPanel.add(scrollPanel);
-        
-        eventBus.addHandler(MapChangeEvent.TYPE, new MapChangeEvent.Handler() {
 
-            @Override
-            public void onMapSelectionChange(MapChangeEvent event) {
-
-                refMap.setCurrentSelection(event.getYlo(), event.getYhi(), event.getXlo(), event.getXhi());
-
-            }
-        });
-        eventBus.addHandler(GridChangeEvent.TYPE, new GridChangeEvent.Handler() {
-
-            @Override
-            public void onGridChange(GridChangeEvent event) {
-                GridSerializable grid = event.getGrid();
-                if ( grid.hasT() ) {
-                    dateTimeWidget.init(grid.getTAxis(), true);
-                }
-                if ( grid.hasX() && grid.hasY() ) {
-                    String xlo = grid.getXAxis().getLo();
-                    String xhi = grid.getXAxis().getHi();
-                    String ylo = grid.getYAxis().getLo();
-                    String yhi = grid.getYAxis().getHi();
-                    refMap.setDataExtent(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
-                    refMap.setTool("xy");
-                }
-            }
-        });
         initWidget(mainPanel);
     }
 
@@ -144,23 +110,16 @@ public class ConstraintWidgetGroup extends Composite {
 
         @Override
         public void onFailure(Throwable caught) {
-           Window.alert("Unable to initialize the constraints panel.");
+            Window.alert("Unable to initialize the constraints panel.");
         }
 
         @Override
         public void onSuccess(List<ERDDAPConstraintGroup> constraintGroups) {
-            init(constraintGroups, false, false);
+            init(constraintGroups);
         }
     };
-    public void init(List<ERDDAPConstraintGroup> constraintGroups, boolean map, boolean dateTime) {
-        
-        if ( !map ) {
-            interiorPanel.remove(refMap);
-        }
-        if ( !dateTime ) {
-            interiorPanel.remove(dateTimeWidget);
-        }
-        
+    public void init(List<ERDDAPConstraintGroup> constraintGroups) {
+
         constraintPanel.clear();
 
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
@@ -239,29 +198,34 @@ public class ConstraintWidgetGroup extends Composite {
         }
         return false;
     }
-
-    public String getXlo() {
-        return String.valueOf(refMap.getXlo());
-    }
-    public String getXhi() {
-        return String.valueOf(refMap.getXhi());
-    }
-    public String getYlo() {
-        return String.valueOf(refMap.getYlo());
-    }
-    public String getYhi() {
-        return String.valueOf(refMap.getYhi());
-    }
-    public String getTlo() {
-        return dateTimeWidget.getFerretDateLo();
-    }
-    public String getThi() {
-        return dateTimeWidget.getFerretDateHi();
-    }
     public void setActive(boolean active) {
         this.active = active;
     }
     public boolean isActive() {
         return active;
+    }
+
+    public void setSelectedPanelIndex(int panelIndex) {
+        constraintPanel.showWidget(panelIndex);
+    }
+    
+    public List<ConstraintTextAnchor> getAnchors() {
+        List<ConstraintTextAnchor> anchors = new ArrayList<ConstraintTextAnchor>();
+        for (int i=0; i < displayPanel.getWidgetCount(); i++ ) {
+            ConstraintTextAnchor cta = (ConstraintTextAnchor) displayPanel.getWidget(i);
+            anchors.add(cta);
+        }
+        return anchors;
+    }
+
+    public void setConstraints(List<ConstraintTextAnchor> cons) {
+        for (Iterator conIt = cons.iterator(); conIt.hasNext();) {
+            ConstraintTextAnchor cta = (ConstraintTextAnchor) conIt.next();
+            displayPanel.add(cta);
+        }
+    }
+
+    public int getConstraintPanelIndex() {
+       return constraintPanel.getVisibleIndex();
     }
 }
