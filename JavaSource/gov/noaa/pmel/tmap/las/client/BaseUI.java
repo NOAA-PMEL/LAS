@@ -156,7 +156,7 @@ public class BaseUI {
      */
     String[] xCatIDs;
     String xContainerType = Constants.FRAME;
-    int xControlsWidth = 280;
+    int xControlsWidth = (int) Constants.CONTROLS_WIDTH;
 
     String xControlsWidthPx = xControlsWidth + "px";
 
