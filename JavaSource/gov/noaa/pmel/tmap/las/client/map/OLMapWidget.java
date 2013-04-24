@@ -628,8 +628,7 @@ public class OLMapWidget extends Composite {
 		return map;
 	}
 
-	public void setTileServer(String name, String url, String format,
-			String layers) {
+	public void setTileServer(String name, String url, String format, String layers) {
 		if (wmsLayer != null) {
 			map.removeLayer(wmsLayer);
 		}
