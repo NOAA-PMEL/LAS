@@ -13,6 +13,7 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
@@ -45,6 +46,7 @@ public class Util {
 		return ortho;
 	}
 	public static HashMap<String, String> getTokenMap(String token) {
+	    token = URL.decode(token);
 		String[] tokens = token.split(";");
 		HashMap<String, String> tokenMap = new HashMap<String, String>();
 		for( int i=0; i < tokens.length; i++ ) {

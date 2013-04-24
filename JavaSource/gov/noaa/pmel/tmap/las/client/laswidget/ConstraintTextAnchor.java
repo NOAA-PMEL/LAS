@@ -36,6 +36,10 @@ public class ConstraintTextAnchor extends Composite {
         this.key = key;
         this.keyValue = keyValue;
         this.op = op;
+        init();
+    }
+
+    private void init() {
         final String anchor_text;
         if ( variable.equals(key) ) {
             anchor_text = "(x) "+variable+" = "+value;
@@ -56,6 +60,40 @@ public class ConstraintTextAnchor extends Composite {
         });
         p.add(a);
         initWidget(p);
+    }
+    public ConstraintTextAnchor(String con) {
+        /* 
+         * This is a string that looks like variable_cr_op_value_cr_key_cr_keyValue
+         * These are stuffed into this form so they can go on the token map for the history.
+         * This code unpacks the string and fixed up the thing.
+         */
+        String[] parts = con.split("_cr_");
+        this.variable = parts[0];
+        this.value = parts[1];
+        this.op = parts[2];
+        this.key = parts[3];
+        this.keyValue = parts[4];
+        init();
+    }
+
+
+    public String getVariable() {
+        return variable;
+    }
+
+
+    public void setVariable(String variable) {
+        this.variable = variable;
+    }
+
+
+    public String getValue() {
+        return value;
+    }
+
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
 

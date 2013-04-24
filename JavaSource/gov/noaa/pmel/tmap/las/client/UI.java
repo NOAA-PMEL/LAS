@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
@@ -32,7 +33,9 @@ import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
@@ -518,6 +521,10 @@ public class UI extends BaseUI {
 
             GridSerializable grid = config.getGrid();
             RegionSerializable[] regions = config.getRegions();
+            List<ERDDAPConstraintGroup> constraintGroups = config.getConstraintGroups();
+            if ( constraintGroups != null && constraintGroups.size() > 0 ) {
+                xTrajectoryConstraint.init(constraintGroups);
+            }
             xAxesWidget.getRefMap().setRegions(regions);
             ops = config.getOperations();
             xVariable.setGrid(grid);
@@ -525,13 +532,25 @@ public class UI extends BaseUI {
             // if (xPanels == null || xPanels.size() == 0) {
             // UI.super.setupOutputPanels(1, Constants.IMAGE);
             // }
+
+
             setupForNewGrid(grid);
             setupPanelsAndRefreshNOforceLASRequest(false);
             if (initialHistory != null && !initialHistory.equals("")) {
                 logger.setLevel(Level.ALL);
                 logger.info("getGridCallback.onSuccess(ConfigSerializable config) calling popHistory(false, initialHistory)");
                 logger.setLevel(Level.OFF);
+                if (initialHistory != null ) {
+                    String[] settings = initialHistory.split("token");
+                    HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+                    setConstraintsFromHistory(tokenMap); 
+                }
                 popHistory(false, initialHistory);
+                /*
+                 * If this is from an initialHistory URL with constraints, first set up the panel, then set them from the token map.
+                 */
+               
+
             }
         }
 
@@ -866,7 +885,7 @@ public class UI extends BaseUI {
             if (xNewVariable.getAttributes().get("grid_type").equals("regular")) {
                 xOperationID = "Plot_2D_XY_zoom";
                 xTrajectoryConstraint.setActive(false);
-                xLeftPanel.remove(xTrajectoryConstraint);
+                xTrajectoryConstraint.setVisible(false);
             } else if (xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
                 xTrajectoryConstraint.setActive(false);
@@ -876,17 +895,17 @@ public class UI extends BaseUI {
                     xOperationID = "Trajectory Plot";
                     if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
                         xTrajectoryConstraint.setActive(true);
-                        xLeftPanel.add(xTrajectoryConstraint);
+                        xTrajectoryConstraint.setVisible(true);
                     }
                 } else {
                     xOperationID = "Insitu_extract_location_value_plot";
                     xTrajectoryConstraint.setActive(false);
-                    xLeftPanel.remove(xTrajectoryConstraint);
+                    xLeftPanel.setVisible(false);
                 }
             } else {
                 xOperationID = "Insitu_extract_location_value_plot";
                 xTrajectoryConstraint.setActive(false);
-                xLeftPanel.remove(xTrajectoryConstraint);
+                xLeftPanel.setVisible(false);
             }
         }
         // Regardless, if it's a trajectory we need to change the widget values.
@@ -942,8 +961,10 @@ public class UI extends BaseUI {
                 panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
             }
         }
-        
-        refresh(false, true, false);
+        // Not quite ready yet, because the initalHistory has not yet been applied.
+        if ( initialHistory == null ) {
+            refresh(false, true, false);
+        }
     }
 
     /**
@@ -1106,6 +1127,9 @@ public class UI extends BaseUI {
                 }
             }
         });
+        
+        xLeftPanel.add(xTrajectoryConstraint);
+
         xDisplayControls.setWidget(1, 0, compareMenu);
 
         // RootPanel.get("vizGal").add(xButtonLayout);
@@ -1240,6 +1264,46 @@ public class UI extends BaseUI {
         History.addValueChangeHandler(historyHandler);
     }
 
+    private void setConstraintsFromHistory(HashMap<String, String> tokenMap) {
+        
+        /*
+         * This history event uses the same data set and variable as the
+         * current state, so we can just set apply the gallery settings.
+         */
+        /*
+         * This section is for keeping track of the constraint panel contents.
+         * 
+         * Seems like a hack, but hey it's what we got to work with.
+         * 
+         * The constraintPanelIndex is the stack panel index of the active constraint.
+         * 
+         * The constraintCount is the number of constraints active.
+         * 
+         * Then there are "constraintCount" strings of the form VARIABLE_cr_VALUE_cr_KEY_cr_KEYVALUE with parameter name constraintN.
+         */
+         
+         String cCount = tokenMap.get("constraintCount");
+         List<ConstraintTextAnchor> cons = new ArrayList<ConstraintTextAnchor>();
+         if ( cCount != null ) {
+             xTrajectoryConstraint.setActive(true);
+             xTrajectoryConstraint.setVisible(true);
+             int c = Integer.valueOf(cCount);
+             for (int i = 0; i < c; i++) {
+                 String con = tokenMap.get("constraint"+i);
+                 ConstraintTextAnchor constraintSer = new ConstraintTextAnchor(con);
+                 cons.add(constraintSer);
+             }
+             String indx = tokenMap.get("constraintPanelIndex");
+             int panelIndex = Integer.valueOf(indx);
+             xTrajectoryConstraint.setSelectedPanelIndex(panelIndex);
+             xTrajectoryConstraint.setConstraints(cons);
+         } else {
+             xTrajectoryConstraint.setActive(false);
+             xTrajectoryConstraint.setVisible(false);
+         }
+         
+    }
+
     /**
      * This has to do with history tokens that apply to the axes controls and
      * navigation in the main panel which are in a separate widget (the l from
@@ -1264,8 +1328,7 @@ public class UI extends BaseUI {
             xAxesWidget.getRefMap().setTool(xView);
         }
         // s, n, w, e
-        xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")), Double.valueOf(tokenMap.get("yhi")), Double.valueOf(tokenMap.get("xlo")),
-                Double.valueOf(tokenMap.get("xhi")));
+        xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")), Double.valueOf(tokenMap.get("yhi")), Double.valueOf(tokenMap.get("xlo")), Double.valueOf(tokenMap.get("xhi")));
 
         if (xVariable.getGrid().hasT()) {
             if (xView.contains("t") || (xAnalysisWidget.isActive() && xAnalysisWidget.getAnalysisAxis().contains("t"))) {
@@ -1413,6 +1476,9 @@ public class UI extends BaseUI {
      */
     private void applyTokens(String[] settings) {
         HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+        
+       
+        
         String atype = tokenMap.get("compute");
         String aover = tokenMap.get("over");
         if (atype != null) {
@@ -1554,6 +1620,24 @@ public class UI extends BaseUI {
         historyToken.append(";imageSize=" + xImageSize.getValue(xImageSize.getSelectedIndex()));
         historyToken.append(";over=" + xAnalysisWidget.getAnalysisAxis());
         historyToken.append(";compute=" + xAnalysisWidget.getAnalysisType());
+        
+        // Right now the constraints are in the gallery. That's gonna change, but...
+        
+        if ( xTrajectoryConstraint.isActive() ) {
+            List<ConstraintTextAnchor> constraints = xTrajectoryConstraint.getAnchors();
+            if ( constraints.size() > 0 ) {
+                historyToken.append(";constraintCount="+constraints.size());
+            }
+            int index = 0;
+            for (Iterator iterator = constraints.iterator(); iterator.hasNext();) {
+                ConstraintTextAnchor cta = (ConstraintTextAnchor) iterator.next();
+                historyToken.append(";constraint"+index+"="+cta.getVariable()+"_cr_"+cta.getValue()+"_cr_"+cta.getOp()+"_cr_"+cta.getKey()+"_cr_"+cta.getKeyValue());
+                index++;
+            }
+            int panelIndex = xTrajectoryConstraint.getConstraintPanelIndex();
+            historyToken.append(";constraintPanelIndex="+panelIndex);
+        }
+        
         return historyToken.toString();
     }
 
@@ -1620,12 +1704,8 @@ public class UI extends BaseUI {
             }
 
             HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
-
-            /*
-             * This history event uses the same data set and variable as the
-             * current state, so we can just set apply the gallery settings.
-             */
-
+            
+           
             if ((tokenMap.containsKey("xDSID") && tokenMap.get("xDSID").equals(xVariable.getDSID()))
                     && (tokenMap.containsKey("varid") && tokenMap.get("varid").equals(xVariable.getID()))) {
                 // We can do this only because we are reusing the current
