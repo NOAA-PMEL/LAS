@@ -63,7 +63,6 @@ Moved reference to the UI.gxt.xml file so it will take precedence over the GWT t
     <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
 -->
     <link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
-    <link rel="stylesheet" href="css/UX/metallic/metallicGrn.css" type="text/css"/>
   </head>
 
   <!--                                           -->
