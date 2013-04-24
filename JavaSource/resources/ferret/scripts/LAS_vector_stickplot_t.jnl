@@ -69,6 +69,7 @@ DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length)
 ! and to label the t axis.
 
 DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview2
 
 ! This viewport will contain the key with the standard arrow length.
 
@@ -85,18 +86,14 @@ PLOT/NOY/AX=0,1,0,0/L=`lle`/VLIM=100:200/TITLE=" "/NOLAB/NOLAB all_zero
 
 ! Define viewports for all the stacked plots.
 !
-! The rt_* viewports, one for each depth being plotted are used to plot the right-
-! hand axes giving the data range for each T level.
-
-! The lf_* viewports are the same size and shape. They will be used to plot the
-! left-hand axis with the corresponding depth
+! The viewports, one for each depth being plotted are used to plot the vector
+! stick lines, and giving the date range for each T.
 
 LET count = 0
 REPEAT/RANGE=`lls`:`lle`:`delta_t`/NAME=m (  \
    LET count = `count+1`;\
    IF `count GT ent` THEN EXIT/LOOP;  \
    DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` rt_`m`; \
-   DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` lf_`m`; \
    LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
 ! Put on the title. If the title was split into two lines, move it up a bit.
@@ -119,48 +116,49 @@ GO labels_above_plot
 
 ! Draw a plot for each series, labelling on the left with the depth.
 
-! Put most of the labels on , except for the title, depth, and yaxis label.
 
-SET VIEW lf_`lls`
+! Set up to draw a light-gray line at zero.
+LET zerovar = 0*($ferret_vector_1)
+LET zero = missing(zerovar,0)
+SET MODE linecolors:7
+ppl color,7,90,90,90
+
 PPL TICS,0,0,0,0
 PPL AXLSZE,0,0
-PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/L=`lls` ($ferret_vector_1)*0
-   PPL PLOT
-LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
-LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"
 PPL TICS,.125,.25,.125,.25
 PPL AXLINT,2,2
 PPL AXLSZE,0.1,0.1
 PPL AXATIC 5,5
 
+
 SET VIEW rt_`lls`
 CANCEL MODE logo
 ! Unlabel 1 removes the depth label...
-PLOT/NOY/L=`lls`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2)
+PLOT/NOY/L=`lls`/AXES=0,0,1,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2)
    GO unlabel 1
-   PPL yaxis ($yaxis_setting)
-   PPL tics,0,0,0,0; PPL AXLSZE,0,0
+   PPL tics,0,0,0,0
+   PPL AXLSZE,0,0
    PPL ylab " "
 PPL PLOTUV 0 1
+LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
+LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"
+PLOT/OVER/NOLAB/COLOR=7/L=1/K=1 zero
 
 LET count = 1
 REPEAT/RANGE=`lls+delta_t`:`lle`:`delta_t`/NAME=m (  \
    LET count = `count+1`;\
    IF `count GT ent` THEN EXIT/LOOP;  \
-   SET VIEW lf_`m`; \
-   PPL TICS,0,0,0,0; PPL AXLSZE,0,0; \
-     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/l=`lls` ($ferret_vector_1)*0; \
-     PPL PLOT; \
-   LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
-   LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"; \
+   PPL TICS,0,0,0,0; \
    PPL TICS,.125,.25,.125,.25; \ 
    PPL AXLINT,2,2; \
    PPL AXLSZE,0.1,0.1; \
    PPL AXATIC 5,5;\
-   ; \
    SET VIEW rt_`m`; \
-   PLOT/NOY/L=`M`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2); \
-     PPL YAXIS ($yaxis_setting);  PPL TICS,0,0,0,0; PPL AXLSZE,0,0; PPL PLOTUV 0 1) 
+   PLOT/NOY/L=`M`/AXES=0,0,1,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2); \
+     PPL YAXIS ($yaxis_setting);  PPL TICS,0,0,0,0; PPL AXLSZE,0,0; PPL PLOTUV 0 1; \
+   LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
+   LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.10, "`tlab`"; \
+   plot/over/nolab/color=7/L=1/k=1 zero) 
 
 ! Make a key: a stick of the length of half the vertical axis; labeled with
 ! the length of the corresponding vector.
@@ -185,7 +183,7 @@ DEF SYM unlab ($data_0_units)
 LABEL `xpos`, `ypos-1.4*keysize`, 0, 0, `keysize`,  "`sticklen` @AC($unlab)"
 
 ! Make the big plot again to set the correct symbols for the RESULT.
-SET VIEW bigview
+SET VIEW bigview2
 CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
 LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*($ferret_vector_1)
 SHADE/NOLAB/NOAX all_bad 
