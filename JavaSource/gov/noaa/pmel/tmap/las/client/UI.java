@@ -1397,6 +1397,14 @@ public class UI extends BaseUI {
 
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+            xTrajectoryConstraint.setActive(true);
+            xTrajectoryConstraint.setVisible(true);
+            xTrajectoryConstraint.init(xVariable.getDSID());
+        } else {
+            xTrajectoryConstraint.setActive(false);
+            xTrajectoryConstraint.setVisible(false);
+        }
         if (xOrtho.size() == 0) {
             return false;
         } else {

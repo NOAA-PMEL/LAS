@@ -43,7 +43,8 @@ public class ConstraintWidgetGroup extends Composite {
     ScrollPanel scrollPanel = new ScrollPanel();
     FlowPanel displayPanel = new FlowPanel();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
-
+    Label topLabel = new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied.");
+    Label constraintLabel = new Label("Active constraints:");
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
 
@@ -54,7 +55,7 @@ public class ConstraintWidgetGroup extends Composite {
     List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
 
     public ConstraintWidgetGroup() {
-
+        constraintPanel.addStyleDependentName("SMALLER");
         constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
             @Override
@@ -91,15 +92,15 @@ public class ConstraintWidgetGroup extends Composite {
         });
 
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
+        mainPanel.add(topLabel);
         interiorPanel.add(constraintPanel);
         mainPanel.add(interiorPanel);
         scrollPanel.addStyleName("allBorder");
         scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
         scrollPanel.add(displayPanel);
         displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
-        mainPanel.add(new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied."));
+        mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
-
         initWidget(mainPanel);
     }
 
@@ -227,5 +228,10 @@ public class ConstraintWidgetGroup extends Composite {
 
     public int getConstraintPanelIndex() {
        return constraintPanel.getVisibleIndex();
+    }
+
+    public void clearConstraints() {
+       displayPanel.clear();
+        
     }
 }

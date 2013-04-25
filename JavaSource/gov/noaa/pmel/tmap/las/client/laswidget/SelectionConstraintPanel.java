@@ -76,7 +76,7 @@ public class SelectionConstraintPanel extends Composite {
     
     
     public SelectionConstraintPanel(ERDDAPConstraintGroup constraintGroup) {
-        valuesList.setVisibleItemCount(10);
+        valuesList.setVisibleItemCount(11);
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -116,7 +116,7 @@ public class SelectionConstraintPanel extends Composite {
         valuesList.addItem(Constants.APPEAR);
         
         mainPanel.add(variablesRadioGroup);
-        valuesList.setWidth(Constants.CONTROLS_WIDTH-10+"px");
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-6+"px");
         valuesList.addStyleDependentName("PADDING");
         mainPanel.add(valuesList);
         initWidget(mainPanel);

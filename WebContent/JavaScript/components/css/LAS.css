@@ -19,6 +19,9 @@
 	margin: 1px;
 	padding: 1px;
 }
+.gwt-StackPanel-SMALLER {
+	font-size: .8em;
+}
 /*
 .gwt-Anchor-CONSTRAINT:link    {color:#900B09; background-color:transparent}
 .gwt-Anchor-CONSTRAINT:visited {color:#900B09; background-color:transparent}
