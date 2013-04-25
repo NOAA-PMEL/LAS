@@ -46,7 +46,7 @@ public class SubsetConstraintPanel extends Composite {
         
         this.constraintGroup = constraintGroup;
         valuesList.setVisibleItemCount(10);
-        valuesList.setWidth(Constants.CONTROLS_WIDTH-12+"px");
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-6+"px");
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
