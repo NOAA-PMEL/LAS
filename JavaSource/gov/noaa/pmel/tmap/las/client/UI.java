@@ -910,6 +910,7 @@ public class UI extends BaseUI {
         }
         // Regardless, if it's a trajectory we need to change the widget values.
         if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
+            xTrajectoryConstraint.clearConstraints();
             xTrajectoryConstraint.init(xNewVariable.getDSID());
         }
         if (xView == null || xView.equals("")) {
