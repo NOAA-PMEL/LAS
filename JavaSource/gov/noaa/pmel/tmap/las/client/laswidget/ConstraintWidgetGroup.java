@@ -44,7 +44,7 @@ public class ConstraintWidgetGroup extends Composite {
     FlowPanel displayPanel = new FlowPanel();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
     Label topLabel = new Label("Constrain the data displayed on the plot.");
-    Label constraintLabel = new Label("Active constraints:");
+    Label constraintLabel = new Label("My selections:");
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
 

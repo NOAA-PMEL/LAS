@@ -886,16 +886,21 @@ public class UI extends BaseUI {
                 xOperationID = "Plot_2D_XY_zoom";
                 xTrajectoryConstraint.setActive(false);
                 xTrajectoryConstraint.setVisible(false);
+                getComparePanel().getOutputControlPanel().setVisible(true);
+                xAnalysisWidget.setVisible(true);
             } else if (xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
                 xTrajectoryConstraint.setActive(false);
-                xLeftPanel.remove(xTrajectoryConstraint);
+                xTrajectoryConstraint.setVisible(false);
+                getComparePanel().getOutputControlPanel().setVisible(true);
+                xAnalysisWidget.setVisible(true);
             } else if (xNewVariable.isDescrete()) {
                 if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
                     xOperationID = "Trajectory Plot";
                     if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
                         xTrajectoryConstraint.setActive(true);
                         xTrajectoryConstraint.setVisible(true);
+                        xAnalysisWidget.setVisible(false);
                     }
                 } else {
                     xOperationID = "Insitu_extract_location_value_plot";
@@ -912,6 +917,10 @@ public class UI extends BaseUI {
         if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
             xTrajectoryConstraint.clearConstraints();
             xTrajectoryConstraint.init(xNewVariable.getDSID());
+            getComparePanel().getOutputControlPanel().setVisible(false);
+        } else {
+            getComparePanel().getOutputControlPanel().setVisible(true);
+            xAnalysisWidget.setVisible(true);
         }
         if (xView == null || xView.equals("")) {
             xView = "xy";
@@ -1288,6 +1297,7 @@ public class UI extends BaseUI {
          if ( cCount != null ) {
              xTrajectoryConstraint.setActive(true);
              xTrajectoryConstraint.setVisible(true);
+             xAnalysisWidget.setVisible(false);
              int c = Integer.valueOf(cCount);
              for (int i = 0; i < c; i++) {
                  String con = tokenMap.get("constraint"+i);
@@ -1301,6 +1311,8 @@ public class UI extends BaseUI {
          } else {
              xTrajectoryConstraint.setActive(false);
              xTrajectoryConstraint.setVisible(false);
+             getComparePanel().getOutputControlPanel().setVisible(true);
+             xAnalysisWidget.setVisible(true);
          }
          
     }
@@ -1400,12 +1412,18 @@ public class UI extends BaseUI {
         if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
+            xAnalysisWidget.setVisible(false);
             xTrajectoryConstraint.init(xVariable.getDSID());
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);
+            getComparePanel().getOutputControlPanel().setVisible(true);
+            xAnalysisWidget.setVisible(true);
         }
         if (xOrtho.size() == 0) {
+
+            xAxesWidget.init(xVariable.getGrid());
+            xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
             return false;
         } else {
 
@@ -2074,6 +2092,11 @@ public class UI extends BaseUI {
         setUpdateRequired(true);
         xVariable.setGrid(grid);
         xAnalysisWidget.setAnalysisAxes(grid);
+        if ( xVariable.isDescrete() ) {
+            xAnalysisWidget.setVisible(false);
+        } else {
+            xAnalysisWidget.setVisible(true);
+        }
         xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
         xOperationID = xOperationsWidget.getCurrentOperation().getID();
         xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
@@ -2105,7 +2128,11 @@ public class UI extends BaseUI {
      * Only sets up the main (upper-left) OutputPanel and does NOT refresh.
      */
     private void setupMainPanel() {
-        xAnalysisWidget.setVisible(true);
+        if ( xTrajectoryConstraint.isActive() ) {
+            xAnalysisWidget.setVisible(false);
+        } else {
+            xAxesWidget.setVisible(true);
+        }
         autoContourButton.setDown(false);
         autoContourTextBox.setText("");
         int buttonIndex = getButtonIndex();
@@ -2119,7 +2146,11 @@ public class UI extends BaseUI {
      * @param resetOnlyNewPanels
      */
     private void setupMainPanelAndRefreshForceLASRequest(boolean resetOnlyNewPanels) {
-        xAnalysisWidget.setVisible(true);
+        if ( xTrajectoryConstraint.isActive() ) {
+            xAnalysisWidget.setVisible(false);
+        } else {
+            xAnalysisWidget.setVisible(true);
+        }
         autoContourButton.setDown(false);
         autoContourTextBox.setText("");
         setupPanelsAndRefresh(resetOnlyNewPanels, true);

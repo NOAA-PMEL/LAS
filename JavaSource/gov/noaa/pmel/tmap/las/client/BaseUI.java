@@ -135,7 +135,11 @@ public class BaseUI {
 
             xAxesWidget.restorePanels();
             xOperationsWidget.setOpen(true);
-            xAnalysisWidget.setVisible(true);
+            if ( xVariable.isDescrete() ) {
+                xAnalysisWidget.setVisible(false);
+            } else {
+                xAnalysisWidget.setVisible(true);
+            }
         }
 
     };
@@ -692,13 +696,15 @@ public class BaseUI {
                     xDatasetButton.setName(title);
                 }
 
-                // DEBUG - pretending there is never single panel mode so the
-                // ortho axes always show up.
+                // Put all the controls on the left when the thing only has one panel.
+//                boolean singlePanel = true;
+//                if ( numPanels > 1 ) {
+//                    singlePanel = false;
+//                }
+                
+                // We cannot be in single panel mode for XY views because we'll miss out the ortho axes widgets.
                 boolean singlePanel = false;
-                // boolean singlePanel = true;
-                // if ( numPanels > 1 ) {
-                // singlePanel = false;
-                // }
+
 
                 OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer, annotationsControl.isDown());
 

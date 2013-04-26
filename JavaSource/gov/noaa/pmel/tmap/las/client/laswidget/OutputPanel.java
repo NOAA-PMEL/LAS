@@ -1120,7 +1120,9 @@ public class OutputPanel extends Composite implements HasName {
         lasAnnotationsPanel.setVisible(annotationsShowing);
         grid.setWidget(0, 0, lasAnnotationsPanel);
         grid.setWidget(1, 0, plot);
-        grid.setWidget(3, 0, outputControlPanel);
+        if ( !singlePanel ) {
+            grid.setWidget(3, 0, outputControlPanel);
+        }
         initWidget(grid);
         logger.info("OutputPanel constructor exiting with id:" + id);
     }
