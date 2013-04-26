@@ -168,7 +168,7 @@ public class OperationsWidget extends Composite {
                         // op.getID().equals("Plot_2D_XY")) {
                         if ( attrs != null && attrs.get("default") != null && Boolean.valueOf(attrs.get("default")) ) {
 
-                            if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y")) ) {
+                            if ( (view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) || op.getID().contains("Trajectory_interactive_plot") ) {
                                 if ( !hasXYMap ) {
                                     xyMapTable.clear();
                                     hasXYMap = true;
