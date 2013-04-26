@@ -184,4 +184,8 @@ public class AnalysisWidget extends Composite {
         }
         analysisAxis.setSelectedIndex(index);
     }
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+    }
 }

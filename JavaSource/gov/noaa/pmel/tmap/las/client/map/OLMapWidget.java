@@ -673,7 +673,7 @@ public class OLMapWidget extends Composite {
 		editing = false;
 		setSelection(currentSelection);
 		// Add the geometry back on to the map if the tools is not a rectangle.
-		if (!tool.equals("xy")) {
+		if (!tool.contains("xy")) {
 			trimSelection(currentSelection);
 		}
 	}
@@ -811,7 +811,7 @@ public class OLMapWidget extends Composite {
 
 	private void setSelection(Bounds bounds) {
 		currentSelection = bounds;
-		if (tool.equals("xy")) {
+		if (tool.contains("xy")) {
 			textWidget.setText(currentSelection.getUpperRightY(),
 					currentSelection.getLowerLeftY(),
 					currentSelection.getUpperRightX(),
@@ -875,7 +875,7 @@ public class OLMapWidget extends Composite {
 
 		}
 		LonLat center = selectionBounds.getCenterLonLat();
-		if (tool.equals("xy")) {
+		if (tool.contains("xy")) {
 			// Use it.
 			boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 			setSelection(selectionBounds);
@@ -1134,7 +1134,7 @@ public class OLMapWidget extends Composite {
 			drawXPoint.deactivate();
 			drawYLine.deactivate();
 			drawYPoint.deactivate();
-			if (tool.equals("xy")) {
+			if (tool.contains("xy")) {
 				if (boxLayer.getFeatures() == null) {
 					Window.alert("Make a selection on the map then select this button, to edit it.");
 					panButton.setDown(true);
@@ -1197,7 +1197,7 @@ public class OLMapWidget extends Composite {
 			panButton.setDown(false);
 			editButton.setDown(false);
 			drawButton.setDown(true);
-			if (tool.equals("xy")) {
+			if (tool.contains("xy")) {
 
 				drawRectangle.activate();
 				drawXLine.deactivate();
