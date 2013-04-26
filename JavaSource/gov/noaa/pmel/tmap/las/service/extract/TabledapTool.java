@@ -290,13 +290,13 @@ public class TabledapTool extends TemplateTool {
             if ( part1.exists() && part1.length() > 0 ) {
                 dt = new DateTime();
                 log.info("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
-                Table table1 = new Table();
-                Table table2 = new Table();
-                table1.readNcCF(part1.getAbsolutePath(), null, null, null, null);
-                table2.readNcCF(part2.getAbsolutePath(), null, null, null, null);
-                table1.append(table2);
-                // How to derive the name "obs" from the files already written?
-                table1.saveAs4DNc(netcdfFilename, table1.findColumnNumber(lonname), table1.findColumnNumber(latname), table1.findColumnNumber(zname), table1.findColumnNumber(time));
+//                Table table1 = new Table();
+//                Table table2 = new Table();
+//                table1.readNcCF(part1.getAbsolutePath(), null, null, null, null);
+//                table2.readNcCF(part2.getAbsolutePath(), null, null, null, null);
+//                table1.append(table2);
+//                // How to derive the name "obs" from the files already written?
+//                table1.saveAs4DNc(netcdfFilename, table1.findColumnNumber(lonname), table1.findColumnNumber(latname), table1.findColumnNumber(zname), table1.findColumnNumber(time));
             } else {
                 part2.renameTo(new File(netcdfFilename));
             }
