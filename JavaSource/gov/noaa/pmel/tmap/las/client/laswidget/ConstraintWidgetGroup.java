@@ -55,7 +55,6 @@ public class ConstraintWidgetGroup extends Composite {
     List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
 
     public ConstraintWidgetGroup() {
-        constraintPanel.addStyleDependentName("SMALLER");
         constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 
             @Override
