@@ -43,52 +43,56 @@ public class ConstraintWidgetGroup extends Composite {
     ScrollPanel scrollPanel = new ScrollPanel();
     FlowPanel displayPanel = new FlowPanel();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
-    Label topLabel = new Label("Constrain the data displayed on the plot.  Only the constraints from the active tab will be applied.");
+    Label topLabel = new Label("Constrain the data displayed on the plot.");
     Label constraintLabel = new Label("Active constraints:");
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
 
     // The selection state
-    List<ConstraintTextAnchor> selectionState = new ArrayList<ConstraintTextAnchor>();
+    // List<ConstraintTextAnchor> selectionState = new ArrayList<ConstraintTextAnchor>();
 
     // The subset state
-    List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
+    // List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
 
     public ConstraintWidgetGroup() {
-        constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-
-            @Override
-            public void onSelection(SelectionEvent<Integer> event) {
-                int tab = event.getSelectedItem();
-                if ( tab == 0 ) {
-                    // Save the selection state...
-                    selectionState.clear();
-                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-                        selectionState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
-                    }
-                    displayPanel.clear();
-                    // Restore the subset state
-                    for (Iterator subsetIt = subsetState.iterator(); subsetIt.hasNext();) {
-                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
-                        displayPanel.add(anchor);
-                    }
-                } else {
-                    // Do the opposite
-                    subsetState.clear();
-                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-                        subsetState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
-                    }
-                    displayPanel.clear();
-                    // Restore the Selection state
-                    for (Iterator subsetIt = selectionState.iterator(); subsetIt.hasNext();) {
-                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
-                        displayPanel.add(anchor);
-                    }
-                }
-
-            }
-
-        });
+        
+ /*
+  * for now no longer do anything when changing constraint type so that the constraints accumulate between panels.
+  */
+//        constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+//
+//            @Override
+//            public void onSelection(SelectionEvent<Integer> event) {
+//                int tab = event.getSelectedItem();
+//                if ( tab == 0 ) {
+//                    // Save the selection state...
+//                    selectionState.clear();
+//                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
+//                        selectionState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
+//                    }
+//                    displayPanel.clear();
+//                    // Restore the subset state
+//                    for (Iterator subsetIt = subsetState.iterator(); subsetIt.hasNext();) {
+//                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
+//                        displayPanel.add(anchor);
+//                    }
+//                } else {
+//                    // Do the opposite
+//                    subsetState.clear();
+//                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
+//                        subsetState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
+//                    }
+//                    displayPanel.clear();
+//                    // Restore the Selection state
+//                    for (Iterator subsetIt = selectionState.iterator(); subsetIt.hasNext();) {
+//                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
+//                        displayPanel.add(anchor);
+//                    }
+//                }
+//
+//            }
+//
+//        });
 
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
         mainPanel.add(topLabel);
