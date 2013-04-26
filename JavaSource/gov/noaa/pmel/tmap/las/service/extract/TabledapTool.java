@@ -3,6 +3,7 @@
  */
 package gov.noaa.pmel.tmap.las.service.extract;
 
+import gov.noaa.pfel.coastwatch.pointdata.Table;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
@@ -23,6 +24,9 @@ import org.jdom.Element;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
+import ucar.unidata.geoloc.LatLonPoint;
+import ucar.unidata.geoloc.LatLonPointImpl;
 
 import com.cohort.util.Calendar2;
 import com.cohort.util.MustBe;
@@ -133,6 +137,10 @@ public class TabledapTool extends TemplateTool {
             String time = getTabledapProperty(lasBackendRequest, "time");
             required(time, causeOfError);
             
+            String latname = getTabledapProperty(lasBackendRequest, "latitude");
+            String lonname = getTabledapProperty(lasBackendRequest, "longitude");
+            String zname = getTabledapProperty(lasBackendRequest, "altitude");
+
             //get id, e.g., pmel_dapper/tao   
             causeOfError = "Could not get id."; 
             String id = getTabledapProperty(lasBackendRequest, "id");
@@ -208,33 +216,45 @@ public class TabledapTool extends TemplateTool {
 //            Table data = new Table();
             DateTime dt = new DateTime();
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-            if (xlo.length() > 0 && xhi.length() > 0 && 
-                String2.parseDouble(xhi) < String2.parseDouble(xlo)) {
-                //split lon needs 2 queries; take care of >xlo
-                //look at diagram in class javadoc above to understand this
-                try {
-                    String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
-                    String firstUrl = dsUrl + q  + "&longitude>=" + xlo;
-                    dt = new DateTime();
-                    System.out.println("{TableDapTool starting file pull for part 1 at "+fmt.print(dt));
-                    lasProxy.executeGetMethodAndSaveResult(firstUrl, part1, null);
-                    dt = new DateTime();
-                    System.out.println("{TableDapTool finished file pull for part 1 at "+fmt.print(dt));
-                } catch (Exception e) {
-                    String message = e.getMessage();
-                    if ( e.getMessage().contains("com.cohort") ) {
-                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
-                        message = message.substring(0, message.indexOf(")"));
+            if (xlo.length() > 0 && xhi.length() > 0 ) {
+                
+                // This little exercise will normalize the x values to -180, 180.
+                double xhiDbl = String2.parseDouble(xhi);
+                double xloDbl = String2.parseDouble(xlo);
+                LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
+                xhiDbl = p.getLongitude();
+                p = new LatLonPointImpl(0, xloDbl);
+                xloDbl = p.getLongitude();
+                
+                // Now a wrap around from west to east should be have xhi < xlo;
+                if ( xhiDbl < xloDbl ) {
+                    //split lon needs 2 queries; take care of >xlo
+                    //look at diagram in class javadoc above to understand this
+                    try {
+                        query.append("&longitude>=" + xlo);
+                        String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
+                        String firstUrl = dsUrl + q;
+                        dt = new DateTime();
+                        log.info("{TableDapTool starting file pull for part 1 at "+fmt.print(dt));
+                        lasProxy.executeGetMethodAndSaveResult(firstUrl, part1, null);
+                        dt = new DateTime();
+                        log.info("{TableDapTool finished file pull for part 1 at "+fmt.print(dt));
+                    } catch (Exception e) {
+                        String message = e.getMessage();
+                        if ( e.getMessage().contains("com.cohort") ) {
+                            message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                            message = message.substring(0, message.indexOf(")"));
+                        }
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
                     }
-                    causeOfError = "Data source error: " + message;
-                    throw new Exception(message);
-                }
-                xlo = ""; //it has been taken care of
+                    xlo = ""; //it has been taken care of
 
-                //was the request canceled?
-                if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                    return lasBackendResponse;
-            }
+                    //was the request canceled?
+                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                        return lasBackendResponse;
+                }
+        }
 //            //do the main data query
 //            //xlo and/or xhi may be specified, but they aren't xhi<xlo
 //            Table tTable = data;
@@ -247,10 +267,10 @@ public class TabledapTool extends TemplateTool {
                 String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
                 String secondUrl = dsUrl + q;
                 dt = new DateTime();
-                System.out.println("{TableDapTool starting file pull for part 2 at "+fmt.print(dt));
+                log.info("{TableDapTool starting file pull for part 2 at "+fmt.print(dt));
                 lasProxy.executeGetMethodAndSaveResult(secondUrl, part2, null);
                 dt = new DateTime();
-                System.out.println("{TableDapTool finished file pull for part 2 at "+fmt.print(dt));
+                log.info("{TableDapTool finished file pull for part 2 at "+fmt.print(dt));
             } catch (Exception e) {
                 String message = e.getMessage();
                 if ( e.getMessage().contains("com.cohort") ) {
@@ -269,8 +289,14 @@ public class TabledapTool extends TemplateTool {
             // If there is only one file, rename it and get on your with life.
             if ( part1.exists() && part1.length() > 0 ) {
                 dt = new DateTime();
-                System.out.println("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
-                //TODO Combine the files.
+                log.info("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
+                Table table1 = new Table();
+                Table table2 = new Table();
+                table1.readNcCF(part1.getAbsolutePath(), null, null, null, null);
+                table2.readNcCF(part2.getAbsolutePath(), null, null, null, null);
+                table1.append(table2);
+                // How to derive the name "obs" from the files already written?
+                table1.saveAs4DNc(netcdfFilename, table1.findColumnNumber(lonname), table1.findColumnNumber(latname), table1.findColumnNumber(zname), table1.findColumnNumber(time));
             } else {
                 part2.renameTo(new File(netcdfFilename));
             }
