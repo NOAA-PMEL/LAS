@@ -1457,6 +1457,9 @@ public class ADDXMLProcessor {
 
                                         
                                         AxisBean tAxis = new AxisBean();
+                                        if ( timeUnits.contains("0000-") ) {
+                                            tAxis.setModulo(true);
+                                        }
                                         if ( calendar != null ) {
                                             tAxis.setCalendar(calendar);
                                         }
