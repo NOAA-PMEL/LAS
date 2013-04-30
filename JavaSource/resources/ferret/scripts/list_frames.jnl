@@ -16,6 +16,7 @@
 !           just t[gt=var] so that it isn't a huge variable to load in tax_datestring.
 ! 6/2010    ACM If its a vector plot, call LAS_auto_veclen_animate instead of 
 !           LAS_auto_levels_animate.
+! 4/2013    ACM Implement the Ferret property ferret_start_memory
 !
 ! list_frames.jnl creates a listing in XML format for animation
 ! Assumes symbol ferret_listing is the output file.
@@ -33,7 +34,7 @@ DEFINE SYMBOL its_autolev_animate = 1
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
-IF `($FERRET_MEMORY"25") LT 100` THEN SET MEM/SIZ=100
+IF `($FERRET_MEMORY"25.6") LT 100` THEN SET MEM/SIZ=100
 
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)

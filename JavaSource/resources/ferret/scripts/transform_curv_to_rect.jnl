@@ -2,6 +2,7 @@
 ! 
 ! ACM 10/2006
 !      4/2007 ACM Apply Ferret symbols for any expression that may have been defined
+!      4/2013 ACM Implement the Ferret property ferret_start_memory
 !
 set mode ver:always
 
@@ -126,10 +127,10 @@ IF ($ferret_curvi_coord_mapfcn"0|curv_to_rect_fsu>1|*>0") THEN
 ELSE 
    LET nmem = `nmem + 12*(mapimax-mapimin+1)*(mapjmax-mapjmin+1)`
 ENDIF
-set mem/siz=800
+IF `($ferret_memory"25.6") LT 500` THEN SET MEM/SIZ=500
 
 DEFINE SYMBOL error_string "error allocating enough memory for curvilinear gridding"
-DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
+DEFINE SYMBOL memsize = ($FERRET_MEMORY"25.6")* 1.e6
 IF `nmem GT ($memsize)` THEN SET MEM/SIZ=`nmem/1.e6`
 
 ! Check for errors 

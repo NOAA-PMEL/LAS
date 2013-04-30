@@ -3,6 +3,7 @@
 ! 
 ! Author: ansley 
 ! Date: 2011/05/16
+!      4/2013 ACM Implement the Ferret property ferret_start_memory
 !
 ! Called by list_csv_data.jnl 
 ! Write csv data: date/time, X, Y, Z, var1, var2, ...
@@ -118,7 +119,7 @@ LET max_size = ($MAX_LIST_SIZE"`use_size`")
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
 
 IF `size* nlist GT max_size` THEN
-   SET MEM/SIZ=300
+   IF `($ferret_memory"25.6") LT 300` THEN SET MEM/SIZ=300
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 

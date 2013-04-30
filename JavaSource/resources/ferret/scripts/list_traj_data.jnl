@@ -2,6 +2,7 @@
 ! list_traj_data.jnl
 ! Author: ansley 
 ! Date: Sep 19 2011
+!      4/2013 ACM Implement the Ferret property ferret_start_memory
 !
 !
 ! Called by Trajectory_Data_Convert_File.jnl 
@@ -50,7 +51,7 @@ LET max_size = ($MAX_LIST_SIZE"`use_size`")
 LET size = `longitude,RETURN=isize`
 
 IF `size* nlist GT max_size` THEN
-   SET MEM/SIZ=300
+   IF `($ferret_memory"25.6") LT 300` THEN SET MEM/SIZ=300
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
