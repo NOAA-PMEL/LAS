@@ -224,9 +224,11 @@ public class UserListBox extends Composite {
         allVariables = variableList;
         for ( int i = 0; i < allVariables.size(); i++ ) {
             VariableSerializable v = allVariables.get(i);
-            list.addItem(v.getName(), v.getID());
-            if((i==0) && (variableMetadataView!=null)){
-                variableMetadataView.setDSID(v.getDSID());
+            if ( !v.getAttributes().get("units").equals("text") || v.getAttributes().get("units") == null ) {
+                list.addItem(v.getName(), v.getID());
+                if((i==0) && (variableMetadataView!=null)){
+                    variableMetadataView.setDSID(v.getDSID());
+                }
             }
         }
         setAddButtonVisible(variables.size() > 1);

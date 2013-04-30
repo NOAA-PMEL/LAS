@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.ESGFSearchButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
@@ -75,6 +76,8 @@ public class BaseUI {
     static final String XTOGGLE_CONTROL_DOWN_TOOLTIP = "Click to show the controls.";
 
     static final String XTOGGLE_CONTROL_UP_TOOLTIP = "Click to hide the controls.";
+    
+    ConstraintWidgetGroup xTrajectoryConstraint = new ConstraintWidgetGroup();
     
     VerticalPanel xLeftPanel = new VerticalPanel();
     VerticalPanel xRightPanel = new VerticalPanel();
@@ -389,6 +392,12 @@ public class BaseUI {
             if (xCatIDs != null && xCatIDs.length > 0) {
                 xESGFSearchButton.setVisible(true);
             }
+            if ( xTrajectoryConstraint.isActive() ) {
+                xTrajectoryConstraint.setVisible(true);
+            } else {
+                // Redundantly make sure it is hidden...
+                xTrajectoryConstraint.setVisible(false);
+            }
             xToggleControls.setTitle(XTOGGLE_CONTROL_UP_TOOLTIP);
             // Must flip this flag BEFORE firing events
             xPanelHeaderHidden = !xPanelHeaderHidden;
@@ -403,6 +412,8 @@ public class BaseUI {
             xOptionsButton.setVisible(false);
             xESGFSearchButton.setVisible(false);
             compareMenu.setVisible(false);
+            // Hide it, perhaps redundantly
+            xTrajectoryConstraint.setVisible(false);
             xToggleControls.setTitle(XTOGGLE_CONTROL_DOWN_TOOLTIP);
             // Must flip this flag BEFORE firing events
             xPanelHeaderHidden = !xPanelHeaderHidden;
