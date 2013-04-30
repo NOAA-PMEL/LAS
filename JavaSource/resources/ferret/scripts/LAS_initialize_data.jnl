@@ -3,6 +3,7 @@
 ! 
 ! Author: ansley manke
 ! 11/2011
+!  4/2013 ACM Implement the Ferret property ferret_start_memory
 !
 ! The LAS_initialize_data.jnl script takes care of everything having to
 ! do with initializing a datset for later use.
@@ -10,6 +11,12 @@
 !
 ! The products that use a specialized data initialization, such as insitu
 ! data, have already defined this symbol.  If undefined, use the std one.
+
+! Allow a Ferret property start_memory to come from the configuration. If
+! an init script has a memory setting, then that will supersede the one
+! in the Ferret property.
+
+IF `($ferret_start_memory"0") GT 0` THEN SET MEM/SIZ=($ferret_start_memory)
 
 IF `($data_initialization_script"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL data_initialization_script LAS_initialize_data_std
