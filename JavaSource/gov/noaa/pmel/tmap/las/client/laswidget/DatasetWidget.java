@@ -194,8 +194,8 @@ public class DatasetWidget extends Tree implements HasName {
                                 DatasetSerializable[] dses = cat.getDatasetSerializableArray();
                                 DatasetSerializable ds = dses[0];
                                 VariableSerializable[] vars = ds.getVariablesSerializable();
-                                loadItem(item, vars);
-                                for ( int j = 1; j < dses.length; j++ ) {
+                                currentlySelected.removeItems();
+                                for ( int j = 0; j < dses.length; j++ ) {
                                     ds = dses[j];
                                     vars = ds.getVariablesSerializable();
                                     loadItem(vars);
@@ -203,7 +203,8 @@ public class DatasetWidget extends Tree implements HasName {
                             } else {
                                 DatasetSerializable ds = cat.getDatasetSerializable();
                                 VariableSerializable[] vars = ds.getVariablesSerializable();
-                                loadItem(item, vars);
+                                currentlySelected.removeItems();
+                                loadItem(vars);
                             }
                         } 
                     }
@@ -255,23 +256,15 @@ public class DatasetWidget extends Tree implements HasName {
             Window.alert("Server Request Failed: " + caught.getMessage());
         }
 
-        private void loadItem(TreeItem item, VariableSerializable[] vars) {
-            item.setText(vars[0].getName());
-            item.setUserObject(vars[0]);
-            for ( int j = 1; j < vars.length; j++ ) {
-                item = new TreeItem();
-                item.setText(vars[j].getName());
-                item.setUserObject(vars[j]);
-                currentlySelected.addItem(item);
-            }
-        }
-
         private void loadItem(VariableSerializable[] vars) {
             for ( int j = 0; j < vars.length; j++ ) {
-                TreeItem item = new TreeItem();
-                item.setText(vars[j].getName());
-                item.setUserObject(vars[j]);
-                currentlySelected.addItem(item);
+                // Do not include variables with units "text" used to denote "selector" variables in in-situ data sets like SOCAT
+                if (!vars[j].getAttributes().get("units").equals("text") || vars[j].getAttributes().get("units") == null) {
+                    TreeItem item = new TreeItem();
+                    item.setText(vars[j].getName());
+                    item.setUserObject(vars[j]);
+                    currentlySelected.addItem(item);
+                }
             }
         }
     };

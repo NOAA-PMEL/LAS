@@ -1,7 +1,10 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import java.util.Vector;
+
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.activity.VariableControlsActivity;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -171,5 +174,21 @@ public class OutputControlPanelImpl extends Composite implements OutputControlPa
     @Override
     public void setWidget(int row, int column, Widget widget) {
         flexTable.setWidget(row, column, widget);
+    }
+    @Override
+    public void setVisible(boolean visible) {
+        // This is kinda dumb, but we have the so many layers to try to use the "correct" MVP that we can't get stuff done.
+        Vector<VariableSerializable> vars = getVariableControls().getMultiVariableSelector().getVariables();
+        if ( vars != null && vars.size() > 0 ) {
+            if ( !vars.get(0).isDescrete() ) {
+                super.setVisible(visible);
+            } else {
+                // Only show this menu for grids.
+                super.setVisible(false);
+            }
+            
+        } else {
+            super.setVisible(visible);
+        }
     }
 }

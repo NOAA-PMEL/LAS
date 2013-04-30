@@ -96,7 +96,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class UI extends BaseUI {
-    ConstraintWidgetGroup xTrajectoryConstraint = new ConstraintWidgetGroup();
+    
     public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
 
         @Override
