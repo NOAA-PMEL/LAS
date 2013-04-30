@@ -78,8 +78,9 @@ ENDIF
 
 IF `($num) EQ 0` THEN 
    DEFINE SYMBOL dataset_url_lab = ($dataset_url_($num)_lab)
-   IF `STRINDEX("($dataset_url_lab)", "http") EQ 0` THEN \
-    DEFINE SYMBOL dataset_url_lab = ($data_0_ftds_url)
+   IF `STRINDEX("($dataset_url_lab)", "http") EQ 0` THEN 
+     IF ($data_0_ftds_url"0|*>1") THEN DEFINE SYMBOL dataset_url_lab = ($data_0_ftds_url)
+   ENDIF
 ENDIF
 
 IF `($num) GT 0` THEN
