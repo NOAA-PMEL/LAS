@@ -16,6 +16,8 @@ DEFINE SYMBOL output_xml_file = $2
 ! We could check for and fix valid_range, actual_range,
 ! and unpacked_valid_range attributes too.
 
+! If it is a virtual dataset then nvars is 0
+
 LET nvars = ..nvars
 
 IF `nvars GT 0` THEN
@@ -34,5 +36,7 @@ say/quiet/outfile="($output_xml_file)"/clobber <?xml version="1.0" encoding="ISO
 say/quiet/outfile="($output_xml_file)"/append <data>
 
 show data/var/xml/append/outfile="($output_xml_file)" 1
-! show axis/all/xml/append/outfile="($output_xml_file)"
+
+IF ($ferret_version) LT 6.85` THEN \
+  show axis/all/xml/append/outfile="($output_xml_file)"
 say/quiet/append/outfile="($output_xml_file)" </data> 
