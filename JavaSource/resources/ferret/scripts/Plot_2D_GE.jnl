@@ -44,20 +44,22 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    DEFINE SYMBOL its_GE = `STRINDEX( "($operation_ID)", "_GE" ) NE 0` 
    IF ($its_GE"0|*>1") THEN
 
+
 ! For Google Earth plots, check y region:
 ! check if region_y_hi > dataset_y_max; if so, reset region_y_hi to dataset_y_max 
 ! check if region_y_lo < dataset_y_min; if so, reset region_y_lo to dataset_y_min 
 
+      GO LAS_initialize_region 0
+      GO LAS_initialize_dataset 0
+
 ! Do not do this if the data are on a curvilinear grid - in that case keep the 
 ! region information from the User Interface
-
       IF `($ferret_curvi_coord_lat"0|*>1") EQ 0` THEN
 
 !  We need to have the region and data symbols so initialize these.
 !  The product script will run these again with the new y region settings.
-          GO LAS_initialize_region 0
-          GO LAS_initialize_dataset 0
           IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
+
 
           IF ($data_0_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_0_var)
 
@@ -69,12 +71,33 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
           IF `($region_y_hi) GT yhi` THEN DEFINE SYMBOL region_0_y_hi = `yhi`
           IF `($region_y_lo) LT ylo` THEN DEFINE SYMBOL region_0_y_lo = `ylo`
 
-          CANCEL DATA/ALL
-          CANCEL VAR/ALL
-
-
        ENDIF
 
+!  Google Earth as of 4/2013 really wants the longitudes to be in -180:180.
+!  If the request is global then just switch to that range.
+
+       DEFINE SYMBOL two_parter = 0
+       LET data_xax = x[gx=($data_0_var)]
+
+       LET dx = `data_xax[i=2] - data_xax[i=1]`
+       IF `($ferret_curvi_coord_lat"0|*>1") EQ 0` THEN LET dx = 2  ! just for testing
+       DEFINE SYMBOL region_0_x_range = `($region_0_x_hi) - ($region_0_x_lo)` 
+       IF `($region_0_x_range) GT 360-2*dx` THEN
+          DEFINE SYMBOL region_0_x_lo = -180
+          DEFINE SYMBOL region_0_x_hi =  180
+          
+! Otherwise try to make it go into -180:180.  
+
+       ELIF `(($region_0_x_lo) GE 180) AND (($region_0_x_hi) GT 180)` THEN
+          DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - 360`
+          DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) - 360`
+       ELIF `(($region_0_x_lo) LT -180) AND (($region_0_x_hi) LE -180)` THEN
+          DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) + 360`
+          DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + 360`
+       ELSE
+          DEFINE SYMBOL two_parter = 1
+       ENDIF
+pause
        go xy_plot_2D
    ENDIF
 
