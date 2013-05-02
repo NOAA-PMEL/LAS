@@ -2,14 +2,17 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.GridChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.RemoveSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
@@ -47,53 +50,15 @@ public class ConstraintWidgetGroup extends Composite {
     Label constraintLabel = new Label("My selections:");
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
-
-    // The selection state
-    // List<ConstraintTextAnchor> selectionState = new ArrayList<ConstraintTextAnchor>();
-
-    // The subset state
-    // List<ConstraintTextAnchor> subsetState = new ArrayList<ConstraintTextAnchor>();
+    
+    ERDDAPVariableConstraintPanel variableConstraints;
+    SelectionConstraintPanel selectionConstraintPanel;
+    SubsetConstraintPanel subsetConstraintPanel;
+    
+    // Keep track of the dsid for this panel.
+    String dsid;
 
     public ConstraintWidgetGroup() {
-        
- /*
-  * for now no longer do anything when changing constraint type so that the constraints accumulate between panels.
-  */
-//        constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-//
-//            @Override
-//            public void onSelection(SelectionEvent<Integer> event) {
-//                int tab = event.getSelectedItem();
-//                if ( tab == 0 ) {
-//                    // Save the selection state...
-//                    selectionState.clear();
-//                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-//                        selectionState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
-//                    }
-//                    displayPanel.clear();
-//                    // Restore the subset state
-//                    for (Iterator subsetIt = subsetState.iterator(); subsetIt.hasNext();) {
-//                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
-//                        displayPanel.add(anchor);
-//                    }
-//                } else {
-//                    // Do the opposite
-//                    subsetState.clear();
-//                    for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-//                        subsetState.add((ConstraintTextAnchor) displayPanel.getWidget(i));
-//                    }
-//                    displayPanel.clear();
-//                    // Restore the Selection state
-//                    for (Iterator subsetIt = selectionState.iterator(); subsetIt.hasNext();) {
-//                        ConstraintTextAnchor anchor = (ConstraintTextAnchor) subsetIt.next();
-//                        displayPanel.add(anchor);
-//                    }
-//                }
-//
-//            }
-//
-//        });
-
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
         mainPanel.add(topLabel);
         interiorPanel.add(constraintPanel);
@@ -108,6 +73,7 @@ public class ConstraintWidgetGroup extends Composite {
     }
 
     public void init(String dsid) {
+        this.dsid = dsid;
         Util.getRPCService().getERDDAPConstraintGroups(dsid, initConstraintsCallback);
     }
     protected AsyncCallback<List<ERDDAPConstraintGroup>> initConstraintsCallback = new AsyncCallback<List<ERDDAPConstraintGroup>>() {
@@ -120,7 +86,29 @@ public class ConstraintWidgetGroup extends Composite {
         @Override
         public void onSuccess(List<ERDDAPConstraintGroup> constraintGroups) {
             init(constraintGroups);
+            Util.getRPCService().getCategories(dsid, dsid, categoryCallback);
         }
+    };
+    protected AsyncCallback<CategorySerializable[]> categoryCallback = new AsyncCallback<CategorySerializable[]>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void onSuccess(CategorySerializable[] cats) {
+            variableConstraints = new ERDDAPVariableConstraintPanel();
+            constraintPanel.add(variableConstraints, "Select a Sub-set by Variable Value", 30);
+            for (int i = 0; i < cats.length; i++) {
+                if ( cats[i].isVariableChildren() ) {
+                    VariableSerializable[] variables = cats[i].getDatasetSerializable().getVariablesSerializable();
+                    variableConstraints.setVariables(variables);
+                }
+            }
+        }
+        
     };
     public void init(List<ERDDAPConstraintGroup> constraintGroups) {
 
@@ -129,12 +117,50 @@ public class ConstraintWidgetGroup extends Composite {
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
             if ( erddapConstraintGroup.getType().equals("selection") ) {
-                constraintPanel.add(new SelectionConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName(), 30);
+                selectionConstraintPanel = new SelectionConstraintPanel(erddapConstraintGroup);
+                constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 30);
             } else {
-                constraintPanel.add(new SubsetConstraintPanel(erddapConstraintGroup), erddapConstraintGroup.getName(), 30);
+                subsetConstraintPanel = new SubsetConstraintPanel(erddapConstraintGroup);
+                constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 30);
             }
         }
+ 
         constraintPanel.showWidget(0);
+        eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
+            
+            @Override
+            public void onAdd(AddVariableConstraintEvent event) {
+                String variable = event.getVariable();
+                String op1 = event.getOp1();
+                String op2 = event.getOp2();
+                String lhs = event.getLhs();
+                String rhs = event.getRhs();
+                String varid = event.getVarid();
+                String dsid = event.getDsid();
+                boolean apply = event.isApply();
+                ConstraintTextAnchor anchor1 = new ConstraintTextAnchor("variable", dsid, varid, variable, lhs, variable, lhs, op1);
+                ConstraintTextAnchor anchor2 = new ConstraintTextAnchor("variable", dsid, varid, variable, rhs, variable, rhs, op2);
+                if ( apply ) {
+                    if ( lhs != null && !lhs.equals("") ) {
+
+                        if ( !contains(anchor1) ) {
+                            displayPanel.add(anchor1);
+                        }
+
+                    }
+                    if ( rhs != null && !rhs.equals("") ) {
+
+                        if ( !contains(anchor2) ) {
+                            displayPanel.add(anchor2);
+                        }
+                    }
+                } else {
+                    // remove them regardless of whether or not they are defined.
+                    remove(anchor1);
+                    remove(anchor2);
+                }
+            }
+        });
         eventBus.addHandler(AddSelectionConstraintEvent.TYPE, new AddSelectionConstraintEvent.Handler() {
 
             @Override
@@ -145,7 +171,7 @@ public class ConstraintWidgetGroup extends Composite {
                 String key = event.getKey();
                 String keyValue = event.getKeyValue();
 
-                ConstraintTextAnchor anchor = new ConstraintTextAnchor(variable, value, key, keyValue, "eq");
+                ConstraintTextAnchor anchor = new ConstraintTextAnchor("text", null, null, variable, value, key, keyValue, "eq");
                 if ( !contains(anchor) ) {
                     displayPanel.add(anchor);
                 }
@@ -162,29 +188,50 @@ public class ConstraintWidgetGroup extends Composite {
             public void onRemove(RemoveSelectionConstraintEvent event) {
                 ConstraintTextAnchor anchor = (ConstraintTextAnchor) event.getSource();
                 displayPanel.remove(anchor);
+                if ( anchor.getType().equals("variable") ) {
+                    variableConstraints.clearTextField(anchor);
+                }
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
             }
 
         });
     }
+//    public void init(List<ERDDAPConstraintGroup> constraintGroups, List<VariableSerializable> variables) {
+//        VariableConstraintLayout variableConstraints = new VariableConstraintLayout("", true);
+//        init(constraintGroups);
+//        constraintPanel.add(variableConstraints, "Select Data by Variable Value", 30);
+//        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+//            VariableSerializable variableSerializable = (VariableSerializable) varIt.next();
+//            variableConstraints.addItem(variableSerializable);
+//        }
+//    }
     public List<ConstraintSerializable> getConstraints() {
         List<ConstraintSerializable> constraints = new ArrayList<ConstraintSerializable>();
         Map<String, ConstraintSerializable> cons = new HashMap<String, ConstraintSerializable>();
         for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
             ConstraintTextAnchor anchor = (ConstraintTextAnchor) displayPanel.getWidget(i);
-            String key = anchor.getKey();
-            String op = anchor.getOp();
-            String value = anchor.getKeyValue();
-            ConstraintSerializable keyConstraint = cons.get(key);
-            if ( keyConstraint == null ) {
-                keyConstraint = new ConstraintSerializable(key, op, "\""+value+"\"", key+"_"+value);
-                cons.put(key, keyConstraint);
+            if ( anchor.getType().equals("text") ) {
+                String key = anchor.getKey();
+                String op = anchor.getOp();
+                String value = anchor.getKeyValue();
+                ConstraintSerializable keyConstraint = cons.get(key);
+                if ( keyConstraint == null ) {
+                    keyConstraint = new ConstraintSerializable("text", null, null, key, op, "\""+value+"\"", key+"_"+value);
+                    cons.put(key, keyConstraint);
+                } else {
+                    String v = keyConstraint.getRhs();
+                    v = v.substring(0, v.length()-1);
+                    v = v + "|" + value+"\"";
+                    keyConstraint.setRhs(v);
+                    keyConstraint.setOp("like");
+                }
             } else {
-                String v = keyConstraint.getRhs();
-                v = v.substring(0, v.length()-1);
-                v = v + "|" + value+"\"";
-                keyConstraint.setRhs(v);
-                keyConstraint.setOp("like");
+                String dsid = anchor.getDsid();
+                String varid = anchor.getVarid();
+                String op = anchor.getOp();
+                String lhs = anchor.getValue();
+                ConstraintSerializable con = new ConstraintSerializable("variable", dsid, varid, varid, op, lhs, dsid+"_"+varid);
+                constraints.add(con);
             }
         }
         for (Iterator keysIt = cons.keySet().iterator(); keysIt.hasNext();) {
@@ -201,6 +248,18 @@ public class ConstraintWidgetGroup extends Composite {
             }
         }
         return false;
+    }
+    private void remove(ConstraintTextAnchor anchor) {
+        ConstraintTextAnchor remove = null;
+        for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
+            ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
+            if ( anchor.equals(a) ) {
+                remove = a;
+            }
+        }
+        if ( remove != null ) {
+            displayPanel.remove(remove);
+        }
     }
     public void setActive(boolean active) {
         this.active = active;

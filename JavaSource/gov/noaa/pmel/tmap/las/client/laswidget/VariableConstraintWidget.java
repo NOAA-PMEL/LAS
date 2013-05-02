@@ -66,10 +66,14 @@ public class VariableConstraintWidget extends Composite {
 		maxTextBox.setValue(max);
 	}
 	public void setVariable(VariableSerializable var) {
-		this.xVariable = var;
-		xLabel.setText(xVariable.getName());
-		xLabel.setTitle(xVariable.getName());
-		xRemove.getElement().setId("other-"+var.getID());
+	    this.xVariable = var;
+	    if ( xVariable.getShortname() != null && !xVariable.getShortname().equals("") ) {
+	        xLabel.setText(xVariable.getShortname());
+	    } else {
+	        xLabel.setText(xVariable.getName());
+	    }
+	    xLabel.setTitle(xVariable.getName());
+	    xRemove.getElement().setId("other-"+var.getID());
 	}
     /**
      * Add a change handler to both the min and max text boxes of this constraint widget.
