@@ -105,7 +105,7 @@ public class SubsetConstraintPanel extends Composite {
         @Override
         public void onSuccess(Map<String, String> result) {
             valuesList.clear();
-            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
+            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 8));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
                 String key_value = (String) rIt.next();
                 String value = (String) result.get(key_value);

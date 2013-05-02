@@ -1686,7 +1686,11 @@ public class OutputPanel extends Composite implements HasName {
         if ( constraints != null ) {
             for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
                 ConstraintSerializable constraint = (ConstraintSerializable) constraintIt.next();
-                lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+                if ( constraint.getType().equals("text") ) {
+                    lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+                } else {
+                    lasRequest.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
+                }
             }
         }
         return lasRequest;

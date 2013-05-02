@@ -6,15 +6,21 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ConstraintSerializable implements IsSerializable {
+    String type;
+    String dsid;
+    String varid;
     String lhs;
-    String op;  // should be one of gt, ge, eq, lt, le
+    String op;  // should be one of gt, ge, eq, lt, le, or like
     String rhs;
     String id;
     public ConstraintSerializable() {
         super();
     }
-    public ConstraintSerializable(String lhs, String op, String rhs, String id) {
+    public ConstraintSerializable(String type, String dsid, String varid, String lhs, String op, String rhs, String id) {
         super();
+        this.type = type;
+        this.dsid = dsid;
+        this.varid = varid;
         this.lhs = lhs;
         this.op = op;
         this.rhs = rhs;
@@ -46,5 +52,22 @@ public class ConstraintSerializable implements IsSerializable {
     public void setRhs(String rhs) {
         this.rhs = rhs;
     }
-    
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+    public String getDsid() {
+        return dsid;
+    }
+    public void setDsid(String dsid) {
+        this.dsid = dsid;
+    }
+    public String getVarid() {
+        return varid;
+    }
+    public void setVarid(String varid) {
+        this.varid = varid;
+    }
 }
