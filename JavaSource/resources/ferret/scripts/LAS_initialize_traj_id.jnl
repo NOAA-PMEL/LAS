@@ -18,7 +18,7 @@ SET MEM/siz=200
 DEFINE SYMBOL traj_max_labels = 200
 DEFINE SYMBOL numobs `($ferret_plot_var),return = isize`
 
-LET trajvar = XSEQUENCE(trajectory_counts)
+LET trajvar = XSEQUENCE(rowSize)
 LET ntrajs = `trajvar,RETURN=isize`
 LET traj_numbers = x[i=1:`ntrajs`]
 
