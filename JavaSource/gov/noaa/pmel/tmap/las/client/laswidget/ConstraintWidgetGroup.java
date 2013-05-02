@@ -142,17 +142,18 @@ public class ConstraintWidgetGroup extends Composite {
                 ConstraintTextAnchor anchor2 = new ConstraintTextAnchor("variable", dsid, varid, variable, rhs, variable, rhs, op2);
                 if ( apply ) {
                     if ( lhs != null && !lhs.equals("") ) {
-
-                        if ( !contains(anchor1) ) {
-                            displayPanel.add(anchor1);
+                        ConstraintTextAnchor a = findMatchingAnchor(anchor1);
+                        if ( a != null ) {
+                            displayPanel.remove(a);
                         }
-
+                        displayPanel.add(anchor1);
                     }
                     if ( rhs != null && !rhs.equals("") ) {
-
-                        if ( !contains(anchor2) ) {
-                            displayPanel.add(anchor2);
+                        ConstraintTextAnchor a = findMatchingAnchor(anchor2);
+                        if ( a != null ) {
+                            displayPanel.remove(a);
                         }
+                        displayPanel.add(anchor2);
                     }
                 } else {
                     // remove them regardless of whether or not they are defined.
@@ -172,14 +173,14 @@ public class ConstraintWidgetGroup extends Composite {
                 String keyValue = event.getKeyValue();
 
                 ConstraintTextAnchor anchor = new ConstraintTextAnchor("text", null, null, variable, value, key, keyValue, "eq");
+
                 if ( !contains(anchor) ) {
                     displayPanel.add(anchor);
                 }
+
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
 
             }
-
-
         });
         // Event handlers for date time and lat/lon (map) constraint events.
         eventBus.addHandler(RemoveSelectionConstraintEvent.TYPE, new RemoveSelectionConstraintEvent.Handler() {
@@ -239,6 +240,15 @@ public class ConstraintWidgetGroup extends Composite {
             constraints.add(cons.get(key));
         }
         return constraints;
+    }
+    private ConstraintTextAnchor findMatchingAnchor(ConstraintTextAnchor anchor) {
+        for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
+            ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
+            if ( a.getKey().equals(anchor.getKey()) && a.getOp().equals(anchor.getOp()) ) {
+                return a;
+            }
+        }
+        return null;
     }
     private boolean contains(ConstraintTextAnchor anchor) {
         for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
