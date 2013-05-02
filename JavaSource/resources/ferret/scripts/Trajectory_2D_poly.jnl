@@ -49,24 +49,8 @@ GO LAS_url_label 0
 GO LAS_initialize_traj_id
 
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
-IF `($ferret_PC1_var"0|*>1") EQ 0` THEN
-   GO set_constraint_labels
-ENDIF
 
-
-!!! When making icons for a trajectory plot, plotting icons very near the 
-!!! plot boundary can cause lines outside the plot area. Extend the area slightly.
-!!IF `($data_var"0|metadata_ID>1|*>0") AND (($traj_max) LE ($traj_max_labels))` THEN
-!!   LET del = `($REGION_X_RANGE)* 0.0001`
-!!   IF `($REGION_X_RANGE) GE 359.8` THEN LET del = (360-($REGION_X_RANGE)) /100.
-!!   DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + del`
-!!   DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - del`
-!!
-!!   LET del = `($REGION_Y_RANGE)* 0.0001`
-!!   DEFINE SYMBOL region_0_y_hi = `MIN(  90, ($region_0_y_hi)+del )`
-!!   DEFINE SYMBOL region_0_y_lo = `MAX( -90, ($region_0_y_lo)-del )`
-!!   GO LAS_initialize_region 0
-!!ENDIF
+GO set_constraint_labels
 
 ! If the variable is TIME then  symbols are
 !  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
@@ -142,29 +126,6 @@ GO LAS_set_plot_qualifiers
 
 ! Open the window
 GO LAS_open_window
-
-! For XY plots we can set the aspect ratio or request a WMS style
-! plot with no axes.
-
-IF `($ferret_view"0|xy>1|*>0") OR ($ferret_view"0|xyt>1|*>0")` THEN
-
-  LET no_range = `($region_X_range) EQ 0 OR ($region_Y_range) EQ 0`
-  IF `no_range` THEN 
-     IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN SET WINDOW/ASPECT = 1:axis
-  ELSE
-     IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN SET WINDOW/ASPECT = `($region_Y_range)/($region_X_range)`:axis
-
-! Set a viewport to make room for the labels on the date key
-     IF ($margin"0|*>1") THEN
-        CANCEL VIEW 
-	DEFINE VIEW/X=0:0.9/Y=0:1 xspace
-     ELSE
-        DEFINE VIEW/X=0:0.95/Y=0:1 xspace
-     ENDIF
-     SET VIEW xspace
-  ENDIF
-
-ENDIF
 
 ! Create the blank plot with bathymetries,
 ! coastlines, EEZ's, etc.
@@ -256,7 +217,10 @@ ELSE
 
    DEFINE SYMBOL poly_command poly($qualifiers)
 
-   GO ($polymark_script"polymark") ($poly_command) x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
+   GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
+   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL POLYGON/OVER
+
 ENDIF
 
 ! Set the shape to what is used above it will be the same on the key
