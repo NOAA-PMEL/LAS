@@ -13,6 +13,11 @@
 	padding: 1px;
 }
 
+.IN-LINE-BUTTON {
+	display: inline-block;
+	width: 40px;
+}
+
 .gwt-ToggleButton-SMALLER {
 	padding: 0px;
 	font-size: .8em;
@@ -114,6 +119,13 @@
 	border-left: 1px solid #d0e4f6;
 	border-right: 1px solid #d0e4f6;
 	border-bottom: 1px solid #d0e4f6;
+	padding: 3px;
+}
+.allBorderGray {
+	border-top: 1px solid lightgray;
+	border-left: 1px solid lightgray;
+	border-right: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
 	padding: 3px;
 }
 
