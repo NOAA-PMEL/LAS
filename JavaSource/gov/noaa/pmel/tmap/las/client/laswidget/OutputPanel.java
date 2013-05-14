@@ -99,9 +99,18 @@ public class OutputPanel extends Composite implements HasName {
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 
     private static final Logger logger = Logger.getLogger(OutputPanel.class.getName());
+    /*
+     * Original layout with the controls at the bottom
+     
+    int annotationsRow = 0;
+    int plotRow = 1;
+    int controlPanelRow = 3;
+    */
     
+    int annotationsRow = 0;
+    int plotRow = 3;
+    int controlPanelRow = 1;
     
-
     public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
 
         @Override
@@ -297,9 +306,9 @@ public class OutputPanel extends Composite implements HasName {
             spin.hide();
             updating = false;
             HTML error = new HTML(exception.toString());
-            Widget size = grid.getWidget(1, 0);
+            Widget size = grid.getWidget(plotRow, 0);
             error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-            grid.setWidget(1, 0, error);
+            grid.setWidget(plotRow, 0, error);
             if (pending) {
                 pending = false;
             }
@@ -336,7 +345,7 @@ public class OutputPanel extends Composite implements HasName {
                 p.add(again);
                 sp.add(p);
                 sp.setSize("30em", "20em");
-                grid.setWidget(1, 0, sp);
+                grid.setWidget(plotRow, 0, sp);
             } else {
                 logger.info("The doc is obviously XML");
                 doc = doc.replaceAll("\n", "").trim();
@@ -435,14 +444,14 @@ public class OutputPanel extends Composite implements HasName {
                                     Text t = (Text) text;
                                     HTML error = new HTML(t.getData().toString().trim());
                                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                                    grid.setWidget(1, 0, error);
+                                    grid.setWidget(plotRow, 0, error);
                                 }
                             }
                         } else if (typeAttribute.equals("batch")) {
                             String elapsed_time = result.getAttribute("elapsed_time");
                             cancelButton.setTime(Integer.valueOf(elapsed_time));
                             cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                            grid.setWidget(1, 0, cancelButton);
+                            grid.setWidget(plotRow, 0, cancelButton);
                             lasRequest.setProperty("product_server", "ui_timeout", "3");
                             String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
                             if (currentURL.contains("cancel"))
@@ -473,7 +482,7 @@ public class OutputPanel extends Composite implements HasName {
                                 logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
                                 HTML error = new HTML(e.toString());
                                 error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                                grid.setWidget(1, 0, error);
+                                grid.setWidget(plotRow, 0, error);
                             }
                         }
                     }
@@ -871,7 +880,7 @@ public class OutputPanel extends Composite implements HasName {
                     }
                 }
             });
-            grid.setWidget(1, 0, frontCanvas);
+            grid.setWidget(plotRow, 0, frontCanvas);
             logger.info("imageLoadHandler firing StringValueChangeEvent");
             eventBus.fireEventFromSource(new StringValueChangeEvent(plotImage.getUrl()), thisOutputPanel);
         }
@@ -1101,16 +1110,8 @@ public class OutputPanel extends Composite implements HasName {
         // Make the comparePanel fire breadcrumb update events, on
         // non-comparePanels listen for them
         // outputControlPanel.getVariableControls().getVariableMetadataView().setOnComparePanel(comparePanel);
-        if (comparePanel) {
-            // Label gs = new Label("   ");
-            // gs.setHeight("25px");
-            // grid.setWidget(0, 0, gs);
-            // grid.setWidget(0, 0, lasAnnotationsPanel);
+        if (comparePanel) {           
             datasetButton.setVisible(false);
-        } else {
-            // grid.setWidget(0, 0, datasetButton);
-            // grid.getCellFormatter().setWidth(0, 0, "1px");
-            // grid.setWidget(0, 1, lasAnnotationsPanel);
         }
 
         HTML plot = new HTML();
@@ -1118,15 +1119,15 @@ public class OutputPanel extends Composite implements HasName {
         plot.setHTML("<br>");
         lasAnnotationsPanel = new LASAnnotationsPanel();
         lasAnnotationsPanel.setVisible(annotationsShowing);
-        grid.setWidget(0, 0, lasAnnotationsPanel);
-        grid.setWidget(1, 0, plot);
+        grid.setWidget(annotationsRow, 0, lasAnnotationsPanel);
+        grid.setWidget(plotRow, 0, plot);
         if ( !singlePanel ) {
-            grid.setWidget(3, 0, outputControlPanel);
+            grid.setWidget(controlPanelRow, 0, outputControlPanel);
         }
         initWidget(grid);
         logger.info("OutputPanel constructor exiting with id:" + id);
     }
-
+    
     /**
      * Evaluate scripts in an HTML string. Will eval both <script
      * src=""></script> and <script>javascript here</scripts>.
@@ -1162,7 +1163,7 @@ public class OutputPanel extends Composite implements HasName {
         // If the passed in variable is a vector, then the panel variable must
         // also be a vector. Right?
         if (vizGalVariable.isVector() && !panelVar.isVector()) {
-            Widget plotWidget = grid.getWidget(1, 0);
+            Widget plotWidget = grid.getWidget(plotRow, 0);
             int w = plotWidget.getOffsetWidth();
             if (w > 100) {
                 w = w - 10;
@@ -1180,7 +1181,7 @@ public class OutputPanel extends Composite implements HasName {
             spin.hide();
             HTML error = new HTML("This data set does not have an axis in the current plot plane.  Choose a different plot.");
             error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-            grid.setWidget(1, 0, error);
+            grid.setWidget(plotRow, 0, error);
             return;
         }
         lasRequest = new LASRequest();
@@ -1435,7 +1436,7 @@ public class OutputPanel extends Composite implements HasName {
             if (updating) {
                 pending = true;
 
-                Widget plotWidget = grid.getWidget(1, 0);
+                Widget plotWidget = grid.getWidget(plotRow, 0);
                 int w = plotWidget.getOffsetWidth();
                 if (w > 100) {
                     w = w - 10;
@@ -1445,13 +1446,13 @@ public class OutputPanel extends Composite implements HasName {
 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                grid.setWidget(1, 0, cancelButton);
+                grid.setWidget(plotRow, 0, cancelButton);
 
                 return;
             }
 
             currentURL = url;
-            Widget plotWidget = grid.getWidget(1, 0);
+            Widget plotWidget = grid.getWidget(plotRow, 0);
             spinSetPopupPositionCenter(plotWidget);
             spin.show();
             logger.info("containerType:" + containerType);
@@ -1470,12 +1471,12 @@ public class OutputPanel extends Composite implements HasName {
                     spin.hide();
                     HTML error = new HTML(e.toString());
                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                    grid.setWidget(1, 0, error);
+                    grid.setWidget(plotRow, 0, error);
                 }
             } else {
                 logger.info("Reusing for output url:" + url);
                 output.setUrl(url);
-                grid.setWidget(1, 0, output);
+                grid.setWidget(plotRow, 0, output);
             }
         } else {
             setPlotImageWidth();
@@ -1815,7 +1816,7 @@ public class OutputPanel extends Composite implements HasName {
     public void refreshPlot(Map<String, String> options, boolean switchAxis, boolean popup, boolean forceLASRequest) {
 
         if ((!panelVar.isVector() && vizGalVariable.isVector())) {
-            Widget plotWidget = grid.getWidget(1, 0);
+            Widget plotWidget = grid.getWidget(plotRow, 0);
             int w = plotWidget.getOffsetWidth();
             if (w > 100) {
                 w = w - 10;
@@ -1826,7 +1827,7 @@ public class OutputPanel extends Composite implements HasName {
         }
 
         if (panelVar.isVector() && !vizGalVariable.isVector()) {
-            Widget plotWidget = grid.getWidget(1, 0);
+            Widget plotWidget = grid.getWidget(plotRow, 0);
             int w = plotWidget.getOffsetWidth();
             if (w > 100) {
                 w = w - 10;
@@ -1846,7 +1847,7 @@ public class OutputPanel extends Composite implements HasName {
             spin.hide();
             HTML error = new HTML("This data set does not have an axis in the current plot plane.  Choose a different plot.");
             error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-            grid.setWidget(1, 0, error);
+            grid.setWidget(plotRow, 0, error);
             return;
         }
 
@@ -1889,7 +1890,7 @@ public class OutputPanel extends Composite implements HasName {
             lasRequest.setProperty("ferret", "fill_levels", fill_levels);
         }
         lasRequest.setProperty("product_server", "ui_timeout", "10");
-        Widget plotWidget = grid.getWidget(1, 0);
+        Widget plotWidget = grid.getWidget(plotRow, 0);
         if (panelVar.getGrid().hasT()) {
             if (view.contains("t") && lasRequest.getRangeLo("t", 0).equals(lasRequest.getRangeHi("t", 0))) {
                 int w = plotWidget.getOffsetWidth();
@@ -1926,7 +1927,7 @@ public class OutputPanel extends Composite implements HasName {
             if (updating) {
                 pending = true;
 
-                Widget pw = grid.getWidget(1, 0);
+                Widget pw = grid.getWidget(plotRow, 0);
                 int w = pw.getOffsetWidth();
                 if (w > 100) {
                     w = w - 10;
@@ -1936,7 +1937,7 @@ public class OutputPanel extends Composite implements HasName {
 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                grid.setWidget(1, 0, cancelButton);
+                grid.setWidget(plotRow, 0, cancelButton);
 
                 return;
             }
@@ -1965,12 +1966,12 @@ public class OutputPanel extends Composite implements HasName {
                     spin.hide();
                     HTML error = new HTML(e.toString());
                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                    grid.setWidget(1, 0, error);
+                    grid.setWidget(plotRow, 0, error);
                 }
             } else {
-                grid.setWidget(1, 0, spinImage);
+                grid.setWidget(plotRow, 0, spinImage);
                 output.setUrl(url);
-                grid.setWidget(1, 0, output);
+                grid.setWidget(plotRow, 0, output);
             }
         } else {
             // No need to call setPlotImageWidth as a controller
@@ -2069,14 +2070,14 @@ public class OutputPanel extends Composite implements HasName {
 
         });
         image.setTitle("  Click to Enlarge.  Images will size with browser.");
-        logger.severe("CALLING grid.setWidget(1, 0, image);");
-        grid.setWidget(1, 0, image);
+        logger.severe("CALLING grid.setWidget(plotRow, 0, image);");
+        grid.setWidget(plotRow, 0, image);
     }
 
     public void setImageSize(int percent) {
         fixedZoom = percent;
         double factor = percent / 100.;
-        Widget p = grid.getWidget(1, 0);
+        Widget p = grid.getWidget(plotRow, 0);
         int w = (int) (Double.valueOf(image_w).doubleValue() * factor);
         int h = (int) (Double.valueOf(image_h).doubleValue() * factor);
         p.setWidth(w + "px");
@@ -2176,7 +2177,7 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     public void setPlotImageWidth() {
-        Widget plotWidget = grid.getWidget(1, 0);
+        Widget plotWidget = grid.getWidget(plotRow, 0);
         // Piggy back setting the annotations width onto this method.
         if (autoZoom) {
             imageScaleRatio = 1.;
@@ -2283,7 +2284,9 @@ public class OutputPanel extends Composite implements HasName {
         }
 
         if (!singlePanel) {
-            outputControlPanel.setWidget(1, 0, panelAxesWidgets);
+            // Try this to the right...
+            // outputControlPanel.setWidget(1, 0, panelAxesWidgets);
+            outputControlPanel.setWidget(0, 1, panelAxesWidgets);
         } else {
             // In singlePanel, the panelAxesWidgets controls will be on the left
             // navbar.

@@ -5722,7 +5722,7 @@ public class LASConfig extends LASDocument {
                     String key = keyE.getTextNormalize();
                     constraint.setKey(key);
                     constraintGroup.add(constraint);
-                } else {
+                } else if (groupType != null && groupType.equals("subset")){
                     List constraints = cg.getChildren("constraint");
                     for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
                         ERDDAPConstraint constraint = new ERDDAPConstraint();
@@ -5739,6 +5739,31 @@ public class LASConfig extends LASDocument {
                             variables.add(var);
                             constraint.setVariables(variables);
                         }
+                        constraintGroup.add(constraint);
+                        Element keyE = c.getChild("key");
+                        if ( keyE != null ) {
+                            String key = keyE.getTextNormalize();
+                            constraint.setKey(key);
+                        }
+                    }
+                } else if ( groupType != null && groupType.equals("season") ) {
+                    // Generally, I would think there would only be one child with one variable...
+                    List constraints = cg.getChildren("constraint");
+                    for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
+                        ERDDAPConstraint constraint = new ERDDAPConstraint();
+                        Element c = (Element) cIt.next();
+                        String widget = c.getAttributeValue("widget");
+                        constraint.setWidget(widget);
+                       
+                            List<VariableSerializable> variables = new ArrayList<VariableSerializable>();
+                            Element variable = c.getChild("variable");
+                            String IDREF = variable.getAttributeValue("IDREF");
+                            VariableSerializable var = getVariable(dsid, IDREF).getVariableSerializable();
+                            String shortname = getVariableName(dsid, IDREF);
+                            var.setShortname(shortname);
+                            variables.add(var);
+                            constraint.setVariables(variables);
+                        
                         constraintGroup.add(constraint);
                         Element keyE = c.getChild("key");
                         if ( keyE != null ) {

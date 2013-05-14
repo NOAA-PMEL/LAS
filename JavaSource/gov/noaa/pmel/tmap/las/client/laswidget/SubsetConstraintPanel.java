@@ -20,18 +20,22 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SubsetConstraintPanel extends Composite {
     
     // Current selection values
     ListBox valuesList = new ListBox();
-
+    ScrollPanel outerScroller = new ScrollPanel();
     VerticalPanel mainPanel  = new VerticalPanel();
     HorizontalPanel rightPanel = new HorizontalPanel();
+    HTML variableTitle = new HTML("<strong>Variable Range:</strong>");
+
     
     VerticalPanel radioButtonGroup = new VerticalPanel();  
 
@@ -42,11 +46,11 @@ public class SubsetConstraintPanel extends Composite {
     ERDDAPConstraintGroup constraintGroup;
 
     String dsid;
-    public SubsetConstraintPanel(ERDDAPConstraintGroup constraintGroup) {
+    
+    public SubsetConstraintPanel() {
         
-        this.constraintGroup = constraintGroup;
-        valuesList.setVisibleItemCount(10);
-        valuesList.setWidth(Constants.CONTROLS_WIDTH-6+"px");
+        valuesList.setVisibleItemCount(6);
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-20+"px");
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -64,8 +68,13 @@ public class SubsetConstraintPanel extends Composite {
         valuesList.addItem(Constants.APPEAR);
         mainPanel.add(radioButtonGroup);
         mainPanel.add(rightPanel);
-        mainPanel.setHeight("100px");
-        initWidget(mainPanel);
+        mainPanel.setHeight("65px");
+        outerScroller.add(mainPanel);
+        initWidget(outerScroller);        
+    }
+    public void init(ERDDAPConstraintGroup constraintGroup) {
+        this.constraintGroup = constraintGroup;
+        radioButtonGroup.clear();
         for (Iterator conIt = constraintGroup.getConstraints().iterator(); conIt.hasNext();) {
             ERDDAPConstraint constraint = (ERDDAPConstraint) conIt.next();
             dsid = constraintGroup.getDsid();
@@ -105,7 +114,7 @@ public class SubsetConstraintPanel extends Composite {
         @Override
         public void onSuccess(Map<String, String> result) {
             valuesList.clear();
-            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 8));
+            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 6));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
                 String key_value = (String) rIt.next();
                 String value = (String) result.get(key_value);
@@ -123,5 +132,14 @@ public class SubsetConstraintPanel extends Composite {
             }
         }
         return null;
+    }
+    public void addVariableConstraint(ERDDAPVariableConstraintPanel variableConstraints) {
+        mainPanel.remove(variableTitle);
+        mainPanel.remove(variableConstraints);
+        mainPanel.add(variableTitle);
+        mainPanel.add(variableConstraints);
+    }
+    public void scrollToBottom() {
+        outerScroller.scrollToBottom();
     }
 }

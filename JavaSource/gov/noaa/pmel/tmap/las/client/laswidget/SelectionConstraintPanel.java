@@ -64,7 +64,7 @@ public class SelectionConstraintPanel extends Composite {
         @Override
         public void onSuccess(Map<String, String> result) {
             valuesList.clear();
-            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 8));
+            valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
                 String key_value = (String) rIt.next();
                 String value = (String) result.get(key_value);
@@ -75,8 +75,8 @@ public class SelectionConstraintPanel extends Composite {
     };
     
     
-    public SelectionConstraintPanel(ERDDAPConstraintGroup constraintGroup) {
-        valuesList.setVisibleItemCount(8);
+    public SelectionConstraintPanel() {
+        valuesList.setVisibleItemCount(10);
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -88,6 +88,18 @@ public class SelectionConstraintPanel extends Composite {
                 eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value), SelectionConstraintPanel.this);
             }
         });
+        
+        valuesList.addItem(Constants.PICK);
+        valuesList.addItem(Constants.APPEAR);
+        
+        mainPanel.add(variablesRadioGroup);
+        valuesList.setWidth(Constants.CONTROLS_WIDTH-6+"px");
+        valuesList.addStyleDependentName("PADDING");
+        mainPanel.add(valuesList);
+        initWidget(mainPanel);
+    }
+    public void init(ERDDAPConstraintGroup constraintGroup) {
+        variablesRadioGroup.clear();
         constraint = constraintGroup.getConstraints().get(0);
         dsid = constraintGroup.getDsid();
         key = constraint.getKey();
@@ -112,14 +124,6 @@ public class SelectionConstraintPanel extends Composite {
                 }});
             variablesRadioGroup.add(button);
         }
-        valuesList.addItem(Constants.PICK);
-        valuesList.addItem(Constants.APPEAR);
-        
-        mainPanel.add(variablesRadioGroup);
-        valuesList.setWidth(Constants.CONTROLS_WIDTH-6+"px");
-        valuesList.addStyleDependentName("PADDING");
-        mainPanel.add(valuesList);
-        initWidget(mainPanel);
     }
     private String getShortName(String name) {
         List<VariableSerializable> variables = constraint.getVariables();
