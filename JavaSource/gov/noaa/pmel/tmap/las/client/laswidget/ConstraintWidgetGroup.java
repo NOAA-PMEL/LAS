@@ -52,8 +52,9 @@ public class ConstraintWidgetGroup extends Composite {
     EventBus eventBus = clientFactory.getEventBus();
     
     ERDDAPVariableConstraintPanel variableConstraints;
-    SelectionConstraintPanel selectionConstraintPanel;
-    SubsetConstraintPanel subsetConstraintPanel;
+    SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
+    SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
+    SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
     
     // Keep track of the dsid for this panel.
     String dsid;
@@ -63,12 +64,18 @@ public class ConstraintWidgetGroup extends Composite {
         mainPanel.add(topLabel);
         interiorPanel.add(constraintPanel);
         mainPanel.add(interiorPanel);
-        scrollPanel.addStyleName("allBorder");
-        scrollPanel.setSize(Constants.CONTROLS_WIDTH+"px", "152px");
+        scrollPanel.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
         scrollPanel.add(displayPanel);
-        displayPanel.setSize(Constants.CONTROLS_WIDTH-20+"px", "150px");
+        scrollPanel.addStyleName("allBorderGray");
+        displayPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
+        constraintPanel.add(selectionConstraintPanel, "text", 30);
+        constraintPanel.add(subsetConstraintPanel, "text", 30);
+        constraintPanel.add(seasonConstraintPanel, "text", 30);
+
+        variableConstraints = new ERDDAPVariableConstraintPanel();
+        subsetConstraintPanel.addVariableConstraint(variableConstraints);
         initWidget(mainPanel);
     }
 
@@ -99,8 +106,7 @@ public class ConstraintWidgetGroup extends Composite {
 
         @Override
         public void onSuccess(CategorySerializable[] cats) {
-            variableConstraints = new ERDDAPVariableConstraintPanel();
-            constraintPanel.add(variableConstraints, "Select a Sub-set by Variable Value", 30);
+            
             for (int i = 0; i < cats.length; i++) {
                 if ( cats[i].isVariableChildren() ) {
                     VariableSerializable[] variables = cats[i].getDatasetSerializable().getVariablesSerializable();
@@ -112,22 +118,23 @@ public class ConstraintWidgetGroup extends Composite {
     };
     public void init(List<ERDDAPConstraintGroup> constraintGroups) {
 
-        constraintPanel.clear();
-
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
             if ( erddapConstraintGroup.getType().equals("selection") ) {
-                selectionConstraintPanel = new SelectionConstraintPanel(erddapConstraintGroup);
-                constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 30);
-            } else {
-                subsetConstraintPanel = new SubsetConstraintPanel(erddapConstraintGroup);
-                constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 30);
+                selectionConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.setHeaderText(0, erddapConstraintGroup.getName());
+            } else if ( erddapConstraintGroup.getType().equals("subset")) {
+                subsetConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.setHeaderText(1, erddapConstraintGroup.getName());
+            } else if ( erddapConstraintGroup.getType().equals("season") ) {
+                seasonConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.setHeaderText(2, erddapConstraintGroup.getName());
             }
         }
  
         constraintPanel.showWidget(0);
         eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
-            
+
             @Override
             public void onAdd(AddVariableConstraintEvent event) {
                 String variable = event.getVariable();
@@ -140,25 +147,44 @@ public class ConstraintWidgetGroup extends Composite {
                 boolean apply = event.isApply();
                 ConstraintTextAnchor anchor1 = new ConstraintTextAnchor("variable", dsid, varid, variable, lhs, variable, lhs, op1);
                 ConstraintTextAnchor anchor2 = new ConstraintTextAnchor("variable", dsid, varid, variable, rhs, variable, rhs, op2);
+                ConstraintTextAnchor a = findMatchingAnchor(anchor1);
+                ConstraintTextAnchor b = findMatchingAnchor(anchor2);
                 if ( apply ) {
                     if ( lhs != null && !lhs.equals("") ) {
-                        ConstraintTextAnchor a = findMatchingAnchor(anchor1);
                         if ( a != null ) {
                             displayPanel.remove(a);
                         }
                         displayPanel.add(anchor1);
-                    }
-                    if ( rhs != null && !rhs.equals("") ) {
-                        ConstraintTextAnchor a = findMatchingAnchor(anchor2);
+                    } else if ( lhs != null ) {
+                        // it's blank, applies been pressed, remove the anchor if it exists
                         if ( a != null ) {
                             displayPanel.remove(a);
                         }
-                        displayPanel.add(anchor2);
                     }
+                    if ( rhs != null && !rhs.equals("") ) {
+                        if ( b != null ) {
+                            displayPanel.remove(b);
+                        }
+                        displayPanel.add(anchor2);
+                    } else if ( rhs != null ) {
+                        // It's the same as above...
+                        if ( b != null ) {
+                            displayPanel.remove(b);
+                        }
+                    }
+
                 } else {
-                    // remove them regardless of whether or not they are defined.
-                    remove(anchor1);
-                    remove(anchor2);
+                    // Apply button not pressed, newly created variable constraint, if there are active constraints, fill them in...
+                    if ( lhs != null && rhs != null && lhs.equals("") && rhs.equals("") ) {                        
+                        if ( a != null ) {
+                            // There is a matching active constraint for the lhs.
+                            variableConstraints.setLhs(a.getKeyValue());
+                        }
+                        if ( b != null ) {
+                            variableConstraints.setRhs(b.getKeyValue());
+                        }
+                    }
+                    subsetConstraintPanel.scrollToBottom();
                 }
             }
         });
@@ -187,10 +213,26 @@ public class ConstraintWidgetGroup extends Composite {
 
             @Override
             public void onRemove(RemoveSelectionConstraintEvent event) {
-                ConstraintTextAnchor anchor = (ConstraintTextAnchor) event.getSource();
-                displayPanel.remove(anchor);
-                if ( anchor.getType().equals("variable") ) {
-                    variableConstraints.clearTextField(anchor);
+                Object source = event.getSource();
+                if ( source instanceof ConstraintTextAnchor ) {
+                    ConstraintTextAnchor anchor = (ConstraintTextAnchor) source;
+                    displayPanel.remove(anchor);
+                    if ( anchor.getType().equals("variable") ) {
+                        variableConstraints.clearTextField(anchor);
+                    }
+                } else if ( source instanceof SeasonConstraintPanel ) {
+                    String variable = event.getVariable();
+                    String value = event.getValue();
+                    String key = event.getKey();
+                    String keyValue = event.getKeyValue();
+
+                    ConstraintTextAnchor anchor = new ConstraintTextAnchor("text", null, null, variable, value, key, keyValue, "eq");
+                    for (int i = 0; i < displayPanel.getWidgetCount(); i++ ) {
+                        ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
+                        if ( a.equals(anchor) ) {
+                            displayPanel.remove(a);
+                        }
+                    }
                 }
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
             }

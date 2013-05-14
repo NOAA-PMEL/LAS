@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class ERDDAPVariableConstraint extends Composite {
@@ -28,7 +29,7 @@ public class ERDDAPVariableConstraint extends Composite {
     TextBox lhs = new TextBox();
     TextBox rhs = new TextBox();
     HTML name = new HTML("variable");
-    CheckBox apply = new CheckBox();
+    PushButton apply = new PushButton("Apply");
     HTML lessThan = new HTML("&lt;");
     HTML lessThanEqual = new HTML("&le;");
     
@@ -40,6 +41,7 @@ public class ERDDAPVariableConstraint extends Composite {
     public ERDDAPVariableConstraint(VariableSerializable variableSerializable) {
         
         this.variable = variableSerializable;
+        mainPanel.setWidth(Constants.CONTROLS_WIDTH-30+"px");
         layout.setWidget(0, 0, apply);
         
         lhs.setWidth("90px");
@@ -102,7 +104,7 @@ public class ERDDAPVariableConstraint extends Composite {
         String op1 = "gt";
         String op2 = "le";
         String rhsText = rhs.getText();              
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), op2, rhsText, apply.getValue()), ERDDAPVariableConstraint.this);
+        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraint.this);
     }
     public VariableSerializable getVariable() {
         return variable;
@@ -119,7 +121,10 @@ public class ERDDAPVariableConstraint extends Composite {
     public String getRhs() {
         return rhs.getText();
     }
-    public void setApply(boolean b) {
-        apply.setValue(b);    
+    public void setLhs(String text) {
+        lhs.setText(text);        
+    }
+    public void setRhs(String text) {
+        rhs.setText(text);
     }
 }
