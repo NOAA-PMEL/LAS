@@ -27,7 +27,7 @@ public class AddVariableConstraintEvent extends GwtEvent<AddVariableConstraintEv
      * @param the second operator for "between" type constraints
      * @param the value o the right of the inequality
      */
-    public AddVariableConstraintEvent(String dsid, String varid, String lhs, String op1, String variable, String op2, String rhs, boolean apply) {
+    public AddVariableConstraintEvent(String dsid, String varid, String lhs, String op1, String variable, String rhs, String op2, boolean apply) {
         super();
         this.dsid = dsid;
         this.varid = varid;
