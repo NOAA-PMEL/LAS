@@ -886,13 +886,13 @@ public class UI extends BaseUI {
                 xOperationID = "Plot_2D_XY_zoom";
                 xTrajectoryConstraint.setActive(false);
                 xTrajectoryConstraint.setVisible(false);
-                getComparePanel().getOutputControlPanel().setVisible(true);
+//                getComparePanel().getOutputControlPanel().setVisible(true);
                 xAnalysisWidget.setVisible(true);
             } else if (xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
                 xTrajectoryConstraint.setActive(false);
                 xTrajectoryConstraint.setVisible(false);
-                getComparePanel().getOutputControlPanel().setVisible(true);
+//                getComparePanel().getOutputControlPanel().setVisible(true);
                 xAnalysisWidget.setVisible(true);
             } else if (xNewVariable.isDescrete()) {
                 if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
@@ -917,9 +917,9 @@ public class UI extends BaseUI {
         if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
             xTrajectoryConstraint.clearConstraints();
             xTrajectoryConstraint.init(xNewVariable.getDSID());
-            getComparePanel().getOutputControlPanel().setVisible(false);
+//            getComparePanel().getOutputControlPanel().setVisible(false);
         } else {
-            getComparePanel().getOutputControlPanel().setVisible(true);
+//            getComparePanel().getOutputControlPanel().setVisible(true);
             xAnalysisWidget.setVisible(true);
         }
         if (xView == null || xView.equals("")) {
@@ -1311,7 +1311,7 @@ public class UI extends BaseUI {
          } else {
              xTrajectoryConstraint.setActive(false);
              xTrajectoryConstraint.setVisible(false);
-             getComparePanel().getOutputControlPanel().setVisible(true);
+//             getComparePanel().getOutputControlPanel().setVisible(true);
              xAnalysisWidget.setVisible(true);
          }
          
@@ -1417,7 +1417,7 @@ public class UI extends BaseUI {
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);
-            getComparePanel().getOutputControlPanel().setVisible(true);
+//            getComparePanel().getOutputControlPanel().setVisible(true);
             xAnalysisWidget.setVisible(true);
         }
         if (xOrtho.size() == 0) {
