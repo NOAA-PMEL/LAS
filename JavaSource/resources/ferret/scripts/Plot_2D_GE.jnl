@@ -97,7 +97,6 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
        ELSE
           DEFINE SYMBOL two_parter = 1
        ENDIF
-pause
        go xy_plot_2D
    ENDIF
 
