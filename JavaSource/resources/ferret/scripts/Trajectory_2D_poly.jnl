@@ -18,6 +18,8 @@ DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
+DEFINE SYMBOL ribbon = 1
+
 SET MODE verify:always  ! allows for debugging
 
 DEFINE SYMBOL its_insitu = 1
@@ -69,16 +71,16 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   ENDIF
   
   IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
-    LET x_var_data = ($data_x_var)
-    IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
+    LET/UNITS=degrees_east x_var_data = ($data_x_var)
+    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
     IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
     IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
     LET var_data = ($ferret_plot_var)
 
   ELSE
     DEFINE SYMBOL do_wrap = 1
-    LET x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
-    IF ($data_y_var"0|*>1") THEN LET y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
+    LET/UNITS=degrees_east x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
+    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
     IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
     IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
     LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
@@ -180,17 +182,24 @@ IF ($ferret_poly_levels"0|*>1") THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels)
 ENDIF
 
-IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
+IF ($ribbon"0|*>1") THEN
+   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON
+ELSE
+   DEFINE SYMBOL plot_command = POLY
+   IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
+ENDIF
 
 ! Make the polygon overlay plot
 
 ! Points will mark location of missing data
-LET missing_flag = -9999999
-LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
-LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
+IF `($ribbon"0|*>1") EQ 0` THEN
+   LET missing_flag = -9999999
+   LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
+   LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
 
 ! Use color=1 for black...
-PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
+   PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
+ENDIF
 
 LET ng = var_data[x=@ngd]
 IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
@@ -215,12 +224,20 @@ ELSE
       DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
    ENDIF
 
-   DEFINE SYMBOL poly_command poly($qualifiers)
+   IF ($ribbon"0|*>1") THEN
+!      ($plot_command)($qualifiers)/sym=18/SIZ=0.06/thick/lev=v/SET x_var_data, y_var_data, var_data 
+      ($plot_command)($qualifiers)/fast/sym=dot/missing=black/lev=v/SET x_var_data, y_var_data, var_data 
+         IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+       PPL RIBBON/OVER
+   ELSE
 
-   GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
-   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-   PPL POLYGON/OVER
+      DEFINE SYMBOL poly_command ($plot_command)($qualifiers)
 
+      GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
+      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+
+      PPL POLYGON/OVER
+   ENDIF
 ENDIF
 
 ! Set the shape to what is used above it will be the same on the key
@@ -256,8 +273,18 @@ ENDIF ! ferret_label
 GO labels_above_plot
 
 
-! add any constraint labels in the lower left.
-IF `($ferret_annotations%0|*>1%) EQ 0` THEN
+! Add any constraint labels in the lower left, or as annotation notes.
+IF `($ferret_annotations%0|*>1%)` THEN
+
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+
+   REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
+      DEFINE SYMBOL mmask = `m`;\
+      IF ($mask_title_($mmask)"0|*>1) THEN ; \
+         DEFINE SYMBOL note_num = `($note_num"0") + 1`; \
+         DEFINE SYMBOL note_($note_num)_lab = ($mask_title_($mmask)); \
+      ENDIF)
+ELSE
 
    IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
    DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
@@ -272,6 +299,11 @@ IF `($ferret_annotations%0|*>1%) EQ 0` THEN
         DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
       ENDIF)
 ENDIF
+
+
+
+! Add cruise information on the top
+GO Trajectory_label_cruise_pts
 
 ! restore key-annotation setting: keys not annotated
 KEYMARK 0

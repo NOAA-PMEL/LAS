@@ -42,6 +42,11 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
+! Is it a cruise dataset?
+
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode")` THEN GO Trajectory_initialize_cruise
+
 ! The x and y locations for insitu plots
 ! Use the _CoordinateAxisType to define data_x_var, data_y_var 
 ! and data_t_var if there is a time variable.
@@ -244,5 +249,5 @@ IF ($nodata"0|*>1") THEN
    CANCEL SYMBOL variable_lab
 ENDIF
 
-!---------------- end of Jons_initialize_data_insitu.jnl -------------------------
+!---------------- end of Trajectory_initialize_data_insitu.jnl -------------------------
 
