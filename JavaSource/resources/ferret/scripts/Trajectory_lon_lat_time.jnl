@@ -24,3 +24,5 @@ IF `($data_x_var%0|*>1%) + ($data_x_var%0|*>1%) LT 2` THEN
    MESSAGE/ERROR **ERROR Dataset must contain a Lon variable and a Lat variable
    EXIT/PROGRAM
 ENDIF
+
+!---------------- end of Trajectory_lon_lat_time.jnl -------------------------

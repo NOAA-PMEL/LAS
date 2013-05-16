@@ -383,6 +383,14 @@ ENDIF
 ! set up any constraint labels
 GO set_constraint_labels
 
+
+ELSE  ! ($ngood) GT 0
+   DEFINE SYMBOL allbad = No Valid Data
+ENDIF  ! ($ngood) GT 0
+
+! Add cruise information on the top
+GO OCDMS_label_cruise_pts
+
 ! Add labels at the top of the plot
 
 GO LAS_url_label 0

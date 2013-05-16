@@ -1,0 +1,114 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $Header$
+! Trajectory_initialize_cruise.jnl
+!
+! Define variables and symbols based on cruise identification variables
+! in the OCDMS database:
+!
+! cruise_ID     -- unique identifier for each cruise
+! ship          -- ship name
+! science_group -- AOML, PMEL, LDEO, ... 
+!
+!acm 2/2009 Additiosn to the symbol definitions at the end to
+!           allow for null strings: replace these with "none"
+
+! Cancel the XY region.   These limits have nothing to do with the 
+! I and J axes of the intermediate data file.
+
+SET MEM/siz=200
+
+DEFINE REGION/DEFAULT cruise_temp_region
+CANCEL REGION
+
+! Create the 'cruise_evnt' variable which increments for each new cruise.
+
+! NOTE:  The calculation of individual cruises only works if the 
+! NOTE:  intermediate netCDF files is ordered by cruise_ID.  Make sure that
+! NOTE:  the SQL query ends with:  'ORDER BY cruise_ID'.
+
+DEFINE SYMBOL cruise_max_labels = 200
+DEFINE SYMBOL numobs `($data_var),return = isize`
+
+! If (for prop-prop plots) there are mask-by settings, apply them
+
+let nmask_labels = 0
+GO Trajectory_mask_by_var ($data_var)
+
+IF `nmask_labels GT 0` THEN
+   LET dvar_to_mask = ($data_var)
+   DEFINE SYMBOL data_var = mask_on_var* dvar_to_mask
+ENDIF
+
+IF `($numobs) EQ 1` THEN
+   LET ncruises = 1
+   DEFINE SYMBOL cruise_max = 1
+   
+   LET cruise_numbers = x[i=1:1]
+   LET longest = 1
+
+   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), rowsize,`longest`)
+
+   LET cruise_n = x[i=1:1]
+   LET subset_mask = x[i=1:1]
+
+ELSE
+   LET rshape = "`rowsize,return=shape`"
+   IF `rshape EQ "X"` THEN LET ncruises = `rowsize,return=isize`
+   IF `rshape EQ "E"` THEN LET ncruises = `rowsize,return=msize`
+   LET cruise_numbers = x[i=1:`ncruises`]
+
+   DEF SYM cruise_max = `ncruises`
+
+   LET longest = rowsize[i=@max]+2
+
+   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), rowsize,`longest`)
+
+! If  a subset of cruise ids is given then plot only those on a Prop/Prop 
+! plot, but using the symbols and colors as determined by the whole dataset.
+
+   IF ($ferret_cruise_list"0|*>1") THEN
+      LET subset_ids = {($ferret_cruise_list)}
+      LET n_subset = `subset_ids,RETURN=isize`
+
+! Define a mask to use on the entire list of values: plot or not to plot
+! the polygons on the prop-prop plot.
+     
+      LET subm_ids = IF ELEMENT_INDEX(cruise_numbers,subset_ids) THEN 1
+      LET subset_mask = subm_ids + 0*x[x=1:`ncruises`]  ! put it on a non-abstract axis.
+
+! apply mask as data_var_z* subset_mask
+
+      DEFINE SYMBOL cruises_shown = `n_subset`
+   ELSE
+      LET subset_mask = 1 + 0*i[i=1:($cruise_max)]
+   ENDIF
+
+ENDIF
+
+! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
+
+IF ($region_0_t_lo"0|*>1") THEN
+   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
+   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ENDIF
+ENDIF 
+
+IF `STRCMP("($region_0_t_lo)", "($region_0_t_hi)") EQ 0` THEN  EXIT/SCRIPT
+
+IF ($region_0_t_hi"0|*>1") THEN
+   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
+   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ENDIF
+ENDIF
+
+!---------------- end of Trajectory_initialize_cruise.jnl -------------------------
