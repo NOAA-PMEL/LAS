@@ -27,6 +27,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.TrajectoryOuterSequenceConstraint;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
@@ -741,13 +742,14 @@ public class UI extends BaseUI {
                 Window.alert("Error getting variables for this dataset.");
             } else {
                 if (cats[0].isVariableChildren()) {
+                    // TODO not a vector.  :-)
                     Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
                     logger.setLevel(Level.ALL);
                     VariableSerializable catsVariable = cats[0].getVariable(historyTokens.get("varid"));
                     logger.warning("requestGridForHistory.onSuccess changing xVariable:" + xVariable + " to cats[0].getVariable(historyTokens.get(\"varid\")):" + catsVariable);
                     xVariable = catsVariable;
                     logger.setLevel(Level.OFF);
-                    xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().setVariables(vars, vars.indexOf(xVariable));
+                    xPanels.get(0).setVariables(vars, vars.indexOf(xVariable));
                     initial_var = xVariable;
                     Util.getRPCService().getGrid(historyTokens.get("xDSID"), historyTokens.get("varid"), initVizGalForHistory);
                 } else {
@@ -793,14 +795,17 @@ public class UI extends BaseUI {
             Object source = event.getSource();
             if (source instanceof UserListBox) {
                 UserListBox lb = (UserListBox) source;
-                VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
-                xNewVariable = v;
-                if (v.isVector() || v.isDescrete()) {
-                    lb.setAddButtonEnabled(false);
-                } else {
-                    lb.setAddButtonEnabled(true);
+                // Only since compare panel events.  Hmmm... better way to do this?
+                if ( lb.getName().contains("Panel-0") ) {
+                    VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
+                    xNewVariable = v;
+                    if (v.isVector() || v.isDescrete()) {
+                        lb.setAddButtonEnabled(false);
+                    } else {
+                        lb.setAddButtonEnabled(true);
+                    }
+                    Util.getRPCService().getConfig(null, xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
                 }
-                Util.getRPCService().getConfig(null, xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
             }
         }
 
@@ -819,14 +824,8 @@ public class UI extends BaseUI {
                 TreeItem item = event.getSelectedItem();
                 Object v = item.getUserObject();
                 if (v instanceof VariableSerializable) {
-                    // Remove extra variable UserLists first
-                    // TODO: Replace this with a higher level method or use
-                    // events
-                    if (xPanels.size() > 0) {
-                        OutputPanel outputPanel = xPanels.get(0);
-                        VariableSelector variableSelector = outputPanel.getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector();
-                        variableSelector.removeListBoxesExceptFirst();
-                    }
+                    variables.clear();
+                    List<VariableSerializable> panelVars = new ArrayList<VariableSerializable>();
                     xNewVariable = (VariableSerializable) v;
                     changeDataset = true;
                     // Build the variables list from the selected item.
@@ -836,7 +835,16 @@ public class UI extends BaseUI {
                         Object userObject = child.getUserObject();
                         if ((userObject != null) && (userObject instanceof VariableSerializable)) {
                             variables.add((VariableSerializable) userObject);
+                            panelVars.add((VariableSerializable) userObject);
                         }
+                    }
+                    if (xPanels.size() > 0) {
+                        OutputPanel outputPanel = xPanels.get(0);
+                        outputPanel.getVariableControls().removeListBoxesExceptFirst();               
+                    }
+                    for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
+                        OutputPanel outputPanel = (OutputPanel) panelsIt.next();
+                        outputPanel.setVariables(panelVars, panelVars.indexOf(xNewVariable));
                     }
                     changeDataset();
                 }
@@ -1085,54 +1093,57 @@ public class UI extends BaseUI {
         eventBus.addHandler(VariablePluralityEvent.TYPE, new VariablePluralityEvent.Handler() {
             @Override
             public void onPluralityChange(VariablePluralityEvent event) {
-                VariableSelector vs = (VariableSelector) event.getSource();
-                if (event.isPlural()) {
-                    // Disable compareMenu and provide tool tip to
-                    // explain why
-                    compareMenu.setEnabled(false);
-                    compareMenu
-                            .setTitle("Comparisons are only available for plots and charts of one variable. Remove such variables on the offending panel(s) to re-enable this control.");
+                Object s = event.getSource();
+                if ( s instanceof VariableControls ) {
+                    VariableControls vc = (VariableControls) s;
+                    if (event.isPlural()) {
+                        // Disable compareMenu and provide tool tip to
+                        // explain why
+                        compareMenu.setEnabled(false);
+                        compareMenu
+                        .setTitle("Comparisons are only available for plots and charts of one variable. Remove such variables on the offending panel(s) to re-enable this control.");
 
-                    List<UserListBox> boxes = vs.getListBoxes();
-                    boolean selected = true;
-                    for (int ib = 0; ib < boxes.size(); ib++) {
-                        UserListBox box = boxes.get(ib);
-                        if (box.getSelectedIndex() < 0) {
-                            selected = false;
-                        }
-                    }
-                    if (selected) {
-                        xAdditionalVariables.clear();
-                        for (int boxesIndex = 0; boxesIndex < boxes.size(); boxesIndex++) {
-                            UserListBox box = boxes.get(boxesIndex);
-                            box.setAddButtonEnabled(true);
-                            int boxSelectionIndex = box.getSelectedIndex();
-                            if (boxSelectionIndex >= 0) {
-                                VariableSerializable v = box.getUserObject(boxSelectionIndex);
-                                if (boxesIndex == 0) {
-                                    // xVariable = v;
-                                    xNewVariable = v;
-                                } else {
-                                    xAdditionalVariables.add(v);
-                                }
+                        List<UserListBox> boxes = vc.getListBoxes();
+                        boolean selected = true;
+                        for (int ib = 0; ib < boxes.size(); ib++) {
+                            UserListBox box = boxes.get(ib);
+                            if (box.getSelectedIndex() < 0) {
+                                selected = false;
                             }
                         }
+                        if (selected) {
+                            xAdditionalVariables.clear();
+                            for (int boxesIndex = 0; boxesIndex < boxes.size(); boxesIndex++) {
+                                UserListBox box = boxes.get(boxesIndex);
+                                box.setAddButtonEnabled(true);
+                                int boxSelectionIndex = box.getSelectedIndex();
+                                if (boxSelectionIndex >= 0) {
+                                    VariableSerializable v = box.getUserObject(boxSelectionIndex);
+                                    if (boxesIndex == 0) {
+                                        // xVariable = v;
+                                        xNewVariable = v;
+                                    } else {
+                                        xAdditionalVariables.add(v);
+                                    }
+                                }
+                            }
 
-                        if (xAdditionalVariables.size() > 0) {
-                            xOperationsWidget.setByNumberOfVariables(xAdditionalVariables.size() + 1);
-                            setupMenusForOperationChange();
-                            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), vs);
+                            if (xAdditionalVariables.size() > 0) {
+                                xOperationsWidget.setByNumberOfVariables(xAdditionalVariables.size() + 1);
+                                setupMenusForOperationChange();
+                                eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), vc);
+                            }
                         }
-                    }
-                } else {
-                    if (!compareMenu.isEnabled()) {
-                        // Enable compareMenu and remove tool tip
-                        compareMenu.setEnabled(true);
-                        compareMenu.setTitle("");
-                        xAdditionalVariables.clear();
-                        xOperationsWidget.setZero(xView);
-                        setupMenusForOperationChange();
-                        eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
+                    } else {
+                        if (!compareMenu.isEnabled()) {
+                            // Enable compareMenu and remove tool tip
+                            compareMenu.setEnabled(true);
+                            compareMenu.setTitle("");
+                            xAdditionalVariables.clear();
+                            xOperationsWidget.setZero(xView);
+                            setupMenusForOperationChange();
+                            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
+                        }
                     }
                 }
             }
@@ -1434,7 +1445,7 @@ public class UI extends BaseUI {
 
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+                panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
                 panel.setOrthoRanges(xView, xOrtho);
             }
             return true;
@@ -1465,7 +1476,7 @@ public class UI extends BaseUI {
         // Now set view axis from history tokens.
         for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panelIt.next();
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
             panel.setOrthoRanges(xView, xOrtho);
         }
 
@@ -1527,13 +1538,13 @@ public class UI extends BaseUI {
         xPanels.get(0).setFromHistoryToken(tmComparePanel, omComparePanel);
         applyHistory(tokenMap);
         if (xPanels.size() > 1) {
-            xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonVisible(false);
+            xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonVisible(false);
         }
 
         if (xVariable.isVector() || xVariable.isDescrete()) {
-            xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(false);
+            xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(false);
         } else {
-            xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(true);
+            xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(true);
         }
 
         for (int t = 1; t < xPanels.size(); t++) {
@@ -1969,7 +1980,7 @@ public class UI extends BaseUI {
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();
             panel.setOperation(xOperationID, xView);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
         }
         xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
 
@@ -2113,7 +2124,7 @@ public class UI extends BaseUI {
             // panel, we need to change the 1st UserList?
             panel.setVariable(xVariable, true);
             panel.setupForCurrentVar(false, ops);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
             panel.setOrthoRanges(xView, xOrtho);
             panel.setOperation(xOperationID, xView);
         }
@@ -2210,7 +2221,7 @@ public class UI extends BaseUI {
             OutputPanel panel = (OutputPanel) panelsIt.next();
 
             panel.setOperation(xOperationID, xView);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
             panel.setOrthoRanges(xView, xOrtho);
         }
         if (xAnalysisWidget.isActive()) {
@@ -2390,7 +2401,7 @@ public class UI extends BaseUI {
             if (grid.hasT()) {
                 panel.setRange("t", false);
             }
-            panel.showOrthoAxes(xView, xOrtho, null);
+            panel.showOrthoAxes(xView, xOrtho, null, xPanelCount);
             panel.setOrthoRanges(xView, xOrtho);
         }
         xAxesWidget.setMessage("");

@@ -10,7 +10,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanelImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButtonImpl;
-import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsOldAndComplicated;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataViewImpl;
@@ -60,7 +60,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	}
 
 	@Override
-	public VariableControls getVariableControls(String id) {
+	public VariableControlsOldAndComplicated getVariableControls(String id) {
 		return new VariableControlsImpl(id);
 	}
 
