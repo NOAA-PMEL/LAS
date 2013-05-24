@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -108,7 +109,7 @@ public class VariableSelectorActivity extends AbstractActivity implements Variab
     
     @Override
     public UserListBox addUserListBox(UserListBox source, VariableSelector view) {
-        Vector<VariableSerializable> variables = source.getVariables();
+        List<VariableSerializable> variables = source.getVariables();
         String sourceName = source.getName();
         UserListBox newListBox = view.initUserListBox(sourceName, false);
         newListBox.setVariables(variables);

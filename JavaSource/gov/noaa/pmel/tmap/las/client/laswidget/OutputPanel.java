@@ -5,6 +5,8 @@ import gov.noaa.pmel.tmap.las.client.BaseUI.Mouse;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.activity.OutputControlPanelActivity;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
+import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASResponseEvent;
@@ -69,9 +71,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasName;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -110,7 +114,44 @@ public class OutputPanel extends Composite implements HasName {
     int annotationsRow = 0;
     int plotRow = 3;
     int controlPanelRow = 1;
-    
+    VariableSelectionChangeEvent.Handler variableChangeHandler = new VariableSelectionChangeEvent.Handler() {
+
+        @Override
+        public void onVariableChange(VariableSelectionChangeEvent event) {
+            Object source = event.getSource();
+            if (source instanceof UserListBox) {
+                UserListBox variablesListBox = (UserListBox) source;
+                // Only proceed if the source was from the same panel or
+                // from the comparePanel
+                if (variablesListBox != null) {
+                    String sourceName = variablesListBox.getName();
+                    if (sourceName != null) {
+                        boolean isFromThisOutputPanel = (ID != null) && ID.equalsIgnoreCase(sourceName);
+                        boolean isFromComparePanel = (CONSTANTS.comparePanelName().equalsIgnoreCase(sourceName));
+                        if (isFromThisOutputPanel || isFromComparePanel) {
+                            int selectedIndex = variablesListBox.getSelectedIndex();
+                            Object variableUserObject = variablesListBox.getUserObject(selectedIndex);
+                            if (variableUserObject instanceof VariableSerializable) {
+                                if (isFromThisOutputPanel) {
+                                    // Update this OutputPanel's variable
+                                    VariableSerializable variable = (VariableSerializable) variableUserObject;
+                                    applyVariableChange(variable, false);
+                                    setChangeDataset(false);
+                                }
+                            }
+                            // Update OutputPanels if update check box is
+                            // checked
+                            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), variablesListBox);
+//                            if (isComparePanel()) {
+//                                // Change the variable at the app level.
+//                                eventBus.fireEventFromSource(new VariableSelectionChangeEvent(), variablesListBox);
+//                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
     public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
 
         @Override
@@ -157,7 +198,9 @@ public class OutputPanel extends Composite implements HasName {
             }
             if (!waitingForHistory) {
                 if (!isComparePanel()) {
-                    getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonVisible(false);
+                    
+                    // TODO helper or higher level method?
+                    variableControls.getListBoxes().get(0).setAddButtonVisible(false);
                 }
                 // Make the update happen automatically, do not force a panel to
                 // update, push the history only if it's not a history event.
@@ -183,7 +226,7 @@ public class OutputPanel extends Composite implements HasName {
                 if (cats[0].isVariableChildren()) {
                     Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
                     nvar = cats[0].getVariable(historyTokenMap.get("varid"));
-                    getOutputControlPanel().getVariableControls().getMultiVariableSelector().setVariables(vars, vars.indexOf(nvar));
+                    variableControls.setVariables(vars, vars.indexOf(nvar));
                     if (panelVar != null && nvar != null && nvar.getDSID().equals(panelVar.getDSID())) {
                         setChangeDataset(false);
                     } else {
@@ -604,7 +647,9 @@ public class OutputPanel extends Composite implements HasName {
         }
     };
 
-    private OutputControlPanel outputControlPanel;
+    //private OutputControlPanelTwo outputControlPanel;
+    
+    private VariableControls variableControls;
 
     private final OutputPanel thisOutputPanel = this;
     /*
@@ -710,7 +755,7 @@ public class OutputPanel extends Composite implements HasName {
                     // applyVariableChange
                     // TODO: Replace this with a higher level method or use
                     // events
-                    getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().removeListBoxesExceptFirst();
+                    variableControls.removeListBoxesExceptFirst();
                     applyVariableChange(variable, true);
                 }
             }
@@ -910,25 +955,26 @@ public class OutputPanel extends Composite implements HasName {
         public void onOperationChange(OperationChangeEvent event) {
             int min = event.getMinVars();
             int max = event.getMaxVars();
-            VariableSelector vs = outputControlPanel.getVariableControls().getMultiVariableSelector().getVariableSelector();
-            List<UserListBox> boxes = vs.getListBoxes();
-
-            if (boxes.size() >= min && boxes.size() <= max)
-                return;
-            if (min == 1 && max == 1) {
-                // Handle the most likely case first separately
-                vs.removeExtraListBoxes(true);
-            } else {
-                if (boxes.size() < min) {
-                    Window.alert("This operation requires more variables.  Add variables until you have " + min + " selected.");
-                } else if (boxes.size() > max) {
-                    while (boxes.size() > max) {
-                        UserListBox b = boxes.get(boxes.size() - 1);
-                        vs.removeListBox(b);
-                    }
-                }
-            }
-        }
+            variableControls.setMinMaxNumberOfVariables(min, max);
+//            VariableSelector vs = outputControlPanel.getVariableControls().getMultiVariableSelector().getVariableSelector();
+//            List<UserListBox> boxes = outputControlPanel.getListBoxes();
+//
+//            if (boxes.size() >= min && boxes.size() <= max)
+//                return;
+//            if (min == 1 && max == 1) {
+//                // Handle the most likely case first separately
+//                vs.removeExtraListBoxes(true);
+//            } else {
+//                if (boxes.size() < min) {
+//                    Window.alert("This operation requires more variables.  Add variables until you have " + min + " selected.");
+//                } else if (boxes.size() > max) {
+//                    while (boxes.size() > max) {
+//                        UserListBox b = boxes.get(boxes.size() - 1);
+//                        vs.removeListBox(b);
+//                    }
+//                }
+//            }
+       }
     };
 
     String operationID;
@@ -1001,6 +1047,9 @@ public class OutputPanel extends Composite implements HasName {
     VariableSerializable vizGalVariable;
 
     boolean waitingForHistory = false;
+    
+    HorizontalPanel topControls = new HorizontalPanel();
+    
 
     /**
      * Builds a VizGal panel with a default plot for the variable. See {@code}
@@ -1017,6 +1066,7 @@ public class OutputPanel extends Composite implements HasName {
         this.optionID = optionID;
         this.view = view;
         this.containerType = container_type;
+        this.variableControls = new VariableControls(id);
         cancelButton = new CancelButton(ID);
         eventBus = clientFactory.getEventBus();
         panelAxesWidgets = new AxesWidgetGroup(
@@ -1054,62 +1104,25 @@ public class OutputPanel extends Composite implements HasName {
         String title = "Settings";
 
         OutputControlPanelActivity outputControlPanelPresenter = new OutputControlPanelActivity(clientFactory, ID);
-        outputControlPanel = outputControlPanelPresenter.init(ID);
+        //outputControlPanel = outputControlPanelPresenter.init(ID);
 
-        datasetButton = outputControlPanel.getDatasetButton();
+        //datasetButton = outputControlPanel.getDatasetButton();
+        // TODO will this show?
+        datasetButton = new DatasetButton();
         eventBus.addHandler(SelectionEvent.getType(), datasetSelctionHandler);
         eventBus.addHandler(OperationChangeEvent.TYPE, operationChangeHandler);
         eventBus.addHandler(CancelEvent.TYPE, cancelRequestHandler);
         eventBus.addHandler(MapChangeEvent.TYPE, mapChangeHandler);
         eventBus.addHandler(FeatureModifiedEvent.TYPE, featureModifiedHandler);
+        eventBus.addHandler(ComparisonModeChangeEvent.TYPE, compareEventHandler);
+        eventBus.addHandler(ControlVisibilityEvent.TYPE, hideControlsHandler);
+        eventBus.addHandler(VariableSelectionChangeEvent.TYPE, variableChangeHandler);
         // TODO: move this logic into the AxesWidgetGroup (or its
         // presenter/activity if one is made)
         datasetButton.addOpenClickHandler(datasetOpenHandler);
         datasetButton.addCloseClickHandler(datasetCloseHandler);
-
-        ChangeHandler variableChangeHandler = new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                Object source = event.getSource();
-                if (source instanceof UserListBox) {
-                    UserListBox variablesListBox = (UserListBox) source;
-                    // Only proceed if the source was from the same panel or
-                    // from the comparePanel
-                    if (variablesListBox != null) {
-                        String sourceName = variablesListBox.getName();
-                        if (sourceName != null) {
-                            boolean isFromThisOutputPanel = (ID != null) && ID.equalsIgnoreCase(sourceName);
-                            boolean isFromComparePanel = (CONSTANTS.comparePanelName().equalsIgnoreCase(sourceName));
-                            if (isFromThisOutputPanel || isFromComparePanel) {
-                                int selectedIndex = variablesListBox.getSelectedIndex();
-                                Object variableUserObject = variablesListBox.getUserObject(selectedIndex);
-                                if (variableUserObject instanceof VariableSerializable) {
-                                    if (isFromThisOutputPanel) {
-                                        // Update this OutputPanel's variable
-                                        VariableSerializable variable = (VariableSerializable) variableUserObject;
-                                        applyVariableChange(variable, false);
-                                        setChangeDataset(false);
-                                    }
-                                }
-                                // Update OutputPanels if update check box is
-                                // checked
-                                eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), variablesListBox);
-                                if (isComparePanel()) {
-                                    // Change the variable at the app level.
-                                    eventBus.fireEventFromSource(new VariableSelectionChangeEvent(), variablesListBox);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        HandlerRegistration variableChangeHandlerReg = eventBus.addHandler(ChangeEvent.getType(), variableChangeHandler);
-
-        // Make the comparePanel fire breadcrumb update events, on
-        // non-comparePanels listen for them
-        // outputControlPanel.getVariableControls().getVariableMetadataView().setOnComparePanel(comparePanel);
+        
+       
         if (comparePanel) {           
             datasetButton.setVisible(false);
         }
@@ -1121,13 +1134,41 @@ public class OutputPanel extends Composite implements HasName {
         lasAnnotationsPanel.setVisible(annotationsShowing);
         grid.setWidget(annotationsRow, 0, lasAnnotationsPanel);
         grid.setWidget(plotRow, 0, plot);
+        //variableControls.addStyleName("IN-LINE");
+        topControls.add(datasetButton);
+        topControls.add(variableControls);
+        topControls.add(panelAxesWidgets);
+        
         if ( !singlePanel ) {
-            grid.setWidget(controlPanelRow, 0, outputControlPanel);
+            grid.setWidget(controlPanelRow, 0, topControls);
+            
         }
         initWidget(grid);
         logger.info("OutputPanel constructor exiting with id:" + id);
     }
-    
+    private ControlVisibilityEvent.Handler hideControlsHandler = new ControlVisibilityEvent.Handler() {
+        
+        @Override
+        public void onVisibilityUpdate(ControlVisibilityEvent event) {
+            if ( event.isVisible() ) {
+                topControls.setVisible(true);
+            } else {
+                topControls.setVisible(false);
+            }
+        }
+    };
+    private ComparisonModeChangeEvent.Handler compareEventHandler = new ComparisonModeChangeEvent.Handler() {
+
+        @Override
+        public void onComparisonModeChange(ComparisonModeChangeEvent event) {
+            
+            if ( !event.isComparing() ) {
+                topControls.removeStyleName("map-size");
+            }
+            
+        }
+        
+    };
     /**
      * Evaluate scripts in an HTML string. Will eval both <script
      * src=""></script> and <script>javascript here</scripts>.
@@ -1507,9 +1548,9 @@ public class OutputPanel extends Composite implements HasName {
         token.append(";catid="+panelVar.getCATID());
         token.append(";dsid=" + panelVar.getDSID());
         token.append(";varid=" + panelVar.getID());
-        // Add additional variables to the mix.
-        List<UserListBox> boxes = outputControlPanel.getVariableControls().getMultiVariableSelector().getVariableSelector().getListBoxes();
 
+
+        List<UserListBox> boxes = variableControls.getListBoxes();;
         for (int i = 1; i < boxes.size(); i++) {
             UserListBox box = boxes.get(i);
             int index = box.getSelectedIndex();
@@ -1546,9 +1587,9 @@ public class OutputPanel extends Composite implements HasName {
     /**
      * @return the outputControlPanel
      */
-    public OutputControlPanel getOutputControlPanel() {
-        return outputControlPanel;
-    }
+//    public OutputControlPanel getOutputControlPanel() {
+//        return outputControlPanel;
+//    }
 
     public String getPrintURL() {
         return currentPrintURL;
@@ -1566,7 +1607,7 @@ public class OutputPanel extends Composite implements HasName {
         }
 
         // Add the extra variable if they are set.
-        List<UserListBox> boxes = outputControlPanel.getVariableControls().getMultiVariableSelector().getVariableSelector().getListBoxes();
+        List<UserListBox> boxes = variableControls.getListBoxes();
         for (int i = 1; i < boxes.size(); i++) {
             UserListBox box = boxes.get(i);
             int index = box.getSelectedIndex();
@@ -2286,7 +2327,8 @@ public class OutputPanel extends Composite implements HasName {
         if (!singlePanel) {
             // Try this to the right...
             // outputControlPanel.setWidget(1, 0, panelAxesWidgets);
-            outputControlPanel.setWidget(0, 1, panelAxesWidgets);
+            grid.setWidget(controlPanelRow, 0, topControls);
+            //outputControlPanel.setWidget(0, 1, panelAxesWidgets);
         } else {
             // In singlePanel, the panelAxesWidgets controls will be on the left
             // navbar.
@@ -2311,7 +2353,9 @@ public class OutputPanel extends Composite implements HasName {
     public void setURL(String url) {
         currentURL = url;
     }
-
+    public void setVariables(List<VariableSerializable> variables, int index) {
+        variableControls.setVariables(variables, index);
+    }
     public void setVariable(VariableSerializable v, boolean setFirstVariableSelector) {
         GridSerializable oldgrid = null;
         if (panelVar != null) {
@@ -2320,16 +2364,16 @@ public class OutputPanel extends Composite implements HasName {
 
         panelVar = v;
         datasetLabel.setText(panelVar.getDSName() + ": " + panelVar.getName());
-        getOutputControlPanel().getVariableControls().setVariable(panelVar);
+        variableControls.setVariable(panelVar);
         UserListBox box = null;
         if (setFirstVariableSelector) {
-            box = getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getFirstListBox();
+            box = variableControls.getFirstListBox();
         } else {
-            box = getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox();
+            box = variableControls.getLatestListBox();
         }
         String varID = panelVar.getID();
         int index = 0;
-        Vector<VariableSerializable> variables = box.getVariables();
+        List<VariableSerializable> variables = box.getVariables();
         for (int vi = 0; vi < variables.size(); vi++) {
             VariableSerializable vs = (VariableSerializable) variables.get(vi);
             if (vs.getID().equals(varID)) {
@@ -2390,7 +2434,12 @@ public class OutputPanel extends Composite implements HasName {
         panelAxesWidgets.setOpen(true);
     }
 
-    public void showOrthoAxes(String view, List<String> ortho, String analysis) {
+    public void showOrthoAxes(String view, List<String> ortho, String analysis, int panelCount) {
+        if ( (ortho.contains("x") || ortho.contains("y")) && panelCount > 1 ) {
+            topControls.addStyleName("map-size");
+        } else {
+            topControls.removeStyleName("map-size");
+        }
         panelAxesWidgets.showOrthoAxes(view, ortho, analysis, isComparePanel());
     }
 
@@ -2613,17 +2662,17 @@ public class OutputPanel extends Composite implements HasName {
         // If the history includes additional variables, add the selectors and
         // set them.
         if (historyTokenMap.keySet().contains("avarcount")) {
-            UserListBox source = getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getListBoxes().get(0);
-            getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().removeExtraListBoxes(false);
+            UserListBox source = variableControls.getListBoxes().get(0);
+            variableControls.removeListBoxesExceptFirst();
             int c = Integer.valueOf(historyTokenMap.get("avarcount"));
             for (int i = 0; i < c; i++) {
                 int avari = i + 1;
                 String avid = historyTokenMap.get("avarid" + avari);
-                VariableSelector vs = getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector();
                 source.setAddButtonVisible(false);
                 source.setRemoveButtonVisible(false);
-                UserListBox box = vs.addUserListBox(source, vs);
-                Vector<VariableSerializable> variables = box.getVariables();
+                variableControls.addUserListBox(source.getVariables(), i+1);
+                UserListBox box = variableControls.getLatestListBox();
+                List<VariableSerializable> variables = box.getVariables();
                 int v = 0;
                 int index = 0;
                 for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
@@ -2874,7 +2923,7 @@ public class OutputPanel extends Composite implements HasName {
                 aAxis = ab.toString();
             }
         }
-        this.showOrthoAxes(view, ortho, aAxis);
+        this.showOrthoAxes(view, ortho, aAxis, 1);
         panelAxesWidgets.getRefMap().resizeMap();
     }
     
@@ -2882,4 +2931,10 @@ public class OutputPanel extends Composite implements HasName {
         this.constraints = constraints;
     }
 
+    public List<VariableSerializable> getVariables() {
+       return variableControls.getListBoxes().get(0).getVariables();
+    }
+    public VariableControls getVariableControls() {
+        return variableControls;
+    }
 }

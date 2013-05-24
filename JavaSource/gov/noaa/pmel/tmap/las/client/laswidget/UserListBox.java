@@ -1,5 +1,9 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.RemoveVariableEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.ArrayList;
@@ -8,9 +12,11 @@ import java.util.List;
 import java.util.Vector;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -21,6 +27,8 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
 public class UserListBox extends Composite {
+    ClientFactory clientFactory = GWT.create(ClientFactory.class);
+    EventBus eventBus = clientFactory.getEventBus();
     PushButton add = new PushButton("+");
     ListBox list;
     private int minItemsForAddButtonToBeVisible = 2;
@@ -33,30 +41,55 @@ public class UserListBox extends Composite {
     private UserListBox() {
         super();
         list = new ListBox();
-        init(null);
+        init(null, true);
     }
 
     /**
      * @wbp.parser.constructor
      */
-    public UserListBox(String id) {
+    public UserListBox(String id, boolean addChangeHandler) {
         super();
         list = new ListBox();
-        init(id);
+        init(id, addChangeHandler);
     }
+    private ClickHandler addButtonClickHandler = new ClickHandler() {
 
-    public UserListBox(String id, boolean isMultipleSelect) {
+        @Override
+        public void onClick(ClickEvent event) {
+            
+            eventBus.fireEventFromSource(new VariablePluralityEvent(true), UserListBox.this);
+            
+        }
+        
+    };
+    private ClickHandler removeButtonClickHandler = new ClickHandler() {
+
+        @Override
+        public void onClick(ClickEvent event) {
+           
+            eventBus.fireEventFromSource(new RemoveVariableEvent(), UserListBox.this);
+            
+        }
+        
+    };
+    
+    private ChangeHandler variableChangeHandler = new ChangeHandler() {
+
+        @Override
+        public void onChange(ChangeEvent event) {
+            
+            eventBus.fireEventFromSource(new VariableSelectionChangeEvent(), UserListBox.this);
+            
+        }
+        
+    };
+    public UserListBox(String id, boolean isMultipleSelect, boolean addChangeHandler) {
         super();
         list = new ListBox(isMultipleSelect);
-        init(id);
+        init(id, addChangeHandler);
     }
-
     public void addAddButtonClickHandler(ClickHandler handler) {
         add.addClickHandler(handler);
-    }
-
-    public void addChangeHandler(ChangeHandler handler) {
-        list.addChangeHandler(handler);
     }
 
     public void addItem(String name, String value) {
@@ -127,11 +160,18 @@ public class UserListBox extends Composite {
         return list.getValue(i);
     }
 
-    public Vector<VariableSerializable> getVariables() {
-        return new Vector<VariableSerializable>(allVariables);
+    public List<VariableSerializable> getVariables() {
+        return allVariables;
     }
 
-    public void init(String id) {
+    public void init(String id, boolean addChangeHandler) {
+        add.addClickHandler(addButtonClickHandler);
+        remove.addClickHandler(removeButtonClickHandler);
+        add.setWidth("30px");
+        remove.setWidth("30px");
+        if (addChangeHandler) list.addChangeHandler(variableChangeHandler);
+        add.addStyleDependentName("SMALLER");
+        remove.addStyleDependentName("SMALLER");
         setName(id);
         add.setTitle("Click to add another variable.");
         panel.setWidget(0, 0, add);
@@ -147,7 +187,6 @@ public class UserListBox extends Composite {
                 // this button should disappear
                 // and the the remove button should appear
                 add.setVisible(false);
-                remove.setVisible(false);
             }
 
         });
@@ -218,13 +257,12 @@ public class UserListBox extends Composite {
         list.setSelectedIndex(index);
     }
 
-    public void setVariables(Vector<VariableSerializable> variables) {
-        List<VariableSerializable> variableList = new ArrayList<VariableSerializable>(variables);
+    public void setVariables(List<VariableSerializable> variables) {
         clear();
-        allVariables = variableList;
+        allVariables = variables;
         for ( int i = 0; i < allVariables.size(); i++ ) {
             VariableSerializable v = allVariables.get(i);
-            if ( !v.getAttributes().get("units").equals("text") || v.getAttributes().get("units") == null ) {
+            if ( v.getAttributes().get("units") == null || !v.getAttributes().get("units").equals("text") ) {
                 list.addItem(v.getName(), v.getID());
                 if((i==0) && (variableMetadataView!=null)){
                     variableMetadataView.setDSID(v.getDSID());
@@ -232,6 +270,18 @@ public class UserListBox extends Composite {
             }
         }
         setAddButtonVisible(variables.size() > 1);
+    }
+    public void setVariable(VariableSerializable variable) {
+        for ( int i = 0; i < allVariables.size(); i++ ) {
+            VariableSerializable v = allVariables.get(i);
+            if ( v.getID().equals(variable.getID()) && v.getDSID().equals(variable.getDSID())) {
+                list.setSelectedIndex(i);
+            }
+        }
+    }
+    public void setVariables(Vector<VariableSerializable> variables) {
+        List<VariableSerializable> variableList = new ArrayList<VariableSerializable>(variables);
+        setVariables(variableList);
     }
 
     public void setAddButtonEnabled(boolean b) {

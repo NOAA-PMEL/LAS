@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 
 /**
- * Default implementation of {@link VariableControls}.
+ * Default implementation of {@link VariableControlsOldAndComplicated}.
  */
-public class VariableControlsImpl extends HorizontalPanel implements VariableControls {
+public class VariableControlsImpl extends HorizontalPanel implements VariableControlsOldAndComplicated {
     private ClientFactory clientFactory;
     private Presenter listener;
     private MultiVariableSelector multiVariableSelector;

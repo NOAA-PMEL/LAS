@@ -39,7 +39,7 @@ public class OutputControlPanelImpl extends Composite implements OutputControlPa
     private String imageURL;
     private Presenter listener;
     String name;
-    private VariableControls variableControls;
+    private VariableControlsOldAndComplicated variableControls;
     private Label opcLabel;
 
     // Private to prevent the instantiation without a name/ID
@@ -125,7 +125,7 @@ public class OutputControlPanelImpl extends Composite implements OutputControlPa
     }
 
     @Override
-    public VariableControls getVariableControls() {
+    public VariableControlsOldAndComplicated getVariableControls() {
         return variableControls;
     }
 
