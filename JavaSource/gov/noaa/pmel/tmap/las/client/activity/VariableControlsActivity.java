@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.client.activity;
 
 //import gov.noaa.pmel.tmap.las.client.laswidget.%placeName%;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsOldAndComplicated;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.client.GWT;
@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  * Activities are started and stopped by an ActivityManager associated with a
  * container Widget.
  */
-public class VariableControlsActivity extends AbstractActivity implements VariableControls.Presenter {
+public class VariableControlsActivity extends AbstractActivity implements VariableControlsOldAndComplicated.Presenter {
 
     private ClientFactory clientFactory;
     private String name;
@@ -30,10 +30,10 @@ public class VariableControlsActivity extends AbstractActivity implements Variab
     }
 
     /**
-     * @return initialized {@link VariableControls} view
+     * @return initialized {@link VariableControlsOldAndComplicated} view
      */
-    public VariableControls init(String id) {
-        VariableControls view = clientFactory.getVariableControls(id);
+    public VariableControlsOldAndComplicated init(String id) {
+        VariableControlsOldAndComplicated view = clientFactory.getVariableControls(id);
         view.setPresenter(this);
         return view;
     }
@@ -45,12 +45,12 @@ public class VariableControlsActivity extends AbstractActivity implements Variab
 
     @Override
     public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {
-        VariableControls view = init(name);
+        VariableControlsOldAndComplicated view = init(name);
         containerWidget.setWidget(view.asWidget());
     }
 
     @Override
-    public void update(VariableControls view) {
+    public void update(VariableControlsOldAndComplicated view) {
         // TODO: Update view, probably because the variable has changed
 //        view.getVariableMetadataView().setDSID(view.getVariable().getDSID()); //TODO: Is this overwriting categories in bread crumbs?
     }

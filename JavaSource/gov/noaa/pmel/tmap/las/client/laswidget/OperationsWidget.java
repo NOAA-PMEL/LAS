@@ -289,6 +289,13 @@ public class OperationsWidget extends Composite {
             }
         }
         setMenu();
+        int totOps = xyMapRow + linePlotsRow + sectionPlotsRow + hofmullerPlotsRow;
+        if ( totOps == 1 ) {
+            // There is no operations choice to be made...
+            this.setVisible(false);
+        } else {
+            this.setVisible(true);
+        }
     }
 
     public OperationSerializable[] getOperationsSerializable() {

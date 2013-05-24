@@ -34,5 +34,5 @@ public class Constants {
     public static String APPEAR = "then a value from the list that appears here.";
     public static String LOADING = "Loading values from server...";
     
-    public static String UPDATE_NEEDED = "APPLY_NEEDED";
+    public static String UPDATE_NEEDED = "APPLY-NEEDED";
 }

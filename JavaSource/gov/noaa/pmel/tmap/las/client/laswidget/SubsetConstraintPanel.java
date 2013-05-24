@@ -133,12 +133,12 @@ public class SubsetConstraintPanel extends Composite {
         }
         return null;
     }
-    public void addVariableConstraint(ERDDAPVariableConstraintPanel variableConstraints) {
-        mainPanel.remove(variableTitle);
-        mainPanel.remove(variableConstraints);
-        mainPanel.add(variableTitle);
-        mainPanel.add(variableConstraints);
-    }
+//    public void addVariableConstraint(ERDDAPVariableConstraintPanel variableConstraints) {
+//        mainPanel.remove(variableTitle);
+//        mainPanel.remove(variableConstraints);
+//        mainPanel.add(variableTitle);
+//        mainPanel.add(variableConstraints);
+//    }
     public void scrollToBottom() {
         outerScroller.scrollToBottom();
     }

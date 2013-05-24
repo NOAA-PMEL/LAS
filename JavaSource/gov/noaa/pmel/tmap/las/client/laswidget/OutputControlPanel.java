@@ -32,7 +32,7 @@ public interface OutputControlPanel extends IsWidget, HasName {
     @Override
     public String getName();
 
-    public VariableControls getVariableControls();
+    public VariableControlsOldAndComplicated getVariableControls();
 
     public Widget getWidget(int row, int column);
 

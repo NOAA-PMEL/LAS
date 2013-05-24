@@ -23,6 +23,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ToggleButton;
@@ -34,6 +35,7 @@ public class SeasonConstraintPanel extends Composite {
     List<ToggleButton> buttons = new ArrayList<ToggleButton>();
 
     FlowPanel mainPanel = new FlowPanel();
+    FlexTable circle = new FlexTable();
     FlowPanel firstRow = new FlowPanel();
     FlowPanel secondRow = new FlowPanel();
     FlowPanel thirdRow = new FlowPanel();
@@ -113,25 +115,38 @@ public class SeasonConstraintPanel extends Composite {
         dec.addClickHandler(monthClickHandler);
 
 
-        firstRow.add(jan);
-        firstRow.add(feb);
-        firstRow.add(mar);
-        firstRow.add(apr);
-
-        secondRow.add(may);
-        secondRow.add(jun);
-        secondRow.add(jul);
-        secondRow.add(aug);
-
-        thirdRow.add(sep);
-        thirdRow.add(oct);
-        thirdRow.add(nov);
-        thirdRow.add(dec);
+        circle.setWidget(0, 0, jan);
+        circle.setWidget(0, 1, feb);
+        circle.setWidget(0, 2, mar);
+        circle.setWidget(0, 3, apr);
+        circle.setWidget(1, 3, may);
+        circle.setWidget(2, 3, jun);
+        circle.setWidget(3, 3, jul);
+        circle.setWidget(3, 2, aug);
+        circle.setWidget(3, 1, sep);
+        circle.setWidget(3, 0, oct);
+        circle.setWidget(2, 0, nov);
+        circle.setWidget(1, 0, dec);
+//        firstRow.add(jan);
+//        firstRow.add(feb);
+//        firstRow.add(mar);
+//        firstRow.add(apr);
+//
+//        secondRow.add(may);
+//        secondRow.add(jun);
+//        secondRow.add(jul);
+//        secondRow.add(aug);
+//
+//        thirdRow.add(sep);
+//        thirdRow.add(oct);
+//        thirdRow.add(nov);
+//        thirdRow.add(dec);
 
         mainPanel.add(hint);
-        mainPanel.add(firstRow);
-        mainPanel.add(secondRow);
-        mainPanel.add(thirdRow);
+        mainPanel.add(circle);
+//        mainPanel.add(firstRow);
+//        mainPanel.add(secondRow);
+//        mainPanel.add(thirdRow);
 
         initWidget(mainPanel);
         eventBus.addHandler(RemoveSelectionConstraintEvent.TYPE, new RemoveSelectionConstraintEvent.Handler() {

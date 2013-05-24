@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PushButton;
 
@@ -35,9 +36,8 @@ public class AxesWidgetGroup extends Composite {
     AxisWidget zWidget;
     HorizontalPanel layout;
     FlexTable menuWidgets;
-//    DisclosurePanel panel;
     FlowPanel panel;
-
+    FlexTable row = new FlexTable();
     HTML plotAxisMessage;
     String title;
     boolean hasZ;
@@ -56,23 +56,7 @@ public class AxesWidgetGroup extends Composite {
      * @param ortho_title
      * @param layout
      */
-    public AxesWidgetGroup(
-            String title,
-            String orientation,
-            String width,
-            String panel_title,
-            String tile_server,
-            EventBus eventBus) {
-        // final AxesWidgetGroup thisAxesWidgetGroup = this;
-        // Handler controlVisibilityEventHandler = new
-        // ControlVisibilityEvent.Handler() {
-        // @Override
-        // public void onVisibilityUpdate(ControlVisibilityEvent event) {
-        // thisAxesWidgetGroup.setVisible(event.isVisible());
-        // }
-        // };
-        // eventBus.addHandler(ControlVisibilityEvent.TYPE,
-        // controlVisibilityEventHandler);
+    public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server, EventBus eventBus) {
         layout = new HorizontalPanel();
         menuWidgets = new FlexTable();
         refMap = new OLMapWidget("128px", "256px", tile_server);
@@ -81,15 +65,26 @@ public class AxesWidgetGroup extends Composite {
         zWidget.setVisible(false);
         dateTimeWidget = new DateTimeWidget();
         dateTimeWidget.setVisible(false);
-        layout.add(refMap);
         panel = new FlowPanel();//new DisclosurePanel(title);
-        panel.add(layout);
-        panel.setVisible(true);//.setOpen(true);
-        menuWidgets.setWidget(0, 0, zWidget);
-        menuWidgets.setWidget(1, 0, dateTimeWidget);
-        menuWidgets.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-        menuWidgets.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-        layout.add(menuWidgets);
+        
+        if ( orientation.equals("horizontal") ) {
+            row.setWidget(0, 0, refMap);
+            row.setWidget(0, 1, zWidget);
+            row.setWidget(0, 2, dateTimeWidget);
+            row.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+            row.getFlexCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+            row.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
+            panel.add(row);
+        } else {
+            layout.add(refMap);
+            panel.add(layout);
+            panel.setVisible(true);//.setOpen(true);
+            menuWidgets.setWidget(0, 0, zWidget);
+            menuWidgets.setWidget(1, 0, dateTimeWidget);
+            menuWidgets.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+            menuWidgets.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+            layout.add(menuWidgets);      
+        }
         initWidget(panel);
     }
 

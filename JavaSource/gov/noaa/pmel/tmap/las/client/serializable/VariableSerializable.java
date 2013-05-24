@@ -99,7 +99,10 @@ public class VariableSerializable extends Serializable implements IsSerializable
 		this.vector = vector;
 	}
 	public boolean isDescrete() {
-	    return !getAttributes().get("grid_type").equals("regular");
+	    return getAttributes().get("grid_type").equals("trajectory") || 
+	            getAttributes().get("grid_type").equals("scattered") || 
+	            getAttributes().get("grid_type").equals("point") ||
+	            getAttributes().get("grid_type").equals("profile") ; //TODO   ||   OTHER DSG TYPES
 	}
     public String getShortname() {
         return shortname;

@@ -12,6 +12,8 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -33,7 +35,7 @@ public class AxisWidget extends Composite {
     ListBox hi_axis = new ListBox();
     FlexTable lo_layout = new FlexTable();
     FlexTable hi_layout = new FlexTable();
-    FlexTable layout = new FlexTable();
+    FlowPanel layout = new FlowPanel();
     NumberFormat format = NumberFormat.getFormat("###.##");
     boolean range;
     EventBus eventBus;
@@ -183,12 +185,27 @@ public class AxisWidget extends Composite {
             lo_layout.setWidget(0, 1, lo_axis);
             hi_layout.setWidget(0, 0, hi_label_range);
             hi_layout.setWidget(0, 1, hi_axis);
-            layout.setWidget(0, 0, lo_layout);
-            layout.setWidget(1, 0, hi_layout);
+            layout.add(lo_layout);
+            layout.add(hi_layout);
+//            layout.setWidget(0, 0, lo_layout);
+//            layout.setWidget(1, 0, hi_layout);
+            lo_layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+            lo_layout.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+            hi_layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+            hi_layout.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+//            layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+//            layout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
         } else {
+            
             lo_layout.setWidget(0, 0, lo_label);
             lo_layout.setWidget(0, 1, lo_axis);
-            layout.setWidget(0, 0, lo_layout);
+//            layout.setWidget(0, 0, lo_layout);
+            layout.add(lo_layout);
+            
+            lo_layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+            lo_layout.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+            
+//            layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
         }
     }
 

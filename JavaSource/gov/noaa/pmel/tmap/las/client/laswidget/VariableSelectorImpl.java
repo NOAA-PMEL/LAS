@@ -146,22 +146,22 @@ public class VariableSelectorImpl extends VerticalPanel implements HasName,
 	public UserListBox initUserListBox(String id, boolean addChangeHandler) {
 		final VariableSelector view = this;
 		final UserListBox newListBox = new UserListBox(id, false);
-		if (addChangeHandler) {
-			newListBox.addChangeHandler(new ChangeHandler() {
-				@Override
-				public void onChange(ChangeEvent event) {
-					listener.onChange(event, view);
-					listener.onChange(event, newListBox);
-				}
-			});
-		} else {
-			newListBox.addChangeHandler(new ChangeHandler() {
-				@Override
-				public void onChange(ChangeEvent event) {
-					listener.onChange(event, view);
-				}
-			});
-		}
+//		if (addChangeHandler) {
+//			newListBox.addChangeHandler(new ChangeHandler() {
+//				@Override
+//				public void onChange(ChangeEvent event) {
+//					listener.onChange(event, view);
+//					listener.onChange(event, newListBox);
+//				}
+//			});
+//		} else {
+//			newListBox.addChangeHandler(new ChangeHandler() {
+//				@Override
+//				public void onChange(ChangeEvent event) {
+//					listener.onChange(event, view);
+//				}
+//			});
+//		}
 		newListBox.addAddButtonClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -207,7 +207,7 @@ public class VariableSelectorImpl extends VerticalPanel implements HasName,
 			}
 			if (latestListBox != null) {
 				latestListBox.setRemoveButtonVisible(itemCount > 1);
-				Vector<VariableSerializable> variables = latestListBox
+				List<VariableSerializable> variables = latestListBox
 						.getVariables();
 				if (variables != null) {
 					latestListBox
@@ -252,7 +252,7 @@ public class VariableSelectorImpl extends VerticalPanel implements HasName,
 		latestListBox.addVectors();
 		if (latestListBox != null) {
 			latestListBox.setRemoveButtonVisible(false);
-			Vector<VariableSerializable> variables = latestListBox
+			List<VariableSerializable> variables = latestListBox
 					.getVariables();
 			if (variables != null) {
 				latestListBox.setAddButtonVisible(variables.size() > itemCount);

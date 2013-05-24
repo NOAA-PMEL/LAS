@@ -259,7 +259,7 @@ public class DatasetWidget extends Tree implements HasName {
         private void loadItem(VariableSerializable[] vars) {
             for ( int j = 0; j < vars.length; j++ ) {
                 // Do not include variables with units "text" used to denote "selector" variables in in-situ data sets like SOCAT
-                if (!vars[j].getAttributes().get("units").equals("text") || vars[j].getAttributes().get("units") == null) {
+                if ( vars[j].getAttributes().get("units") == null || !vars[j].getAttributes().get("units").equals("text") ) {
                     TreeItem item = new TreeItem();
                     item.setText(vars[j].getName());
                     item.setUserObject(vars[j]);

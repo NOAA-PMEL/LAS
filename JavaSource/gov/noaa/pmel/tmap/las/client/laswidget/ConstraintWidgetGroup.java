@@ -46,21 +46,24 @@ public class ConstraintWidgetGroup extends Composite {
     ScrollPanel scrollPanel = new ScrollPanel();
     FlowPanel displayPanel = new FlowPanel();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
-    Label topLabel = new Label("Constrain the data displayed on the plot.");
-    Label constraintLabel = new Label("My selections:");
+    HTML topLabel = new HTML("<strong>Select:</strong>");
+    HTML constraintLabel = new HTML("<strong>My selections:</strong>");
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
-    
+    private static double STACK_HEIGHT = Constants.CONTROLS_WIDTH + 60;
     ERDDAPVariableConstraintPanel variableConstraints;
-    SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
-    SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
-    SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
+//    SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
+//    SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
+//    SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
     
     // Keep track of the dsid for this panel.
     String dsid;
+    
+    // Keep track of the stack panel index.
+    int panel = 0;
 
     public ConstraintWidgetGroup() {
-        constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", Constants.CONTROLS_WIDTH+"px");
+        constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", STACK_HEIGHT+"px");
         mainPanel.add(topLabel);
         interiorPanel.add(constraintPanel);
         mainPanel.add(interiorPanel);
@@ -70,12 +73,12 @@ public class ConstraintWidgetGroup extends Composite {
         displayPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
-        constraintPanel.add(selectionConstraintPanel, "text", 30);
-        constraintPanel.add(subsetConstraintPanel, "text", 30);
-        constraintPanel.add(seasonConstraintPanel, "text", 30);
+//        constraintPanel.add(selectionConstraintPanel, "text", 30);
+//        constraintPanel.add(subsetConstraintPanel, "text", 30);
+//        constraintPanel.add(seasonConstraintPanel, "text", 30);
 
         variableConstraints = new ERDDAPVariableConstraintPanel();
-        subsetConstraintPanel.addVariableConstraint(variableConstraints);
+//        subsetConstraintPanel.addVariableConstraint(variableConstraints);
         initWidget(mainPanel);
     }
 
@@ -117,22 +120,39 @@ public class ConstraintWidgetGroup extends Composite {
         
     };
     public void init(List<ERDDAPConstraintGroup> constraintGroups) {
-
+        panel = 0;
+        if ( constraintPanel.getWidgetCount() > 0 ) constraintPanel.clear();
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
             if ( erddapConstraintGroup.getType().equals("selection") ) {
+                SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
                 selectionConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.setHeaderText(0, erddapConstraintGroup.getName());
+                constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 22);       
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
             } else if ( erddapConstraintGroup.getType().equals("subset")) {
+                SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
                 subsetConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.setHeaderText(1, erddapConstraintGroup.getName());
+                constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
             } else if ( erddapConstraintGroup.getType().equals("season") ) {
+                SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
                 seasonConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.setHeaderText(2, erddapConstraintGroup.getName());
+                constraintPanel.add(seasonConstraintPanel, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals("variable") ) {
+                variableConstraints = new ERDDAPVariableConstraintPanel();
+                constraintPanel.add(variableConstraints, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
             }
         }
  
-        constraintPanel.showWidget(0);
+        if ( constraintPanel.getWidgetCount() > 0 ) {
+            constraintPanel.showWidget(0);
+        }
         eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
 
             @Override
@@ -184,7 +204,6 @@ public class ConstraintWidgetGroup extends Composite {
                             variableConstraints.setRhs(b.getKeyValue());
                         }
                     }
-                    subsetConstraintPanel.scrollToBottom();
                 }
             }
         });

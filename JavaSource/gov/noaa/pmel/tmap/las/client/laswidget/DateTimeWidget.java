@@ -29,8 +29,11 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.maps.jsio.rebind.LongFragmentGenerator;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
@@ -69,7 +72,7 @@ public class DateTimeWidget extends Composite {
 	ListBox hi_day = new ListBox();
 	HourListBox hi_hour = new HourListBox();
     
-	Grid dateTimeWidget = new Grid(2, 6);
+	FlexTable dateTimeWidget = new FlexTable();
 
 	boolean hasYear = false;
 	boolean hasMonth = false;
@@ -355,17 +358,20 @@ public class DateTimeWidget extends Composite {
 			}
 			
 		}
-		CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
+		FlexCellFormatter cellFormatter = dateTimeWidget.getFlexCellFormatter();
 		if ( range ) {
 			for ( int i = 0; i < 5; i++ ) {
 				cellFormatter.setVisible(1, i, true);
 			}
 			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+			cellFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+			cellFormatter.setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
 		} else {
 			for ( int i = 0; i < 5; i++ ) {
 				cellFormatter.setVisible(1, i, false);
 			}
             dateTimeWidget.setWidget(0, 0, d_label);
+            cellFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
 		}
 	}
 
