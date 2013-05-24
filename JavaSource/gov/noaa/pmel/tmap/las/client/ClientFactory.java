@@ -5,7 +5,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsOldAndComplicated;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 
@@ -33,7 +33,7 @@ public interface ClientFactory {
 
 	OutputControlPanel getOutputControlPanel(String id);
 
-	VariableControls getVariableControls(String id);
+	VariableControlsOldAndComplicated getVariableControls(String id);
 
 	VariableMetadataView getVariableMetadataView(String id);
 

@@ -16,6 +16,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsOldAndComplicated;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -123,7 +124,7 @@ public class BaseUI {
     /*
      * Classes that extend BaseUI can keep track of xVariable's siblings
      */
-    Vector<VariableSerializable> variables = new Vector<VariableSerializable>();
+    List<VariableSerializable> variables = new ArrayList<VariableSerializable>();
     List<VariableSerializable> xAdditionalVariables = new ArrayList<VariableSerializable>();
     // Analysis controls in the navigation panel
     AnalysisWidget xAnalysisWidget;
@@ -725,9 +726,9 @@ public class BaseUI {
 
                 // TODO: Utilize MVP design patterns to avoid such tight
                 // couplings
-                OutputControlPanel outputControlPanel = panel.getOutputControlPanel();
-                outputControlPanel.getDisplayButton().setVisible(numPanels > 1);
-                VariableControls variableControls = outputControlPanel.getVariableControls();
+//                OutputControlPanel outputControlPanel = panel.getOutputControlPanel();
+//                outputControlPanel.getDisplayButton().setVisible(numPanels > 1);
+//                VariableControls variableControls = outputControlPanel.getVariableControls();
                 // VariableMetadataView variableMetadataView =
                 // variableControls.getVariableMetadataView();
                 if (xVariable != null) {
@@ -739,9 +740,12 @@ public class BaseUI {
 
                     // Set the variables in this panel's
                     // OutputControlPanel's MultiVariableSelector
-                    final MultiVariableSelector multiVariableSelector = variableControls.getMultiVariableSelector();
+                    //final MultiVariableSelector multiVariableSelector = variableControls.getMultiVariableSelector();
+                    final VariableControls variableControls = panel.getVariableControls();
                     if ((variables != null) && (variables.size() > 0) && (variables.indexOf(xVariable) >= 0)) {
-                        multiVariableSelector.setVariables(variables, variables.indexOf(xVariable));
+                        List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
+                        vs.addAll(variables);
+                        panel.setVariables(vs, variables.indexOf(xVariable));
                     } else {
                         // Update variables an then set the variables in this
                         // panels' OutputControlPanel's MultiVariableSelector
@@ -752,15 +756,18 @@ public class BaseUI {
                             // the server
                             OutputPanel comparePanel = (OutputPanel) xPanelTable.getWidget(0, 0);
                             if (comparePanel != null) {
-                                variables = comparePanel.getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariables();
+                                
+                                variables = comparePanel.getVariables();
+                                List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
+                                vs.addAll(variables);
                                 if ((variables != null) && (variables.size() > 0) && (variables.indexOf(xVariable) >= 0)) {
-                                    multiVariableSelector.setVariables(variables, variables.indexOf(xVariable));
+                                    panel.setVariables(vs, variables.indexOf(xVariable));
                                     mustUpdateVariablesFromServer = false;
                                 }
                             }
                         }
                         if (mustUpdateVariablesFromServer)
-                            updateVariablesFromServer(multiVariableSelector);
+                            updateVariablesFromServer(variableControls);
                     }
                 }
 
@@ -951,7 +958,7 @@ public class BaseUI {
     /**
      * @param multiVariableSelector
      */
-    void updateVariablesFromServer(final MultiVariableSelector multiVariableSelector) {
+    void updateVariablesFromServer(final VariableControls variableControls) {
         AsyncCallback updateSubPanelVarsCallback = new AsyncCallback() {
 
             @Override
@@ -979,7 +986,9 @@ public class BaseUI {
                                 if (vars[i].getID().equals(xVarID))
                                     index = i;
                             }
-                            multiVariableSelector.setVariables(variables, index);
+                            List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
+                            vs.addAll(variables);
+                            variableControls.setVariables(vs, index);
                         }
                     }
                 }
