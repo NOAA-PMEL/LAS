@@ -11,6 +11,8 @@ import java.util.Vector;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -22,17 +24,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ERDDAPVariableConstraintPanel extends Composite {
+public class ERDDAPValidDataConstraintPanel extends Composite {
 
-    HorizontalPanel row1 = new HorizontalPanel();
     HorizontalPanel row2 = new HorizontalPanel();
-    HorizontalPanel row3 = new HorizontalPanel();
-    TextBox lhs = new TextBox();
-    TextBox rhs = new TextBox();
+
 
     PushButton apply = new PushButton("Apply");
-    HTML lessThan = new HTML("&lt;");
-    HTML lessThanEqual = new HTML("&le;");
 
     VariableSerializable variable;
 
@@ -44,7 +41,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
 
-    public ERDDAPVariableConstraintPanel() {
+    public ERDDAPValidDataConstraintPanel() {
         variablesListBox.setVisibleItemCount(1);
         variablesListBox.addChangeHandler(new ChangeHandler() {
 
@@ -52,43 +49,28 @@ public class ERDDAPVariableConstraintPanel extends Composite {
             public void onChange(ChangeEvent event) {
                 int index = variablesListBox.getSelectedIndex();
                 variable = variablesListBox.getVariable(index);
-                eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ERDDAPVariableConstraintPanel.this);
+                eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "ne", variable.getName(), "", "ne", false), ERDDAPValidDataConstraintPanel.this);
             }
 
         });
 
-        lhs.addChangeHandler(new ChangeHandler() {
+
+        apply.addClickHandler(new ClickHandler() {
 
             @Override
-            public void onChange(ChangeEvent event) {
+            public void onClick(ClickEvent event) {
                 fireEvent();
             }
             
         });
-        rhs.addChangeHandler( new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                fireEvent();
-            }
-            
-        });
-
         layout.setWidget(0, 0, apply);
        
         
-        row1.add(lhs);
-        row1.add(lessThan);
 
         row2.add(variablesListBox);
 
-
-        row3.add(lessThanEqual);
-        row3.add(rhs);
-
-        layout.setWidget(0, 1, row1);
         layout.setWidget(1, 0, row2);
-        layout.setWidget(2, 0, row3);
+
         
         layout.getFlexCellFormatter().setRowSpan(0, 0, 3);
         
@@ -123,26 +105,12 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         int index = variablesListBox.getSelectedIndex();
         variable = variablesListBox.getVariable(index);
     }
-    public void clearTextField(ConstraintTextAnchor anchor) {
-        if ( variable.getID().equals(anchor.getVarid()) && variable.getDSID().equals(anchor.getDsid())) {
-            if ( anchor.getOp().equals("gt") ) {
-                lhs.setText("");
-            } else if ( anchor.getOp().equals("le")) {
-                rhs.setText("");
-            }
-        }
-    }
-    public void setLhs(String text) {
-        lhs.setText(text);
-    }
-    public void setRhs(String text) {
-        rhs.setText(text);
-    }
+
     private void fireEvent() {
-        String lhsText = lhs.getText();
-        String op1 = "gt";
-        String op2 = "le";
-        String rhsText = rhs.getText();              
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraintPanel.this);
+
+        String op1 = "ne";
+        String op2 = "ne";
+            
+        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "NaN", op1, variable.getName(), "NaN", op2, true), ERDDAPValidDataConstraintPanel.this);
     }
 }

@@ -52,9 +52,7 @@ public class ConstraintWidgetGroup extends Composite {
     EventBus eventBus = clientFactory.getEventBus();
     private static double STACK_HEIGHT = Constants.CONTROLS_WIDTH + 60;
     ERDDAPVariableConstraintPanel variableConstraints;
-//    SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
-//    SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
-//    SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
+    ERDDAPValidDataConstraintPanel validConstraints;
     
     // Keep track of the dsid for this panel.
     String dsid;
@@ -73,12 +71,9 @@ public class ConstraintWidgetGroup extends Composite {
         displayPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
-//        constraintPanel.add(selectionConstraintPanel, "text", 30);
-//        constraintPanel.add(subsetConstraintPanel, "text", 30);
-//        constraintPanel.add(seasonConstraintPanel, "text", 30);
 
         variableConstraints = new ERDDAPVariableConstraintPanel();
-//        subsetConstraintPanel.addVariableConstraint(variableConstraints);
+        validConstraints = new ERDDAPValidDataConstraintPanel();
         initWidget(mainPanel);
     }
 
@@ -114,6 +109,7 @@ public class ConstraintWidgetGroup extends Composite {
                 if ( cats[i].isVariableChildren() ) {
                     VariableSerializable[] variables = cats[i].getDatasetSerializable().getVariablesSerializable();
                     variableConstraints.setVariables(variables);
+                    validConstraints.setVariables(variables);
                 }
             }
         }
@@ -147,6 +143,11 @@ public class ConstraintWidgetGroup extends Composite {
                 constraintPanel.add(variableConstraints, erddapConstraintGroup.getName(), 22);
                 constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
                 panel++;
+            } else if ( erddapConstraintGroup.getType().equals("valid") ) {
+                validConstraints = new ERDDAPValidDataConstraintPanel();
+                constraintPanel.add(validConstraints, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
             }
         }
  
@@ -170,29 +171,43 @@ public class ConstraintWidgetGroup extends Composite {
                 ConstraintTextAnchor a = findMatchingAnchor(anchor1);
                 ConstraintTextAnchor b = findMatchingAnchor(anchor2);
                 if ( apply ) {
-                    if ( lhs != null && !lhs.equals("") ) {
-                        if ( a != null ) {
-                            displayPanel.remove(a);
+                    if ( op1.equals("ne") && op2.equals("ne") ) {
+                        // Both are the same, only use the second here:
+                        if ( rhs != null && !rhs.equals("") ) {
+                            if ( b != null ) {
+                                displayPanel.remove(b);
+                            }
+                            displayPanel.add(anchor2);
+                        } else if ( rhs != null ) {
+                            // It's the same as above...
+                            if ( b != null ) {
+                                displayPanel.remove(b);
+                            }
                         }
-                        displayPanel.add(anchor1);
-                    } else if ( lhs != null ) {
-                        // it's blank, applies been pressed, remove the anchor if it exists
-                        if ( a != null ) {
-                            displayPanel.remove(a);
+                    } else {
+                        if ( lhs != null && !lhs.equals("") ) {
+                            if ( a != null ) {
+                                displayPanel.remove(a);
+                            }
+                            displayPanel.add(anchor1);
+                        } else if ( lhs != null ) {
+                            // it's blank, applies been pressed, remove the anchor if it exists
+                            if ( a != null ) {
+                                displayPanel.remove(a);
+                            }
+                        }
+                        if ( rhs != null && !rhs.equals("") ) {
+                            if ( b != null ) {
+                                displayPanel.remove(b);
+                            }
+                            displayPanel.add(anchor2);
+                        } else if ( rhs != null ) {
+                            // It's the same as above...
+                            if ( b != null ) {
+                                displayPanel.remove(b);
+                            }
                         }
                     }
-                    if ( rhs != null && !rhs.equals("") ) {
-                        if ( b != null ) {
-                            displayPanel.remove(b);
-                        }
-                        displayPanel.add(anchor2);
-                    } else if ( rhs != null ) {
-                        // It's the same as above...
-                        if ( b != null ) {
-                            displayPanel.remove(b);
-                        }
-                    }
-
                 } else {
                     // Apply button not pressed, newly created variable constraint, if there are active constraints, fill them in...
                     if ( lhs != null && rhs != null && lhs.equals("") && rhs.equals("") ) {                        
