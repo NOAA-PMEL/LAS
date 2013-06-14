@@ -2,6 +2,8 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
+import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.Iterator;
@@ -144,5 +146,14 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         String op2 = "le";
         String rhsText = rhs.getText();              
         eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraintPanel.this);
+        eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
+    }
+    public void clearTextFields() {
+        lhs.setText("");
+        rhs.setText("");
+        
+    }
+    public VariableSerializable getVariable() {
+        return variable;
     }
 }

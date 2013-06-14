@@ -5,11 +5,33 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ConfigSerializable implements IsSerializable {
+    String dsid;
+    String varid;
 	GridSerializable grid;
 	OperationSerializable[] operations;
 	RegionSerializable[] regions;
 	List<ERDDAPConstraintGroup> constraintGroups;
-	public GridSerializable getGrid() {
+	CategorySerializable categorySerializable;
+
+    public CategorySerializable getCategorySerializable() {
+        return categorySerializable;
+    }
+    public void setCategorySerializable(CategorySerializable categorySerializable) {
+        this.categorySerializable = categorySerializable;
+    }
+    public String getDsid() {
+        return dsid;
+    }
+    public void setDsid(String dsid) {
+        this.dsid = dsid;
+    }
+    public String getVarid() {
+        return varid;
+    }
+    public void setVarid(String varid) {
+        this.varid = varid;
+    }
+    public GridSerializable getGrid() {
 		return grid;
 	}
 	public void setGrid(GridSerializable grid) {

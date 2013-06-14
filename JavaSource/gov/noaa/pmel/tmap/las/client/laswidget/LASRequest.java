@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -590,5 +591,17 @@ public class LASRequest {
             }
         }
         return op;
+    }
+
+    public void addConstraints(List<ConstraintSerializable> cons) {
+        for (Iterator conIt = cons.iterator(); conIt.hasNext();) {
+            ConstraintSerializable constraint = (ConstraintSerializable) conIt.next();
+            if ( constraint.getType().equals("text") ) {
+                this.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+            } else {
+                this.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
+            }
+        }
+        
     }
 }

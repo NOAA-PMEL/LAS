@@ -749,7 +749,7 @@ public class UI extends BaseUI {
                     logger.warning("requestGridForHistory.onSuccess changing xVariable:" + xVariable + " to cats[0].getVariable(historyTokens.get(\"varid\")):" + catsVariable);
                     xVariable = catsVariable;
                     logger.setLevel(Level.OFF);
-                    xPanels.get(0).setVariables(vars, vars.indexOf(xVariable));
+                    xPanels.get(0).setVariables(vars, xVariable);
                     initial_var = xVariable;
                     Util.getRPCService().getGrid(historyTokens.get("xDSID"), historyTokens.get("varid"), initVizGalForHistory);
                 } else {
@@ -844,7 +844,7 @@ public class UI extends BaseUI {
                     }
                     for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
                         OutputPanel outputPanel = (OutputPanel) panelsIt.next();
-                        outputPanel.setVariables(panelVars, panelVars.indexOf(xNewVariable));
+                        outputPanel.setVariables(panelVars, xNewVariable);
                     }
                     changeDataset();
                 }
@@ -924,7 +924,7 @@ public class UI extends BaseUI {
         // Regardless, if it's a trajectory we need to change the widget values.
         if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
             xTrajectoryConstraint.clearConstraints();
-            xTrajectoryConstraint.init(xNewVariable.getDSID());
+            xTrajectoryConstraint.init(xNewVariable.getDSID(), xNewVariable.getID());
 //            getComparePanel().getOutputControlPanel().setVisible(false);
         } else {
 //            getComparePanel().getOutputControlPanel().setVisible(true);
@@ -1424,7 +1424,7 @@ public class UI extends BaseUI {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
-            xTrajectoryConstraint.init(xVariable.getDSID());
+            xTrajectoryConstraint.init(xVariable.getDSID(), xVariable.getID());
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);

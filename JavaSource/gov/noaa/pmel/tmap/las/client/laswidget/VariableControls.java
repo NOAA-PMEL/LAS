@@ -134,10 +134,10 @@ public class VariableControls extends Composite {
         layout.add(list);
         setAddRemove(false);
     }
-    public void setVariables(List<VariableSerializable> variables, int index) {
+    public void setVariables(List<VariableSerializable> variables, VariableSerializable var) {
         setVariables(variables);
         UserListBox list = (UserListBox) layout.getWidget(layout.getWidgetCount() - 1);
-        list.setSelectedIndex(index);
+        list.setVariable(var);
     }
     public void addUserListBox(List<VariableSerializable> variables, int index) {
         int next = layout.getWidgetCount() + 1;
