@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsOldAndComplicated;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCManager;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -25,6 +26,8 @@ public interface ClientFactory {
 	EventBus getEventBus();
 
 	HelpMenuBar getHelpMenuBar();
+	
+	RPCManager getRPCManager();
 
 	// PlaceController getPlaceController();
 	public InteractiveDownloadDataView getInteractiveDownloadDataView();

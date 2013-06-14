@@ -128,4 +128,12 @@ public class Util {
 		String image = imageUrl.substring(imageUrl.lastIndexOf("/")+1, imageUrl.length());
 		return "file="+file+"&image="+image;
 	}
+	 public static native String getTileServer()
+	    /*-{
+	        if ($wnd.OL_map_widget_tile_server == undefined) {
+	            return "";
+	        } else {
+	            return $wnd.OL_map_widget_tile_server;
+	        }
+	    }-*/;
 }

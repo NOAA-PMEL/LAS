@@ -3,6 +3,10 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.CategoriesReturnedEvent;
+import gov.noaa.pmel.tmap.las.client.event.ConfigReturnedEvent;
+import gov.noaa.pmel.tmap.las.client.event.GetCategoriesEvent;
+import gov.noaa.pmel.tmap.las.client.event.GetConfigEvent;
 import gov.noaa.pmel.tmap.las.client.event.GridChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.RemoveSelectionConstraintEvent;
@@ -37,6 +41,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class ConstraintWidgetGroup extends Composite {
 
@@ -44,7 +49,7 @@ public class ConstraintWidgetGroup extends Composite {
     VerticalPanel mainPanel = new VerticalPanel();
     HorizontalPanel interiorPanel = new HorizontalPanel();
     ScrollPanel scrollPanel = new ScrollPanel();
-    FlowPanel displayPanel = new FlowPanel();
+    ConstraintTextDisplay displayPanel = new ConstraintTextDisplay();
     StackLayoutPanel constraintPanel = new StackLayoutPanel(Style.Unit.PX);
     HTML topLabel = new HTML("<strong>Select:</strong>");
     HTML constraintLabel = new HTML("<strong>My selections:</strong>");
@@ -67,93 +72,43 @@ public class ConstraintWidgetGroup extends Composite {
         mainPanel.add(interiorPanel);
         scrollPanel.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
         scrollPanel.add(displayPanel);
-        scrollPanel.addStyleName("allBorderGray");
+        scrollPanel.addStyleName(Constants.ALLBORDER);
         displayPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
 
         variableConstraints = new ERDDAPVariableConstraintPanel();
         validConstraints = new ERDDAPValidDataConstraintPanel();
-        initWidget(mainPanel);
-    }
-
-    public void init(String dsid) {
-        this.dsid = dsid;
-        Util.getRPCService().getERDDAPConstraintGroups(dsid, initConstraintsCallback);
-    }
-    protected AsyncCallback<List<ERDDAPConstraintGroup>> initConstraintsCallback = new AsyncCallback<List<ERDDAPConstraintGroup>>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Unable to initialize the constraints panel.");
-        }
-
-        @Override
-        public void onSuccess(List<ERDDAPConstraintGroup> constraintGroups) {
-            init(constraintGroups);
-            Util.getRPCService().getCategories(dsid, dsid, categoryCallback);
-        }
-    };
-    protected AsyncCallback<CategorySerializable[]> categoryCallback = new AsyncCallback<CategorySerializable[]>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void onSuccess(CategorySerializable[] cats) {
-            
-            for (int i = 0; i < cats.length; i++) {
-                if ( cats[i].isVariableChildren() ) {
-                    VariableSerializable[] variables = cats[i].getDatasetSerializable().getVariablesSerializable();
-                    variableConstraints.setVariables(variables);
-                    validConstraints.setVariables(variables);
-                }
-            }
-        }
         
-    };
-    public void init(List<ERDDAPConstraintGroup> constraintGroups) {
-        panel = 0;
-        if ( constraintPanel.getWidgetCount() > 0 ) constraintPanel.clear();
-        for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
-            ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
-            if ( erddapConstraintGroup.getType().equals("selection") ) {
-                SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
-                selectionConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 22);       
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
-                panel++;
-            } else if ( erddapConstraintGroup.getType().equals("subset")) {
-                SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
-                subsetConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
-                panel++;
-            } else if ( erddapConstraintGroup.getType().equals("season") ) {
-                SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
-                seasonConstraintPanel.init(erddapConstraintGroup);
-                constraintPanel.add(seasonConstraintPanel, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
-                panel++;
-            } else if ( erddapConstraintGroup.getType().equals("variable") ) {
-                variableConstraints = new ERDDAPVariableConstraintPanel();
-                constraintPanel.add(variableConstraints, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
-                panel++;
-            } else if ( erddapConstraintGroup.getType().equals("valid") ) {
-                validConstraints = new ERDDAPValidDataConstraintPanel();
-                constraintPanel.add(validConstraints, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
-                panel++;
+        constraintPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                int panel = event.getSelectedItem();
+                Widget opened = constraintPanel.getWidget(panel);
+                if ( opened instanceof ERDDAPVariableConstraintPanel ) {
+                    ERDDAPVariableConstraintPanel vcw = (ERDDAPVariableConstraintPanel) opened;
+                    VariableSerializable variable = vcw.getVariable();
+                    // Set the current values for the variable if it's already constrainted.
+                    eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ConstraintWidgetGroup.this);
+                }
+                
             }
-        }
- 
-        if ( constraintPanel.getWidgetCount() > 0 ) {
-            constraintPanel.showWidget(0);
-        }
+        });
+        
+        eventBus.addHandler(ConfigReturnedEvent.TYPE, new ConfigReturnedEvent.Handler() {
+            
+            @Override
+            public void onConfigReturned(ConfigReturnedEvent event) {
+                List<ERDDAPConstraintGroup> gs = event.getConfigSerializable().getConstraintGroups();
+                CategorySerializable cat = event.getConfigSerializable().getCategorySerializable();
+                VariableSerializable[] variables = cat.getDatasetSerializable().getVariablesSerializable();
+                variableConstraints.setVariables(variables);
+                validConstraints.setVariables(variables);               
+                init(gs);
+            }
+        });
+       
         eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
 
             @Override
@@ -166,8 +121,8 @@ public class ConstraintWidgetGroup extends Composite {
                 String varid = event.getVarid();
                 String dsid = event.getDsid();
                 boolean apply = event.isApply();
-                ConstraintTextAnchor anchor1 = new ConstraintTextAnchor("variable", dsid, varid, variable, lhs, variable, lhs, op1);
-                ConstraintTextAnchor anchor2 = new ConstraintTextAnchor("variable", dsid, varid, variable, rhs, variable, rhs, op2);
+                ConstraintTextAnchor anchor1 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, lhs, variable, lhs, op1);
+                ConstraintTextAnchor anchor2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
                 ConstraintTextAnchor a = findMatchingAnchor(anchor1);
                 ConstraintTextAnchor b = findMatchingAnchor(anchor2);
                 if ( apply ) {
@@ -210,13 +165,18 @@ public class ConstraintWidgetGroup extends Composite {
                     }
                 } else {
                     // Apply button not pressed, newly created variable constraint, if there are active constraints, fill them in...
+                    variableConstraints.clearTextFields();
                     if ( lhs != null && rhs != null && lhs.equals("") && rhs.equals("") ) {                        
                         if ( a != null ) {
                             // There is a matching active constraint for the lhs.
-                            variableConstraints.setLhs(a.getKeyValue());
+                            if (variable.equals(variableConstraints.getVariable().getName()) ) {
+                                variableConstraints.setLhs(a.getKeyValue());
+                            }
                         }
                         if ( b != null ) {
-                            variableConstraints.setRhs(b.getKeyValue());
+                            if (variable.equals(variableConstraints.getVariable().getName()) ) {
+                                variableConstraints.setRhs(b.getKeyValue());
+                            }
                         }
                     }
                 }
@@ -251,7 +211,7 @@ public class ConstraintWidgetGroup extends Composite {
                 if ( source instanceof ConstraintTextAnchor ) {
                     ConstraintTextAnchor anchor = (ConstraintTextAnchor) source;
                     displayPanel.remove(anchor);
-                    if ( anchor.getType().equals("variable") ) {
+                    if ( anchor.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
                         variableConstraints.clearTextField(anchor);
                     }
                 } else if ( source instanceof SeasonConstraintPanel ) {
@@ -272,6 +232,58 @@ public class ConstraintWidgetGroup extends Composite {
             }
 
         });
+        
+        initWidget(mainPanel);
+    }
+
+    public void init(String dsid, String varid) {
+        this.dsid = dsid;
+        eventBus.fireEventFromSource(new GetConfigEvent(dsid, varid), this); 
+    }
+    // Init after a call from somewhere's else.  Event?
+    public void init(List<ERDDAPConstraintGroup> constraintGroups, VariableSerializable[] variables) {       
+        variableConstraints.setVariables(variables);
+        validConstraints.setVariables(variables);  
+        init(constraintGroups);
+    }
+    public void init(List<ERDDAPConstraintGroup> constraintGroups) {
+        panel = 0;
+        if ( constraintPanel.getWidgetCount() > 0 ) constraintPanel.clear();
+        for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
+            ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
+            if ( erddapConstraintGroup.getType().equals("selection") ) {
+                SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
+                selectionConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 22);       
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals("subset")) {
+                SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
+                subsetConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals("season") ) {
+                SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
+                seasonConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.add(seasonConstraintPanel, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
+                constraintPanel.add(variableConstraints, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals("valid") ) {
+                constraintPanel.add(validConstraints, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            }
+        }
+ 
+        if ( constraintPanel.getWidgetCount() > 0 ) {
+            constraintPanel.showWidget(0);
+        }
+        
     }
 //    public void init(List<ERDDAPConstraintGroup> constraintGroups, List<VariableSerializable> variables) {
 //        VariableConstraintLayout variableConstraints = new VariableConstraintLayout("", true);
@@ -283,59 +295,17 @@ public class ConstraintWidgetGroup extends Composite {
 //        }
 //    }
     public List<ConstraintSerializable> getConstraints() {
-        List<ConstraintSerializable> constraints = new ArrayList<ConstraintSerializable>();
-        Map<String, ConstraintSerializable> cons = new HashMap<String, ConstraintSerializable>();
-        for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-            ConstraintTextAnchor anchor = (ConstraintTextAnchor) displayPanel.getWidget(i);
-            if ( anchor.getType().equals("text") ) {
-                String key = anchor.getKey();
-                String op = anchor.getOp();
-                String value = anchor.getKeyValue();
-                ConstraintSerializable keyConstraint = cons.get(key);
-                if ( keyConstraint == null ) {
-                    keyConstraint = new ConstraintSerializable("text", null, null, key, op, "\""+value+"\"", key+"_"+value);
-                    cons.put(key, keyConstraint);
-                } else {
-                    String v = keyConstraint.getRhs();
-                    v = v.substring(0, v.length()-1);
-                    v = v + "|" + value+"\"";
-                    keyConstraint.setRhs(v);
-                    keyConstraint.setOp("like");
-                }
-            } else {
-                String dsid = anchor.getDsid();
-                String varid = anchor.getVarid();
-                String op = anchor.getOp();
-                String lhs = anchor.getValue();
-                ConstraintSerializable con = new ConstraintSerializable("variable", dsid, varid, varid, op, lhs, dsid+"_"+varid);
-                constraints.add(con);
-            }
-        }
-        for (Iterator keysIt = cons.keySet().iterator(); keysIt.hasNext();) {
-            String key = (String) keysIt.next();
-            constraints.add(cons.get(key));
-        }
-        return constraints;
+        return displayPanel.getConstraints();
     }
-    private ConstraintTextAnchor findMatchingAnchor(ConstraintTextAnchor anchor) {
-        for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-            ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
-            if ( a.getKey().equals(anchor.getKey()) && a.getOp().equals(anchor.getOp()) ) {
-                return a;
-            }
-        }
-        return null;
+    public ConstraintTextAnchor findMatchingAnchor(ConstraintTextAnchor anchor) {
+        return displayPanel.findMatchingAnchor(anchor);
+        
     }
     private boolean contains(ConstraintTextAnchor anchor) {
-        for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-            ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
-            if ( anchor.equals(a) ) {
-                return true;
-            }
-        }
-        return false;
+        return displayPanel.contains(anchor);
+        
     }
-    private void remove(ConstraintTextAnchor anchor) {
+    public void remove(ConstraintTextAnchor anchor) {
         ConstraintTextAnchor remove = null;
         for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
             ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
@@ -373,7 +343,9 @@ public class ConstraintWidgetGroup extends Composite {
             displayPanel.add(cta);
         }
     }
-
+    public void addConstraint(ConstraintTextAnchor con) {
+        displayPanel.add(con);
+    }
     public int getConstraintPanelIndex() {
        return constraintPanel.getVisibleIndex();
     }
@@ -381,5 +353,22 @@ public class ConstraintWidgetGroup extends Composite {
     public void clearConstraints() {
        displayPanel.clear();
         
+    }
+
+    public void setLhs(String a1) {
+        variableConstraints.setLhs(a1);
+    }
+
+    public void setRhs(String value) {
+       variableConstraints.setRhs(value);        
+    }
+
+    public void clearTextFields() {
+        variableConstraints.clearTextFields();
+        
+    }
+
+    public VariableSerializable getVariable() {
+        return variableConstraints.getVariable();
     }
 }

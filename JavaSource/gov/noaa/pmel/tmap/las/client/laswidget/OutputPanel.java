@@ -226,7 +226,7 @@ public class OutputPanel extends Composite implements HasName {
                 if (cats[0].isVariableChildren()) {
                     Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
                     nvar = cats[0].getVariable(historyTokenMap.get("varid"));
-                    variableControls.setVariables(vars, vars.indexOf(nvar));
+                    variableControls.setVariables(vars, nvar);
                     if (panelVar != null && nvar != null && nvar.getDSID().equals(panelVar.getDSID())) {
                         setChangeDataset(false);
                     } else {
@@ -1103,10 +1103,6 @@ public class OutputPanel extends Composite implements HasName {
 
         String title = "Settings";
 
-        OutputControlPanelActivity outputControlPanelPresenter = new OutputControlPanelActivity(clientFactory, ID);
-        //outputControlPanel = outputControlPanelPresenter.init(ID);
-
-        //datasetButton = outputControlPanel.getDatasetButton();
         // TODO will this show?
         datasetButton = new DatasetButton();
         eventBus.addHandler(SelectionEvent.getType(), datasetSelctionHandler);
@@ -1725,15 +1721,9 @@ public class OutputPanel extends Composite implements HasName {
         if (containerType.equals(Constants.IMAGE)) {
             lasRequest.setProperty("las", "output_type", "xml");
         }
+       
         if ( constraints != null ) {
-            for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
-                ConstraintSerializable constraint = (ConstraintSerializable) constraintIt.next();
-                if ( constraint.getType().equals("text") ) {
-                    lasRequest.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
-                } else {
-                    lasRequest.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
-                }
-            }
+            lasRequest.addConstraints(constraints);
         }
         return lasRequest;
     }
@@ -2353,8 +2343,8 @@ public class OutputPanel extends Composite implements HasName {
     public void setURL(String url) {
         currentURL = url;
     }
-    public void setVariables(List<VariableSerializable> variables, int index) {
-        variableControls.setVariables(variables, index);
+    public void setVariables(List<VariableSerializable> variables, VariableSerializable var) {
+        variableControls.setVariables(variables, var);
     }
     public void setVariable(VariableSerializable v, boolean setFirstVariableSelector) {
         GridSerializable oldgrid = null;

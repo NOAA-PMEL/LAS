@@ -1,27 +1,18 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.RemoveConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.RemoveSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasChangeHandlers;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -58,22 +49,22 @@ public class SeasonConstraintPanel extends Composite {
     VariableSerializable var;
     HTML hint = new HTML("Select <i>any</i> sequence of consecuative months, e.g. DJF.");
 
-    List<Integer> days = new ArrayList<Integer>();
+    List<String> months = new ArrayList<String>();
 
     public SeasonConstraintPanel() {
 
-        days.add(31); // Jan
-        days.add(59); // Feb
-        days.add(90); // Mar
-        days.add(120); // Apr
-        days.add(151); // May
-        days.add(181); // Jun
-        days.add(212); // Jul
-        days.add(243); // Aug
-        days.add(273); // Sep
-        days.add(304); // Oct
-        days.add(334); // Nov
-        days.add(365); // Dec
+        months.add("Jan");
+        months.add("Feb");
+        months.add("Mar");
+        months.add("Apr");
+        months.add("May");
+        months.add("Jun");
+        months.add("Jul");
+        months.add("Aug");
+        months.add("Sep");
+        months.add("Oct");
+        months.add("Nov");
+        months.add("Dec");
 
         jan.addStyleName("IN-LINE-BUTTON");
         feb.addStyleName("IN-LINE-BUTTON");
@@ -127,26 +118,9 @@ public class SeasonConstraintPanel extends Composite {
         circle.setWidget(3, 0, oct);
         circle.setWidget(2, 0, nov);
         circle.setWidget(1, 0, dec);
-//        firstRow.add(jan);
-//        firstRow.add(feb);
-//        firstRow.add(mar);
-//        firstRow.add(apr);
-//
-//        secondRow.add(may);
-//        secondRow.add(jun);
-//        secondRow.add(jul);
-//        secondRow.add(aug);
-//
-//        thirdRow.add(sep);
-//        thirdRow.add(oct);
-//        thirdRow.add(nov);
-//        thirdRow.add(dec);
 
         mainPanel.add(hint);
         mainPanel.add(circle);
-//        mainPanel.add(firstRow);
-//        mainPanel.add(secondRow);
-//        mainPanel.add(thirdRow);
 
         initWidget(mainPanel);
         eventBus.addHandler(RemoveSelectionConstraintEvent.TYPE, new RemoveSelectionConstraintEvent.Handler() {
@@ -155,9 +129,10 @@ public class SeasonConstraintPanel extends Composite {
             public void onRemove(RemoveSelectionConstraintEvent event) {
                 Object source = event.getSource();
                 if ( source instanceof ConstraintTextAnchor ) {
-                    int m = Integer.valueOf(event.getKeyValue());
-                    buttons.get(m-1).setDown(false);
-                    disable(m-1, false);
+                    String month = event.getKeyValue();
+                    int m = months.indexOf(month);
+                    buttons.get(m).setDown(false);
+                    disable(m, false);
                 }
 
             }
@@ -194,22 +169,20 @@ public class SeasonConstraintPanel extends Composite {
                     buttons.get(current).setEnabled(true);
                 } else {
                     buttons.get(current).setEnabled(false);
-
                 }
-
             } 
         }
 
         for ( int i = 0; i < 12; i++ ) {
             if ( buttons.get(i).isDown() ) {
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getID(), String.valueOf(i+1), var.getID(), String.valueOf(i+1)), this);
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getID(), months.get(i), var.getID(), months.get(i)), this);
             }
         }
         //eventBus.fireEventFromSource(new AddVariableConstraintEvent(var.getDSID(), var.getID(), String.valueOf(start), "ge", var.getName(), String.valueOf(end), "le", true), this);
     }
     private void disable(int index, boolean fire) {
         if ( fire ) {
-            eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), String.valueOf(index+1), var.getID(), String.valueOf(index+1)), this);
+            eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), months.get(index), var.getID(), months.get(index)), this);
         }
         // Special case of clicking the start of the sequence.  It won't make an orphan to just turn it off.
         int prev;
@@ -236,7 +209,7 @@ public class SeasonConstraintPanel extends Composite {
                 foundSecondEnabled = true;
             }
             if (  !foundSecondEnabled ) {
-                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), String.valueOf(i+1), var.getID(), String.valueOf(i+1)), this);
+                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), months.get(i), var.getID(), months.get(i)), this);
                 buttons.get(current).setDown(false);
                 buttons.get(current).setEnabled(false);
             }

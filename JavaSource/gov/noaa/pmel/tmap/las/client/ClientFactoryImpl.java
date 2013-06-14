@@ -16,6 +16,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataViewImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelectorImpl;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCManager;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -33,7 +34,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	// PlaceController(eventBus);
 	private static final InteractiveDownloadDataView interactiveDownloadDataView = new InteractiveDownloadDataViewImpl();
 	private static final HelpMenuBar helpMenuBar = new HelpMenuBarImpl();
-
+    private static final RPCManager rpcManager = new RPCManager();
 	@Override
 	public EventBus getEventBus() {
 		return eventBus;
@@ -92,5 +93,10 @@ public class ClientFactoryImpl implements ClientFactory {
 			ClickHandler handler) {
 		return new ToggleButtonImpl(upText, downText, handler);
 	}
+
+    @Override
+    public RPCManager getRPCManager() {
+        return rpcManager;
+    }
 
 }

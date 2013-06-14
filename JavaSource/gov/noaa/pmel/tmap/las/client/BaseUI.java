@@ -431,7 +431,7 @@ public class BaseUI {
      */
     public void initialize() {
         logger.setLevel(Level.OFF);
-        xTileServer = getTileServer();
+        xTileServer = Util.getTileServer();
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
         // string if they are null.
@@ -745,7 +745,7 @@ public class BaseUI {
                     if ((variables != null) && (variables.size() > 0) && (variables.indexOf(xVariable) >= 0)) {
                         List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
                         vs.addAll(variables);
-                        panel.setVariables(vs, variables.indexOf(xVariable));
+                        panel.setVariables(vs, xVariable);
                     } else {
                         // Update variables an then set the variables in this
                         // panels' OutputControlPanel's MultiVariableSelector
@@ -761,7 +761,7 @@ public class BaseUI {
                                 List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
                                 vs.addAll(variables);
                                 if ((variables != null) && (variables.size() > 0) && (variables.indexOf(xVariable) >= 0)) {
-                                    panel.setVariables(vs, variables.indexOf(xVariable));
+                                    panel.setVariables(vs, xVariable);
                                     mustUpdateVariablesFromServer = false;
                                 }
                             }
@@ -814,14 +814,7 @@ public class BaseUI {
         setAnnotationsMode(null, showAnnotations);
     }
 
-    private native String getTileServer()
-    /*-{
-		if ($wnd.OL_map_widget_tile_server == undefined) {
-			return "";
-		} else {
-			return $wnd.OL_map_widget_tile_server;
-		}
-    }-*/;
+   
 
     private void printerFriendly() {
         StringBuilder urlfrag = new StringBuilder(URLUtil.getBaseURL() + "getAnnotations.do?");
@@ -980,15 +973,15 @@ public class BaseUI {
                             variables = new Vector<VariableSerializable>();
                             if (xVariable != null)
                                 xVarID = xVariable.getID();
-                            int index = -1;
+                            VariableSerializable tv = null;
                             for (int i = 0; i < vars.length; i++) {
                                 variables.add(vars[i]);
                                 if (vars[i].getID().equals(xVarID))
-                                    index = i;
+                                    tv = vars[i];
                             }
                             List<VariableSerializable> vs = new ArrayList<VariableSerializable>();
                             vs.addAll(variables);
-                            variableControls.setVariables(vs, index);
+                            variableControls.setVariables(vs, tv);
                         }
                     }
                 }

@@ -47,6 +47,22 @@ public class ConstraintTextAnchor extends Composite {
     }
 
     private void init() {
+        
+        setText();
+        a.addStyleDependentName("CONSTRAINT");
+        
+        a.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(ConstraintTextAnchor.this.variable, ConstraintTextAnchor.this.value, ConstraintTextAnchor.this.key, ConstraintTextAnchor.this.keyValue), ConstraintTextAnchor.this);              
+            }
+            
+        });
+        p.add(a);
+        initWidget(p);
+    }
+    private void setText() {
         final String anchor_text;
         String opv = "";
         if ( op.equals("eq") ) {
@@ -69,19 +85,8 @@ public class ConstraintTextAnchor extends Composite {
         }
        
         a.setText(anchor_text);
-        a.addStyleDependentName("CONSTRAINT");
-        
-        a.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(ConstraintTextAnchor.this.variable, ConstraintTextAnchor.this.value, ConstraintTextAnchor.this.key, ConstraintTextAnchor.this.keyValue), ConstraintTextAnchor.this);              
-            }
-            
-        });
-        p.add(a);
-        initWidget(p);
     }
+
     public ConstraintTextAnchor(String con) {
         /* 
          * This is a string that looks like variable_cr_op_value_cr_key_cr_keyValue
@@ -115,6 +120,7 @@ public class ConstraintTextAnchor extends Composite {
 
     public void setValue(String value) {
         this.value = value;
+        setText();
     }
 
 
@@ -135,6 +141,7 @@ public class ConstraintTextAnchor extends Composite {
 
     public void setKeyValue(String keyValue) {
         this.keyValue = keyValue;
+        setText();
     }
 
 

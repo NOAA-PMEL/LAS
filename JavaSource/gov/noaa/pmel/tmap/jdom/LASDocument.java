@@ -254,9 +254,10 @@ public class LASDocument extends Document {
         if (pgIt.hasNext()) {
             propGroup = (Element) pgIt.next();
         }
-        if ( pgIt.hasNext() ) {
-            throw new LASException("More than one property group with name = "+group);
-        }
+//        if ( pgIt.hasNext() ) {
+//            throw new LASException("More than one property group with name = "+group);
+//        }
+        // Just return the first...
         return propGroup;
     }
     
