@@ -178,10 +178,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         wire_config.setOperations(wire_operations);
         RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
         wire_config.setRegions(wire_regions);
+        wire_config.setDsid(dsid);
+        wire_config.setVarid(varid);
         return wire_config;
     }
     public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException {
         ConfigSerializable wire_config = new ConfigSerializable();
+        CategorySerializable cat= getCategoryWithGrids(dsid, dsid);
+        wire_config.setCategorySerializable(cat);
         List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
         if ( constraintGroups != null && constraintGroups.size() > 0) {
             wire_config.setConstraintGroups(constraintGroups);
@@ -194,6 +198,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         wire_config.setOperations(wire_operations);
         RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
         wire_config.setRegions(wire_regions);
+        wire_config.setDsid(dsid);
+        wire_config.setVarid(varid);
         return wire_config;
     }
     public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
