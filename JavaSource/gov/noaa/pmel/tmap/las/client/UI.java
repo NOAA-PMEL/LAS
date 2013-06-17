@@ -153,7 +153,7 @@ public class UI extends BaseUI {
                                 xVariable = vars[i];
                                 logger.setLevel(Level.OFF);
                                 // View is null to get all operations
-                                Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+                                Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridCallback);
                             }
                         }
                     }
@@ -804,7 +804,7 @@ public class UI extends BaseUI {
                     } else {
                         lb.setAddButtonEnabled(true);
                     }
-                    Util.getRPCService().getConfig(null, xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
+                    Util.getRPCService().getConfig(null, xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
                 }
             }
         }
@@ -924,7 +924,7 @@ public class UI extends BaseUI {
         // Regardless, if it's a trajectory we need to change the widget values.
         if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") && xNewVariable.getProperties().get("tabledap_access") != null ) {
             xTrajectoryConstraint.clearConstraints();
-            xTrajectoryConstraint.init(xNewVariable.getDSID(), xNewVariable.getID());
+            xTrajectoryConstraint.init(xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID());
 //            getComparePanel().getOutputControlPanel().setVisible(false);
         } else {
 //            getComparePanel().getOutputControlPanel().setVisible(true);
@@ -936,7 +936,7 @@ public class UI extends BaseUI {
         xVariable = xNewVariable;
 
         // Get all the config info. View is null to get all operations.
-        Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
+        Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
 
     }
 
@@ -1424,7 +1424,7 @@ public class UI extends BaseUI {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
-            xTrajectoryConstraint.init(xVariable.getDSID(), xVariable.getID());
+            xTrajectoryConstraint.init(xVariable.getCATID(), xVariable.getDSID(), xVariable.getID());
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);

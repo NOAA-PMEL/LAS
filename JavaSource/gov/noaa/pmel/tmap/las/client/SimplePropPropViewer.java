@@ -363,7 +363,7 @@ public class SimplePropPropViewer implements EntryPoint {
             yhi = lasRequest.getRangeHi("y", 0);
             tlo = lasRequest.getRangeLo("t", 0);
             thi = lasRequest.getRangeHi("t", 0);
-            Util.getRPCService().getConfig(null, dsid, varid, datasetCallback);
+            Util.getRPCService().getConfig(null, catid, dsid, varid, datasetCallback);
         } else {
 
         }

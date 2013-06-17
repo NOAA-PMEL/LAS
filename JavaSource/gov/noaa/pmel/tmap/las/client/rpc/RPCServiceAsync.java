@@ -24,7 +24,7 @@ public interface RPCServiceAsync {
     public void getOperations(String view, String dsid, String varid, AsyncCallback opCallback);
 	public void getOptions(String opid, AsyncCallback optionsCallback);
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
-    public void getConfig(String view, String dsid, String varid, AsyncCallback<ConfigSerializable> timeSeriesCallback);
+    public void getConfig(String view, String catid, String dsid, String varid, AsyncCallback<ConfigSerializable> timeSeriesCallback);
     public void getPropertyGroup(String name, AsyncCallback propertyGroupCallback);
 	/**
 	 * @param dsid
