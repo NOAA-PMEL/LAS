@@ -233,7 +233,7 @@ public class OutputPanel extends Composite implements HasName {
                     } else {
                         setChangeDataset(true);
                     }
-                    Util.getRPCService().getConfig(null, historyTokenMap.get("dsid"), historyTokenMap.get("varid"), configCallback);
+                    Util.getRPCService().getConfig(null, historyTokenMap.get("catid"), historyTokenMap.get("dsid"), historyTokenMap.get("varid"), configCallback);
                 } else {
                     Window.alert("No variables found in this category");
                 }
@@ -2444,8 +2444,9 @@ public class OutputPanel extends Composite implements HasName {
         if (nvar != null) {
             String nvarDSID = nvar.getDSID();
             String nvarID = nvar.getID();
+            String catID = nvar.getCATID();
             if (nvarDSID != null && nvarID != null && configCallback != null) {
-                Util.getRPCService().getConfig(null, nvarDSID, nvarID, configCallback);
+                Util.getRPCService().getConfig(null, catID, nvarDSID, nvarID, configCallback);
             }
         }
     }

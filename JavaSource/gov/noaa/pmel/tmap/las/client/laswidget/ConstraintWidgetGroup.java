@@ -236,9 +236,9 @@ public class ConstraintWidgetGroup extends Composite {
         initWidget(mainPanel);
     }
 
-    public void init(String dsid, String varid) {
+    public void init(String catid, String dsid, String varid) {
         this.dsid = dsid;
-        eventBus.fireEventFromSource(new GetConfigEvent(dsid, varid), this); 
+        eventBus.fireEventFromSource(new GetConfigEvent(catid, dsid, varid), this); 
     }
     // Init after a call from somewhere's else.  Event?
     public void init(List<ERDDAPConstraintGroup> constraintGroups, VariableSerializable[] variables) {       

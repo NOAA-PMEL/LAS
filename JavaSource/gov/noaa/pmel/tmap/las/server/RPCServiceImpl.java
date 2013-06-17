@@ -182,9 +182,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         wire_config.setVarid(varid);
         return wire_config;
     }
-    public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException {
+    public ConfigSerializable getConfig(String view, String catid, String dsid, String varid) throws RPCException {
         ConfigSerializable wire_config = new ConfigSerializable();
-        CategorySerializable cat= getCategoryWithGrids(dsid, dsid);
+        CategorySerializable cat= getCategoryWithGrids(catid, dsid);
         wire_config.setCategorySerializable(cat);
         List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
         if ( constraintGroups != null && constraintGroups.size() > 0) {

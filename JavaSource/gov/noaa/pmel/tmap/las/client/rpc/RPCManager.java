@@ -92,10 +92,11 @@ public class RPCManager {
         Util.getRPCService().getCategories(dsid, dsid, categoryCallback);     
     }
     private void fireGetConfig(GetConfigEvent event) {
+        final String c = event.getCatid();
         final String d = event.getDsid();
         final String v = event.getVarid();
         pendingRPCEvents.add(event);
-        Util.getRPCService().getConfig(null, d, v, getConfigCallback);
+        Util.getRPCService().getConfig(null, c, d, v, getConfigCallback);
     }
     private void removeStaleEvents(List<GwtEvent> pendingRPCEvents, Type type) {
         List<GwtEvent> remove = new ArrayList<GwtEvent>();

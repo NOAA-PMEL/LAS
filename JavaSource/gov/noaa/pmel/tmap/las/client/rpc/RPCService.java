@@ -41,7 +41,7 @@ public interface RPCService extends RemoteService {
 	 * @throws RPCException
 	 */
 	public RegionSerializable[] getRegions(String dsid, String varid) throws RPCException;
-	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException;
+	public ConfigSerializable getConfig(String view, String catid, String dsid, String varid) throws RPCException;
 	public Map<String, String> getIDMap(String data_url) throws RPCException;
 	
 	
