@@ -26,6 +26,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.ui.IESafeImage;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -543,7 +544,7 @@ public class OutputPanel extends Composite implements HasName {
 
                     if (!imageurl.equals("")) {
                         currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                        plotImage = new Image();
+                        plotImage = new IESafeImage();
                         x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                         y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
@@ -1004,7 +1005,7 @@ public class OutputPanel extends Composite implements HasName {
     // Set to true if there is a request for refresh that comes in while the
     // panel is updating...
     boolean pending = false;
-    Image plotImage = null;
+    IESafeImage plotImage = null;
 
     // Keep track of the global values from the compare panel (upper left) so we
     // can revert
