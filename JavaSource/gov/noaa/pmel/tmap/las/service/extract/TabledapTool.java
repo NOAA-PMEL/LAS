@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.util.Constraint;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,6 +26,18 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import ucar.ma2.DataType;
+import ucar.nc2.constants.FeatureType;
+import ucar.nc2.dt.DataIterator;
+import ucar.nc2.dt.TrajectoryObsDataset;
+import ucar.nc2.dt.TrajectoryObsDatatype;
+import ucar.nc2.ft.FeatureCollection;
+import ucar.nc2.ft.FeatureDataset;
+import ucar.nc2.ft.FeatureDatasetFactoryManager;
+import ucar.nc2.ft.FeatureDatasetPoint;
+import ucar.nc2.ft.PointFeatureCollectionIterator;
+import ucar.nc2.ft.TrajectoryFeature;
+import ucar.nc2.ft.TrajectoryFeatureCollection;
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImpl;
 
@@ -290,11 +303,17 @@ public class TabledapTool extends TemplateTool {
             if ( part1.exists() && part1.length() > 0 ) {
                 dt = new DateTime();
                 log.info("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
+                merge(part1, part2);
 //                Table table1 = new Table();
 //                Table table2 = new Table();
 //                table1.readNcCF(part1.getAbsolutePath(), null, null, null, null);
 //                table2.readNcCF(part2.getAbsolutePath(), null, null, null, null);
 //                table1.append(table2);
+//                // TODO sort by time and curise ID.
+//                IntermediateNetcdfFile ncfile = new IntermediateNetcdfFile(netcdfFilename, false);
+//                ncfile.create(table1, lasBackendRequest);
+//                ncfile.fill(table1);
+//                ncfile.close();
 //                // How to derive the name "obs" from the files already written?
 //                table1.saveAs4DNc(netcdfFilename, table1.findColumnNumber(lonname), table1.findColumnNumber(latname), table1.findColumnNumber(zname), table1.findColumnNumber(time));
             } else {
@@ -313,6 +332,53 @@ public class TabledapTool extends TemplateTool {
         }
 
         return lasBackendResponse;
+    }
+
+    private void merge(File part1, File part2) throws IOException {
+        FeatureDataset dataset1;
+        FeatureDataset dataset2;
+        Formatter errlog = new Formatter();
+        dataset1 = FeatureDatasetFactoryManager.open(null, part1.getAbsolutePath(), null, errlog);
+        if (dataset1 == null) {
+          log.error("Could not open: "+ part1.getAbsolutePath()+" because "+errlog);
+          return;
+        }
+        dataset2 = FeatureDatasetFactoryManager.open(null, part2.getAbsolutePath(), null, errlog);
+        if (dataset2 == null) {
+          log.error("Could not open: "+ part2.getAbsolutePath()+" because "+errlog);
+          return;
+        }
+        FeatureDatasetPoint traj1 = null;
+        FeatureType type1 = dataset1.getFeatureType();
+        if ( type1 == FeatureType.TRAJECTORY ) {
+            traj1 = (FeatureDatasetPoint) dataset1;
+        }
+        FeatureDatasetPoint traj2 = null ;
+        FeatureType type2 = dataset2.getFeatureType();
+        if ( type2 == FeatureType.TRAJECTORY ) {
+            traj2 = (FeatureDatasetPoint) dataset2;
+        }
+        
+        List<FeatureCollection> fc1 = traj1.getPointFeatureCollectionList();
+        for (Iterator iterator = fc1.iterator(); iterator.hasNext();) {
+            FeatureCollection fc = (FeatureCollection) iterator.next();
+            if ( fc.getCollectionFeatureType() == FeatureType.TRAJECTORY ) {
+                TrajectoryFeatureCollection tfc1 = (TrajectoryFeatureCollection) fc;
+                for (PointFeatureCollectionIterator tfcIt = tfc1.getPointFeatureCollectionIterator(8196); tfcIt.hasNext();) {
+                    TrajectoryFeature tf = (TrajectoryFeature) tfcIt.next();
+                    String name = tf.getName();
+                    System.out.println("\t"+name);
+                }
+            }
+        }
+        
+        
+        if ( dataset1 != null ) {
+            dataset1.close();
+        }
+        if ( dataset2 != null ) {
+            dataset2.close();
+        }
     }
 
     /**

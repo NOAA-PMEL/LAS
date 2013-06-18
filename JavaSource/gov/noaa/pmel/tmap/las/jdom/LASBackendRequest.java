@@ -832,6 +832,9 @@ public class LASBackendRequest extends LASDocument {
         String value = "";
         Element data = this.getRootElement().getChild("dataObjects").getChild("data");
         Element db_access = findPropertyGroup(data,"database_access");
+        if ( db_access == null ) {
+            db_access = findPropertyGroup(data,"tabledap_access");
+        }
         value = findPropertyValue(db_access, property);
         return value;
     }
@@ -1800,5 +1803,17 @@ public class LASBackendRequest extends LASDocument {
             }
         }
 
+    }
+    public boolean isTrajectory() {
+        boolean trajectory = true;
+        List variables = getVariables();
+        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+            String name = (String) varIt.next();
+            String grid = getDataAttribute(name, "grid_type");
+            if ( grid != null ) {
+                trajectory = trajectory && grid.toLowerCase().equals("trajectory");
+            }
+        }
+        return trajectory;
     }
 }
