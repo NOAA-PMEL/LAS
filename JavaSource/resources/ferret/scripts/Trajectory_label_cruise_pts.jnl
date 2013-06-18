@@ -30,7 +30,7 @@ ELSE
 ENDIF
 
 LET var_fill = MISSING(check_var,`fillval`)
-LET var_fill_z =  EXPNDI_BY_Z_COUNTS(var_fill, rowsize,`longest`)
+LET var_fill_z =  EXPNDI_BY_Z_COUNTS(var_fill, xsequence(rowsize),`longest`)
 
 LET var_flag_z = IF var_fill_z EQ `fillval` THEN 1
 LET nbad_in_cruise =  var_flag_z[K=@NGD]
@@ -54,10 +54,7 @@ LET yloc = `($ppl$height) - ($ppl$yorg) - 0.6`
 IF `($from_pts"0|*>1") EQ 0` THEN LET yloc = `yloc - 0.2`
 
 
-IF ($ferret_annotations"0|*>1") THEN
-   DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s)
-ELSE
+IF `($ferret_annotations"0|*>1") EQ 0` THEN
    LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
 ENDIF
 
@@ -68,7 +65,7 @@ LET yloc = `yloc - 0.2`
 IF ($ferret_annotations"0|*>1") THEN
       DEFINE SYMBOL note_num = `($note_num"0") + 1`
       DEFINE SYMBOL note_($note_num)_lab = ($ngood) of ($from_pts) obs
-      IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($ngood) obs (($nbad) missing)
+      IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs (($nbad) missing)
 ELSE   
    IF `STRCMP("($database_table_label)", "data") EQ 0` THEN 
       LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($ngood) of ($from_pts) obs
@@ -82,4 +79,3 @@ ELSE
    ENDIF
 ENDIF
 !---------------- end of Trajectory_label_cruise_pts.jnl -------------------------
-

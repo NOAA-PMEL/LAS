@@ -22,10 +22,14 @@ LET trajvar = XSEQUENCE(rowSize)
 LET ntrajs = `trajvar,RETURN=isize`
 LET traj_numbers = x[i=1:`ntrajs`]
 
-LET longest = trajvar[i=@max]+2
+! Is the traj variable in the E direction?
+define symbol rdir = `trajvar,return=shape` 
+define symbol rind = ($rdir"|X>I|E>M")
 
-LET data_var_z =  EXPNDI_BY_Z_COUNTS(longitude, trajvar,`longest`)
-LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(trajvar,`longest`)
+LET longest = trajvar[($rind)=@max]+2
+
+LET data_var_z =  EXPNDI_BY_Z_COUNTS(longitude, xsequence(trajvar),`longest`)
+LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(trajvar),`longest`)
 
 ! If  a subset of cruise ids is given then only plot those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.
