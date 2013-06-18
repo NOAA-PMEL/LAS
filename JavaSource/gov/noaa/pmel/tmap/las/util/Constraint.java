@@ -57,6 +57,8 @@ public class Constraint {
             opString = ">=";
         } else if ( op.equals("like") ) {
             opString = "=~";
+        } else if ( op.equals("is") ) {
+            opString = "=~";
         }
         return opString;
     }
@@ -77,6 +79,10 @@ public class Constraint {
     }
     public String getAsERDDAPString() {
         // Even stuff that looks like a number has to be enclosed in quotes for ERDDAP variables that come is a list of distinct values.
-        return lhs+getOpAsSymbol()+rhs;
+        if ( op.equals("is") || op.equals("like") ) {
+            lhs = lhs.replaceAll(",", "|");
+            rhs = rhs.replaceAll(",", "|");
+        }
+        return lhs+getOpAsSymbol()+"\""+rhs+"\"";
     }
 }
