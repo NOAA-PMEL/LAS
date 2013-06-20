@@ -386,26 +386,42 @@ public class LASRequest {
         for ( int i = 0; i < constraints.getLength(); i++ ) {
             Map<String, String> c = new HashMap<String, String>();
             Element constraint = (Element) constraints.item(i);
+            String type = constraint.getAttribute("type");
             c.put("op", constraint.getAttribute("op"));
-            c.put("type", constraint.getAttribute("type"));
+            c.put("type", type);
             String id = constraint.getAttribute("id");
             if ( id != null ) {
                 c.put("id", id);
             }
-
+            if ( type.equals("variable") ) {
             NodeList vl = constraint.getElementsByTagName("v");
             Element v = (Element) vl.item(0);
             Text text = (Text) v.getFirstChild();
             String value = text.getData();
             c.put("value", value);
+           
+                // If it's a variable constraint it will contain a "link" element that defines the variable.
+                NodeList ll = constraint.getElementsByTagName("link");
+                Element link = (Element) ll.item(0);
+                String match = link.getAttribute("match");
 
-            NodeList ll = constraint.getElementsByTagName("link");
-            Element link = (Element) ll.item(0);
-            String match = link.getAttribute("match");
-
-            c.put("dsID", getDatasetId(match));
-            c.put("varID", getVariableId(match));
-
+                c.put("dsID", getDatasetId(match));
+                c.put("varID", getVariableId(match));
+            } else if ( type.equals("text") ) {
+                NodeList vl = constraint.getElementsByTagName("v");
+                Element v = (Element) vl.item(0);
+                Text text = (Text) v.getFirstChild();
+                String lhs = text.getData();
+                c.put("lhs", lhs);
+                Element v1 = (Element) vl.item(1);
+                Text text1 = (Text) v1.getFirstChild();
+                String op = text1.getData();
+                c.put("op", op);
+                Element v2 = (Element) vl.item(2);
+                Text text2 = (Text) v2.getFirstChild();
+                String rhs = text2.getData();
+                c.put("rhs", rhs);
+            }
             vcs.add(c);
         }
         return vcs;

@@ -117,7 +117,8 @@ public class SimplePropPropViewer implements EntryPoint {
     AxisWidget zAxisWidget = new AxisWidget();
     VerticalPanel spaceTimeConstraints = new VerticalPanel();
     HorizontalPanel spaceTimeTopRow = new HorizontalPanel();
-    Map<String, VariableSerializable> xDatasetVariables = new HashMap<String, VariableSerializable>();
+    Map<String, VariableSerializable> xFilteredDatasetVariables = new HashMap<String, VariableSerializable>();
+    Map<String, VariableSerializable> xAllDatasetVariables = new HashMap<String, VariableSerializable>();
     ToggleButton annotationsButton;
     LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
     HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -604,7 +605,43 @@ public class SimplePropPropViewer implements EntryPoint {
             if (!cruiseIcons.getIDs().equals(""))
                 lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
         } else if ((!contained || netcdf == null) && grid_type.equals("trajectory")) {
+            // This should only occur when the app loads for the first time...
+            
             operationID = "Trajectory_correlation_plot";
+            // We need to make the initial netCDF file with *all* the variables in each row.
+
+            // Grab the existing variable
+            String v0 = lasRequest.getVariable(0);
+            lasRequest.removeVariables();
+            // Find the first non-sub-set variable that is not already included
+
+            String v1 = null;
+            String vds = null;
+            for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
+                String key = (String) allIt.next();
+                VariableSerializable v = xAllDatasetVariables.get(key);
+                if ( !v.getID().equals(v0) && v.getAttributes().get("subset_variable") == null ) {
+                    v1 = v.getID();
+                    vds = v.getDSID();
+                }
+            }
+            if ( vds != null ) {
+                lasRequest.addVariable(vds, v0, 0);
+                if ( v1 != null ) {
+                    lasRequest.addVariable(vds, v1, 0);
+                    for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
+                        String key = (String) allIt.next();
+                        VariableSerializable v = xAllDatasetVariables.get(key);
+                        String vid = v.getID();
+                        String did = v.getDSID();
+                        if ( !vid.equals(v1) && !vid.equals(v0) ) {
+                            lasRequest.addVariable(v.getDSID(), v.getID(), 0);
+                        }
+                    }
+                    xVariables.setVariable(xAllDatasetVariables.get(v0));
+                    yVariables.setVariable(xAllDatasetVariables.get(v1));
+                }
+            }
         } else {
             operationID = "prop_prop_plot";
         }
@@ -920,17 +957,18 @@ public class SimplePropPropViewer implements EntryPoint {
                         resize(Window.getClientWidth(), Window.getClientHeight());
 
                     }
+                    
+                    // set the constraint text values and the world coordinates if we got an image back... 
+
+                    world_startx = x_axis_lower_left;
+                    world_endx = x_axis_upper_right;
+                    world_starty = y_axis_lower_left;
+                    world_endy = y_axis_upper_right;
+                   
+                    printURL = Util.getAnnotationsFrag(annourl, imageurl);
+                    setTextValues();
                 }
-                logger.info("(world_startx, world_starty):(" + world_startx + ", " + world_starty + ")");
-                logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
-                world_startx = x_axis_lower_left;
-                world_endx = x_axis_upper_right;
-                world_starty = y_axis_lower_left;
-                world_endy = y_axis_upper_right;
-                logger.warning("(world_startx, world_starty):(" + world_startx + ", " + world_starty + ")");
-                logger.warning("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
-                setTextValues();
-                printURL = Util.getAnnotationsFrag(annourl, imageurl);
+                
             }
         }
     };
@@ -1005,6 +1043,12 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 int index = -1;
                 int time_index = -1;
+                for (int i = 0; i < variables.length; i++) {
+                    VariableSerializable vs = variables[i];
+                    if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
+                        xAllDatasetVariables.put(vs.getID(), vs);
+                    }
+                }
                 xVariables.setVariables(Arrays.asList(variables));
                 yVariables.setVariables(Arrays.asList(variables));
                 colorVariables.setVariables(Arrays.asList(variables));
@@ -1013,7 +1057,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 List<VariableSerializable> filtered = xVariables.getVariables();
                 for (Iterator iterator = filtered.iterator(); iterator.hasNext();) {
                     VariableSerializable variableSerializable = (VariableSerializable) iterator.next();
-                    xDatasetVariables.put(variableSerializable.getID(), variableSerializable);
+                    xFilteredDatasetVariables.put(variableSerializable.getID(), variableSerializable);
                 }
                 xVariables.setAddButtonVisible(false);
                 yVariables.setAddButtonVisible(false);
@@ -1063,12 +1107,29 @@ public class SimplePropPropViewer implements EntryPoint {
                     String op = con.get("op");
                     String value = con.get("value");
                     String id = con.get("id");
-                    String plotv = plotVariable(varid);
-                    VariableSerializable v = xDatasetVariables.get(varid);
-                    ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                    fixedConstraintPanel.add(cta);
-                    ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                    constraintWidgetGroup.addConstraint(cta2);
+                    String type = con.get("type");
+
+                    if ( type.equals("variable") ) {
+                        VariableSerializable v = xFilteredDatasetVariables.get(varid);
+                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                        fixedConstraintPanel.add(cta);
+                        ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                        constraintWidgetGroup.addConstraint(cta2);
+                    } else if ( type.equals("text") ) {
+                        String lhs = con.get("lhs");
+                        String rhs = con.get("rhs");
+                        if ( rhs.contains(",") ) {
+                            String[] r = rhs.split(",");
+                            for (int i = 0; i < r.length; i++) {
+                                ConstraintTextAnchor cta = new ConstraintTextAnchor("text", dsid, lhs, lhs, r[i], lhs, r[i], "eq");
+                                fixedConstraintPanel.add(cta);
+                            }
+
+                        } else{
+                            ConstraintTextAnchor cta = new ConstraintTextAnchor("text", dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                            fixedConstraintPanel.add(cta);
+                        }
+                    }
                     setConstraints();
                 }
                 // The request is now set up like a property-property plot
@@ -1150,9 +1211,9 @@ public class SimplePropPropViewer implements EntryPoint {
             String varColor = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
             lasRequest.addVariable(dsid, varColor, 0);
         }
-        for (Iterator varIt = xDatasetVariables.keySet().iterator(); varIt.hasNext();) {
+        for (Iterator varIt = xFilteredDatasetVariables.keySet().iterator(); varIt.hasNext();) {
             String id = (String) varIt.next();
-            VariableSerializable var = xDatasetVariables.get(id);
+            VariableSerializable var = xFilteredDatasetVariables.get(id);
             if (!id.equals(vix) && !id.equals(viy)) {
                 if (colorCheckBox.getValue()) {
                     String varColor = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
@@ -1277,15 +1338,15 @@ public class SimplePropPropViewer implements EntryPoint {
         History.newItem(xml, false);
     }
 
-    private String plotVariable(String id) {
-        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
-        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
-        if (varX.getID().equals(id))
-            return "x";
-        if (varY.getID().equals(id))
-            return "y";
-        return "";
-    }
+//    private String plotVariable(String id) {
+//        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
+//        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
+//        if (varX.getID().equals(id))
+//            return "x";
+//        if (varY.getID().equals(id))
+//            return "y";
+//        return "";
+//    }
 
     private void warn(String message) {
         String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
@@ -1585,4 +1646,15 @@ public class SimplePropPropViewer implements EntryPoint {
             }
         }
     };
+    private String plotVariable(String id) {
+        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
+        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
+        
+        if (varX.getID().equals(id))
+            return "x";
+        if (varY.getID().equals(id))
+            return "y";
+        return "";
+    }
+
 }

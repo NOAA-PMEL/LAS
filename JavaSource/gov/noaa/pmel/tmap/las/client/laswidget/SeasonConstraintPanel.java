@@ -131,8 +131,11 @@ public class SeasonConstraintPanel extends Composite {
                 if ( source instanceof ConstraintTextAnchor ) {
                     String month = event.getKeyValue();
                     int m = months.indexOf(month);
-                    buttons.get(m).setDown(false);
-                    disable(m, false);
+                    // TODO This text anchor might be for some other variable.  Can we do a better job of differentiating these?
+                    if ( m >= 0 && m <=11 ) {
+                        buttons.get(m).setDown(false);
+                        disable(m, false);
+                    }
                 }
 
             }
