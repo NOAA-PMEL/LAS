@@ -511,6 +511,9 @@ public class LASBackendRequest extends LASDocument {
                 Element part = (Element) partIt.next();
                 String name = "constraint_"+index+"_"+part.getName();
                 String value = part.getTextNormalize();
+                if ( value.contains("|") ) {
+                    value = value.replace("|", ",");
+                }
                 symbols.put(name, value);
             }
             index++;
