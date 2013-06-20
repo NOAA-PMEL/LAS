@@ -27,7 +27,7 @@ public class ConstraintTextDisplay extends FlowPanel {
                 } else {
                     String v = keyConstraint.getRhs();
                     
-                    v = v + "," + value;
+                    v = v + "|" + value;
                     keyConstraint.setRhs(v);
                     keyConstraint.setOp("is");
                 }
