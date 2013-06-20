@@ -153,13 +153,11 @@ public class TabledapTool extends TemplateTool {
             String latname = getTabledapProperty(lasBackendRequest, "latitude");
             String lonname = getTabledapProperty(lasBackendRequest, "longitude");
             String zname = getTabledapProperty(lasBackendRequest, "altitude");
-
-            //get id, e.g., pmel_dapper/tao   
+            
             causeOfError = "Could not get id."; 
             String id = getTabledapProperty(lasBackendRequest, "id");
             log.debug("Got id: " + id); 
             required(id, causeOfError);
-     
             //get "debug" file name, may be null or ""
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
             causeOfError = "Unable to getResultAsFile(debug): ";
@@ -168,7 +166,14 @@ public class TabledapTool extends TemplateTool {
             //create the query.   First: variables
             StringBuffer query = new StringBuffer();
             // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
-            query.append(String2.replaceAll(lasBackendRequest.getVariablesAsString(), " ", ""));
+            String variables = lasBackendRequest.getVariablesAsString();
+            // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
+            variables = variables.replace(cruiseid+",", "");
+            variables = variables.replace(cruiseid, "");
+            
+            query.append(String2.replaceAll(variables, " ", ""));
+            
+            
 
             //then variable constraints  
             List constraintElements = lasBackendRequest.getRootElement().getChildren("constraint");
