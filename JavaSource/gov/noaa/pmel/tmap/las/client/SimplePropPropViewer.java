@@ -1118,8 +1118,8 @@ public class SimplePropPropViewer implements EntryPoint {
                     } else if ( type.equals("text") ) {
                         String lhs = con.get("lhs");
                         String rhs = con.get("rhs");
-                        if ( rhs.contains(",") ) {
-                            String[] r = rhs.split(",");
+                        if ( rhs.contains("|") ) {
+                            String[] r = rhs.split("|");
                             for (int i = 0; i < r.length; i++) {
                                 ConstraintTextAnchor cta = new ConstraintTextAnchor("text", dsid, lhs, lhs, r[i], lhs, r[i], "eq");
                                 fixedConstraintPanel.add(cta);
