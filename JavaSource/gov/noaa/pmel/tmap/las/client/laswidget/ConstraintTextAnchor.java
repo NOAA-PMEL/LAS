@@ -77,6 +77,10 @@ public class ConstraintTextAnchor extends Composite {
             opv = ">=";
         } else if ( op.equals("ne") ) {
             opv = "!=";
+        } else if ( op.equals("like") ) {
+            opv = "=";
+        } else if ( op.equals("is") ) {
+            opv = "=";
         }
         if ( variable.equals(key) ) {
             anchor_text = "(x) "+variable+" "+opv+" "+value;

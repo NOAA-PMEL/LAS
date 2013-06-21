@@ -38,4 +38,8 @@ public class Constants {
     public static String UPDATE_NEEDED = "APPLY-NEEDED";
     
     public static String VARIABLE_CONSTRAINT = "variable";
+    public static String TEXT_CONSTRAINT = "text";
+    public static String X_CONSTRAINT = "x";
+    public static String Y_CONSTRAINT = "y";
+    public static String T_CONSTRAINT = "t";
 }
