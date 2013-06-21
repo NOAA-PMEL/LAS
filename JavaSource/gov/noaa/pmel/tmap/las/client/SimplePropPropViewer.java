@@ -1109,24 +1109,24 @@ public class SimplePropPropViewer implements EntryPoint {
                     String id = con.get("id");
                     String type = con.get("type");
 
-                    if ( type.equals("variable") ) {
+                    if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
                         VariableSerializable v = xFilteredDatasetVariables.get(varid);
                         ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
                         fixedConstraintPanel.add(cta);
                         ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
                         constraintWidgetGroup.addConstraint(cta2);
-                    } else if ( type.equals("text") ) {
+                    } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
                         String lhs = con.get("lhs");
                         String rhs = con.get("rhs");
-                        if ( rhs.contains("|") ) {
-                            String[] r = rhs.split("\\|");
+                        if ( rhs.contains("_ns_") ) {
+                            String[] r = rhs.split("_ns_");
                             for (int i = 0; i < r.length; i++) {
-                                ConstraintTextAnchor cta = new ConstraintTextAnchor("text", dsid, lhs, lhs, r[i], lhs, r[i], "eq");
+                                ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
                                 fixedConstraintPanel.add(cta);
                             }
 
                         } else{
-                            ConstraintTextAnchor cta = new ConstraintTextAnchor("text", dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                            ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
                             fixedConstraintPanel.add(cta);
                         }
                     }
@@ -1144,20 +1144,20 @@ public class SimplePropPropViewer implements EntryPoint {
     };
     private void setFixedT(String tlo, String thi) {
         
-        ConstraintTextAnchor cta_tlo = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
+        ConstraintTextAnchor cta_tlo = new ConstraintTextAnchor(Constants.T_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
         fixedConstraintPanel.add(cta_tlo);   
-        ConstraintTextAnchor cta_thi = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "time", "time", thi, "time", thi, "le");
+        ConstraintTextAnchor cta_thi = new ConstraintTextAnchor(Constants.T_CONSTRAINT, dsid, "time", "time", thi, "time", thi, "le");
         fixedConstraintPanel.add(cta_thi);  
         
     }
     private void setFixedXY(String xlo, String xhi, String ylo, String yhi) {
-        ConstraintTextAnchor cta_xlo = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "longitude", "longitude", xlo, "longitude", xlo, "ge");
+        ConstraintTextAnchor cta_xlo = new ConstraintTextAnchor(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xlo, "longitude", xlo, "ge");
         fixedConstraintPanel.add(cta_xlo);   
-        ConstraintTextAnchor cta_xhi = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "longitude", "longitude", xhi, "longitude", xhi, "le");
+        ConstraintTextAnchor cta_xhi = new ConstraintTextAnchor(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xhi, "longitude", xhi, "le");
         fixedConstraintPanel.add(cta_xhi);   
-        ConstraintTextAnchor cta_ylo = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "latitude", "latitude", ylo, "latitude", ylo, "ge");
+        ConstraintTextAnchor cta_ylo = new ConstraintTextAnchor(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", ylo, "latitude", ylo, "ge");
         fixedConstraintPanel.add(cta_ylo);   
-        ConstraintTextAnchor cta_yhi = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, "latitude", "latitude", yhi, "latitude", yhi, "le");
+        ConstraintTextAnchor cta_yhi = new ConstraintTextAnchor(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", yhi, "latitude", yhi, "le");
         fixedConstraintPanel.add(cta_yhi);  
     }
     private int getNumber(Node firstChild) {
@@ -1230,33 +1230,20 @@ public class SimplePropPropViewer implements EntryPoint {
     
 
     private void setConstraints() {
+        
         update.addStyleDependentName("APPLY-NEEDED");
         undoState = new LASRequest(lasRequest.toString());
         lasRequest.removeConstraints();
-        String varY = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
-        String varX = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-        // The initialState is null the first time this is called when setting
-        // up the very first correlation plot.
-        String vx = null;
-        if (initialState != null) {
-            vx = initialState.getVariable(0);
-        }
-        
-        String vy = null;
-        if (initialState != null) {
-            vy = initialState.getVariable(1);
-        }
-        
-        String vc = null;
-        if (initialState != null) {
-            vc = initialState.getVariable(2);
-        }
-        
         
         List<ConstraintSerializable> fixedcons = fixedConstraintPanel.getConstraints();
         List<ConstraintSerializable> cons = constraintWidgetGroup.getConstraints();
-        
-        //lasRequest.addConstraints(fixedcons);
+        // X, Y, Z and T are handled separately
+        for (Iterator conIt = fixedcons.iterator(); conIt.hasNext();) {
+            ConstraintSerializable constraintSerializable = (ConstraintSerializable) conIt.next();
+            if ( constraintSerializable.getType().equals(Constants.VARIABLE_CONSTRAINT) || constraintSerializable.getType().equals(Constants.TEXT_CONSTRAINT)) {
+                lasRequest.addConstraint(constraintSerializable);
+            }
+        }
         lasRequest.addConstraints(cons);
         //TODO get the constraints out the group object and set in them into the request.  Now!
        
