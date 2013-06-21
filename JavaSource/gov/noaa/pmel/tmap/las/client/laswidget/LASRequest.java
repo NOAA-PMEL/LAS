@@ -608,15 +608,17 @@ public class LASRequest {
         }
         return op;
     }
-
+    public void addConstraint(ConstraintSerializable constraint) {
+        if ( constraint.getType().equals("text") ) {
+            this.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+        } else {
+            this.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
+        }
+    }
     public void addConstraints(List<ConstraintSerializable> cons) {
         for (Iterator conIt = cons.iterator(); conIt.hasNext();) {
             ConstraintSerializable constraint = (ConstraintSerializable) conIt.next();
-            if ( constraint.getType().equals("text") ) {
-                this.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
-            } else {
-                this.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
-            }
+            addConstraint(constraint);
         }
         
     }
