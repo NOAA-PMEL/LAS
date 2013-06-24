@@ -301,7 +301,7 @@ public class ConstraintWidgetGroup extends Composite {
         return displayPanel.findMatchingAnchor(anchor);
         
     }
-    private boolean contains(ConstraintTextAnchor anchor) {
+    public boolean contains(ConstraintTextAnchor anchor) {
         return displayPanel.contains(anchor);
         
     }

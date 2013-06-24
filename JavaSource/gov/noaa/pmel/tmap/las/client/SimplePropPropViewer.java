@@ -227,9 +227,9 @@ public class SimplePropPropViewer implements EntryPoint {
     double imageScaleRatio = 1.0; // Keep track of the factor by which the image
     
     ConstraintWidgetGroup constraintWidgetGroup = new ConstraintWidgetGroup();
-
-    // has been scaled.
-
+    
+    String initialHistory;
+    boolean hasInitialHistory = false;
     @Override
     public void onModuleLoad() {
         logger.setLevel(Level.ALL);
@@ -344,17 +344,7 @@ public class SimplePropPropViewer implements EntryPoint {
         String catid = Util.getParameterString("catid");
         String xml = Util.getParameterString("xml");
         if (xml != null && !xml.equals("")) {
-            xml = URL.decode(xml);
-
-            // Get rid of the entity values for > and <
-            xml = xml.replace("&gt;", ">");
-            xml = xml.replace("&lt;", "<");
-            // Replace the op value with gt ge eq lt le as needed.
-            xml = xml.replace("op=\">=\"", "op=\"ge\"");
-            xml = xml.replace("op=\">\"", "op=\"gt\"");
-            xml = xml.replace("op=\"=\"", "op=\"eq\"");
-            xml = xml.replace("op=\"<=\"", "op=\"le\"");
-            xml = xml.replace("op=\"<\"", "op=\"lt\"");
+            xml = decode(xml);
             lasRequest = new LASRequest(xml);
             dsid = lasRequest.getDataset(0);
             varid = lasRequest.getVariable(0);
@@ -364,9 +354,27 @@ public class SimplePropPropViewer implements EntryPoint {
             yhi = lasRequest.getRangeHi("y", 0);
             tlo = lasRequest.getRangeLo("t", 0);
             thi = lasRequest.getRangeHi("t", 0);
+
+            // No need to wait, these can be set now...
+            if (xlo != null && xhi != null && ylo != null && yhi != null) {
+                
+                setFixedXY(xlo, xhi, ylo, yhi);
+                
+                
+            }
+            setFixedT(tlo, thi);
+            
             Util.getRPCService().getConfig(null, catid, dsid, varid, datasetCallback);
         } else {
-
+            Window.alert("This app must be launched from the main interface.");
+        }
+        initialHistory = getAnchor();
+        if ( initialHistory != null && !initialHistory.equals("") ) {
+            hasInitialHistory = true;
+            initialHistory = decode(initialHistory);
+        } else {
+            hasInitialHistory = false;
+            initialHistory = "";
         }
         eventBus.addHandler(VariableSelectionChangeEvent.TYPE, new VariableSelectionChangeEvent.Handler() {
 
@@ -693,17 +701,21 @@ public class SimplePropPropViewer implements EntryPoint {
             if (plot_id.equals("Trajectory_correlation_plot")) {
                 initialState = new LASRequest(lasRequest.toString());
             }
+            
+            
+            
             // Need to warn again...
             youveBeenWarned = false;
-            spin.hide();
+            
             print.setEnabled(true);
             String doc = response.getText();
             String imageurl = "";
             String annourl = "";
             // Look at the doc. If it's not obviously XML, treat it as HTML.
             if (!doc.substring(0, 100).contains("<?xml")) {
-
-                spin.hide();
+                if ( initialHistory == null || initialHistory.equals("") ) { 
+                    spin.hide();
+                }
                 VerticalPanel p = new VerticalPanel();
                 ScrollPanel sp = new ScrollPanel();
                 HTML result = new HTML(doc);
@@ -824,10 +836,14 @@ public class SimplePropPropViewer implements EntryPoint {
                     plotImage = new IESafeImage(imageurl);
                     x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                     y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
-
+                    // If you are not going to pop the history, hide the spinner.
+                    if ( initialHistory == null || initialHistory.equals("") ) { 
+                      spin.hide();
+                    }
                     if (frontCanvas != null) {
                         outputPanel.setWidget(2, 0, plotImage);
                         plotImage.setVisible(false);
+                        
                         plotImage.addLoadHandler(new LoadHandler() {
 
                             @Override
@@ -966,9 +982,13 @@ public class SimplePropPropViewer implements EntryPoint {
                     world_endy = y_axis_upper_right;
                    
                     printURL = Util.getAnnotationsFrag(annourl, imageurl);
-                    setTextValues();
+                    setTextValues();  
                 }
-                
+
+            }
+            
+            if ( initialHistory != null && !initialHistory.equals("") ) {                      
+                popHistory(initialHistory);
             }
         }
     };
@@ -1077,15 +1097,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 GridSerializable grid = xVariables.getUserObject(xVariables.getSelectedIndex()).getGrid();
                 
-     
-                if (xlo != null && xhi != null && ylo != null && yhi != null) {
-                    
-                    setFixedXY(xlo, xhi, ylo, yhi);
-                    
-                    
-                }
-                setFixedT(tlo, thi);
 
+                // TODO this is not right for data with a z axis.  It needs to be analogous with the setFixedXY and setFixedT
                 if (grid.hasZ()) {
                     zAxisWidget.init(grid.getZAxis());
                     zAxisWidget.setVisible(true);
@@ -1101,37 +1114,9 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 setVariables();
                 List<Map<String, String>> vcs = lasRequest.getVariableConstraints();
-                for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
-                    Map<String, String> con = (Map<String, String>) vcIt.next();
-                    String varid = con.get("varID");
-                    String op = con.get("op");
-                    String value = con.get("value");
-                    String id = con.get("id");
-                    String type = con.get("type");
-
-                    if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
-                        VariableSerializable v = xFilteredDatasetVariables.get(varid);
-                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                        fixedConstraintPanel.add(cta);
-                        ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                        constraintWidgetGroup.addConstraint(cta2);
-                    } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
-                        String lhs = con.get("lhs");
-                        String rhs = con.get("rhs");
-                        if ( rhs.contains("_ns_") ) {
-                            String[] r = rhs.split("_ns_");
-                            for (int i = 0; i < r.length; i++) {
-                                ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
-                                fixedConstraintPanel.add(cta);
-                            }
-
-                        } else{
-                            ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
-                            fixedConstraintPanel.add(cta);
-                        }
-                    }
-                    setConstraints();
-                }
+                
+                setFixedConstraintsFromRequest(vcs);
+                
                 // The request is now set up like a property-property plot
                 // request,
                 // so save it.
@@ -1140,8 +1125,74 @@ public class SimplePropPropViewer implements EntryPoint {
             }
         }
 
-       
     };
+
+    private void setConstraintsFromRequest(List<Map<String, String>> vcs) {
+        for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
+            Map<String, String> con = (Map<String, String>) vcIt.next();
+            String varid = con.get("varID");
+            String op = con.get("op");
+            String value = con.get("value");
+            String id = con.get("id");
+            String type = con.get("type");
+
+            if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
+                VariableSerializable v = xFilteredDatasetVariables.get(varid);
+                ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                if ( !constraintWidgetGroup.contains(cta2) ) {
+                    constraintWidgetGroup.addConstraint(cta2);
+                }
+            } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
+                String lhs = con.get("lhs");
+                String rhs = con.get("rhs");
+                if ( rhs.contains("_ns_") ) {
+                    String[] r = rhs.split("_ns_");
+                    for (int i = 0; i < r.length; i++) {
+                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
+                        constraintWidgetGroup.addConstraint(cta);
+                    }
+
+                } else{
+                    ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                    constraintWidgetGroup.addConstraint(cta);
+                }
+            }
+        }
+        setConstraints();
+    }
+    private void setFixedConstraintsFromRequest(List<Map<String, String>> vcs) {
+        for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
+            Map<String, String> con = (Map<String, String>) vcIt.next();
+            String varid = con.get("varID");
+            String op = con.get("op");
+            String value = con.get("value");
+            String id = con.get("id");
+            String type = con.get("type");
+            if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
+                VariableSerializable v = xFilteredDatasetVariables.get(varid);
+                ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                if ( !fixedConstraintPanel.contains(cta) ) {
+                    fixedConstraintPanel.add(cta);
+                }
+            } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
+                String lhs = con.get("lhs");
+                String rhs = con.get("rhs");
+                if ( rhs.contains("_ns_") ) {
+                    String[] r = rhs.split("_ns_");
+                    for (int i = 0; i < r.length; i++) {
+                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
+                        fixedConstraintPanel.add(cta);
+                    }
+
+                } else{
+                    ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                    fixedConstraintPanel.add(cta);
+                }
+            }
+        }
+        setConstraints();
+    }
+   
     private void setFixedT(String tlo, String thi) {
         
         ConstraintTextAnchor cta_tlo = new ConstraintTextAnchor(Constants.T_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
@@ -1245,7 +1296,6 @@ public class SimplePropPropViewer implements EntryPoint {
             }
         }
         lasRequest.addConstraints(cons);
-        //TODO get the constraints out the group object and set in them into the request.  Now!
        
     }
 
@@ -1280,43 +1330,13 @@ public class SimplePropPropViewer implements EntryPoint {
             colorVariables.setEnabled(false);
         }
 
-         String xlo = lasRequest.getRangeLo("x", 0);
-         String xhi = lasRequest.getRangeHi("x", 0);
-         String ylo = lasRequest.getRangeLo("y", 0);
-         String yhi = lasRequest.getRangeHi("y", 0);
-
-        
-        if (xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("")) {
-            setFixedXY(xlo, xhi, ylo, yhi);
-        }
-
-        String tlo = lasRequest.getRangeLo("t", 0);
-        String thi = lasRequest.getRangeHi("t", 0);
-        setFixedT(tlo, thi);
-
-        String zlo = lasRequest.getRangeLo("t", 0);
-        String zhi = lasRequest.getRangeHi("t", 0);
-        if (zlo != null && !zlo.equals("") && zhi != null && !zhi.equals("")) {
-            zAxisWidget.setLo(zlo);
-            zAxisWidget.setHi(zhi);
-        }
-
         List<Map<String, String>> vcons = lasRequest.getVariableConstraints();
-       
-
-        if (vcons.size() > 0) {
-            for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
-                Map<String, String> con = (Map<String, String>) vconsIt.next();
-                String varid = con.get("varID");
-                String op = con.get("op");
-                String value = con.get("value");
-                String id = con.get("id");
-                // TODO Use the information here to fire the right event to get the group widget to update itself with these variable values
-            }
-        }
+        setConstraintsFromRequest(vcons);
 
         setVariables();
 
+        initialHistory = "";
+        hasInitialHistory = false;
         updatePlot(false);
 
     }
@@ -1324,16 +1344,6 @@ public class SimplePropPropViewer implements EntryPoint {
     private void pushHistory(String xml) {
         History.newItem(xml, false);
     }
-
-//    private String plotVariable(String id) {
-//        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
-//        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
-//        if (varX.getID().equals(id))
-//            return "x";
-//        if (varY.getID().equals(id))
-//            return "y";
-//        return "";
-//    }
 
     private void warn(String message) {
         String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
@@ -1643,5 +1653,27 @@ public class SimplePropPropViewer implements EntryPoint {
             return "y";
         return "";
     }
+    protected String getAnchor() {
+        String url = Window.Location.getHref();
+        if (url.contains("#")) {
+            return url.substring(url.indexOf("#") + 1, url.length());
+        } else {
+            return "";
+        }
 
+    }
+    private String decode(String xml) {
+        xml = URL.decode(xml);
+
+        // Get rid of the entity values for > and <
+        xml = xml.replace("&gt;", ">");
+        xml = xml.replace("&lt;", "<");
+        // Replace the op value with gt ge eq lt le as needed.
+        xml = xml.replace("op=\">=\"", "op=\"ge\"");
+        xml = xml.replace("op=\">\"", "op=\"gt\"");
+        xml = xml.replace("op=\"=\"", "op=\"eq\"");
+        xml = xml.replace("op=\"<=\"", "op=\"le\"");
+        xml = xml.replace("op=\"<\"", "op=\"lt\"");
+        return xml;
+    }
 }
