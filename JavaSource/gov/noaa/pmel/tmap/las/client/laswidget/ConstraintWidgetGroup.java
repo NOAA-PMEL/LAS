@@ -121,10 +121,10 @@ public class ConstraintWidgetGroup extends Composite {
                 String varid = event.getVarid();
                 String dsid = event.getDsid();
                 boolean apply = event.isApply();
-                ConstraintTextAnchor anchor1 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, lhs, variable, lhs, op1);
-                ConstraintTextAnchor anchor2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
-                ConstraintTextAnchor a = findMatchingAnchor(anchor1);
-                ConstraintTextAnchor b = findMatchingAnchor(anchor2);
+                VariableConstraintAnchor anchor1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, lhs, variable, lhs, op1);
+                VariableConstraintAnchor anchor2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
+                VariableConstraintAnchor a = (VariableConstraintAnchor) findMatchingAnchor(anchor1);
+                VariableConstraintAnchor b = (VariableConstraintAnchor) findMatchingAnchor(anchor2);
                 if ( apply ) {
                     if ( op1.equals("ne") && op2.equals("ne") ) {
                         // Both are the same, only use the second here:
@@ -132,7 +132,7 @@ public class ConstraintWidgetGroup extends Composite {
                             if ( b != null ) {
                                 displayPanel.remove(b);
                             }
-                            displayPanel.add(anchor2);
+                            addConstraint(anchor2);
                         } else if ( rhs != null ) {
                             // It's the same as above...
                             if ( b != null ) {
@@ -144,7 +144,7 @@ public class ConstraintWidgetGroup extends Composite {
                             if ( a != null ) {
                                 displayPanel.remove(a);
                             }
-                            displayPanel.add(anchor1);
+                            addConstraint(anchor1);
                         } else if ( lhs != null ) {
                             // it's blank, applies been pressed, remove the anchor if it exists
                             if ( a != null ) {
@@ -155,7 +155,7 @@ public class ConstraintWidgetGroup extends Composite {
                             if ( b != null ) {
                                 displayPanel.remove(b);
                             }
-                            displayPanel.add(anchor2);
+                            addConstraint(anchor2);
                         } else if ( rhs != null ) {
                             // It's the same as above...
                             if ( b != null ) {
@@ -192,10 +192,10 @@ public class ConstraintWidgetGroup extends Composite {
                 String key = event.getKey();
                 String keyValue = event.getKeyValue();
 
-                ConstraintTextAnchor anchor = new ConstraintTextAnchor("text", null, null, variable, value, key, keyValue, "eq");
+                TextConstraintAnchor anchor = new TextConstraintAnchor("text", null, null, variable, value, key, keyValue, "eq");
 
                 if ( !contains(anchor) ) {
-                    displayPanel.add(anchor);
+                    addConstraint(anchor);
                 }
 
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
@@ -208,8 +208,8 @@ public class ConstraintWidgetGroup extends Composite {
             @Override
             public void onRemove(RemoveSelectionConstraintEvent event) {
                 Object source = event.getSource();
-                if ( source instanceof ConstraintTextAnchor ) {
-                    ConstraintTextAnchor anchor = (ConstraintTextAnchor) source;
+                if ( source instanceof TextConstraintAnchor ) {
+                    TextConstraintAnchor anchor = (TextConstraintAnchor) source;
                     displayPanel.remove(anchor);
                     if ( anchor.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
                         variableConstraints.clearTextField(anchor);
@@ -220,9 +220,9 @@ public class ConstraintWidgetGroup extends Composite {
                     String key = event.getKey();
                     String keyValue = event.getKeyValue();
 
-                    ConstraintTextAnchor anchor = new ConstraintTextAnchor("text", null, null, variable, value, key, keyValue, "eq");
+                    TextConstraintAnchor anchor = new TextConstraintAnchor("text", null, null, variable, value, key, keyValue, "eq");
                     for (int i = 0; i < displayPanel.getWidgetCount(); i++ ) {
-                        ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
+                        TextConstraintAnchor a = (TextConstraintAnchor) displayPanel.getWidget(i);
                         if ( a.equals(anchor) ) {
                             displayPanel.remove(a);
                         }
@@ -297,24 +297,27 @@ public class ConstraintWidgetGroup extends Composite {
     public List<ConstraintSerializable> getConstraints() {
         return displayPanel.getConstraints();
     }
-    public ConstraintTextAnchor findMatchingAnchor(ConstraintTextAnchor anchor) {
+    public ConstraintAnchor findMatchingAnchor(ConstraintAnchor anchor) {
         return displayPanel.findMatchingAnchor(anchor);
         
     }
-    public boolean contains(ConstraintTextAnchor anchor) {
+    public boolean contains(TextConstraintAnchor anchor) {
         return displayPanel.contains(anchor);
         
     }
-    public void remove(ConstraintTextAnchor anchor) {
-        ConstraintTextAnchor remove = null;
+    public void remove(TextConstraintAnchor anchor) {
+        TextConstraintAnchor remove = null;
         for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-            ConstraintTextAnchor a = (ConstraintTextAnchor) displayPanel.getWidget(i);
+            TextConstraintAnchor a = (TextConstraintAnchor) displayPanel.getWidget(i);
             if ( anchor.equals(a) ) {
                 remove = a;
             }
         }
         if ( remove != null ) {
-            displayPanel.remove(remove);
+            boolean r = displayPanel.remove(remove);
+            if (!r) {
+                Window.alert("Text anchor remove failed");
+            }
         }
     }
     public void setActive(boolean active) {
@@ -328,22 +331,28 @@ public class ConstraintWidgetGroup extends Composite {
         constraintPanel.showWidget(panelIndex);
     }
     
-    public List<ConstraintTextAnchor> getAnchors() {
-        List<ConstraintTextAnchor> anchors = new ArrayList<ConstraintTextAnchor>();
+    public List<TextConstraintAnchor> getAnchors() {
+        List<TextConstraintAnchor> anchors = new ArrayList<TextConstraintAnchor>();
         for (int i=0; i < displayPanel.getWidgetCount(); i++ ) {
-            ConstraintTextAnchor cta = (ConstraintTextAnchor) displayPanel.getWidget(i);
+            TextConstraintAnchor cta = (TextConstraintAnchor) displayPanel.getWidget(i);
             anchors.add(cta);
         }
         return anchors;
     }
 
-    public void setConstraints(List<ConstraintTextAnchor> cons) {
+    public void setConstraints(List<ConstraintAnchor> cons) {
         for (Iterator conIt = cons.iterator(); conIt.hasNext();) {
-            ConstraintTextAnchor cta = (ConstraintTextAnchor) conIt.next();
-            displayPanel.add(cta);
+            ConstraintAnchor cta = (ConstraintAnchor) conIt.next();
+            addConstraint(cta);
         }
     }
-    public void addConstraint(ConstraintTextAnchor con) {
+    public void addConstraint(ConstraintAnchor con) {      
+        displayPanel.add(con);
+    }
+    public void addUniqueConstraint(TextConstraintAnchor con) {
+        if ( displayPanel.contains(con) ) {
+            remove(con);
+        }       
         displayPanel.add(con);
     }
     public int getConstraintPanelIndex() {

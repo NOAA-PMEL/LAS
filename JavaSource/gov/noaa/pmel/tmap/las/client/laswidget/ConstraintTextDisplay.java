@@ -15,7 +15,7 @@ public class ConstraintTextDisplay extends FlowPanel {
         List<ConstraintSerializable> constraints = new ArrayList<ConstraintSerializable>();
         Map<String, ConstraintSerializable> cons = new HashMap<String, ConstraintSerializable>();
         for (int i = 0; i < this.getWidgetCount(); i++) {
-            ConstraintTextAnchor anchor = (ConstraintTextAnchor) this.getWidget(i);
+            ConstraintDisplay anchor = (ConstraintDisplay) this.getWidget(i);
             if ( anchor.getType().equals(Constants.TEXT_CONSTRAINT) ) {
                 String key = anchor.getKey();
                 String op = anchor.getOp();
@@ -48,9 +48,9 @@ public class ConstraintTextDisplay extends FlowPanel {
         return constraints;
     }
 
-    public ConstraintTextAnchor findMatchingAnchor(ConstraintTextAnchor anchor) {
+    public ConstraintAnchor findMatchingAnchor(ConstraintAnchor anchor) {
         for (int i = 0; i < this.getWidgetCount(); i++) {
-            ConstraintTextAnchor a = (ConstraintTextAnchor) this.getWidget(i);
+            ConstraintAnchor a = (ConstraintAnchor) this.getWidget(i);
             if ( a.getKey().equals(anchor.getKey()) && a.getOp().equals(anchor.getOp()) ) {
                 return a;
             }
@@ -58,9 +58,9 @@ public class ConstraintTextDisplay extends FlowPanel {
         return null;
     }
 
-    public boolean contains(ConstraintTextAnchor anchor) {
+    public boolean contains(TextConstraintAnchor anchor) {
         for (int i = 0; i < this.getWidgetCount(); i++) {
-            ConstraintTextAnchor a = (ConstraintTextAnchor) this.getWidget(i);
+            TextConstraintAnchor a = (TextConstraintAnchor) this.getWidget(i);
             if ( anchor.equals(a) ) {
                 return true;
             }

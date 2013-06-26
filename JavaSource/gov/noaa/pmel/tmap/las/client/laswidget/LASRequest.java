@@ -394,12 +394,12 @@ public class LASRequest {
                 c.put("id", id);
             }
             if ( type.equals("variable") ) {
-            NodeList vl = constraint.getElementsByTagName("v");
-            Element v = (Element) vl.item(0);
-            Text text = (Text) v.getFirstChild();
-            String value = text.getData();
-            c.put("value", value);
-           
+                NodeList vl = constraint.getElementsByTagName("v");
+                Element v = (Element) vl.item(0);
+                Text text = (Text) v.getFirstChild();
+                String value = text.getData();
+                c.put("value", value);
+
                 // If it's a variable constraint it will contain a "link" element that defines the variable.
                 NodeList ll = constraint.getElementsByTagName("link");
                 Element link = (Element) ll.item(0);

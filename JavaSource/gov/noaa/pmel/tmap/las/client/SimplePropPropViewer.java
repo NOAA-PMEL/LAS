@@ -8,15 +8,18 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
-import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextAnchor;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintLabel;
+import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.ERDDAPVariableConstraintPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintLayout;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
@@ -128,6 +131,7 @@ public class SimplePropPropViewer implements EntryPoint {
     HTML spinImage;
     HorizontalPanel coloredBy = new HorizontalPanel();
     ConstraintTextDisplay fixedConstraintPanel = new ConstraintTextDisplay();
+    ScrollPanel fixedScroller = new ScrollPanel();
     Label selection = new Label("Current selection:");
     Label horizontalLabel = new Label("Horizontal: ");
     Label verticalLabel = new Label("Vertical: ");
@@ -402,12 +406,12 @@ public class SimplePropPropViewer implements EntryPoint {
                 String varid = event.getVarid();
                 String dsid = event.getDsid();
                 boolean apply = event.isApply();
-                ConstraintTextAnchor anchor1 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, lhs, variable, lhs, op1);
-                ConstraintTextAnchor anchor2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
-                ConstraintTextAnchor a = constraintWidgetGroup.findMatchingAnchor(anchor1);
-                ConstraintTextAnchor b = constraintWidgetGroup.findMatchingAnchor(anchor2);
-                ConstraintTextAnchor afixed = fixedConstraintPanel.findMatchingAnchor(anchor1);
-                ConstraintTextAnchor bfixed = fixedConstraintPanel.findMatchingAnchor(anchor2);
+                VariableConstraintAnchor anchor1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, lhs, variable, lhs, op1);
+                VariableConstraintAnchor anchor2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
+                VariableConstraintAnchor a = (VariableConstraintAnchor) constraintWidgetGroup.findMatchingAnchor(anchor1);
+                VariableConstraintAnchor b = (VariableConstraintAnchor) constraintWidgetGroup.findMatchingAnchor(anchor2);
+                VariableConstraintAnchor afixed = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(anchor1);
+                VariableConstraintAnchor bfixed = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(anchor2);
                 if ( afixed != null && !anchor1.getValue().equals("") && !a.getValue().equals("")) {
                     double v1 = Double.valueOf(anchor1.getValue());
                     double a1 = Double.valueOf(afixed.getValue());
@@ -430,11 +434,14 @@ public class SimplePropPropViewer implements EntryPoint {
         outputPanel.setWidget(0, 0, lasAnnotationsPanel);
         output.add(annotationsButton);
         output.add(outputPanel);
-        spaceTimeTopRow.add(new HTML("<b>&nbsp;&nbsp;Fixed Constraints from the main interface:</b>&nbsp;"));
+        spaceTimeTopRow.add(new HTML("<b>Fixed Constraints from the main interface:</b>&nbsp;"));
         spaceTimeConstraints.add(spaceTimeTopRow);
         // TODO style and label
-        fixedConstraintPanel.addStyleName(Constants.ALLBORDER);
-        spaceTimeConstraints.add(fixedConstraintPanel);
+        fixedConstraintPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
+        fixedScroller.addStyleName(Constants.ALLBORDER);
+        fixedScroller.add(fixedConstraintPanel);
+        fixedScroller.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
+        spaceTimeConstraints.add(fixedScroller);
         spaceTimeConstraints.add(timePanel);
         spaceTimeConstraints.add(zAxisWidget);
         RootPanel.get("icons").add(cruiseIcons);
@@ -1000,6 +1007,7 @@ public class SimplePropPropViewer implements EntryPoint {
         String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
         String yid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
         String yname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
+        String dsid = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
         double minx;
         double maxx;
         if ( world_endx > world_startx ) {
@@ -1009,13 +1017,19 @@ public class SimplePropPropViewer implements EntryPoint {
             minx = world_endx;
             maxx = world_startx;
         }
-        String v = constraintWidgetGroup.getVariable().getName();
-        if ( v.equals(xname) ) {
-            constraintWidgetGroup.setLhs(dFormat.format(minx));
-            constraintWidgetGroup.setRhs(dFormat.format(maxx));
+        VariableSerializable v = constraintWidgetGroup.getVariable();
+        
+        
+        VariableConstraintAnchor ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
+        VariableConstraintAnchor ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
+        boundByFixed(ctax1);
+        boundByFixed(ctax2);
+        constraintWidgetGroup.addConstraint(ctax1);
+        constraintWidgetGroup.addConstraint(ctax2);
+        if ( v.getName().equals(xname) ) {
+            constraintWidgetGroup.setLhs(ctax1.getValue());
+            constraintWidgetGroup.setRhs(ctax2.getValue());
         }
-        // Set the constraint display...
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(dsid, xid, dFormat.format(minx), "gt", xname, dFormat.format(maxx), "le", true), SimplePropPropViewer.this);
         double miny;
         double maxy;
         if ( world_endy > world_starty ) {
@@ -1025,11 +1039,34 @@ public class SimplePropPropViewer implements EntryPoint {
             miny = world_endy;
             maxy = world_starty;
         }
-        if ( v.equals(yname) ) {
-            constraintWidgetGroup.setLhs(dFormat.format(miny));
-            constraintWidgetGroup.setRhs(dFormat.format(maxy));
+        
+        VariableConstraintAnchor ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
+        VariableConstraintAnchor ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
+        boundByFixed(ctay1);
+        boundByFixed(ctay2);    
+        constraintWidgetGroup.addConstraint(ctay1);
+        constraintWidgetGroup.addConstraint(ctay2);
+        if ( v.getName().equals(yname) ) {
+            constraintWidgetGroup.setLhs(ctay1.getValue());
+            constraintWidgetGroup.setRhs(ctay2.getValue());
         }
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(dsid, yid, dFormat.format(miny), "gt", yname, dFormat.format(maxy), "le", true), SimplePropPropViewer.this);
+    }
+    private void boundByFixed(VariableConstraintAnchor a) {
+        VariableConstraintAnchor match = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(a);
+        if ( match != null ) {
+            double value = Double.valueOf(a.getValue());
+            double matchV = Double.valueOf(match.getValue());
+            String op = match.getOp();
+            if ( op.equals("gt") || op.equals("ge")) {
+                if ( value < matchV ) {
+                    a.setValue(match.getValue());
+                }
+            } else if ( op.equals("lt") || op.equals("le") ) {
+                if ( value > matchV) {
+                    a.setValue(match.getValue());
+                }
+            }
+        }
     }
 
     AsyncCallback<ConfigSerializable> datasetCallback = new AsyncCallback<ConfigSerializable>() {
@@ -1128,32 +1165,30 @@ public class SimplePropPropViewer implements EntryPoint {
     };
 
     private void setConstraintsFromRequest(List<Map<String, String>> vcs) {
+        String op1 = "gt";
+        String op2 = "le";
         for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
             Map<String, String> con = (Map<String, String>) vcIt.next();
             String varid = con.get("varID");
             String op = con.get("op");
             String value = con.get("value");
-            String id = con.get("id");
             String type = con.get("type");
-
             if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
-                VariableSerializable v = xFilteredDatasetVariables.get(varid);
-                ConstraintTextAnchor cta2 = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                if ( !constraintWidgetGroup.contains(cta2) ) {
-                    constraintWidgetGroup.addConstraint(cta2);
-                }
+                VariableSerializable v = xFilteredDatasetVariables.get(varid);        
+                VariableConstraintAnchor cta2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);       
+                constraintWidgetGroup.addConstraint(cta2);
             } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
                 String lhs = con.get("lhs");
                 String rhs = con.get("rhs");
                 if ( rhs.contains("_ns_") ) {
                     String[] r = rhs.split("_ns_");
                     for (int i = 0; i < r.length; i++) {
-                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
+                        TextConstraintAnchor cta = new TextConstraintAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
                         constraintWidgetGroup.addConstraint(cta);
                     }
 
                 } else{
-                    ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                    TextConstraintAnchor cta = new TextConstraintAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
                     constraintWidgetGroup.addConstraint(cta);
                 }
             }
@@ -1170,22 +1205,20 @@ public class SimplePropPropViewer implements EntryPoint {
             String type = con.get("type");
             if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
                 VariableSerializable v = xFilteredDatasetVariables.get(varid);
-                ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
-                if ( !fixedConstraintPanel.contains(cta) ) {
-                    fixedConstraintPanel.add(cta);
-                }
+                ConstraintLabel cta = new ConstraintLabel(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                fixedConstraintPanel.add(cta);
             } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
                 String lhs = con.get("lhs");
                 String rhs = con.get("rhs");
                 if ( rhs.contains("_ns_") ) {
                     String[] r = rhs.split("_ns_");
                     for (int i = 0; i < r.length; i++) {
-                        ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
+                        ConstraintLabel cta = new ConstraintLabel(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
                         fixedConstraintPanel.add(cta);
                     }
 
                 } else{
-                    ConstraintTextAnchor cta = new ConstraintTextAnchor(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                    ConstraintLabel cta = new ConstraintLabel(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
                     fixedConstraintPanel.add(cta);
                 }
             }
@@ -1195,20 +1228,20 @@ public class SimplePropPropViewer implements EntryPoint {
    
     private void setFixedT(String tlo, String thi) {
         
-        ConstraintTextAnchor cta_tlo = new ConstraintTextAnchor(Constants.T_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
+        ConstraintLabel cta_tlo = new ConstraintLabel(Constants.T_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
         fixedConstraintPanel.add(cta_tlo);   
-        ConstraintTextAnchor cta_thi = new ConstraintTextAnchor(Constants.T_CONSTRAINT, dsid, "time", "time", thi, "time", thi, "le");
+        ConstraintLabel cta_thi = new ConstraintLabel(Constants.T_CONSTRAINT, dsid, "time", "time", thi, "time", thi, "le");
         fixedConstraintPanel.add(cta_thi);  
         
     }
     private void setFixedXY(String xlo, String xhi, String ylo, String yhi) {
-        ConstraintTextAnchor cta_xlo = new ConstraintTextAnchor(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xlo, "longitude", xlo, "ge");
+        ConstraintLabel cta_xlo = new ConstraintLabel(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xlo, "longitude", xlo, "ge");
         fixedConstraintPanel.add(cta_xlo);   
-        ConstraintTextAnchor cta_xhi = new ConstraintTextAnchor(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xhi, "longitude", xhi, "le");
+        ConstraintLabel cta_xhi = new ConstraintLabel(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xhi, "longitude", xhi, "le");
         fixedConstraintPanel.add(cta_xhi);   
-        ConstraintTextAnchor cta_ylo = new ConstraintTextAnchor(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", ylo, "latitude", ylo, "ge");
+        ConstraintLabel cta_ylo = new ConstraintLabel(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", ylo, "latitude", ylo, "ge");
         fixedConstraintPanel.add(cta_ylo);   
-        ConstraintTextAnchor cta_yhi = new ConstraintTextAnchor(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", yhi, "latitude", yhi, "le");
+        ConstraintLabel cta_yhi = new ConstraintLabel(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", yhi, "latitude", yhi, "le");
         fixedConstraintPanel.add(cta_yhi);  
     }
     private int getNumber(Node firstChild) {
