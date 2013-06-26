@@ -128,7 +128,7 @@ public class SeasonConstraintPanel extends Composite {
             @Override
             public void onRemove(RemoveSelectionConstraintEvent event) {
                 Object source = event.getSource();
-                if ( source instanceof ConstraintTextAnchor ) {
+                if ( source instanceof TextConstraintAnchor ) {
                     String month = event.getKeyValue();
                     int m = months.indexOf(month);
                     // TODO This text anchor might be for some other variable.  Can we do a better job of differentiating these?

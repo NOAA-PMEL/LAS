@@ -125,7 +125,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         int index = variablesListBox.getSelectedIndex();
         variable = variablesListBox.getVariable(index);
     }
-    public void clearTextField(ConstraintTextAnchor anchor) {
+    public void clearTextField(TextConstraintAnchor anchor) {
         if ( variable.getID().equals(anchor.getVarid()) && variable.getDSID().equals(anchor.getDsid())) {
             if ( anchor.getOp().equals("gt") ) {
                 lhs.setText("");

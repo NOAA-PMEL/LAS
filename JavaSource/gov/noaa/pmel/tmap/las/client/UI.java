@@ -15,7 +15,8 @@ import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
-import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextAnchor;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintAnchor;
+import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
@@ -27,6 +28,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.TrajectoryOuterSequenceConstraint;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
@@ -1300,11 +1302,11 @@ public class UI extends BaseUI {
          * 
          * The constraintCount is the number of constraints active.
          * 
-         * Then there are "constraintCount" strings of the form VARIABLE_cr_VALUE_cr_KEY_cr_KEYVALUE with parameter name constraintN.
+         * Then there are "constraintCount" strings of the form TYPE_VARIABLE_cr_VALUE_cr_KEY_cr_KEYVALUE with parameter name constraintN.
          */
          
          String cCount = tokenMap.get("constraintCount");
-         List<ConstraintTextAnchor> cons = new ArrayList<ConstraintTextAnchor>();
+         List<ConstraintAnchor> cons = new ArrayList<ConstraintAnchor>();
          if ( cCount != null ) {
              xTrajectoryConstraint.setActive(true);
              xTrajectoryConstraint.setVisible(true);
@@ -1312,8 +1314,14 @@ public class UI extends BaseUI {
              int c = Integer.valueOf(cCount);
              for (int i = 0; i < c; i++) {
                  String con = tokenMap.get("constraint"+i);
-                 ConstraintTextAnchor constraintSer = new ConstraintTextAnchor(con);
-                 cons.add(constraintSer);
+                 if ( con.startsWith(Constants.VARIABLE_CONSTRAINT) ) {
+                     VariableConstraintAnchor constraintSer = new VariableConstraintAnchor(con);
+                     cons.add(constraintSer);
+                 } else {
+                     TextConstraintAnchor constraintSer = new TextConstraintAnchor(con);
+                     cons.add(constraintSer);
+                 }
+                 
              }
              String indx = tokenMap.get("constraintPanelIndex");
              int panelIndex = Integer.valueOf(indx);
@@ -1662,14 +1670,14 @@ public class UI extends BaseUI {
         // Right now the constraints are in the gallery. That's gonna change, but...
         
         if ( xTrajectoryConstraint.isActive() ) {
-            List<ConstraintTextAnchor> constraints = xTrajectoryConstraint.getAnchors();
+            List<TextConstraintAnchor> constraints = xTrajectoryConstraint.getAnchors();
             if ( constraints.size() > 0 ) {
                 historyToken.append(";constraintCount="+constraints.size());
             }
             int index = 0;
             for (Iterator iterator = constraints.iterator(); iterator.hasNext();) {
-                ConstraintTextAnchor cta = (ConstraintTextAnchor) iterator.next();
-                historyToken.append(";constraint"+index+"="+cta.getVariable()+"_cr_"+cta.getValue()+"_cr_"+cta.getOp()+"_cr_"+cta.getKey()+"_cr_"+cta.getKeyValue());
+                TextConstraintAnchor cta = (TextConstraintAnchor) iterator.next();
+                historyToken.append(";constraint"+index+"="+cta.getType()+"_cr_"+cta.getVariable()+"_cr_"+cta.getValue()+"_cr_"+cta.getOp()+"_cr_"+cta.getKey()+"_cr_"+cta.getKeyValue());
                 index++;
             }
             int panelIndex = xTrajectoryConstraint.getConstraintPanelIndex();
