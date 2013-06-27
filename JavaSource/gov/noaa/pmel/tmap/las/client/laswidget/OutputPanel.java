@@ -554,8 +554,6 @@ public class OutputPanel extends Composite implements HasName {
                             plotImage.addErrorHandler(imageErrorHandler);
                             plotImage.setUrl(imageurl);
                             grid.setWidget(2, 0, plotImage);
-                            // TODO get changes from v8.0.1
-                            // TODO Why set it invisible?  Whey drawToScreen on the canvas instead of just I don't know something else?
                             plotImage.setVisible(false);
                             frontCanvas.addMouseUpHandler(new MouseUpHandler() {
 
@@ -583,18 +581,7 @@ public class OutputPanel extends Composite implements HasName {
                             // The old stuff if there is no canvas...
                             currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
                             setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-                            // No need to call setPlotImageWidth as a controller
-                            // that listens to the new
-                            // StringValueChangeEvent(imageurl) will eventually
-                            // do so
-                            // setPlotImageWidth();
                         }
-                        logger.info("onResponseReceived firing StringValueChangeEvent");
-                        // N.B. Applications that use the output panel must handle the image URL event to resize the window.
-                        
-                        // This is also called in the image on-load?
-                        
-                        // eventBus.fireEventFromSource(new StringValueChangeEvent(imageurl), thisOutputPanel);
                     }
                     world_startx = x_axis_lower_left;
                     world_endx = x_axis_upper_right;
@@ -2015,7 +2002,6 @@ public class OutputPanel extends Composite implements HasName {
             // that listens to the new
             // StringValueChangeEvent(url) will eventually do so
             // setPlotImageWidth();
-            logger.info("refreshPlot firing StringValueChangeEvent with currentURL = url:" + url);
             eventBus.fireEvent(new StringValueChangeEvent(url));
         }
     }
@@ -2226,8 +2212,6 @@ public class OutputPanel extends Composite implements HasName {
             if (plotImage != null) {
                 // set the plotImage to the grid before scaling so plotImage's
                 // imageElement will be valid
-                grid.setWidget(2, 0, plotImage);
-                plotImage.setVisible(false);
                 scale(plotImage, imageScaleRatio);
             }
         } else {
