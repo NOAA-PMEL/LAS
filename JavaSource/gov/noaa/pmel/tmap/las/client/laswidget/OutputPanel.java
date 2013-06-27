@@ -544,16 +544,18 @@ public class OutputPanel extends Composite implements HasName {
 
                     if (!imageurl.equals("")) {
                         currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                        plotImage = new IESafeImage();
+                        plotImage = new IESafeImage(imageurl);
                         x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                         y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
                         if (frontCanvas != null) {
-                            
+                          
                             plotImage.addLoadHandler(imageLoadHandler);
                             plotImage.addErrorHandler(imageErrorHandler);
                             plotImage.setUrl(imageurl);
                             grid.setWidget(2, 0, plotImage);
+                            // TODO get changes from v8.0.1
+                            // TODO Why set it invisible?  Whey drawToScreen on the canvas instead of just I don't know something else?
                             plotImage.setVisible(false);
                             frontCanvas.addMouseUpHandler(new MouseUpHandler() {
 
@@ -589,7 +591,10 @@ public class OutputPanel extends Composite implements HasName {
                         }
                         logger.info("onResponseReceived firing StringValueChangeEvent");
                         // N.B. Applications that use the output panel must handle the image URL event to resize the window.
-                        eventBus.fireEventFromSource(new StringValueChangeEvent(imageurl), thisOutputPanel);
+                        
+                        // This is also called in the image on-load?
+                        
+                        // eventBus.fireEventFromSource(new StringValueChangeEvent(imageurl), thisOutputPanel);
                     }
                     world_startx = x_axis_lower_left;
                     world_endx = x_axis_upper_right;
@@ -2609,25 +2614,8 @@ public class OutputPanel extends Composite implements HasName {
         try {
             imageData = context.getImageData(0, 0, w, h);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            if (image == null) {
-                logger.severe("image:null");
-            } else {
-                logger.warning("image:" + image.toString());
-            }
-            logger.warning("scaleToRatio:" + scaleToRatio);
-            logger.warning("ch:" + ch);
-            logger.warning("cw:" + cw);
-            logger.warning("dw:" + dw);
-            logger.warning("w:" + w);
-            logger.warning("dh:" + dh);
-            logger.warning("h:" + h);
-            if (imageData == null) {
-                logger.severe("imageData:null");
-            } else {
-                logger.warning("imageData:" + imageData.toString());
-            }
-            e.printStackTrace();
+            // no image data. we'll try againg...
+            String b = e.getLocalizedMessage();
         }
 
         frontCanvas.setCoordinateSpaceHeight((int) h + 10);
