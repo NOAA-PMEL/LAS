@@ -80,8 +80,8 @@ public class Constraint {
     public String getAsERDDAPString() {
         // Even stuff that looks like a number has to be enclosed in quotes for ERDDAP variables that come is a list of distinct values.
         if ( op.equals("is") || op.equals("like") ) {
-            lhs = lhs.replaceAll(",", "|");
-            rhs = rhs.replaceAll(",", "|");
+            lhs = lhs.replaceAll("_ns_", "|");
+            rhs = rhs.replaceAll("_ns_", "|");
         }
         return lhs+getOpAsSymbol()+"\""+rhs+"\"";
     }
