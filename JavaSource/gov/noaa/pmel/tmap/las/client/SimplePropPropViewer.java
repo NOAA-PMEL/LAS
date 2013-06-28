@@ -1024,8 +1024,17 @@ public class SimplePropPropViewer implements EntryPoint {
         VariableConstraintAnchor ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
         boundByFixed(ctax1);
         boundByFixed(ctax2);
+        
+        if ( constraintWidgetGroup.contains(ctax1)) {
+            constraintWidgetGroup.remove(ctax1);
+        }
         constraintWidgetGroup.addConstraint(ctax1);
+        
+        if ( constraintWidgetGroup.contains(ctax2) ) {
+            constraintWidgetGroup.remove(ctax2);
+        }
         constraintWidgetGroup.addConstraint(ctax2);
+        
         if ( v.getName().equals(xname) ) {
             constraintWidgetGroup.setLhs(ctax1.getValue());
             constraintWidgetGroup.setRhs(ctax2.getValue());
@@ -1044,8 +1053,17 @@ public class SimplePropPropViewer implements EntryPoint {
         VariableConstraintAnchor ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
         boundByFixed(ctay1);
         boundByFixed(ctay2);    
+        
+        if ( constraintWidgetGroup.contains(ctay1) ) {
+            constraintWidgetGroup.remove(ctay1);
+        }
         constraintWidgetGroup.addConstraint(ctay1);
+        
+        if ( constraintWidgetGroup.contains(ctay2) ) {
+            constraintWidgetGroup.remove(ctay2);
+        }
         constraintWidgetGroup.addConstraint(ctay2);
+        
         if ( v.getName().equals(yname) ) {
             constraintWidgetGroup.setLhs(ctay1.getValue());
             constraintWidgetGroup.setRhs(ctay2.getValue());

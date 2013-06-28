@@ -48,9 +48,9 @@ public class ConstraintTextDisplay extends FlowPanel {
         return constraints;
     }
 
-    public ConstraintAnchor findMatchingAnchor(ConstraintAnchor anchor) {
+    public ConstraintDisplay findMatchingAnchor(ConstraintDisplay anchor) {
         for (int i = 0; i < this.getWidgetCount(); i++) {
-            ConstraintAnchor a = (ConstraintAnchor) this.getWidget(i);
+            ConstraintDisplay a = (ConstraintDisplay) this.getWidget(i);
             if ( a.getKey().equals(anchor.getKey()) && a.getOp().equals(anchor.getOp()) ) {
                 return a;
             }
@@ -58,9 +58,9 @@ public class ConstraintTextDisplay extends FlowPanel {
         return null;
     }
 
-    public boolean contains(TextConstraintAnchor anchor) {
+    public boolean contains(ConstraintDisplay anchor) {
         for (int i = 0; i < this.getWidgetCount(); i++) {
-            TextConstraintAnchor a = (TextConstraintAnchor) this.getWidget(i);
+            ConstraintDisplay a = (ConstraintDisplay) this.getWidget(i);
             if ( anchor.equals(a) ) {
                 return true;
             }

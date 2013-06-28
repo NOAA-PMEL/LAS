@@ -297,18 +297,18 @@ public class ConstraintWidgetGroup extends Composite {
     public List<ConstraintSerializable> getConstraints() {
         return displayPanel.getConstraints();
     }
-    public ConstraintAnchor findMatchingAnchor(ConstraintAnchor anchor) {
+    public ConstraintDisplay findMatchingAnchor(ConstraintDisplay anchor) {
         return displayPanel.findMatchingAnchor(anchor);
         
     }
-    public boolean contains(TextConstraintAnchor anchor) {
+    public boolean contains(ConstraintDisplay anchor) {
         return displayPanel.contains(anchor);
         
     }
-    public void remove(TextConstraintAnchor anchor) {
-        TextConstraintAnchor remove = null;
+    public void remove(ConstraintDisplay anchor) {
+        ConstraintDisplay remove = null;
         for (int i = 0; i < displayPanel.getWidgetCount(); i++) {
-            TextConstraintAnchor a = (TextConstraintAnchor) displayPanel.getWidget(i);
+            ConstraintDisplay a = (ConstraintDisplay) displayPanel.getWidget(i);
             if ( anchor.equals(a) ) {
                 remove = a;
             }
