@@ -57,7 +57,7 @@ DEFINE SYMBOL shape = `UPCASE("($4"NONE")")`
 ! IF there are no axes, a purely scalar variable, just write it and exit.
 
 IF ($shape"0|NONE>1|*>0") THEN
-   SAVE/FILE="$1"/CLOBBER $3
+   SAVE/FILE="$1"/OUTTYPE=float/CLOBBER $3
    EXIT/SCRIPT
 ENDIF
 
