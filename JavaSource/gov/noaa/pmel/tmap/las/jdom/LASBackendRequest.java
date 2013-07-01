@@ -503,24 +503,83 @@ public class LASBackendRequest extends LASDocument {
         HashMap<String, String> symbols = new HashMap<String,String>();
         List constraints = this.getRootElement().getChildren("constraint");
         int index=0;
+        List<MVSymbol> textSymbols = new ArrayList<MVSymbol>();
         for (Iterator conIt = constraints.iterator(); conIt.hasNext();) {
             Element con = (Element) conIt.next();
             List parts = con.getChildren();
-            symbols.put("constraint_"+index+"_type", con.getAttributeValue("type"));
-            for (Iterator partIt = parts.iterator(); partIt.hasNext();) {
-                Element part = (Element) partIt.next();
-                String name = "constraint_"+index+"_"+part.getName();
-                String value = part.getTextNormalize();
-                if ( value.contains("_ns_") ) {
-                    value = value.replace("_ns_", ",");
+            String type = con.getAttributeValue("type");
+            if ( type.equals("text") ) {
+                MVSymbol mvs= new MVSymbol();
+                for (Iterator partIt = parts.iterator(); partIt.hasNext();) {
+                    Element part = (Element) partIt.next();
+                    String name = part.getName();
+                    String value = part.getTextNormalize();
+                    if ( value.contains("_ns_") ) {
+                        String[] values = value.split("_ns_");
+                        mvs.setValuesName(name);
+                        mvs.setValues(values);
+                    } else {
+                        mvs.put(name, value);
+                    }
                 }
-                symbols.put(name, value);
+                textSymbols.add(mvs);
+            } else {
+                symbols.put("constraint_"+index+"_type", type);
+                for (Iterator partIt = parts.iterator(); partIt.hasNext();) {
+                    Element part = (Element) partIt.next();
+                    String name = "constraint_"+index+"_"+part.getName();
+                    String value = part.getTextNormalize();
+                    if ( value.contains("_ns_") ) {
+                        value = value.replace("_ns_", ",");
+                    }
+                    symbols.put(name, value);
+                }
+                index++;
             }
+        }
+       
+        for (Iterator mvsIt = textSymbols.iterator(); mvsIt.hasNext();) {
             index++;
+            MVSymbol mvs = (MVSymbol) mvsIt.next();
+            if ( mvs.values != null ) {
+                // repeat
+                for (int i = 0; i < mvs.values.length; i++) {
+                    for (Iterator partsIt = mvs.parts.keySet().iterator(); partsIt.hasNext();) {
+                        String pname = (String) partsIt.next();
+                        String name = "constraint_"+index+"_"+pname;
+                        String value = mvs.parts.get(pname);
+                        symbols.put(name, value);
+                    }
+                    symbols.put("constraint_"+index+"_"+mvs.valuesName, mvs.values[i]);
+                    index++;
+                }
+                
+            } else {
+                // print parts only.
+                for (Iterator partsIt = mvs.parts.keySet().iterator(); partsIt.hasNext();) {
+                    String pname = (String) partsIt.next();
+                    String name = "constraint_"+index+"_"+pname;
+                    String value = mvs.parts.get(name);
+                    symbols.put(name, value);
+                }
+            }
         }
         return symbols;
     }
-    
+    private class MVSymbol {
+        Map<String, String> parts = new HashMap<String, String>();
+        String[] values;
+        String valuesName;
+        private void setValuesName(String valuesName) {
+            this.valuesName = valuesName;
+        }
+        private void put(String name, String value) {
+            parts.put(name, value);
+        }
+        private void setValues(String[] values) {
+            this.values = values;
+        }
+    }
     /**
      * Count the number of results in the expected response
      * @return the count
