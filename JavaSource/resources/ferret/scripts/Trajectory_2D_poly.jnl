@@ -18,7 +18,7 @@ DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
-DEFINE SYMBOL ribbon = 1
+!DEFINE SYMBOL ribbon = 1
 
 SET MODE verify:always  ! allows for debugging
 
