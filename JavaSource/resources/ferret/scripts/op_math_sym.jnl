@@ -15,6 +15,7 @@ IF ($2"0|GT>1|*>0") THEN DEFINE SYMBOL math_op_sym = >
 IF ($2"0|GE>1|*>0") THEN DEFINE SYMBOL math_op_sym = <=
 IF ($2"0|EQ>1|*>0") THEN DEFINE SYMBOL math_op_sym = =
 IF ($2"0|NE>1|*>0") THEN DEFINE SYMBOL math_op_sym = NE
+IF ($2"0|IS>1|*>0") THEN DEFINE SYMBOL math_op_sym = is
 
 ELSE
 
@@ -24,6 +25,7 @@ IF ($2"0|GT>1|*>0") THEN DEFINE SYMBOL math_op_sym = @MA41@SR
 IF ($2"0|GE>1|*>0") THEN DEFINE SYMBOL math_op_sym = @MA43@SR
 IF ($2"0|EQ>1|*>0") THEN DEFINE SYMBOL math_op_sym = @CA17@SR  ! The one from MA font is too close together
 IF ($2"0|NE>1|*>0") THEN DEFINE SYMBOL math_op_sym = @MA36@SR
+IF ($2"0|IS>1|*>0") THEN DEFINE SYMBOL math_op_sym = is
 
 ENDIF
-!-----------------End of op_math_sym ---------------------------------
+!-----------------End of op_math_sym 
