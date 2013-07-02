@@ -551,6 +551,7 @@ public class LASBackendRequest extends LASDocument {
                         symbols.put(name, value);
                     }
                     symbols.put("constraint_"+index+"_"+mvs.valuesName, mvs.values[i]);
+                    symbols.put("constraint_"+index+"_type", "text");
                     index++;
                 }
                 
@@ -562,6 +563,7 @@ public class LASBackendRequest extends LASDocument {
                     String value = mvs.parts.get(name);
                     symbols.put(name, value);
                 }
+                symbols.put("constraint_"+index+"_type", "text");
             }
         }
         return symbols;
