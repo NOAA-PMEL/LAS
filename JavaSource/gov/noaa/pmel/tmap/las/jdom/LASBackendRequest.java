@@ -539,7 +539,7 @@ public class LASBackendRequest extends LASDocument {
         }
        
         for (Iterator mvsIt = textSymbols.iterator(); mvsIt.hasNext();) {
-            index++;
+            if ( index > 0 ) index++;
             MVSymbol mvs = (MVSymbol) mvsIt.next();
             if ( mvs.values != null ) {
                 // repeat
