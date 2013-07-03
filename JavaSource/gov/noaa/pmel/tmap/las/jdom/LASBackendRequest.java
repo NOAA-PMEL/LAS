@@ -560,7 +560,7 @@ public class LASBackendRequest extends LASDocument {
                 for (Iterator partsIt = mvs.parts.keySet().iterator(); partsIt.hasNext();) {
                     String pname = (String) partsIt.next();
                     String name = "constraint_"+index+"_"+pname;
-                    String value = mvs.parts.get(name);
+                    String value = mvs.parts.get(pname);
                     symbols.put(name, value);
                 }
                 symbols.put("constraint_"+index+"_type", "text");
