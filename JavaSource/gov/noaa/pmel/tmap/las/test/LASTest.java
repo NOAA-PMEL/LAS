@@ -39,7 +39,7 @@ public class LASTest{
 	
     private LASConfig lasConfig = new LASConfig();
     private LASTestOptions lto;
-    private String size;
+    
     
     public LASTest(LASTestOptions l, LASConfig c) {
     	lto = l;
@@ -90,24 +90,22 @@ public class LASTest{
                 } else {
                     int start = 0;
                     int end = 10;
-                    ArrayList<Dataset> ds = test(start, end);
+                    ArrayList<Dataset> ds = getDatasetRange(start, end);
                     ltd.testDataset(web_output, ds);
+                    // Do the first 10000 datasets.  :-)
+                    // The list should come back empty from the server when we run out before the 10000th.
+                    int count = 10000;
                     // Do the rest.
-                    if ( size != null ) {
-                        try {
-                            int count = Integer.valueOf(size);
-
+                    
                             while ( end < count) {
                                 start = start + 10;
                                 end = end + 10;
-                                ds = test(start, end);
+                                ds = getDatasetRange(start, end);
                                 ltd.testDataset(web_output, ds);
                             }
 
-                        } catch (Exception e) {
-                            // Oh well.  Bummer.
-                        }
-                    }
+                        
+                    
                 }
                 
 
@@ -130,13 +128,13 @@ public class LASTest{
             System.err.println(e.getMessage());
         }
     }
-    private ArrayList<Dataset> test(int start, int end) throws HttpException, IOException, JDOMException {
+    private ArrayList<Dataset> getDatasetRange(int start, int end) throws HttpException, IOException, JDOMException {
         LASDocument doc = new LASDocument();
         // Get the first 10 and keep the size
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         lasProxy.executeGetMethodAndStreamResult(lto.getLAS()+"getDatasets.do?format=xml&start=0&end=10", stream);
         JDOMUtils.XML2JDOM(stream.toString(), doc);
-        size = doc.getRootElement().getAttributeValue("count");
+        
         List<Element> dE = doc.getRootElement().getChildren("dataset");
         ArrayList<Dataset> ds = new ArrayList<Dataset>();
         for (Iterator catIt = dE.iterator(); catIt.hasNext();) {
