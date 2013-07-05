@@ -2193,12 +2193,18 @@ public class LASConfig extends LASDocument {
         }
         Element variable = getElementByXPath(xpathValue);
         if ( variable == null ) {
-        	// It might be a "remote" variable...
-        	return "";
+            // It might be a "remote" variable...
+            return "";
         }
         Element dataset = variable.getParentElement().getParentElement();
+
         String varURL = variable.getAttributeValue("url");
         String dsURL = dataset.getAttributeValue("url");
+        String url = combinedURL(dsURL, varURL);
+        if ( url.equals("none") ) log.warn("URL for "+xpathValue+" is empty.");
+        return url;
+    }
+    public static String combinedURL(String dsURL, String varURL) {
         String url = "";
         if ( varURL != null && dsURL != null) {
             if ( varURL.startsWith("http://") || varURL.startsWith("file:///") ) {
@@ -2215,8 +2221,8 @@ public class LASConfig extends LASDocument {
         }
 
         if ( url == null ) {
-        	log.warn("URL for "+xpathValue+" is empty.");
-        	url = "none";
+            
+            url = "none";
         }
 
         if (url.startsWith("file://")) {
@@ -2228,7 +2234,7 @@ public class LASConfig extends LASDocument {
         if (url.startsWith("file:")) {
             url = url.substring(5, url.length());
         }
-         return url;
+        return url;
     }
     /**
      * Get the value of a "global" property (a property in the config that is not in any particular data set or variable).
