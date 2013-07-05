@@ -72,14 +72,37 @@ public class GetDatasets extends ConfigService {
         if ( format == null ) {
             format = "json";
         }
+        String startString = request.getParameter("start");
+        String endString = request.getParameter("end");
+        
+        int start = 0;
+        int end = 0;
         
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         log.debug("Processing request for dataset list.");
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
                 
-        ArrayList<Category> datasets = new ArrayList<Category>();
+        ArrayList<Dataset> datasets = new ArrayList<Dataset>();
 		try {
-			datasets = lasConfig.getDatasetsAsCategories(false);
+			datasets = lasConfig.getFullDatasets();
+			if ( startString != null ) {
+			    try {
+                    start = Integer.valueOf(startString);
+                } catch (NumberFormatException e) {
+                   start = 0;
+                }
+			}
+			if ( endString != null ) {
+			    try {
+			        int requestedEnd = Integer.valueOf(endString);
+			        end = Math.min(requestedEnd, datasets.size());
+			    } catch (NumberFormatException e) {
+			        end = datasets.size();
+			    }
+			} else {
+			    end = datasets.size();
+			}
+			
 		} catch (JDOMException e) {
 			sendError(response, "<datasets>", format, e.getMessage());
 		} catch (LASException e) {
@@ -87,10 +110,10 @@ public class GetDatasets extends ConfigService {
 		}
         StringBuffer xml = new StringBuffer();
         
-        xml.append("<datasets>");
-        for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
-            Dataset ds = (Dataset) dsIt.next();
-            xml.append(ds.toXML());
+        xml.append("<datasets count=\""+datasets.size()+"\">");
+        for (int i = start; i < end; i++) {
+            Dataset d = datasets.get(i);
+            xml.append(d.toXML());
         }
         xml.append("</datasets>");
         

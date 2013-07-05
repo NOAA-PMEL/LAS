@@ -52,12 +52,11 @@ public class LASDatasetTester{
      * Test remote OPeNDAP URLs
      *
      */
-    public void testDataset(boolean web_output){
+    public void testDataset(boolean web_output, ArrayList<Dataset> datasets){
 
     	String test_output_file = null;
     	LASTestResults testResults = new LASTestResults();
-    	ArrayList<Dataset> datasets = new ArrayList<Dataset>();
-    	ArrayList<Variable> variables = new ArrayList<Variable>();
+    	
 
     	try{
     		if ( web_output ) {
@@ -68,11 +67,11 @@ public class LASDatasetTester{
     			}
     			Date now = new Date();
     			testResults.putTest(TestConstants.TEST_DIRECT_OPENDAP, now.getTime());
-    		}
+    			
+    		} 
 
-    		//get datasets
-    		datasets = lasConfig.getDatasets(true);
-    		//loop over each dataset
+    		
+    		
 
 
 
@@ -84,7 +83,9 @@ public class LASDatasetTester{
     				
 
     				//get the data URL
-    				String dsURL = lasConfig.getFullDataObjectURL(dataset.getID(), var.getID());
+    				String durl = dataset.getAttributesAsMap().get("url");
+    				String varURL = var.getAttributesAsMap().get("url");
+    				String dsURL = LASConfig.combinedURL(durl, varURL);
 
     				//if url is in format of ....xyz.nc#var
     				if(dsURL.contains("#")){

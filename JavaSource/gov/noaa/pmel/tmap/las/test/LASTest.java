@@ -5,10 +5,16 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.Dataset;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,7 +22,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.httpclient.HttpException;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 
 
 
@@ -31,6 +39,7 @@ public class LASTest{
 	
     private LASConfig lasConfig = new LASConfig();
     private LASTestOptions lto;
+    private String size;
     
     public LASTest(LASTestOptions l, LASConfig c) {
     	lto = l;
@@ -46,48 +55,96 @@ public class LASTest{
     	if ( !url.endsWith("/") ) {
     		url = url+"/";
     	}
-    
-        try{
-        	     	
-        	ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        	lasProxy.executeGetMethodAndStreamResult(url+"getConfig.do?format=xml", stream);
-        	JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
-        	
-        } catch (Exception e){
-            
-        	try {
-        		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        		lasProxy.executeGetMethodAndStreamResult(url+"/output/lasV7.xml", stream);
-        		JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
-        	} catch (Exception exp){
-        		System.err.println("Unable to get configuration information from "+l.getLAS()+".  Is the server running?");
-        		System.exit(-1);
-        	}
-        	
-        }
+    	
+    	lto.setLAS(url);
+//    
+//        try{
+//        	     	
+//        	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        	lasProxy.executeGetMethodAndStreamResult(url+"getConfig.do?format=xml", stream);
+//        	JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
+//        	
+//        } catch (Exception e){
+//            
+//        	try {
+//        		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        		lasProxy.executeGetMethodAndStreamResult(url+"/output/lasV7.xml", stream);
+//        		JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
+//        	} catch (Exception exp){
+//        		System.err.println("Unable to get configuration information from "+l.getLAS()+".  Is the server running?");
+//        		System.exit(-1);
+//        	}
+//        	
+//        }
     }
     public void runTest(LASTestOptions lto, boolean web_output){
+        try {
+            //test OPeNDAP URLs 
+            if(lto.testConn()){
+                if ( !web_output ) System.out.println("==== LAS test: Are the datasets alive? =================");
+                LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
+                if ( web_output ) {
+                    // The lasConfig should be complete... Test the whole bunch
+                    ArrayList<Dataset> datasets = lasConfig.getDatasets();
+                    ltd.testDataset(web_output, datasets);
+                } else {
+                    int start = 0;
+                    int end = 10;
+                    ArrayList<Dataset> ds = test(start, end);
+                    ltd.testDataset(web_output, ds);
+                    // Do the rest.
+                    if ( size != null ) {
+                        try {
+                            int count = Integer.valueOf(size);
 
-    	//test OPeNDAP URLs 
-    	if(lto.testConn()){
-    		if ( !web_output ) System.out.println("==== LAS test: Are the datasets alive? =================");
-    		LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
-    	    ltd.testDataset(web_output);
+                            while ( end < count) {
+                                start = start + 10;
+                                end = end + 10;
+                                ds = test(start, end);
+                                ltd.testDataset(web_output, ds);
+                            }
+
+                        } catch (Exception e) {
+                            // Oh well.  Bummer.
+                        }
+                    }
+                }
+                
+
+            }
+            if ( !web_output ) System.out.println();
+            //test F-TDS URLs 
+            if(lto.testFTDS()){
+                if ( !web_output ) System.out.println("==== LAS test: Are the FTDS URLs working? =================");
+                LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
+                ltd.testFTDS(web_output);
+            }
+            if ( !web_output ) System.out.println();
+            //test product response
+            if(lto.testResp()){
+                if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
+                LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
+                ltr.testResponse(web_output);
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
-    	if ( !web_output ) System.out.println();
-        //test F-TDS URLs 
-        if(lto.testFTDS()){
-        	if ( !web_output ) System.out.println("==== LAS test: Are the FTDS URLs working? =================");
-        	 LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
-             ltd.testFTDS(web_output);
+    }
+    private ArrayList<Dataset> test(int start, int end) throws HttpException, IOException, JDOMException {
+        LASDocument doc = new LASDocument();
+        // Get the first 10 and keep the size
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        lasProxy.executeGetMethodAndStreamResult(lto.getLAS()+"getDatasets.do?format=xml&start=0&end=10", stream);
+        JDOMUtils.XML2JDOM(stream.toString(), doc);
+        size = doc.getRootElement().getAttributeValue("count");
+        List<Element> dE = doc.getRootElement().getChildren("dataset");
+        ArrayList<Dataset> ds = new ArrayList<Dataset>();
+        for (Iterator catIt = dE.iterator(); catIt.hasNext();) {
+            Element d = (Element) catIt.next();
+            Dataset c = new Dataset(d);
+            ds.add(c);
         }
-        if ( !web_output ) System.out.println();
-        //test product response
-        if(lto.testResp()){
-        	if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
-        	LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
-            ltr.testResponse(web_output);
-        }
+        return ds;
     }
     public void runTest(LASTestOptions lto) {
     	runTest(lto, false);
