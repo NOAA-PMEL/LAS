@@ -78,30 +78,32 @@ public class GetDatasets extends ConfigService {
         int start = 0;
         int end = 0;
         
+        // Both zero means all.
+        if ( startString != null ) {
+            try {
+                start = Integer.valueOf(startString);
+            } catch (NumberFormatException e) {
+               start = 0;
+            }
+        }
+        if ( endString != null ) {
+            try {
+                end = Integer.valueOf(endString);
+            } catch (NumberFormatException e) {
+                end = 0;
+            }
+        } else {
+            end = 0;
+        }
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         log.debug("Processing request for dataset list.");
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
                 
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
 		try {
-			datasets = lasConfig.getFullDatasets();
-			if ( startString != null ) {
-			    try {
-                    start = Integer.valueOf(startString);
-                } catch (NumberFormatException e) {
-                   start = 0;
-                }
-			}
-			if ( endString != null ) {
-			    try {
-			        int requestedEnd = Integer.valueOf(endString);
-			        end = Math.min(requestedEnd, datasets.size());
-			    } catch (NumberFormatException e) {
-			        end = datasets.size();
-			    }
-			} else {
-			    end = datasets.size();
-			}
+			datasets = lasConfig.getDatasets(true, start, end);
+			
+			
 			
 		} catch (JDOMException e) {
 			sendError(response, "<datasets>", format, e.getMessage());
@@ -110,8 +112,8 @@ public class GetDatasets extends ConfigService {
 		}
         StringBuffer xml = new StringBuffer();
         
-        xml.append("<datasets count=\""+datasets.size()+"\">");
-        for (int i = start; i < end; i++) {
+        xml.append("<datasets>");
+        for (int i = 0; i < datasets.size(); i++) {
             Dataset d = datasets.get(i);
             xml.append(d.toXML());
         }

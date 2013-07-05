@@ -2000,6 +2000,56 @@ public class LASConfig extends LASDocument {
     public ArrayList<Dataset> getDatasets() throws JDOMException, LASException {
     	return getDatasets(false);
     }
+    public ArrayList<Dataset> getDatasets(boolean full, int start, int end) throws JDOMException, LASException {
+        ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+        Element datasetsE = getDatasetsAsElement();
+        
+        List datasetElements = datasetsE.getChildren("dataset");
+        if ( start <= 0 && end <= 0 ) {
+            start = 0;
+            end = datasetElements.size();
+        } else {
+            end = Math.min(end, datasetElements.size());
+        }
+        
+        for (int index = start; index < end; index++) {
+            
+            Element dataset = (Element) datasetElements.get(index);
+            Element ds_novars = (Element)dataset.clone();
+
+            if ( full ) {
+                ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
+                ds_novars.getChild("variables").removeChildren("variable");
+                for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+                    Variable variable = (Variable) varIt.next();
+                    ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
+                }
+            } else {
+                /*
+                 * For, the JavaScript UI, we want to strip out the children.
+                 * we'll remove every things that's not properties.  However, we will
+                 * keep the contributor and documentation elements.
+                 */
+                List children = ds_novars.getChildren();
+                ArrayList<String> remove = new ArrayList<String>();
+                for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+                    Element child = (Element) childIt.next();
+                    if (!child.getName().equals("properties") &&
+                            !child.getName().equals("documentation") &&
+                            !child.getName().equals("contributor") ) {
+                        remove.add(child.getName());
+                    }
+                }
+                for (int i=0; i < remove.size(); i++) {
+                    ds_novars.removeChild(remove.get(i));
+                }
+            }
+            Dataset ds = new Dataset(ds_novars);
+            ds.setAttribute("catid", ds.getID());
+            datasets.add(ds);
+        }
+        return datasets;
+    }
     /**
      * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.
      * @return ArrayList of dataset objects
@@ -2007,45 +2057,10 @@ public class LASConfig extends LASDocument {
      * @throws JDOMException
      */
     public ArrayList<Dataset> getDatasets(boolean full) throws JDOMException, LASException {
-        ArrayList<Dataset> datasets = new ArrayList<Dataset>();
-        Element datasetsE = getDatasetsAsElement();
-        List datasetElements = datasetsE.getChildren("dataset");
-        for (Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();) {
-            Element dataset = (Element) dsIt.next();
-            Element ds_novars = (Element)dataset.clone();
-
-            if ( full ) {
-            	ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
-            	ds_novars.getChild("variables").removeChildren("variable");
-            	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-					Variable variable = (Variable) varIt.next();
-					ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
-				}
-            } else {
-            	/*
-                 * For, the JavaScript UI, we want to strip out the children.
-                 * we'll remove every things that's not properties.  However, we will
-                 * keep the contributor and documentation elements.
-                 */
-            	List children = ds_novars.getChildren();
-            	ArrayList<String> remove = new ArrayList<String>();
-            	for (Iterator childIt = children.iterator(); childIt.hasNext();) {
-            		Element child = (Element) childIt.next();
-            		if (!child.getName().equals("properties") &&
-            				!child.getName().equals("documentation") &&
-            				!child.getName().equals("contributor") ) {
-            			remove.add(child.getName());
-            		}
-            	}
-            	for (int i=0; i < remove.size(); i++) {
-            		ds_novars.removeChild(remove.get(i));
-            	}
-            }
-        	Dataset ds = new Dataset(ds_novars);
-        	ds.setAttribute("catid", ds.getID());
-        	datasets.add(ds);
-        }
-        return datasets;
+        
+        return getDatasets(full, 0, 0);
+        
+        
     }
     /**
      * Return all datasets as a single "datasets" element.
@@ -2144,32 +2159,7 @@ public class LASConfig extends LASDocument {
         Element dataset = variable.getParentElement().getParentElement();
         String varURL = variable.getAttributeValue("url");
         String dsURL = dataset.getAttributeValue("url");
-        String url = "";
-        if ( varURL != null && dsURL != null) {
-            if ( varURL.startsWith("http://") || varURL.startsWith("file:///") ) {
-                url = varURL;
-            } else {
-                url = dsURL + varURL;
-            }
-        } else if ( varURL != null && dsURL == null ) {
-            url = varURL;
-        } else if ( varURL == null && dsURL != null ) {
-            url = dsURL;
-        } else if ( varURL == null && dsURL == null ) {
-            url = null;
-        }
-        if (url.startsWith("file:///")) {
-            url = url.substring(7, url.length());
-        }
-        if (url.startsWith("file://")) {
-            url = url.substring(6, url.length());
-        }
-        if (url.startsWith("file:/")) {
-            url = url.substring(5, url.length());
-        }
-        if (url.startsWith("file:")) {
-            url = url.substring(5, url.length());
-        }
+        String url = combinedURL(dsURL, varURL);
          return url;
     }
     public String getFullDataObjectURL(String dsid, String varid) throws LASException, JDOMException {
