@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.ui.state.OptionBean;
 import gov.noaa.pmel.tmap.las.util.Dataset;
+import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Variable;
 
 import java.io.BufferedReader;
@@ -61,12 +62,12 @@ public class LASResponseTester{
 	 * Test whether responses from product server are correct
 	 *
 	 */
-	public void testResponse(boolean web_output){
+	public void testResponse(boolean web_output, ArrayList<Dataset> datasets) {
 		String dsID;
 		String varID;
 		String varpath;
 
-		ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+		
 		ArrayList<Variable> variables = new ArrayList<Variable>();
 
 		String productServerURL;
@@ -85,11 +86,7 @@ public class LASResponseTester{
 				testResults.putTest(TestConstants.TEST_PRODUCT_RESPONSE, date.getTime());
 			}
 
-			productServerURL = lasConfig.getServerURL();
-
-			//get datasets
-			Element datasetsE = lasConfig.getDatasetsAsElement();
-			List datasetElements = datasetsE.getChildren("dataset");
+			productServerURL = lto.getLAS()+"ProductServer.do";
 
 			if ( !web_output ) {
 				System.out.println("==== Product Server: "+ productServerURL);
@@ -99,26 +96,24 @@ public class LASResponseTester{
             String vregex = lto.getVregex();
                 
 			//loop over each dataset
-			for(Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();){
-				//Dataset ds = (Dataset)dsIt.next();
-				Element datasetE = (Element) dsIt.next();
-				dsID = datasetE.getAttributeValue("ID");
+			for(Iterator dsIt = datasets.iterator(); dsIt.hasNext();){
+				Dataset ds = (Dataset)dsIt.next();
 				boolean dmatch = true;
 				if ( dregex != null ) {
-				    dmatch = Pattern.matches(dregex, dsID);
+				    dmatch = Pattern.matches(dregex, ds.getID());
 				}
 				if ( dmatch ) {
 				    if ( web_output ) {
-				        testResults.putDataset(TestConstants.TEST_PRODUCT_RESPONSE, datasetE.getAttributeValue("name"), dsID);
+				        testResults.putDataset(TestConstants.TEST_PRODUCT_RESPONSE, ds.getName(), ds.getID());
 				    }
 				    //get first variable of this dataset
-				    variables = lasConfig.getVariables(dsID);
+				    variables = ds.getVariables();
 				    boolean allVar = lto.allVariable() || vregex != null;
 
 				    if(!allVar){
 				        if ( variables != null && variables.size() > 0 ) {
 				            Variable firstVar = variables.get(0);
-				            varLASRequest(datasetE, firstVar, web_output, testResults);
+				            varLASRequest(ds, firstVar, web_output, testResults);
 				        }
 				    }else{
 				        for(Iterator varIt = variables.iterator(); varIt.hasNext();){
@@ -128,7 +123,7 @@ public class LASResponseTester{
 				                vmatch = Pattern.matches(vregex, theVar.getID());
 				            }
 				            if ( vmatch ) {
-				                varLASRequest(datasetE, theVar, web_output, testResults);
+				                varLASRequest(ds, theVar, web_output, testResults);
 				            }
 				        }
 				    }
@@ -147,17 +142,15 @@ public class LASResponseTester{
 	 * @param dsE the dataset element
 	 * @param theVar the variable to test
 	 */
-	public void varLASRequest(Element dsE, Variable theVar, boolean web_output, LASTestResults testResults) {
-		String dsID = dsE.getAttributeValue("ID");
-		String dsName = dsE.getAttributeValue("name");
-		String varID = theVar.getID();
+	public void varLASRequest(Dataset dataset, Variable theVar, boolean web_output, LASTestResults testResults) {
 
-		//build XPath for this variable
-		String varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+	    String dsoURL = dataset.getAttributeValue("url");
+		String varURL = theVar.getAttributeValue("url");
+
 
 		try{
 			//get the data URL
-			String dsURL = lasConfig.getFullDataObjectURL(varpath);
+			String dsURL = LASConfig.combinedURL(dsoURL, varURL);
 			String userds = lto.getDataset();
 
 			//if url is in format of ....xyz.nc#var
@@ -171,7 +164,7 @@ public class LASResponseTester{
 
 			if(dsURL == null && dsURL == ""){
 				if ( web_output ) {
-					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset invalid");
+					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dataset.getID(), dsURL, "n/a", "n/a", "n/a", "failed - dataset invalid");
 				} else {
 					System.out.println("The dataset URL is not valid.");
 				}
@@ -194,7 +187,7 @@ public class LASResponseTester{
 			//if(isAvailable){
 			if( userds == null || userds=="" || dsURL.contains(userds) ){
 				if ( !web_output ) {
-					System.out.println("---- Dataset Name: "+ dsName);
+					System.out.println("---- Dataset Name: "+ dataset.getName());
 					System.out.println("     -- Dataset  URL: "+ dsURL);   
 				}
 				if(dsURL.contains("http")){
@@ -207,10 +200,11 @@ public class LASResponseTester{
 					if ( !web_output ) {
 						System.out.println("        Variable: "+ theVar.getName());
 					}
+					
+					
 
-					boolean hasZ = lasConfig.hasZ(varpath);            
-					boolean hasT = lasConfig.hasT(dsID, varID);
-
+					boolean hasZ = theVar.getGrid().hasZ();
+					boolean hasT = theVar.getGrid().hasT();
 					String v = lto.getView();
 
 					//by default, test each view           
@@ -220,46 +214,46 @@ public class LASResponseTester{
 						if ( !web_output ) {
 							System.out.print("         -- test x line plot: ");
 						}
-						makeLASRequest("x", dsID, varID, web_output, testResults);       
+						makeLASRequest("x", theVar, web_output, testResults);       
 						if ( !web_output ) {
 							System.out.print("         -- test y line plot: ");
 						}
-						makeLASRequest("y", dsID, varID, web_output, testResults);                
+						makeLASRequest("y", theVar, web_output, testResults);                
 						if(hasZ){      
 							if ( !web_output ) {
 								System.out.print("         -- test z line plot: ");
 							}
-							makeLASRequest("z", dsID, varID, web_output, testResults);                
+							makeLASRequest("z", theVar, web_output, testResults);                
 						}
 
 						if(hasT){     
 							if ( !web_output ) {
 								System.out.print("         -- test time series: ");
 							}
-							makeLASRequest("t", dsID, varID, web_output, testResults);
+							makeLASRequest("t", theVar, web_output, testResults);
 						}
 
 						//2D plots  
 						if ( !web_output ) {
 							System.out.print("         -- test XY 2D  plot: ");
 						}
-						makeLASRequest("xy", dsID, varID, web_output, testResults);                
+						makeLASRequest("xy", theVar, web_output, testResults);                
 						if(hasZ){   
 							if ( !web_output ) {
 								System.out.print("         -- test XZ 2D  plot: ");
 							}
-							makeLASRequest("xz", dsID, varID, web_output, testResults);      
+							makeLASRequest("xz", theVar, web_output, testResults);      
 							
 							if ( !web_output ) {
 								System.out.print("         -- test YZ 2D  plot: ");
 							}
-							makeLASRequest("yz", dsID, varID, web_output, testResults);
+							makeLASRequest("yz", theVar, web_output, testResults);
 
 							if(hasT){
 								if ( !web_output ) {
 									System.out.print("         -- test ZT 2D  plot: ");
 								}
-								makeLASRequest("zt", dsID, varID, web_output, testResults);
+								makeLASRequest("zt", theVar, web_output, testResults);
 							}
 						}
 
@@ -267,11 +261,11 @@ public class LASResponseTester{
 							if ( !web_output ) {
 								System.out.print("         -- test XT 2D  plot: ");
 							}
-							makeLASRequest("xt", dsID, varID, web_output, testResults);
+							makeLASRequest("xt",theVar, web_output, testResults);
 							if ( !web_output ) {
 								System.out.print("         -- test YT 2D  plot: ");
 							}
-							makeLASRequest("yt", dsID, varID, web_output, testResults);       				
+							makeLASRequest("yt", theVar, web_output, testResults);       				
 						}
 
 					}else{ 
@@ -283,12 +277,12 @@ public class LASResponseTester{
 							if ( !web_output) System.out.println("       -- No T axis!");
 						}else{               	            	    
 							if ( !web_output ) System.out.print("        -- test "+v+" plot: ");
-							makeLASRequest(v, dsID, varID, web_output, testResults);                
+							makeLASRequest(v, theVar, web_output, testResults);                
 						}            
 					}
 				}else{
 					if ( web_output ) {
-						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset unavailable");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dataset.getID(), dsURL, "n/a", "n/a", "n/a", "failed - dataset unavailable");
 					} else {
 						System.out.println("        ******** WARNING ******** The dataset is not available");
 					}
@@ -361,16 +355,16 @@ public class LASResponseTester{
 	 * @param dsID dataset ID
 	 * @param varID variable ID
 	 */
-	public void makeLASRequest(String viewtype, String dsID, String varID, boolean web_output, LASTestResults testResults) {
+	public void makeLASRequest(String viewtype, Variable variable, boolean web_output, LASTestResults testResults) {
 		String requestURL ="";
 		String serverURL;
-		String varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+
 		LASUIRequest lr = new LASUIRequest();
 
-		lr = buildLASUIRequest(viewtype,dsID,varID);
+		lr = buildLASUIRequest(viewtype,variable);
 
 		try{
-			serverURL = lasConfig.getServerURL();
+			serverURL = lto.getLAS()+"ProductServer.do";
 			requestURL = serverURL+"?xml=" + lr.toEncodedURLString()+"&debug=true"; 
 		} catch (Exception e){
 			e.printStackTrace();
@@ -401,7 +395,7 @@ public class LASResponseTester{
 				if(sbuf.toString().contains("error")){
 					String debugFile = extractDebugFile(sbuf.toString());
 					if ( web_output ) {
-						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "failed");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, variable.getDSID(), requestURL, viewtype, lr.getOperation(), lr.getThi(), "failed");
 					} else {
 						System.out.println("              ---------- ERROR !!!");
 					}
@@ -424,7 +418,7 @@ public class LASResponseTester{
 				}else{//correct response (hope so!)
 					inProgress = false;
 					if ( web_output ) {
-						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "passed");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, variable.getDSID(), requestURL, viewtype, lr.getOperation(), lr.getThi(), "passed");
 					} else {
 						System.out.println("              ---------- PASS!");
 					}
@@ -445,7 +439,7 @@ public class LASResponseTester{
 				URLConnection conn = url.openConnection();
 				conn.connect();
 				if ( web_output ) {
-					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "canceled");
+					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, variable.getDSID(), requestURL, viewtype, lr.getOperation(), lr.getThi(), "canceled");
 				} else {
 					System.out.println("The request either takes too long or may have error --- cancel it!");
 				}
@@ -477,11 +471,11 @@ public class LASResponseTester{
 	 * @param dsID dataset ID
 	 * @param varID variable ID
 	 */
-	public LASUIRequest buildLASUIRequest(String viewtype, String dsID, String varID){
+	public LASUIRequest buildLASUIRequest(String viewtype, Variable variable){
 		ArrayList<OptionBean> options = null;
 
 		LASUIRequest lr = new LASUIRequest();
-		lr.addVariable(dsID,varID);
+		lr.addVariable(variable.getDSID(),variable.getID());
 
 		if(viewtype.length() == 1){
 			lr.setOperation("Plot_1D");
@@ -505,7 +499,7 @@ public class LASResponseTester{
 
 		HashMap<String, HashMap<String,String[]>> region = new HashMap<String, HashMap<String,String[]>>();
 
-		region = makeRegion(viewtype, dsID, varID);
+		region = makeRegion(viewtype, variable.getGrid());
 		if(region != null){lr.setRegion(region);}
 
 		return lr;
@@ -568,7 +562,7 @@ public class LASResponseTester{
 	 * @param dsID dataset ID
 	 * @param varID variable ID
 	 */
-	public HashMap<String, HashMap<String,String[]>> makeRegion(String viewtype, String dsID, String varID){
+	public HashMap<String, HashMap<String,String[]>> makeRegion(String viewtype, Grid grid){
 
 		String xLo = "";
 		String xHi = "";
@@ -587,25 +581,25 @@ public class LASResponseTester{
 		HashMap<String,String[]> points = new HashMap<String,String[]>();
 		HashMap<String,String[]> intervals = new HashMap<String,String[]>();
 
-		String varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+		
 
 		try{
 			//get the end points of each axis
-			xLo = lasConfig.getLo("x",varpath);
-			xHi = lasConfig.getHi("x",varpath);
-			yLo = lasConfig.getLo("y",varpath);
-			yHi = lasConfig.getHi("y",varpath);
-			if(lasConfig.hasZ(varpath)){
+			xLo = grid.getAxis("x").getLo();
+			xHi = grid.getAxis("x").getHi();
+			yLo = grid.getAxis("y") .getLo();
+			yHi = grid.getAxis("y").getHi();
+			if(grid.hasZ()){
 				hasZ = true;
-				zLo = lasConfig.getLo("z",varpath);
-				zHi = lasConfig.getHi("z",varpath);
+				zLo = grid.getAxis("z").getLo();
+				zHi = grid.getAxis("z").getHi();
 			}
 			//time axis
-			if(lasConfig.hasT(dsID, varID)){
+			if(grid.hasT()){
 				hasT = true;
 
 				//get time format for this variable defined in dataset configuration file
-				tLo = lasConfig.getLo("t",varpath);
+				tLo = grid.getTime().getLo();
 				LASDateFormat ldf = new LASDateFormat(tLo);
 				String tFormat = ldf.getDateFormat();
 
@@ -615,17 +609,11 @@ public class LASResponseTester{
 				lodt = fmt.parseDateTime(tLo);   
 				tLo = lodt.toString(ferretfmt);
 
-				LASTimeAxis lta = getLASTimeAxis(varpath);
-				lta.setLoDateTime(lodt);                
-				String time_style = lta.getStyle();
-				if(time_style.equals("arange")){                   
-					hidt = lta.getHiDateTime();   
-					tHi = hidt.toString(ferretfmt);
-				}else if(time_style.equals("v")){                    
-					tHi = lasConfig.getHi("t",varpath);
+                  
+					tHi = grid.getTime().getHi();
 					hidt= fmt.parseDateTime(tHi); 
 					tHi = hidt.toString(ferretfmt);
-				}
+				
 			}
 		}catch (Exception e){
 			e.printStackTrace();
