@@ -96,18 +96,18 @@ public class LASTest{
                     // The list should come back empty from the server when we run out before the 10000th.
                     int count = 10000;
                     // Do the rest.
-                    
-                            while ( end < count) {
-                                start = start + 10;
-                                end = end + 10;
-                                ds = getDatasetRange(start, end);
-                                ltd.testDataset(web_output, ds);
-                            }
 
-                        
-                    
+                    while ( end < count) {
+                        start = start + 10;
+                        end = end + 10;
+                        ds = getDatasetRange(start, end);
+                        ltd.testDataset(web_output, ds);
+                    }
+
+
+
                 }
-                
+
 
             }
             if ( !web_output ) System.out.println();
@@ -122,7 +122,27 @@ public class LASTest{
             if(lto.testResp()){
                 if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
                 LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
-                ltr.testResponse(web_output);
+                if ( web_output ) {
+                    // The lasConfig should be complete... Test the whole bunch
+                    ArrayList<Dataset> datasets = lasConfig.getDatasets();
+                    ltr.testResponse(web_output, datasets);
+                } else {
+                    int start = 0;
+                    int end = 10;
+                    ArrayList<Dataset> ds = getDatasetRange(start, end);
+                    ltr.testResponse(web_output, ds);
+                    // Do the first 10000 datasets.  :-)
+                    // The list should come back empty from the server when we run out before the 10000th.
+                    int count = 10000;
+                    // Do the rest.
+
+                    while ( end < count) {
+                        start = start + 10;
+                        end = end + 10;
+                        ds = getDatasetRange(start, end);
+                        ltr.testResponse(web_output, ds);
+                    }
+                }                
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
