@@ -539,7 +539,7 @@ public class LASBackendRequest extends LASDocument {
         }
        
         for (Iterator mvsIt = textSymbols.iterator(); mvsIt.hasNext();) {
-            if ( index > 0 ) index++;
+            
             MVSymbol mvs = (MVSymbol) mvsIt.next();
             if ( mvs.values != null ) {
                 // repeat
@@ -564,6 +564,7 @@ public class LASBackendRequest extends LASDocument {
                     symbols.put(name, value);
                 }
                 symbols.put("constraint_"+index+"_type", "text");
+                index++;
             }
         }
         return symbols;
