@@ -152,7 +152,7 @@ public class LASTest{
         LASDocument doc = new LASDocument();
         // Get the first 10 and keep the size
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        lasProxy.executeGetMethodAndStreamResult(lto.getLAS()+"getDatasets.do?format=xml&start=0&end=10", stream);
+        lasProxy.executeGetMethodAndStreamResult(lto.getLAS()+"getDatasets.do?format=xml&start="+start+"&end="+end, stream);
         JDOMUtils.XML2JDOM(stream.toString(), doc);
         
         List<Element> dE = doc.getRootElement().getChildren("dataset");
