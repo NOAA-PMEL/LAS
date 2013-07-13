@@ -106,9 +106,9 @@ public class FerretDataSource implements DatasetSource {
                 String expr_two =  URLDecoder.decode(expressions.get(1), "UTF-8");
                 String [] cmds;
                 if ( expr_two.contains("_cr_") ) {
-                    cmds = expressions.get(1).split("_cr_");
+                    cmds = expr_two.split("_cr_");
                 } else {
-                    cmds = expressions.get(1).split(";");
+                    cmds = expr_two.split(";");
                 }
                 for ( int i = 0; i < cmds.length; i++ ) {
                 	cmds[i] = cmds[i].replaceAll("_q-t_", "\"");
