@@ -100,7 +100,9 @@ public class FerretDataSource implements DatasetSource {
             jnl.append("use \""+base+"\"\n");
 
             if ( !expressions.get(1).trim().equals("") ) {
-                String expr_two =  expressions.get(1);
+                
+                // Decode the expression because it might contain an encode URL.
+                String expr_two =  URLDecoder.decode(expressions.get(1), "UTF-8");
                 String [] cmds;
                 if ( expr_two.contains("_cr_") ) {
                     cmds = expressions.get(1).split("_cr_");
