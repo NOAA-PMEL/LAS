@@ -1457,6 +1457,12 @@ public class ADDXMLProcessor {
 
                                         
                                         AxisBean tAxis = new AxisBean();
+                                        if ( timeUnits == null ) {
+                                            // Something went wrong, do a regular scan...
+                                            forceAxes.put("t", new Boolean(true));
+                                            dgab = createBeansFromThreddsDataset(threddsDataset, threddsDataset.getAccess(ServiceType.OPENDAP));
+                                            return dgab;
+                                        }
                                         if ( timeUnits.contains("0000-") ) {
                                             tAxis.setModulo(true);
                                         }
