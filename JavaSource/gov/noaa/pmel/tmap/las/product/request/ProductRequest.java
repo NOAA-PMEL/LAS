@@ -379,20 +379,22 @@ public class ProductRequest {
                                         	String encoded = URLEncoder.encode(lasConfig.getFTDSURL(varXPath), "UTF-8");
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
-                                        		StringBuffer jnl = gridTo.getJnl();
+                                        		StringBuffer jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                        		jnl.append(gridTo.getJnl().toString());
                                         		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
-                                        		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
+                                        		String expr = URLEncoder.encode("_expr_{}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
                                         		data.setAttribute("url", comboURL);
                                         		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
                                         		gridTo.getData().setAttribute("url", comboURL);
                                         		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                         	} else {    
-                                        		StringBuffer jnl = gridTo.getJnl();
+                                        	    StringBuffer jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                                jnl.append(gridTo.getJnl().toString());
                                         		gridTo.setVar(gridTo.getVar());
                                                 jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
-                                                expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
+                                                expression = URLEncoder.encode("_expr_{}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
                                         } catch (UnsupportedEncodingException e) {
@@ -432,15 +434,16 @@ public class ProductRequest {
                                     if ( !gridTo.getGridID().equals(current_gridID) ||
                                     	 !gridTo.getDsID().equals(current_dsID)) {
                                     	String g = "g"+view;
-                                    	if (gridTo.isAnalysis()) {                                    		
-                                    		StringBuffer analysis_jnl = gridTo.getJnl();
-                                    		analysis_jnl.append(";"+jnl);
+                                    	if (gridTo.isAnalysis()) {   
+                                    	    StringBuffer analysis_jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                    		jnl.append(gridTo.getJnl().toString());
+                                    		analysis_jnl.append("_cr_"+jnl);
                                     		var = data.getAttributeValue("var");
                                     		String revar = var+"_"+var_count+"_transformed";
                                     		data.setAttribute("var", revar);
                                     		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
-                                    		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
+                                    		String expr = URLEncoder.encode("_expr_{}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
                                     		data.setAttribute("url", comboURL);
                                     		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
@@ -448,8 +451,9 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
+                                    		jnl.append("use \""+encoded+"\"_cr_");
                                     		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
-                                    		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
+                                    		expression = URLEncoder.encode("_expr_{}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_transformed");
                                     		//data.setAttribute("title", "Transformed Variable");
