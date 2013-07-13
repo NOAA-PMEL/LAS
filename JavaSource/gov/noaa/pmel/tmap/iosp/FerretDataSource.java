@@ -64,7 +64,8 @@ public class FerretDataSource implements DatasetSource {
         if ( expressions.size() == 2 ) {
             if ( !expressions.get(0).trim().equals("") ) {
                 List<String> expression_one = new ArrayList<String>();
-                String[] urls = expressions.get(0).split(",");
+                String od = URLDecoder.decode(expressions.get(0), "UTF-8");
+                String[] urls = od.split(",");
                 for ( int i = 0; i < urls.length; i++ ) { 
                     String [] cmds;
                     if ( urls[i].contains("_cr_") ) {
@@ -118,7 +119,8 @@ public class FerretDataSource implements DatasetSource {
             }
         } else if ( expressions.size() == 1 ) {
             if ( !expressions.get(0).trim().equals("") ) {
-                String[] urls = expressions.get(0).split(",");
+                String od = URLDecoder.decode(expressions.get(0), "UTF-8");
+                String[] urls =od.split(",");
                 for ( int i = 0; i < urls.length; i++ ) {
                 	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
                 	if ( FerretCommands.containsCommand(dataURL) ) {
