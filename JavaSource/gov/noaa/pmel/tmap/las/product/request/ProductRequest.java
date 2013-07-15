@@ -379,7 +379,7 @@ public class ProductRequest {
                                         	String encoded = URLEncoder.encode(lasConfig.getFTDSURL(varXPath), "UTF-8");
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
-                                        		StringBuffer jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                        		StringBuffer jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
                                         		jnl.append(gridTo.getJnl().toString());
                                         		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
@@ -390,7 +390,7 @@ public class ProductRequest {
                                         		gridTo.getData().setAttribute("url", comboURL);
                                         		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                         	} else {    
-                                        	    StringBuffer jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                        	    StringBuffer jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
                                                 jnl.append(gridTo.getJnl().toString());
                                         		gridTo.setVar(gridTo.getVar());
                                                 jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
@@ -435,7 +435,7 @@ public class ProductRequest {
                                     	 !gridTo.getDsID().equals(current_dsID)) {
                                     	String g = "g"+view;
                                     	if (gridTo.isAnalysis()) {   
-                                    	    StringBuffer analysis_jnl = new StringBuffer("use \""+encoded+"\"_cr_");
+                                    	    StringBuffer analysis_jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
                                     		jnl.append(gridTo.getJnl().toString());
                                     		analysis_jnl.append("_cr_"+jnl);
                                     		var = data.getAttributeValue("var");
@@ -451,7 +451,7 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append("use \""+encoded+"\"_cr_");
+                                    		jnl.append("use _qt_"+encoded+"_qt__cr_");
                                     		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);

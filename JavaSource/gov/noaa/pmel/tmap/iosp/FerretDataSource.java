@@ -113,7 +113,7 @@ public class FerretDataSource implements DatasetSource {
                 for ( int i = 0; i < cmds.length; i++ ) {
                 	cmds[i] = cmds[i].replaceAll("_q-t_", "\"");
                 	if ( !FerretCommands.containsForbiddenCommand(cmds[i])) {
-                       jnl.append(cmds[i]+"\n");
+                       jnl.append(cmds[i].replace("_qt_","\"")+"\n");
                 	}
                 }
             }
@@ -131,7 +131,7 @@ public class FerretDataSource implements DatasetSource {
                     } else {
                         if ( !FerretCommands.containsForbiddenCommand(dataURL) ) {
                             int ds = i + 2;
-                            jnl.append("use \""+dataURL+"\"\n");
+                            jnl.append("use \""+dataURL.replace("_qt_","\"")+"\"\n");
                         }
                     }
                 }
