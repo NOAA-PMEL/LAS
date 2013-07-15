@@ -40,7 +40,7 @@ ELSE
 ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN 
-   DEFINE SYMBOL data_var ($data_($num)_var)
+   DEFINE SYMBOL data_var '($data_($num)_var)'
    DEFINE SYMBOL data_orig_var ($data_($num)_var)
 ENDIF
 
@@ -163,7 +163,7 @@ IF ($fer_last_error"0|0|1|*>1") THEN
 ENDIF
 
 SET DATA "($data_($num)_url)"
-DEFINE SYMBOL dset($num) = `($data_($num)_var),RETURN=dsetnum`
+DEFINE SYMBOL dset($num) = `($data_var),RETURN=dsetnum`
 
 ! Here do sanity checks on Ferret properties, such as dep_axis_scale
 
