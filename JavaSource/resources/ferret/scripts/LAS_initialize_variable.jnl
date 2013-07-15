@@ -32,7 +32,9 @@ IF ($ferret_factor"0|*>1") THEN
    DEFINE SYMBOL redefined_($data_($num)_var)_factor = 1
 ENDIF
 
-LET attlist = ($data_var).attnames
+! This syntax needs the variable without quotes even if its a reserved name.
+LET attlist = ($data_($num)_var).attnames
+
 IF ($data_var_nq"0|*>1") THEN LET attlist = ($data_var_nq).attnames
 DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
