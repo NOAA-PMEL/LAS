@@ -2281,10 +2281,7 @@ public class ADDXMLProcessor {
         category.setID(id);
 
 
-        //if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
-        
-        // See what it looks like without skipping the data sets that don't have access.
-        if ( ThreddsDataset.hasAccess() ) {
+        if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
             String url = ThreddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName();
             String curl = DODSNetcdfFile.canonicalURL(url);
             if ( !skip(curl) ) {
