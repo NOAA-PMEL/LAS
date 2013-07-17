@@ -4,7 +4,7 @@
 ! Define variables and symbols based on trajectory identification variables
 !
 ! TRAJECTORIES      - unique identifier for each cruise
-! TRAJECTORY_COUNTS - number of points per trajectory
+! TRAJECTORY_COUNTS - number of points per trajectory  Now use symbol rowvar
 
 IF ($nodata"0|*>1") THEN EXIT/SCRIPT
 SET MEM/siz=200
@@ -18,7 +18,7 @@ SET MEM/siz=200
 DEFINE SYMBOL traj_max_labels = 200
 DEFINE SYMBOL numobs `($ferret_plot_var),return = isize`
 
-LET trajvar = XSEQUENCE(rowSize)
+LET trajvar = XSEQUENCE(($rowvar))
 LET ntrajs = `trajvar,RETURN=isize`
 LET traj_numbers = x[i=1:`ntrajs`]
 
@@ -79,4 +79,3 @@ IF ($region_0_t_hi"0|*>1") THEN
 ENDIF
 
 !---------------- end of LAS_initialize_traj_id.jnl -------------------------
-

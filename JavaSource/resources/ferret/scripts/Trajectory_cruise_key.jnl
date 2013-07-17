@@ -1,0 +1,19 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Trajectory_cruise_key.jnl
+!
+! 
+! Make a list of the ID number and Cruise ID to go back 
+! for possible subsets of this set of cruises.
+
+IF `($cruise_max) LE ($cruise_max_labels)` THEN
+
+   IF `($ferret_cruise_list_xml"0|*>1") EQ 0` THEN 
+      GO LAS_insitu_write_webrowset.jnl
+
+   ENDIF
+
+ENDIF
+
+! LAS creates the key from the webrowset
+
+! End of file ------------ Trajectory_cruise_key.jnl --------------------------

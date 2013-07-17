@@ -1,0 +1,95 @@
+! Trajectory_map_icons.jnl
+! For the variable SOCAT CRUISE ID (variable is metadata_ID)
+! Draw the icons as in the Property-Property plot on a map.
+! 7/2009 acm
+! 1/2010 acm - thin out the icons which are too dense to see well.
+!              leave a thin dotted line at the original density
+!              add to the title, "from data sampled every xxx"
+
+IF `($cruise_max) GT ($cruise_max_labels)` THEN EXIT/SCRIPT
+
+! When the data crosses the branch cut, replicate the cruise_id vars
+! lon+360, and contcatenate with the original points before plotting.
+
+STAT ($data_x_var)
+IF `($STAT_MIN) LT ($REGION_X_LO)` THEN
+
+    IF ($data_x_var"0|*>1") THEN LET x_var_data = \
+      (IF longitude LT 0 THEN longitude + 360 ELSE longitude)
+    IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
+    IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
+    IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
+    LET var_data   = ($ferret_plot_var)
+
+ENDIF
+
+! Because the symbols are large, we will thin them down. This value looks
+! pretty good for lots of data or for smaller amounts.
+DEFINE SYMBOL cruise_thinning = 5
+
+! ...first make little black symbols to show all the data
+
+PLOT/OVER/NOLAB/VS/SYM=dot/COLOR=black x_var_data,latitude
+
+SET AXIS/STRIDE=($cruise_thinning) `longitude,RETURN=xaxis`
+DEFINE SYMBOL relabel_subsampling = 1
+
+LET data_1_var_z =  EXPNDI_BY_Z(x_var_data, cruise_mask,`ncruises`,`longest`)
+LET data_var_z =  EXPNDI_BY_Z(y_var_data, cruise_mask,`ncruises`,`longest`)
+
+DEFINE SYMBOL ferret_icons_palette = ten_by_levels
+DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_icons_palette)
+DEFINE SYMBOL poly_size = 0.6
+DEFINE SYMBOL poly_size = 1.0  ! testing bigger symbols with outline
+DEFINE SYMBOL ferret_poly_scale = 0.6  ! testing bigger symbols with outline
+
+IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/THICK=1
+
+DEFINE SYMBOL poly_command poly($qualifiers)
+
+LET pmask = data_1_var_z
+LET qmask = data_var_z
+
+! Use different color for each cruise 1-10, 11-21, ...
+! Use different symbols for each set of 10
+
+
+LET ncolors = 10
+LET nshapes = 20
+LET polygon_set = `INT(0.5+($cruise_max)/nshapes)`
+IF `polygon_set*nshapes LT ($cruise_max)` THEN LET polygon_set = `polygon_set+1`
+
+! See polyshape script for the list of available pre-defined shapes.
+
+! Set the shapes with the same script as in the script 200symbols.jnl
+GO LAS_pp_set_traj_shapes
+
+LET cmax = `MIN(($cruise_max),ncolors)`
+LET c1 = 1
+DEFINE SYMBOL poly_command ($poly_command)/LEVELS=(`c1`,`cmax+1`,1)
+LET ishape = 1
+LET icolor = 1
+
+LET colr_index = MOD(i[i=1:`ncruises`],`ncolors`)
+LET allcolors = IF colr_index EQ 0 THEN `ncolors` ELSE colr_index 
+LET dmask = allcolors + 0*qmask
+
+LET c1 = 1
+LET cn = `ncolors`
+REPEAT/RANGE=1:`ncruises`:`ncolors`/NAME=ic (\
+ DEFINE SYMBOL ishape = `ishape`;\
+ LET zx = TRANSPOSE_XZ(pmask[i=`c1`:`cn`]);\
+ LET zy = TRANSPOSE_XZ(qmask[i=`c1`:`cn`]);\
+ LET zd = TRANSPOSE_XZ(dmask[i=`c1`:`cn`]);\
+ LET xpolydat = XSEQUENCE(zx);\
+ LET ypolydat = XSEQUENCE(zy);\
+ LET dpolydat = XSEQUENCE(zd);\
+ LET do_it = `xpolydat[i=@ngd] GT 0`;\
+ IF `do_it` THEN GO polymark ($poly_command) \
+ xpolydat, ypolydat, dpolydat, ($shape($ishape)), ($poly_size) ;\
+  ;\
+  LET c1 = `c1 + ncolors`;\
+  LET cn = `cn + ncolors`; \
+  IF `cn GT ncruises` THEN LET cn = `ncruises`;\
+  LET ishape = `ishape+1`;\ 
+)

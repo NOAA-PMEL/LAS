@@ -54,6 +54,7 @@ GO LAS_initialize_traj_id
 
 GO set_constraint_labels
 
+
 ! If the variable is TIME then  symbols are
 !  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
 ! 
@@ -113,7 +114,7 @@ ENDIF
 
 IF ($ferret_by_id"0|*>1") THEN
    DEFINE SYMBOL ferret_palette = more_by_levels
-   DEFINE SYMBOL ferret_poly_levels = `trajectory_counts,RETURN=lsize`
+   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    IF ($do_wrap"0|*>1") THEN 
@@ -192,7 +193,7 @@ ENDIF
 ! Make the polygon overlay plot
 
 ! Points will mark location of missing data
-IF `($ribbon"0|*>1") EQ 0` THEN
+IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
    LET missing_flag = -9999999
    LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
    LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
@@ -208,7 +209,7 @@ IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 DEFINE SYMBOL do_icons = 0
 IF ($data_var"0|metadata_ID>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
-      GO OCDMS_map_icons
+      GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
    ENDIF
 
@@ -310,7 +311,7 @@ KEYMARK 0
 
 ! Save the results
 
-IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO OCDMS_cruise_key
+IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key
 
 GO LAS_results box
 

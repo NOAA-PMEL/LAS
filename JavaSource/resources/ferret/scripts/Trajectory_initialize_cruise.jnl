@@ -3,13 +3,11 @@
 ! Trajectory_initialize_cruise.jnl
 !
 ! Define variables and symbols based on cruise identification variables
-! in the OCDMS database:
+! in the SOCAT database:
 !
 ! cruise_ID     -- unique identifier for each cruise
-! ship          -- ship name
-! science_group -- AOML, PMEL, LDEO, ... 
-!
-!acm 2/2009 Additiosn to the symbol definitions at the end to
+
+!acm 2/2009 Additions to the symbol definitions at the end to
 !           allow for null strings: replace these with "none"
 
 ! Cancel the XY region.   These limits have nothing to do with the 
@@ -28,10 +26,15 @@ CANCEL REGION
 
 DEFINE SYMBOL cruise_max_labels = 200
 DEFINE SYMBOL numobs `($data_var),return = isize`
+LET num_e = `($data_var),return = msize`
+
+IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 
 ! Are the rowsize variables in the E direction?
 define symbol rdir = `rowsize,return=shape` 
 define symbol rind = ($rdir"|X>I|E>M")
+
+
 
 ! If (for prop-prop plots) there are mask-by settings, apply them
 
@@ -43,11 +46,14 @@ IF `nmask_labels GT 0` THEN
    DEFINE SYMBOL data_var = mask_on_var* dvar_to_mask
 ENDIF
 
+
 IF `($numobs) EQ 1` THEN
    LET ncruises = 1
    DEFINE SYMBOL cruise_max = 1
    
    LET cruise_numbers = x[i=1:1]
+   LET cruise_mask = x[i=1:1] 
+
    LET longest = 1
 
    LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(rowsize),`longest`)
@@ -60,6 +66,7 @@ ELSE
    IF `rshape EQ "X"` THEN LET ncruises = `rowsize,return=isize`
    IF `rshape EQ "E"` THEN LET ncruises = `rowsize,return=msize`
    LET cruise_numbers = x[i=1:`ncruises`]
+   LET cruise_mask = x[i=1:`ncruises`]  ! may redefine later
 
    DEF SYM cruise_max = `ncruises`
 

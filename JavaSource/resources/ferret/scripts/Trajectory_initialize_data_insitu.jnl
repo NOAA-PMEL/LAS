@@ -9,6 +9,7 @@ DEFINE SYMBOL num ($1"0")
 
 DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
+
 ! The variable at the x and y locations
 
 IF ($data_($num)_var"0|1|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
@@ -45,7 +46,8 @@ ENDIF
 ! Is it a cruise dataset?
 
 LET varnames = ..varnames
-IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode")` THEN GO Trajectory_initialize_cruise
+IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode")` THEN
+ GO Trajectory_initialize_cruise
 
 ! The x and y locations for insitu plots
 ! Use the _CoordinateAxisType to define data_x_var, data_y_var 
@@ -82,11 +84,30 @@ IF `is_element_of_str(global_attnames, "query_result")` THEN
 
 ENDIF
 
+LET varnames = ..varnames
+LET nvars = ..nvars
+IF `is_element_of_str(global_attnames, "featureType") ` THEN
+    REPEAT/RANGE=1:`nvars`/name=q (\
+      DEF SYM q = `q`;\
+      DEF SYM vname = `varnames[i=($q)]`;\
+      GO Trajectory_find_roles)
+ENDIF
+
 ! If the plot is colored by trajectory ID then fake that variable, and exit
-IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN 
+
+LET color_by_traj = 0
+IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
+   DEF SYM rowvar = rowSize
+   LET color_by_traj = 1
+ENDIF
+
+! Or, is this a DSG file with cruise_id?
+
+IF `($data_($num)_var"0|cruise_id>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
+
+IF `color_by_traj EQ 1` THEN
 
    USE "($data_($num)_url)"
-   LET varnames = ..varnames
 
    DEFINE SYMBOL data_($num)_var = `varnames[i=1]`
    DEFINE SYMBOL is_vid = 1
@@ -97,7 +118,7 @@ IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN
 
    GO LAS_initialize_traj_id
 
-   DEFINE SYMBOL ferret_poly_levels = `trajectory_counts,RETURN=lsize`
+   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL data_($num)_var = var_data
@@ -108,6 +129,8 @@ IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN
    IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
 
    IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
+
+   IF `($data_($num)_units%0|" ">0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
 
    DEFINE SYMBOL ferret_plot_title ($data_title)
@@ -117,6 +140,7 @@ IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN
 
    EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF
+
 
 LET data_num = `($data_($num)_var),return=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
