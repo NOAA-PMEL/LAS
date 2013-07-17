@@ -7,9 +7,16 @@
 ! Fix to let the rhs for month ranges have multiple items, 
 ! given in a comma-separated list
 
+! Is it where the data-var is not NaN? If so then don't try to make
+! black sysmbols at missing-values, and no need for (0 missing) on labels
+
+IF `($rhs"|NaN>1|*>0")+($op"|NE>1|*>0") EQ 2` THEN 
+   IF `($lhs"|($data_0_ID)>1|*>0")` THEN DEF SYM has_missing = 0
+   DEFINE SYMBOL provisional_title = Where ($lhs) is valid  ! save this
+ENDIF
+
 DEFINE SYMBOL translate_math = 1
 IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
-
 
 IF `STRINDEX("($rhs)", "'") GT 0` THEN
    LET slen = `STRLEN("($rhs)")`
@@ -80,6 +87,12 @@ IF `($lhs"|time>1|TIME>1|*>0")` THEN
       DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhsdate)
    ENDIF
    IF ($rhsdate"0|*>1") THEN DEFINE SYMBOL rhs ($rhsdate)
+ENDIF
+
+! Is it where a var is not NaN? If so then title was saved above
+
+IF `($rhs"|NaN>1|*>0")+($op"|NE>1|*>0") EQ 2` THEN 
+   DEFINE SYMBOL mask_title_($nmask_labels) = ($provisional_title)
 ENDIF
 
 IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
