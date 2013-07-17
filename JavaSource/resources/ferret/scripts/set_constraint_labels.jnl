@@ -9,9 +9,13 @@ IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 ! How many constraints could there be?  Should probably get 
 ! this from the server...
 
+DEF SYM has_missing = 0
+
+! The first EXIT should really be EXIT/LOOP...
+
 REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL v = `v`; \
-  IF ($constraint_($v)_lhs"1|*>0") THEN EXIT/LOOP ; \
+  IF ($constraint_($v)_lhs"1|*>0") THEN EXIT/CYCLE ; \
   DEFINE SYMBOL lhs = ($constraint_($v)_lhs); \
   DEFINE SYMBOL op = ($constraint_($v)_op); \
   DEFINE SYMBOL rhs = ($constraint_($v)_rhs); \
