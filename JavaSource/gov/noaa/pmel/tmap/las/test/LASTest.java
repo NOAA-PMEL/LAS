@@ -121,12 +121,17 @@ public class LASTest{
             //test product response
             if(lto.testResp()){
                 if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
+                
                 LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
                 if ( web_output ) {
                     // The lasConfig should be complete... Test the whole bunch
                     ArrayList<Dataset> datasets = lasConfig.getDatasets();
                     ltr.testResponse(web_output, datasets);
                 } else {
+
+                    if ( !web_output ) {
+                        System.out.println("==== Product Server: "+ lto.getLAS());
+                    }
                     int start = 0;
                     int end = 10;
                     ArrayList<Dataset> ds = getDatasetRange(start, end);
