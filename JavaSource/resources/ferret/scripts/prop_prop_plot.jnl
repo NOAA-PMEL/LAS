@@ -151,6 +151,13 @@ LET xsize = `($xvar),RETURN=isize`
 LET ysize = `($yvar),RETURN=isize`
 
 IF `xsize NE ysize` THEN 
+! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
+! and the other on the trajectory (or profile) axis?  May need to expand a variable 
+! onto the obs axis
+         
+	 sh dat/att
+	 sh dat
+
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
   EXIT/PROGRAM
 ENDIF
@@ -273,6 +280,14 @@ ELSE
       DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
       let zsize = `zvar,return=isize`
       IF `zsize NE xsize` THEN
+
+! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
+! and the other on the trajectory (or profile) axis?  May need to expand a variable 
+! onto the obs axis
+         
+	 sh dat/att
+	 sh dat
+
         MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
          EXIT/PROGRAM
       ENDIF
@@ -390,6 +405,9 @@ IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
+
+! If it's a color-by-ID plot, make the webrowset file for the cruise key
+IF `color_by_traj EQ 1` THEN GO Trajectory_cruise_key
 
 ! Save the results
 

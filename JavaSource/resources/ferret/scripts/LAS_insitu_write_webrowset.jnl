@@ -1,0 +1,33 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_insitu_write_webrowset.jnl
+!
+!
+! Make a LIST/QUIET of the ID number and Cruise ID to go back 
+! for possible subsets of this set of cruises.
+
+CANCEL MODE VERIFY
+IF ($debug_mode"0|*>1") THEN  LET seconds_1 = ($CLOCK_SECS)
+
+IF `($result_webrowset_filename"0|*>1") EQ 0` THEN
+  EXIT/SCRIPT
+ENDIF
+
+! Write all the counter numbers and the cruise IDs in the webrowset format
+LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_webrowset_filename)")
+
+! Newer Ferret (v6.85+) will let the arguments be on other than the X axis
+!LOAD write_webrow(cruise_id, cruise_name, cruise_mask, "($result_webrowset_filename)")
+
+SET MODE/LAST verify
+
+IF ($debug_mode"0|*>1") THEN
+   DEFINE SYMBOL secs = `(($clock_secs) - seconds_1),PREC=5`
+   LABEL/NOUSER `xloc_db`,`yloc_db`, 1, 0, 0.12,Webrowset xml ($secs)
+   LET yloc_db = `yloc_db - 0.16`
+   SAY ----- debug mode Webrowset xml ($secs) -----
+ENDIF
+
+
+!!!!
+
+! End of file ------------ LAS_insitu_write_webrowset.jnl --------------------------

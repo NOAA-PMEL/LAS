@@ -1,7 +1,6 @@
 ! LAS_pp_set_traj_shapes.jnl
 
 ! Set the shapes to be used for trajs. 
-! Call from OCDMS_correlation.jnl 
 ! and by 200symbols.jnl which makes the icons
 ! used in the key of traj shapes and colors.
 

@@ -2,9 +2,8 @@
 ! $Header$
 ! Trajectory_label_cruise_pts.jnl
 !
-! Puts a label in the upper right with number of cruises
+! Add to annotations the upper right with number of cruises
 ! and number of valid and missing points shown.
-! Or add to annotations.
 
 
 ! If all labeling turned off just exit.
@@ -54,28 +53,18 @@ LET yloc = `($ppl$height) - ($ppl$yorg) - 0.6`
 IF `($from_pts"0|*>1") EQ 0` THEN LET yloc = `yloc - 0.2`
 
 
-IF `($ferret_annotations"0|*>1") EQ 0` THEN
-   LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
-ENDIF
+LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
 
 LET yloc = `yloc - 0.2`
 !
 !DEFINE SYMBOL database_table_label = `cruise_id.database_table`
 
-IF ($ferret_annotations"0|*>1") THEN
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($ngood) of ($from_pts) obs
-      IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs (($nbad) missing)
-ELSE   
-   IF `STRCMP("($database_table_label)", "data") EQ 0` THEN 
-      LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($ngood) of ($from_pts) obs
-      LET yloc = `yloc - 0.2`
-      LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS(($nbad) missing)
-   ELSE
-      LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @ASsample of ($ngood) (($nbad) missing)
-      LET yloc = `yloc - 0.2`
-      IF ($from_pts"0|*>1") THEN \ 
-      LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @ASsampled from ($from_pts) total obs
-   ENDIF
-ENDIF
+DEFINE SYMBOL note_num = `($note_num"0") + 1`
+DEFINE SYMBOL note_($note_num)_lab = ($ngood) of ($from_pts) obs
+IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs (($nbad) missing)
+
+! If the constraint was where the color variable is valid, then no need for (0 missing)
+
+IF `($has_missing"0|0>1|*>0") AND ($nbad"|0>1|*>0")` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs
+
 !---------------- end of Trajectory_label_cruise_pts.jnl -------------------------

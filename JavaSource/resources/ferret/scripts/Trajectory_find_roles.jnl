@@ -1,0 +1,21 @@
+! Trajectory_find_roles.jnl
+! Find the Trajectory dimension and get its size
+! Find the Obs dimension and get its size
+
+
+LET var_attnames = ($vname).attnames
+IF `IS_ELEMENT_OF_STR(var_attnames, "cf_role")` THEN 
+   LET trajSize = `($vname),RETURN=msize`
+ENDIF
+
+IF `IS_ELEMENT_OF_STR(var_attnames, "sample_dimension")` THEN 
+   DEF SYM obsdim = `($vname).sample_dimension`
+   LET obsXvar = x[gx=($obsdim)]
+   LET obsSize = `obsXvar,RETURN=isize`
+ENDIF 
+
+LET var_title = ($vname).long_name
+IF `STRINDEX(var_title, "Number of Observations") GT 0` THEN 
+   DEF SYM rowvar = ($vname)
+ENDIF 
+

@@ -1,7 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! LAS_pp_colorby_traj.jnl
 ! Draw the correlation plot with icons colored by trajectory ID.
-! taken from OCDMS_corr_plot.jnl
 
 ! Create the 'traj' variables and symbols
 ! Create a new title that includes subsampling info
@@ -14,13 +13,12 @@ IF `($data_1_var"0|*>1") EQ 0` THEN
   EXIT/PROGRAM
 ENDIF
 
-DEFINE SYMBOL traj_max = `trajectory_counts,RETURN=size`
+DEFINE SYMBOL traj_max = `($rowvar),RETURN=size`
 
 
 ! TODO: will need to define subset-mask variable, applying the set to ID_DATA or 
 ! a preliminary variable used to define ID_DATA.
 
-let subset_mask = 1
 let tmask = if ID_DATA[i=@ddb] eq 1 then 1
 let traj_mask = tmask[gx=($ferret_plot_var_0)@ASN]
 
