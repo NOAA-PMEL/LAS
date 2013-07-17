@@ -39,6 +39,9 @@ IF `($FERRET_MEMORY"25.6") LT 100` THEN SET MEM/SIZ=100
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
+CANCEL MODE long_lab
+CANCEL MODE latit_lab
+
 IF ($do_curvi_xy"0") THEN 
    LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
    IF ($region_zt"0|*>1") THEN \
