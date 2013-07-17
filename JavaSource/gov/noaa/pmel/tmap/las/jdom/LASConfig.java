@@ -2005,6 +2005,10 @@ public class LASConfig extends LASDocument {
         Element datasetsE = getDatasetsAsElement();
         
         List datasetElements = datasetsE.getChildren("dataset");
+        if ( start > datasetElements.size() && end > datasetElements.size() ) {
+            // We've run off the end...
+            return datasets;
+        }
         if ( start <= 0 && end <= 0 ) {
             start = 0;
             end = datasetElements.size();

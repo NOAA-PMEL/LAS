@@ -88,9 +88,6 @@ public class LASResponseTester{
 
 			productServerURL = lto.getLAS()+"ProductServer.do";
 
-			if ( !web_output ) {
-				System.out.println("==== Product Server: "+ productServerURL);
-			}
 			
             String dregex = lto.getDregex();
             String vregex = lto.getVregex();
