@@ -89,7 +89,7 @@
 			<response ID="DBExtractResponse">
 				<result type="debug" ID="db_debug" file_suffix=".txt" />
 				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
-                <result type="webrowset" ID="icon_webrowset" file_suffix=".xml" />
+                <result type="webrowset" ID="webrowset" file_suffix=".xml" />
 				<result type="cancel" ID="cancel" />
 			</response>
 			<service>extract</service>
@@ -213,6 +213,7 @@
             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
             <result type="debug" ID="debug" file_suffix=".txt" />
             <result type="xml" ID="webrowset" file_suffix=".xml" />
+            <result type="icon_webrowset" ID="icon_webrowset" file_suffix=".xml" />
             <result type="cancel" ID="cancel" />
         </response>
         <service>ferret</service>
@@ -253,6 +254,7 @@
                     <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
                     <result type="debug" ID="debug" file_suffix=".txt"/>
 	            <result type="xml" ID="webrowset" file_suffix=".xml"/>	
+                    <result type="icon_webrowset" ID="icon_webrowset" file_suffix=".xml" />
 		    <result type="cancel" ID="cancel" />
                </response>
                <service>ferret</service>
