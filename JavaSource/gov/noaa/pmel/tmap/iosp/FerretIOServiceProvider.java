@@ -107,27 +107,57 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 	 * ucar.nc2.IOServiceProvider#isValidFile(ucar.unidata.io.RandomAccessFile)
 	 */
 	public boolean isValidFile(RandomAccessFile raf) throws IOException {
-		log.debug("Checking valid file for Ferret netCDF file.");
+	    log.debug("Checking valid file for Ferret netCDF file.");
+	    final byte[] MAGIC = new byte[]{0x43, 0x44, 0x46, 0x01};
 
-		long pos = 0;
-		long size = raf.length();
+	    byte[] netcdfmagic = new byte[4];
+	    try {
+	        raf.read(netcdfmagic);
+	        if ( netcdfmagic[0] == MAGIC[0] && netcdfmagic[1] == MAGIC[1] && netcdfmagic[2] == MAGIC[2] ) {
+	            // It's a netcdf 3 file...
+	            return false;
+	        }
+	        raf.seek(0);
 
-		byte[] b = new byte[10];
-		try {
-			while (pos < size && pos < maxHeader) {
-				raf.seek(pos);
-				raf.read(b);
-				String magic = new String(b);
-				if (FerretCommands.containsCommand(magic)) {
-					log.debug("Yes, is valid");
-					return true;
-				}
-				pos++;
-			}
-		} catch (IOException e) {
-		} // fall through
-		log.debug("No, is not valid");
-		return false;
+	        final byte[] head = {(byte) 0x89, 'H', 'D', 'F', '\r', '\n', 0x1a, '\n'};
+	        final String hdf5magic = new String(head);
+
+
+	        long size = raf.length();
+	        long pos = 0;
+	        byte[] hm = new byte[8];
+	        while (pos < size && pos < maxHeader) {
+	            raf.seek(pos);
+	            raf.read(hm);
+	            String magic = new String(hm);
+	            if (magic.equals(hdf5magic)) {
+	                // This is an HDF file...
+	                return false;
+	            }
+	            pos++;
+	        }
+
+
+
+
+	        byte[] b = new byte[10];
+	        pos = 0;
+
+
+	        while (pos < size && pos < maxHeader) {
+	            raf.seek(pos);
+	            raf.read(b);
+	            String magic = new String(b);
+	            if (FerretCommands.containsCommand(magic)) {
+	                log.debug("Yes, is valid");
+	                return true;
+	            }
+	            pos++;
+	        }
+	    } catch (IOException e) {
+	    } // fall through
+	    log.debug("No, is not valid");
+	    return false;
 	}
 
 	/*
