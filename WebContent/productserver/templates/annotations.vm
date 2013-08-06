@@ -73,11 +73,12 @@ text-align:left;
        	    </ul>
            </td>
           </tr>
-
+          <tr width="100%">
+             <td class="regular">
+                 $las_annotations.getHeader()
+             </td>
+          </tr>
    </table>
-	<div class="footer">
-		$las_annotations.getHeader()
-	</div>
   </div>
   </body>
 </html>
