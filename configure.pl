@@ -82,11 +82,12 @@ EOF
 #
 # Ferret environment variable names
 #
+my @EnvVars;
 if ( $ferrettype eq "ferret" ) {
-my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
+@EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
                  FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF);
 } else {
-my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
+@EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
                  FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF LD_LIBRARY_PATH FER_LIBS PYTHONPATH);
 }
 
@@ -189,6 +190,9 @@ while (! $ferret){
 }
 print "\n\n";
 
+$LasConfig{ferret} = $ferret;
+my $ff = $LasConfig{ferret};
+print "You have a valid version of Ferret at $ff\n\n";
 
 } # end of if ferrettype eq ferret (with pyferret we found it in the pre-amble script).
 
@@ -230,8 +234,6 @@ if ( ! -d $classesDir ) {
     print OUT "las.db.password=dummy_value\n";
     print OUT "las.db.dbase=dummy_value\n";
 
-$LasConfig{ferret} = $ferret;
-print "You have a valid version of Ferret.\n\n";
 
 #
 # Get the path to access the LAS UI
@@ -729,16 +731,20 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
            print "product server in $sample_out[$i].\n";
            if (! getYesOrNo("Overwrite this file", 1)){
               print "I will not change this configuration\n";
-          } else {
-             if (-f $sample_out[$i] && !unlink $sample_out[$i]){
-                print "Couldn't delete $sample_out[$i]\n"; return;
-            }
-            if (!copy($sample_in[$i], $sample_out[$i])){
+           } else {
+              if (!copy($sample_in[$i], $sample_out[$i])){
+                  print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
+              }
+           }
+       } else {
+           if (!copy($sample_in[$i], $sample_out[$i])){
                print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
-            }
-          }
+           }
        }
     }
+ 
+    mkdir "WebContent/docs";
+   
     if (!copy("conf/example/levitus_monthly.html","WebContent/docs/levitus_monthly.html")){
        print "Couldn't copy levitus_monthly.html.\n";
     }
