@@ -144,6 +144,8 @@ print "You have a valid version of Java.\n\n";
 # Search for Ferret, make sure it is correct version
 #
 
+if ( $ferrettype eq "ferret" ) {
+
 $ENV{PATH} = $ENV{PATH} . ":/usr/local/ferret/bin/";
 my ($ferret, $autoferret);
 $autoferret = $LasConfig{ferret};
@@ -186,6 +188,9 @@ while (! $ferret){
     }
 }
 print "\n\n";
+
+
+} # end of if ferrettype eq ferret (with pyferret we found it in the pre-amble script).
 
 my $autotds4 = $LasConfig{autotds4};
 if (! $autotds4){
