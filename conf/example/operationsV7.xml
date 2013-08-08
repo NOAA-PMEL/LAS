@@ -17,7 +17,7 @@
                 service_action="" default="true" category="file" output_template="climate_analysis_plots">
                 <response ID="PlotResp" type="HTML" index="1">
                         <result type="map_scale" ID="map_scale" file_suffix=".xml" />
-                        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
+                        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png" />
                         <result type="debug" ID="debug" file_suffix=".txt" />
                         <result type="xml" ID="webrowset" file_suffix=".xml" />
                         <result type="cancel" ID="cancel" />
@@ -31,7 +31,7 @@
                         <grid_type name="regular" />
                 </grid_types>
         </operation>
-!-- BEGIN trajectory operations -->
+<!-- BEGIN trajectory operations -->
    <operation name="ASCII file"
         ID="Trajectory_Data_Extract_File" output_template="netcdf"
         service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
@@ -184,13 +184,13 @@
 			</args>
 			<response ID="PlotResp" type="HTML" index="1">
 				<result type="image" ID="plot_image" streamable="true"
-					mime_type="image/png" file_suffix=".gif" />
+					mime_type="image/png" file_suffix=".png" />
 				<result type="ps" ID="plot_postscript" streamable="true"
 					mime_type="application/postscript" file_suffix=".ps" />
 				<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 				<result type="js_total" ID="js_total" file_suffix=".js" />
 				<result type="map_data" ID="map_data" file_suffix=".txt" />
-				<result type="image" ID="ref_map" file_suffix=".gif" />
+				<result type="image" ID="ref_map" file_suffix=".png" />
 				<result type="debug" ID="debug" file_suffix=".txt" />
 				<result type="cancel" ID="cancel" />
 				<result type="xml" ID="webrowset" file_suffix=".xml" />
@@ -210,7 +210,7 @@
         </args>
         <response ID="PlotResp" type="HTML" index="1">
             <result type="map_scale" ID="map_scale" file_suffix=".xml" />
-            <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
+            <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png" />
             <result type="debug" ID="debug" file_suffix=".txt" />
             <result type="xml" ID="webrowset" file_suffix=".xml" />
             <result type="icon_webrowset" ID="icon_webrowset" file_suffix=".xml" />
@@ -251,7 +251,7 @@
                </args>
                <response ID="PlotResp" type="HTML" index="1">
 		    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
                     <result type="debug" ID="debug" file_suffix=".txt"/>
 	            <result type="xml" ID="webrowset" file_suffix=".xml"/>	
                     <result type="icon_webrowset" ID="icon_webrowset" file_suffix=".xml" />
@@ -267,12 +267,383 @@
 		</grid_types>
     </operation>
     <!-- End of trajectory operations -->
+<!-- BEGIN ERDDAP trajectory operations -->
+   <operation name="ASCII file"
+        ID="ERDDAP_Trajectory_Data_Extract_File" output_template="netcdf"
+        service_action="ERDDAP_Trajectory_Data_Extract_netCDF" order="0500" category="file">
+        <operation name="ERDDAP Extraction" ID="ERDDAPExtract"
+            output_template="ascii" service_action="ERDDAP_Trajectory_interactive_plot">
+            <response ID="ERDDAPExtractResponse">
+                <result type="debug" ID="db_debug" file_suffix=".txt" />
+                <result type="netCDF" ID="netcdf" file_suffix=".nc" />
+                <result type="cancel" ID="cancel" />
+            </response>
+            <service>tabledap</service>
+        </operation>
+        <operation name="ASCII file" chained="true"
+        ID="ERDDAP_Trajectory_Data_Extract_File" output_template="ascii"
+        service_action="ERDDAP_Trajectory_Data_Convert_File" order="0500" category="file">
+        <args>
+                <arg chained="true" type="variable" index="1" operation="ERDDAPExtract"
+                    result="netcdf" file_suffix=".nc" />
+                <arg type="region" index="1" ID="in-situ-Region" />
+            </args>
+        <service>ferret</service>
+        <response ID="ERDDAP_Data_Extract_netCDF_Response">
+            <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    </operation>
+   <operation name="NetCDF file"
+        ID="ERDDAP_Trajectory_Data_Extract_netCDF" output_template="netcdf"
+        service_action="ERDDAP_Trajectory_Data_Extract_netCDF" order="0500" category="file">
+        <operation name="ERDDAP Extraction" ID="ERDDAPExtract"
+			output_template="ascii" service_action="ERDDAP_Trajectory_interactive_plot">
+			<response ID="ERDDAPExtractResponse">
+				<result type="debug" ID="db_debug" file_suffix=".txt" />
+				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
+                <result type="webrowset" ID="icon_webrowset" file_suffix=".xml" />
+				<result type="cancel" ID="cancel" />
+			</response>
+			<service>tabledap</service>
+		</operation>
+		<operation name="NetCDF file"
+        ID="ERDDAP_Trajectory_Data_Extract_netCDF" output_template="netcdf"
+        service_action="Data_Download" order="0500" category="file">
+        <args>
+				<arg chained="true" type="variable" index="1" operation="ERDDAPExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+        <!-- A bit of a kludge...  No service is really needed, but the ProductServer is not expecting the template service in the second operation of a compound operation... -->
+        <service>ferret</service>
+        <response ID="ERDDAP_Data_Extract_netCDF_Response">
+            <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    </operation>
+   <operation ID="ERDDAP_Trajectory_Interactive_Download" default="true" minvars="1" maxvars="100000" name="Interactive Download"
+        output_template="ERDDAP_trajectory_interactive_download" service_action="" order="0300" category="table">
+        <service>template</service>
+        <response ID="ERDDAP_Data_Download_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+   
+    </operation>
+    <!--  This is the default XY plot for a ERRDAP trajectory. -->
+	<operation name="Trajectory Plot" ID="ERDDAP_Trajectory_interactive_plot"
+		output_template="zoom" default="true" category="visualization">
+		<operation name="Database Extraction" ID="ERDDAPExtract"
+			output_template="" service_action="ERDDAP_Trajectory_interactive_plot">
+			<response ID="ERDDAPExtractResponse">
+				<result type="debug" ID="db_debug" file_suffix=".txt" />
+				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
+				<result type="cancel" ID="cancel" />
+			</response>
+			<service>tabledap</service>
+		</operation>
+		<operation chained="true" name="Trajectory Map" ID="ERDDAP_Trajectory_2D_poly"
+			output_template="output" service_action="Trajectory_2D_poly">
+			<args>
+				<arg chained="true" type="variable" index="1" operation="ERDDAPExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+			<response ID="PlotResp" type="HTML" index="1">
+				<result type="image" ID="plot_image" streamable="true"
+					mime_type="image/png" file_suffix=".png" />
+				<result type="ps" ID="plot_postscript" streamable="true"
+					mime_type="application/postscript" file_suffix=".ps" />
+				<result type="map_scale" ID="map_scale" file_suffix=".xml" />
+				<result type="js_total" ID="js_total" file_suffix=".js" />
+				<result type="map_data" ID="map_data" file_suffix=".txt" />
+				<result type="image" ID="ref_map" file_suffix=".png" />
+				<result type="debug" ID="debug" file_suffix=".txt" />
+				<result type="cancel" ID="cancel" />
+				<result type="xml" ID="webrowset" file_suffix=".xml" />
+			</response>
+			<service>ferret</service>
+		</operation>
+		<region>
+			<intervals name="xy" type="Maps" title="Latitude-Longitude" />
+			<intervals name="xyt" type="Maps" title="Latitude-Longitude" />
+		</region>
+	</operation>
+    <!-- END ERDDAP Trajectory_interactive_plot -->
+    <!-- This is the property-property operation for trajectory in-situ data. It gets called from the Correlation view defined below.  -->
+      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" default="true" category="file" output_template="zoom">
+	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
+          <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
+               <response ID="DBExtractResponse">
+                    <result type="debug" ID="db_debug" file_suffix=".txt"/>
+                    <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+		     <result type="cancel" ID="cancel" />
+               </response>
+               <service>tabledap</service>
+	        <properties>
+                  <property_group type="backend_request">
+                     <property>
+                        <name>exclude</name>
+                        <value>ferret,prop_hist</value>
+                     </property>
+                  </property_group>
+               </properties>
+          </operation>
+          <operation chained="true" name="Trajectory Correlation Plot" ID="Trajectgory_correlation" service_action="Trajectory_correlation">
+               <args>
+                    <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+                    <arg type="region" index="1" ID="in-situ-Region"/>
+               </args>
+               <response ID="PlotResp" type="HTML" index="1">
+		    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+                    <result type="debug" ID="debug" file_suffix=".txt"/>
+	            <result type="xml" ID="webrowset" file_suffix=".xml"/>	
+		    <result type="cancel" ID="cancel" />
+               </response>
+               <service>ferret</service>
+          </operation>
+          <region>
+			<intervals name="xyt" />
+		</region>
+		<grid_types>
+		    <grid_type name="trajectory"/>
+		</grid_types>
+    </operation>
+    <!-- End of ERDDAP trajectory operations -->
+<!-- BEGIN netCDF data source Trajectory operations -->
+    <operation name="ASCII file"
+        ID="ERDDAP_Trajectory_Data_Extract_File" output_template="ascii"
+        service_action="ERDDAP_Trajectory_Data_Convert_File" order="0500" category="file">
+        <args>
+                <arg chained="true" type="variable" index="1" operation="netCDFExtract"
+                    result="netcdf" file_suffix=".nc" />
+                <arg type="region" index="1" ID="in-situ-Region" />
+            </args>
+        <service>ferret</service>
+        <response ID="ERDDAP_Data_Extract_netCDF_Response">
+            <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    <operation name="NetCDF file" default="true"
+        ID="ERDDAP_Trajectory_Data_Extract_netCDF" output_template="netcdf"
+        service_action="Data_Download" order="0500" category="file">
+        <args>
+				<arg chained="true" type="variable" index="1" operation="ERDDAPExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+        <!-- A bit of a kludge...  No service is really needed, but the ProductServer is not expecting the template service in the second operation of a compound operation... -->
+        <service>ferret</service>
+        <response ID="netCDF_Data_Extract_netCDF_Response">
+            <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+   <operation ID="netCDF_Trajectory_Interactive_Download" default="true" minvars="1" maxvars="100000" name="Interactive Download"
+        output_template="ERDDAP_trajectory_interactive_download" service_action="" order="0300" category="table">
+        <service>template</service>
+        <response ID="ERDDAP_Data_Download_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+   
+    </operation>
+    <!--  This is the default XY plot for a ERRDAP trajectory. -->
+	<operation name="Trajectory Plot" ID="ERDDAP_Trajectory_interactive_plot"
+		output_template="zoom" default="true" category="visualization">
+			<args>
+				<arg chained="true" type="variable" index="1" operation="ERDDAPExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+			<response ID="PlotResp" type="HTML" index="1">
+				<result type="image" ID="plot_image" streamable="true"
+					mime_type="image/png" file_suffix=".png" />
+				<result type="ps" ID="plot_postscript" streamable="true"
+					mime_type="application/postscript" file_suffix=".ps" />
+				<result type="map_scale" ID="map_scale" file_suffix=".xml" />
+				<result type="js_total" ID="js_total" file_suffix=".js" />
+				<result type="map_data" ID="map_data" file_suffix=".txt" />
+				<result type="image" ID="ref_map" file_suffix=".png" />
+				<result type="debug" ID="debug" file_suffix=".txt" />
+				<result type="cancel" ID="cancel" />
+				<result type="xml" ID="webrowset" file_suffix=".xml" />
+			</response>
+			<service>ferret</service>
+		<region>
+			<intervals name="xy" type="Maps" title="Latitude-Longitude" />
+			<intervals name="xyt" type="Maps" title="Latitude-Longitude" />
+		</region>
+	</operation>
+    <!-- END ERDDAP Trajectory_interactive_plot -->
+    <!-- This is the property-property operation for trajectory in-situ data. It gets called from the Correlation view defined below.  -->
+      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" default="true" category="file" output_template="zoom">
+	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
+          <operation chained="true" name="Trajectory Correlation Plot" ID="Trajectgory_correlation" service_action="Trajectory_correlation">
+               <args>
+                    <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+                    <arg type="region" index="1" ID="in-situ-Region"/>
+               </args>
+               <response ID="PlotResp" type="HTML" index="1">
+		    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+                    <result type="debug" ID="debug" file_suffix=".txt"/>
+	            <result type="xml" ID="webrowset" file_suffix=".xml"/>	
+		    <result type="cancel" ID="cancel" />
+               </response>
+               <service>ferret</service>
+          </operation>
+          <region>
+			<intervals name="xyt" />
+		</region>
+		<grid_types>
+		    <grid_type name="trajectory"/>
+		</grid_types>
+    </operation>
+    <!-- End of netCDF only trajectory operations -->
 	<operation name="Correlation Plot" ID="Correlation"
 		service_action="" default="true" category="correlation" output_template="Correlation">
 		<response ID="PlotResp" type="HTML" index="1">
 			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 			<result type="image" ID="plot_image" streamable="true"
-				mime_type="image/png" file_suffix=".gif" />
+				mime_type="image/png" file_suffix=".png" />
 			<result type="debug" ID="debug" file_suffix=".txt" />
 			<result type="xml" ID="webrowset" file_suffix=".xml" />
 			<result type="cancel" ID="cancel" />
@@ -304,11 +675,13 @@
         service_action="Plot_2D_XY" order="0001" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
-            <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+            <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png" />
+            <result type="svg" ID="plot_svg" file_suffix=".svg" />
+            <result type="ps" ID="plot_ps" file_suffix=".ps" />
+            <result type="pdf" ID="plot_pdf" file_suffix=".pdf" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -357,10 +730,10 @@
        <operation ID="Overlay_Plot_2D" default="false" name="Overlay plot" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true" category="visualization" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif" />
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png" />
              <!--  <result type="ps" ID="plot_postscript" 
 streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map"  file_suffix=".gif" />
+             <result type="image" ID="ref_map"  file_suffix=".png" />
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
              <result type="cancel" ID="cancel"/>
@@ -381,9 +754,12 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true" minvars="2" maxvars="2">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif" />
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png" />
+             <result type="svg" ID="plot_svg" file_suffix=".svg" />
+             <result type="ps" ID="plot_ps" file_suffix=".ps" />
+             <result type="pdf" ID="plot_pdf" file_suffix=".pdf" />
 	<!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map" file_suffix=".gif" />
+             <result type="image" ID="ref_map" file_suffix=".png" />
              <result type="map_scale" ID="map_scale"/>
 	     <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -408,10 +784,10 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>ferret</service>
             <response ID="PlotResp">
                 <result type="image" ID="plot_image1" streamable="true"
-                    mime_type="image/gif" file_suffix=".gif"/>
+                    mime_type="image/png" file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript1"
                     streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> -->
-                <result type="image" ID="ref_map1"  file_suffix=".gif"/>
+                <result type="image" ID="ref_map1"  file_suffix=".png"/>
                 <result type="map_scale" ID="map_scale1" file_suffix=".xml"/>
                 <result type="debug" ID="debug1" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel1" file_suffix=".txt"/>
@@ -422,10 +798,10 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>ferret</service>
             <response ID="PlotResp">
                 <result type="image" ID="plot_image2" streamable="true"
-                    mime_type="image/gif" file_suffix=".gif" />
+                    mime_type="image/png" file_suffix=".png" />
                 <!-- <result type="ps" ID="plot_postscript2"
                     streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-                <result type="image" ID="ref_map2" file_suffix=".gif" />
+                <result type="image" ID="ref_map2" file_suffix=".png" />
                 <result type="map_scale" ID="map_scale2" file_suffix=".xml"/>
                 <result type="debug" ID="debug2" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel2" file_suffix=".txt"/>
@@ -475,9 +851,12 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation ID="Plot_1D" default="true" name="Line plot" minvars="1" maxvars="12" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+             <result type="svg" ID="plot_svg" file_suffix=".svg" />
+             <result type="ps" ID="plot_ps" file_suffix=".ps" />
+             <result type="pdf" ID="plot_pdf" file_suffix=".pdf" />
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-             <result type="image" ID="ref_map" file_suffix=".gif"/>
+             <result type="image" ID="ref_map" file_suffix=".png"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -498,9 +877,12 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation ID="Plot_1D_zoom" default="true" name="Line plot"  minvars="1" maxvars="12"  type="Line Plots" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization"  isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+             <result type="svg" ID="plot_svg" file_suffix=".svg" />
+             <result type="ps" ID="plot_ps" file_suffix=".ps" />
+             <result type="pdf" ID="plot_pdf" file_suffix=".pdf" />
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-             <result type="image" ID="ref_map" file_suffix=".gif"/>
+             <result type="image" ID="ref_map" file_suffix=".png"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -543,10 +925,10 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+                mime_type="image/png" file_suffix=".png" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" file_suffix=".ps"/> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -567,7 +949,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif"/>
+                mime_type="image/png" file_suffix=".png"/>
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
             <result type="image" ID="ref_map" />
@@ -725,10 +1107,10 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
-                        <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
-                        <result type="image" ID="colorbar" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+                        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+                        <result type="image" ID="colorbar" streamable="true" mime_type="image/png" file_suffix=".png"/>
                         <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-                        <result type="image" ID="ref_map" file_suffix=".gif"/>
+                        <result type="image" ID="ref_map" file_suffix=".png"/>
                         <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
                         <result type="debug" ID="debug" file_suffix=".txt"/>
                         <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -760,9 +1142,9 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
-          <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+          <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
           <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-          <result type="image" ID="ref_map" file_suffix=".gif"/>
+          <result type="image" ID="ref_map" file_suffix=".png"/>
           <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
           <result type="debug" ID="debug" file_suffix=".txt"/>
           <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -827,9 +1209,9 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="1D Plot" ID="Plot_1D_GE" output_template="output_response" service_action="Plot_1D" private="true" order="0704" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-             <result type="image" ID="ref_map" file_suffix=".gif"/>
+             <result type="image" ID="ref_map" file_suffix=".png"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -903,7 +1285,7 @@ streamable="true" mime_type="application/postscript"/> -->
         output_template="output_wms" service_action="Plot_2D_WMS" private="true" order="9999">
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif"/>
+                mime_type="image/png" file_suffix=".png"/>
         </response>
         <service>ferret</service>
         <region>
@@ -917,7 +1299,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="2D Color Key for WMS" ID="Plot_2D_ColorKey" 
           output_template="output_colorkey" service_action="Plot_2D_WMS" private="true">
           <response ID="PlotResp">
-             <result type="image" ID="colorbar" streamable="true" mime_type="image/gif" />
+             <result type="image" ID="colorbar" streamable="true" mime_type="image/png" />
           </response>
         <service>ferret</service>
         <region>
@@ -949,10 +1331,10 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+                mime_type="image/png" file_suffix=".png" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -982,10 +1364,10 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+                mime_type="image/png" file_suffix=".png" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1005,10 +1387,10 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+                mime_type="image/png" file_suffix=".png" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" file_suffix=".ps"/> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1031,10 +1413,10 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
+                mime_type="image/png" file_suffix=".png" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" file_suffix=".ps"/> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="image" ID="ref_map" file_suffix=".png" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1331,9 +1713,9 @@ streamable="true" mime_type="application/postscript"/> -->
                     <arg type="region" index="1" ID="in-situ-Region"/>
                </args>
                <response ID="PlotResp" type="HTML" index="1">
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
                     <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
-                    <result type="image" ID="ref_map" file_suffix=".gif" />
+                    <result type="image" ID="ref_map" file_suffix=".png" />
                     <result type="debug" ID="debug" file_suffix=".txt"/>
 		<result type="map_scale" ID="map_scale"/>
                </response>
@@ -1376,10 +1758,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif"/>
+                <result type="image" ID="ref_map"  file_suffix=".png"/>
 		<result type="map_scale" ID="map_scale"/>
 		<result type="debug" ID="debug" file_suffix=".txt"/>
             </response>
@@ -1438,10 +1820,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif"/>
+                <result type="image" ID="ref_map"  file_suffix=".png"/>
 		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1488,10 +1870,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif" />
+                <result type="image" ID="ref_map"  file_suffix=".png" />
 		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1535,10 +1917,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif" />
+                <result type="image" ID="ref_map"  file_suffix=".png" />
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
             </response>
@@ -1600,10 +1982,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps" /> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif"/>
+                <result type="image" ID="ref_map"  file_suffix=".png"/>
 		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1647,10 +2029,10 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/gif"  file_suffix=".gif"/>
+                    mime_type="image/png"  file_suffix=".png"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps" /> -->
-                <result type="image" ID="ref_map"  file_suffix=".gif"/>
+                <result type="image" ID="ref_map"  file_suffix=".png"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
             </response>
@@ -1792,7 +2174,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation default="false" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="3">
                <response ID="PlotResp" type="HTML" index="1">
                     <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
                     <result type="debug" ID="debug" file_suffix=".txt"/>
                     <result type="xml" ID="webrowset" file_suffix=".xml"/>
                     <result type="cancel" ID="cancel" />
@@ -1833,7 +2215,7 @@ streamable="true" mime_type="application/postscript"/> -->
                     <arg type="region" index="1" ID="in-situ-Region"/>
                </args>
                <response ID="PlotResp" type="HTML" index="1">
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
                     <result type="debug" ID="debug" file_suffix=".txt"/>
                	    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
 		     <result type="cancel" ID="cancel" />
