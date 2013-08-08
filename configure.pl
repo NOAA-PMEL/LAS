@@ -18,16 +18,20 @@ if (-f $configp){
     do $configp;
 }
 
-#
-# Ferret environment variable names
-#
-my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
-                 FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF);
 
-print "\n\nConfiguring V7.0 User Interface...\nIf you want to install the in-situ examples make sure you've loaded the sample data.\nSee the installation instructions at: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/installation/ for details.\n\n";
+print "\n\nConfiguring V8.0 User Interface...\nIf you want to install the in-situ examples make sure you've loaded the sample data.\nSee the installation instructions at: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/installation/ for details.\n\n";
 #
 # Make sure Ferret environment variable has been set up
 #   
+
+my $ferrettype=$ENV{FERRETTYPE};
+
+if ( $ferrettype eq "pyferret" ) {
+    # Don't care if it fails, the default results will work...
+    copy("JavaSource/resources/ferret/scripts/Py_LAS_results.jnl", "JavaSource/resources/ferret/scripts/LAS_results.jnl");
+}
+
+$LasConfig{ferrettype} = $ferrettype;
 
 if (! $ENV{FER_DIR} ){
     print <<EOF; 
@@ -38,6 +42,52 @@ if (! $ENV{FER_DIR} ){
   You need to do this before configuring LAS.
 EOF
     exit 1;
+}
+
+# If pyferret, check for FER_LIBS, PYTHONPATH and LD_LIBRARY_PATH
+if ( $ferrettype eq "pyferret" ) {
+    if (! $ENV{FER_LIBS} ){
+    print <<EOF; 
+  Your PYFERRET environment has not been properly set up.
+  (The environment variable FER_LIBS is not defined)
+
+  Have you executed "source your_system_path/pyferret_paths" ?
+  You need to do this before configuring LAS.
+EOF
+    exit 1;
+    }
+    if (! $ENV{PYTHONPATH} ){
+    print <<EOF; 
+  Your PYFERRET environment has not been properly set up.
+  (The environment variable PYTHONPATH is not defined
+   and must be set to the local site modules to find pyferret)
+
+  Have you executed "source your_system_path/pyferret_paths" ?
+  You need to do this before configuring LAS.
+EOF
+    exit 1;
+    }
+    if (! $ENV{LD_LIBRARY_PATH} ){
+    print <<EOF; 
+  Your PYFERRET environment has not been properly set up.
+  (The environment variable LD_LIBRARY_PATH is not defined
+   and must be set to find the shared libraries for pyferret)
+
+  Have you executed "source your_system_path/pyferret_paths" ?
+  You need to do this before configuring LAS.
+EOF
+    exit 1;
+    }
+}
+#
+# Ferret environment variable names
+#
+if ( $ferrettype eq "ferret" ) {
+my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
+                 FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF);
+} else {
+my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
+                 FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF LD_LIBRARY_PATH FER_LIBS PYTHONPATH);
 }
 
 #
@@ -416,6 +466,7 @@ my @Scripts = qw(build.xml
                  conf/example/sample_insitu_ui.xml
                  conf/example/productserver.xml
                  JavaSource/resources/ferret/FerretBackendConfig.xml.base
+                 JavaSource/resources/ferret/FerretBackendConfig.xml.pybase
                  JavaSource/resources/kml/KMLBackendConfig.xml
                  JavaSource/resources/database/DatabaseBackendConfig.xml
                  WebContent/WEB-INF/struts-config.xml
@@ -469,6 +520,7 @@ foreach my $script (@Scripts){
         s/\@TDS_DYNADATA\@/$LasConfig{tds_dynadata}/g;
         s/\@TDS_TEMP\@/$LasConfig{tds_temp}/g;
         s/\@PWD\@/$cdir/g;
+        s/\@PYEXE\@/$ENV{PYEXE}/g;
         print OUTSCRIPT $_;
     }
     close INSCRIPT;
@@ -501,7 +553,24 @@ if (-f "JavaSource/resources/ferret/FerretBackendConfig.xml"){
     
 
     if ( getYesOrNo("Do you want to use this file") ) {
+print <<EOF;
+Using current file.
+EOF
     } else {
+print <<EOF;
+The current file has been saved in: JavaSource/resources/ferret/FerretBackendConfig.xml.old
+EOF
+          system("mv $ferretConfig $ferretConfig.old");
+          if ( $ferrettype eq "ferret" ) {
+            copy ("$ferretConfig.base","$ferretConfig") or
+          die "Could not get FerretBackendConfig.xml initialization file";
+          } else {
+            copy ("$ferretConfig.pybase","$ferretConfig") or
+          die "Could not get FerretBackendConfig.xml initialization file";
+          }
+          printENV($ferretConfig, @EnvVars);
+   }
+} else {
 print <<EOF;
 
 Creating a  new 'JavaSource/resources/ferret/FerretBackendConfig.xml'
@@ -510,14 +579,13 @@ based on your current environment variable settings.
 The current file has been saved in: JavaSource/resources/ferret/FerretBackendConfig.xml.old
 
 EOF
-       system("mv $ferretConfig $ferretConfig.old");
-       copy ("$ferretConfig.base","$ferretConfig") or
+       if ( $ferrettype eq "ferret" ) {
+         copy("$ferretConfig.base","$ferretConfig") or
        die "Could not get FerretBackendConfig.xml initialization file";
-       printENV($ferretConfig, @EnvVars);
-    }
-} else {
-       copy("$ferretConfig.base","$ferretConfig") or
+       } else {
+         copy("$ferretConfig.pybase","$ferretConfig") or
        die "Could not get FerretBackendConfig.xml initialization file";
+       }
        printENV($ferretConfig, @EnvVars);
 }
 
@@ -655,14 +723,15 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
            print "You already have this XML configuration file for your\n";
            print "product server in $sample_out[$i].\n";
            if (! getYesOrNo("Overwrite this file", 1)){
-              print "I will not generate a sample configuration\n";
+              print "I will not change this configuration\n";
+          } else {
+             if (-f $sample_out[$i] && !unlink $sample_out[$i]){
+                print "Couldn't delete $sample_out[$i]\n"; return;
+            }
+            if (!copy($sample_in[$i], $sample_out[$i])){
+               print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
+            }
           }
-       }
-       if (-f $sample_out[$i] && !unlink $sample_out[$i]){
-           print "Couldn't delete $sample_out[$i]\n"; return;
-       }
-       if (!copy($sample_in[$i], $sample_out[$i])){
-           print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
        }
     }
     if (!copy("conf/example/levitus_monthly.html","WebContent/docs/levitus_monthly.html")){
