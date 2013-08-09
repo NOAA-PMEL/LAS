@@ -38,6 +38,7 @@ public class UserListBox extends Composite {
     List<VariableSerializable> allVariables = new ArrayList<VariableSerializable>();
     List<VariableSerializable> vectorVariables = new ArrayList<VariableSerializable>();
     private VariableMetadataView variableMetadataView;
+    private boolean colorBy = false;
     private UserListBox() {
         super();
         list = new ListBox();
@@ -263,14 +264,23 @@ public class UserListBox extends Composite {
          for ( int i = 0; i < variables.size(); i++ ) {
              VariableSerializable v = variables.get(i);
              if ( v.getAttributes().get("subset_variable") == null || !v.getAttributes().get("subset_variable").equals("true") ) {
-                 allVariables.add(v);
-                 list.addItem(v.getName(), v.getID());
-                 if((i==0) && (variableMetadataView!=null)){
-                     variableMetadataView.setDSID(v.getDSID());
-                 }
+                add(v);
+                if((i==0) && (variableMetadataView!=null)){
+                    variableMetadataView.setDSID(v.getDSID());
+                }
+             } else if ( colorBy == true && v.getAttributes().get("color_by") != null && v.getAttributes().get("color_by").equals("true") ) {
+                 add(v);
              }
          }
          setAddButtonVisible(variables.size() > 1);
+     }
+     private void add(VariableSerializable v) {
+         allVariables.add(v);
+         list.addItem(v.getName(), v.getID());
+        
+     }
+     public void setColorBy (boolean colorBy) {
+         this.colorBy = colorBy;
      }
      public void setVariable(VariableSerializable variable) {
          list.setSelectedIndex(0);

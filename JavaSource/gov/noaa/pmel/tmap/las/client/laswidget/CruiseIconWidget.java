@@ -93,35 +93,7 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			String doc = response.getText();
-			doc = doc.replaceAll("\n", "").trim();
-			Document responseXML = XMLParser.parse(doc);
-			NodeList rows = responseXML.getElementsByTagName("currentRow");
-			icons.clear();
-			interior.clear();
-			ids.clear();
-			for(int n=0; n<rows.getLength();n++) {
-				if ( rows.item(n) instanceof Element ) {
-					Element result = (Element) rows.item(n);
-					NodeList items = result.getElementsByTagName("columnValue");
-					if ( items.item(0) instanceof Element ) {
-						Element idE = (Element) items.item(0);
-						if ( idE.getFirstChild() instanceof Text ) {
-							Text idT= (Text) idE.getFirstChild();
-							String id = idT.getData().toString().trim();
-							ids.add(id);
-						}
-					}
-				}
-			}
-			
-			int i = 1;
-			for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
-				String id = (String) idsIt.next();
-				IconCheckBox icb = new IconCheckBox(i, id);
-				icons.add(icb);
-				interior.add(icb);
-				i++;
-			}
+            load(doc);
 		}
     	
     };
@@ -136,32 +108,42 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			String doc = response.getText();
-			doc = doc.replaceAll("\n", "").trim();
-			Document responseXML = XMLParser.parse(doc);
-			NodeList rows = responseXML.getElementsByTagName("currentRow");
-			for(int n=0; n<rows.getLength();n++) {
-				if ( rows.item(n) instanceof Element ) {
-					Element result = (Element) rows.item(n);
-					NodeList items = result.getElementsByTagName("columnValue");
-					if ( items.item(0) instanceof Element ) {
-						Element idE = (Element) items.item(0);
-						if ( idE.getFirstChild() instanceof Text ) {
-							Text idT= (Text) idE.getFirstChild();
-							String id = idT.getData().toString().trim();
-							ids.add(id);
-						}
-					}
-				}
-			}
-			int i = 1;
-			for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
-				String id = (String) idsIt.next();
-				IconCheckBox icb = new IconCheckBox(i, id);
-				icons.add(icb);
-				interior.add(icb);
-				i++;
-			}
+			load(doc);
+			
 		}
+
     	
     };
+
+    private void load(String doc) {
+        icons.clear();
+        interior.clear();
+        ids.clear();
+        doc = doc.replaceAll("\n", "").trim();
+        Document responseXML = XMLParser.parse(doc);
+        NodeList rows = responseXML.getElementsByTagName("currentRow");
+        for(int n=0; n<rows.getLength();n++) {
+            if ( rows.item(n) instanceof Element ) {
+                Element result = (Element) rows.item(n);
+                NodeList items = result.getElementsByTagName("columnValue");
+                if ( items.item(1) instanceof Element ) {
+                    Element idE = (Element) items.item(1);
+                    if ( idE.getFirstChild() instanceof Text ) {
+                        Text idT= (Text) idE.getFirstChild();
+                        String id = idT.getData().toString().trim();
+                        ids.add(id);
+                    }
+                }
+            }
+        }
+        int i = 1;
+        for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
+            String id = (String) idsIt.next();
+            IconCheckBox icb = new IconCheckBox(i, id);
+            icons.add(icb);
+            interior.add(icb);
+            i++;
+        }
+        
+    }
 }

@@ -21,27 +21,11 @@ public class ConstraintAnchor extends ConstraintDisplay {
     Anchor a = new Anchor();
     public ConstraintAnchor(String type, String dsid, String varid, String variable, String value, String key, String keyValue, String op) {
         super(type, dsid, varid, variable, value, key, keyValue, op);
-        init();
     }
     
 
-    private void init() {
-        
-        setText();
-        
-        
-        a.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(ClickEvent event) {
-                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(ConstraintAnchor.this.variable, ConstraintAnchor.this.value, ConstraintAnchor.this.key, ConstraintAnchor.this.keyValue), ConstraintAnchor.this);              
-            }
-            
-        });
-        p.add(a);
-        initWidget(p);
-    }
-    private void setText() {
+    
+    protected void setText() {
         final String anchor_text;
         String opv = displayOp();
        
@@ -64,7 +48,6 @@ public class ConstraintAnchor extends ConstraintDisplay {
          * This code unpacks the string and fixes up the thing.
          */
         super(con);
-        init();
     }
     public void setValue(String value) {
         this.value = value;

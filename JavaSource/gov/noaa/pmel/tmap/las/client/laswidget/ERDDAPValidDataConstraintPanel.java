@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.Iterator;
@@ -49,7 +49,7 @@ public class ERDDAPValidDataConstraintPanel extends Composite {
             public void onChange(ChangeEvent event) {
                 int index = variablesListBox.getSelectedIndex();
                 variable = variablesListBox.getVariable(index);
-                eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "ne", variable.getName(), "", "ne", false), ERDDAPValidDataConstraintPanel.this);
+                eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "ne", variable.getName(), "", "ne", false), ERDDAPValidDataConstraintPanel.this);
             }
 
         });
@@ -111,6 +111,6 @@ public class ERDDAPValidDataConstraintPanel extends Composite {
         String op1 = "ne";
         String op2 = "ne";
             
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "NaN", op1, variable.getName(), "NaN", op2, true), ERDDAPValidDataConstraintPanel.this);
+        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "NaN", op1, variable.getName(), "NaN", op2, true), ERDDAPValidDataConstraintPanel.this);
     }
 }

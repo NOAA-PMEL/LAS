@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.CategoriesReturnedEvent;
 import gov.noaa.pmel.tmap.las.client.event.ConfigReturnedEvent;
 import gov.noaa.pmel.tmap.las.client.event.GetCategoriesEvent;
@@ -90,7 +90,7 @@ public class ConstraintWidgetGroup extends Composite {
                     ERDDAPVariableConstraintPanel vcw = (ERDDAPVariableConstraintPanel) opened;
                     VariableSerializable variable = vcw.getVariable();
                     // Set the current values for the variable if it's already constrainted.
-                    eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ConstraintWidgetGroup.this);
+                    eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ConstraintWidgetGroup.this);
                 }
                 
             }
@@ -109,10 +109,10 @@ public class ConstraintWidgetGroup extends Composite {
             }
         });
        
-        eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
+        eventBus.addHandler(VariableConstraintEvent.TYPE, new VariableConstraintEvent.Handler() {
 
             @Override
-            public void onAdd(AddVariableConstraintEvent event) {
+            public void onChange(VariableConstraintEvent event) {
                 String variable = event.getVariable();
                 String op1 = event.getOp1();
                 String op2 = event.getOp2();
@@ -149,6 +149,9 @@ public class ConstraintWidgetGroup extends Composite {
                             // it's blank, applies been pressed, remove the anchor if it exists
                             if ( a != null ) {
                                 displayPanel.remove(a);
+                                if (variable.equals(variableConstraints.getVariable().getName()) ) {
+                                    variableConstraints.setRhs(rhs);
+                                }
                             }
                         }
                         if ( rhs != null && !rhs.equals("") ) {
@@ -160,9 +163,13 @@ public class ConstraintWidgetGroup extends Composite {
                             // It's the same as above...
                             if ( b != null ) {
                                 displayPanel.remove(b);
+                                if (variable.equals(variableConstraints.getVariable().getName()) ) {
+                                    variableConstraints.setLhs(lhs);
+                                }
                             }
                         }
                     }
+                    eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), ConstraintWidgetGroup.this);
                 } else {
                     // Apply button not pressed, newly created variable constraint, if there are active constraints, fill them in...
                     variableConstraints.clearTextFields();
@@ -227,6 +234,8 @@ public class ConstraintWidgetGroup extends Composite {
                             displayPanel.remove(a);
                         }
                     }
+                } else if ( source instanceof VariableConstraintAnchor ) {
+                    Window.alert("Remove variable constraint.");
                 }
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
             }
