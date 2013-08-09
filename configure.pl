@@ -935,7 +935,7 @@ sub printENV($ferretConfig, @EnvVars) {
 
         print CONFIGFILE '    <environment>',"\n";
         foreach my $var (@EnvVars){
-            $ENV{$var} = ". " . $ENV{$var} if $var !~ /PLOTFONT/;
+            $ENV{$var} = ". " . $ENV{$var} if ($var !~ /PLOTFONT/ && $var !~ /PYTHONPATH/ && $var !~ /LD_LIBRARY_PATH/ && $var !~ /FER_LIBS/);
             if ($var =~ /FER_GO|FER_PALETTE/){
                 $ENV{$var} = "scripts jnls jnls/insitu jnls/section " . $ENV{$var};
                 $ENV{$var} = $LasConfig{custom_name} . " " . $ENV{$var}
