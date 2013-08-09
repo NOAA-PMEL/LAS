@@ -47,6 +47,7 @@ get_python_vars() {
 #       number reported by the python executable (which validates the python executable)
         python_subdirectory=`${ans} -c "import sys; print 'python%i.%i' % sys.version_info[:2]"`
         if echo "${python_subdirectory}" | grep -q '^python2\.[67]$'; then
+            pyname=${ans}
             return 0
         elif echo "${python_subdirectory}" | grep -q '^python'; then
             echo " ${ans} appears to be ${python_subdirectory}; only python2.6 or python2.7 supported "
