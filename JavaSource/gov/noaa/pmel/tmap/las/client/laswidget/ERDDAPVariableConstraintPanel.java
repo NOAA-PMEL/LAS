@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -54,7 +54,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
             public void onChange(ChangeEvent event) {
                 int index = variablesListBox.getSelectedIndex();
                 variable = variablesListBox.getVariable(index);
-                eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ERDDAPVariableConstraintPanel.this);
+                eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ERDDAPVariableConstraintPanel.this);
             }
 
         });
@@ -145,7 +145,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         String op1 = "gt";
         String op2 = "le";
         String rhsText = rhs.getText();              
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraintPanel.this);
+        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraintPanel.this);
         eventBus.fireEvent(new WidgetSelectionChangeEvent(false, true, true));
     }
     public void clearTextFields() {

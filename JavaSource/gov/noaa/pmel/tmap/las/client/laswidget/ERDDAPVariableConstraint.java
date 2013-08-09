@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.core.client.GWT;
@@ -104,7 +104,7 @@ public class ERDDAPVariableConstraint extends Composite {
         String op1 = "gt";
         String op2 = "le";
         String rhsText = rhs.getText();              
-        eventBus.fireEventFromSource(new AddVariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraint.this);
+        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraint.this);
     }
     public VariableSerializable getVariable() {
         return variable;

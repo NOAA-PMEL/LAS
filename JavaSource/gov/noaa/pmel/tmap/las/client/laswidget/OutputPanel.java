@@ -104,6 +104,9 @@ public class OutputPanel extends Composite implements HasName {
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 
     private static final Logger logger = Logger.getLogger(OutputPanel.class.getName());
+    
+    OutputFormatChooser formatChooser = new OutputFormatChooser();
+    
     /*
      * Original layout with the controls at the bottom
      
@@ -412,6 +415,12 @@ public class OutputPanel extends Composite implements HasName {
                             image_ready = true;
                             imageurl = result.getAttribute("url");
                             logger.info("imageurl = result.getAttribute(\"url\"):" + imageurl);
+                        } else if ( typeAttribute.equals("pdf") ) {
+                            formatChooser.setPdfUrl(result.getAttribute("url"));
+                        } else if ( typeAttribute.equals("svg") ) {
+                            formatChooser.setSvgUrl(result.getAttribute("url"));
+                        } else if ( typeAttribute.equals("ps") ) {
+                            formatChooser.setPsUrl(result.getAttribute("url"));
                         } else if (typeAttribute.equals("annotations")) {
                             annourl = result.getAttribute("url");
                             lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl) + "&catid=" + panelVar.getDSID());
@@ -540,6 +549,9 @@ public class OutputPanel extends Composite implements HasName {
                     image_w = x_image_size;
                     image_h = y_image_size;
 
+                    String urlfrag = URLUtil.getBaseURL() + "getAnnotations.do?template=image_w_annotations.vm&"+getPrintURL();
+                    formatChooser.setPrintUrl(urlfrag);
+                    
                     // set the canvas with the image and get to drawin'
 
                     if (!imageurl.equals("")) {
@@ -550,6 +562,8 @@ public class OutputPanel extends Composite implements HasName {
 
                         if (frontCanvas != null) {
                           
+                            grid.setWidget(plotRow, 1, formatChooser);
+                            
                             plotImage.addLoadHandler(imageLoadHandler);
                             plotImage.addErrorHandler(imageErrorHandler);
                             plotImage.setUrl(imageurl);
@@ -1866,6 +1880,7 @@ public class OutputPanel extends Composite implements HasName {
         difference = false;
 
         messagePanel.hide();
+        formatChooser.hide();
 
         if (!hasViewAxes()) {
             spin.hide();
@@ -2382,7 +2397,7 @@ public class OutputPanel extends Composite implements HasName {
         this.setPanelWidth(width);
         int plotImageWidth = convertPXtoInt(getPlotWidth());
         logger.info("New plotImageWidth:" + plotImageWidth);
-        super.setWidth(width + "px");
+        //super.setWidth(width + "px");
         if (plotImageWidth != width) {
             logger.warning("Couldn't set the exact width of this plotImage to width:" + width);
         }

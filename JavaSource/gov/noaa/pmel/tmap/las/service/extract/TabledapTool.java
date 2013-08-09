@@ -139,21 +139,21 @@ public class TabledapTool extends TemplateTool {
             //get url (almost always ending in "/tabledap/")
             causeOfError = "Could not get url from backend request: "; 
             String url = lasBackendRequest.getRootElement().getChild(
-                "dataObjects").getChild("data").getAttributeValue("url");
+                    "dataObjects").getChild("data").getAttributeValue("url");
             required(url, causeOfError);
 
             causeOfError = "Could not get trajectory id from backend request: "; 
             String cruiseid = getTabledapProperty(lasBackendRequest, "trajectory_id");
             required(cruiseid, causeOfError);
-            
+
             causeOfError = "Could not get tiem column name from backend request: "; 
             String time = getTabledapProperty(lasBackendRequest, "time");
             required(time, causeOfError);
-            
+
             String latname = getTabledapProperty(lasBackendRequest, "latitude");
             String lonname = getTabledapProperty(lasBackendRequest, "longitude");
             String zname = getTabledapProperty(lasBackendRequest, "altitude");
-            
+
             causeOfError = "Could not get id."; 
             String id = getTabledapProperty(lasBackendRequest, "id");
             log.debug("Got id: " + id); 
@@ -162,7 +162,7 @@ public class TabledapTool extends TemplateTool {
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
             causeOfError = "Unable to getResultAsFile(debug): ";
             String constraintFileName = lasBackendRequest.getResultAsFile("debug"); 
-            
+
             //create the query.   First: variables
             StringBuffer query = new StringBuffer();
             // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
@@ -170,10 +170,10 @@ public class TabledapTool extends TemplateTool {
             // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
             variables = variables.replace(cruiseid+",", "");
             variables = variables.replace(cruiseid, "");
-            
+
             query.append(String2.replaceAll(variables, " ", ""));
-            
-            
+
+
 
             //then variable constraints  
             List constraintElements = lasBackendRequest.getRootElement().getChildren("constraint");
@@ -195,8 +195,8 @@ public class TabledapTool extends TemplateTool {
                     query.append("&" + c.getAsERDDAPString());  //op is now <, <=, ...
                 }
             }
-            
-    
+
+
             //get region constraints 
             causeOfError = "Unable to get required database properties.";
             String xlo = lasBackendRequest.getXlo();  //don't constrain to +-180?  getDatabaseXlo?
@@ -230,12 +230,12 @@ public class TabledapTool extends TemplateTool {
             //get the data   
             causeOfError = "Could not convert the data source to a netCDF file: ";   
             String dsUrl = url + id + ".ncCF?";  //don't include ".dods"; readOpendapSequence does that
-            File part1 = new File(netcdfFilename+".part1");
-//            Table data = new Table();
+
+            //            Table data = new Table();
             DateTime dt = new DateTime();
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
             if (xlo.length() > 0 && xhi.length() > 0 ) {
-                
+
                 // This little exercise will normalize the x values to -180, 180.
                 double xhiDbl = String2.parseDouble(xhi);
                 double xloDbl = String2.parseDouble(xlo);
@@ -243,50 +243,39 @@ public class TabledapTool extends TemplateTool {
                 xhiDbl = p.getLongitude();
                 p = new LatLonPointImpl(0, xloDbl);
                 xloDbl = p.getLongitude();
-                
+
                 // Now a wrap around from west to east should be have xhi < xlo;
                 if ( xhiDbl < xloDbl ) {
-                    //split lon needs 2 queries; take care of >xlo
-                    //look at diagram in class javadoc above to understand this
-                    try {
-                        query.append("&longitude>=" + xlo);
-                        String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
-                        String firstUrl = dsUrl + q;
-                        dt = new DateTime();
-                        log.info("{TableDapTool starting file pull for part 1 at "+fmt.print(dt));
-                        lasProxy.executeGetMethodAndSaveResult(firstUrl, part1, null);
-                        dt = new DateTime();
-                        log.info("{TableDapTool finished file pull for part 1 at "+fmt.print(dt));
-                    } catch (Exception e) {
-                        String message = e.getMessage();
-                        if ( e.getMessage().contains("com.cohort") ) {
-                            message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
-                            message = message.substring(0, message.indexOf(")"));
-                        }
-                        causeOfError = "Data source error: " + message;
-                        throw new Exception(message);
-                    }
-                    xlo = ""; //it has been taken care of
-
-                    //was the request canceled?
-                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                        return lasBackendResponse;
+                    if ( xhiDbl < 0 && xloDbl >=0 ) {
+                        // This should be true, otherwise how would to get into this situation unless you wrapped around the entire world and overlapped...
+                        xhiDbl = xhiDbl + 360.0d;
+                        query.append("&lon360>=" + xloDbl);
+                        query.append("&lon360<=" + xhiDbl);
+                    } // the else block is that you overlapped so leave off the longitude constraint all teogether
+                    
+                } else {
+                    // This else block is the case where it a query that does not cross the date line
+                    query.append("&longitude>=" + xlo);
+                    query.append("&longitude<=" + xhi);
                 }
-        }
-//            //do the main data query
-//            //xlo and/or xhi may be specified, but they aren't xhi<xlo
-//            Table tTable = data;
-//            if (data.nColumns() > 0) //put in temp table if already data in 'data'
-//                tTable = new Table();
-            File part2 = new File(netcdfFilename+".part2");
-            if (xlo.length() > 0) query.append("&longitude>=" + xlo);
-            if (xhi.length() > 0) query.append("&longitude<=" + xhi);
+            } else {
+                //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
+                if (xlo.length() > 0) query.append("&longitude>=" + xlo);
+                if (xhi.length() > 0) query.append("&longitude<=" + xhi);
+            }
+            //            //do the main data query
+            //            //xlo and/or xhi may be specified, but they aren't xhi<xlo
+            //            Table tTable = data;
+            //            if (data.nColumns() > 0) //put in temp table if already data in 'data'
+            //                tTable = new Table();
+            File temp_file = new File(netcdfFilename+".temp");
+            
             try {
                 String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
                 String secondUrl = dsUrl + q;
                 dt = new DateTime();
                 log.info("{TableDapTool starting file pull for part 2 at "+fmt.print(dt));
-                lasProxy.executeGetMethodAndSaveResult(secondUrl, part2, null);
+                lasProxy.executeGetMethodAndSaveResult(secondUrl, temp_file, null);
                 dt = new DateTime();
                 log.info("{TableDapTool finished file pull for part 2 at "+fmt.print(dt));
             } catch (Exception e) {
@@ -298,32 +287,14 @@ public class TabledapTool extends TemplateTool {
                 causeOfError = "Data source error: " + message;
                 throw new Exception(message);
             }
-            
-            
+
+
             //was the request canceled?
             if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
                 return lasBackendResponse;
-            
-            // If there is only one file, rename it and get on your with life.
-            if ( part1.exists() && part1.length() > 0 ) {
-                dt = new DateTime();
-                log.info("{TableDapTool starting file join for part 1 and 2 "+fmt.print(dt));
-                merge(part1, part2);
-//                Table table1 = new Table();
-//                Table table2 = new Table();
-//                table1.readNcCF(part1.getAbsolutePath(), null, null, null, null);
-//                table2.readNcCF(part2.getAbsolutePath(), null, null, null, null);
-//                table1.append(table2);
-//                // TODO sort by time and curise ID.
-//                IntermediateNetcdfFile ncfile = new IntermediateNetcdfFile(netcdfFilename, false);
-//                ncfile.create(table1, lasBackendRequest);
-//                ncfile.fill(table1);
-//                ncfile.close();
-//                // How to derive the name "obs" from the files already written?
-//                table1.saveAs4DNc(netcdfFilename, table1.findColumnNumber(lonname), table1.findColumnNumber(latname), table1.findColumnNumber(zname), table1.findColumnNumber(time));
-            } else {
-                part2.renameTo(new File(netcdfFilename));
-            }
+
+            temp_file.renameTo(new File(netcdfFilename));
+
 
             // The service just wrote the file to the requested location so
             // copy the response element from the request to the response.

@@ -1,29 +1,26 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import gov.noaa.pmel.tmap.las.client.event.AddVariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
+import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintLabel;
-import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.ERDDAPVariableConstraintPanel;
-import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
+import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
-import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintLayout;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
-import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
@@ -35,7 +32,6 @@ import gov.noaa.pmel.tmap.las.client.ui.IESafeImage;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,7 +77,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -141,7 +136,7 @@ public class SimplePropPropViewer implements EntryPoint {
     UserListBox xVariables = new UserListBox(XSELECTOR, true);
     UserListBox yVariables = new UserListBox(YSELECTOR, true);
     UserListBox colorVariables = new UserListBox(COLORSELECTOR, true);
-    PushButton update = new PushButton("Update Plot");
+    AlertButton update = new AlertButton("Update Plot", Constants.UPDATE_NEEDED);
     PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
     Label warnText;
@@ -238,6 +233,7 @@ public class SimplePropPropViewer implements EntryPoint {
     public void onModuleLoad() {
         logger.setLevel(Level.ALL);
 
+        colorVariables.setColorBy(true);
         ClientFactory cf = GWT.create(ClientFactory.class);
         eventBus = cf.getEventBus();
 
@@ -394,10 +390,10 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
             }
         });
-        eventBus.addHandler(AddVariableConstraintEvent.TYPE, new AddVariableConstraintEvent.Handler() {
+        eventBus.addHandler(VariableConstraintEvent.TYPE, new VariableConstraintEvent.Handler() {
 
             @Override
-            public void onAdd(AddVariableConstraintEvent event) {
+            public void onChange(VariableConstraintEvent event) {
                 String variable = event.getVariable();
                 String op1 = event.getOp1();
                 String op2 = event.getOp2();
@@ -1137,6 +1133,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 xVariables.setAddButtonVisible(false);
                 yVariables.setAddButtonVisible(false);
                 colorVariables.setAddButtonVisible(false);
+                
                 if (index > 0) {
                     yVariables.setSelectedIndex(index);
                 }
