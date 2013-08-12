@@ -12,6 +12,7 @@ package gov.noaa.pmel.tmap.iosp;
 import gov.noaa.pmel.tmap.iosp.IOSPException;
 import gov.noaa.pmel.tmap.iosp.IOSPDocument;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -253,6 +254,20 @@ public class FerretConfig extends IOSPDocument {
             }
         }
         return "";
+    }
+    public List<String> getArgs() {
+        List<String> args = new ArrayList<String>();
+        Element invoker = this.getRootElement().getChild("invoker");
+        if ( invoker != null ) {
+            List configured_args = invoker.getChildren("arg");
+            for (Iterator argIt = configured_args.iterator(); argIt.hasNext();) {
+                Element arg = (Element) argIt.next();
+                String a = arg.getTextTrim();
+                args.add(a);
+            }
+            
+        }
+        return args;
     }
     /**
      * Returns the path to the Ferret executable.

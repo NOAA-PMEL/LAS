@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 /**
@@ -161,37 +162,16 @@ public class FerretTool extends Tool{
             log.debug("Output:\n"+output);
             temp_file.renameTo(out_file);
             if ( output_filename != null && !output_filename.equals("") ) {
-                // If it ends with .xml it's the header file and we need to capture it.
-                // If not, its an netCDF file and we catch the output in a log file.
-                String err_filename;
-                if (!output_filename.endsWith(".xml") ) {
-                    output_filename = output_filename+".log";
-                    err_filename = output_filename;
-                } else {
-                    err_filename = output_filename+".err";
-                }
+
+                String logfile = output_filename+".log";
                 log.debug("Writing output to "+output_filename);
-                
-                PrintWriter headerWriter=null;
-                File header = new File(output_filename);
-                // TODO temporary? check to see if the script made the output file itself.
-                if ( !header.exists() ) {
-                	headerWriter = new PrintWriter(new FileOutputStream(header));               
-                	headerWriter.println(output);
-                	if ( err_filename.endsWith(".log" ) ) {
-                		// Append error to the log file
-                		headerWriter.println(stderr);
-                	} else {
-                		// Create a new error file.
-                		File error = new File(err_filename);
-                		PrintWriter errWriter = new PrintWriter(new FileOutputStream(error));
-                		errWriter.println(stderr);
-                		errWriter.flush();
-                		errWriter.close();
-                	}
-                	headerWriter.flush();
-                	headerWriter.close();
-                }
+                PrintWriter logwriter = new PrintWriter(new FileOutputStream(logfile));               
+                logwriter.println(output);
+                logwriter.println(stderr);
+
+                logwriter.flush();
+                logwriter.close();
+
 
             }
         }
@@ -298,11 +278,14 @@ public class FerretTool extends Tool{
         boolean useNice = ferretConfig.getUseNice();
 
         String ferretBinary = ferretConfig.getFerret();
+        
+        List<String> fargs = ferretConfig.getArgs();
+        
         int offset = (useNice) ? 1 : 0;
 
         String[] cmd;
 
-        cmd = new String[offset + 5];
+        cmd = new String[offset + fargs.size() + 2];
 
 
         if (useNice) {
@@ -311,14 +294,12 @@ public class FerretTool extends Tool{
 
 
         cmd[offset] = ferretBinary;
+        
+        for (int i = 0; i < fargs.size(); i++) {
+            cmd[offset + i+1] = fargs.get(i);
+        }
 
-        cmd[offset + 1] = "-gif";
-
-        cmd[offset + 2] = "-server";
-
-        cmd[offset + 3] = "-script";
-
-        cmd[offset + 4] = argBuffer.toString();
+        cmd[offset + fargs.size()+1] = argBuffer.toString();
 
 
         String env[] = runTimeEnv.getEnv();
