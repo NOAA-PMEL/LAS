@@ -275,6 +275,14 @@ public class FerretTool extends Tool{
         }
 
 
+        /*
+         * There are two sets of arguments that come into the task.
+         * fargs aref from the configuration -gif -script stuff like that.
+         * args are those arguments that need to be passed to the [py]ferret command line
+         * which in the case of making the header or the name of the script to make the headers,
+         * the name of the script to initialize the data set and the name of the XML file to receive the info.
+         *
+         */
         boolean useNice = ferretConfig.getUseNice();
 
         String ferretBinary = ferretConfig.getFerret();
@@ -285,7 +293,8 @@ public class FerretTool extends Tool{
 
         String[] cmd;
 
-        cmd = new String[offset + fargs.size() + 2];
+        // We've never used the "nice" feature
+        cmd = new String[offset + fargs.size() + args.length + 1];
 
 
         if (useNice) {
@@ -298,8 +307,9 @@ public class FerretTool extends Tool{
         for (int i = 0; i < fargs.size(); i++) {
             cmd[offset + i+1] = fargs.get(i);
         }
-
-        cmd[offset + fargs.size()+1] = argBuffer.toString();
+        for (int i = 0; i < args.length; i++) {
+            cmd[offset + fargs.size()+1+i] = args[i];
+        }
 
 
         String env[] = runTimeEnv.getEnv();
