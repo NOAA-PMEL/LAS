@@ -394,6 +394,7 @@ public class OutputPanel extends Composite implements HasName {
                 sp.setSize("30em", "20em");
                 grid.setWidget(plotRow, 0, sp);
             } else {
+                formatChooser.hide();
                 logger.info("The doc is obviously XML");
                 doc = doc.replaceAll("\n", "").trim();
                 Document responseXML = XMLParser.parse(doc);
@@ -562,7 +563,7 @@ public class OutputPanel extends Composite implements HasName {
 
                         if (frontCanvas != null) {
                           
-                            grid.setWidget(plotRow, 1, formatChooser);
+                            
                             
                             plotImage.addLoadHandler(imageLoadHandler);
                             plotImage.addErrorHandler(imageErrorHandler);
@@ -1103,6 +1104,8 @@ public class OutputPanel extends Composite implements HasName {
 
         grid = new FlexTable();
         grid.getCellFormatter().setHeight(0, 0, "");
+        
+        formatChooser.hide();
 
         datasetLabel = new Label();
 
@@ -1141,6 +1144,8 @@ public class OutputPanel extends Composite implements HasName {
         topControls.add(datasetButton);
         topControls.add(variableControls);
         topControls.add(panelAxesWidgets);
+        topControls.add(formatChooser);
+        formatChooser.hide();
         
         if ( !singlePanel ) {
             grid.setWidget(controlPanelRow, 0, topControls);
@@ -1880,7 +1885,8 @@ public class OutputPanel extends Composite implements HasName {
         difference = false;
 
         messagePanel.hide();
-        formatChooser.hide();
+        
+       
 
         if (!hasViewAxes()) {
             spin.hide();
