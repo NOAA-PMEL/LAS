@@ -5,34 +5,38 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class OutputFormatChooser extends Composite {
-    VerticalPanel layout = new VerticalPanel();
+    HorizontalPanel layout = new HorizontalPanel();
     
+    String buttonWidth = "28px";
+    String buttonHeight = "33px";
     String pdfUrl;
 
-    private static Image pdfImage = new Image(GWT.getModuleBaseURL()+ "../images/pdf_icon35.jpg");
+    private Image pdfImage = new Image(GWT.getModuleBaseURL()+ "../images/pdf_icon35.png");
     PushButton pdfButton = new PushButton(pdfImage);
     
     String psUrl;
     
-    private static Image psImage = new Image(GWT.getModuleBaseURL()+ "../images/ps_icon35.jpg");
+    private Image psImage = new Image(GWT.getModuleBaseURL()+ "../images/ps_icon35.png");
     PushButton psButton = new PushButton(psImage);
     
     String svgUrl;
     
-    private static Image svgImage = new Image(GWT.getModuleBaseURL()+ "../images/svg_icon35.jpg");
+    private Image svgImage = new Image(GWT.getModuleBaseURL()+ "../images/svg_icon35.png");
     PushButton svgButton = new PushButton(svgImage);
     
     String printUrl;
     
-    private static Image printImage = new Image(GWT.getModuleBaseURL()+ "../images/printer_icon35.jpg");
+    private Image printImage = new Image(GWT.getModuleBaseURL()+ "../images/printer_icon35.png");
     PushButton printButton = new PushButton(printImage);
     
     public OutputFormatChooser() {
+        pdfButton.setSize(buttonWidth, buttonHeight);
         pdfButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -46,6 +50,7 @@ public class OutputFormatChooser extends Composite {
         
         layout.add(pdfButton);
        
+        psButton.setSize(buttonWidth, buttonHeight);
         psButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -59,6 +64,7 @@ public class OutputFormatChooser extends Composite {
         
         layout.add(psButton);
         
+        svgButton.setSize(buttonWidth, buttonHeight);
         svgButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -72,6 +78,7 @@ public class OutputFormatChooser extends Composite {
         
         svgButton.setTitle("Get this plot as Scalable Vector Graphics file.");
         
+        printButton.setSize(buttonWidth, buttonHeight);
         printButton.addClickHandler(new ClickHandler() {
 
             @Override
@@ -92,6 +99,7 @@ public class OutputFormatChooser extends Composite {
         pdfButton.setVisible(false);
         psButton.setVisible(false);
         svgButton.setVisible(false);
+        layout.setVisible(false);
     }
     
     public String getPdfUrl() {
@@ -101,6 +109,7 @@ public class OutputFormatChooser extends Composite {
 
     public void setPdfUrl(String pdfUrl) {
         this.pdfUrl = pdfUrl;
+        layout.setVisible(true);
         pdfButton.setVisible(true);
     }
 
@@ -112,11 +121,13 @@ public class OutputFormatChooser extends Composite {
 
     public void setPsUrl(String psUrl) {
         this.psUrl = psUrl;
+        layout.setVisible(true);
         psButton.setVisible(true);
     }
 
     public void setSvgUrl(String svgUrl) {
         this.svgUrl = svgUrl;
+        layout.setVisible(true);
         svgButton.setVisible(true);
     }
 
@@ -131,6 +142,7 @@ public class OutputFormatChooser extends Composite {
 
     public void setPrintUrl(String printUrl) {
         this.printUrl = printUrl;
+        layout.setVisible(true);
     }
 
 
