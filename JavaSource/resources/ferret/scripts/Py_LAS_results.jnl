@@ -25,7 +25,7 @@
 IF `($its_GE"0|*>1") AND ($ferret_version) GE 6.12` THEN DEFINE SYMBOL trans = /TRANS
 
 IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
-IF ($result_plot_ps%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
+IF ($result_plot_ps_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
 IF ($result_plot_pdf_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_pdf_filename)"
 IF ($result_plot_svg_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_svg_filename)"
 
