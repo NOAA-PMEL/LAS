@@ -185,8 +185,9 @@
 			<response ID="PlotResp" type="HTML" index="1">
 				<result type="image" ID="plot_image" streamable="true"
 					mime_type="image/png" file_suffix=".png" />
-				<result type="ps" ID="plot_postscript" streamable="true"
-					mime_type="application/postscript" file_suffix=".ps" />
+                                <result type="svg" ID="plot_svg" file_suffix=".svg" />
+                                <result type="ps" ID="plot_ps" file_suffix=".ps" />
+                                <result type="pdf" ID="plot_pdf" file_suffix=".pdf" />
 				<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 				<result type="js_total" ID="js_total" file_suffix=".js" />
 				<result type="map_data" ID="map_data" file_suffix=".txt" />
