@@ -1142,9 +1142,10 @@ public class OutputPanel extends Composite implements HasName {
         grid.setWidget(plotRow, 0, plot);
         //variableControls.addStyleName("IN-LINE");
         topControls.add(datasetButton);
+        topControls.add(formatChooser);
         topControls.add(variableControls);
         topControls.add(panelAxesWidgets);
-        topControls.add(formatChooser);
+        
         formatChooser.hide();
         
         if ( !singlePanel ) {
