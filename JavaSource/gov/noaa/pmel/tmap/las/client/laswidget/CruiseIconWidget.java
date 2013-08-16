@@ -76,6 +76,9 @@ public class CruiseIconWidget extends Composite {
 			IconCheckBox icb = (IconCheckBox) iconsIt.next();
 			if ( icb.isChecked() ) {
 				String id = icb.getID();
+				if ( id.contains("(") ) {
+				    id = id.substring(0,id.indexOf(" ("));
+				}
 				ids.append(id);
 				if (iconsIt.hasNext()) ids.append(",");
 			}
