@@ -504,22 +504,7 @@ public class SimplePropPropViewer implements EntryPoint {
     protected void synchAnnotationsMode() {
         showAnnotations(lasAnnotationsPanel.isVisible());
     }
-
-    protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
-
-        @Override
-        public void onFeatureChanged() {
-            update.addStyleDependentName("APPLY-NEEDED");
-        }
-    };
-    public ChangeHandler needApply = new ChangeHandler() {
-
-        @Override
-        public void onChange(ChangeEvent event) {
-            update.addStyleDependentName("APPLY-NEEDED");
-        }
-
-    };
+    
     ClickHandler updateClick = new ClickHandler() {
 
         @Override
@@ -540,6 +525,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
         boolean contained = true;
         setConstraints();
+        
+        //TODO this should wait until the result comes back and is good and should be an event, right?
         update.removeStyleDependentName("APPLY-NEEDED");
 
         lasAnnotationsPanel.setError("Fetching plot annotations...");
