@@ -8,15 +8,15 @@
 CANCEL MODE VERIFY
 IF ($debug_mode"0|*>1") THEN  LET seconds_1 = ($CLOCK_SECS)
 
-IF `($result_webrowset_filename"0|*>1") EQ 0` THEN
+IF `($result_icon_webrowset_filename"0|*>1") EQ 0` THEN
   EXIT/SCRIPT
 ENDIF
 
 ! Write all the counter numbers and the cruise IDs in the webrowset format
-LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_webrowset_filename)")
+LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
 
 ! Newer Ferret (v6.85+) will let the arguments be on other than the X axis
-!LOAD write_webrow(cruise_id, cruise_name, cruise_mask, "($result_webrowset_filename)")
+!LOAD write_webrow(cruise_id, cruise_name, cruise_mask, "($result_icon_webrowset_filename)")
 
 SET MODE/LAST verify
 
