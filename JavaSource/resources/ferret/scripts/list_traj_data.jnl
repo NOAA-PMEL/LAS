@@ -55,6 +55,8 @@ IF `size* nlist GT max_size` THEN
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
+
+SET LIST/prec=6
 SET LIST/FILE="($result_ferret_listing_filename)"
 LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F16.0) SIZE
 
