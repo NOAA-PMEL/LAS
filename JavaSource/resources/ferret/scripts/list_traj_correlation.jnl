@@ -1,0 +1,21 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! list_traj_correlation.jnl
+! 
+! Author: Ansley Manke
+! Date: 8/2013
+
+! Given 2 or 3 variables from a Trajectory_correlation plot, and possible
+! constraints, define the same variables that would be plotted, and list them
+! to an ascii file with a header.
+! 
+! Once the variables are initialized call the prop-prop 
+! plot script from the LAS scripts.
+
+set mode ver:always
+DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
+
+DEFINE SYMBOL its_trajectory_corr = 1
+GO list_prop_prop
+
+! ----- End of list_traj_correlation.jnl ------------------------------------------------
+
