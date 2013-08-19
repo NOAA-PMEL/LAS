@@ -227,7 +227,7 @@ IF ($data_2_var"0|*>1") THEN
    DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var)_
 ENDIF
 
-LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F16.0) `size`
+LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F10.0) `size`
 
 DEFINE SYMBOL list_quals = APPEND
 
@@ -237,10 +237,8 @@ REPEAT/RANGE=1:($note_num)/name=q (\
  DEFINE SYMBOL qq = `q`; \
  SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND   ($note_($qq)_lab) )
 
-can sym nothing 
-SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND       ($nothing)
-SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND       ($nothing)
-SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND       ($nothing)
+LET blank = " "
+LIST/NOHEAD/NOROW/FILE/APPEND/FORMAT=(A) blank
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 LET use_size = 1000000*($ferret_memory)/4.
