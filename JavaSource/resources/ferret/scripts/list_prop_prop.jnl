@@ -179,7 +179,6 @@ IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \
 
 ! set up any constraint labels
 GO set_constraint_labels
-pause
 
 ! Define a mask based on the constraints, to apply to list variables
 

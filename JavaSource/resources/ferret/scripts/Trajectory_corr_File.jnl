@@ -31,7 +31,7 @@ IF ($data_2_var"0|vid>1|*>0")  THEN
 ENDIF
 
 DEFINE SYMBOL its_trajectory_corr = 1
-GO prop_prop_plot
+GO list_prop_prop
 
 ! ----- End of Trajectory_correlation.jnl ------------------------------------------------
 
