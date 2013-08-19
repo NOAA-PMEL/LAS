@@ -9,8 +9,6 @@
 !
 ! where 2 < lon < 12
 
-IF ($rhsdate"0|*>1") THEN 
-
 IF `STRINDEX("($op_last)", "G") GT 0 AND STRINDEX("($op)", "L") GT 0` THEN 
    DEFINE SYMBOL letter2 = `SUBSTRING("($op_last)", 2, 1)`
    DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
