@@ -106,7 +106,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
    DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
 
-   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+   LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
 
    DEFINE SYMBOL color_by = 1
 
@@ -134,6 +134,47 @@ GO LAS_set_strides_prop
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
+
+! The variables must be the same size. Check and set up a nice message if not.
+
+LET xsize = `xvar,RETURN=isize`
+LET ysize = `yvar,RETURN=isize`
+
+IF `xsize NE ysize` THEN 
+
+! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
+! and the other on the trajectory (or profile) axis?  May need to expand a variable 
+! onto the obs axis.
+! If a variable on the M axis is a string, create a numeric ID variable, index 1,2,3, ...
+
+   DEF SYM ztype = `xvar,RETURN=dtype`
+   IF ($ztype"0|CHAR>1|*>0`) THEN DEF SYM is_id = 1
+
+   DEF SYM xshape = `xvar,RETURN=shape`
+   DEF SYM yshape = `yvar,RETURN=shape`
+
+   IF `($xshape"0|E>1|*>0)` THEN
+      LET mvar = ($ferret_plot_var_0)
+
+      IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_0)]
+      LET xvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
+	    
+   ELSEIF `($yshape"0|E>1|*>0)` THEN
+      LET mvar = ($ferret_plot_var_1)
+
+      IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_1)]
+      LET xvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
+	  
+   ENDIF
+
+   LET xsize = `xvar,RETURN=isize`
+   LET ysize = `yvar,RETURN=isize`
+   IF `xsize NE ysize` THEN 
+      MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
+      EXIT/PROGRAM
+   ENDIF
+ENDIF
+
 DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar
 
@@ -145,22 +186,6 @@ IF ($constraint_0_lhs"0|*>1) THEN
    DEFINE SYMBOL yvar = var_constr_1
 ENDIF
 
-! The variables must be the same size. Check and set up a nice message if not.
-
-LET xsize = `($xvar),RETURN=isize`
-LET ysize = `($yvar),RETURN=isize`
-
-IF `xsize NE ysize` THEN 
-! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
-! and the other on the trajectory (or profile) axis?  May need to expand a variable 
-! onto the obs axis
-         
-	 sh dat/att
-	 sh dat
-
-  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
-  EXIT/PROGRAM
-ENDIF
 
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers 
@@ -278,20 +303,33 @@ IF ($color_by_traj"0|*>1") THEN
 ELSE
    IF ($color_by"0|*>1") THEN 
       DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
-      let zsize = `zvar,return=isize`
+      let zsize = `zvar,RETURN=isize`
       IF `zsize NE xsize` THEN
 
 ! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
 ! and the other on the trajectory (or profile) axis?  May need to expand a variable 
 ! onto the obs axis
-         
-	 sh dat/att
-	 sh dat
+! If a variable on the M axis is a string, create a numeric ID variable, index 1,2,3, ...
 
-        MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
-         EXIT/PROGRAM
+	 DEF SYM ztype = `zvar,RETURN=dtype`
+         IF ($ztype"0|CHAR>1|*>0`) THEN DEF SYM is_id = 1
+
+         DEF SYM zshape = `zvar,RETURN=shape`
+	 IF `($zshape"0|E>1|*>0)` THEN
+	    LET mvar = ($ferret_plot_var_2)
+
+	    IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_2)]
+	    LET zvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
+	 ENDIF
+	 LET zsize = `zvar,RETURN=isize`
+
+	 IF `zsize NE xsize` THEN
+            MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
+            EXIT/PROGRAM
+	 ENDIF
+
       ENDIF
-      
+
    ! Get color-plot qualifiers
       IF ($ferret_fill_levels"0|*>1") THEN 
          DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
