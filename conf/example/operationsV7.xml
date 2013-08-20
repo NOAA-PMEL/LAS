@@ -203,7 +203,7 @@
 		</region>
 	</operation>
  <!-- Private operation only invoked by correlation viewer when it knows the plot can be made from the existing netCDF file. -->
-    <operation name="Trajectory Correlation Plot" ID="Trajectgory_correlation"
+    <operation name="Trajectory Correlation Plot" ID="Trajectgory_correlation_plot"
         service_action="Trajectory_correlation" private="true"
         output_template="zoom">
         <args>
@@ -225,9 +225,27 @@
             <grid_type name="trajectory" />
         </grid_types>
     </operation>
+     <operation name="Trajectory Correlation Table" ID="Trajectgory_correlation_table"
+        service_action="Trajectory_corr_File" private="true" output_template="netcdf">
+        <args>
+            <arg type="region" index="1" ID="in-situ-Region" />
+        </args>
+        <response ID="FileResp" type="HTML" index="1">
+            <result type="debug" ID="debug" file_suffix=".txt" />
+            <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+            <result type="cancel" ID="cancel" />
+        </response>
+        <service>ferret</service>
+        <region>
+            <intervals name="xyt" />
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+    </operation>
     <!-- END Trajectory_interactive_plot -->
     <!-- This is the property-property operation for trajectory in-situ data. It gets called from the Correlation view defined below.  -->
-      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" default="true" category="file" output_template="zoom">
+      <operation name="Correlation Plot" ID="Trajectory_correlation_extract_and_plot" default="true" category="file" output_template="zoom">
 	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
           <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
                <response ID="DBExtractResponse">
