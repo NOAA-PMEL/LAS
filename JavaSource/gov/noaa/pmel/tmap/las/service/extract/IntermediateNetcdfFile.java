@@ -151,6 +151,7 @@ public class IntermediateNetcdfFile {
 
         	netcdfFile.addVariable("trdim", DataType.DOUBLE, dimList);
         	netcdfFile.addVariableAttribute("trdim", "units", time_units);
+        	netcdfFile.addVariableAttribute("trdim", "point_spacing", "even");
         	netcdfFile.addVariableAttribute("trdim", "time_origin", time_origin);
 
         	netcdfFile.addVariable("trange", DataType.DOUBLE, dimList);
