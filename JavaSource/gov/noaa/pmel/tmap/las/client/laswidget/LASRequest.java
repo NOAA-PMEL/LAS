@@ -48,6 +48,7 @@ public class LASRequest {
             op.setAttribute("match", "/lasdata/operations/operation[@ID='" + operation + "']");
         }
     }
+    
     /**
      * Gets the value of a Property element in the named PropertyGroup of
      * the LASRequest. Null if the property is not found.
@@ -85,7 +86,7 @@ public class LASRequest {
                     }
                 }
             }
-            // Property not found. Create it.
+            // Property not found. Ignore it.
             if ( prop == null ) {
                 return null;
             }
@@ -93,6 +94,52 @@ public class LASRequest {
             return null;
         }
         return null;
+    }
+    /**
+     * Private helper to find the element that contains a property.
+     */
+    public void removeProperty(String group_name, String property_name) {
+        NodeList l = document.getDocumentElement().getElementsByTagName("properties");
+        Element properties = null;
+        if ( l != null && l.getLength() > 0 ) {
+            properties = (Element) l.item(0);
+        } 
+        Element group = null;
+        if ( properties != null ) {
+            NodeList groups = properties.getChildNodes();
+            for ( int i = 0; i < groups.getLength(); i++ ) {
+                Node child = groups.item(i);
+                if ( child instanceof Element ) {
+                    Element g = (Element) child;
+                    if ( g.getNodeName().equals(group_name) ) {
+                        group = g;
+                    }
+                }
+            }
+            if ( group != null ) {
+                NodeList props = group.getChildNodes();
+                Element prop = null;
+                for ( int i = 0; i < props.getLength(); i++ ) {
+                    Node child = props.item(i);
+                    if ( child instanceof Element ) {
+                        Element p = (Element) child;
+                        if ( p.getNodeName().equals(property_name) ) {
+                            prop = p;
+                        }
+                    }
+                }
+                // Property not found. Ignore it.
+                if ( prop != null ) {
+                    group.removeChild(prop);
+                }
+                // If all the properties are gone, remove the group.
+                props = group.getChildNodes();
+                if ( props.getLength() <= 0 ) {
+                    properties.removeChild(group);
+                }
+            } 
+            
+        }
     }
     /**
      * Replaces the value of a Property element in the named PropertyGroup of
