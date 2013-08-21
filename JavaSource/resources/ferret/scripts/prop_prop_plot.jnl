@@ -180,10 +180,11 @@ DEFINE SYMBOL yvar = yvar
 
 ! Apply any constraints
 IF ($constraint_0_lhs"0|*>1) THEN
-   GO apply_pp_constraints 0 xvar
-   DEFINE SYMBOL xvar = var_constr_0
-   GO apply_pp_constraints 1 yvar
-   DEFINE SYMBOL yvar = var_constr_1
+   GO prop_prop_constraints
+   LET constr_x = var_mask* xvar
+   LET constr_y = var_mask* yvar
+   DEFINE SYMBOL xvar = constr_x
+   DEFINE SYMBOL yvar = constr_y
 ENDIF
 
 
@@ -302,7 +303,6 @@ IF ($color_by_traj"0|*>1") THEN
 
 ELSE
    IF ($color_by"0|*>1") THEN 
-      DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
       let zsize = `zvar,RETURN=isize`
       IF `zsize NE xsize` THEN
 
@@ -319,7 +319,9 @@ ELSE
 	    LET mvar = ($ferret_plot_var_2)
 
 	    IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_2)]
-	    LET zvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
+	    LET mask_mvar = text_mask* mvar
+	    list mvar, mask_mvar; pause
+	    LET zvar = EXPND_BY_LEN(xsequence(mask_mvar),xsequence(rowsize),`rowsize[m=@sum]`)
 	 ENDIF
 	 LET zsize = `zvar,RETURN=isize`
 
@@ -329,6 +331,16 @@ ELSE
 	 ENDIF
 
       ENDIF
+
+      DEFINE SYMBOL zvar = zvar
+
+      IF ($var_mask"0|*>1") THEN
+         LET constr_z = var_mask* zvar
+	 DEFINE SYMBOL zvar = constr_z
+      ENDIF
+
+      DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+
 
    ! Get color-plot qualifiers
       IF ($ferret_fill_levels"0|*>1") THEN 
@@ -346,7 +358,7 @@ ELSE
    ! Dont use the palette coming in. Its for variable 0
       DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
-      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
+      DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
    ELSE
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
    ENDIF
