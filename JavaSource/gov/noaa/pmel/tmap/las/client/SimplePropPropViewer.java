@@ -143,6 +143,7 @@ public class SimplePropPropViewer implements EntryPoint {
     PopupPanel warning = new PopupPanel(true);
     PushButton ok;
     PushButton cancel;
+    PushButton table = new PushButton("Data Table");
     boolean youveBeenWarned = false;
     // The current intermediate file
     String netcdf = null;
@@ -295,6 +296,17 @@ public class SimplePropPropViewer implements EntryPoint {
         update.setWidth("80px");
         update.ensureDebugId("update");
 
+        table.setTitle("See data for the current plot in a table.");
+        table.addStyleDependentName("SMALLER");
+        table.addClickHandler(new ClickHandler(){
+
+            @Override
+            public void onClick(ClickEvent event) {
+                openTable();
+            }
+            
+        });
+        
         // Never show the add button...
         xVariables.setMinItemsForAddButtonToBeVisible(10000);
         yVariables.setMinItemsForAddButtonToBeVisible(10000);
@@ -312,6 +324,7 @@ public class SimplePropPropViewer implements EntryPoint {
         print.setEnabled(false);
         buttonPanel.add(update);
         buttonPanel.add(print);
+        buttonPanel.add(table);
         topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
         controlPanel.setWidget(0, 0, topRow);
         controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
@@ -523,7 +536,7 @@ public class SimplePropPropViewer implements EntryPoint {
     private void updatePlot(boolean addHistory) {
         // TODO Before submitting...
 
-        boolean contained = true;
+        
         setConstraints();
         
         //TODO this should wait until the result comes back and is good and should be an event, right?
@@ -534,8 +547,55 @@ public class SimplePropPropViewer implements EntryPoint {
         spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
         spin.show();
 
+        makeRequest(true);
        
-        
+        frontCanvas = Canvas.createIfSupported();
+        if (frontCanvas != null) {
+            frontCanvasContext = frontCanvas.getContext2d();
+        } else {
+            Window.alert("You are accessing this site with an older, no longer supported browser. "
+                    + "Some or all features of this site will not work correctly using your browser. " + "Recommended browsers include these or higher versions of these: "
+                    + "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
+        }
+
+        String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
+
+        currentURL = url;
+
+        if (addHistory) {
+            pushHistory(lasRequest.toString());
+        }
+
+        RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+        try {
+            sendRequest.sendRequest(null, lasRequestCallback);
+        } catch (RequestException e) {
+            HTML error = new HTML(e.toString());
+            outputPanel.setWidget(1, 0, error);
+        }
+
+    }
+    private void openTable() {
+        makeRequest(false);
+        LASRequest tableRequest = new LASRequest(lasRequest.toString());
+        String dsid = tableRequest.getDataset(0);
+        String v0 = tableRequest.getVariable(0);
+        String v1 = tableRequest.getVariable(1);
+        String v2 = null;
+        if ( colorCheckBox.getValue() ) {
+            v2 = tableRequest.getVariable(2);
+        }
+        tableRequest.removeVariables();
+        tableRequest.addVariable(dsid, v0, 0);
+        tableRequest.addVariable(dsid, v1, 0);
+        if ( v2 != null ) {
+            tableRequest.addVariable(dsid, v2, 0);
+        }
+        String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
+        Window.open(url, "_new", null);
+    }
+    private void makeRequest(boolean plot) {
+        boolean contained = true;
 
         String zlo = null;
         String zhi = null;
@@ -581,10 +641,18 @@ public class SimplePropPropViewer implements EntryPoint {
         }
 
         lasRequest.setProperty("product_server", "ui_timeout", "20");
-        lasRequest.setProperty("las", "output_type", "xml");
+        if ( plot ) {
+            lasRequest.setProperty("las", "output_type", "xml");
+        } else {
+            lasRequest.removeProperty("las", "output_type");
+        }
         String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
         if (netcdf != null && contained && grid_type.equals("trajectory")) {
-            operationID = "Trajectgory_correlation"; // No data base access;
+            if ( plot ) {
+                operationID = "Trajectgory_correlation_plot"; // No data base access;
+            } else {
+                operationID = "Trajectgory_correlation_table";
+            }
             // plot only from
             // existing
             // netCDF file.
@@ -604,8 +672,13 @@ public class SimplePropPropViewer implements EntryPoint {
                 lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
         } else if ((!contained || netcdf == null) && grid_type.equals("trajectory")) {
             // This should only occur when the app loads for the first time...
-            
-            operationID = "Trajectory_correlation_plot";
+            if ( plot ) {
+                operationID = "Trajectory_correlation_extract_and_plot";
+            } else {
+                
+                // This should never happen, but if it does.
+                Window.alert("Cannot make table.");
+            }
             // We need to make the initial netCDF file with *all* the variables in each row.
 
             // Grab the existing variable
@@ -646,31 +719,6 @@ public class SimplePropPropViewer implements EntryPoint {
         lasRequest.setOperation(operationID, operationType);
         lasRequest.setProperty("ferret", "annotations", "file");
 
-        frontCanvas = Canvas.createIfSupported();
-        if (frontCanvas != null) {
-            frontCanvasContext = frontCanvas.getContext2d();
-        } else {
-            Window.alert("You are accessing this site with an older, no longer supported browser. "
-                    + "Some or all features of this site will not work correctly using your browser. " + "Recommended browsers include these or higher versions of these: "
-                    + "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
-        }
-
-        String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
-
-        currentURL = url;
-
-        if (addHistory) {
-            pushHistory(lasRequest.toString());
-        }
-
-        RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-        try {
-            sendRequest.sendRequest(null, lasRequestCallback);
-        } catch (RequestException e) {
-            HTML error = new HTML(e.toString());
-            outputPanel.setWidget(1, 0, error);
-        }
-
     }
 
     RequestCallback lasRequestCallback = new RequestCallback() {
@@ -678,7 +726,7 @@ public class SimplePropPropViewer implements EntryPoint {
         @Override
         public void onError(Request request, Throwable exception) {
 
-            spin.hide();
+            spin.hide();                    
             Window.alert("Product request failed.");
 
         }
