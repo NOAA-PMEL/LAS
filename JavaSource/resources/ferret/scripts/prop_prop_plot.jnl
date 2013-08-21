@@ -320,7 +320,6 @@ ELSE
 
 	    IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_2)]
 	    LET mask_mvar = text_mask* mvar
-	    list mvar, mask_mvar; pause
 	    LET zvar = EXPND_BY_LEN(xsequence(mask_mvar),xsequence(rowsize),`rowsize[m=@sum]`)
 	 ENDIF
 	 LET zsize = `zvar,RETURN=isize`
