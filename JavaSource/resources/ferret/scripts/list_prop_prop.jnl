@@ -33,6 +33,7 @@ DEFINE SYMBOL its_prop_prop_plot = 1  ! used in setting titles and in RESULTS
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
+
 ! Check for errors (They often occur during dataset initialization.)
 
 IF ($error_status"0|*>1") THEN
@@ -40,12 +41,15 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+set var/name=Longitude_ Longitude
+set var/name=Latitude_  Latitude
+set var/name=($data_0_var)_ ($data_0_var)
 ! Here is variable 0 title 
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)_
 
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 
@@ -61,14 +65,15 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+set var/name=($data_1_var)_ ($data_1_var)
+
+
 ! Here is variable 1 title 
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
-
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
@@ -84,16 +89,17 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
      EXIT/PROGRAM
    ENDIF
    
+
+   set var/name=($data_2_var)_ ($data_2_var)
+
    ! Here is variable 2 title 
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
 
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)_
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)_
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
 
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-
-   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2)_)
 
    DEFINE SYMBOL color_by = 1
 
@@ -114,11 +120,10 @@ DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar
 
 ! Apply any constraints
+GO prop_prop_constraints
 IF ($constraint_0_lhs"0|*>1) THEN
-   GO apply_pp_constraints 0 xvar
-   DEFINE SYMBOL xvar = var_constr_0
-   GO apply_pp_constraints 1 yvar
-   DEFINE SYMBOL yvar = var_constr_1
+   DEFINE SYMBOL xvar = var_mask* xvar
+   DEFINE SYMBOL yvar = var_mask* yvar
 ENDIF
 
 ! The variables must be the same size. Check and set up a nice message if not.
@@ -140,12 +145,12 @@ ENDIF
 
 
 ! Do we want the date string or the date coordinate?  List both.
-IF `($ferret_timelab_res"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_timelab_res = day
+IF `($ferret_timelab_res"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_timelab_res = minute
 
 DEFINE SYMBOL t_units_string = `TIME.units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
 IF `nsince GT 0` THEN DEFINE SYMBOl tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
-   
+
 DEFINE SYMBOL data_prop_var = ($data_0_var)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
@@ -180,10 +185,9 @@ IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \
 ! set up any constraint labels
 GO set_constraint_labels
 
-! Define a mask based on the constraints, to apply to list variables
+! apply mask to list variables
 
-LET output_mask = IF var_constr_0 AND var_constr_1 THEN 1+0*var_constr_0
-LET size = `output_mask[i=@ngd]`
+LET size = `var_mask[i=@ngd]`
 
 ! Make a time axis from the time coordinates and use it to compute the date strings.
 LET amin = time[i=@MIN]
@@ -192,39 +196,36 @@ DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
 DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`TIME.time_origin`"/UNITS=($tunits) haxis
 
-LET timesample = COMPRESSI(output_mask*time)
+LET timesample = COMPRESSI(var_mask*time)
 LET/TITLE="Time"/UNITS="`time,RETURN=units`" Times = timesample
-LET/TITLE="Time String" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
+LET/TITLE="Date" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
 
 LET nlist = 2
 DEFINE SYMBOL vars_out = Dates, Times
 
 ! Define Longitude and Latitude variables at the masked locations
 
-LET/TITLE="`longitude,RETURN=title`"/UNITS="`longitude,RETURN=units`"  Lon = COMPRESSI(output_mask*longitude)
-LET/TITLE="`latitude,RETURN=title`"/UNITS="`latitude,RETURN=units`" Lat = COMPRESSI(output_mask*latitude)
+LET/TITLE="`longitude_,RETURN=title`"/UNITS="`longitude_,RETURN=units`" Longitude = COMPRESSI(var_mask*longitude_)
+LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = COMPRESSI(var_mask*latitude_)
 
 LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out), Lon, Lat
+DEFINE SYMBOL vars_out = ($vars_out), Longitude, Latitude
 
 ! Define variables with titles
 
-LET/TITLE="`($data_0_var),RETURN=title`"/UNITS="`($data_0_var),RETURN=units`" \
- ($data_0_var)_ = COMPRESSI(output_mask*var_constr_0)
-LET/TITLE="`($data_1_var),RETURN=title`"/UNITS="`($data_1_var),RETURN=units`" \
- ($data_1_var)_ = COMPRESSI(output_mask*var_constr_1)
+LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var) = COMPRESSI(var_mask*($ferret_plot_var_0))
+LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var) = COMPRESSI(var_mask*($ferret_plot_var_1))
 
 LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var)_, ($data_1_var)_
+DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var), ($data_1_var)
 
 ! color-by variable on the prop-prop plot:
 
 IF ($data_2_var"0|*>1") THEN 
-   LET/TITLE="`($data_2_var),RETURN=title`"/UNITS="`($data_12_var),RETURN=units`" \
-    ($data_2_var)_ = COMPRESSI(output_mask*zvar)
+   LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var) = COMPRESSI(var_mask*zvar)
    
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var)_
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var)
 ENDIF
 
 LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F10.0) `size`
@@ -233,9 +234,11 @@ DEFINE SYMBOL list_quals = APPEND
 
 ! Constraint labels
 
-REPEAT/RANGE=1:($note_num)/name=q (\
- DEFINE SYMBOL qq = `q`; \
- SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND   ($note_($qq)_lab) )
+IF `($note_num"0") GT 0` THEN
+   REPEAT/RANGE=1:($note_num)/name=q (\
+     DEFINE SYMBOL qq = `q`; \
+     SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND   ($note_($qq)_lab) )
+ENDIF
 
 LET blank = " "
 LIST/NOHEAD/NOROW/FILE/APPEND/FORMAT=(A) blank
