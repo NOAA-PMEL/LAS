@@ -37,7 +37,6 @@ $las_response.toString()
     #set($cols = $metadata.size())
         
     #set($size = $las_datatable.getData().get($metadata.get(0)).size())
-    Total number of rows is $size <br>
     <table border="2" cellpadding="4">
         ## Set the column headers including one for the row number.
         <tr>
