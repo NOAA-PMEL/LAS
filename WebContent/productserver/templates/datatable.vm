@@ -14,10 +14,32 @@ $las_response.toString()
 <head>
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta http-equiv="X-UA-Compatible" content="IE=9">
+    
+  <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
+  <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
+  <script language="JavaScript">
+   var outReq = {};
+   function initializeLASRequest() {
+      outReq = new LASRequest("$las_request.toJavaScriptSafeString()");
+   }
+   function gocsv() {
+       outReq.setProperty("ferret", "data_format", "csv");
+       outReq.setOperation("Trajectory_Corrrelation_File");
+       var url = "ProductServer.do?xml=" + outReq.getXMLText();
+       window.open(url, "_blank", "", false);
+    }
+    function gotsv() {
+       outReq.setProperty("ferret", "data_format", "tsv");
+       outReq.setOperation("Trajectory_Corrrelation_File");
+       var url = "ProductServer.do?xml=" + outReq.getXMLText();
+       window.open(url, "_blank", "", false);
+    }
+  </script>
 
 <title>LAS Output -- $las_config.getTitle()</title>
 ##
 
+<body  onload="initializeLASRequest()">
 
 ## Write the preamble
 
@@ -25,7 +47,10 @@ $las_response.toString()
 #foreach ( $p in $preamble)
 <strong>$p<br></strong>
 #end
-
+<br>
+Download these data <a href='javascript:gocsv()'>as a comma separated values (CSV) file</a> or <a href='javascript:gotsv()'>as a tab separated values (TSV) file</a></a>.
+<br>
+<br>
 ##Write the rows.
     ## Set up an alternator tool to color every other row.
     #set($color = $alternator.auto('#F3E7C9','#FFFFFF'))
