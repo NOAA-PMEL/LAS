@@ -226,13 +226,13 @@
         </grid_types>
     </operation>
      <operation name="Trajectory Correlation Table" ID="Trajectgory_correlation_table"
-        service_action="Trajectory_corr_File" private="true" output_template="netcdf">
+        service_action="Trajectory_corr_File" private="true" output_template="datatable">
         <args>
             <arg type="region" index="1" ID="in-situ-Region" />
         </args>
         <response ID="FileResp" type="HTML" index="1">
             <result type="debug" ID="debug" file_suffix=".txt" />
-            <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+            <result type="DataTable" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" />
         </response>
         <service>ferret</service>
