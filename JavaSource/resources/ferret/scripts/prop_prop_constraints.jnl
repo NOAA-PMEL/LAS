@@ -15,10 +15,6 @@
 
 DEFINE SYMBOL translate_math = 1
 
-! Set default masks if there are no constraints
-
-LET var_mask = 1+0*time
-LET text_mask = 1
 
 ! Define var_mask variable with all of the variable constraints.
 
