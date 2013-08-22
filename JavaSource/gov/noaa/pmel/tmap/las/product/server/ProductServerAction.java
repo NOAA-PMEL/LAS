@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.product.server;
 
 import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.DataTable;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASAnnotations;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
@@ -611,6 +612,26 @@ public final class ProductServerAction extends LASAction {
         LASBackendResponse compoundResponse = productServerRunner.getCompoundResponse();
         
         // It finished.  Return the product.
+        // Prepare the DataTable object
+        log.debug("Preparing the annotations file.");
+        // Create a LASAnnotations object.
+        DataTable lasDataTable = null;
+        // Only handle local data table files
+        String datatable_filename = compoundResponse.getResultAsFileByType("DataTable");
+        if ( !datatable_filename.equals("")) {
+            File file = new File(datatable_filename);
+            try {
+                lasDataTable = new DataTable(file);
+                // Put these objects in the context so the output template can use them.
+                request.setAttribute("las_datatable", lasDataTable);
+            } catch (IOException e) {
+                file.delete();
+                removeOnError(productRequest);
+                logerror(request, "Error parsing the DataTable file.", e);
+            } 
+        }
+
+        // End of DataTable
         log.debug("Preparing the annotations file.");
         // Create a LASAnnotations object.
         LASAnnotations lasAnnotations = new LASAnnotations();
