@@ -316,6 +316,14 @@ ELSE
 
          DEF SYM zshape = `zvar,RETURN=shape`
 	 IF `($zshape"0|E>1|*>0)` THEN
+
+! Is there a rowsize variable?
+
+	    IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
+	      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
+	      EXIT/PROGRAM
+	   NDIF
+
 	    LET mvar = ($ferret_plot_var_2)
 
 	    IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_2)]

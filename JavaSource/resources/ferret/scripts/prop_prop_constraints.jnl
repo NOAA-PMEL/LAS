@@ -1,0 +1,79 @@
+! prop_prop_constraints.jnl
+! Define a mask that captures variable constraints for Prop-Prop plots
+
+! Argument 1 is the variable id
+! Argument 2 is the variable to apply constraints to.  This is 
+! the variable after region, striding and XSEQUENCE are applied.
+
+! A constraint comesas a set of 4 symbols
+! each var ge one value and le another value.
+
+!   constraint_n_lhs  is the variable name
+!   constraint_n_op   is the operation (le, ge)
+!   constraint_n_rhs  is the value 
+!   constraint_n_type must be "variable"  (will there be other types of constraints?)
+
+DEFINE SYMBOL translate_math = 1
+
+! Set default masks if there are no constraints
+
+LET var_mask = 1+0*time
+LET text_mask = 1
+
+! Define var_mask variable with all of the variable constraints.
+
+LET vnames = ..varnames
+
+DEFINE SYMBOL var_mask = var_mask_0
+LET nmaskx = 0
+
+REPEAT/RANGE=0:100/NAME=ic (\
+  DEF SYM ic = `ic`;\
+  IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
+  DEF SYM cvar = ($constraint_($ic)_lhs);\
+  LET has_var = `(IS_ELEMENT_OF_STR_N(vnames, "($cvar)") GT 0) OR (IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0)`;\
+  IF `has_var EQ 0` THEN EXIT/CYCLE;\
+  IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_;\
+  IF `($constraint_($ic)_type"0|variable>1|*>0") EQ 0` THEN EXIT/CYCLE;\
+  LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
+  LET nmaskx = `nmaskx+1`;\
+  IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
+  )
+
+IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
+
+! Now look for text constraints. These get applied to trajectories.
+
+! Are there any text constraints?
+
+LET ntxtconstr = 0
+REPEAT/RANGE=0:100/NAME=ic (\
+  DEF SYM ic = `ic`;\
+  IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
+  IF `($constraint_($ic)_type"0|text>1|*>0") EQ 1` THEN LET ntxtconstr = `ntxtconstr+1`)
+
+IF `ntxtconstr EQ 0` THEN EXIT/SCRIPT
+
+DEF SYM ic = 0
+LET i_mask = _m[ge=rowsize]
+DEF SYM itxt = 0
+
+DEFINE SYMBOL text_mask = 0
+
+REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
+ IF `done EQ 1` THEN EXIT/LOOP)
+
+IF `($itxt) GT 0` THEN
+   LET text_mask_sum  = ($text_mask)
+   LET text_mask = IF text_mask_sum GT 0 THEN 1
+ENDIF
+
+! there may have been more masks defined on the obs axis
+
+IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
+
+! End of  ------------- prop_prop_constraints.jnl--------------------------
+
+sh sym *mask*
+pause
+
