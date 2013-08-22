@@ -83,7 +83,8 @@ IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_ba
 
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
-IF `($data_count"0") GE 3` THEN ! color by 3rd variable
+!IF `($data_count"0") GE 3` THEN ! color by 3rd variable
+IF ($data_2_var"0|*>1") THEN ! color by 3rd variable
 
    ! Initialize the 3rd variable.
    ! In fact the region and dataset will be the
@@ -322,7 +323,7 @@ ELSE
 	    IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
 	      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
 	      EXIT/PROGRAM
-	   NDIF
+	   ENDIF
 
 	    LET mvar = ($ferret_plot_var_2)
 
