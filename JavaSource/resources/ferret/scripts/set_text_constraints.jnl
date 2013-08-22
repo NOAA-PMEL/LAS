@@ -26,6 +26,3 @@ LET text_mask_($cvar)_($($cvar)_itxt)a  = if ($cvar) EQ "($constraint_($ic)_rhs)
 
 LET text_mask_($cvar)_($($cvar)_itxt) = MISSING(text_mask_($cvar)_($($cvar)_itxt)a, 0)
 DEFINE SYMBOL text_mask_($cvar) = ($text_mask_($cvar)"0") +  text_mask_($cvar)_($($cvar)_itxt) 
-
-sh sym text_mask*
-pause

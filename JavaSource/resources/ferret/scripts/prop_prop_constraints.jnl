@@ -42,7 +42,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
 
 IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
 
-! Now look for text constraints. These get applied to trajectories.
+! Now look for text constraints.
 
 ! Are there any text constraints?
 
@@ -52,13 +52,13 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
   IF `($constraint_($ic)_type"0|text>1|*>0") EQ 1` THEN LET ntxtconstr = `ntxtconstr+1`)
 
-IF `ntxtconstr EQ 0` THEN EXIT/SCRIPT
 
 DEF SYM ic = 0
 LET i_mask = _m[ge=rowsize]
 DEF SYM itxt = 0
-
 DEFINE SYMBOL text_mask = 0
+
+IF `ntxtconstr EQ 0` THEN EXIT/SCRIPT
 
 REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
  IF `done EQ 1` THEN EXIT/LOOP)
@@ -73,7 +73,4 @@ ENDIF
 IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
 
 ! End of  ------------- prop_prop_constraints.jnl--------------------------
-
-sh sym *mask*
-pause
 
