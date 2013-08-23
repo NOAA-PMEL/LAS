@@ -59,14 +59,13 @@ IF `ntxtconstr EQ 0` THEN EXIT/SCRIPT
 REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
  IF `done EQ 1` THEN EXIT/LOOP)
 
-IF `($itxt) GT 0` THEN
-   LET text_mask_sum  = ($text_mask)
-   LET text_mask = IF text_mask_sum GT 0 THEN 1
-ENDIF
 
-! there may have been more masks defined on the obs axis
+! Text masks are zero and 1 so they can be added.
+! Now make it a mask with missing and 1, to multiply with var_mask
 
-IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
+LET text_mask_zero = ($text_mask)
+LET text_mask = IF text_mask_zero NE 0 THEN 1
+
+LET all_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn]
 
 ! End of  ------------- prop_prop_constraints.jnl--------------------------
-

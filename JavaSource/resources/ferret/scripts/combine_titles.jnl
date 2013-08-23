@@ -2,12 +2,21 @@
 ! where masking is done, combine labels for 2 masks on a variable 
 ! into one expression, e.g.
 !
-!  where lon < 12
-!  where lon > 2
+!  Where lon < 12
+!  Where lon > 2
 !
 ! become a single title,
 !
-! where 2 < lon < 12
+!  Where 2 < lon < 12
+!
+! Or for text constraints, make a list:
+!
+!  Where tmonth is Jun
+!  Where tmonth is Jul
+!
+! becomes
+!
+!  Where tmonth is Jun, Jul
 
 IF `STRINDEX("($op_last)", "G") GT 0 AND STRINDEX("($op)", "L") GT 0` THEN 
    DEFINE SYMBOL letter2 = `SUBSTRING("($op_last)", 2, 1)`
@@ -48,5 +57,25 @@ IF `STRINDEX("($op_last)", "L") GT 0 AND STRINDEX("($op)", "G") GT 0` THEN
       DEFINE SYMBOL  mask_title_($nmask_labels) = Where `($rhs),prec=3` ($opA) ($lhs_last) ($opB) `($rhs_last),prec=3`
    ENDIF
 ENDIF
+
+! Now look for text constraints,
+
+IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN 
+   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last),($rhs)
+
+   CANCEL SYMBOL mask_title_($nmask_labels)
+   DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
+   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+ENDIF
+
+
+IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN 
+   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last),($rhs)
+
+   CANCEL SYMBOL mask_title_($nmask_labels)
+   DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
+   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+ENDIF
+
 
 ! ----- End of combine_titles.jnl ------------------------------------------------

@@ -20,188 +20,21 @@ set mode ver:always
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
 
+DEF SYM its_prop_plot = 1
 
 ! For LAS v8.0 relese, dont take into account any of these Ferret properties.
 ! This is a workaround for items 3 and 4 in ticket 1388; the issues will be 
 ! revisited in LAS 8.1 see ticket 1390.
+
 CANCEL SYMBOL ferret_fill_levels
 CANCEL SYMBOL ferret_contour_levels
 CANCEL SYMBOL ferret_palette
 
-! This may already have been set by e.g. Trajectory_correlation.jnl
+! Initialize data and variables
+! Set up masks for constraints
+! The plot variables ($xvar), ($yvar), and optional color-by ($zvar) are defined.
 
-IF `($data_count"0") LT 2` THEN
-  MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
-  EXIT/PROGRAM
-ENDIF
-
-DEFINE SYMBOL its_prop_prop_plot = 1  ! used in setting titles and in RESULTS
-LET vnames = ..varnames
-
-! Define symbols associated with the region and data and perform any
-! initialization needed for this dataset.
-
-GO LAS_initialize_region 0
-GO LAS_initialize_data 0
-
-! Check for errors (They often occur during dataset initialization.)
-
-IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-! Here is variable 0 title 
-DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
-
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
-
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
-
-! Set up upper-left labels with the region info
-GO LAS_pp_set_region_labels
-
-! Initialize the second variable.
-! In fact the region and dataset will be the
-! same as for var 0 (for now anyway)
-
-GO LAS_initialize_region 1
-GO LAS_initialize_data 1
-
-IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-! Here is variable 1 title 
-DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
-
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
-
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
-
-IF `($data_count"0") GE 3` THEN ! color by 3rd variable
-
-   ! Initialize the 3rd variable.
-   ! In fact the region and dataset will be the
-   ! same as for var 0 (for now anyway)
-   
-   GO LAS_initialize_region 2
-   GO LAS_initialize_data 2
-   
-   IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR **ERROR ($error_string)
-     EXIT/PROGRAM
-   ENDIF
-   
-   ! Here is variable 2 title 
-   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
-
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
-
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-
-   LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
-
-   DEFINE SYMBOL color_by = 1
-
-! Is this a color-by-trajectory plot?  (this is already determined elsewhere)
-
-!   LET allatts = ($ferret_plot_var_2).attnames
-!   IF `IS_ELEMENT_OF_STR(allatts, "cf_role") EQ 1` THEN
-!      LET is_traj_id = STRCMP("`($ferret_plot_var_2).cf_role`", "trajectory_id")
-!      IF `is_traj_id EQ 0` THEN DEFINE SYMBOL color_by_traj = 1
-!   ENDIF
-
-ENDIF
-
-IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
-   DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
-
-IF  ($color_by"0") THEN 
-   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
-      DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
-ENDIF
-
-GO LAS_set_strides_prop
-
-
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
-LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
-
-
-! The variables must be the same size. Check and set up a nice message if not.
-
-LET xsize = `xvar,RETURN=isize`
-LET ysize = `yvar,RETURN=isize`
-
-IF `xsize NE ysize` THEN 
-
-! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
-! and the other on the trajectory (or profile) axis?  May need to expand a variable 
-! onto the obs axis.
-! If a variable on the M axis is a string, create a numeric ID variable, index 1,2,3, ...
-
-   DEF SYM ztype = `xvar,RETURN=dtype`
-   IF ($ztype"0|CHAR>1|*>0`) THEN DEF SYM is_id = 1
-
-   DEF SYM xshape = `xvar,RETURN=shape`
-   DEF SYM yshape = `yvar,RETURN=shape`
-
-   IF `($xshape"0|E>1|*>0)` THEN
-   
-! Is there a rowsize variable?
-
-      IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
-         MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
-         EXIT/PROGRAM
-      ENDIF
-
-      LET mvar = ($ferret_plot_var_0)
-
-      IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_0)]
-      LET xvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
-	    
-   ELSEIF `($yshape"0|E>1|*>0)` THEN
-      LET mvar = ($ferret_plot_var_1)
-
-      IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_1)]
-      LET xvar = EXPND_BY_LEN(xsequence(mvar),xsequence(rowsize),`rowsize[m=@sum]`)
-	  
-   ENDIF
-
-   LET xsize = `xvar,RETURN=isize`
-   LET ysize = `yvar,RETURN=isize`
-   IF `xsize NE ysize` THEN 
-      MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
-      EXIT/PROGRAM
-   ENDIF
-ENDIF
-
-DEFINE SYMBOL xvar = xvar
-DEFINE SYMBOL yvar = yvar
-
-! Apply any constraints
-
-! Set default masks if there are no constraints
-
-LET var_mask = 1+0*time
-LET text_mask = 1
-
-IF ($constraint_0_lhs"0|*>1) THEN
-   GO prop_prop_constraints
-   LET constr_x = var_mask* xvar
-   LET constr_y = var_mask* yvar
-   DEFINE SYMBOL xvar = constr_x
-   DEFINE SYMBOL yvar = constr_y
-ENDIF
-
+GO setup_prop_prop
 
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers 
@@ -243,7 +76,9 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/VS/color=8
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
 
-DEFINE SYMBOL nx = `($xvar)[x=@ngd]`
+LET gvar = ($xvar)
+DEFINE SYMBOL nx = `gvar[x=@ngd]`
+
 IF `STRCMP("($nx)", "bad") NE 0 AND STRCMP("($nx)", "0") NE 0` THEN
    STAT ($xvar)
    PPL %RANGE `($stat_min)`, `($stat_max)`, 10
@@ -259,7 +94,9 @@ ENDIF
 DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
 DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
-DEFINE SYMBOL ny = `($yvar)[x=@ngd]`
+LET gvar = ($yvar)
+DEFINE SYMBOL ny = `gvar[x=@ngd]`
+
 IF `STRCMP("($ny)", "bad") NE 0 AND STRCMP("($ny)", "0") NE 0` THEN
    STAT ($yvar)
    PPL %RANGE `($stat_min)`, `($stat_may)`, 10
@@ -294,7 +131,6 @@ IF `($ferret_annotations%0|*>1%) EQ 0` THEN
       ENDIF)
 ENDIF
 
-
    ! Formatting of lon, lat, time axes if appropriate
 LET p = ($xvar) 
 LET q = ($yvar)
@@ -310,7 +146,9 @@ GO LAS_xytvar_setup
 
 ! Polygon plot
 
-DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($xvar)
+DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
+IF `($data_count"0") GT 2` THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($color_by_traj"0|*>1") THEN 
@@ -318,52 +156,8 @@ IF ($color_by_traj"0|*>1") THEN
 
 ELSE
    IF ($color_by"0|*>1") THEN 
-      let zsize = `zvar,RETURN=isize`
-      IF `zsize NE xsize` THEN
 
-! Is this a DSG file? If so is one of the variables on the sample-dimension (obs) axis
-! and the other on the trajectory (or profile) axis?  May need to expand a variable 
-! onto the obs axis
-! If a variable on the M axis is a string, create a numeric ID variable, index 1,2,3, ...
-
-	 DEF SYM ztype = `zvar,RETURN=dtype`
-         IF ($ztype"0|CHAR>1|*>0`) THEN DEF SYM is_id = 1
-
-         DEF SYM zshape = `zvar,RETURN=shape`
-	 IF `($zshape"0|E>1|*>0)` THEN
-! Is there a rowsize variable?
-
-            IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
-               MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
-               EXIT/PROGRAM
-            ENDIF
-
-	    LET mvar = ($ferret_plot_var_2)
-
-	    IF ($is_id) THEN LET mvar = _M[ge=($ferret_plot_var_2)]
-	    LET mask_mvar = text_mask* mvar
-	    LET zvar = EXPND_BY_LEN(xsequence(mask_mvar),xsequence(rowsize),`rowsize[m=@sum]`)
-	 ENDIF
-	 LET zsize = `zvar,RETURN=isize`
-
-	 IF `zsize NE xsize` THEN
-            MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
-            EXIT/PROGRAM
-	 ENDIF
-
-      ENDIF
-
-      DEFINE SYMBOL zvar = zvar
-
-      IF ($var_mask"0|*>1") THEN
-         LET constr_z = var_mask* zvar
-	 DEFINE SYMBOL zvar = constr_z
-      ENDIF
-
-      DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
-
-
-   ! Get color-plot qualifiers
+! Get color-plot qualifiers
       IF ($ferret_fill_levels"0|*>1") THEN 
          DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
       ELSE
@@ -376,7 +170,7 @@ ELSE
          DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
       ENDIF
    
-   ! Dont use the palette coming in. Its for variable 0
+! Dont use the palette coming in. Its for variable 0
       DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
       DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
