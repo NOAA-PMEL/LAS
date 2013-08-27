@@ -1,0 +1,234 @@
+
+! This may already have been set by e.g. Trajectory_correlation.jnl
+
+IF `($data_count"0") LT 2` THEN
+  MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
+  EXIT/PROGRAM
+ENDIF
+
+DEFINE SYMBOL its_prop_prop_plot = 1  ! used in setting titles and in RESULTS
+
+LET vnames = ..varnames
+
+! Define symbols associated with the region and data and perform any
+! initialization needed for this dataset.
+
+GO LAS_initialize_region 0
+GO LAS_initialize_data 0
+
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+SET VAR/NAME=Longitude_ Longitude
+SET VAR/NAME=Latitude_  Latitude
+SET VAR/NAME=($data_0_var)_ ($data_0_var)
+
+! Here is variable 0 title 
+DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)_
+
+
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
+
+LET/TITLE="($ferret_title_0)" xvar = ($ferret_plot_var_0)
+
+! Is it a varible on the E axis of a DSG file?
+
+DEF SYM vshape = `xvar,RETURN=shape`
+IF `($vshape"0|E>1|*>0)` THEN
+
+! Is there a rowsize variable?
+
+   IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
+      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
+      EXIT/PROGRAM
+   ENDIF
+
+! Expand trajectory variable into obs axis
+   DEF SYM vtype = 0
+   DEF SYM vtype = `xvar,RETURN=dtype`
+   DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+
+   IF ($is_string"0|*>1") THEN 
+      LET xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
+      IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
+	  LET mvar_0 = _m[ge=($ferret_plot_var_0)]
+	  LET xvar = EXPND_BY_LEN(mvar_0, rowsize,`rowsize[m=@sum]`)
+       ENDIF
+   ELSE
+      LET xvar = EXPND_BY_LEN(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
+   ENDIF
+ENDIF
+
+! Initialize the second variable.
+! In fact the region and dataset will be the
+! same as for var 0 (for now anyway)
+
+GO LAS_initialize_region 1
+GO LAS_initialize_data 1
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+SET VAR/NAME=($data_1_var)_ ($data_1_var)
+
+
+! Here is variable 1 title 
+DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
+
+DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)_
+IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
+
+LET/TITLE="($ferret_title_0)" yvar = ($ferret_plot_var_1)
+
+! Is it a varible on the E axis of a DSG file?
+
+DEF SYM vshape = `yvar,RETURN=shape`
+IF `($vshape"0|E>1|*>0)` THEN
+
+! Is there a rowsize variable?
+
+   IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
+      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
+      EXIT/PROGRAM
+   ENDIF
+
+! Expand trajectory variable into obs axis
+   DEF SYM vtype = 0
+   DEF SYM vtype = `yvar,RETURN=dtype`
+   DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+
+   IF ($is_string"0|*>1") THEN 
+      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
+      IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
+	 LET mvar_1 = _m[ge=($ferret_plot_var_1)]
+	 LET zvar = EXPND_BY_LEN(mvar_1, rowsize,`rowsize[m=@sum]`)
+      ENDIF
+   ELSE
+      LET yvar = EXPND_BY_LEN(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
+   ENDIF
+ENDIF
+
+IF `($data_count"0") GE 3` THEN ! color by 3rd variable
+
+   ! Initialize the 3rd variable.
+   ! In fact the region and dataset will be the
+   ! same as for var 0 (for now anyway)
+   
+   GO LAS_initialize_region 2
+   GO LAS_initialize_data 2
+   
+   IF ($error_status"0|*>1") THEN
+     MESSAGE/ERROR **ERROR ($error_string)
+     EXIT/PROGRAM
+   ENDIF
+   
+
+   SET VAR/NAME=($data_2_var)_ ($data_2_var)
+
+   ! Here is variable 2 title 
+   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
+
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)_
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)_
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
+
+   LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
+   
+! Is it a varible on the E axis of a DSG file?
+
+   DEF SYM vshape = `zvar,RETURN=shape`
+   IF `($vshape"0|E>1|*>0)` THEN
+
+! Is there a rowsize variable?
+
+      IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
+         MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
+         EXIT/PROGRAM
+      ENDIF
+
+! Expand trajectory variable into obs axis
+      DEF SYM vtype = 0
+      DEF SYM vtype = `zvar,RETURN=dtype`
+      DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+
+      IF ($is_string"0|*>1") THEN 
+         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
+	 IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
+	    LET mvar_2 = _m[ge=($ferret_plot_var_2)]
+	    LET zvar = EXPND_BY_LEN(mvar_2, rowsize,`rowsize[m=@sum]`)
+	 ENDIF
+      ELSE
+         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
+      ENDIF
+   ENDIF
+
+   DEFINE SYMBOL zvar = zvar
+
+   DEFINE SYMBOL color_by = 1
+
+ENDIF
+
+IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
+   DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
+
+IF  ($color_by"0") THEN 
+   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
+      DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
+ENDIF
+
+DEFINE SYMBOL xvar = xvar
+DEFINE SYMBOL yvar = yvar
+
+! Apply any constraints
+
+LET var_mask = 1+0*time
+LET text_mask = 1
+LET ntext_masks = 0
+
+IF ($constraint_0_lhs"0|*>1) THEN
+   GO prop_prop_constraints
+ENDIF
+
+LET all_mask = var_mask* text_mask
+
+! The variables must be the same size. Check and set up a nice message if not.
+
+LET xsize = `xvar,RETURN=isize`
+LET ysize = `yvar,RETURN=isize`
+
+IF `xsize NE ysize` THEN 
+  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
+  EXIT/PROGRAM
+ENDIF
+
+
+IF ($color_by"0|*>1") THEN 
+   let zsize = `zvar,RETURN=isize`
+   IF `zsize NE xsize` THEN
+
+      IF `zsize NE xsize` THEN
+         MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
+         EXIT/PROGRAM
+      ENDIF
+      
+      DEFINE SYMBOL zvar = all_mask*zvar
+
+   ENDIF
+   DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
+
+   DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+
+ENDIF  ! color-by 3rd var
+
+DEFINE SYMBOL xvar = all_mask*xvar
+DEFINE SYMBOL yvar = all_mask*yvar
