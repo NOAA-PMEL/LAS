@@ -15,7 +15,6 @@
 
 DEFINE SYMBOL translate_math = 1
 
-
 ! Define var_mask variable with all of the variable constraints.
 
 LET vnames = ..varnames
@@ -32,6 +31,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_;\
   IF `($constraint_($ic)_type"0|variable>1|*>0") EQ 0` THEN EXIT/CYCLE;\
   LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
+  IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
   IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
   )
