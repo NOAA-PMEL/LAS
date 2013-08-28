@@ -22,6 +22,8 @@ GO LAS_reset_gifname
 
 DEF SYM its_prop_plot = 1
 
+!DEFINE SYMBOL ribbon = 1
+
 ! For LAS v8.0 relese, dont take into account any of these Ferret properties.
 ! This is a workaround for items 3 and 4 in ticket 1388; the issues will be 
 ! revisited in LAS 8.1 see ticket 1390.
@@ -59,9 +61,7 @@ ENDIF
 ! This is going to be a polygon plot. Options for color, shape, size.
 
 DEFINE SYMBOL polycolor = ($ferret_symbol_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
-
 DEFINE SYMBOL polysize = ($ferret_symbol_size%0.6|default>*0.6|*%)
-
 DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triangle|delta\
 |square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle%)
 
@@ -137,15 +137,28 @@ DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
 
-GO LAS_xytvar_setup
 
 ! Polygon plot
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
+IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+
+GO LAS_xytvar_setup
+
 
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
+IF ($ribbon"0|*>1") THEN
+   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=19/THICK
+   DEFINE SYMBOL plot_end_command = PLOT/OVER
+   IF `($data_count"0") GT 2` THEN 
+      DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow
+      DEFINE SYMBOL plot_end_command = RIBBON/OVER
+   ENDIF
+ENDIF
+
+IF `($ribbon"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
 IF ($color_by_traj"0|*>1") THEN 
    GO LAS_pp_colorby_traj
 
@@ -153,11 +166,7 @@ ELSE
    IF ($color_by"0|*>1") THEN 
 
 ! Get color-plot qualifiers
-      IF ($ferret_fill_levels"0|*>1") THEN 
-         DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
-      ELSE
-         DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=v
-      ENDIF
+      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels"v")
    
       IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
          DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
@@ -167,12 +176,12 @@ ELSE
    
 ! Dont use the palette coming in. Its for variable 0
       DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
       DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
    ELSE
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
    ENDIF
-   
    
    IF `($ferret_annotations%0|*>1%) EQ 0` THEN
       LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
@@ -180,15 +189,19 @@ ELSE
    ENDIF
    
    DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
-
    DEFINE SYMBOL poly_command POLYGON($poly_qual)
 
-   GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
-   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-   PPL POLYGON
+   IF ($ribbon"0") THEN
+      ($plot_command)($poly_qual) ($plot_arg)
+      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+      PPL ($plot_end_command)
+   ELSE
+      GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
+      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+      PPL POLYGON
+   ENDIF
 
 ENDIF  ! color-by-trajectory or not...
-
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
