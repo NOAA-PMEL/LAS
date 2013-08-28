@@ -192,16 +192,16 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO prop_prop_constraints
 ENDIF
 
-LET all_mask = var_mask* text_mask
+LET constraints_mask = var_mask* text_mask
 
 IF ($color_by"0|*>1") THEN 
 
-   DEFINE SYMBOL zvar = all_mask*zvar
+   DEFINE SYMBOL zvar = constraints_mask*zvar
    DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
 
 ENDIF  ! color-by 3rd var
 
-DEFINE SYMBOL xvar = all_mask*xvar
-DEFINE SYMBOL yvar = all_mask*yvar
+DEFINE SYMBOL xvar = constraints_mask*xvar
+DEFINE SYMBOL yvar = constraints_mask*yvar
