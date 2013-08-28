@@ -66,6 +66,6 @@ REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
 LET text_mask_zero = ($text_mask)
 LET text_mask = IF text_mask_zero NE 0 THEN 1
 
-LET all_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn]
+LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn]
 
 ! End of  ------------- prop_prop_constraints.jnl--------------------------
