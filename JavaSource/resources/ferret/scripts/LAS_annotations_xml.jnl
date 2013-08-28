@@ -57,6 +57,7 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
    IF `($note_num"0") GT 0` THEN
       REPEAT/RANGE=1:($note_num)/NAME=m (\
          DEFINE SYMBOL mnote = `m`; \
+	 IF `($note_($mnote)_lab"0|*>1") EQ 0` THEN EXIT/CYCLE; \
          DEFINE SYMBOL out = <annotation type="note">; \
          GO write_to_xml; \
          DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote)_lab)", 1, "($result_annotations_filename)" )`; \
@@ -69,7 +70,7 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
       GO write_to_xml
       DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($calendar_lab)", 1, "($result_annotations_filename)" )`
       DEFINE SYMBOL out = </annotation>
-      GO write_to_xml;
+      GO write_to_xml
    ENDIF
    IF ($dataset_institute_lab"0|*>1") THEN
       DEFINE SYMBOL out = <annotation type="note">
