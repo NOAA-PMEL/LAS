@@ -18,9 +18,10 @@ DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
-!DEFINE SYMBOL ribbon = 1
 
 SET MODE verify:always  ! allows for debugging
+
+!DEFINE SYMBOL ribbon = 1
 
 DEFINE SYMBOL its_insitu = 1
 DEFINE SYMBOL its_trajectory_map = 1
@@ -64,7 +65,7 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO prop_prop_constraints
 ENDIF
 
-LET all_mask = var_mask* text_mask
+LET constraints_mask = var_mask* text_mask
 
 
 
@@ -201,7 +202,7 @@ IF ($ferret_poly_levels"0|*>1") THEN
 ENDIF
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON
+   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/THICK($qualifiers)
 ELSE
    DEFINE SYMBOL plot_command = POLY
    IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
@@ -209,7 +210,7 @@ ENDIF
 
 ! Apply the constraints mask
 
-LET var_data = all_mask * ($var_data)
+LET var_data = constraints_mask * ($var_data)
 
 ! Make the polygon overlay plot
 
@@ -226,9 +227,8 @@ ENDIF
 LET ng = var_data[x=@ngd]
 IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 
-
 DEFINE SYMBOL do_icons = 0
-IF ($data_var"0|metadata_ID>1|*>0") THEN
+	IF ($data_var"0|metadata_ID>1|cruise_expocode>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
       GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
@@ -248,7 +248,7 @@ ELSE
 
    IF ($ribbon"0|*>1") THEN
 !      ($plot_command)($qualifiers)/sym=18/SIZ=0.06/thick/lev=v/SET x_var_data, y_var_data, var_data 
-      ($plot_command)($qualifiers)/fast/sym=dot/missing=black/lev=v/SET x_var_data, y_var_data, var_data 
+      ($plot_command)($qualifiers)/missing=black/lev=v/SET x_var_data, y_var_data, var_data 
          IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
        PPL RIBBON/OVER
    ELSE
