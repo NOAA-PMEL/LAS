@@ -19,11 +19,9 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL lhs = ($constraint_($v)_lhs); \
   DEFINE SYMBOL op = ($constraint_($v)_op); \
   DEFINE SYMBOL rhs = ($constraint_($v)_rhs); \
+  IF ($rhs"NaN>1|*>0") THEN DEFINE SYMBOL rhs = valid; \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
   GO make_c_lab)
-
-sh sym nmask_labels, mask_title*
-sh sym note_num, note*lab
 
 IF `($nmask_labels"0") GT 0` THEN
    REPEAT/RANGE=1:($nmask_labels)/NAME=mlab (\
