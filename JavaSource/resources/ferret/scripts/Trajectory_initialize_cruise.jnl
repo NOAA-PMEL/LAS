@@ -31,10 +31,8 @@ LET num_e = `($data_var),return = msize`
 IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 
 ! Are the rowsize variables in the E direction?
-define symbol rdir = `rowsize,return=shape` 
-define symbol rind = ($rdir"|X>I|E>M")
-
-
+define symbol rdir = `rowsize,RETURN=shape` 
+define symbol rind = ($rdir"|X>I|E>M|POINT>M")
 
 ! If (for prop-prop plots) there are mask-by settings, apply them
 
@@ -62,9 +60,9 @@ IF `($numobs) EQ 1` THEN
    LET subset_mask = x[i=1:1]
 
 ELSE
-   LET rshape = "`rowsize,return=shape`"
-   IF `rshape EQ "X"` THEN LET ncruises = `rowsize,return=isize`
-   IF `rshape EQ "E"` THEN LET ncruises = `rowsize,return=msize`
+   LET ncruises = 1
+   IF `($rind"0|X>1|*>0")` THEN LET ncruises = `rowsize,RETURN=isize`
+   IF `($rind"0|E>1|*>0")` THEN LET ncruises = `rowsize,RETURN=msize`
    LET cruise_numbers = x[i=1:`ncruises`]
    LET cruise_mask = x[i=1:`ncruises`]  ! may redefine later
 

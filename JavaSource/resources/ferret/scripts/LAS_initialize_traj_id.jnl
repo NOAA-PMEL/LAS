@@ -18,14 +18,11 @@ SET MEM/siz=200
 DEFINE SYMBOL traj_max_labels = 200
 DEFINE SYMBOL numobs `($ferret_plot_var),return = isize`
 
-LET trajvar = XSEQUENCE(($rowvar))
-LET ntrajs = `trajvar,RETURN=isize`
+LET trajvar = ($rowvar)
+LET ntrajs = `trajvar,RETURN=($rind)size`
 LET traj_numbers = x[i=1:`ntrajs`]
 
-! Is the traj variable in the E direction?
-define symbol rdir = `trajvar,return=shape` 
-define symbol rind = ($rdir"|X>I|E>M")
-
+! rind direction of rowsize, defined in Trajectory_initialize_cruise
 LET longest = trajvar[($rind)=@max]+2
 
 LET data_var_z =  EXPNDI_BY_Z_COUNTS(longitude, xsequence(trajvar),`longest`)

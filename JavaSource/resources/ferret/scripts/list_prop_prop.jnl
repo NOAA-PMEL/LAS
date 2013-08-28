@@ -18,146 +18,8 @@ ENDIF
 SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/prec=6
 
-! This may already have been set by e.g. Trajectory_correlation.jnl
 
-IF `($data_count"0") LT 2` THEN
-  MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
-  EXIT/PROGRAM
-ENDIF
-
-DEFINE SYMBOL its_prop_prop_plot = 1  ! used in setting titles and in RESULTS
-
-! Define symbols associated with the region and data and perform any
-! initialization needed for this dataset.
-
-GO LAS_initialize_region 0
-GO LAS_initialize_data 0
-
-
-! Check for errors (They often occur during dataset initialization.)
-
-IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-set var/name=Longitude_ Longitude
-set var/name=Latitude_  Latitude
-set var/name=($data_0_var)_ ($data_0_var)
-
-! Here is variable 0 title 
-DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)_
-
-
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
-
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
-
-! Is it a varible on the E axis of a DSG file?
-
-DEF SYM vshape = `xvar,RETURN=shape`
-IF `($vshape"0|E>1|*>0)` THEN
-
-! Expand trajectory variable into obs axis
-   IF ($is_string"0|*>1") THEN 
-      LET xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
-   ELSE
-      LET xvar = EXPND_BY_LEN(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
-   ENDIF
-ENDIF
-
-! Initialize the second variable.
-! In fact the region and dataset will be the
-! same as for var 0 (for now anyway)
-
-GO LAS_initialize_region 1
-GO LAS_initialize_data 1
-
-IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-set var/name=($data_1_var)_ ($data_1_var)
-
-
-! Here is variable 1 title 
-DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
-
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
-
-LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($ferret_plot_var_1))
-
-! Is it a varible on the E axis of a DSG file?
-
-DEF SYM vshape = `yvar,RETURN=shape`
-IF `($vshape"0|E>1|*>0)` THEN
-
-! Expand trajectory variable into obs axis
-   IF ($is_string"0|*>1") THEN 
-      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
-   ELSE
-      LET yvar = EXPND_BY_LEN(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
-   ENDIF
-ENDIF
-
-IF `($data_count"0") GE 3` THEN ! color by 3rd variable
-
-   ! Initialize the 3rd variable.
-   ! In fact the region and dataset will be the
-   ! same as for var 0 (for now anyway)
-   
-   GO LAS_initialize_region 2
-   GO LAS_initialize_data 2
-   
-   IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR **ERROR ($error_string)
-     EXIT/PROGRAM
-   ENDIF
-   
-
-   set var/name=($data_2_var)_ ($data_2_var)
-
-   ! Here is variable 2 title 
-   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
-
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)_
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)_
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
-
-   LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
-   
-! Is it a varible on the E axis of a DSG file?
-
-   DEF SYM vshape = `yvar,RETURN=shape`
-   IF `($vshape"0|E>1|*>0)` THEN
-
-! Expand trajectory variable into obs axis
-      IF ($is_string"0|*>1") THEN 
-         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
-      ELSE
-         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
-      ENDIF
-   ENDIF
-
-   DEFINE SYMBOL color_by = 1
-
-ENDIF
-
-IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
-   DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
-
-IF  ($color_by"0") THEN 
-   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
-      DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
-ENDIF
-
-DEFINE SYMBOL xvar = xvar
-DEFINE SYMBOL yvar = yvar
+GO setup_prop_prop
 
 ! Apply any constraints
 
@@ -248,35 +110,43 @@ GO set_constraint_labels
 
 LET size = `all_mask[i=@ngd]`
 
+IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
+
 ! Make a time axis from the time coordinates and use it to compute the date strings.
-LET amin = time[i=@MIN]
-LET amax = time[i=@MAX]
-DEFINE SYMBOL is_time = 1
-GO LAS_is_range amin amax
-DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`TIME.time_origin`"/UNITS=($tunits) haxis
+   LET amin = time[i=@MIN]
+   LET amax = time[i=@MAX]
+   DEFINE SYMBOL is_time = 1
+   GO LAS_is_range amin amax
+   DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`TIME.time_origin`"/UNITS=($tunits) haxis
 
-LET timesample = COMPRESSI(all_mask*time)
-LET/TITLE="Time"/UNITS="`time,RETURN=units`" Times = timesample
-LET/TITLE="Date" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
+   LET timesample = COMPRESSI(all_mask*time)
+   LET/TITLE="Time"/UNITS="`time,RETURN=units`" Times = timesample
+   LET/TITLE="Date" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
 
-LET nlist = 2
-DEFINE SYMBOL vars_out = Dates, Times
+   LET nlist = 2
+   DEFINE SYMBOL vars_out = Dates, Times, 
+
+ENDIF  ! dates, times
 
 ! Define Longitude and Latitude variables at the masked locations
 
-LET/TITLE="`longitude_,RETURN=title`"/UNITS="`longitude_,RETURN=units`" Longitude = COMPRESSI(all_mask*longitude_)
-LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = COMPRESSI(all_mask*latitude_)
+IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
 
-LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out), Longitude, Latitude
+   LET/TITLE="`longitude,RETURN=title`"/UNITS="`longitude,RETURN=units`" Longitude_ = COMPRESSI(all_mask*longitude)
+   LET/TITLE="`latitude,RETURN=title`"/UNITS="`latitude,RETURN=units`" Latitude_ = COMPRESSI(all_mask*latitude)
+
+   LET nlist = `nlist + 2`
+   DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude, 
+
+ENDIF  ! longitude, latitude8/27/2013
 
 ! Define variables with titles
 
-LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var) = COMPRESSI(all_mask*($ferret_plot_var_0))
-LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var) = COMPRESSI(all_mask*($ferret_plot_var_1))
+LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var)_ = COMPRESSI(all_mask*($ferret_plot_var_0))
+LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var)_ = COMPRESSI(all_mask*($ferret_plot_var_1))
 
 LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var), ($data_1_var)
+DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var), ($data_1_var)
 
 ! color-by variable on the prop-prop plot:
 
@@ -287,9 +157,9 @@ IF ($data_2_var"0|*>1") THEN
       LET iindices = IF all_mask THEN ii
       LET compress_mask = COMPRESSI(iindices)
       LEt nok = `compress_mask[i=@ngd]`
-      LET/TITLE="($data_2_title)" ($data_2_var) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
+      LET/TITLE="($data_2_title)" ($data_2_var)_ = SAMPLEI (zvar, compress_mask[i=1:`nok`])
    ELSE
-      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var) = COMPRESSI(all_mask*zvar)
+      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var)_ = COMPRESSI(all_mask*zvar)
    ENDIF
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var)

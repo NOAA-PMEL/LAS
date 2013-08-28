@@ -1,5 +1,4 @@
-
-! This may already have been set by e.g. Trajectory_correlation.jnl
+! setup_prop_prop.jnl
 
 IF `($data_count"0") LT 2` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -16,7 +15,6 @@ LET vnames = ..varnames
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
-
 ! Check for errors (They often occur during dataset initialization.)
 
 IF ($error_status"0|*>1") THEN
@@ -24,23 +22,25 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-SET VAR/NAME=Longitude_ Longitude
-SET VAR/NAME=Latitude_  Latitude
-SET VAR/NAME=($data_0_var)_ ($data_0_var)
-
 ! Here is variable 0 title 
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)_
+DEFINE SYMBOL variable_0_lab = ($ferret_title_0)
+DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
 
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
 
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_base_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
+LET nx_var = `($ferret_plot_var_0),return=isize`
+LET ny_var = `($ferret_plot_var_0),return=jsize`
+LET nz_var = `($ferret_plot_var_0),return=ksize`
+LET nt_var = `($ferret_plot_var_0),return=lsize`
+LET ne_var = `($ferret_plot_var_0),return=msize`
+LET nf_var = `($ferret_plot_var_0),return=nsize`
 
-LET/TITLE="($ferret_title_0)" xvar = ($ferret_plot_var_0)
+LET nx_var = `nx_var*ny_var*nz_var*nt_var*ne_var*nf_var`
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEF SYM vshape = `xvar,RETURN=shape`
+DEF SYM vshape = `($ferret_plot_var_0),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -78,21 +78,16 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-SET VAR/NAME=($data_1_var)_ ($data_1_var)
-
-
 ! Here is variable 1 title 
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
+DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
+DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_base_var)_
-IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
-
-LET/TITLE="($ferret_title_0)" yvar = ($ferret_plot_var_1)
+LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEF SYM vshape = `yvar,RETURN=shape`
+DEF SYM vshape = `($ferret_plot_var_1),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -132,21 +127,18 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
      EXIT/PROGRAM
    ENDIF
    
-
-   SET VAR/NAME=($data_2_var)_ ($data_2_var)
-
    ! Here is variable 2 title 
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
 
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)_
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)_
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)_
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
 
    LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
    
 ! Is it a varible on the E axis of a DSG file?
 
-   DEF SYM vshape = `zvar,RETURN=shape`
+   DEF SYM vshape = `($ferret_plot_var_2),RETURN=shape`
    IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -191,7 +183,8 @@ DEFINE SYMBOL yvar = yvar
 
 ! Apply any constraints
 
-LET var_mask = 1+0*time
+LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
+let subset_mask = 1
 LET text_mask = 1
 LET ntext_masks = 0
 
@@ -201,29 +194,9 @@ ENDIF
 
 LET all_mask = var_mask* text_mask
 
-! The variables must be the same size. Check and set up a nice message if not.
-
-LET xsize = `xvar,RETURN=isize`
-LET ysize = `yvar,RETURN=isize`
-
-IF `xsize NE ysize` THEN 
-  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
-  EXIT/PROGRAM
-ENDIF
-
-
 IF ($color_by"0|*>1") THEN 
-   let zsize = `zvar,RETURN=isize`
-   IF `zsize NE xsize` THEN
 
-      IF `zsize NE xsize` THEN
-         MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
-         EXIT/PROGRAM
-      ENDIF
-      
-      DEFINE SYMBOL zvar = all_mask*zvar
-
-   ENDIF
+   DEFINE SYMBOL zvar = all_mask*zvar
    DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)

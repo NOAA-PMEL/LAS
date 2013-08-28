@@ -22,10 +22,14 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
   GO make_c_lab)
 
+sh sym nmask_labels, mask_title*
+sh sym note_num, note*lab
+
 IF `($nmask_labels"0") GT 0` THEN
-   REPEAT/RANGE=1:($nmask_labels) (\
+   REPEAT/RANGE=1:($nmask_labels)/NAME=mlab (\
+   DEFINE SYMBOL mlab = `mlab`;\
    DEFINE SYMBOL note_num `($note_num"0") + 1`; \
-   IF ($mask_title_($note_num)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($note_num)); \
+   IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($mlab)); \
    )
 ENDIF
 

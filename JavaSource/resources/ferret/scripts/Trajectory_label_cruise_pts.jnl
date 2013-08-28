@@ -35,29 +35,40 @@ LET var_flag_z = IF var_fill_z EQ `fillval` THEN 1
 LET nbad_in_cruise =  var_flag_z[K=@NGD]
 LET ngood_in_cruise = var_fill_z[K=@NGD] - var_flag_z[K=@NGD]
 
-LET ngood_chosen_cruises = subset_mask* ngood_in_cruise
-LET nbad_chosen_cruises = subset_mask* nbad_in_cruise
+LET expocode_mask = 1
+IF ($text_mask_cruise_expocode"0|*>1") THEN 
+   LET expocode_mask = XSEQUENCE(($text_mask_cruise_expocode))
+ELSE
+   IF `IS_ELEMENT_OF_STR_N(varnames, "cruise_expocode") NE 0` THEN 
+      LET expocode_m = 1+0*_m[ge=cruise_expocode]
+      LET expocode_mask =  XSEQUENCE(expocode_m)
+   ENDIF
+ENDIF
+
+LET ngood_chosen_cruises = subset_mask* expocode_mask* ngood_in_cruise
+LET nbad_chosen_cruises = subset_mask* expocode_mask*  nbad_in_cruise
 DEFINE SYMBOL ngood = `ngood_chosen_cruises[i=@sum]`
 DEFINE SYMBOL nbad = `nbad_chosen_cruises[i=@sum]`
 
 LET allvars = ..varnames
 
-! c_s used to add plural s to a label if more than one cruise.
-
-DEFINE SYMBOL c_s = s
-IF `($cruise_max) EQ 1` THEN CANCEL SYMBOL c_s
+IF ($cruises_shown"1|*>0") THEN DEFINE SYMBOL cruises_shown = `expocode_mask[i=@sum]`
 
 DEFINE SYMBOL cruises_shown = ($cruises_shown"($cruise_max)")
 LET xloc = `($ppl$width) - ($ppl$xorg) - 0.1`
 LET yloc = `($ppl$height) - ($ppl$yorg) - 0.6`
 IF `($from_pts"0|*>1") EQ 0` THEN LET yloc = `yloc - 0.2`
 
-
-LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
+IF `($ferret_annotations"0|*>1") EQ 0` THEN \
+ LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
 
 LET yloc = `yloc - 0.2`
 !
 !DEFINE SYMBOL database_table_label = `cruise_id.database_table`
+
+! c_s used to add plural s to a label if more than one cruise.
+CANCEL SYMBOL c_s
+IF `($cruises_shown"0") GT 1` THEN DEFINE SYMBOL c_s = s
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
 DEFINE SYMBOL note_($note_num)_lab = ($ngood) of ($from_pts) obs
