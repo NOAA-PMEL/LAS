@@ -28,7 +28,12 @@ IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode") NE 0` THEN
 ! What do we want here?  imask would put out the full key,
 ! or webrow_mask would put out subset key, listing names and numbers 1, 3, 5, ...
 
-   LOAD write_webrow_icon(XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+!   LOAD write_webrow_icon(XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+
+! If writing the whole key, we can use write_webrow:
+
+   LOAD write_webrow(XSEQUENCE(cruise_expocode), XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+
 ELSE
    LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
 ENDIF
