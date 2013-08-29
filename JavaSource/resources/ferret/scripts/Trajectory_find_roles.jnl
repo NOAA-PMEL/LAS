@@ -6,16 +6,14 @@
 LET var_attnames = ($vname).attnames
 IF `IS_ELEMENT_OF_STR(var_attnames, "cf_role")` THEN 
    LET trajSize = `($vname),RETURN=msize`
+   DEFINE SYMBOL trajectory_variable = ($vname)
 ENDIF
 
 IF `IS_ELEMENT_OF_STR(var_attnames, "sample_dimension")` THEN 
    DEF SYM obsdim = `($vname).sample_dimension`
    LET obsXvar = x[gx=($obsdim)]
    LET obsSize = `obsXvar,RETURN=isize`
-ENDIF 
-
-LET var_title = ($vname).long_name
-IF `STRINDEX(var_title, "Number of Observations") GT 0` THEN 
    DEF SYM rowvar = ($vname)
 ENDIF 
 
+!---------------- end of Trajectory_find_roles.jnl -------------------------

@@ -47,17 +47,7 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-! Is it a cruise dataset?
 
-LET varnames = ..varnames
-IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode")` THEN
- GO Trajectory_initialize_cruise
-
-! The x and y locations for insitu plots
-! Use the _CoordinateAxisType to define data_x_var, data_y_var 
-! and data_t_var if there is a time variable.
-
-GO Trajectory_lon_lat_time
 
 ! Check for the global attribute query_result, and see if
 ! it contains a string No data found or other message
@@ -65,7 +55,7 @@ GO Trajectory_lon_lat_time
 
 LET nglobal_atts = ..nattrs
 LET global_attnames = ..attnames
-IF `is_element_of_str(global_attnames, "query_result")` THEN
+IF `IS_ELEMENT_OF_STR_N(global_attnames, "query_result")` THEN
    LET/D=1/title="no data found for this query"/units=" " latitude = `1,return=bad`
    LET/D=1/title="no data found for this query"/units=" " longitude = `1,return=bad`
    DEFINE SYMBOL data_0_var = longitude
@@ -74,7 +64,6 @@ IF `is_element_of_str(global_attnames, "query_result")` THEN
    CANCEL SYMBOL data_1_units
    DEFINE SYMBOL data_2_var = latitude
    CANCEL SYMBOL data_2_units
-
    
    DEFINE SYMBOL data_var = ($data_($num)_var)
    DEFINE SYMBOL ferret_plot_var = ($data_($num)_var)
@@ -88,27 +77,38 @@ IF `is_element_of_str(global_attnames, "query_result")` THEN
 
 ENDIF
 
+! Is it a cruise dataset?
+
 LET varnames = ..varnames
 LET nvars = ..nvars
-IF `is_element_of_str(global_attnames, "featureType") ` THEN
+IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
     REPEAT/RANGE=1:`nvars`/name=q (\
       DEF SYM q = `q`;\
       DEF SYM vname = `varnames[i=($q)]`;\
       GO Trajectory_find_roles)
 ENDIF
 
+IF `IS_ELEMENT_OF_STR_N(varnames, "($trajectory_variable)")` THEN
+ GO Trajectory_initialize_cruise
+
+! The x and y locations for insitu plots
+! Use the _CoordinateAxisType to define data_x_var, data_y_var 
+! and data_t_var if there is a time variable.
+
+GO Trajectory_lon_lat_time
+
 ! If the plot is colored by trajectory ID then fake that variable, and exit
 
 LET color_by_traj = 0
 
-IF `($data_($num)_var"0|vid>1|cruise_expocode>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
+IF `($data_($num)_var"0|vid>1|($trajectory_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
    DEF SYM rowvar = rowSize
    LET color_by_traj = 1
 ENDIF
 
 ! Or, is this a DSG file with cruise_id?
 
-IF `($data_($num)_var"0|cruise_id>1|cruise_expocode>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
+IF `($data_($num)_var"0|cruise_id>1|($trajectory_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
 
 IF `color_by_traj EQ 1` THEN
 
@@ -158,13 +158,13 @@ DEFINE SYMBOL data_num = `data_num`
 
 LET allvars = ..varnames
 
-IF `IS_ELEMENT_OF_STR(allvars, "($data_x_var)")` THEN 
+IF `IS_ELEMENT_OF_STR_N(allvars, "($data_x_var)")` THEN 
    STAT ($data_x_var)
    PPL %RANGE `($stat_min)`, `($stat_max)`, 10
    DEFINE SYMBOL x_rounded_range = ($ppl$range_low):($ppl$range_high)
 ENDIF
 
-IF `IS_ELEMENT_OF_STR(allvars, "($data_y_var)")` THEN 
+IF `IS_ELEMENT_OF_STR_N(allvars, "($data_y_var)")` THEN 
    STAT ($data_y_var)
    PPL %RANGE `($stat_min)`, `($stat_max)`, 10
    DEFINE SYMBOL y_rounded_range = ($ppl$range_low):($ppl$range_high)
@@ -279,4 +279,3 @@ IF ($nodata"0|*>1") THEN
 ENDIF
 
 !---------------- end of Trajectory_initialize_data_insitu.jnl -------------------------
-

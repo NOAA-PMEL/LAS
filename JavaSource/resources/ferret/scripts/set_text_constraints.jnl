@@ -33,5 +33,5 @@ IF ($shape"0|E>1|*>0") THEN \
 
 DEFINE SYMBOL text_mask = ($text_mask"0") +  text_mask_($cvar)_($($cvar)_itxt) 
 
-! We will use text_mask_cruise_expocode in making an annotation about number of cruises
+! We will use text_mask_trajectory in making an annotation about number of cruises
 DEFINE SYMBOL text_mask_($cvar) = ($text_mask_($cvar)"0") +  text_mask_($cvar)_($($cvar)_itxt)b

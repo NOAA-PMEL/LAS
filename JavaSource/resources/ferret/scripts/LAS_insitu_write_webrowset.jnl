@@ -13,28 +13,25 @@ IF `($result_icon_webrowset_filename"0|*>1") EQ 0` THEN
 ENDIF
 
 ! Write all the counter numbers and the cruise IDs in the webrowset format.
-! For SOCAT 3, no need for cruise_id and cruise_name. The subsetting is
-! handled by cruise_expocode, so the cruise index is handled differently.
+! For SOCAT 3, cruise_id cruise_name are identical to cruise_expocode
 
-LET varnames = ..varnames
-
-IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode") NE 0` THEN 
+IF ($trajectory_variable"0|*>1") THEN 
 
    let imask = i[gx=xmask_axis]
 
    let webrow_mask = XSEQUENCE(cruise_mask)* imask
-   list cruise_mask, webrow_mask
 
-! What do we want here?  imask would put out the full key,
-! or webrow_mask would put out subset key, listing names and numbers 1, 3, 5, ...
+! What do we want here? write_webrow with imask would put out the full key,
+! or write_webrow_icon with webrow_mask would make a subset key, listing names and numbers 1, 3, 5, ...
 
-!   LOAD write_webrow_icon(XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+!   LOAD write_webrow_icon(XSEQUENCE(($trajectory_variable)), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
 
 ! If writing the whole key, we can use write_webrow:
 
-   LOAD write_webrow(XSEQUENCE(cruise_expocode), XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+   LOAD write_webrow(XSEQUENCE(($trajectory_variable)), XSEQUENCE(($trajectory_variable)), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
 
 ELSE
+
    LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
 ENDIF
 
@@ -51,3 +48,5 @@ ENDIF
 !!!!
 
 ! End of file ------------ LAS_insitu_write_webrowset.jnl --------------------------
+
+pause
