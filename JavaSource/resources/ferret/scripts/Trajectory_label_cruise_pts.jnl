@@ -35,24 +35,24 @@ LET var_flag_z = IF var_fill_z EQ `fillval` THEN 1
 LET nbad_in_cruise =  var_flag_z[K=@NGD]
 LET ngood_in_cruise = var_fill_z[K=@NGD] - var_flag_z[K=@NGD]
 
-LET expocode_mask = 1
-IF ($text_mask_cruise_expocode"0|*>1") THEN 
-   LET expocode_mask = XSEQUENCE(($text_mask_cruise_expocode))
+LET trajectory_mask = 1
+IF ($text_mask_trajectory"0|*>1") THEN 
+   LET trajectory_mask = XSEQUENCE(($text_mask_trajectory))
 ELSE
-   IF `IS_ELEMENT_OF_STR_N(varnames, "cruise_expocode") NE 0` THEN 
-      LET expocode_m = 1+0*_m[ge=cruise_expocode]
-      LET expocode_mask =  XSEQUENCE(expocode_m)
+   IF `IS_ELEMENT_OF_STR_N(varnames, "($trajectory_variable)") NE 0` THEN 
+      LET trajectory_m = 1+0*_m[ge=($trajectory_variable)]
+      LET trajectory_mask =  XSEQUENCE(trajectory_m)
    ENDIF
 ENDIF
 
-LET ngood_chosen_cruises = subset_mask* expocode_mask* ngood_in_cruise
-LET nbad_chosen_cruises = subset_mask* expocode_mask*  nbad_in_cruise
+LET ngood_chosen_cruises = subset_mask* trajectory_mask* ngood_in_cruise
+LET nbad_chosen_cruises = subset_mask* trajectory_mask*  nbad_in_cruise
 DEFINE SYMBOL ngood = `ngood_chosen_cruises[i=@sum]`
 DEFINE SYMBOL nbad = `nbad_chosen_cruises[i=@sum]`
 
 LET allvars = ..varnames
 
-IF ($cruises_shown"1|*>0") THEN DEFINE SYMBOL cruises_shown = `expocode_mask[i=@sum]`
+IF ($cruises_shown"1|*>0") THEN DEFINE SYMBOL cruises_shown = `trajectory_mask[i=@sum]`
 
 DEFINE SYMBOL cruises_shown = ($cruises_shown"($cruise_max)")
 LET xloc = `($ppl$width) - ($ppl$xorg) - 0.1`

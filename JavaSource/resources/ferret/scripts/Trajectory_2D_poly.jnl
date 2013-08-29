@@ -18,7 +18,6 @@ DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
-
 SET MODE verify:always  ! allows for debugging
 
 !DEFINE SYMBOL ribbon = 1
@@ -228,7 +227,7 @@ LET ng = var_data[x=@ngd]
 IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 
 DEFINE SYMBOL do_icons = 0
-	IF ($data_var"0|metadata_ID>1|cruise_expocode>1|*>0") THEN
+	IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
       GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
