@@ -13,15 +13,25 @@ IF `($result_icon_webrowset_filename"0|*>1") EQ 0` THEN
 ENDIF
 
 ! Write all the counter numbers and the cruise IDs in the webrowset format.
-! cruise_id and cruise_expocode are the same in SOCAT 3+
+! For SOCAT 3, no need for cruise_id and cruise_name. The subsetting is
+! handled by cruise_expocode, so the cruise index is handled differently.
 
 LET varnames = ..varnames
-IF `IS_ELEMENT_OF_STR(varnames, "cruise_name)") EQ 0` THEN LET cruise_name = cruise_expocode
 
-LOAD write_webrow(XSEQUENCE(cruise_expocode), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
+IF `IS_ELEMENT_OF_STR(varnames, "cruise_expocode") NE 0` THEN 
 
-! Newer Ferret (v6.85+) will let the arguments be on other than the X axis
-!LOAD write_webrow(cruise_id, cruise_name, cruise_mask, "($result_icon_webrowset_filename)")
+   let imask = i[gx=xmask_axis]
+
+   let webrow_mask = XSEQUENCE(cruise_mask)* imask
+   list cruise_mask, webrow_mask
+
+! What do we want here?  imask would put out the full key,
+! or webrow_mask would put out subset key, listing names and numbers 1, 3, 5, ...
+
+   LOAD write_webrow_icon(XSEQUENCE(cruise_expocode), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+ELSE
+   LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
+ENDIF
 
 SET MODE/LAST verify
 
