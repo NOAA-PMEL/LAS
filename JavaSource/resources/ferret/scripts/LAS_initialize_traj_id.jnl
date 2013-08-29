@@ -20,7 +20,9 @@ DEFINE SYMBOL numobs `($ferret_plot_var),return = isize`
 
 LET trajvar = ($rowvar)
 LET ntrajs = `trajvar,RETURN=($rind)size`
-LET traj_numbers = x[i=1:`ntrajs`]
+
+DEFINE AXIS/X=1:`ntrajs`:1 xtraj_axis
+LET traj_numbers = x[gx=xtraj_axis]
 
 ! rind direction of rowsize, defined in Trajectory_initialize_cruise
 LET longest = trajvar[($rind)=@max]+2
@@ -39,13 +41,16 @@ LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(trajvar),`longest`)
 ! the polygons on the prop-prop plot.
      
       LET subm_ids = IF ELEMENT_INDEX(traj_numbers,subset_ids) THEN 1
-      LET subset_mask = subm_ids + 0*x[x=1:`ntrajs`]  ! put it on a non-abstract axis.
+      IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = subm_ids + 0*x[x=1:`ntrajs`]  ! put it on a non-abstract axis. 
 
 ! apply mask as data_var_z* subset_mask
 
       DEFINE SYMBOL cruises_shown = `n_subset`
    ELSE
-      LET subset_mask = 1 + 0*i[i=1:`ntrajs`]
+
+! There may be a subset already defined from ferret_cruise_list
+
+      IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = 1 + 0*i[i=1:`ntrajs`]
    ENDIF
 
 

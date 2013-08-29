@@ -100,14 +100,15 @@ ENDIF
 ! If the plot is colored by trajectory ID then fake that variable, and exit
 
 LET color_by_traj = 0
-IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
+
+IF `($data_($num)_var"0|vid>1|cruise_expocode>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
    DEF SYM rowvar = rowSize
    LET color_by_traj = 1
 ENDIF
 
 ! Or, is this a DSG file with cruise_id?
 
-IF `($data_($num)_var"0|cruise_id>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
+IF `($data_($num)_var"0|cruise_id>1|cruise_expocode>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
 
 IF `color_by_traj EQ 1` THEN
 
