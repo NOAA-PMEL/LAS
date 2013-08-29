@@ -184,7 +184,8 @@ DEFINE SYMBOL yvar = yvar
 ! Apply any constraints
 
 LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
-let subset_mask = 1
+
+IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = 1
 LET text_mask = 1
 LET ntext_masks = 0
 

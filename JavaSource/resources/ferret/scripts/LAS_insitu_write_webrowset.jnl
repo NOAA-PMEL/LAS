@@ -12,8 +12,13 @@ IF `($result_icon_webrowset_filename"0|*>1") EQ 0` THEN
   EXIT/SCRIPT
 ENDIF
 
-! Write all the counter numbers and the cruise IDs in the webrowset format
-LOAD write_webrow(XSEQUENCE(cruise_id), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
+! Write all the counter numbers and the cruise IDs in the webrowset format.
+! cruise_id and cruise_expocode are the same in SOCAT 3+
+
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR(varnames, "cruise_name)") EQ 0` THEN LET cruise_name = cruise_expocode
+
+LOAD write_webrow(XSEQUENCE(cruise_expocode), XSEQUENCE(cruise_name), XSEQUENCE(cruise_mask), "($result_icon_webrowset_filename)")
 
 ! Newer Ferret (v6.85+) will let the arguments be on other than the X axis
 !LOAD write_webrow(cruise_id, cruise_name, cruise_mask, "($result_icon_webrowset_filename)")
