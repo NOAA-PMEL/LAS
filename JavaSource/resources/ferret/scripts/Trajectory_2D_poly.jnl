@@ -65,8 +65,7 @@ IF ($constraint_0_lhs"0|*>1) THEN
 ENDIF
 
 LET constraints_mask = var_mask* text_mask
-
-
+LET constraints_mask1 = var_mask* text_mask
 
 ! If the variable is TIME then  symbols are
 !  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
@@ -84,6 +83,11 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
      DEFINE SYMBOL stat_min ($region_x_lo)
   ENDIF
   
+
+
+  sh sym stat_min, stat_max
+  sh sym region_x_lok, region_x_hi
+
   IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
     LET/UNITS=degrees_east x_var_data = ($data_x_var)
     IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
@@ -100,7 +104,20 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
     IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
     LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
     DEFINE SYMBOL var_data = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+
+    LET constraints_mask = XCAT (constraints_mask1, constraints_mask1)
   ENDIF
+
+  IF `($REGION_X_LO) LT ($STAT_MIN)` THEN
+    DEFINE SYMBOL do_wrap = 1
+    LET/UNITS=degrees_east x_var_data   = XCAT( ($data_x_var), ($data_x_var)-360 )
+    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
+    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
+    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
+    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+    DEFINE SYMBOL var_data = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+
+    LET constraints_mask = XCAT (constraints_mask1, constraints_mask1)
 ENDIF
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
