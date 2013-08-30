@@ -81,11 +81,6 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   ELSE
      DEFINE SYMBOL stat_min ($region_x_lo)
   ENDIF
-  
-
-
-  sh sym stat_min, stat_max
-  sh sym region_x_lok, region_x_hi
 
   IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
     LET/UNITS=degrees_east x_var_data = ($data_x_var)
