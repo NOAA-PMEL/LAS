@@ -32,6 +32,7 @@ public class CruiseIconWidget extends Composite {
     ScrollPanel panel = new ScrollPanel();
     VerticalPanel layout = new VerticalPanel();
     VerticalPanel interior = new VerticalPanel();
+    List<String> checkedIcons = new ArrayList<String>();
     public CruiseIconWidget() {
     	layout.add(message);
     	message.setVisible(false);
@@ -70,6 +71,20 @@ public class CruiseIconWidget extends Composite {
     		message.setHTML(e.toString());
     	}
     }
+    public List<String> getCheckedIconList() {
+        List<String> checkedIcons = new ArrayList<String>();
+        for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
+            IconCheckBox icb = (IconCheckBox) iconsIt.next();
+            if ( icb.isChecked() ) {
+                String id = icb.getID();
+                checkedIcons.add(id);
+            }
+        }
+        return checkedIcons;
+    }
+    public void setCheckedIconList(List<String> checkedIcons) {
+        this.checkedIcons = checkedIcons;
+    }
     public String getIDs() {
     	StringBuilder ids = new StringBuilder();
     	for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
@@ -85,6 +100,19 @@ public class CruiseIconWidget extends Composite {
 		}
     	return ids.toString();
     }
+    public void setCheckedIcons(List<String> checkedIcons) {
+        for (Iterator checkIconIt = checkedIcons.iterator(); checkIconIt.hasNext();) {
+            String id = (String) checkIconIt.next();
+            for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
+                IconCheckBox icb = (IconCheckBox) iconsIt.next();
+                String boxId = icb.getID();
+                if ( boxId.equals(id) ) {
+                    icb.setValue(true);
+                }
+            }
+        }
+        
+    }
     RequestCallback iconCallback = new RequestCallback() {
 
 		@Override
@@ -97,6 +125,7 @@ public class CruiseIconWidget extends Composite {
 		public void onResponseReceived(Request request, Response response) {
 			String doc = response.getText();
             load(doc);
+            setCheckedIcons(checkedIcons);
 		}
     	
     };

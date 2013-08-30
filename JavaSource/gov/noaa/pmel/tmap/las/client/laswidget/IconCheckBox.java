@@ -33,4 +33,7 @@ public class IconCheckBox extends Composite {
 	public boolean isChecked() {
 		return checkbox.getValue();
 	}
+	public void setValue(boolean value) {
+	    checkbox.setValue(value);
+	}
 }
