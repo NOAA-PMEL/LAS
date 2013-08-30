@@ -32,6 +32,7 @@ import gov.noaa.pmel.tmap.las.client.ui.IESafeImage;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -191,6 +192,8 @@ public class SimplePropPropViewer implements EntryPoint {
     protected String thi;
     protected String zlo;
     protected String zhi;
+    
+    protected List<String> currentIconList = new ArrayList<String>();
 
     // There are 3 states we want to track.
 
@@ -668,8 +671,11 @@ public class SimplePropPropViewer implements EntryPoint {
             if (v2 != null) {
                 lasRequest.setProperty("data_2", "url", netcdf);
             }
-            if (!cruiseIcons.getIDs().equals(""))
+            lasRequest.removeProperty("ferret", "cruise_list");
+            if (!cruiseIcons.getIDs().equals("") ) {
+                currentIconList = cruiseIcons.getCheckedIconList();
                 lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
+            }
         } else if ((!contained || netcdf == null) && grid_type.equals("trajectory")) {
             // This should only occur when the app loads for the first time...
             if ( plot ) {
@@ -825,6 +831,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl));
                         } else if (result.getAttribute("type").equals("icon_webrowset")) {
                             String iconurl = result.getAttribute("url");
+                            cruiseIcons.setCheckedIconList(currentIconList);
                             cruiseIcons.init(iconurl);
                         } else if (result.getAttribute("type").equals("netCDF")) {
                             netcdf = result.getAttribute("file");
