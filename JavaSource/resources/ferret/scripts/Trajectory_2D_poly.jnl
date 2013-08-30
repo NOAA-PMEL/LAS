@@ -72,9 +72,8 @@ LET constraints_mask1 = var_mask* text_mask
 ! 
 ! In this case we can set up a time axis, and call polymark_datekey 
 
-! When the data crosses the branch cut, replicate the lon,lat,var variables with lon+360,
-! and contcatenate with the original points before plotting.
-
+! When the data crosses the branch cut, replicate the lon,lat,var variables 
+! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   IF `($nodata"0|*>1") EQ 0` THEN 
