@@ -1,0 +1,75 @@
+! decimate_dsg.jnl
+!
+! Redefine data_var, data_x_var, data_y_var
+! * Insert gaps between cruises
+! * Fix longitudes crossing the dateline.
+! * If the amount of data is large, also decimate
+!   via piecewise linear fit.
+
+DEFINE SYMBOL ncruises = `rowsize,RETURN=msize`
+
+if ($ncruises"0|*>1") THEN 
+   LET mmax = `rowsize[m=1:($ncruises)@sum]` ! 1st m cruises
+   LET npts = mmax
+ELSE
+   LET npts = `($data_var),RETURN=isize`
+ENDIF
+
+
+! Replace the last datum in each trajectory with the bad-value.
+! For the longitudes, also fix the crossings of the dateline.
+
+LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], rowsize, 0)
+LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], rowsize, 1)
+LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], rowsize, 0)
+
+LET npts = `lat_with_gaps,RETURN=isize`
+
+
+! Only decimate if there is a lot of data
+
+IF `npts LT 200000` THEN 
+   DEFINE SYMBOL data_var = var_with_gaps
+   DEFINE SYMBOL data_x_var = lon_with_gaps
+   DEFINE SYMBOL data_y_var = lat_with_gaps
+   EXIT/SCRIPT
+ENDIF
+
+DEFINE SYMBOL piecewise_decimation = 1
+SET MEM/SIZ=400
+
+LET nf = npts
+LET control = 2
+LET lontol = 0.5
+LET lontol = 2
+LET lattol = `lontol`
+LET fco2tol =`lontol*2`
+
+LET decimate_lonlat = PIECEWISE3(\
+lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, fco2tol)
+
+LET nout_lonlat = `decimate_lonlat[i=@ngd]`
+DEFINE SYMBOL nout_lonlat = `nout_lonlat`
+
+stat var_with_gaps
+say `nout_lonlat/npts` Decimation fraction
+
+LET xsamplepts = XSEQUENCE(decimate_lonlat[i=1:($nout_lonlat)])
+DEFINE AXIS/X=1:($nout_lonlat):1 xsample_axis
+LET samplepts = xsamplepts[gx=xsample_axis@asn] 
+
+
+! If there is a missing value in the fco2's make a gap in lon/lat there as well. Otherwise 
+! The ribbon plot with /miss=blank still fills halfway to the next location with a color, 
+! and that next location may be the next cruise, halfway around the world.
+
+LET lons = if var_with_gaps then lon_with_gaps
+LET lats = if var_with_gaps then lat_with_gaps
+
+LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts)
+LET lonsample = SAMPLE_FAST_I(lons, samplepts)
+LET latsample = SAMPLE_FAST_I(lats, samplepts)
+
+DEFINE SYMBOL data_var = varsample
+DEFINE SYMBOL data_x_var = lonsample
+DEFINE SYMBOL data_y_var = latsample
