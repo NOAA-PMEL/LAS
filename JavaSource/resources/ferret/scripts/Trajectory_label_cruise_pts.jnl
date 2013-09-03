@@ -12,7 +12,6 @@ IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
 LET check_var = $1%($ferret_plot_var)%
 
-
 ! Fill with a known value to distinguish between input missing values
 ! and values missing because of the different length of cruises.
 
@@ -47,23 +46,22 @@ ENDIF
 
 LET ngood_chosen_cruises = subset_mask* trajectory_mask* ngood_in_cruise
 LET nbad_chosen_cruises = subset_mask* trajectory_mask*  nbad_in_cruise
-DEFINE SYMBOL ngood = `ngood_chosen_cruises[i=@sum]`
-DEFINE SYMBOL nbad = `nbad_chosen_cruises[i=@sum]`
+
+! Just compute one of these, and subtract from the total in dataset
+
+IF `($ngood_data"0|*>1") EQ 0` THEN 
+   SET MEM/SIZ=700
+   LET allsize = `check_var,RETURN=isize`
+   DEFINE SYMBOL nbad_data = `nbad_chosen_cruises[i=@SUM]`
+   DEFINE SYMBOL ngood_data = `allsize - ($nbad_data)`
+ENDIF
 
 LET allvars = ..varnames
 
 IF ($cruises_shown"1|*>0") THEN DEFINE SYMBOL cruises_shown = `trajectory_mask[i=@sum]`
 
 DEFINE SYMBOL cruises_shown = ($cruises_shown"($cruise_max)")
-LET xloc = `($ppl$width) - ($ppl$xorg) - 0.1`
-LET yloc = `($ppl$height) - ($ppl$yorg) - 0.6`
-IF `($from_pts"0|*>1") EQ 0` THEN LET yloc = `yloc - 0.2`
 
-IF `($ferret_annotations"0|*>1") EQ 0` THEN \
- LABEL/NOUSER `xloc`,`yloc`, 1, 0, 0.12, @AS($cruises_shown) cruise($c_s)
-
-LET yloc = `yloc - 0.2`
-!
 !DEFINE SYMBOL database_table_label = `cruise_id.database_table`
 
 ! c_s used to add plural s to a label if more than one cruise.
@@ -71,11 +69,17 @@ CANCEL SYMBOL c_s
 IF `($cruises_shown"0") GT 1` THEN DEFINE SYMBOL c_s = s
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab = ($ngood) of ($from_pts) obs
-IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs (($nbad) missing)
+DEFINE SYMBOL note_($note_num)_lab = ($ngood_data) of ($from_pts) obs
+IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs (($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
-IF `($has_missing"0|0>1|*>0") AND ($nbad"|0>1|*>0")` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood) obs
+IF `($has_missing"0|0>1|*>0") AND ($nbad_data"|0>1|*>0")` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs
+
+! Notation about the decimation
+IF ($piecewise_decimation"0|*>1") THEN 
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = Decimated with Piecewise Linear Method to ($nout_lonlat) good points
+ENDIF
 
 !---------------- end of Trajectory_label_cruise_pts.jnl -------------------------
