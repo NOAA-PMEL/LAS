@@ -233,11 +233,15 @@ public class SimplePropPropViewer implements EntryPoint {
     
     String initialHistory;
     boolean hasInitialHistory = false;
+    
+    String trajectory_id;
     @Override
     public void onModuleLoad() {
         logger.setLevel(Level.ALL);
 
         colorVariables.setColorBy(true);
+        // Turn it on by default...
+        colorCheckBox.setValue(true);
         ClientFactory cf = GWT.create(ClientFactory.class);
         eventBus = cf.getEventBus();
 
@@ -355,7 +359,7 @@ public class SimplePropPropViewer implements EntryPoint {
         controlPanel.setWidget(2, 1, coloredBy);
         controlPanel.setWidget(2, 2, colorVariables);
         topPanel.add(controlPanel);
-        colorVariables.setEnabled(false);
+       
         update.addClickHandler(updateClick);
         String catid = Util.getParameterString("catid");
         String xml = Util.getParameterString("xml");
@@ -379,7 +383,6 @@ public class SimplePropPropViewer implements EntryPoint {
                 
             }
             setFixedT(tlo, thi);
-            
             Util.getRPCService().getConfig(null, catid, dsid, varid, datasetCallback);
         } else {
             Window.alert("This app must be launched from the main interface.");
@@ -1156,8 +1159,13 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 int index = -1;
                 int time_index = -1;
+                
                 for (int i = 0; i < variables.length; i++) {
                     VariableSerializable vs = variables[i];
+                    String tid = vs.getAttributes().get("trajectory_id");
+                    if ( tid != null && tid.equals("true") ) {
+                        trajectory_id = vs.getID();
+                    }
                     if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
                         xAllDatasetVariables.put(vs.getID(), vs);
                     }
@@ -1165,6 +1173,11 @@ public class SimplePropPropViewer implements EntryPoint {
                 xVariables.setVariables(Arrays.asList(variables));
                 yVariables.setVariables(Arrays.asList(variables));
                 colorVariables.setVariables(Arrays.asList(variables));
+                if ( trajectory_id != null && !trajectory_id.equals("") ) {
+                    colorVariables.setVariable(xAllDatasetVariables.get(trajectory_id));
+                } else {
+                    colorCheckBox.setValue(false);
+                }
                 
                 // These are the variables filtered for vectors and sub-set variables
                 List<VariableSerializable> filtered = xVariables.getVariables();
