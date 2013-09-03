@@ -42,6 +42,8 @@ ENDIF
 IF ($data_($num)_var"0|*>1") THEN 
    DEFINE SYMBOL data_var '($data_($num)_var)'
    DEFINE SYMBOL data_orig_var ($data_($num)_var)
+   DEFINE SYMBOL data_var_nq ($data_($num)_var)
+
 ENDIF
 
 DEFINE SYMBOL data_name ($data_($num)_name)
@@ -53,7 +55,8 @@ DEFINE SYM var_num ($num)
 ! (Apparently addXML now does this automatically, so check for it already being in ' ')
 
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = `UPCASE("($data_var)")`
-IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = `UPCASE("($data_var)")`
+IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = `UPCASE("($data_var_nq)")`
+IF ($data_($num)_var_nq"0|*>1") THEN DEFINE SYMBOL data_var_nq = `UPCASE("($data_var_nq)")`
 LET varlen = `STRLEN("($data_var)")`
 IF `STRINDEX("($data_var)", "'") EQ 1 AND STRRINDEX("($data_var)", "'") EQ varlen` THEN
    DEFINE SYMBOL surrounding_quotes_already = 1
