@@ -20,7 +20,7 @@ DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 SET MODE verify:always  ! allows for debugging
 
-!DEFINE SYMBOL ribbon = 1
+DEFINE SYMBOL ribbon = 1
 
 DEFINE SYMBOL its_insitu = 1
 DEFINE SYMBOL its_trajectory_map = 1
@@ -67,6 +67,15 @@ ENDIF
 LET constraints_mask = var_mask* text_mask
 LET constraints_mask1 = var_mask* text_mask
 
+! Apply the constraints mask
+
+LET var_data_masked = constraints_mask * ($data_var)
+DEFINE SYMBOL data_var = var_data_masked
+
+! For the annotations
+DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
+DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+
 ! If the variable is TIME then  symbols are
 !  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
 ! 
@@ -76,42 +85,34 @@ LET constraints_mask1 = var_mask* text_mask
 ! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
+
+
+  IF ($rowvar"0|*>1") THEN GO decimate_dsg
+
+  LET/UNITS=degrees_east x_var_data = ($data_x_var)
+!  LET/UNITS=degrees_east x_var_data = IF ($data_x_var) LT 0 then ($data_x_var)+360 else ($data_x_var)
   IF `($nodata"0|*>1") EQ 0` THEN 
-     STAT ($data_x_var)
+     STAT x_var_data
   ELSE
      DEFINE SYMBOL stat_min ($region_x_lo)
   ENDIF
 
-  IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
-    LET/UNITS=degrees_east x_var_data = ($data_x_var)
-    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
-    IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
-    IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
-    LET var_data = ($ferret_plot_var)
-    DEFINE SYMBOL var_data = ($ferret_plot_var)
+  IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
+  IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
+  IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
+  LET var_data = ($data_var)
+  DEFINE SYMBOL var_data = ($data_var)
 
-  ELSE
-    DEFINE SYMBOL do_wrap = 1
-    LET/UNITS=degrees_east x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
-    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
-    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
-    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
-    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
-    DEFINE SYMBOL var_data = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
-
-    LET constraints_mask = XCAT (constraints_mask1, constraints_mask1)
+  IF `($STAT_MIN) LT ($REGION_X_LO)` THEN
+    DEFINE SYMBOL do_wrap = 360
+    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + ($do_wrap)
   ENDIF
 
   IF `($REGION_X_LO) LT ($STAT_MIN)` THEN
-    DEFINE SYMBOL do_wrap = 1
-    LET/UNITS=degrees_east x_var_data   = XCAT( ($data_x_var), ($data_x_var)-360 )
-    IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
-    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
-    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
-    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
-    DEFINE SYMBOL var_data = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+    DEFINE SYMBOL do_wrap = -360
+    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + (($do_wrap))
+  ENDIF
 
-    LET constraints_mask = XCAT (constraints_mask1, constraints_mask1)
 ENDIF
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
@@ -144,11 +145,6 @@ IF ($ferret_by_id"0|*>1") THEN
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
-   IF ($do_wrap"0|*>1") THEN 
-      LET vdata = id_data[i=1:`($data_x_var),RETURN=isize`]
-      LET var_data  = XCAT( vdata, vdata )
-      DEFINE SYMBOL var_data = XCAT( vdata, vdata )
-   ENDIF
    DEFINE SYMBOL ferret_plot_title Colored by Trajectory Number
 ENDIF
 
@@ -212,15 +208,11 @@ IF ($ferret_poly_levels"0|*>1") THEN
 ENDIF
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/THICK($qualifiers)
+   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/THICK/LINE($qualifiers)
 ELSE
    DEFINE SYMBOL plot_command = POLY
    IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
 ENDIF
-
-! Apply the constraints mask
-
-LET var_data = constraints_mask * ($var_data)
 
 ! Make the polygon overlay plot
 
@@ -232,10 +224,9 @@ IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
 
 ! Use color=1 for black...
    PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
+   IF ($do_wrap"0|*>1") THEN\
+     PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad+(($do_wrap)),y_loc_bad 
 ENDIF
-
-LET ng = var_data[x=@ngd]
-IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 
 DEFINE SYMBOL do_icons = 0
 	IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
@@ -257,12 +248,16 @@ ELSE
    ENDIF
 
    IF ($ribbon"0|*>1") THEN
-!      ($plot_command)($qualifiers)/sym=18/SIZ=0.06/thick/lev=v/SET x_var_data, y_var_data, var_data 
-      ($plot_command)($qualifiers)/missing=black/lev=v/SET x_var_data, y_var_data, var_data 
+      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
          IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
        PPL RIBBON/OVER
+
+       IF ($do_wrap"0|*>1") THEN \
+          ($plot_command)($qualifiers)/missing=black x_var_data+(($do_wrap)), y_var_data, var_data 
    ELSE
 
+      LET ng = var_data[x=@ngd]
+      IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
       DEFINE SYMBOL poly_command ($plot_command)($qualifiers)
 
       GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
