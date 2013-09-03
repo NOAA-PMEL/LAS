@@ -239,25 +239,28 @@ public class TabledapTool extends TemplateTool {
                 // This little exercise will normalize the x values to -180, 180.
                 double xhiDbl = String2.parseDouble(xhi);
                 double xloDbl = String2.parseDouble(xlo);
-                LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
-                xhiDbl = p.getLongitude();
-                p = new LatLonPointImpl(0, xloDbl);
-                xloDbl = p.getLongitude();
+                // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
+                if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
+                    LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
+                    xhiDbl = p.getLongitude();
+                    p = new LatLonPointImpl(0, xloDbl);
+                    xloDbl = p.getLongitude();
 
-                // Now a wrap around from west to east should be have xhi < xlo;
-                if ( xhiDbl < xloDbl ) {
-                    if ( xhiDbl < 0 && xloDbl >=0 ) {
-                        // This should be true, otherwise how would to get into this situation unless you wrapped around the entire world and overlapped...
-                        xhiDbl = xhiDbl + 360.0d;
-                        query.append("&lon360>=" + xloDbl);
-                        query.append("&lon360<=" + xhiDbl);
-                    } // the else block is that you overlapped so leave off the longitude constraint all teogether
-                    
-                } else {
-                    // This else block is the case where it a query that does not cross the date line
-                    query.append("&longitude>=" + xlo);
-                    query.append("&longitude<=" + xhi);
-                }
+                    // Now a wrap around from west to east should be have xhi < xlo;
+                    if ( xhiDbl < xloDbl ) {
+                        if ( xhiDbl < 0 && xloDbl >=0 ) {
+                            // This should be true, otherwise how would to get into this situation unless you wrapped around the entire world and overlapped...
+                            xhiDbl = xhiDbl + 360.0d;
+                            query.append("&lon360>=" + xloDbl);
+                            query.append("&lon360<=" + xhiDbl);
+                        } // the else block is that you overlapped so leave off the longitude constraint all teogether
+
+                    } else {
+                        // This else block is the case where it a query that does not cross the date line
+                        query.append("&longitude>=" + xlo);
+                        query.append("&longitude<=" + xhi);
+                    }
+                }// Span the whole globe so leave off the lon query all together.
             } else {
                 //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
                 if (xlo.length() > 0) query.append("&longitude>=" + xlo);
