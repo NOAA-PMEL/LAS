@@ -10,336 +10,339 @@
 !              add to the title, "from data sampled every xxx"
 !
 ! Set the gif filename, changing it from .gif to the name from this request
-GO LAS_reset_gifname
+GO LAS_reset_gifname; sho sym clock_secs
 
-! Initialize the region and data.
+! Initialize the region and data.; sho sym clock_secs
 
-DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
+DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu; sho sym clock_secs
 
-! DEFINE SYMBOL ferret_label = 0
+! DEFINE SYMBOL ferret_label = 0; sho sym clock_secs
 
-SET MODE verify:always  ! allows for debugging
+SET MODE verify:always  ! allows for debugging; sho sym clock_secs
 
-DEFINE SYMBOL ribbon = 1
+DEFINE SYMBOL ribbon = 1; sho sym clock_secs
 
-DEFINE SYMBOL its_insitu = 1
-DEFINE SYMBOL its_trajectory_map = 1
-GO LAS_initialize_region 0
+DEFINE SYMBOL its_insitu = 1; sho sym clock_secs
+DEFINE SYMBOL its_trajectory_map = 1; sho sym clock_secs
+GO LAS_initialize_region 0; sho sym clock_secs
 
-IF ($data_0_var"0|vid>1|*>0")  THEN 
-   DEFINE SYMBOL ferret_by_id = 1
-   USE "($data_0_url)"
-   LET varnames = ..varnames
+IF ($data_0_var"0|vid>1|*>0")  THEN
+   DEFINE SYMBOL ferret_by_id = 1; sho sym clock_secs
+   USE "($data_0_url)"; sho sym clock_secs
+   LET varnames = ..varnames; sho sym clock_secs
 
-   DEFINE SYMBOL data_0_var = `varnames[i=1]`
-   CANCEL DATA "($data_0_url)"
+   DEFINE SYMBOL data_0_var = `varnames[i=1]`; sho sym clock_secs
+   CANCEL DATA "($data_0_url)"; sho sym clock_secs
 ENDIF
-GO LAS_initialize_data 0
+GO LAS_initialize_data 0; sho sym clock_secs
 
-! Check for errors (They often occur during dataset initialization.)
+! Check for errors (They often occur during dataset initialization.); sho sym clock_secs
 
 IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
+  MESSAGE/ERROR **ERROR ($error_string); sho sym clock_secs
+  EXIT/PROGRAM; sho sym clock_secs
 ENDIF
 
-! Set the URL label for the first dataset.
-GO LAS_url_label 0
+! Set the URL label for the first dataset.; sho sym clock_secs
+GO LAS_url_label 0; sho sym clock_secs
 
-! Create the trajectory variables and symbols
+! Create the trajectory variables and symbols; sho sym clock_secs
 
-GO LAS_initialize_traj_id
+GO LAS_initialize_traj_id; sho sym clock_secs
 
-! Apply any constraints
+! Apply any constraints; sho sym clock_secs
 
-LET xvar = ($ferret_plot_var)
-LET nx_var = `($ferret_plot_var),return=isize`
+LET xvar = ($ferret_plot_var); sho sym clock_secs
+LET nx_var = `($ferret_plot_var),return=isize`; sho sym clock_secs
 
-LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
-let subset_mask = 1
-LET text_mask = 1
-LET ntext_masks = 0
+LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]; sho sym clock_secs
+let subset_mask = 1; sho sym clock_secs
+LET text_mask = 1; sho sym clock_secs
+LET ntext_masks = 0; sho sym clock_secs
 
 IF ($constraint_0_lhs"0|*>1) THEN
-   GO prop_prop_constraints
+   GO prop_prop_constraints; sho sym clock_secs
 ENDIF
 
-LET constraints_mask = var_mask* text_mask
-LET constraints_mask1 = var_mask* text_mask
+LET constraints_mask = var_mask* text_mask; sho sym clock_secs
+LET constraints_mask1 = var_mask* text_mask; sho sym clock_secs
 
-! Apply the constraints mask
+! Apply the constraints mask; sho sym clock_secs
 
-LET var_data_masked = constraints_mask * ($data_var)
-DEFINE SYMBOL data_var = var_data_masked
+LET var_data_masked = constraints_mask * ($data_var); sho sym clock_secs
+DEFINE SYMBOL data_var = var_data_masked; sho sym clock_secs
 
-! For the annotations
-DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
-DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+! For the annotations; sho sym clock_secs
+DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`; sho sym clock_secs
+DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`; sho sym clock_secs
 
-! If the variable is TIME then  symbols are
-!  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
-! 
-! In this case we can set up a time axis, and call polymark_datekey 
+! If the variable is TIME then  symbols are; sho sym clock_secs
+!  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??; sho sym clock_secs
+! ; sho sym clock_secs
+! In this case we can set up a time axis, and call polymark_datekey ; sho sym clock_secs
 
-! When the data crosses the branch cut, replicate the lon,lat,var variables 
-! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
+! When the data crosses the branch cut, replicate the lon,lat,var variables ; sho sym clock_secs
+! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable; sho sym clock_secs
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
+  IF ($rowvar"0|*>1") THEN GO decimate_dsg; sho sym clock_secs
 
-  IF ($rowvar"0|*>1") THEN GO decimate_dsg
-
-  LET/UNITS=degrees_east x_var_data = ($data_x_var)
-!  LET/UNITS=degrees_east x_var_data = IF ($data_x_var) LT 0 then ($data_x_var)+360 else ($data_x_var)
-  IF `($nodata"0|*>1") EQ 0` THEN 
-     STAT x_var_data
+  LET/UNITS=degrees_east x_var_data = ($data_x_var); sho sym clock_secs
+!  LET/UNITS=degrees_east x_var_data = IF ($data_x_var) LT 0 then ($data_x_var)+360 else ($data_x_var); sho sym clock_secs
+  IF `($nodata"0|*>1") EQ 0` THEN
+     STAT x_var_data; sho sym clock_secs
   ELSE
-     DEFINE SYMBOL stat_min ($region_x_lo)
+     DEFINE SYMBOL stat_min ($region_x_lo); sho sym clock_secs
   ENDIF
 
-  IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
-  IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
-  IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
-  LET var_data = ($data_var)
-  DEFINE SYMBOL var_data = ($data_var)
+  IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var); sho sym clock_secs
+  IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var); sho sym clock_secs
+  IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var); sho sym clock_secs
+  LET var_data = ($data_var); sho sym clock_secs
+  DEFINE SYMBOL var_data = ($data_var); sho sym clock_secs
 
   IF `($STAT_MIN) LT ($REGION_X_LO)` THEN
-    DEFINE SYMBOL do_wrap = 360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + ($do_wrap)
+    DEFINE SYMBOL do_wrap = 360; sho sym clock_secs
+    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + ($do_wrap); sho sym clock_secs
   ENDIF
 
   IF `($REGION_X_LO) LT ($STAT_MIN)` THEN
-    DEFINE SYMBOL do_wrap = -360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + (($do_wrap))
+    DEFINE SYMBOL do_wrap = -360; sho sym clock_secs
+    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + (($do_wrap)); sho sym clock_secs
   ENDIF
 
 ENDIF
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 
-   LET tmin = ($data_t_var)[i=@MIN]
-   LET tmax = ($data_t_var)[i=@MAX]
+   LET tmin = ($data_t_var)[i=@MIN]; sho sym clock_secs
+   LET tmax = ($data_t_var)[i=@MAX]; sho sym clock_secs
 
-   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
-   IF `since_loc GT 1` THEN 
-      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
-      DEFINE SYMBOL tunits = `tunits`
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2; sho sym clock_secs
+   IF `since_loc GT 1` THEN
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`); sho sym clock_secs
+      DEFINE SYMBOL tunits = `tunits`; sho sym clock_secs
    ENDIF
-   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
-   DEFINE SYMBOL polymark_script = polymark_datekey
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis ; sho sym clock_secs
+   DEFINE SYMBOL polymark_script = polymark_datekey; sho sym clock_secs
 
-! Define time variable for last arg.
-! yes?  GO polymark_datekey polygon_command xpts ypts [values] [shape] [scale] timevar
+! Define time variable for last arg.; sho sym clock_secs
+! yes?  GO polymark_datekey polygon_command xpts ypts [values] [shape] [scale] timevar; sho sym clock_secs
 
-   LET ttvar = t[gt=time_axis]
-   DEFINE SYMBOL datekey_time_arg = ttvar
+   LET ttvar = t[gt=time_axis]; sho sym clock_secs
+   DEFINE SYMBOL datekey_time_arg = ttvar; sho sym clock_secs
 
-   DEFINE SYMBOL margin = 1
-   DEFINE SYMBOL ferret_poly_levels = 30
+   DEFINE SYMBOL margin = 1; sho sym clock_secs
+   DEFINE SYMBOL ferret_poly_levels = 30; sho sym clock_secs
 
 ENDIF
 
 IF ($ferret_by_id"0|*>1") THEN
-   DEFINE SYMBOL ferret_palette = more_by_levels
-   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
-   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
-   LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
-   DEFINE SYMBOL var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
-   DEFINE SYMBOL ferret_plot_title Colored by Trajectory Number
+   DEFINE SYMBOL ferret_palette = more_by_levels; sho sym clock_secs
+   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`; sho sym clock_secs
+   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z))); sho sym clock_secs
+   LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]; sho sym clock_secs
+   DEFINE SYMBOL var_data = id_data[i=1:`($data_x_var),RETURN=isize`]; sho sym clock_secs
+   DEFINE SYMBOL ferret_plot_title Colored by Trajectory Number; sho sym clock_secs
 ENDIF
 
-! Plot qualifiers (graticule lines etc)
-GO LAS_set_plot_qualifiers 
+! Plot qualifiers (graticule lines etc); sho sym clock_secs
+GO LAS_set_plot_qualifiers ; sho sym clock_secs
 
-! Open the window
-GO LAS_open_window
+! Open the window; sho sym clock_secs
+GO LAS_open_window; sho sym clock_secs
 
-! Create the blank plot with bathymetries,
-! coastlines, EEZ's, etc.
+! Create the blank plot with bathymetries,; sho sym clock_secs
+! coastlines, EEZ's, etc.; sho sym clock_secs
 
-DEFINE SYMBOL basemap_palette = grayscale
-DEFINE SYMBOL basemap_levels = (-10000,-1000,1000)(-1000,0,100)
-GO LAS_XY_overlay_basemap
+DEFINE SYMBOL basemap_palette = grayscale; sho sym clock_secs
+DEFINE SYMBOL basemap_levels = (-10000,-1000,1000)(-1000,0,100); sho sym clock_secs
+GO LAS_XY_overlay_basemap; sho sym clock_secs
 
-PPL SHASET PROTECT
+PPL SHASET PROTECT; sho sym clock_secs
 
-! Note argument 1 is ignored by Jons_fland.jnl. It determines the resoultion itself.
-!  GO Jons_fland 20 black
-!  GO Jons_fland 20 navy
-!  GO Jons_fland 20 brown_dark
+! Note argument 1 is ignored by Jons_fland.jnl. It determines the resoultion itself.; sho sym clock_secs
+!  GO Jons_fland 20 black; sho sym clock_secs
+!  GO Jons_fland 20 navy; sho sym clock_secs
+!  GO Jons_fland 20 brown_dark; sho sym clock_secs
 
-GO Jons_fland 20 green_deep
-PPL SHASET PROTECT
+! GO Jons_fland 20 green_deep; sho sym clock_secs
+PPL SHASET PROTECT; sho sym clock_secs
 
-! Turn on annotate_key, which persists until turned off
-! (unless key_annoatate property tells us otherwise).
+! Turn on annotate_key, which persists until turned off; sho sym clock_secs
+! (unless key_annoatate property tells us otherwise).; sho sym clock_secs
 
 IF ($ferret_key_annotate"1|0|1|*>1") THEN
-   KEYMARK 1
+   KEYMARK 1; sho sym clock_secs
 ELSE
-   KEYMARK 0
+   KEYMARK 0; sho sym clock_secs
 ENDIF
 
-! Define plot qualifiers for polygon overlay
+! Define plot qualifiers for polygon overlay; sho sym clock_secs
 
-CANCEL SYMBOL qualifiers 
-DEFINE SYMBOL qualifiers = /OVER/NOLAB
+CANCEL SYMBOL qualifiers ; sho sym clock_secs
+DEFINE SYMBOL qualifiers = /OVER/NOLAB; sho sym clock_secs
 
-! If undefined, set polygon scale according to number of points
-IF ($ferret_poly_scale"1|*>0") THEN 
-   GO LAS_set_poly_scale
-   DEFINE SYMBOL ferret_poly_scale 0.5*($ferret_poly_scale)
+! If undefined, set polygon scale according to number of points; sho sym clock_secs
+IF ($ferret_poly_scale"1|*>0") THEN
+   GO LAS_set_poly_scale; sho sym clock_secs
+   DEFINE SYMBOL ferret_poly_scale 0.5*($ferret_poly_scale); sho sym clock_secs
 ENDIF
 
-! Color key for the variable values.
-! If there is no plot variable defined (only plotting locations),
-! do not plot the key.
+! Color key for the variable values.; sho sym clock_secs
+! If there is no plot variable defined (only plotting locations),; sho sym clock_secs
+! do not plot the key.; sho sym clock_secs
 
-IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0
+IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0; sho sym clock_secs
 
 IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+   DEFINE SYMBOL qualifiers = ($qualifiers)/KEY; sho sym clock_secs
 ELSE
-   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY; sho sym clock_secs
 ENDIF
 
-IF ($ferret_poly_levels"0|*>1") THEN 
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels)
+IF ($ferret_poly_levels"0|*>1") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels); sho sym clock_secs
 ENDIF
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/THICK/LINE($qualifiers)
+   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers); sho sym clock_secs
+   IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK; sho sym clock_secs
 ELSE
-   DEFINE SYMBOL plot_command = POLY
-   IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
+   DEFINE SYMBOL plot_command = POLY; sho sym clock_secs
+   IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL; sho sym clock_secs
 ENDIF
 
-! Make the polygon overlay plot
+! Make the polygon overlay plot; sho sym clock_secs
 
-! Points will mark location of missing data
+! Points will mark location of missing data; sho sym clock_secs
 IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
-   LET missing_flag = -9999999
-   LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
-   LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
+   LET missing_flag = -9999999; sho sym clock_secs
+   LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data ; sho sym clock_secs
+   LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data ; sho sym clock_secs
 
-! Use color=1 for black...
-   PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
+! Use color=1 for black...; sho sym clock_secs
+   PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad ; sho sym clock_secs
    IF ($do_wrap"0|*>1") THEN\
-     PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad+(($do_wrap)),y_loc_bad 
+     PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad+(($do_wrap)),y_loc_bad ; sho sym clock_secs
 ENDIF
 
-DEFINE SYMBOL do_icons = 0
+DEFINE SYMBOL do_icons = 0; sho sym clock_secs
 	IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
-      GO Trajectory_map_icons
-      DEFINE SYMBOL do_icons = 1
+      GO Trajectory_map_icons; sho sym clock_secs
+      DEFINE SYMBOL do_icons = 1; sho sym clock_secs
    ENDIF
 
 ELSE
 
-   ! Set the palette
-   ! If there is no variable, only locations, and if a palette is not 
-   ! defined by ferret_palette, use black.
+   ! Set the palette; sho sym clock_secs
+   ! If there is no variable, only locations, and if a palette is not ; sho sym clock_secs
+   ! defined by ferret_palette, use black.; sho sym clock_secs
 
    IF ($ferret_plot_var"0|*>1") THEN
-      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
+      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*"); sho sym clock_secs
    ELSE
-      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
+      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY; sho sym clock_secs
    ENDIF
 
    IF ($ribbon"0|*>1") THEN
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
-         IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-       PPL RIBBON/OVER
+      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data ; sho sym clock_secs
+         IF ($ferret_annotations%0|*>1%) THEN GO key_at_top; sho sym clock_secs
+       PPL RIBBON/OVER; sho sym clock_secs
 
        IF ($do_wrap"0|*>1") THEN \
-          ($plot_command)($qualifiers)/missing=black x_var_data+(($do_wrap)), y_var_data, var_data 
+          ($plot_command)($qualifiers)/missing=black x_var_data+(($do_wrap)), y_var_data, var_data ; sho sym clock_secs
    ELSE
 
-      LET ng = var_data[x=@ngd]
-      IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
-      DEFINE SYMBOL poly_command ($plot_command)($qualifiers)
+      LET ng = var_data[x=@ngd]; sho sym clock_secs
+      IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY; sho sym clock_secs
+      DEFINE SYMBOL poly_command ($plot_command)($qualifiers); sho sym clock_secs
 
-      GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
-      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+      GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg); sho sym clock_secs
+      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top; sho sym clock_secs
 
-      PPL POLYGON/OVER
+      PPL POLYGON/OVER; sho sym clock_secs
    ENDIF
 ENDIF
 
-! Set the shape to what is used above it will be the same on the key
-DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
 
-! Add labels; unless all labels have been turned off
+GO Jons_fland 20 green_deep; sho sym clock_secs
 
-IF `($ferret_label"1|0|1|*>1") EQ 1` THEN 
-   
-   ! Add the plot title on the bottom
-   ! Nudge things down a little for 'yt and 'zt views because the time axis
-   ! has years labeled beneath the months.
-   
+! Set the shape to what is used above it will be the same on the key; sho sym clock_secs
+DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%); sho sym clock_secs
+
+! Add labels; unless all labels have been turned off; sho sym clock_secs
+
+IF `($ferret_label"1|0|1|*>1") EQ 1` THEN
+   ; sho sym clock_secs
+   ! Add the plot title on the bottom; sho sym clock_secs
+   ! Nudge things down a little for 'yt and 'zt views because the time axis; sho sym clock_secs
+   ! has years labeled beneath the months.; sho sym clock_secs
+   ; sho sym clock_secs
    IF `($ferret_annotations"0|*>1") EQ 0` THEN
       IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
-        LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) ; sho sym clock_secs
       ELSE
-        LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) ; sho sym clock_secs
       ENDIF
    ENDIF
-   
-   IF ($t_lab_lo"0|*>1") THEN 
-      DEFINE SYMBOL n_left_labels `($n_left_labels"0") + 1`
-      DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo)
-      IF ($t_lab_hi"0|*>1") THEN DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo) to ($t_lab_hi)
-      DEFINE SYMBOL time_lab ($upper_left_($n_left_labels))
+   ; sho sym clock_secs
+   IF ($t_lab_lo"0|*>1") THEN
+      DEFINE SYMBOL n_left_labels `($n_left_labels"0") + 1`; sho sym clock_secs
+      DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo); sho sym clock_secs
+      IF ($t_lab_hi"0|*>1") THEN DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo) to ($t_lab_hi); sho sym clock_secs
+      DEFINE SYMBOL time_lab ($upper_left_($n_left_labels)); sho sym clock_secs
    ENDIF
 
-ENDIF ! ferret_label
+ENDIF ! ferret_label; sho sym clock_secs
 
-! Add labels at the top for the dataset name etc if they exist  
+! Add labels at the top for the dataset name etc if they exist  ; sho sym clock_secs
 
-GO labels_above_plot
+GO labels_above_plot; sho sym clock_secs
 
 
-! Add any constraint labels in the lower left, or as annotation notes.
+! Add any constraint labels in the lower left, or as annotation notes.; sho sym clock_secs
 IF `($ferret_annotations%0|*>1%)` THEN
 
-   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1; sho sym clock_secs
 
    REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
       DEFINE SYMBOL mmask = `m`;\
       IF ($mask_title_($mmask)"0|*>1) THEN ; \
          DEFINE SYMBOL note_num = `($note_num"0") + 1`; \
          DEFINE SYMBOL note_($note_num)_lab = ($mask_title_($mmask)); \
-      ENDIF)
+      ENDIF); sho sym clock_secs
 ELSE
 
-   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
-   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1; sho sym clock_secs
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`; sho sym clock_secs
 
-   DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
-   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+   DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`; sho sym clock_secs
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`; sho sym clock_secs
 
    REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
       DEFINE SYMBOL mmask = `m`;\
       IF ($mask_title_($mmask)"0|*>1) THEN ; \
         LABEL/NOUSER `($label_x)`, `($label_y)`, -1, 0, 0.12, ($mask_title_($mmask)) ; \
         DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
-      ENDIF)
+      ENDIF); sho sym clock_secs
 ENDIF
 
-! Add cruise information on the top
-GO Trajectory_label_cruise_pts
+! Add cruise information on the top; sho sym clock_secs
+GO Trajectory_label_cruise_pts; sho sym clock_secs
 
-! if constraints are shown via constraint_0_lhs etc, define labels for those
-GO set_constraint_labels
+! if constraints are shown via constraint_0_lhs etc, define labels for those; sho sym clock_secs
+GO set_constraint_labels; sho sym clock_secs
 
-! restore key-annotation setting: keys not annotated
+! restore key-annotation setting: keys not annotated; sho sym clock_secs
 KEYMARK 0
 
-! Save the results
+! Save the results; sho sym clock_secs
 
-IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key
+IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key; sho sym clock_secs
 
-GO LAS_results box
+GO LAS_results box; sho sym clock_secs
 
-! End of file ------------Trajectory_2D_poly.jnl--------------------------
+! End of file ------------Trajectory_2D_poly.jnl--------------------------; sho sym clock_secs
