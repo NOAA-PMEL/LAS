@@ -1452,6 +1452,15 @@ public class SimplePropPropViewer implements EntryPoint {
 
         setVariables();
 
+        String cruise_list = lasRequest.getProperty("ferret", "cruise_list");
+        if ( cruise_list != null ) {
+            String[] chicons = cruise_list.split(",");
+            List<String> checkedIcons = Arrays.asList(chicons);
+            cruiseIcons.clear();
+            cruiseIcons.setCheckedIcons(checkedIcons);
+        } else {
+            cruiseIcons.clear();
+        }
         initialHistory = "";
         hasInitialHistory = false;
         updatePlot(false);
