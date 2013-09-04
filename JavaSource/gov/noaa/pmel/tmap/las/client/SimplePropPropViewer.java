@@ -696,6 +696,7 @@ public class SimplePropPropViewer implements EntryPoint {
             // Find the first non-sub-set variable that is not already included
 
             String v1 = null;
+            String v2 = null;
             String vds = null;
             for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
                 String key = (String) allIt.next();
@@ -705,22 +706,32 @@ public class SimplePropPropViewer implements EntryPoint {
                     vds = v.getDSID();
                 }
             }
+            if ( colorCheckBox.getValue() ) {
+                v2 = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
+                lasRequest.setProperty("data", "count", "3");
+            } else {
+                lasRequest.setProperty("data", "count", "2");
+            }
             if ( vds != null ) {
                 lasRequest.addVariable(vds, v0, 0);
                 if ( v1 != null ) {
                     lasRequest.addVariable(vds, v1, 0);
+                }
+                if ( v2 != null ) { 
+                    lasRequest.addVariable(vds, v2, 0);
+                }
                     for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
                         String key = (String) allIt.next();
                         VariableSerializable v = xAllDatasetVariables.get(key);
                         String vid = v.getID();
                         String did = v.getDSID();
-                        if ( !vid.equals(v1) && !vid.equals(v0) ) {
+                        if (!vid.equals(v2) && !vid.equals(v1) && !vid.equals(v0) ) {
                             lasRequest.addVariable(v.getDSID(), v.getID(), 0);
                         }
                     }
                     xVariables.setVariable(xAllDatasetVariables.get(v0));
                     yVariables.setVariable(xAllDatasetVariables.get(v1));
-                }
+                
             }
         } else {
             operationID = "prop_prop_plot";
