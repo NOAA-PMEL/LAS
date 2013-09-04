@@ -60,6 +60,7 @@ IF ($data_($num)_var_nq"0|*>1") THEN DEFINE SYMBOL data_var_nq = `UPCASE("($data
 LET varlen = `STRLEN("($data_var)")`
 IF `STRINDEX("($data_var)", "'") EQ 1 AND STRRINDEX("($data_var)", "'") EQ varlen` THEN
    DEFINE SYMBOL surrounding_quotes_already = 1
+   DEFINE SYMBOL data_var = `UPCASE("($data_($num)_var)")`
 ELSE 
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = ($data_var)
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = '($data_var)'
