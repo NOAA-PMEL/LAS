@@ -41,23 +41,30 @@ SET MEM/SIZ=400
 LET nf = npts
 LET control = 2
 LET lontol = 0.5
-LET lontol = 2
+LET lontol = 3
 LET lattol = `lontol`
-LET fco2tol =`lontol*2`
+stat var_with_gaps
+LET vartol = 0.5* (($stat_std)^0.5)
 
 LET decimate_lonlat = PIECEWISE3(\
-lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, fco2tol)
+ lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, vartol)
+
 
 LET nout_lonlat = `decimate_lonlat[i=@ngd]`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
-
-stat var_with_gaps
 say `nout_lonlat/npts` Decimation fraction
 
 LET xsamplepts = XSEQUENCE(decimate_lonlat[i=1:($nout_lonlat)])
 DEFINE AXIS/X=1:($nout_lonlat):1 xsample_axis
 LET samplepts = xsamplepts[gx=xsample_axis@asn] 
 
+! Prevent calling decimation function later for a second time.
+SAVE/FILE="($result_annotations_filename).nc"/clobber samplepts
+CANCEL VAR samplepts
+
+USE "($result_annotations_filename).nc"
+LET filesample = `samplepts,RETURN=dsetnum`
+SET DATA 1
 
 ! If there is a missing value in the fco2's make a gap in lon/lat there as well. Otherwise 
 ! The ribbon plot with /miss=blank still fills halfway to the next location with a color, 
@@ -66,10 +73,11 @@ LET samplepts = xsamplepts[gx=xsample_axis@asn]
 LET lons = if var_with_gaps then lon_with_gaps
 LET lats = if var_with_gaps then lat_with_gaps
 
-LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts)
-LET lonsample = SAMPLE_FAST_I(lons, samplepts)
-LET latsample = SAMPLE_FAST_I(lats, samplepts)
+LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts[d=`filesample`])
+LET lonsample = SAMPLE_FAST_I(lons, samplepts[d=`filesample`])
+LET latsample = SAMPLE_FAST_I(lats, samplepts[d=`filesample`])
 
 DEFINE SYMBOL data_var = varsample
 DEFINE SYMBOL data_x_var = lonsample
 DEFINE SYMBOL data_y_var = latsample
+
