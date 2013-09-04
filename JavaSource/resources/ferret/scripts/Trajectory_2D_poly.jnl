@@ -86,7 +86,14 @@ DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`; sho sym clock_secs
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
-  IF ($rowvar"0|*>1") THEN GO decimate_dsg; sho sym clock_secs
+  
+
+  IF ($rowvar"0|*>1") THEN 
+     GO decimate_dsg; sho sym clock_secs
+  ELSE
+     LET nout_lonlat = `var_data_masked[i=@ngd]`; sho sym clock_secs
+     DEFINE SYMBOL nout_lonlat = `nout_lonlat` ; sho sym clock_secs
+  ENDIF
 
   LET/UNITS=degrees_east x_var_data = ($data_x_var); sho sym clock_secs
 !  LET/UNITS=degrees_east x_var_data = IF ($data_x_var) LT 0 then ($data_x_var)+360 else ($data_x_var); sho sym clock_secs
