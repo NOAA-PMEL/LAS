@@ -32,6 +32,9 @@ IF `npts LT 200000` THEN
    DEFINE SYMBOL data_var = var_with_gaps
    DEFINE SYMBOL data_x_var = lon_with_gaps
    DEFINE SYMBOL data_y_var = lat_with_gaps
+   
+   LET nout_lonlat = `($data_var)[i=@ngd]`; sho sym clock_secs
+   DEFINE SYMBOL nout_lonlat = `nout_lonlat` ; sho sym clock_secs
    EXIT/SCRIPT
 ENDIF
 
