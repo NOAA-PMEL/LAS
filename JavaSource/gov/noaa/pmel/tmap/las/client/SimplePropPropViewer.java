@@ -569,7 +569,8 @@ public class SimplePropPropViewer implements EntryPoint {
         currentURL = url;
 
         if (addHistory) {
-            pushHistory(lasRequest.toString());
+            String x = lasRequest.toString();
+            pushHistory(x);
         }
 
         RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
@@ -1246,6 +1247,8 @@ public class SimplePropPropViewer implements EntryPoint {
     };
 
     private void setConstraintsFromRequest(List<Map<String, String>> vcs) {
+        // Start with an empty slate, then add back those from the previous request.
+        constraintWidgetGroup.clearConstraints();
         String op1 = "gt";
         String op2 = "le";
         for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
