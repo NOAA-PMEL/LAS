@@ -110,6 +110,8 @@ ENDIF
 
 IF `($data_($num)_var"0|cruise_id>1|($trajectory_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
 
+DEFINE SYMBOL data_($num)_var_in = ($data_($num)_var)
+
 IF `color_by_traj EQ 1` THEN
 
    USE "($data_($num)_url)"
