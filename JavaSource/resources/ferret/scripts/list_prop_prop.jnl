@@ -5,10 +5,17 @@
 ! Date: 08-2013
 
 ! lists prop_prop_plot.jnl creates an ascii listing of the data from a 
-! property-property plot, using the data variable in symbol data_0_var,
-! the second variable from data_1_var and optionally colored by data_2_var.
+! property-property plot, using the data variable in symbol ferret_plot_var_0,
+! the second variable from ferret_plot_var_1 and optionally colored by ferret_plot_var_2.
 
 set mode ver:always
+
+
+! Open the dataset. Rename the variables to varname_
+! Keep original variable names as symbols data_0_var_orig, ...
+! Treat longitude and latitude the same.
+
+GO LAS_rename_vars 0
 
 DEFINE SYMBOL frmt width=1024/norow
 
@@ -29,7 +36,7 @@ LET xsize = `xvar,RETURN=isize`
 LET ysize = `yvar,RETURN=isize`
 
 IF `xsize NE ysize` THEN 
-  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
+  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($ferret_plot_var_0), ($ferret_plot_var_1)
   EXIT/PROGRAM
 ENDIF
 
@@ -75,7 +82,7 @@ IF ($color_by"0|*>1") THEN
       LET zsize = `zvar,RETURN=isize`
 
       IF `zsize NE xsize` THEN
-         MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
+         MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($ferret_plot_var_0), ($ferret_plot_var_2)
          EXIT/PROGRAM
       ENDIF
       
@@ -98,15 +105,12 @@ DEFINE SYMBOL t_units_string = `TIME.units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
 IF `nsince GT 0` THEN DEFINE SYMBOl tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
 
-DEFINE SYMBOL data_prop_var = ($data_0_var)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
-IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
-IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
+IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
- LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
 
 ! set up any constraint labels
 GO set_constraint_labels
@@ -137,37 +141,37 @@ ENDIF  ! dates, times
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
 
-   LET/TITLE="`longitude,RETURN=title`"/UNITS="`longitude,RETURN=units`" Longitude_ = COMPRESSI(constraints_mask*longitude)
-   LET/TITLE="`latitude,RETURN=title`"/UNITS="`latitude,RETURN=units`" Latitude_ = COMPRESSI(constraints_mask*latitude)
+   LET/TITLE="`longitude_,RETURN=title`"/UNITS="`longitude_,RETURN=units`" Longitude = COMPRESSI(constraints_mask*longitude_)
+   LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = COMPRESSI(constraints_mask*latitude_)
 
    LET nlist = `nlist + 2`
-   DEFINE SYMBOL vars_out = ($vars_out) Longitude_, Latitude_,  
+   DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude,  
 
 ENDIF  ! longitude, latitude8/27/2013
 
 ! Define variables with titles
 
-LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var)_ = COMPRESSI(constraints_mask*($ferret_plot_var_0))
-LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var)_ = COMPRESSI(constraints_mask*($ferret_plot_var_1))
+LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_0))
+LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
 
 LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var)_, ($data_1_var)_ 
+DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in), ($data_1_var_in)
 
 ! color-by variable on the prop-prop plot:
 
-IF ($data_2_var"0|*>1") THEN 
+IF ($ferret_plot_var_2"0|*>1") THEN 
    
    IF ($is_string"0|*>1") THEN  
       LET ii = i[g=time]
       LET iindices = IF constraints_mask THEN ii
       LET compress_mask = COMPRESSI(iindices)
       LEt nok = `compress_mask[i=@ngd]`
-      LET/TITLE="($data_2_title)" ($data_2_var_in)_ = SAMPLEI (zvar, compress_mask[i=1:`nok`])
+      LET/TITLE="($data_2_title)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
    ELSE
-      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in)_ = COMPRESSI(constraints_mask*zvar)
+      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = COMPRESSI(constraints_mask*zvar)
    ENDIF
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)_
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)
 ENDIF
 
 LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F10.0) `size`

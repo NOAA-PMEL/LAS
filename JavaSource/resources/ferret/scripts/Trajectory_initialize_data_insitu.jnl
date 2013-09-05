@@ -110,13 +110,9 @@ ENDIF
 
 IF `($data_($num)_var"0|cruise_id>1|($trajectory_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_traj = 1
 
-DEFINE SYMBOL data_($num)_var_in = ($data_($num)_var)
-
 IF `color_by_traj EQ 1` THEN
 
    USE "($data_($num)_url)"
-
-   DEFINE SYMBOL data_($num)_var_in = ($data_($num)_var)
 
    DEFINE SYMBOL data_($num)_var = `varnames[i=1]`
    DEFINE SYMBOL is_vid = 1
@@ -130,7 +126,7 @@ IF `color_by_traj EQ 1` THEN
    DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    IF ($its_listing"0|*>1") THEN
-      LET/TITLE="($data_($num)_var_in)" var_data = ($data_($num)_var_in)
+      LET/TITLE="($data_($num)_var)" var_data = ($data_($num)_var)
    ELSE
       LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    ENDIF
