@@ -32,8 +32,11 @@ public class DataTable {
         boolean columnEnd = false;
         boolean headersStart = false;
         boolean dataStart = false;
+        String h0 = null;
+        int cols = 0;
         while ( line != null ) {
             if ( line.contains("Column ") ) {
+                cols++;
                 columnStart = true;
             } else {
                 if ( columnStart ) {
@@ -41,12 +44,17 @@ public class DataTable {
                 }
             }
 
-
+            
             if ( columnStart && columnEnd && !headersStart) {
                 headersStart = true;
                 headers = line.trim().split("\\s+");
                 List<String> h = new ArrayList<String>();
-                h.add("DATE");
+                if ( headers.length == cols -1 ) {
+                    h.add("DATE");
+                    h0 = "DATE";
+                } else {
+                    h0 = headers[0];
+                }
                 for (int i = 0; i < headers.length; i++) {
                     h.add(headers[i]);
                 }
@@ -55,13 +63,13 @@ public class DataTable {
                 preamble.add(line.trim());
             }
             if (headersStart) {
-                if ( dataStart ) {
+                if ( dataStart && h0 != null ) {
                     String date_string = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
                     line = line.substring(line.lastIndexOf("\"")+1, line.length()); 
-                    List<String> datelist = data.get("DATE");
+                    List<String> datelist = data.get(h0);
                     if ( datelist == null ) {
                         datelist = new ArrayList<String>();
-                        data.put("DATE", datelist);
+                        data.put(h0, datelist);
                     }
                     datelist.add(date_string);
                     String[] values = line.trim().split("\\s+");
