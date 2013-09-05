@@ -141,8 +141,15 @@ IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits =
 ! Polygon plot
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
+LET compute_good = ($xvar)
+DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-IF `($data_count"0") GT 2` THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+IF `($data_count"0") GT 2` THEN 
+   DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+   LET compute_good = ($zvar)
+   DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+ENDIF
 
 GO LAS_xytvar_setup
 
@@ -202,6 +209,7 @@ ELSE
    ENDIF
 
 ENDIF  ! color-by-trajectory or not...
+
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
