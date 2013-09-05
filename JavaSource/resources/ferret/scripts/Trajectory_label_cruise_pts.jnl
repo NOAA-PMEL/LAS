@@ -5,10 +5,8 @@
 ! Add to annotations the upper right with number of cruises
 ! and number of valid and missing points shown.
 
-
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
-
 
 LET check_var = $1%($ferret_plot_var)%
 
@@ -59,7 +57,6 @@ ENDIF
 LET allvars = ..varnames
 
 IF ($cruises_shown"1|*>0") THEN DEFINE SYMBOL cruises_shown = `trajectory_mask[i=@sum]`
-
 DEFINE SYMBOL cruises_shown = ($cruises_shown"($cruise_max)")
 
 !DEFINE SYMBOL database_table_label = `cruise_id.database_table`
@@ -69,12 +66,14 @@ CANCEL SYMBOL c_s
 IF `($cruises_shown"0") GT 1` THEN DEFINE SYMBOL c_s = s
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab = ($ngood_data) of ($from_pts) obs
-IF `($from_pts"0|*>1") EQ 0` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs (($nbad_data) missing)
+DEFINE SYMBOL note_($note_num)_lab =  ($cruises_shown) cruise($c_s), ($ngood_data) obs
+IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
+ ($cruises_shown) cruise($c_s), ($ngood_data) obs (($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
-IF `($has_missing"0|0>1|*>0") AND ($nbad_data"|0>1|*>0")` THEN DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs
+IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
+ DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs
 
 ! Notation about the decimation
 IF ($piecewise_decimation"0|*>1") THEN 
