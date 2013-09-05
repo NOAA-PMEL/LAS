@@ -85,6 +85,12 @@ public class CruiseIconWidget extends Composite {
     public void setCheckedIconList(List<String> checkedIcons) {
         this.checkedIcons = checkedIcons;
     }
+    public void clear() {
+        for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
+            IconCheckBox icb = (IconCheckBox) iconsIt.next();
+            icb.setValue(false);
+        }
+    }
     public String getIDs() {
     	StringBuilder ids = new StringBuilder();
     	for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
