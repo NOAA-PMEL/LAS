@@ -83,8 +83,7 @@ ELSE
 ! Once the all_subset is defined then the list mask is all set.
 
    IF ($ferret_cruise_list"0|*>1") THEN
-sh var subset_mask
-sh sym all_subset
+
       IF ($all_subset"1|*>0") THEN
 
          LET all_len = STRLEN("($ferret_cruise_list)")
@@ -137,18 +136,18 @@ sh sym all_subset
             DEFINE SYMBOL cruises_shown = `n_subset`
          ELSE
    
-         LET n_subset = `rowsize,RETURN=msize`
-         LET subset_mask = 1 + 0*i[i=1:`n_subset`]
+            LET n_subset = `rowsize,RETURN=msize`
+            LET subset_mask = 1 + 0*i[i=1:`n_subset`]
+         ENDIF
 
       ENDIF  ! all_subset defined
 
       DEFINE SYMBOL subset_mask = 1
+      LET cruise_mask = subset_mask  ! used in the key when color-by-cruise
 
    ENDIF     ! ferret_cruise_list defined
 
 ENDIF
-
-LET cruise_mask = subset_mask  ! used in the key when color-by-cruise
 
 ! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
 
