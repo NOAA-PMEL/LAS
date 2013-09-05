@@ -22,8 +22,12 @@ let traj_mask1 = tmask[gx=($ferret_plot_var_0)@ASN]
 let traj_mask2 = if i[gx=($ferret_plot_var_0)] eq 1 then 1 else 0
 let traj_mask = if (traj_mask1+traj_mask2) eq 1 then 1
 
-LET data_1_var_z =  EXPNDI_BY_Z(($ferret_plot_var_0), traj_mask,`ntrajs`,`longest`)
-LET data_var_z =  EXPNDI_BY_Z(($ferret_plot_var_1), traj_mask,`ntrajs`,`longest`)
+LET xvar = constraints_mask* ($ferret_plot_var_0)
+LET yvar = constraints_mask* ($ferret_plot_var_1)
+LET dvar = constraints_mask* ID_DATA
+
+LET data_1_var_z =  EXPNDI_BY_Z(xvar, traj_mask,`ntrajs`,`longest`)
+LET data_var_z =  EXPNDI_BY_Z(yvar, traj_mask,`ntrajs`,`longest`)
 
 ! Set up to plot the data and the linear fit
 LET pmask =  subset_mask * data_1_var_z
@@ -68,10 +72,13 @@ IF `($traj_max) EQ 1` THEN
    PLOT/NOAX/VS/OVER/LINE=6/NOLAB pmask, qmask
    PLOT/NOAX/VS/OVER/SYM=20/NOLAB/thick=1 pmask, qmask
 
+   DEFINE SYMBOL ngood_data = `pmask[i=@ngd]`
+
 ELIF `($traj_max) LE ($traj_max_labels)` THEN
 
    LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
    LET q = XSEQUENCE( subset_mask * data_var_z)
+
 
    ! Use different color for each traj 1-10, 11-21, ...
    ! Use different symbols for each set of 10
@@ -130,12 +137,14 @@ ELIF `($traj_max) LE ($traj_max_labels)` THEN
     )
 ! Note need to protect the colors from one set of 10 to the next
   
+   DEFINE SYMBOL ngood_data = `dpolydat[i=@ngd]`
 ELSE ! all trajs
 
    GO polymark ($poly_command) p q p \
      ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") \
      ($poly_scale)
 
+   DEFINE SYMBOL ngood_data = `p[i=@ngd]`
 ENDIF
 
 ! End of file ------------ LAS_pp_colorby_traj.jnl--------------------------
