@@ -679,6 +679,8 @@ public class SimplePropPropViewer implements EntryPoint {
             if (!cruiseIcons.getIDs().equals("") ) {
                 currentIconList = cruiseIcons.getCheckedIconList();
                 lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
+            } else {
+                currentIconList = new ArrayList<String>();
             }
         } else if ((!contained || netcdf == null) && grid_type.equals("trajectory")) {
             // This should only occur when the app loads for the first time...
