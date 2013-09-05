@@ -22,12 +22,12 @@ let traj_mask1 = tmask[gx=($ferret_plot_var_0)@ASN]
 let traj_mask2 = if i[gx=($ferret_plot_var_0)] eq 1 then 1 else 0
 let traj_mask = if (traj_mask1+traj_mask2) eq 1 then 1
 
-LET xvar = constraints_mask* ($ferret_plot_var_0)
-LET yvar = constraints_mask* ($ferret_plot_var_1)
+LET pvar = constraints_mask* ($ferret_plot_var_0)
+LET qvar = constraints_mask* ($ferret_plot_var_1)
 LET dvar = constraints_mask* ID_DATA
 
-LET data_1_var_z =  EXPNDI_BY_Z(xvar, traj_mask,`ntrajs`,`longest`)
-LET data_var_z =  EXPNDI_BY_Z(yvar, traj_mask,`ntrajs`,`longest`)
+LET data_1_var_z =  EXPNDI_BY_Z(pvar, traj_mask,`ntrajs`,`longest`)
+LET data_var_z =  EXPNDI_BY_Z(qvar, traj_mask,`ntrajs`,`longest`)
 
 ! Set up to plot the data and the linear fit
 LET pmask =  subset_mask * data_1_var_z
