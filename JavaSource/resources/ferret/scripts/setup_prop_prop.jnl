@@ -183,6 +183,8 @@ DEFINE SYMBOL yvar = yvar
 
 ! Apply any constraints
 
+! Initialize mask variables
+
 LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
 
 IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = 1
@@ -193,7 +195,8 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO prop_prop_constraints
 ENDIF
 
-LET constraints_mask = var_mask* text_mask
+LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * cruise_mask_obs[gx=time@asn]
+LET constraints_mask = text_mask * var_mask * cruise_mask_obs
 
 IF ($color_by"0|*>1") THEN 
 

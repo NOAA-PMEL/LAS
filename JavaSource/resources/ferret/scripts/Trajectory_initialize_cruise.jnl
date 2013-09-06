@@ -68,7 +68,7 @@ ELSE
    IF `($rind"0|I>1|*>0")` THEN LET ncruises = `rowsize,RETURN=isize`
    IF `($rind"0|M>1|*>0")` THEN LET ncruises = `rowsize,RETURN=msize`
    LET cruise_numbers = i[gx=xmask_axis]
-   LET cruise_mask = 1 + 0*cruise_numbers  ! may redefine later
+   IF `($subset_mask"0|*>1") EQ 0` THEN LET cruise_mask = 1 + 0*cruise_numbers  ! may redefine later
 
    DEF SYM cruise_max = `ncruises`
 
@@ -79,74 +79,8 @@ ELSE
 ! If  a subset of cruise ids is given then plot only those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.
 
-! Format the cruise list and define the mask.  Do this just once - 
-! Once the all_subset is defined then the list mask is all set.
-
-   IF ($ferret_cruise_list"0|*>1") THEN
-
-      IF ($all_subset"1|*>0") THEN
-
-         LET all_len = STRLEN("($ferret_cruise_list)")
-         LET subset_len = `all_len`
-
-! Initialize, first cruise id in symbol all_subset
-
-         DEFINE SYMBOL subset_list = ($ferret_cruise_list)
-         LET s1 = 1
-         LET s2 =  `STRINDEX("($subset_list)", ",")`
-         IF `s2 EQ 0` THEN LET s2 = subset_len+1
-         DEFINE SYMBOL one_cruise = "`SUBSTRING("($subset_list)", 1,s2-1)`"
-         DEFINE SYMBOl all_subset = ($one_cruise)
-         DEFINE SYMBOL subset_list= ($all_subset)
-         IF `s2 NE 0` THEN 
-            LET s1 = `s1+s2`
-            IF `s1 LT all_len` THEN 
-	     DEFINE SYMBOL subset_list= `SUBSTRING("($ferret_cruise_list)",s1,subset_len-s2)`
-             LET subset_len = STRLEN("($subset_list)")
-	    ENDIF
-         ENDIF
-
-! If more in the list, add them.
-
-         IF `(s2 NE 0) AND (s1 LT all_len)` THEN
-            REPEAT/RANGE=1:200 ( ;\
-              LET s2 =  `STRINDEX("($subset_list)", ",")`;\
-              IF `s2 EQ 0` THEN LET s2 = subset_len+1;\
-              DEFINE SYMBOL one_cruise = "`SUBSTRING("($subset_list)", 1,s2-1)`";\
-	      DEFINE SYMBOl all_subset = ($all_subset),($one_cruise);\
-	      IF `s2 EQ 0` THEN EXIT/LOOP;\
-	      LET s1 = `s1+s2`;\
-	      IF `s1 GE all_len` THEN EXIT/LOOP;\
-              DEFINE SYMBOL subset_list= `SUBSTRING("($ferret_cruise_list)",s1,subset_len-s2)`;\
-	      LET subset_len = STRLEN("($subset_list)");\
-	      )
-         ENDIF
-
-         LET subset_ids = {($all_subset)}
-
-! Define a mask to use on the entire list of values: plot or not to plot
-! the polygons on the prop-prop plot.
-         list varnames
-   
-         IF `IS_ELEMENT_OF_STR_N(varnames, "($trajectory_variable)") NE 0` THEN 
-            LET subm_ids = IF ELEMENT_INDEX_STR_N(($trajectory_variable), subset_ids) GT 0 THEN 1
-! apply mask as data_var_z* subset_mask
-            LET subset_mask = XSEQUENCE(subm_ids) + 0*i[gx=xmask_axis]  ! put it on a non-abstract axis
-
-            DEFINE SYMBOL cruises_shown = `n_subset`
-         ELSE
-   
-            LET n_subset = `rowsize,RETURN=msize`
-            LET subset_mask = 1 + 0*i[i=1:`n_subset`]
-         ENDIF
-
-      ENDIF  ! all_subset defined
-
-      DEFINE SYMBOL subset_mask = 1
-      LET cruise_mask = subset_mask  ! used in the key when color-by-cruise
-
-   ENDIF     ! ferret_cruise_list defined
-
+! Format the cruise list and define the mask. 
+   GO cruise_list_mask
 ENDIF
 
 ! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
