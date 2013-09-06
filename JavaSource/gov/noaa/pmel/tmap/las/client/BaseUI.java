@@ -10,6 +10,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.ESGFSearchButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.LinkButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.NavAxesGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
@@ -51,9 +52,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasName;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -83,6 +87,7 @@ public class BaseUI {
     VerticalPanel xLeftPanel = new VerticalPanel();
     VerticalPanel xRightPanel = new VerticalPanel();
     ListBox compareMenu = new ListBox();
+   
     public ClickHandler annotationsClickHandler = new ClickHandler() {
 
         @Override
@@ -136,17 +141,21 @@ public class BaseUI {
 
         @Override
         public void onClick(ClickEvent arg0) {
-
-            xAxesWidget.restorePanels();
-            xOperationsWidget.setOpen(true);
-            if ( xVariable.isDescrete() ) {
-                xAnalysisWidget.setVisible(false);
-            } else {
-                xAnalysisWidget.setVisible(true);
-            }
+            
+            pickerCloseActions();
+            
         }
 
     };
+    protected void pickerCloseActions() {
+        xAxesWidget.restorePanels();
+        xOperationsWidget.setOpen(true);
+        if ( xVariable.isDescrete() ) {
+            xAnalysisWidget.setVisible(false);
+        } else {
+            xAnalysisWidget.setVisible(true);
+        }
+    }
     /*
      * Button layout for the required button controls for any UI
      */
@@ -250,6 +259,9 @@ public class BaseUI {
      * Make an HTML only popup page that can be printed.
      */
     PushButton xPrinterFriendlyButton;
+    
+    // Get a link to the current page..
+    LinkButton xLinkButton;
 
     // Controls for the panel sizes and to hide and show the headers.
 
@@ -533,6 +545,8 @@ public class BaseUI {
 
         });
 
+        xLinkButton = new LinkButton();
+        
         xLeftPanel.add(xButtonLayout);
         xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDisplayControls);
         xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1, "268");
@@ -555,12 +569,15 @@ public class BaseUI {
         xDatasetButton.addOpenClickHandler(xButtonOpenHandler);
         xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
         xPrinterFriendlyButton.addStyleDependentName("SMALLER");
+        xLinkButton.addStyleDependentName("SMALLER");
         // Other buttons have their style handled in the widget itself.
         //xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOtherControls);
         xRightPanel.add(xOtherControls);
         xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1, false);
 
         xOtherControls.setWidget(0, xOtherControlsIndex++, xPrinterFriendlyButton);
+        xOtherControls.getCellFormatter().setWordWrap(0, xOtherControlsIndex - 1, false);
+        xOtherControls.setWidget(0, xOtherControlsIndex++, xLinkButton);
         xOtherControls.getCellFormatter().setWordWrap(0, xOtherControlsIndex - 1, false);
         // xButtonLayout.addStyleName("HEADER-WIDTH");
         setTopLeftAlignment(xButtonLayout);
@@ -606,6 +623,8 @@ public class BaseUI {
             }
         });
     }
+
+    
 
     public void setDatasetOpenHandler(OpenHandler<TreeItem> handler) {
         // There is no default open handler, so if it's null don't remove it.
