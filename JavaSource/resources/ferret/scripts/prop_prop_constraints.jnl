@@ -40,8 +40,6 @@ IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
 
 ! Now look for text constraints.
 
-! Are there any text constraints?
-
 LET ntxtconstr = 0
 REPEAT/RANGE=0:100/NAME=ic (\
   DEF SYM ic = `ic`;\
@@ -65,7 +63,5 @@ REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
 
 LET text_mask_zero = ($text_mask)
 LET text_mask = IF text_mask_zero NE 0 THEN 1
-
-LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn]
 
 ! End of  ------------- prop_prop_constraints.jnl--------------------------
