@@ -124,6 +124,15 @@ public class DatasetWidget extends Tree implements HasName {
                 CategorySerializable cat = (CategorySerializable) item.getUserObject();
                 Util.getRPCService().getCategories(cat.getID(), null, categoryCallback);
             }
+            // Open the item.  Work around double firing bug.
+            // http://code.google.com/p/google-web-toolkit/issues/detail?id=3660&q=Tree%20selection&colspec=ID%20Type%20Status%20Owner%20Milestone%20Summary%20Stars
+            TreeItem selItem = event.getSelectedItem();
+            TreeItem parent = selItem.getParentItem();
+            selItem.getTree().setSelectedItem(parent, false); // null is ok
+            if(parent != null)
+                parent.setSelected(false);  // not compulsory
+            selItem.setState(!selItem.getState(), false);
+
         }
 
     };

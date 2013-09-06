@@ -849,6 +849,10 @@ public class UI extends BaseUI {
                         outputPanel.setVariables(panelVars, xNewVariable);
                     }
                     changeDataset();
+                    // Requested in #1538, which restores the behavior of the original picker which was disliked previously,
+                    // "because it closes and I can't tell if I clicked on anything".
+                    xDatasetButton.close();
+                    pickerCloseActions();
                 }
             }
         }

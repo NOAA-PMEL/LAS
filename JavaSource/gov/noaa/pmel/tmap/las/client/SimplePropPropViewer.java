@@ -16,6 +16,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
+import gov.noaa.pmel.tmap.las.client.laswidget.LinkButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
@@ -144,6 +145,7 @@ public class SimplePropPropViewer implements EntryPoint {
     PopupPanel warning = new PopupPanel(true);
     PushButton ok;
     PushButton cancel;
+    LinkButton link = new LinkButton();
     PushButton table = new PushButton("Data Table");
     boolean youveBeenWarned = false;
     // The current intermediate file
@@ -331,6 +333,7 @@ public class SimplePropPropViewer implements EntryPoint {
         print.setEnabled(false);
         buttonPanel.add(update);
         buttonPanel.add(print);
+        buttonPanel.add(link);
         buttonPanel.add(table);
         topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
         controlPanel.setWidget(0, 0, topRow);

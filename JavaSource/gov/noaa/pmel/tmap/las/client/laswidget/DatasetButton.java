@@ -66,7 +66,7 @@ public class DatasetButton extends Composite {
                     dataset_name.setText(selectedVariable.getDSName());
                     variable_name.setText(selectedVariable.getName());
                     datasetWidget.setName(name); // setting the name of this datasetWidget as it will be the source of the re-firing of event
-                    eventBus.fireEvent(event); // this datasetWidget is now the source
+                    eventBus.fireEvent(event); // this datasetWidget is now the source                    
                 }
             }
         });
@@ -94,7 +94,9 @@ public class DatasetButton extends Composite {
     public void setOffset(int offset) {
         this.offset = offset;
     }
-
+    public void close() {
+        datasetPanel.hide();
+    }
     public ClickHandler openClick = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
