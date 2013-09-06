@@ -32,7 +32,6 @@ public class DataTable {
         boolean columnEnd = false;
         boolean headersStart = false;
         boolean dataStart = false;
-        String h0 = null;
         int cols = 0;
         while ( line != null ) {
             if ( line.contains("Column ") ) {
@@ -47,40 +46,40 @@ public class DataTable {
             
             if ( columnStart && columnEnd && !headersStart) {
                 headersStart = true;
-                headers = line.trim().split("\\s+");
+                headers = line.trim().split(",");
                 List<String> h = new ArrayList<String>();
-                if ( headers.length == cols -1 ) {
-                    h.add("DATE");
-                    h0 = "DATE";
-                } else {
-                    h0 = headers[0];
-                }
                 for (int i = 0; i < headers.length; i++) {
-                    h.add(headers[i]);
+                    String value = headers[i];
+                    if ( value.startsWith("\"")) {
+                        value = value.substring(1, value.length());
+                    }
+                    if ( value.endsWith("\"") ) {
+                        value = value.substring(0, value.length()-1);
+                    }
+                    h.add(value);
                 }
                 setHeaders(h);
             } else if ( !headersStart && !columnEnd ) {
                 preamble.add(line.trim());
             }
             if (headersStart) {
-                if ( dataStart && h0 != null ) {
-                    String date_string = line.substring(line.indexOf("\"")+1, line.lastIndexOf("\""));
-                    line = line.substring(line.lastIndexOf("\"")+1, line.length()); 
-                    List<String> datelist = data.get(h0);
-                    if ( datelist == null ) {
-                        datelist = new ArrayList<String>();
-                        data.put(h0, datelist);
-                    }
-                    datelist.add(date_string);
-                    String[] values = line.trim().split("\\s+");
-                    for (int i = 1; i < getHeaders().size(); i++ ) {
+                if ( dataStart ) {
+                    String[] values = line.trim().split(",");
+                    for (int i = 0; i < getHeaders().size(); i++ ) {
                         String header = getHeaders().get(i);
                         List<String> datalist = data.get(header);
                         if ( datalist == null ) {
                             datalist = new ArrayList<String>();
                             data.put(header, datalist);
                         }
-                        datalist.add(values[i-1].trim());
+                        String value = values[i];
+                        if ( value.startsWith("\"")) {
+                            value = value.substring(1, value.length());
+                        }
+                        if ( value.endsWith("\"") ) {
+                            value = value.substring(0, value.length()-1);
+                        }
+                        datalist.add(value);
                     }
                 }
                 dataStart = true;
