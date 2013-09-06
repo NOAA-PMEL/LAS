@@ -47,8 +47,6 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-
-
 ! Check for the global attribute query_result, and see if
 ! it contains a string No data found or other message
 ! Make assignments so that a blank plot will be drawn
@@ -86,6 +84,30 @@ IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
       DEF SYM q = `q`;\
       DEF SYM vname = `varnames[i=($q)]`;\
       GO Trajectory_find_roles)
+ENDIF
+
+
+IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN 
+
+! For ascii listings, if a variable is the same as the trajectory variable,
+! then remove reference to the trajectory variable. It is always listed as part
+! of the metadata.
+
+   REPEAT/RANGE=0:($data_count)/name=ivar (\
+    DEFINE SYMBOL ivar = `ivar`;\
+    IF `($data_($ivar)_var"0|($trajectory_variable"A")>1|*>0")` THEN DEFINE SYMBOL iremove = `ivar`;\
+    )
+
+   IF ($iremove"0|*>1) THEN 
+      cancel symbol data_($iremove)_*
+      DEFINE SYMBOL data_count = `($data_count) - 1`
+   ENDIF
+
+! Open the dataset. Rename the variables to varname_
+! Keep original variable names as symbols data_0_var_orig, ...
+! Treat longitude and latitude the same.
+   GO LAS_rename_vars 0
+   DEFINE SYMBOL data_var ($data_($num)_var)
 ENDIF
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "($trajectory_variable)")` THEN
@@ -127,13 +149,16 @@ IF `color_by_traj EQ 1` THEN
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    IF ($its_listing"0|*>1") THEN
       LET/TITLE="($data_($num)_var)" var_data = ($data_($num)_var)
+      DEFINE SYMBOL data_($num)_var = ($data_($num)_var)
+      DEFINE SYMBOL data_var = ($data_($num)_var)
+      DEFINE SYMBOL ferret_plot_var = ($data_($num)_var)
    ELSE
       LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+      DEFINE SYMBOL data_($num)_var = var_data
+      DEFINE SYMBOL data_var = var_data
+      DEFINE SYMBOL ferret_plot_var = var_data
    ENDIF
 
-   DEFINE SYMBOL data_($num)_var = var_data
-   DEFINE SYMBOL data_var = var_data
-   DEFINE SYMBOL ferret_plot_var = var_data
    DEFINE SYMBOL ferret_plot_title = Trajectory ID
 
    IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
