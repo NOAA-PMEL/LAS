@@ -29,6 +29,16 @@ SET LIST/prec=6
 DEFINE SYMBOL its_listing = 1
 GO setup_prop_prop
 
+! If the color-by variable is a duplicate of either variable 0 or 1, no need to list it.
+
+IF ($ferret_plot_var_2"0|($ferret_plot_var_0)>1|($ferret_plot_var_1)>1|*>0") THEN \
+ CANCEL SYMBOL ferret_plot_var_2
+
+! For that matter, if variable 0 matches variable 1, we can skip one of them.
+sh var xvar
+sh var yvar
+IF ($ferret_plot_var_1"0|($ferret_plot_var_0)>1|*>0") THEN \
+ CANCEL SYMBOL ferret_plot_var_1
 
 ! The variables must be the same size. Check and set up a nice message if not.
 
@@ -105,12 +115,14 @@ DEFINE SYMBOL t_units_string = `TIME.units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
 IF `nsince GT 0` THEN DEFINE SYMBOl tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
 
-DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
-DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
-IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
 
-DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
+DEFINE SYMBOL plot_arg = ($xvar), ($xvar)
+
+IF ($ferret_plot_var_1"0|*>1") THEN
+   IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+   DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
+ENDIF
 
 ! set up any constraint labels
 GO set_constraint_labels
@@ -152,10 +164,15 @@ ENDIF  ! longitude, latitude8/27/2013
 ! Define variables with titles
 
 LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_0))
-LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
 
-LET nlist = `nlist + 2`
-DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in), ($data_1_var_in)
+LET nlist = `nlist + 1`
+DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in)
+
+IF ($ferret_plot_var_1"0|*>1") THEN
+   LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
+   LET nlist = `nlist + 1`
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
+ENDIF
 
 ! color-by variable on the prop-prop plot:
 
