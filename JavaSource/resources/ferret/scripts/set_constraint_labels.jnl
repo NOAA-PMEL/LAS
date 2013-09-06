@@ -37,10 +37,15 @@ ENDIF
 ! takes precedence; list only that.
 
 IF `($ferret_cruise_list"0|*>1") AND (($cruises_labeled"0|*>1") EQ 0)` THEN
-   LET s2 =  `STRRINDEX("($ferret_cruise_list)", ",")`
-   
-   DEFINE SYMBOL note_num `($note_num"0") + 1`; \
-   DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, s2-1)`
+   DEFINE SYMBOL note_num `($note_num"0") + 1`
+
+   LET slen = STRLEN("($ferret_cruise_list)")
+   DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
+   IF `STRCMP("($lastletter)", ",") EQ 0` THEN
+      DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
+   ELSE
+      DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
+   ENDIF
 
 ENDIF
 
