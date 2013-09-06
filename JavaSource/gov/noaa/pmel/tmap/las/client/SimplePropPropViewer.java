@@ -598,6 +598,7 @@ public class SimplePropPropViewer implements EntryPoint {
         if ( v2 != null ) {
             tableRequest.addVariable(dsid, v2, 0);
         }
+        tableRequest.setProperty("ferret", "data_format", "csv");
         String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
         Window.open(url, "_new", null);
     }
