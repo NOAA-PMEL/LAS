@@ -527,6 +527,7 @@ public class UI extends BaseUI {
             List<ERDDAPConstraintGroup> constraintGroups = config.getConstraintGroups();
             if ( constraintGroups != null && constraintGroups.size() > 0 ) {
                 xTrajectoryConstraint.init(constraintGroups);
+                xTrajectoryConstraint.setVisible(true);
             }
             xAxesWidget.getRefMap().setRegions(regions);
             ops = config.getOperations();
@@ -1332,10 +1333,12 @@ public class UI extends BaseUI {
              xTrajectoryConstraint.setSelectedPanelIndex(panelIndex);
              xTrajectoryConstraint.setConstraints(cons);
          } else {
-             xTrajectoryConstraint.setActive(false);
-             xTrajectoryConstraint.setVisible(false);
-//             getComparePanel().getOutputControlPanel().setVisible(true);
-             xAnalysisWidget.setVisible(true);
+             if ( !xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+                 xTrajectoryConstraint.setActive(false);
+                 xTrajectoryConstraint.setVisible(false);
+                 //             getComparePanel().getOutputControlPanel().setVisible(true);
+                 xAnalysisWidget.setVisible(true);
+             }
          }
          
     }
