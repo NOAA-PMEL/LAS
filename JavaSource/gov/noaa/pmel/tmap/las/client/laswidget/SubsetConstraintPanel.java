@@ -16,18 +16,28 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SubsetConstraintPanel extends Composite {
+    
+    Map<String, String> currentValues;
+    TextBox filter = new TextBox();
+    Label filterLabel = new Label("Filter: ");
+    
+    HorizontalPanel filterPanel = new HorizontalPanel();
     
     // Current selection values
     ListBox valuesList = new ListBox();
@@ -48,7 +58,31 @@ public class SubsetConstraintPanel extends Composite {
     String dsid;
     
     public SubsetConstraintPanel() {
-        
+        filter.addKeyUpHandler(new KeyUpHandler() {
+
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                String f = filter.getText();
+                valuesList.clear();
+                if ( !f.equals("") ) {
+                    for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
+                        String key_value = (String) rIt.next();
+                        String value = (String) currentValues.get(key_value);
+                        if ( value.startsWith(f) ) {
+                            valuesList.addItem(value, key_value);
+                        }
+                    }
+                } else {
+                    for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
+                        String key_value = (String) rIt.next();
+                        String value = (String) currentValues.get(key_value);
+                        valuesList.addItem(value, key_value);
+                    }
+                }
+                
+            }
+            
+        });
         valuesList.setVisibleItemCount(6);
         valuesList.setWidth(Constants.CONTROLS_WIDTH-20+"px");
         valuesList.addChangeHandler(new ChangeHandler(){
@@ -66,6 +100,9 @@ public class SubsetConstraintPanel extends Composite {
         rightPanel.add(valuesList);
         valuesList.addItem(Constants.PICK);
         valuesList.addItem(Constants.APPEAR);
+        filterPanel.add(filterLabel);
+        filterPanel.add(filter);
+        mainPanel.add(filterPanel);
         mainPanel.add(radioButtonGroup);
         mainPanel.add(rightPanel);
         mainPanel.setHeight("65px");
@@ -93,6 +130,7 @@ public class SubsetConstraintPanel extends Composite {
 
                     @Override
                     public void onClick(ClickEvent event) {
+                        filter.setText("");
                         RadioButton button = (RadioButton) event.getSource();
                         valuesList.clear();
                         valuesList.addItem(Constants.LOADING);
@@ -113,6 +151,7 @@ public class SubsetConstraintPanel extends Composite {
 
         @Override
         public void onSuccess(Map<String, String> result) {
+            currentValues = result;
             valuesList.clear();
             valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 6));
             for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
