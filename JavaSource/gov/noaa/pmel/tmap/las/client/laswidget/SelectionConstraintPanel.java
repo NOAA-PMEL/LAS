@@ -112,7 +112,7 @@ public class SelectionConstraintPanel extends Composite {
                     for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
                         String key_value = (String) rIt.next();
                         String value = (String) currentValues.get(key_value);
-                        if ( value.startsWith(f) ) {
+                        if ( value.toLowerCase().startsWith(f.toLowerCase()) ) {
                             valuesList.addItem(value, key_value);
                         }
                     }
