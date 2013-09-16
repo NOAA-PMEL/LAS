@@ -169,6 +169,8 @@ IF ($trajectory_variable"0|*>1") THEN DEFINE SYMBOL vars_out = trajectory_var,
 IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
 
 ! Make a time axis from the time coordinates and use it to compute the date strings.
+! Don't list the time variable itself. Hard to give it enough resolution to be useful.
+
    LET amin = time[i=@MIN]
    LET amax = time[i=@MAX]
    DEFINE SYMBOL is_time = 1
@@ -177,10 +179,10 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
 
    LET timesample = COMPRESSI(constraints_mask*time)
    LET/TITLE="Time"/UNITS="`time,RETURN=units`" Times = timesample
-   LET/TITLE="Date"/UNITS="Date String" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
+   LET/TITLE="Date" Dates = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
 
-   LET nlist = 2
-   DEFINE SYMBOL vars_out = ($vars_out) Dates, Times, 
+   LET nlist = 1
+   DEFINE SYMBOL vars_out = ($vars_out) Dates, 
 
 ENDIF  ! dates, times
 
