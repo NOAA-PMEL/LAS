@@ -235,8 +235,8 @@ IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
      PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad+(($do_wrap)),y_loc_bad 
 ENDIF
 
-DEFINE SYMBOL do_icons = 0
-	IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
+   DEFINE SYMBOL do_icons = 0
+   IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
       GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
@@ -348,7 +348,7 @@ KEYMARK 0
 
 ! Save the results
 
-IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key
+IF `($rowSizes) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key
 
 GO LAS_results box
 
