@@ -14,7 +14,7 @@ if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
 if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
 if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
 IF `STRLEN("($ferret_view)") EQ 2` THEN
-   IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
+   IF `($ppl$zmin"0") GE 1.e35 AND ($ppl$zmax"0") LE -1.e35` THEN DEFINE SYMBOL nokey = 1
    IF `($nokey"0") EQ 0` THEN 
       PPL SHAKEY 1,,,,,,,,,,1
       IF `($ferret_key_annotate"1") EQ 0` THEN keymark 0
