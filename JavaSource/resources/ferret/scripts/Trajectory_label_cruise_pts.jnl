@@ -53,7 +53,6 @@ IF `($ngood_data"0|*>1") EQ 0` THEN
    DEFINE SYMBOL nbad_data = `nbad_chosen_cruises[i=@SUM]`
    DEFINE SYMBOL ngood_data = `allsize - ($nbad_data)`
 ENDIF
-pause
 
 LET allvars = ..varnames
 

@@ -15,9 +15,6 @@
 
 SET MEM/siz=200
 
-DEFINE REGION/DEFAULT cruise_temp_region
-CANCEL REGION
-
 ! Create the 'cruise_evnt' variable which increments for each new cruise.
 
 ! NOTE:  The calculation of individual cruises only works if the 
