@@ -1,0 +1,313 @@
+! feature_mask_by_var.jnl
+
+! Define variables masked by value, and
+! labels for this masking
+! Allow for masking by time -- the user draws a rectangle on the
+! plot, and the coord range comes back in hours-since-1970.
+
+! I dont think this set of symbol is used. Won't we be getting
+! constraint symbols instead of these ferret_PC1_var, etc?
+
+LET varname = $1
+
+! The variable may be requested to be masked by a range
+! on some variable.
+
+LET mask_on_var0 = 1 + 0* varname
+DEFINE SYMBOL mask_on_var = mask_on_var0 
+
+LET nmask_labels = 0
+DEFINE SYMBOL nmask_labels = `nmask_labels`
+
+DEFINE SYMBOL nmask_vars = 0
+CANCEL SYMBOL comma
+
+CANCEL SYMBOL mask_vars
+CANCEL SYMBOL mask_ops
+CANCEL SYMBOL mask_vals
+
+IF ($ferret_PC1_var"0|*>1") THEN DEFINE SYMBOL ferret_PC1_op = `UPCASE ("($ferret_PC1_op)")`
+IF ($ferret_PC2_var"0|*>1") THEN DEFINE SYMBOL ferret_PC2_op = `UPCASE ("($ferret_PC2_op)")`
+IF ($ferret_PC3_var"0|*>1") THEN DEFINE SYMBOL ferret_PC3_op = `UPCASE ("($ferret_PC3_op)")`
+IF ($ferret_PC4_var"0|*>1") THEN DEFINE SYMBOL ferret_PC4_op = `UPCASE ("($ferret_PC4_op)")`
+
+! When there are underscores in the var name, the label cannot
+! combine ascii fonts (to display underscore) with math symbol font
+! So, just for the label, remove the underscore.
+
+IF ($ferret_PC1_Var"0|*>1") THEN DEFINE SYMBOL ferret_PC1_Var_Lab = ($ferret_PC1_Var)
+IF ($ferret_PC2_Var"0|*>1") THEN DEFINE SYMBOL ferret_PC2_Var_Lab = ($ferret_PC2_Var)
+IF ($ferret_PC3_Var"0|*>1") THEN DEFINE SYMBOL ferret_PC3_Var_Lab = ($ferret_PC3_Var)
+IF ($ferret_PC4_Var"0|*>1") THEN DEFINE SYMBOL ferret_PC4_Var_Lab = ($ferret_PC4_Var)
+
+IF ($ferret_PC1_var"0|*>1") THEN
+   IF `STRINDEX("($ferret_PC1_Var)", "_") GT 0` THEN 
+      IF ($its_prop_plot"0|0|1|*>1") THEN
+         GO remove_underscores ($ferret_PC1_Var)
+         DEFINE SYMBOL ferret_PC1_Var_Lab = ($Var_Lab)
+      ENDIF
+   ENDIF
+ENDIF
+IF ($ferret_PC2_var"0|*>1") THEN
+   IF `STRINDEX("($ferret_PC2_Var)", "_") GT 0` THEN 
+      IF ($its_prop_plot"0|0|1|*>1") THEN
+         GO remove_underscores ($ferret_PC2_Var)
+         DEFINE SYMBOL ferret_PC2_Var_Lab = ($Var_Lab)
+      ENDIF
+   ENDIF
+ENDIF
+IF ($ferret_PC3_var"0|*>1") THEN
+   IF `STRINDEX("($ferret_PC3_Var)", "_") GT 0` THEN 
+      IF ($its_prop_plot"0|0|1|*>1") THEN
+         GO remove_underscores ($ferret_PC3_Var)
+         DEFINE SYMBOL ferret_PC3_Var_Lab = ($Var_Lab)
+      ENDIF
+   ENDIF
+ENDIF
+IF ($ferret_PC4_var"0|*>1") THEN
+   IF `STRINDEX("($ferret_PC4_Var)", "_") GT 0` THEN 
+      IF ($its_prop_plot"0|0|1|*>1") THEN
+         GO remove_underscores ($ferret_PC4_Var)
+         DEFINE SYMBOL ferret_PC4_Var_Lab = ($Var_Lab)
+      ENDIF
+   ENDIF
+ENDIF
+
+! Create labels such as   
+!     Where Salinity < 33
+!     Where 21 <= Temp < 32
+!     Where jday = 300
+
+DEFINE SYMBOL translate_math = ($its_prop_plot"1")
+
+IF `($ferret_PC1_Var"0|*>1") AND ($ferret_PC1_op"0|*>1") AND ($ferret_PC1_val"0|*>1")` THEN
+   LET mask_on_var_pc1 = IF ($ferret_PC1_Var) ($ferret_PC1_op) ($ferret_PC1_val) THEN 1
+   DEFINE SYMBOL mask_on_var = ($mask_on_var) * mask_on_var_pc1
+   GO op_math_sym ($translate_math) ($ferret_PC1_op)
+   DEFINE SYMBOL mask_lab_1 = Where ($ferret_PC1_Var_Lab) ($math_op_sym) `($ferret_PC1_val),prec=3`
+   LET nmask_labels = `nmask_labels + 1`
+
+   DEFINE SYMBOL mask_vars = ($mask_vars)($comma)"($ferret_PC1_Var)"
+   DEFINE SYMBOL mask_ops = ($mask_ops)($comma)"($ferret_PC1_op)"
+   DEFINE SYMBOL mask_vals = ($mask_vals)($comma)"($ferret_PC1_val)"
+   DEFINE SYMBOL comma = ,
+
+ENDIF
+
+IF `($ferret_PC2_Var"0|*>1") AND ($ferret_PC2_op"0|*>1") AND ($ferret_PC2_val"0|*>1")` THEN
+   LET mask_on_var_pc2 = IF ($ferret_PC2_Var) ($ferret_PC2_op) ($ferret_PC2_val) THEN 1
+   DEFINE SYMBOL mask_on_var = ($mask_on_var) * mask_on_var_pc2
+   GO op_math_sym ($translate_math) ($ferret_PC2_op)
+   DEFINE SYMBOL mask_lab_2 = Where ($ferret_PC2_Var_Lab) ($math_op_sym) `($ferret_PC2_val),prec=3`
+   LET nmask_labels = `nmask_labels + 1`
+
+   DEFINE SYMBOL mask_vars = ($mask_vars)($comma)"($ferret_PC2_Var)"
+   DEFINE SYMBOL mask_ops = ($mask_ops)($comma)"($ferret_PC2_op)"
+   DEFINE SYMBOL mask_vals = ($mask_vals)($comma)"($ferret_PC2_val)"
+   DEFINE SYMBOL comma = ,
+
+   ! Check for same variable as a previous one, and if so combine the labels, e.g. 34 le SAL lt 35.5
+   IF ($ferret_PC2_Var"|($ferret_PC1_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC1_op)", "G") GT 0 AND STRINDEX("($ferret_PC2_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC1_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC2_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC1_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC2_val),prec=3`
+         CANCEL SYMBOL mask_lab_2
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC1_op)", "L") GT 0 AND STRINDEX("($ferret_PC2_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC2_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC1_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC2_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC1_val),prec=3`
+         CANCEL SYMBOL mask_lab_2
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+ENDIF
+
+IF `($ferret_PC3_Var"0|*>1") AND ($ferret_PC3_op"0|*>1") AND ($ferret_PC3_val"0|*>1")` THEN
+   LET mask_on_var_pc3 = IF ($ferret_PC3_Var) ($ferret_PC3_op) ($ferret_PC3_val) THEN 1
+   DEFINE SYMBOL mask_on_var = ($mask_on_var) * mask_on_var_pc3
+   GO op_math_sym ($translate_math) ($ferret_PC3_op)
+   DEFINE SYMBOL mask_lab_3 = Where ($ferret_PC3_Var_Lab) ($math_op_sym) `($ferret_PC3_val),prec=3`
+   LET nmask_labels = `nmask_labels + 1`
+
+   DEFINE SYMBOL mask_vars = ($mask_vars)($comma)"($ferret_PC3_Var)"
+   DEFINE SYMBOL mask_ops = ($mask_ops)($comma)"($ferret_PC3_op)"
+   DEFINE SYMBOL mask_vals = ($mask_vals)($comma)"($ferret_PC3_val)"
+   DEFINE SYMBOL comma = ,
+
+   ! Check for same variable as a previous one, and if so combine the labels
+   IF ($ferret_PC3_Var"|($ferret_PC1_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC1_op)", "G") GT 0 AND STRINDEX("($ferret_PC3_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC1_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC2_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC1_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC3_val),prec=3`
+         CANCEL SYMBOL mask_lab_3
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC1_op)", "L") GT 0 AND STRINDEX("($ferret_PC3_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC3_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC1_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC3_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC1_val),prec=3`
+         CANCEL SYMBOL mask_lab_3
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+   
+   IF ($ferret_PC3_Var"|($ferret_PC2_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC2_op)", "G") GT 0 AND STRINDEX("($ferret_PC3_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC2_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC3_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_2 = Where `($ferret_PC2_val),prec=3` ($opA) ($ferret_PC2_Var_Lab) ($opB) `($ferret_PC3_val),prec=3`
+         CANCEL SYMBOL mask_lab_3
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC2_op)", "L") GT 0 AND STRINDEX("($ferret_PC3_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC3_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC2_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_2 = Where `($ferret_PC3_val),prec=3` ($opA) ($ferret_PC2_Var_Lab) ($opB) `($ferret_PC2_val),prec=3`
+         CANCEL SYMBOL mask_lab_3
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+
+ENDIF
+
+IF `($ferret_PC4_Var"0|*>1") AND ($ferret_PC4_op"0|*>1") AND ($ferret_PC4_val"0|*>1")` THEN
+   LET mask_on_var_pc4 = IF ($ferret_PC4_Var) ($ferret_PC4_op) ($ferret_PC4_val) THEN 1
+   DEFINE SYMBOL mask_on_var = ($mask_on_var) * mask_on_var_pc4
+   GO op_math_sym ($translate_math) ($ferret_PC4_op)
+   DEFINE SYMBOL mask_lab_4 = Where ($ferret_PC4_Var_Lab) ($math_op_sym) `($ferret_PC4_val),prec=3`
+   LET nmask_labels = `nmask_labels + 1`
+
+   DEFINE SYMBOL mask_vars = ($mask_vars)($comma)"($ferret_PC4_Var)"
+   DEFINE SYMBOL mask_ops = ($mask_ops)($comma)"($ferret_PC4_op)"
+   DEFINE SYMBOL mask_vals = ($mask_vals)($comma)"($ferret_PC4_val)"
+   DEFINE SYMBOL comma = ,
+
+   ! Check for same variable as a previous one, and if so combine the labels
+   IF ($ferret_PC4_Var"|($ferret_PC1_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC1_op)", "G") GT 0 AND STRINDEX("($ferret_PC4_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC1_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC4_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC1_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC4_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC1_op)", "L") GT 0 AND STRINDEX("($ferret_PC4_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC4_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC1_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_1 = Where `($ferret_PC4_val),prec=3` ($opA) ($ferret_PC1_Var_Lab) ($opB) `($ferret_PC1_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+   
+   IF ($ferret_PC4_Var"|($ferret_PC2_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC2_op)", "G") GT 0 AND STRINDEX("($ferret_PC4_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC2_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC4_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_2 = Where `($ferret_PC2_val),prec=3` ($opA) ($ferret_PC2_Var_Lab) ($opB) `($ferret_PC4_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC2_op)", "L") GT 0 AND STRINDEX("($ferret_PC4_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC4_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC2_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_2 = Where `($ferret_PC4_val),prec=3` ($opA) ($ferret_PC2_Var_Lab) ($opB) `($ferret_PC2_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+   
+   IF ($ferret_PC4_Var"|($ferret_PC3_Var)>1|*>0") THEN
+      IF `STRINDEX("($ferret_PC3_op)", "G") GT 0 AND STRINDEX("($ferret_PC4_op)", "L") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC3_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC4_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_3 = Where `($ferret_PC3_val),prec=3` ($opA) ($ferret_PC3_Var_Lab) ($opB) `($ferret_PC4_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+      IF `STRINDEX("($ferret_PC3_op)", "L") GT 0 AND STRINDEX("($ferret_PC4_op)", "G") GT 0` THEN 
+         DEFINE SYMBOL letter2 = `SUBSTRING("($ferret_PC4_op)", 2, 1)`
+	 DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+         GO op_math_sym ($translate_math) ($reverse)
+	 DEFINE SYMBOL opA = ($math_op_sym)
+         GO op_math_sym ($translate_math) ($ferret_PC3_op)
+	 DEFINE SYMBOL opB = ($math_op_sym)
+         DEFINE SYMBOL mask_lab_3 = Where `($ferret_PC4_val),prec=3` ($opA) ($ferret_PC3_Var_Lab) ($opB) `($ferret_PC3_val),prec=3`
+         CANCEL SYMBOL mask_lab_4
+	 LET nmask_labels = `nmask_labels - 1`
+      ENDIF
+   ENDIF
+
+ENDIF
+
+LET mask_on_var = ($mask_on_var)
+
+IF `nmask_labels EQ 0` THEN
+   CANCEL SYMBOL mask_on_var
+   CANCEL VARIABLE mask_on_var
+   CANCEL SYMBOL mask_vars
+   CANCEL SYMBOL mask_ops
+   CANCEL SYMBOL mask_vals
+ELSE
+   LET mask_vars = {($mask_vars)}
+   LET mask_ops = {($mask_ops)}
+   LET mask_vals = {($mask_vals)}
+ENDIF
+
+! Consolidate
+LET imask = ($nmask_labels)
+IF `nmask_labels GT 0` THEN
+REPEAT/i=1:4 (DEFINE SYMBOL ii = `i`;\
+  IF ($mask_lab_($ii)"0|mm>0|*>1") THEN LET imask = `imask + 1` ;\
+  IF ($mask_lab_($ii)"0|mm>0|*>1") THEN DEFINE SYMBOL mask_title_`imask` = ($mask_lab_($ii)); \
+ )
+!-----------------End of feature_mask_by_var ---------------------------------
+
