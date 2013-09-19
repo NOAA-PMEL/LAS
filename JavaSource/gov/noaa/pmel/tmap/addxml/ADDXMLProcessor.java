@@ -1688,6 +1688,7 @@ public class ADDXMLProcessor {
             id = tid;
             id = id.replace("/", ".");
             id = id.replace(":", ".");
+            id = id.replace(",","");
             if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
             id = id.replaceAll(" ", "-"); 
         } else {
