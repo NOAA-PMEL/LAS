@@ -40,7 +40,7 @@ LET nx_var = `nx_var*ny_var*nz_var*nt_var*ne_var*nf_var`
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEF SYM vshape = `($ferret_plot_var_0),RETURN=shape`
+DEFINE SYMBOL vshape = `($ferret_plot_var_0),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -51,9 +51,9 @@ IF `($vshape"0|E>1|*>0)` THEN
    ENDIF
 
 ! Expand trajectory variable into obs axis
-   DEF SYM vtype = 0
-   DEF SYM vtype = `xvar,RETURN=dtype`
-   DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+   DEFINE SYMBOL vtype = 0
+   DEFINE SYMBOL vtype = `xvar,RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
    IF ($is_string"0|*>1") THEN 
       LET xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
@@ -87,7 +87,7 @@ LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEF SYM vshape = `($ferret_plot_var_1),RETURN=shape`
+DEFINE SYMBOL vshape = `($ferret_plot_var_1),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -98,9 +98,9 @@ IF `($vshape"0|E>1|*>0)` THEN
    ENDIF
 
 ! Expand trajectory variable into obs axis
-   DEF SYM vtype = 0
-   DEF SYM vtype = `yvar,RETURN=dtype`
-   DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+   DEFINE SYMBOL vtype = 0
+   DEFINE SYMBOL vtype = `yvar,RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
    IF ($is_string"0|*>1") THEN 
       LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
@@ -138,7 +138,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    
 ! Is it a varible on the E axis of a DSG file?
 
-   DEF SYM vshape = `($ferret_plot_var_2),RETURN=shape`
+   DEFINE SYMBOL vshape = `($ferret_plot_var_2),RETURN=shape`
    IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -149,9 +149,9 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       ENDIF
 
 ! Expand trajectory variable into obs axis
-      DEF SYM vtype = 0
-      DEF SYM vtype = `zvar,RETURN=dtype`
-      DEF SYM is_string = ($vtype"0|CHAR>1|*>0`)
+      DEFINE SYMBOL vtype = 0
+      DEFINE SYMBOL vtype = `zvar,RETURN=dtype`
+      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
       IF ($is_string"0|*>1") THEN 
          LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
@@ -195,8 +195,8 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO prop_prop_constraints
 ENDIF
 
-LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * cruise_mask_obs[gx=time@asn]
-LET constraints_mask = text_mask * var_mask * cruise_mask_obs
+LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * feature_mask_obs[gx=time@asn]
+LET constraints_mask = text_mask * var_mask * feature_mask_obs
 
 IF ($color_by"0|*>1") THEN 
 

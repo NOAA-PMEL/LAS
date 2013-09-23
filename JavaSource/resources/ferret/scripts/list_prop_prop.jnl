@@ -24,7 +24,7 @@ DEFINE SYMBOL its_listing = 1
 
 GO setup_prop_prop
 
-IF ($ferret_plot_var_2"0|($trajectory_variable"A")|*>0") THEN CANCEL SYMBOL ferret_plot_var_2
+IF ($ferret_plot_var_2"0|($feature_variable"A")|*>0") THEN CANCEL SYMBOL ferret_plot_var_2
 
 ! If the color-by variable is a duplicate of either variable 0 or 1, no need to list it.
 
@@ -58,23 +58,23 @@ IF ($constraint_0_lhs"0|*>1) THEN
 ENDIF
 
 
-LET cruise_obs_mask = EXPND_BY_LEN(cruise_mask, rowsize,`rowsize[m=@sum]`)
+LET cruise_obs_mask = EXPND_BY_LEN(cruise_mask, ($rowvar), `($rowvar)[m=@sum]`)
 LET constraints_mask = var_mask* text_mask* cruise_obs_mask
 
 
 ! Set up to list the trajectory variable with the metadata
 
-IF ($trajectory_variable"0|*>1") THEN
+IF ($feature_variable"0|*>1") THEN
 
-   DEF SYM trajtype = `($trajectory_variable),RETURN=dtype`
+   DEF SYM trajtype = `($feature_variable),RETURN=dtype`
    IF ($trajtype"0|CHAR>1|*>0") THEN DEF SYM is_string = 1
 
-   DEF SYM trajshape = `($trajectory_variable),RETURN=shape`
+   DEF SYM trajshape = `($feature_variable),RETURN=shape`
    IF `($trajshape"0|E>1|*>0)` THEN
 
          ! Expand all strings into obs axis
          IF ($is_string"0|*>1") THEN 
-	    LET traj_obs = EXPND_BY_LEN_STR(($trajectory_variable), rowsize,`rowsize[m=@sum]`)
+	    LET traj_obs = EXPND_BY_LEN_STR(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
 	    
 	    LET ii = i[g=time]
 	    LET iindices = IF constraints_mask THEN ii
@@ -83,10 +83,10 @@ IF ($trajectory_variable"0|*>1") THEN
 	    LET trajectory_var = SAMPLEI (traj_obs, compress_mask[i=1:`nok`])
 
 	 ELSE
-	    LET traj_obs = EXPND_BY_LEN(($trajectory_variable), rowsize,`rowsize[m=@sum]`)
+	    LET traj_obs = EXPND_BY_LEN(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
             LET trajectory_var = constraints_mask*traj_obs
          ENDIF
-	 SET VAR/TITLE="`($trajectory_variable),RETURN=title`" trajectory_var
+	 SET VAR/TITLE="`($feature_variable),RETURN=title`" trajectory_var
       ENDIF
 
    ENDIF
@@ -115,9 +115,9 @@ IF ($color_by"0|*>1") THEN
 
          ! Expand all strings into obs axis
          IF ($is_string"0|*>1") THEN 
-	    LET zvar = EXPND_BY_LEN_STR(zvar, rowsize,`rowsize[m=@sum]`)
+	    LET zvar = EXPND_BY_LEN_STR(zvar, ($rowvar), `($rowvar)[m=@sum]`)
 	 ELSE
-	    LET zvar = EXPND_BY_LEN(zvar, rowsize,`rowsize[m=@sum]`)
+	    LET zvar = EXPND_BY_LEN(zvar, ($rowvar), `($rowvar)[m=@sum]`)
          ENDIF
       ENDIF
       LET zsize = `zvar,RETURN=isize`
@@ -164,7 +164,7 @@ LET size = `constraints_mask[i=@ngd]`
 
 ! Always list the trajectory id, e.g. cruise_expocode
 
-IF ($trajectory_variable"0|*>1") THEN DEFINE SYMBOL vars_out = trajectory_var, 
+IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL vars_out = trajectory_var, 
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "time") GT 0` THEN
 

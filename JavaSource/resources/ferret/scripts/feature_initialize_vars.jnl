@@ -68,7 +68,7 @@ ELSE
    LET feature_numbers = i[gx=xmask_axis]
    IF `($subset_mask"0|*>1") EQ 0` THEN LET feature_mask = 1 + 0*feature_numbers  ! may redefine later
 
-   DEF SYM feature_max = `nfeatures`
+   DEFINE SYMBOL feature_max = `nfeatures`
 
    LET longest = ($rowvar)[($rind)=@max]+2
 
@@ -78,7 +78,7 @@ ELSE
 ! plot, but using the symbols and colors as determined by the whole dataset.
 
 ! Format the feature list and define the mask. 
-!   GO feature_list_mask
+   GO feature_list_mask
 ENDIF
 
 ! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
