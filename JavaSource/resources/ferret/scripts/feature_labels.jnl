@@ -36,8 +36,8 @@ LET trajectory_mask = 1
 IF ($text_mask_trajectory"0|*>1") THEN 
    LET trajectory_mask = XSEQUENCE(($text_mask_trajectory))
 ELSE
-   IF `IS_ELEMENT_OF_STR_N(varnames, "($trajectory_variable)") NE 0` THEN 
-      LET trajectory_m = 1+0*_m[ge=($trajectory_variable)]
+   IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)") NE 0` THEN 
+      LET trajectory_m = 1+0*_m[ge=($feature_variable)]
       LET trajectory_mask =  XSEQUENCE(trajectory_m)
    ENDIF
 ENDIF
@@ -62,10 +62,9 @@ DEFINE SYMBOL prof_traj_shown = ($prof_traj_shown"($prof_traj_max)")
 ! c_s used to add plural s to a label if more than one trajectory or profile.
 CANCEL SYMBOL c_s
 IF `($prof_traj_shown"0") GT 1` THEN DEFINE SYMBOL c_s = s
+IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
+ DEFINE SYMBOL feature_type = trajectorie
 
-DEFINE SYMBOL feature_type = cruise
-DEFINE SYMBOL upstring = `UPCASE ("($Ferret_plot_title)")`
-IF `STRINDEX("($upstring)", "PROFILE") GT 0` THEN DEFINE SYMBOL feature_type = profile
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
 DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) obs
 IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \

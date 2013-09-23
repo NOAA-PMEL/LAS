@@ -15,6 +15,7 @@ GO LAS_reset_gifname
 ! Initialize the region and data.
 
 DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
+DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
@@ -48,7 +49,7 @@ GO LAS_url_label 0
 
 ! Create the trajectory variables and symbols
 
-GO LAS_initialize_traj_id
+!GO LAS_initialize_traj_id
 
 ! Apply any constraints
 
@@ -236,7 +237,7 @@ IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
 ENDIF
 
    DEFINE SYMBOL do_icons = 0
-   IF ($data_var"0|metadata_ID>1|($trajectory_variable)>1|*>0") THEN
+   IF ($data_var"0|metadata_ID>1|($feature_variable)>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
       GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
@@ -338,7 +339,8 @@ ELSE
 ENDIF
 
 ! Add cruise information on the top
-GO Trajectory_label_cruise_pts
+!GO Trajectory_label_cruise_pts
+GO feature_labels
 
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels
@@ -348,7 +350,7 @@ KEYMARK 0
 
 ! Save the results
 
-IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO Trajectory_cruise_key
+IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO feature_key
 
 GO LAS_results box
 
