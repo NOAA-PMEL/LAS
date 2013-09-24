@@ -22,7 +22,7 @@
 GO LAS_reset_gifname
 
 set mode ver:always
-DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
+DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
 IF ($data_2_var"0|vid>1|*>0")  THEN 
    DEFINE SYMBOL ferret_by_id = 1

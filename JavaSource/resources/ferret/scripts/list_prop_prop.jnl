@@ -58,8 +58,9 @@ IF ($constraint_0_lhs"0|*>1) THEN
 ENDIF
 
 
-LET cruise_obs_mask = EXPND_BY_LEN(cruise_mask, ($rowvar), `($rowvar)[m=@sum]`)
-LET constraints_mask = var_mask* text_mask* cruise_obs_mask
+LET feature_mask_obs = EXPND_BY_LEN(feature_mask,rowsize,`rowsize[m=@sum]`)
+
+LET constraints_mask = var_mask* text_mask* feature_mask_obs
 
 
 ! Set up to list the trajectory variable with the metadata
