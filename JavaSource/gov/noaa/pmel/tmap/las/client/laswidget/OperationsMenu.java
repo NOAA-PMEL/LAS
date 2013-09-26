@@ -68,13 +68,21 @@ public class OperationsMenu extends Composite {
 	}
     private void turnOffButtons() {
 		animationButton.setEnabled(false);
+		animationButton.setOperation(null);
 		compareButton.setEnabled(false);
+		compareButton.setOperation(null);
 		googleEarthButton.setEnabled(false);
+		googleEarthButton.setOperation(null);
 		showValuesButton.setEnabled(false);
+		showValuesButton.setOperation(null);
 		exportToDesktopButton.setEnabled(false);
+		exportToDesktopButton.setOperation(null);
 		saveAsButton.setEnabled(false);
+		saveAsButton.setOperation(null);
 		correlationButton.setEnabled(false);
+		correlationButton.setOperation(null);
 	    climateAnalysis.setEnabled(false);
+	    climateAnalysis.setOperation(null);
 
     }
 	public void setMenus(OperationSerializable[] ops, String view) {
