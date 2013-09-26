@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.util.Constraint;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
@@ -153,6 +154,8 @@ public class TabledapTool extends TemplateTool {
             String latname = getTabledapProperty(lasBackendRequest, "latitude");
             String lonname = getTabledapProperty(lasBackendRequest, "longitude");
             String zname = getTabledapProperty(lasBackendRequest, "altitude");
+            String dummy = getTabledapProperty(lasBackendRequest, "dummy");
+
 
             causeOfError = "Could not get id."; 
             String id = getTabledapProperty(lasBackendRequest, "id");
@@ -166,12 +169,28 @@ public class TabledapTool extends TemplateTool {
             //create the query.   First: variables
             StringBuffer query = new StringBuffer();
             // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
-            String variables = lasBackendRequest.getVariablesAsString();
+            ArrayList<String> vars = lasBackendRequest.getVariables();
+            // If lat, lon and z are included as data variables, knock them out of this list.
+            vars.remove(latname);
+            vars.remove(lonname);
+            vars.remove(zname);
+            String variables = "";
+            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                String variable = (String) varIt.next();
+                variables = variables+variable;
+                if (varIt.hasNext()) {
+                    variables = variables + ",";
+                }
+            }
             // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
             variables = variables.replace(cruiseid+",", "");
             variables = variables.replace(cruiseid, "");
 
-            query.append(String2.replaceAll(variables, " ", ""));
+            if ( !variables.equals("") ) {
+                query.append(String2.replaceAll(variables, " ", ""));
+            } else {
+                query.append(dummy);
+            }
 
 
 
