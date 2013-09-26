@@ -174,6 +174,7 @@ public class TabledapTool extends TemplateTool {
             vars.remove(latname);
             vars.remove(lonname);
             vars.remove(zname);
+            vars.remove(time);
             String variables = "";
             for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
                 String variable = (String) varIt.next();
