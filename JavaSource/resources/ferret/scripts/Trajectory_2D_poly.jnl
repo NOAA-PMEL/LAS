@@ -175,7 +175,7 @@ PPL SHASET PROTECT
 !  GO Jons_fland 20 navy
 !  GO Jons_fland 20 brown_dark
 
-! GO Jons_fland 20 green_deep
+GO Jons_fland 20 green_deep
 PPL SHASET PROTECT
 
 ! Turn on annotate_key, which persists until turned off
@@ -274,9 +274,6 @@ ELSE
       PPL POLYGON/OVER
    ENDIF
 ENDIF
-
-
-GO Jons_fland 20 green_deep
 
 ! Set the shape to what is used above it will be the same on the key
 DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
