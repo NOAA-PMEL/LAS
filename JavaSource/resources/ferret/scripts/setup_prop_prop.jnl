@@ -165,7 +165,6 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ENDIF
 
    DEFINE SYMBOL zvar = zvar
-
    DEFINE SYMBOL color_by = 1
 
 ENDIF
@@ -174,9 +173,41 @@ IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
    DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
 
 IF  ($color_by"0") THEN 
+   IF ($data_2_var"0|time>1|*>0") THEN  DEFINE SYMBOL ferret_plot_key = date_key 
+
    IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
       DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
 ENDIF
+
+! Special color-by-time key
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
+
+! In this case we set up a time axis, and label the color key with dates
+! If the units are seconds since, we don't need that much resolution for this. Make it hours.
+
+   LET tmin = ($data_var)[i=@MIN]
+   LET tmax = ($data_var)[i=@MAX]
+
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN 
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL tunits = `tunits`
+   ENDIF
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   IF ($tunits"0|seconds>1|*>0") THEN \
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE SYMBOL datekey = 1
+
+   DEFINE SYMBOL ferret_key_annotate = 0
+
+   LET ttvar = t[gt=time_axis]
+   DEFINE SYMBOL datekey_time_arg = ttvar
+
+   DEFINE SYMBOL ferret_plot_levels = 30
+   DEFINE SYMBOL ferret_fill_levels = 30
+
+ENDIF
+
 
 DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar

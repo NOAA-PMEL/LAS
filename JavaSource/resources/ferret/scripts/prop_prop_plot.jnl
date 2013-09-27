@@ -28,9 +28,9 @@ DEFINE SYMBOL its_prop_plot = 1
 ! This is a workaround for items 3 and 4 in ticket 1388; the issues will be 
 ! revisited in LAS 8.1 see ticket 1390.
 
-CANCEL SYMBOL ferret_fill_levels
-CANCEL SYMBOL ferret_contour_levels
-CANCEL SYMBOL ferret_palette
+!CANCEL SYMBOL ferret_fill_levels
+!CANCEL SYMBOL ferret_contour_levels
+!CANCEL SYMBOL ferret_palette
 
 ! Initialize data and variables
 ! Set up masks for constraints
@@ -204,7 +204,7 @@ ELSE
    ELSE
       GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-      PPL POLYGON
+      PPL POLYGON/OVER
    ENDIF
 
 ENDIF  ! color-by-trajectory or not...
