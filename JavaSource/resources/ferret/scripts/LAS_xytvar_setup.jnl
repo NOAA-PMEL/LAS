@@ -39,6 +39,12 @@ IF `($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1` THEN
    SET VIEW full_view
 ENDIF
 
+! Do not label axes with the words LONGITUDE, LATITUDE
+IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
+IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
+IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
+IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
+
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
 
@@ -116,11 +122,19 @@ LET indep_var1 = y[gy=vaxis1]
 
 IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN 
 
+   DEFINE SYMBOL is_lon = 1
+
 ! Get min and max longitudes and create a LON axis.
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
+   LET amin = ($region_x_lo)
+   LET amax = ($region_x_hi)
+
    GO LAS_is_range amin amax
+   LET ax_lo_1 = `ax_lo`
+   LET ax_hi_1 = `ax_hi`
+   list amin, amax, ax_lo, ax_hi
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_x = ppl xfor (($dm_labels))
@@ -132,6 +146,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 ENDIF
 
 IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN 
+
+   DEFINE SYMBOL is_lat = 1
 
 ! Get min and max longitudes and create a LAT axis.
 
@@ -184,6 +200,8 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
          LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
          DEFINE SYMBOL tunits = `tunits`
       ENDIF
+      IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
+
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
       DEFINE SYMBOL timeaxis = haxis
       DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
@@ -223,6 +241,8 @@ ENDIF
 IF `($ferret_prop_var"0|longitude>1|*>0") EQ 0` THEN 
 IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
 
+   DEFINE SYMBOL is_lon = 1
+
 ! Get min and max longitudes and create a LON axis.
 ! Draw a blank plot to put formatted axis on the plot.
 
@@ -231,8 +251,8 @@ IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN
    LET amin = q_var[i=@MIN]
    LET amax = q_var[i=@MAX]
    GO LAS_is_range amin amax
-   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis 
 
+   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis 
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_y = ppl yfor (($dm_labels))
 
    LET indep_var = x[gx=vaxis]
@@ -263,6 +283,8 @@ ENDIF
 
 IF `($ferret_prop_var"0|latitude>1|*>0") EQ 0` THEN 
 IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN 
+
+   DEFINE SYMBOL is_lat = 1
 
 ! Get min and max latitudes and create a LAT axis.
 ! Draw a blank plot to put formatted axis on the plot.
@@ -312,6 +334,7 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
          LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
          DEFINE SYMBOL tunits = `tunits`
       ENDIF
+      IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
       DEFINE SYMBOL timeaxis = vaxis
       DEFINE AXIS/Y=`ax_lo`:`ax_hi`:`del_ax` vaxis1
@@ -402,6 +425,20 @@ IF `($ferret_prop_var"0|latitude>1|*>0") OR ($is_lat_prop"0|0|1|*>0")` THEN
    LET allmiss1 = IF bvar THEN (`bvar1,RETURN=bad`)
    SHADE/NOAX/NOKEY/PAL=white($pqual)/title=" " allmiss1
 
+ENDIF
+
+! If its a lon/lat plot, make a map with the same resolution as it would be
+! done on a map, but with light gray.
+! Don't do this if it's a lon vs lat.
+
+IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
+   DEFINE SYMBOL basemap_area = `( (($xaxis_max)-($xaxis_min)) * (($yaxis_max)-($yaxis_min)) )/ (360 * 180)`
+   DEFINE SYMBOL region_x_lo = ($ppl$xmin)
+   DEFINE SYMBOL region_x_hi = ($ppl$xmax)
+   DEFINE SYMBOL land_palette = gray_light
+
+   GO Jons_fland 5 ($land_palette)
+   SET DATA 1
 ENDIF
 
 SET MODE/LAST nodata_lab

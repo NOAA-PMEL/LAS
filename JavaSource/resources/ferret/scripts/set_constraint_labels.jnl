@@ -20,7 +20,7 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL op = ($constraint_($v)_op); \
   DEFINE SYMBOL rhs = ($constraint_($v)_rhs); \
   IF ($rhs"NaN>1|*>0") THEN DEFINE SYMBOL rhs = valid; \
-  IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
+  IF `($lhs"99|*>0") EQ 99` THEN EXIT/loop; \
   GO make_c_lab)
 
 IF `($nmask_labels"0") GT 0` THEN
