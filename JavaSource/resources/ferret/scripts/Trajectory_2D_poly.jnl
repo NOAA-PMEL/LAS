@@ -77,17 +77,10 @@ DEFINE SYMBOL data_var = var_data_masked
 DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
 DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
 
-! If the variable is TIME then  symbols are
-!  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
-! 
-! In this case we can set up a time axis, and call polymark_datekey 
-
 ! When the data crosses the branch cut, replicate the lon,lat,var variables 
 ! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
-
-  
 
   IF ($rowvar"0|*>1") THEN 
      GO decimate_dsg
@@ -122,33 +115,37 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
 ENDIF
 
-IF ($ferret_plot_key"0|date_key>1|*>0") THEN
+! Special color-by-time key
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
 
-   LET tmin = ($data_t_var)[i=@MIN]
-   LET tmax = ($data_t_var)[i=@MAX]
+! In this case we set up a time axis, and label the color key with dates
+! If the units are seconds since, we don't need that much resolution for this. Make it hours.
+
+   LET tmin = ($data_var)[i=@MIN]
+   LET tmax = ($data_var)[i=@MAX]
 
    LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
-   IF `since_loc GT 1` THEN
+   IF `since_loc GT 1` THEN 
       LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
       DEFINE SYMBOL tunits = `tunits`
    ENDIF
    DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
-   DEFINE SYMBOL polymark_script = polymark_datekey
+   IF ($tunits"0|seconds>1|*>0") THEN \
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE SYMBOL datekey = 1
 
-! Define time variable for last arg.
-! yes?  GO polymark_datekey polygon_command xpts ypts [values] [shape] [scale] timevar
+   DEFINE SYMBOL ferret_key_annotate = 0
 
    LET ttvar = t[gt=time_axis]
    DEFINE SYMBOL datekey_time_arg = ttvar
 
-   DEFINE SYMBOL margin = 1
-   DEFINE SYMBOL ferret_poly_levels = 30
+   DEFINE SYMBOL ferret_plot_levels = 30
 
 ENDIF
 
 IF ($ferret_by_id"0|*>1") THEN
    DEFINE SYMBOL ferret_palette = more_by_levels
-   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
+   DEFINE SYMBOL ferret_plot_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
@@ -210,8 +207,8 @@ ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-IF ($ferret_poly_levels"0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels)
+IF ($ferret_plot_levels"0|*>1") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_plot_levels)
 ENDIF
 
 IF ($ribbon"0|*>1") THEN

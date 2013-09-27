@@ -4,6 +4,7 @@
 ! Google Earth plots have their own, separate color bar image file.
 IF ($its_GE"0|*>1") THEN EXIT/SCRIPT
 
+DEFINE SYMBOL horizontal_key = 1
 
 LET key_label_size = ($text_size"0.08")
 
@@ -17,4 +18,9 @@ let y2 = `y1+0.2`
 DEFINE SYMBOL nkeylabels = 10
 LET lev_del = INT(($lev_num"20")/($nkeylabels))
 
-ppl shakey ,0,`-1*key_label_size`,`lev_del`,,,`x1`,`x2`,`y1`,`y2`
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN
+   ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
+  GO color_datekey ttvar
+ELSE
+   ppl shakey ,0,`-1*key_label_size`,`lev_del`,,,`x1`,`x2`,`y1`,`y2`
+ENDIF
