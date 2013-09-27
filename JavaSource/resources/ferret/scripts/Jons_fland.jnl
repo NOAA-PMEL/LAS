@@ -12,7 +12,7 @@
 ! $3 = overlay_style - "basemap", "transparent", or "overlay" (default)
 ! $4 = detailed - may be "detailed", "all" or "solid"  default=solid
 
-DEFINE SYMBOL fland_palette = ($2"gray")
+DEFINE SYMBOL fland_palette = ($2"green_deep")
 
 DEFINE SYMBOL fland_area = `( ($region_x_range) * ($region_y_range) ) / (360 * 180)`
 
@@ -48,7 +48,7 @@ IF `use_landmask EQ 1` THEN
       LET landvar = landmask[GX=x_super_fine,GY=y_super_fine]
    ENDIF
 
-   SHADE/NOLAB/NOKEY/LEV=(0,10,10)/PAL=green_deep/OVERLAY  landvar
+   SHADE/NOLAB/NOKEY/LEV=(0,10,10)/PAL=($fland_palette)/OVERLAY  landvar
    CANCEL DATA landmask02
    SET DATA/RESTORE
 ELSE
