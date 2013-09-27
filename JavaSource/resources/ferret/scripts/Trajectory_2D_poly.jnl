@@ -181,9 +181,7 @@ ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-IF ($ferret_plot_levels"0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_plot_levels)
-ENDIF
+DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_plot_levels"v")
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
