@@ -47,32 +47,6 @@ ENDIF
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-! Create the trajectory variables and symbols
-
-!GO LAS_initialize_traj_id
-
-! Apply any constraints
-
-LET xvar = ($ferret_plot_var)
-LET nx_var = `($ferret_plot_var),return=isize`
-
-LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
-let subset_mask = 1
-LET text_mask = 1
-LET ntext_masks = 0
-
-IF ($constraint_0_lhs"0|*>1) THEN
-   GO prop_prop_constraints
-ENDIF
-
-LET constraints_mask = var_mask* text_mask
-LET constraints_mask1 = var_mask* text_mask
-
-! Apply the constraints mask
-
-LET var_data_masked = constraints_mask * ($data_var)
-DEFINE SYMBOL data_var = var_data_masked
-
 ! For the annotations
 DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
 DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
@@ -306,6 +280,9 @@ GO labels_above_plot
 
 
 ! Add any constraint labels in the lower left, or as annotation notes.
+! (The constraints themselves are handled in the data request from ERDDAP.
+!  We do not need masking for constraints in map plots.)
+
 IF `($ferret_annotations%0|*>1%)` THEN
 
    IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
