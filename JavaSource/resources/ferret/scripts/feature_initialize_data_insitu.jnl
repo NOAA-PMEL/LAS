@@ -27,8 +27,12 @@ IF ($data_($num)_units"0|1|*>1") THEN
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_title) (($data_units))
 ENDIF
 
+IF `(STRINDEX("($ferret_plot_title%0%)", "Time") GT 0) AND (STRINDEX("($ferret_plot_title%0%)", " since ") GT 0)` THEN \
+DEFINE SYMBOL ferret_plot_title = Time
+
 IF `($1"0") EQ 0` THEN 
    DEFINE SYMBOL variable_lab = ($ferret_plot_title)
+
 ELSE
    IF `($1"0") EQ 1` THEN DEFINE SYMBOL variable_lab = \
    ($ferret_plot_title) vs ($variable_lab)
@@ -231,13 +235,13 @@ ELSE
 ENDIF
 
 
-! Special setup for color-by-time
-IF ($data_0_var"0|time>1|*>0") THEN 
+! Special setup for color-by-time on trajectory plot
+IF `($data_0_var"0|time>1|*>0") AND ($its_prop_plot"1|*>0")` THEN 
    DEFINE SYMBOL ferret_plot_key = date_key 
    SET VAR/TITLE="Time" ($data_var)[d=`data_num`] 
    SET VAR/TITLE="Time" ($ferret_plot_var)[d=`data_num`] 
-
 ENDIF
+
 
 ! Mark whether there are color levels set on first entry. 
 ! Compute automatic open-ended levels.
