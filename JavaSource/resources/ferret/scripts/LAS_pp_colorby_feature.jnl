@@ -39,7 +39,6 @@ LET q = XSEQUENCE( subset_mask * data_var_z)
 ! Set up to make polygon plot. If there are not too many features
 ! color the data according to feature.
 
-
 DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOAXES/NOKEY/NOLAB/
 
 IF `($feature_max) LE ($feature_max_labels)` THEN
@@ -61,20 +60,7 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
 DEFINE SYMBOL poly_command POLY($qualifiers)
 DEFINE SYMBOL line_color = blue
 
-! If there is just one feature, draw it with PLOT/VS which is faster than
-! drawing polygons. Symbol 20 is a triangle.
-
-sh sym feature_max, feature_max_labels
-
-IF `($feature_max) EQ 1` THEN
-
-   IF ($connect_dots"0|0|1|*>1") THEN \
-   PLOT/NOAX/VS/OVER/LINE=6/NOLAB pmask, qmask
-   PLOT/NOAX/VS/OVER/SYM=20/NOLAB/thick=1 pmask, qmask
-
-   DEFINE SYMBOL ngood_data = `pmask[i=@ngd]`
-
-ELIF `($feature_max) LE ($feature_max_labels)` THEN
+IF `($feature_max) LE ($feature_max_labels)` THEN
 
    LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
    LET q = XSEQUENCE( subset_mask * data_var_z)
