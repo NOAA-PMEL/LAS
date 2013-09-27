@@ -154,6 +154,7 @@ public class TabledapTool extends TemplateTool {
             String latname = getTabledapProperty(lasBackendRequest, "latitude");
             String lonname = getTabledapProperty(lasBackendRequest, "longitude");
             String zname = getTabledapProperty(lasBackendRequest, "altitude");
+            String orderby = getTabledapProperty(lasBackendRequest, "orderby");
             String dummy = getTabledapProperty(lasBackendRequest, "dummy");
 
 
@@ -239,11 +240,24 @@ public class TabledapTool extends TemplateTool {
             if (zhi.length() > 0) query.append("&altitude<=" + zhi);
             if (tlo.length() > 0) query.append("&time>=" + tlo);
             if (thi.length() > 0) query.append("&time<=" + thi);
+            
+            if ( orderby != null ) {
+                if ( !orderby.equals("") ) {
+                    query.append("&orderBy(\""+orderby+"\")");
+                } else {
+                    query.append("&orderBy(\""+cruiseid+","+time+"\")");
+                }
+            } else {
+                query.append("&orderBy(\""+cruiseid+","+time+"\")");
+            }
+            
+            
 
             //store constraint in debug file
             causeOfError = "Could not create constraint expression in " + constraintFileName + ": ";
             String querySummary = "query=" + query.toString() + " xlo=" + xlo + " xhi=" + xhi;
             log.debug(querySummary);
+            
             if (constraintFileName != null && constraintFileName.length() > 0)
                 Test.ensureEqual(String2.writeToFile(constraintFileName, querySummary), "", causeOfError);
 
