@@ -145,6 +145,13 @@ public class TabledapTool extends TemplateTool {
 
             causeOfError = "Could not get trajectory id from backend request: "; 
             String cruiseid = getTabledapProperty(lasBackendRequest, "trajectory_id");
+            if ( cruiseid != null ) {
+                if ( cruiseid.equals("") ) {
+                    cruiseid = getTabledapProperty(lasBackendRequest, "profile_id");
+                }
+            } else {
+                cruiseid = getTabledapProperty(lasBackendRequest, "profile_id");
+            }
             required(cruiseid, causeOfError);
 
             causeOfError = "Could not get tiem column name from backend request: "; 
