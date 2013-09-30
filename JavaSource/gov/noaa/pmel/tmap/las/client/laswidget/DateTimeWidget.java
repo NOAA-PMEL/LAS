@@ -217,13 +217,21 @@ public class DateTimeWidget extends Composite {
 		}
 		String display_hi = tAxis.getAttributes().get("display_hi");
         String display_lo = tAxis.getAttributes().get("display_lo");
+        String default_time = tAxis.getAttributes().get("default");
         if ( display_hi != null ) {
             setHi(display_hi);
         }
         if ( display_lo != null ) {
             setLo(display_lo);
         }
-			
+		if ( default_time != null && default_time.equals("last") ) {
+		    if ( display_hi != null ) {
+		        setLo(display_hi);
+		    } else {
+		        String max = this.getFerretDateMax();
+	            setLo(max);
+		    }
+		}
        
 	}
 	public void reinit() {
