@@ -128,8 +128,6 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
-   LET amin = ($region_x_lo)
-   LET amax = ($region_x_hi)
 
    GO LAS_is_range amin amax
    LET ax_lo_1 = `ax_lo`
@@ -142,7 +140,6 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    LET dep_var = x[gx=haxis]
    CANCEL SYMBOL data_1_units
    CANCEL SYMBOL ferret_title_0  ! dont need a horizontal axis label
-
 ENDIF
 
 IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN 
