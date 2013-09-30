@@ -194,6 +194,9 @@ public class TabledapTool extends TemplateTool {
             // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
             variables = variables.replace(cruiseid+",", "");
             variables = variables.replace(cruiseid, "");
+            if ( variables.endsWith(",") ) {
+                variables = variables.substring(0, variables.length()-1);
+            }
 
             if ( !variables.equals("") ) {
                 query.append(String2.replaceAll(variables, " ", ""));
