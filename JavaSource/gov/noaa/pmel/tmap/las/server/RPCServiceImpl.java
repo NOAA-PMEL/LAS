@@ -768,6 +768,13 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     protected void checkPermutationStrongName() throws SecurityException {
         // we are going to completely forego this check...
     }
+    /**
+     * Get the values of an ERDDAP "subset" variable to use as a way to select which DSG items are selected from the ERRDDAP server.
+     * A query looks something like this:
+     * 
+     * http://dunkel.pmel.noaa.gov:8660/erddap/tabledap/OSMCV4_DUO_SURFACE_TRAJECTORY.json?platform_type&distinct()
+     * 
+     */
     @Override
     public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, Map<String, String> xyzt) throws RPCException {
         Map<String, String> outerSequenceValues = new TreeMap<String, String>();
