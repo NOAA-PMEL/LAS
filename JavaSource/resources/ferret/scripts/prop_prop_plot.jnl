@@ -22,15 +22,17 @@ GO LAS_reset_gifname
 
 DEFINE SYMBOL its_prop_plot = 1
 
-!DEFINE SYMBOL ribbon = 1
+DEFINE SYMBOL ribbon = 1
 
 ! For LAS v8.0 relese, dont take into account any of these Ferret properties.
 ! This is a workaround for items 3 and 4 in ticket 1388; the issues will be 
 ! revisited in LAS 8.1 see ticket 1390.
 
-!CANCEL SYMBOL ferret_fill_levels
-!CANCEL SYMBOL ferret_contour_levels
-!CANCEL SYMBOL ferret_palette
+! CANCEL SYMBOL ferret_fill_levels
+! CANCEL SYMBOL ferret_contour_levels
+! CANCEL SYMBOL ferret_palette
+
+DEFINE SYMBOL ferret_fill_levels = v
 
 ! Initialize data and variables
 ! Set up masks for constraints
@@ -58,7 +60,7 @@ IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-! This is going to be a polygon plot. Options for color, shape, size.
+! This may be a polygon plot. Options for color, shape, size.
 
 DEFINE SYMBOL polycolor = ($ferret_symbol_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
 DEFINE SYMBOL polysize = ($ferret_symbol_size%0.6|default>*0.6|*%)
@@ -77,9 +79,10 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/VS/color=8
 ! the plot axes.
 
 DEFINE SYMBOL nx = `nx_var`
+LET nok = `($ferret_plot_var_0)[i=@ngd]`
 
-IF `STRCMP("($nx)", "bad") NE 0 AND STRCMP("($nx)", "0") NE 0` THEN
-   STAT ($xvar)
+STAT ($xvar)
+IF `nok GT 0 AND ($stat_ngood"0") GT 0` THEN
    PPL %RANGE `($stat_min)`, `($stat_max)`, 10
 ELSE
    PPL %RANGE `($region_0_x_lo)`, `($region_0_x_hi)`, 10
@@ -93,8 +96,8 @@ ENDIF
 DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
 DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
-IF `STRCMP("($nx)", "bad") NE 0 AND STRCMP("($nx)", "0") NE 0` THEN
-   STAT ($yvar)
+STAT ($yvar)
+IF `nok GT 0 AND ($stat_ngood"0") GT 0` THEN
    PPL %RANGE `($stat_min)`, `($stat_may)`, 10
 ELSE
    PPL %RANGE `($region_0_y_lo)`, `($region_0_y_hi)`, 10
