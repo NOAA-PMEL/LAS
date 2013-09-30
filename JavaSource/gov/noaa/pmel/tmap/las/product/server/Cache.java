@@ -4,9 +4,11 @@ import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
+import gov.noaa.pmel.tmap.las.util.FileListing;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -141,57 +143,28 @@ public class Cache extends LinkedHashMap<String, File> implements Serializable{
         currentBytes = 0l;
     }
     
-    /** Serialize this cache object to a local file<p>
-     * @param cacheFile the local file to store this cache object
-     */
-    public void saveCacheToStore(File cacheFile) 
-    throws LASException {
-        try {
-            ObjectOutputStream entryStream =
-                new ObjectOutputStream
-                (new FileOutputStream
-                        (cacheFile));
-            entryStream.writeObject(this);
-            entryStream.close();
-        } catch (IOException ioe) {
-            throw new LASException("saving to persistence mechanism failed; " +
-                    "cache will not persist after reboot; " +
-                    "message: " + ioe);
-        }
-    }
     
     /** Load a local file and populate this cache object<p>
      * @param cacheFile the local file to load
      */
     public void loadCacheFromStore(File cacheFile) 
     throws LASException {
-        
+        File dir = cacheFile.getParentFile();
         if (!cacheFile.exists()) {
             return;
         }
         
         try {
-            ObjectInputStream entryStream = 
-                new ObjectInputStream
-                (new FileInputStream
-                        (cacheFile));
-            Map restoredCache = (Map)entryStream.readObject();
-            Iterator it = restoredCache.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                String query = (String)entry.getKey();
-                File file = (File)entry.getValue();
-                if(file!=null&&file.exists()){
-                    addFile(query, file);
+            List<File> cachedFiles = FileListing.getFileListing(dir);
+            for (Iterator fileIt = cachedFiles.iterator(); fileIt.hasNext();) {
+                File file = (File) fileIt.next();
+                if ( !file.getName().equals("lasV7.xml") ) {
+                    addFile(file.getAbsolutePath(), file);
                 }
-            }	    
-            
-            entryStream.close();	    
-        } catch (Exception e) {
-            throw new LASException("cache could not be reloaded from " + 
-                    cacheFile.getAbsolutePath() + 
-                    "; message: " + e);
-        } 
+            }
+        } catch (FileNotFoundException e) {
+            throw new LASException(e.getMessage());
+        }
     }
     public boolean cacheHit(LASBackendResponse lasResponse) {
         boolean cacheHit = true;

@@ -13,6 +13,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchService;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -221,6 +225,8 @@ public class LASConfigPlugIn implements PlugIn {
 			log.error("Could not parse the las config file "+configFileName);
 		} catch (LASException e) {
 		    log.error("Could not parse the las config file "+configFileName);
+        } catch (IOException e) {
+            log.error("Could not parse the las config file "+configFileName);
         }
 		
 
@@ -262,9 +268,11 @@ public class LASConfigPlugIn implements PlugIn {
 			log.error("Could not parse the las config file "+configFileName);
 		} catch (LASException e) {
             log.error("Could not parse the las config file "+configFileName);
+        } catch (IOException e) {
+            log.error("Could not parse the las config file "+configFileName);
         }
 	}
-	public void go_init() throws JDOMException, UnsupportedEncodingException, LASException {
+	public void go_init() throws JDOMException, LASException, IOException {
 
 	    // If this is not a reinit, lock the product server here!!
 	    if ( !reinit_flag ) context.setAttribute(LAS_LOCK_KEY, "true");
@@ -577,99 +585,101 @@ public class LASConfigPlugIn implements PlugIn {
 	    // Unlock the product server and start accepting new requests...
 	    context.setAttribute(LAS_LOCK_KEY, "false");
 
-	    // Server is up and ready to go...  Set up regular testing...
-	    LASTestOptions lto = lasConfig.getTestOptions();
-	    if ( lto != null ) {
-	        TestTask testTask = new TestTask(context);
-	        Timer testTimer = new Timer("LASTest Timer", true);
-	        double d = lto.getDelay();
-	        if ( d < 0 ) d = 0;
-	        double p = lto.getPeriod();
-	        // Not more than twice a day.  
-	        if ( p < 43200000 ) p = 43200000;
-	        testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
-	    }
-	   
-	    // Default to once a day...
-	    String interval_string = "24";
-	    String age_string = "168";
-	    String ivunits = "hours";
-	    String time = "00:01";
-	    
-	    interval_string = lasConfig.getGlobalPropertyValue("product_server", "clean_interval");
-	    ivunits = lasConfig.getGlobalPropertyValue("product_server", "clean_units");
-	    age_string = lasConfig.getGlobalPropertyValue("product_server", "clean_age");
-	    time = lasConfig.getGlobalPropertyValue("product_server", "clean_time");
-
-        if ( interval_string.equals("") ) {
-            interval_string = "24";
-        }
-        if ( age_string.equals("") ) {
-            age_string = "168";
-        }
-        if ( ivunits.equals("") ) {
-            ivunits = "hours";
-        }
-        if ( time.equals("") ) {
-            time = "00:01";
-        }
-	    
-        DateTime now = new DateTime();
-	    long interval = 1000*60*60*24;    
-	    long age = interval*7; // Older than a week old
-	    try {
-	        interval = Long.valueOf(interval_string);
-	        age = Long.valueOf(age_string);
-	        if ( ivunits.toLowerCase().contains("hour") ) {
-	            interval = interval * 1000*60*60;
-	            age = age * 1000*60*60;
-	        } else if (ivunits.toLowerCase().contains("day") ) {
-	            interval = interval * 1000*60*60*24;	     
-	            age = age * 1000*60*60*24;
+	    if ( !reinit_flag ) {
+	        // Server is up and ready to go...  
+            // Set up testing and file watching...
+	        LASTestOptions lto = lasConfig.getTestOptions();
+	        if ( lto != null ) {
+	            TestTask testTask = new TestTask(context);
+	            Timer testTimer = new Timer("LASTest Timer", true);
+	            double d = lto.getDelay();
+	            if ( d < 0 ) d = 0;
+	            double p = lto.getPeriod();
+	            // Not more than twice a day.  
+	            if ( p < 43200000 ) p = 43200000;
+	            testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
 	        }
-	    } catch (Exception e) {
-	        interval = 1000*60*60*24;
-	        age = interval*7;
-	    }
 
-	    DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
-	    DateTimeFormatter ymdhm = DateTimeFormat.forPattern("yyyy-MM-dd HH:ss");
-	    String today_string = ymd.print(now);
-	    today_string = today_string + " " + time;
-	    DateTime start;
-	    DateTime startToday = ymdhm.parseDateTime(today_string);
-	    DateTime startTomorrow = startToday.plusHours(24);
-	    if ( now.isAfter(startToday) ) {
-	        start = startTomorrow;
-	    } else {
-	        start = startToday;
-	    }
-	    
-	    
-	    Timer timer = new Timer();
+	        // Default to once a day...
+	        String interval_string = "24";
+	        String age_string = "168";
+	        String ivunits = "hours";
+	        String time = "00:01";
 
-	    if ( next < 999999999999999999l ) {
-	        UpdateTask update = new UpdateTask(context);
-	        timer.schedule(update, next);
+	        interval_string = lasConfig.getGlobalPropertyValue("product_server", "clean_interval");
+	        ivunits = lasConfig.getGlobalPropertyValue("product_server", "clean_units");
+	        age_string = lasConfig.getGlobalPropertyValue("product_server", "clean_age");
+	        time = lasConfig.getGlobalPropertyValue("product_server", "clean_time");
+
+	        if ( interval_string.equals("") ) {
+	            interval_string = "24";
+	        }
+	        if ( age_string.equals("") ) {
+	            age_string = "168";
+	        }
+	        if ( ivunits.equals("") ) {
+	            ivunits = "hours";
+	        }
+	        if ( time.equals("") ) {
+	            time = "00:01";
+	        }
+
+	        DateTime now = new DateTime();
+	        long interval = 1000*60*60*24;    
+	        long age = interval*7; // Older than a week old
+	        try {
+	            interval = Long.valueOf(interval_string);
+	            age = Long.valueOf(age_string);
+	            if ( ivunits.toLowerCase().contains("hour") ) {
+	                interval = interval * 1000*60*60;
+	                age = age * 1000*60*60;
+	            } else if (ivunits.toLowerCase().contains("day") ) {
+	                interval = interval * 1000*60*60*24;	     
+	                age = age * 1000*60*60*24;
+	            }
+	        } catch (Exception e) {
+	            interval = 1000*60*60*24;
+	            age = interval*7;
+	        }
+
+	        DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
+	        DateTimeFormatter ymdhm = DateTimeFormat.forPattern("yyyy-MM-dd HH:ss");
+	        String today_string = ymd.print(now);
+	        today_string = today_string + " " + time;
+	        DateTime start;
+	        DateTime startToday = ymdhm.parseDateTime(today_string);
+	        DateTime startTomorrow = startToday.plusHours(24);
+	        if ( now.isAfter(startToday) ) {
+	            start = startTomorrow;
+	        } else {
+	            start = startToday;
+	        }
+
+
+	        Timer timer = new Timer();
+
+	        if ( next < 999999999999999999l ) {
+	            UpdateTask update = new UpdateTask(context);
+	            timer.schedule(update, next);
+	        }
+
+	        ReaperTask reaper = new ReaperTask(context, age);
+	        timer.schedule(reaper, new Date(start.getMillis()), interval);
+
+	        // Watch the config directory and reload if something changes...
+	        WatchService watcher = FileSystems.getDefault().newWatchService();
+	        Path conf = configFile.getParentFile().toPath();
+	        conf.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+	        Reload reload = new Reload(watcher, context);
+	        reload.start();
 	    }
-	   
-	    ReaperTask reaper = new ReaperTask(context, age);
-	    ServersListTask servers = new ServersListTask(context, lasServersStaticFileName, lasServersFileName);
-	    timer.schedule(reaper, new Date(start.getMillis()), interval);
-	    if ( lasConfig.pruneCategories() ) {
-	        timer.schedule(servers, new Date(now.getMillis()), 1000*60*60);
-	    }
+//	    ServersListTask servers = new ServersListTask(context, lasServersStaticFileName, lasServersFileName);
+//	    if ( lasConfig.pruneCategories() ) {
+//	        timer.schedule(servers, new Date(now.getMillis()), 1000*60*60);
+//	    }
 	}
 	public void destroy() {
-
-		Cache cache = (Cache) context.getAttribute(ServerConfigPlugIn.CACHE_KEY);
-		ServerConfig serverConfig = (ServerConfig)context.getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
-		try {
-			cache.saveCacheToStore(serverConfig.getCacheFile());
-		} catch (LASException e) {
-			log.error(e.toString());
-		}
-
+	    log.error("Shutting down LAS");
 	}
 
 	public void update(ServletContext context) throws ServletException, JDOMException, UnsupportedEncodingException, LASException {
