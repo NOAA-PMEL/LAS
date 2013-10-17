@@ -168,7 +168,7 @@ ENDIF
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=19/THICK
+   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
       DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow
