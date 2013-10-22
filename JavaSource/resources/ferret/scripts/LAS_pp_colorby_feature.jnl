@@ -1,4 +1,4 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! LAS_pp_colorby_feature.jnl
 ! Draw the correlation plot with icons colored by feature ID.
 
@@ -17,17 +17,84 @@ DEFINE SYMBOL feature_max = `($rowvar),RETURN=size`
 
 ! The mask is 1 for start of features 
 
-let tmask = if id_data[i=@ddb] eq 1 then 1 else 0
-let obs_mask1 = tmask[gx=($ferret_plot_var_0)@ASN]
-let obs_mask2 = if i[gx=($ferret_plot_var_0)] eq 1 then 1 else 0
-let obs_mask = if (obs_mask1+obs_mask2) eq 1 then 1
+LET feature_id = _M[GE=featurevar]
+LET feature_len =($rowvar)
+
+IF ($subset_mask"0|*>1") THEN
+   LET feature_id = ESEQUENCE(subset_mask) * _M[GE=featurevar]
+   LET feature_len = ESEQUENCE(subset_mask) * ($rowvar)
+ENDIF
+
+LET idvar = EXPND_BY_LEN(feature_id, ($rowvar), ($rowvar)[m=@sum])
+
+LET decimate_size = `feature_len[m=@max]`
+
+list feature_id, feature_len
+list decimate_size
+
+LET tmask = IF idvar[i=@ddb] EQ 1 THEN 1 ELSE 0
+LET obs_mask1 = tmask[gx=($ferret_plot_var_0)@ASN]
+LET obs_mask2 = IF i[gx=($ferret_plot_var_0)] EQ 1 THEN 1 ELSE 0
+LET obs_mask = IF (obs_mask1+obs_mask2) EQ 1 THEN 1
 
 LET pvar = constraints_mask* ($ferret_plot_var_0)
+IF ($pvar_reset"0|*>1") THEN LET pvar = constraints_mask* ($pvar_reset)
 LET qvar = constraints_mask* ($ferret_plot_var_1)
-LET dvar = constraints_mask* ID_DATA
+LET dvar =  idvar
 
-LET data_1_var_z =  EXPNDI_BY_Z(pvar, obs_mask,`nfeatures`,`longest`)
-LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask,`nfeatures`,`longest`)
+LET data_1_var_z =  EXPNDI_BY_Z(pvar, obs_mask, `nfeatures`, `longest`)
+LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
+
+! Decimation for longitude/latitude plots
+
+LET num_decimate = 10
+IF `($numobs) LT num_decimate` THEN LET num_decimate = -1  ! separate cruises but dont decimate
+
+IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1|*>0") AND\
+ (($numobs) GE num_decimate)` THEN
+
+   LET pxvar = ($ferret_plot_var_0)
+   IF ($pvar_reset"0|*>1") THEN LET pxvar = ($pvar_reset) ! see LAS_xytvar_setup
+   LET qyvar = ($ferret_plot_var_1)
+   
+   LET var_data = idvar
+   
+   DEFINE SYMBOL data_x_var = if idvar then pxvar
+   DEFINE SYMBOL data_y_var =  if idvar then qyvar
+   DEFINE SYMBOL data_var = idvar
+   
+   ! Arguments are 
+   !  min # points for doing decimation 
+   !  lon/lat tolerance for piecewise decimation
+   !  var tolerance (var at lon/lat)
+   
+   LET max_range = MAX(($region_x_range), ($region_y_range))
+   LET tol = `0.01*LOG(decimate_size)/max_range`
+   IF `tol LT 1.e-2` THEN LET tol = 1.e-2
+
+   GO decimate_dsg `num_decimate` `tol` 0.1
+
+   LET pvar = ($data_x_var)
+   LET qvar = ($data_y_var)
+
+! data_var is the feature index at each obs index i, with a gap between features.
+! Find where the features start now that they are sampled. (Need to remove the gaps
+! between features that the script introduces...)
+
+   LET index_sampled = if ($data_var) then ($data_var) else ($data_var)[i=@shf:-1]
+   LET new_feature = index_sampled[i=@ddb]
+   LET decimated_mask1 = IF new_feature NE 0 THEN 1 ELSE 0
+   LET decimated_mask2 = IF I[gx=($data_var)] EQ 1 THEN 1 ELSE 0
+   LET ndmask = `pvar,return=isize`
+   LET decimated_mask  = IF (decimated_mask1 + decimated_mask2) EQ 1 THEN 1
+   
+   ! This value of longest is now wrong, but it's too big so should be harmless.
+   
+   LET data_1_var_z =  EXPNDI_BY_Z(pvar, decimated_mask, `nfeatures`, `longest`)
+   LET data_var_z =  EXPNDI_BY_Z(qvar, decimated_mask, `nfeatures`, `longest`)
+
+ENDIF  ! Decimation for longitude/latitude plots
+
 
 ! Set up to plot the data and the linear fit
 LET pmask =  subset_mask * data_1_var_z
@@ -64,7 +131,6 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
 
    LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
    LET q = XSEQUENCE( subset_mask * data_var_z)
-
 
    ! Use different color for each feature 1-10, 11-21, ...
    ! Use different symbols for each set of 10

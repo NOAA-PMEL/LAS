@@ -205,7 +205,11 @@ ELSE
       LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
       LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
    ENDIF
-   
+
+! on lat/lon plots, draw a gray line on the cruise tracks.
+! (but the cruise tracks have not been separated for these plots... Don't do it after all.)
+!   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  ($xvar), ($yvar)
+
    DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($poly_qual)
 

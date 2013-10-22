@@ -92,6 +92,7 @@ let q_var = q + pqmask
 
 LET amin = p_var[i=@MIN]
 LET amax = p_var[i=@MAX]
+
 DEFINE SYMBOL is_time = ($ferret_prop_var"0|time>1|TIME>1|*>0") 
 IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax 
@@ -128,11 +129,59 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
+   
+! Initialize   
+   LET ax_lo = ($region_x_lo)
+   LET ax_hi = ($region_x_hi)
+   LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
 
-   GO LAS_is_range amin amax
-   LET ax_lo_1 = `ax_lo`
-   LET ax_hi_1 = `ax_hi`
-   list amin, amax, ax_lo, ax_hi
+   IF `(ax_hi-ax_lo) LT 359` THEN 
+
+      LET ax_lo360 = `xvar_360[i=@MIN]`
+      LET ax_hi360 = `xvar_360[i=@MAX]`
+      IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
+         LET xvar = xvar_360
+         DEFINE SYMBOL pvar_reset = xvar_360
+	 set var/name=longitude_in longitude 
+	 LET/UNITS="`longitude_in,RETURN=units`"/d=1 longitude = IF longitude_in LT 0 THEN longitude_in+360 ELSE longitude_in
+	 CANCEL SYMBOL pvar_reset
+	 LET xvar_360 = longitude
+         LET ax_lo = p_var[i=@MIN]
+         LET ax_hi = p_var[i=@MAX] 
+         LET ax_lo = `ax_lo360`
+         LET ax_hi = `ax_hi360`
+         DEFINE SYMBOl region_x_range = `ax_hi360-ax_lo360`  ! reset this so Jons_fland.jnl chooses the right resolution
+      ENDIF
+
+      CANCEL SYMBOL put_label  ! an all-missing label may not be needed if we are using LON+360
+      GO LAS_is_range ax_lo ax_hi
+
+      IF `(ax_hi-ax_lo) GE 359` THEN 
+         LET ax_lo = ($region_x_lo)
+         LET ax_hi = ($region_x_hi)
+      ENDIF
+
+   ELSE  ! case with 360 degree range
+      IF `ax_lo LT (-178)` THEN
+         LET xvar = xvar_360
+         DEFINE SYMBOL pvar_reset = xvar_360
+         LET ax_lo = 0
+         LET ax_hi = 360
+         DEFINE SYMBOl region_x_range = 360  ! reset this so Jons_fland.jnl chooses the right resolution
+      ENDIF
+
+
+   ENDIF  !`(ax_hi-ax_lo) LT 359`
+
+   IF `amax GT 180` THEN 
+         LET xvar = xvar_360
+         DEFINE SYMBOL pvar_reset = xvar_360
+   ENDIF
+
+   IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
+         LET xvar = xvar_360
+         DEFINE SYMBOL pvar_reset = xvar_360
+   ENDIF
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_x = ppl xfor (($dm_labels))
@@ -153,6 +202,7 @@ IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN
    GO LAS_is_range amin amax
 
    DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
+
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_x = ppl xfor (($dm_labels))
 
    LET dep_var = y[gy=haxis]
@@ -290,6 +340,7 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
    LET amax = q_var[i=@MAX]
    GO LAS_is_range amin amax
    DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis 
+   DEFINE SYMBOL region_y_range = `ax_hi - ax_lo`  ! reset this so Jons_fland.jnl chooses the right resolution
 
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_y = ppl yfor (($dm_labels))
 
