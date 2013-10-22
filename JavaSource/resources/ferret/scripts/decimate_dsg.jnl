@@ -5,11 +5,19 @@
 ! * Fix longitudes crossing the dateline.
 ! * If the amount of data is large, also decimate
 !   via piecewise linear fit.
+!
+!
+! Arguments are 
+!  min # points for doing decimation 
+!  lon/lat tolerance for piecewise decimation
+!  var tolerance (var at lon/lat)
 
-DEFINE SYMBOL ncruises = `rowsize,RETURN=msize`
+IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
-if ($ncruises"0|*>1") THEN 
-   LET mmax = `rowsize[m=1:($ncruises)@sum]` ! 1st m cruises
+DEFINE SYMBOL ncruises = `($rowvar),RETURN=msize`
+
+IF ($ncruises"0|*>1") THEN 
+   LET mmax = `($rowvar)[m=1:($ncruises)@sum]` ! 1st m cruises
    LET npts = mmax
 ELSE
    LET npts = `($data_var),RETURN=isize`
@@ -19,22 +27,23 @@ ENDIF
 ! Replace the last datum in each trajectory with the bad-value.
 ! For the longitudes, also fix the crossings of the dateline.
 
-LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], rowsize, 0)
-LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], rowsize, 1)
-LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], rowsize, 0)
+LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)
+LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
+LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
-
 ! Only decimate if there is a lot of data
 
-IF `npts LT 200000` THEN 
+LET min_decimate = ($1"200000")
+IF `npts LT min_decimate` THEN 
    DEFINE SYMBOL data_var = var_with_gaps
    DEFINE SYMBOL data_x_var = lon_with_gaps
    DEFINE SYMBOL data_y_var = lat_with_gaps
    
-   LET nout_lonlat = `($data_var)[i=@ngd]`; sho sym clock_secs
-   DEFINE SYMBOL nout_lonlat = `nout_lonlat` ; sho sym clock_secs
+   LET nout_lonlat = `($data_var)[i=@ngd]`
+   DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
+
    EXIT/SCRIPT
 ENDIF
 
@@ -43,25 +52,35 @@ SET MEM/SIZ=400
 
 LET nf = npts
 LET control = 2
-LET lontol = 0.5
-LET lontol = 3
-LET lattol = `lontol`
+
+LET lontol = ($2"0.5")
+LET lontol = ($2"3")
+LET lattol = lontol
+
 stat var_with_gaps
-LET vartol = 0.5* (($stat_std)^0.5)
+LET var_tol = 0.5* (($stat_std)^0.5)
+LET vartol = ($3"`var_tol`")
 
 LET decimate_lonlat = PIECEWISE3(\
  lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, vartol)
-
 
 LET nout_lonlat = `decimate_lonlat[i=@ngd]`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
 say `nout_lonlat/npts` Decimation fraction
 
 LET xsamplepts = XSEQUENCE(decimate_lonlat[i=1:($nout_lonlat)])
+
+LET good_sample = IF xsamplepts GT 0 THEN xsamplepts
+LEt nsample = `good_sample[i=@ngd]`
+
+LET nout_lonlat =  `nsample`
+DEFINE SYMBOL nout_lonlat = `nout_lonlat`
+SAY `nout_lonlat/npts` Decimation fraction
+
 DEFINE AXIS/X=1:($nout_lonlat):1 xsample_axis
 LET samplepts = xsamplepts[gx=xsample_axis@asn] 
 
-! Prevent calling decimation function later for a second time.
+! Prevent calling decimation function later for a second time
 SAVE/FILE="($result_annotations_filename).nc"/clobber samplepts
 CANCEL VAR samplepts
 
@@ -84,3 +103,4 @@ DEFINE SYMBOL data_var = varsample
 DEFINE SYMBOL data_x_var = lonsample
 DEFINE SYMBOL data_y_var = latsample
 
+! End of file ------------ decimate_dsg.jnl--------------------------
