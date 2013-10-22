@@ -70,8 +70,23 @@ DEFINE SYMBOL math_op_sym = ($op)
 IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
 DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
 
+! Show time constraint as a formatted time
 IF `($lhs"|time>1|TIME>1|*>0")` THEN
    CANCEL SYMBOL rhsdate
+   IF `($timeaxis"0|*>1") EQ 0` THEN 
+      LET amin = time[i=@MIN]
+      LET amax = time[i=@MAX]
+      DEFINE SYMBOL is_time = 1
+      GO LAS_is_range amin amax
+      CANCEL SYMBOL is_time
+      LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+      IF `since_loc GT 1` THEN 
+         LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+         DEFINE SYMBOL tunits = `tunits`
+      ENDIF
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) timeaxis
+      DEFINE SYMBOl timeaxis = timeaxis
+   ENDIF
    LET tt = t[gt=($timeaxis)]
    LET nt = `tt,RETURN=lsize`
    LET tn = tt[L=`nt`]
