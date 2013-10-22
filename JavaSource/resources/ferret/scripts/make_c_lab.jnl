@@ -79,12 +79,12 @@ IF `($lhs"|time>1|TIME>1|*>0")` THEN
       DEFINE SYMBOL is_time = 1
       GO LAS_is_range amin amax
       CANCEL SYMBOL is_time
-      LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+      LET since_loc = STRINDEX("`($data_t_var"time").units`","since") - 2
       IF `since_loc GT 1` THEN 
-         LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+         LET tunits = SUBSTRING("`($data_t_var"time").units`",1,`since_loc`)
          DEFINE SYMBOL tunits = `tunits`
       ENDIF
-      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) timeaxis
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var"time").time_origin`"/units=($tunits) timeaxis
       DEFINE SYMBOl timeaxis = timeaxis
    ENDIF
    LET tt = t[gt=($timeaxis)]
