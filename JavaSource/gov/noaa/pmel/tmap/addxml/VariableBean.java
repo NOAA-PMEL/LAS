@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.addxml;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.jdom.Element;
 
@@ -23,6 +24,7 @@ public class VariableBean extends LasBean {
 	private String url;
 	private String units;
 	private GridBean grid;
+	private Map<String, String> attributes = new HashMap<String, String>();
 	private HashMap<String, HashMap<String, String>> properties = new HashMap<String, HashMap<String, String>>();
 	public VariableBean() {
 	}
@@ -72,6 +74,9 @@ public class VariableBean extends LasBean {
 		groupMap.put(name, value);
 		properties.put(group, groupMap);
 	}
+	public void addAttribute(String name, String value) {
+	    attributes.put(name, value);
+	}
     public Element toXml(boolean seven) {
         Element variable;
 
@@ -94,6 +99,11 @@ public class VariableBean extends LasBean {
             Element link = new Element("link");
             link.setAttribute("match", "/lasdata/grids/"+grid.getElement());
             variable.addContent(link);
+        }
+        for (Iterator attIt = attributes.keySet().iterator(); attIt.hasNext();) {
+            String name = (String) attIt.next();
+            String value = attributes.get(name);
+            variable.setAttribute(name, value);
         }
         if ( properties.size() > 0 ) {
                 Element propertiesE = new Element("properties");
