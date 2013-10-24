@@ -318,6 +318,7 @@ public class DatasetBean extends LasBean {
                         n.setText(value);
                         groupE.addContent(n);
                     }
+                    propertiesE.addContent(groupE);
                 }
             }
             dataset.addContent(propertiesE);
