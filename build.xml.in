@@ -332,6 +332,7 @@
 		<unjar src="lib/JSAP_1.03a.jar" dest="${addxml-build}" />
 		<unjar src="lib/netcdfAll-4.2.jar" dest="${addxml-build}" />
 		<unjar src="lib/log4j-1.2.13.jar" dest="${addxml-build}" />
+		<unjar src="lib/commons-cli-1.2.jar" dest="${addxml-build}" />
 		<javac srcdir="src/gov/noaa/pmel/tmap/addxml:src/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
 			<classpath>
