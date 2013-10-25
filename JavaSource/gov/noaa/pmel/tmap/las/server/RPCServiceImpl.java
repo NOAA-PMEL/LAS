@@ -43,7 +43,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -850,7 +849,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         } catch (LASException e) {
             throw new RPCException(e.getMessage());
         }
-       
         return outerSequenceValues;
     }
     @Override
@@ -914,14 +912,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     }
     @Override
     public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws RPCException {
-        LASConfig lasConfig = getLASConfig();
-        try {
-            return lasConfig.getERDDAPConstraintGroups(dsid);
-        } catch (JDOMException e) {
-           throw new RPCException(e.getMessage());
-        } catch (LASException e) {
-            throw new RPCException(e.getMessage());
-        }
+        return getERDDAPConstraintGroups(dsid);
     }
    
 }
