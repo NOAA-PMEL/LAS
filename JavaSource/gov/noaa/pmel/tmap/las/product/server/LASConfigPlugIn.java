@@ -586,20 +586,6 @@ public class LASConfigPlugIn implements PlugIn {
 	    context.setAttribute(LAS_LOCK_KEY, "false");
 
 	    if ( !reinit_flag ) {
-	        // Server is up and ready to go...  
-            // Set up testing and file watching...
-	        LASTestOptions lto = lasConfig.getTestOptions();
-	        if ( lto != null ) {
-	            TestTask testTask = new TestTask(context);
-	            Timer testTimer = new Timer("LASTest Timer", true);
-	            double d = lto.getDelay();
-	            if ( d < 0 ) d = 0;
-	            double p = lto.getPeriod();
-	            // Not more than twice a day.  
-	            if ( p < 43200000 ) p = 43200000;
-	            testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
-	        }
-
 	        // Watch the config directory and reload if something changes...
 	        WatchService watcher = FileSystems.getDefault().newWatchService();
 	        Path conf = configFile.getParentFile().toPath();
