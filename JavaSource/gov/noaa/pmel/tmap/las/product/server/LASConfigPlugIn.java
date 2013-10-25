@@ -600,72 +600,6 @@ public class LASConfigPlugIn implements PlugIn {
 	            testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
 	        }
 
-	        // Default to once a day...
-	        String interval_string = "24";
-	        String age_string = "168";
-	        String ivunits = "hours";
-	        String time = "00:01";
-
-	        interval_string = lasConfig.getGlobalPropertyValue("product_server", "clean_interval");
-	        ivunits = lasConfig.getGlobalPropertyValue("product_server", "clean_units");
-	        age_string = lasConfig.getGlobalPropertyValue("product_server", "clean_age");
-	        time = lasConfig.getGlobalPropertyValue("product_server", "clean_time");
-
-	        if ( interval_string.equals("") ) {
-	            interval_string = "24";
-	        }
-	        if ( age_string.equals("") ) {
-	            age_string = "168";
-	        }
-	        if ( ivunits.equals("") ) {
-	            ivunits = "hours";
-	        }
-	        if ( time.equals("") ) {
-	            time = "00:01";
-	        }
-
-	        DateTime now = new DateTime();
-	        long interval = 1000*60*60*24;    
-	        long age = interval*7; // Older than a week old
-	        try {
-	            interval = Long.valueOf(interval_string);
-	            age = Long.valueOf(age_string);
-	            if ( ivunits.toLowerCase().contains("hour") ) {
-	                interval = interval * 1000*60*60;
-	                age = age * 1000*60*60;
-	            } else if (ivunits.toLowerCase().contains("day") ) {
-	                interval = interval * 1000*60*60*24;	     
-	                age = age * 1000*60*60*24;
-	            }
-	        } catch (Exception e) {
-	            interval = 1000*60*60*24;
-	            age = interval*7;
-	        }
-
-	        DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
-	        DateTimeFormatter ymdhm = DateTimeFormat.forPattern("yyyy-MM-dd HH:ss");
-	        String today_string = ymd.print(now);
-	        today_string = today_string + " " + time;
-	        DateTime start;
-	        DateTime startToday = ymdhm.parseDateTime(today_string);
-	        DateTime startTomorrow = startToday.plusHours(24);
-	        if ( now.isAfter(startToday) ) {
-	            start = startTomorrow;
-	        } else {
-	            start = startToday;
-	        }
-
-
-	        Timer timer = new Timer();
-
-	        if ( next < 999999999999999999l ) {
-	            UpdateTask update = new UpdateTask(context);
-	            timer.schedule(update, next);
-	        }
-
-	        ReaperTask reaper = new ReaperTask(context, age);
-	        timer.schedule(reaper, new Date(start.getMillis()), interval);
-
 	        // Watch the config directory and reload if something changes...
 	        WatchService watcher = FileSystems.getDefault().newWatchService();
 	        Path conf = configFile.getParentFile().toPath();
@@ -673,10 +607,7 @@ public class LASConfigPlugIn implements PlugIn {
 	        Reload reload = new Reload(watcher, context);
 	        reload.start();
 	    }
-//	    ServersListTask servers = new ServersListTask(context, lasServersStaticFileName, lasServersFileName);
-//	    if ( lasConfig.pruneCategories() ) {
-//	        timer.schedule(servers, new Date(now.getMillis()), 1000*60*60);
-//	    }
+	    
 	}
 	public void destroy() {
 	    log.error("Shutting down LAS");
