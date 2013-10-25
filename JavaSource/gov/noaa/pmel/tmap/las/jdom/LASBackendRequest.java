@@ -766,7 +766,10 @@ public class LASBackendRequest extends LASDocument {
         for (Iterator varIt = data.iterator(); varIt.hasNext();) {
             Element variable = (Element) varIt.next();
             var_name = variable.getAttributeValue("var");
-            variables.add(var_name);
+            // Avoid duplicates
+            if ( !variables.contains(var_name) ) {
+                variables.add(var_name);
+            }
         }
         return variables;
     }
