@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASDatabaseBackendConfig;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
+import gov.noaa.pmel.tmap.las.service.extract.IntermediateNetcdfFile;
 
 import java.io.BufferedReader;
 import java.io.File;
