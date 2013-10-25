@@ -23,6 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -72,6 +75,9 @@ public class LASConfigPlugIn implements PlugIn {
 	public static final String LAS_CONFIG_NOTFOUND_MESSAGE = "Server failed to get the LAS configuration. "
 			+ "It is likely that LAS was not configured and thus there is no tomcat6/content/LAS_WEBAPP_NAME/conf/server/las.xml file for the LAS WebApp. "
 			+ "Administrators can check for this problem by reading the log file, probably in tomcat6/content/baker/logs/las.log";
+	
+	public static final String TEST_SCHEDULER = "test_schduler";
+	public static final String REAP_SCHEDULER = "read_scheduler";
 	
 	/*
 	 * This is the key where we will store a boolean with the results of an F-TDS test.
@@ -586,6 +592,94 @@ public class LASConfigPlugIn implements PlugIn {
 	    context.setAttribute(LAS_LOCK_KEY, "false");
 
 	    if ( !reinit_flag ) {
+	        
+	        
+	        
+	        if ( lasConfig != null ) {
+	            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+	            LASTestOptions lto = lasConfig.getTestOptions();
+	            if ( lto != null ) {
+
+	                long d = lto.getDelay();
+	                if ( d < 0 ) d = 0;
+	                long p = lto.getPeriod();
+	                // Not more than twice a day.  
+	                if ( p < 43200000 ) p = 43200000;
+	                scheduler.scheduleAtFixedRate(new TestTask(context), d, p, TimeUnit.MICROSECONDS);
+	                context.setAttribute(TEST_SCHEDULER, scheduler);
+	            }
+	        }
+	        if ( lasConfig != null ) {
+	            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+	            // Default to once a day...
+	            String interval_string = "24";
+	            String age_string = "168";
+	            String ivunits = "hours";
+	            String time = "00:01";
+	            TimeUnit timeunit = TimeUnit.HOURS;
+
+	            // How often to reap in either hours or days 
+	            interval_string = lasConfig.getGlobalPropertyValue("product_server", "clean_interval");
+	            // Units used for the interval and the age
+	            ivunits = lasConfig.getGlobalPropertyValue("product_server", "clean_units");
+	            // Age expressed in chosen units at which a file is removed (defaults to 7 days)
+	            age_string = lasConfig.getGlobalPropertyValue("product_server", "clean_age");
+	            // Time of day at which to start the cleaner running.  Defaults to start immediately.
+	            time = lasConfig.getGlobalPropertyValue("product_server", "clean_time");
+
+	            if ( interval_string.equals("") ) {
+	                interval_string = "24";
+	            }
+	            if ( age_string.equals("") ) {
+	                age_string = "168";
+	            }
+	            if ( ivunits.equals("") ) {
+	                ivunits = "hours";
+	            }
+	            if ( time.equals("") ) {
+	                time = "00:01";
+	            }
+
+	            DateTime now = new DateTime();
+	            long interval = 1000*60*60*24;    
+	            long age = interval*7; // Older than a week old
+	            try {
+	                interval = Long.valueOf(interval_string);
+	                age = Long.valueOf(age_string);
+	                if ( ivunits.toLowerCase().contains("hour") ) {
+	                    interval = interval * 1000*60*60;
+	                    age = age * 1000*60*60;
+	                    // timeunit defaults to hours
+	                } else if (ivunits.toLowerCase().contains("day") ) {
+	                    interval = interval * 1000*60*60*24;         
+	                    age = age * 1000*60*60*24;
+	                    timeunit = TimeUnit.DAYS;
+	                }
+	            } catch (Exception e) {
+	                interval = 1000*60*60*24;
+	                age = interval*7;
+	            }
+
+	            DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
+	            DateTimeFormatter ymdhm = DateTimeFormat.forPattern("yyyy-MM-dd HH:ss");
+	            String today_string = ymd.print(now);
+	            today_string = today_string + " " + time;
+	            long delay = 0;
+	            DateTime startToday = ymdhm.parseDateTime(today_string);
+	            DateTime startTomorrow = startToday.plusHours(24);
+	            if ( now.isAfter(startToday) ) {
+	                delay = startTomorrow.getMillis() - now.getMillis();
+	            } else {
+	                delay = startToday.getMillis() - now.getMillis();
+	            }
+	            if ( delay < 0 ) {
+	                delay = 0;
+	            }
+
+	            scheduler.scheduleAtFixedRate(new ReaperTask(context, age), delay, interval, timeunit);
+	            context.setAttribute(REAP_SCHEDULER, scheduler);
+	        }
+	        
 	        // Watch the config directory and reload if something changes...
 	        WatchService watcher = FileSystems.getDefault().newWatchService();
 	        Path conf = configFile.getParentFile().toPath();
@@ -597,6 +691,14 @@ public class LASConfigPlugIn implements PlugIn {
 	}
 	public void destroy() {
 	    log.error("Shutting down LAS");
+	    ScheduledExecutorService scheduler1 = (ScheduledExecutorService) context.getAttribute(TEST_SCHEDULER);
+	    if ( scheduler1 != null ) {
+	        scheduler1.shutdownNow();
+	    }
+	    ScheduledExecutorService scheduler2 = (ScheduledExecutorService) context.getAttribute(REAP_SCHEDULER);
+        if ( scheduler2 != null ) {
+            scheduler2.shutdownNow();
+        }
 	}
 
 	public void update(ServletContext context) throws ServletException, JDOMException, UnsupportedEncodingException, LASException {
