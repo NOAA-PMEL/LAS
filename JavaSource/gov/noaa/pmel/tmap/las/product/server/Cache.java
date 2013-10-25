@@ -159,10 +159,22 @@ public class Cache extends LinkedHashMap<String, File> implements Serializable{
             for (Iterator fileIt = cachedFiles.iterator(); fileIt.hasNext();) {
                 File file = (File) fileIt.next();
                 if ( !file.getName().equals("lasV7.xml") ) {
-                    addFile(file.getAbsolutePath(), file);
+                    if ( file.getName().endsWith("_response.xml") ) {
+                        LASBackendResponse b = new LASBackendResponse();
+                        JDOMUtils.XML2JDOM(file, b);
+                        if ( !b.hasError() ) {
+                            addFile(file.getAbsolutePath(), file);
+                        }
+                    } else {
+                        addFile(file.getAbsolutePath(), file);
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
+            throw new LASException(e.getMessage());
+        } catch (IOException e) {
+            throw new LASException(e.getMessage());
+        } catch (JDOMException e) {
             throw new LASException(e.getMessage());
         }
     }
