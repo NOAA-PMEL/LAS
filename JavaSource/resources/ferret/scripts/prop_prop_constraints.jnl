@@ -16,6 +16,8 @@
 DEFINE SYMBOL translate_math = 1
 
 ! Define var_mask variable with all of the variable constraints.
+! When there is a longitude constraint, define symbols with the values,
+! to be used in making the map underlying prop-prop plots.
 
 LET vnames = ..varnames
 
@@ -34,6 +36,8 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
   IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
+  IF `($constraint_($ic)_lhs"0|longitude>1|*>0") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_lon_min = ($constraint_($ic)_rhs) ;\
+  IF `($constraint_($ic)_lhs"0|longitude>1|*>0") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_lon_max = ($constraint_($ic)_rhs) ;\
   )
 
 IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
