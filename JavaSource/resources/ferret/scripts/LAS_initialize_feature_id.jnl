@@ -49,6 +49,7 @@ LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(featurevar),`longest`)
 
       LET n_subset = `subset_mask[I=@NGD]`
       DEFINE SYMBOL cruises_shown = `n_subset`
+      DEFINE SYMBOL prof_traj_shown = `n_subset`
    ELSE
 
 ! There may be a subset already defined from ferret_cruise_list
@@ -57,6 +58,7 @@ LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(featurevar),`longest`)
       
       LET n_subset = `subset_mask[I=@NGD]`
       DEFINE SYMBOL cruises_shown = `n_subset`
+      DEFINE SYMBOL prof_traj_shown = `n_subset`
    ENDIF
 
 ! Make time symbols w/o the trailing 00:00:00
