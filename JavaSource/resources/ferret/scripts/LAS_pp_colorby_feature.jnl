@@ -13,6 +13,12 @@ IF `($data_1_var"0|*>1") EQ 0` THEN
   EXIT/PROGRAM
 ENDIF
 
+LET n_in_mask = constraints_mask[i=@ngd]
+IF `n_in_mask eq 0` THEN 
+  DEFINE SYMBOL put_label = Data All Missing or Inconsistent Variable Constraints
+  EXIT/SCRIPT
+ENDIF
+
 DEFINE SYMBOL feature_max = `($rowvar),RETURN=size`
 
 ! The mask is 1 for start of features 
@@ -27,15 +33,39 @@ ENDIF
 
 LET idvar = EXPND_BY_LEN(feature_id, ($rowvar), ($rowvar)[m=@sum])
 
-LET decimate_size = `feature_len[m=@max]`
+! Masking for constraints may mean not all are shown. Recompute cruises_shown.
 
-list feature_id, feature_len
-list decimate_size
+LET idvar_masked = idvar * var_mask
+LET count_nf = 0
+LET count_orig = 0
+REPEAT/RANGE=1:`($rowvar),RETURN=msize`/NAME=ic (\
+ DEFINE SYMBOL ic = `ic` ;\
+ DEFINE SYMBOL nf = `idvar_masked[I=@LOC:($ic)]` ;\
+ DEFINE SYMBOL cruise_is = ($nf"0|bad>0|*>($ic)") ;\
+ LET count_nf = `count_nf +  ($nf"0|bad>0|*>1")` ;\
+ IF `($cruise_is) GT 0` THEN LET count_orig = `count_orig + rowsize[m=($cruise_is)]`;\ 
+)
+DEFINE SYMBOL cruises_shown = `count_nf`
+DEFINE SYMBOL prof_traj_shown = `count_nf`
 
-LET tmask = IF idvar[i=@ddb] EQ 1 THEN 1 ELSE 0
+LET decimate_size = count_orig
+
+! Now we have the full size of desired cruise selection. Do the decimation if any on 
+! the full set so as to keep placeholders for all the cruises (decimating cruises , 
+! that are all-blank, lose the start and end of cruises)
+
+LET feature_id = _M[GE=featurevar]
+LET feature_len =($rowvar)
+
+! This section setting up obs_mask, for non-lon-lat plots, which do not use decimation.
+LET all_feature_id = _M[GE=featurevar]
+LET all_idvar = EXPND_BY_LEN(all_feature_id, ($rowvar), ($rowvar)[m=@sum])
+
+LET tmask = IF all_idvar[i=@ddb] EQ 1 THEN 1 ELSE 0
 LET obs_mask1 = tmask[gx=($ferret_plot_var_0)@ASN]
 LET obs_mask2 = IF i[gx=($ferret_plot_var_0)] EQ 1 THEN 1 ELSE 0
 LET obs_mask = IF (obs_mask1+obs_mask2) EQ 1 THEN 1
+
 
 LET pvar = constraints_mask* ($ferret_plot_var_0)
 IF ($pvar_reset"0|*>1") THEN LET pvar = constraints_mask* ($pvar_reset)
@@ -53,14 +83,19 @@ IF `($numobs) LT num_decimate` THEN LET num_decimate = -1  ! separate cruises bu
 IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1|*>0") AND\
  (($numobs) GE num_decimate)` THEN
 
-   LET pxvar = ($ferret_plot_var_0)
-   IF ($pvar_reset"0|*>1") THEN LET pxvar = ($pvar_reset) ! see LAS_xytvar_setup
-   LET qyvar = ($ferret_plot_var_1)
+   DEFINE SYMBOL is_decimate = 1
+
+   LET pxvar = constraints_mask* ($ferret_plot_var_0)
+   IF ($pvar_reset"0|*>1") THEN LET pxvar = constraints_mask*  ($pvar_reset) ! see LAS_xytvar_setup
+   LET qyvar = constraints_mask* ($ferret_plot_var_1)
    
    LET var_data = idvar
    
    DEFINE SYMBOL data_x_var = if idvar then pxvar
    DEFINE SYMBOL data_y_var =  if idvar then qyvar
+   
+   DEFINE SYMBOL data_x_var = pxvar
+   DEFINE SYMBOL data_y_var = qyvar
    DEFINE SYMBOL data_var = idvar
    
    ! Arguments are 
@@ -68,14 +103,22 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    !  lon/lat tolerance for piecewise decimation
    !  var tolerance (var at lon/lat)
    
+   LET full_range = 360*90
+   LET max_range = ($region_x_range)* ($region_y_range)
    LET max_range = MAX(($region_x_range), ($region_y_range))
-   LET tol = `0.01*LOG(decimate_size)/max_range`
-   IF `tol LT 1.e-2` THEN LET tol = 1.e-2
+
+
+!   LET tol = `0.01*LOG(decimate_size)/max_range`
+!   LET tol = `0.01*LOG(decimate_size)`
+!   LET tol = `max_range/full_range)`
+   LET tol = `(max_range/full_range)/LOG(decimate_size)`
+   IF `tol LT 1.e-6` THEN LET tol = 1.e-6
 
    GO decimate_dsg `num_decimate` `tol` 0.1
 
    LET pvar = ($data_x_var)
    LET qvar = ($data_y_var)
+   LET dvar = ($data_var)
 
 ! data_var is the feature index at each obs index i, with a gap between features.
 ! Find where the features start now that they are sampled. (Need to remove the gaps
@@ -92,9 +135,14 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    
    LET data_1_var_z =  EXPNDI_BY_Z(pvar, decimated_mask, `nfeatures`, `longest`)
    LET data_var_z =  EXPNDI_BY_Z(qvar, decimated_mask, `nfeatures`, `longest`)
+   LET data_var_d =  EXPNDI_BY_Z(dvar, decimated_mask, `nfeatures`, `longest`)
+
+   LET dmask =  subset_mask * data_var_d
+   DEFINE SYMBOL have_dmask = 1
+
+   DEFINE SYMBOL ngood_data = `pvar[i=@ngd]`
 
 ENDIF  ! Decimation for longitude/latitude plots
-
 
 ! Set up to plot the data and the linear fit
 LET pmask =  subset_mask * data_1_var_z
@@ -153,7 +201,7 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
 
    LET colr_index = MOD(i[i=1:`nfeatures`],`ncolors`)
    LET allcolors = IF colr_index EQ 0 THEN `ncolors` ELSE colr_index 
-   LET dmask = subset_mask * allcolors + 0*qmask
+   IF `($have_dmask"0|*>1") EQ 0` THEN LET dmask = subset_mask * allcolors + 0*qmask
 
    LET transpmask = TRANSPOSE_XZ(pmask)
    LET transqmask = TRANSPOSE_XZ(qmask)
@@ -169,7 +217,9 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
     LET zd = transdmask[k=`c1`:`cn`];\
     LET xpolydat = XSEQUENCE(zx);\
     LET ypolydat = XSEQUENCE(zy);\
-    LET dpolydat = XSEQUENCE(zd);\
+    LET colorplus = 0;\
+    IF ($is_decimate"0|*>1") THEN LET colorplus = (ishape-1)*ncolors;\
+    LET dpolydat = XSEQUENCE(zd-`colorplus`);\
     LET all_mask = IF xpolydat+ypolydat+dpolydat THEN 1;\
     LET all_x = COMPRESSI(all_mask*xpolydat);\
     LET all_y = COMPRESSI(all_mask*ypolydat);\
@@ -186,8 +236,8 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
      IF `cn GT nfeatures` THEN LET cn = `nfeatures`;\
      LET ishape = `ishape+1`;\
      PPL shaset protect;\
-    )
-    
+     )
+
 ! Note need to protect the colors from one set of 10 to the next
   
 ELSE ! all features
@@ -198,5 +248,8 @@ ELSE ! all features
 
    DEFINE SYMBOL ngood_data = `p[i=@ngd]`
 ENDIF
+
+DEFINE SYMBOL nout_lonlat = ($ngood_data)
+DEFINE SYMBOL ngood_data = `count_orig`
 
 ! End of file ------------ LAS_pp_colorby_feature.jnl--------------------------
