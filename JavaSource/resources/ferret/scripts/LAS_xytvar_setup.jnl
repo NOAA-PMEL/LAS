@@ -17,6 +17,14 @@
 PPL TICS .125,.25,.125,.25
 PPL axlabp,-1,-1
 
+!! TESTING; do we want to only constrain the map for constraints, not for
+!! chosen trajectories?
+
+DEFINE SYMBOL xvar = var_mask*text_mask*xvar
+DEFINE SYMBOL yvar = var_mask*text_mask*yvar
+LET p = ($xvar) 
+LET q = ($yvar)
+
 
 ! If they are not lon, lat, or time, put axis labels on the plot.
 ! (easier to understand, e.g. SST as a fcn of AIRT)
@@ -129,10 +137,12 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
-   
+
+
 ! Initialize   
    LET ax_lo = ($region_x_lo)
    LET ax_hi = ($region_x_hi)
+
    LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
 
    IF `(ax_hi-ax_lo) LT 359` THEN 
@@ -181,6 +191,14 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
          LET xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
+   ENDIF
+
+! If there was a longitude mask apply that to the plot region
+
+   IF ($constr_lon_min"0|*>1") THEN
+      LET amin = ($constr_lon_min)
+      LET amax = ($constr_lon_max)
+      GO LAS_is_range amin amax
    ENDIF
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
@@ -477,7 +495,7 @@ ENDIF
 
 ! If its a lon/lat plot, make a map with the same resolution as it would be
 ! done on a map, but with light gray.
-! Don't do this if it's a lon vs lat.
+! Only if longitude is on the horizontal axis
 
 IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
    DEFINE SYMBOL basemap_area = `( (($xaxis_max)-($xaxis_min)) * (($yaxis_max)-($yaxis_min)) )/ (360 * 180)`
@@ -490,4 +508,11 @@ IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1
 ENDIF
 
 SET MODE/LAST nodata_lab
+
+!!  See testing comment at top
+DEFINE SYMBOL xvar = constraints_mask*xvar
+DEFINE SYMBOL yvar = constraints_mask*yvar
+LET p = ($xvar) 
+LET q = ($yvar)
+
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------
