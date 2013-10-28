@@ -32,6 +32,15 @@ IF ($is_time"0|0|*>1") THEN
    ENDIF
    LET del_ax = 24
    IF `ax_hi - ax_lo LT 26` THEN LET del_ax = 1
+   
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN 
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL tunits = `tunits`
+   ENDIF
+   
+   IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
+
 ELSE
    IF `ax_lo EQ ax_hi` THEN
       LET ax_lo = `ax_lo - 0.5`
