@@ -260,12 +260,6 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       DEFINE SYMBOL win_asp = /ASPECT=0.75
       SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
    ELSE
-      LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
-      IF `since_loc GT 1` THEN 
-         LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
-         DEFINE SYMBOL tunits = `tunits`
-      ENDIF
-      IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
 
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
       DEFINE SYMBOL timeaxis = haxis
@@ -395,12 +389,6 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
       SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
       LET tt = t[gt=vaxis]
    ELSE
-      LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
-      IF `since_loc GT 1` THEN 
-         LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
-         DEFINE SYMBOL tunits = `tunits`
-      ENDIF
-      IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
       DEFINE SYMBOL timeaxis = vaxis
       DEFINE AXIS/Y=`ax_lo`:`ax_hi`:`del_ax` vaxis1
