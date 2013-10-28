@@ -321,6 +321,7 @@ public class TabledapTool extends TemplateTool {
                 String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
                 String secondUrl = dsUrl + q;
                 dt = new DateTime();
+                log.debug("TableDapTool query="+secondUrl);
                 log.info("{TableDapTool starting file pull for part 2 at "+fmt.print(dt));
                 lasProxy.executeGetMethodAndSaveResult(secondUrl, temp_file, null);
                 dt = new DateTime();
