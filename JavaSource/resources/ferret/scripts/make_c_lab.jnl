@@ -72,10 +72,11 @@ DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
 
 ! Show time constraint as a formatted time
 IF `($lhs"|time>1|TIME>1|*>0")` THEN
+   IF `($timevar"0|*>1") EQ 0` THEN DEFINE SYMBOL timevar = time
    CANCEL SYMBOL rhsdate
    IF `($timeaxis"0|*>1") EQ 0` THEN 
-      LET amin = time[i=@MIN]
-      LET amax = time[i=@MAX]
+      LET amin = ($timevar)[i=@MIN]
+      LET amax = ($timevar)[i=@MAX]
       DEFINE SYMBOL is_time = 1
       GO LAS_is_range amin amax
       CANCEL SYMBOL is_time
