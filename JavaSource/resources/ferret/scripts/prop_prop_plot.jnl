@@ -16,11 +16,12 @@
 ! changes will need to be made to annotate that info on the plot.
 
 set mode ver:always
-!
+
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
 
 DEFINE SYMBOL its_prop_plot = 1
+DEFINE SYMBOL its_insitu = 1
 
 DEFINE SYMBOL ribbon = 1
 
@@ -40,9 +41,6 @@ DEFINE SYMBOL ferret_fill_levels = v
 
 GO setup_prop_prop
 
-! Plot qualifiers (graticule lines etc)
-GO LAS_set_plot_qualifiers 
-
 ! Open the window, apply size, scale options
 
 ! dont want to set the aspect ratio using xy region, so reset
@@ -55,7 +53,6 @@ GO LAS_open_window
 DEFINE SYMBOL ferret_view = ($viewsave)
 
 ! Build up the plot qualifiers
-
 IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
@@ -71,45 +68,6 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-
-! The underlying plot is a PLOT/VS
-DEFINE SYMBOL qualifiers = ($qualifiers)/VS/color=8
-
-! Expand the horizontal and vertical scale a bit data is not on top of
-! the plot axes.
-
-DEFINE SYMBOL nx = `nx_var`
-LET nok = `($ferret_plot_var_0)[i=@ngd]`
-
-STAT ($xvar)
-IF `nok GT 0 AND ($stat_ngood"0") GT 0` THEN
-   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-ELSE
-   PPL %RANGE `($region_0_x_lo)`, `($region_0_x_hi)`, 10
-ENDIF
-
-IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
-   DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
-   DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
-   DEFINE SYMBOL ppl$range_inc = 1
-ENDIF
-DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
-DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
-
-STAT ($yvar)
-IF `nok GT 0 AND ($stat_ngood"0") GT 0` THEN
-   PPL %RANGE `($stat_min)`, `($stat_may)`, 10
-ELSE
-   PPL %RANGE `($region_0_y_lo)`, `($region_0_y_hi)`, 10
-ENDIF
-
-IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
-   DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
-   DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
-   DEFINE SYMBOL ppl$range_inc = 1
-ENDIF
-DEFINE SYMBOL ferret_dep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
-DEFINE SYMBOL qualifiers ($qualifiers)/VLIM=($ppl$range_low):($ppl$range_high)
 
 DEFINE SYMBOL qualifiers ($qualifiers)/NOKEY/NOLAB
 
@@ -139,21 +97,23 @@ DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
 
-
 ! Polygon plot
+GO LAS_xytvar_setup
+IF ($put_label"0|*>1") THEN DEFINE SYMBOL all_missing = 1
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
-LET compute_good = ($xvar)
+
+LET compute_good = xvar
 DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
 
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
-   LET compute_good = ($zvar)
+   LET compute_good = zvar
    DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
 ENDIF
 
-GO LAS_xytvar_setup
+IF `($all_missing"0") EQ 0` THEN
 
 ! If a time axis was defined, set symbols in the original time units for the map scale file.
 IF ($timeaxis"0|haxis>1|*>0) THEN 
@@ -171,35 +131,76 @@ IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
-      DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow
+      DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow/MISSING=blank
       DEFINE SYMBOL plot_end_command = RIBBON/OVER
    ENDIF
 ENDIF
 
 IF `($ribbon"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
+
 IF ($color_by_feature"0|*>1") THEN 
    GO LAS_pp_colorby_feature
 
+!   put_label has been set if all data is missing or constraints return no data.
 ELSE
    IF ($color_by"0|*>1") THEN 
+   
+      IF ($rowvar"0|*>1") THEN 
+
+         DEFINE SYMBOL is_decimate = 1
+
+         LET pxvar = constraints_mask* ($ferret_plot_var_0)
+         IF ($pvar_reset"0|*>1") THEN LET pxvar = constraints_mask*  ($pvar_reset) ! see LAS_xytvar_setup
+         LET qyvar = constraints_mask* ($ferret_plot_var_1)
+   
+         LET var_data = idvar
+   
+         DEFINE SYMBOL data_x_var = pxvar
+         DEFINE SYMBOL data_y_var = qyvar
+         DEFINE SYMBOL data_var = zvar
+
+         LET ranger = MINMAX(pxvar)
+         LET tol1 = `0.1* (ranger[i=2] - ranger[i=1])`
+         IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+
+         LET ranger = MINMAX(qyvar)
+         LET tol2 = `0.1* (ranger[i=2] - ranger[i=1])`
+         IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
+
+         LET ranger = MINMAX(zvar)
+         LET tol3 = `0.1* (ranger[i=2] - ranger[i=1])`
+         IF `tol3 LT 1.e-6` THEN LET tol2 = 1.e-6
+
+!list tol1, tol2, tol3; pause
+         GO decimate_dsg 50000 tol1 tol2 tol3
+!pause
+         LET pvar = ($data_x_var)
+         LET qvar = ($data_y_var)
+         LET dvar = ($data_var)
+
+      ELSE   ! IF ($rowvar)
+         LET nout_lonlat = `var_data_masked[i=@ngd]`
+         DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
+      ENDIF  ! IF ($rowvar)
 
 ! Get color-plot qualifiers
-      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels"v")
+     DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels"v")
    
-      IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
-         DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
-      ELSE
-         DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
-      ENDIF
+     IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
+        DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
+     ELSE
+        DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
+     ENDIF
    
 ! Dont use the palette coming in. Its for variable 0
-      DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+     DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
-      DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
-   ELSE
+     DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
+
+   ELSE    ! IF ($color_by)
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
-   ENDIF
+   ENDIF   ! IF ($color_by)
    
    IF `($ferret_annotations%0|*>1%) EQ 0` THEN
       LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
@@ -224,6 +225,7 @@ ELSE
    ENDIF
 
 ENDIF  ! color-by-trajectory or not...
+
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
@@ -289,6 +291,10 @@ IF ($do_rsquare"1|0|*>1) THEN
    ENDIF
 
 ENDIF
+
+
+ENDIF  ! all_missing or not...
+
 
 ! notation with number of cruises, trajectories, or profiles and obs.
 GO feature_labels
