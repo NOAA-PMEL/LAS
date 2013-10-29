@@ -165,6 +165,9 @@ IF `color_by_feature EQ 1` THEN
    EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF
 
+! Set color levels for the data variable
+DEFINE SYMBOL data_num = 1
+GO LAS_initialize_var_levels
 
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
