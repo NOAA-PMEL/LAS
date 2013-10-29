@@ -255,7 +255,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    DEFINE SYMBOL data_1_title = Time
 
    IF `baddat EQ 1` THEN
-      DEFINE AXIS/t=0:2:1 haxis
+      DEFINE AXIS/t=0:2:1/t0=1-jan-0000/units=seconds haxis
       LET tt = t[gt=haxis]
       DEFINE SYMBOL win_asp = /ASPECT=0.75
       SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
@@ -442,7 +442,8 @@ ELSE
 ENDIF
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
-   LABEL/NOUSER 0.2, 0.2, -1, 0, 0.12, @AS($put_label)
+   LABEL/NOUSER 0.2, ($ppl$ylen), -1, 0, 0.12, @AS($put_label)
+   DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
    EXIT/SCRIPT
 ENDIF
 
