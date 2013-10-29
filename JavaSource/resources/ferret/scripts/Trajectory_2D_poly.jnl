@@ -57,7 +57,30 @@ DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
   IF ($rowvar"0|*>1") THEN 
-     GO decimate_dsg
+
+     LET decimate_size = ($ngood_data)
+      LET num_decimate = 200000
+
+     DEFINE SYMBOL  data_x_is_lon = 1
+   
+     LET full_range = 360*90
+     LET max_range = ($region_x_range)* ($region_y_range)
+     LET max_range = MAX(($region_x_range), ($region_y_range))
+
+      DEFINE SYMBOL  data_x_is_lon = 1
+!      LET tol1 = `(max_range/full_range)/LOG(decimate_size)`
+      LET tol1 = `(max_range/full_range)`
+      IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+      LET tol2 = `tol1`
+
+      LET tol1 = 0.1*($region_x_range)/360
+      IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+
+      LET tol2 = 0.1*($region_y_range)/180
+      IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
+
+     GO decimate_dsg `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
+     
   ELSE
      LET nout_lonlat = `var_data_masked[i=@ngd]`
      DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
@@ -127,7 +150,7 @@ IF ($ferret_by_id"0|*>1") THEN
 ENDIF
 
 ! Plot qualifiers (graticule lines etc)
-GO LAS_set_plot_qualifiers 
+GO LAS_set_plot_qualifiers
 
 ! Open the window
 GO LAS_open_window
@@ -160,8 +183,8 @@ ENDIF
 
 ! Define plot qualifiers for polygon overlay
 
-CANCEL SYMBOL qualifiers 
-DEFINE SYMBOL qualifiers = /OVER/NOLAB
+!CANCEL SYMBOL qualifiers 
+DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
 ! If undefined, set polygon scale according to number of points
 IF ($ferret_poly_scale"1|*>0") THEN
@@ -180,8 +203,6 @@ IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
 ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
-
-DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_plot_levels"v")
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
@@ -231,6 +252,7 @@ ELSE
 
        IF ($do_wrap"0|*>1") THEN \
           ($plot_command)($qualifiers)/missing=black x_var_data+(($do_wrap)), y_var_data, var_data 
+
    ELSE
 
       LET ng = var_data[x=@ngd]
