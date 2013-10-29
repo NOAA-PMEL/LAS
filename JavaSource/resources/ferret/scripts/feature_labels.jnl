@@ -73,14 +73,14 @@ IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
 IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
- DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) obs
+ DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs
 
 ! Notation about the decimation
-IF ($piecewise_decimation"0|*>1") THEN 
+IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   LET fraction = ($nout_lonlat)/ABS(($ngood_data)-($nbad_data"0"))
+   LET fraction = ($nout_lonlat)/ABS(($ngood_data))
    DEFINE SYMBOL note_($note_num)_lab = Decimated with Piecewise Linear Method to ($nout_lonlat) \
 good points,  fraction `fraction,PREC=4`
 ENDIF
-!---------------- end of feature_labels.jnl -------------------------
 
+!---------------- end of feature_labels.jnl -------------------------
