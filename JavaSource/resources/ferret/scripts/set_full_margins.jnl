@@ -1,5 +1,7 @@
 ! Set up for small margins, color key at the top
 ! full_view2 is for property-property plots to use.
+! 10/13 change X=0.06 to X=0.07 throughout. When the vertical
+! axis labels need more than 2 digits, we need more space.
 
 ! Google Earth plots need no margins. This has already been set up.
 IF ($its_GE"0|*>1") THEN 
@@ -9,14 +11,15 @@ IF ($its_GE"0|*>1") THEN
 ENDIF
 
 DEFINE SYMBOL text_size = ($ferret_text_size"0.09")
+
 CAN view
 
-DEFINE VIEW/AXES/X=0.06:0.98/y=0.06:0.93 full_view
-DEFINE VIEW/AXES/X=0.06:0.98/y=0.06:0.93 full_view2
+DEFINE VIEW/AXES/X=0.07:0.99/y=0.06:0.93 full_view
+DEFINE VIEW/AXES/X=0.07:0.99/y=0.06:0.93 full_view2
 
 IF ($ferret_view%0|yt>1|zt>1|t>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.06:0.98/y=0.07:0.93  full_view
-   DEFINE VIEW/AXES/X=0.06:0.98/y=0.07:0.93  full_view2
+   DEFINE VIEW/AXES/X=0.07:0.98/y=0.07:0.93  full_view
+   DEFINE VIEW/AXES/X=0.07:0.98/y=0.07:0.93  full_view2
 ENDIF
 
 if ($ferret_view%0|xt>1|*>0%) THEN 
@@ -42,3 +45,5 @@ IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with F
 PPL TICS,,,,,1,1
 PPL AXLSZE ($text_size),($text_size)
 
+
+pause
