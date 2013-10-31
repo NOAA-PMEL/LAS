@@ -91,16 +91,16 @@ LET decimate_lonlat = PIECEWISE3(\
 SAVE/FILE="($result_annotations_filename).nc"/clobber decimate_lonlat
 can var decimate_lonlat
 USE "($result_annotations_filename).nc"
-LET filesample = `decimate_lonlat,RETURN=dsetnum`
+DEFINE SYMBOL filesample = `decimate_lonlat,RETURN=dsetnum`
 set data 1
 
-LET nout_lonlat = `decimate_lonlat[d=`filesample`,i=@ngd]`
+LET nout_lonlat = `decimate_lonlat[d=($filesample),i=@ngd]`
 
 SAY _________________ AFTER THE DECIMATE CALL ITSELF  clock seconds:   ($clock_secs)
 
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
 
-LET xsamplepts = XSEQUENCE(decimate_lonlat[d=`filesample`,i=1:($nout_lonlat)])
+LET xsamplepts = XSEQUENCE(decimate_lonlat[d=($filesample),i=1:($nout_lonlat)])
 
 LET good_sample = IF xsamplepts GT 0 THEN xsamplepts
 LEt nsample = `good_sample[i=@ngd]`
@@ -115,14 +115,13 @@ LET samplepts = xsamplepts[gx=xsample_axis@asn]
 ! Prevent calling decimation function later for a second time
 
 SAVE/APPEND/FILE="($result_annotations_filename).nc" samplepts
-CAN DATA `filesample`
+CAN DATA ($filesample)
 CANCEL VAR samplepts
 USE "($result_annotations_filename).nc"
 SET DATA 1
-sh dat; pause
 ! If the decimation returns most of the data, don't do it.
 
-LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts[d=`filesample`])
+LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts[d=($filesample)])
 LET ngood_sampled = `varsample[i=@ngd]`
 
 IF `(nout_lonlat/($ngood_data)) GT 0.8` THEN
@@ -144,9 +143,9 @@ ENDIF
 LET lons = if var_with_gaps then lon_with_gaps
 LET lats = if var_with_gaps then lat_with_gaps
 
-LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts[d=`filesample`])
-LET lonsample = SAMPLE_FAST_I(lons, samplepts[d=`filesample`])
-LET latsample = SAMPLE_FAST_I(lats, samplepts[d=`filesample`])
+LET varsample = SAMPLE_FAST_I(var_with_gaps, samplepts[d=($filesample)])
+LET lonsample = SAMPLE_FAST_I(lons, samplepts[d=($filesample)])
+LET latsample = SAMPLE_FAST_I(lats, samplepts[d=($filesample)])
 
 DEFINE SYMBOL data_var = varsample
 DEFINE SYMBOL data_x_var = lonsample
