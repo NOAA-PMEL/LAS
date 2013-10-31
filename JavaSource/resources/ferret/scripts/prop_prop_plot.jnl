@@ -171,9 +171,8 @@ ELSE
          LET tol3 = `0.1* (ranger[i=2] - ranger[i=1])`
          IF `tol3 LT 1.e-6` THEN LET tol2 = 1.e-6
 
-!list tol1, tol2, tol3; pause
-         GO decimate_dsg 50000 tol1 tol2 tol3
-!pause
+         GO decimate_dsg 200000 tol1 tol2 tol3
+
          LET pvar = ($data_x_var)
          LET qvar = ($data_y_var)
          LET dvar = ($data_var)
@@ -292,9 +291,7 @@ IF ($do_rsquare"1|0|*>1) THEN
 
 ENDIF
 
-
 ENDIF  ! all_missing or not...
-
 
 ! notation with number of cruises, trajectories, or profiles and obs.
 GO feature_labels
