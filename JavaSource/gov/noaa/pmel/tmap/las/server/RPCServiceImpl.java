@@ -162,44 +162,54 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return cats;
     }
     public ConfigSerializable getConfig(String view, String[] xpaths) throws RPCException {
-        ConfigSerializable wire_config = new ConfigSerializable();
-        String dsid = Util.getDSID(xpaths[0]);
-        String varid = Util.getVarID(xpaths[0]);
-        List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
-        if ( constraintGroups != null && constraintGroups.size() > 0) {
-            wire_config.setConstraintGroups(constraintGroups);
-        } else {
-            wire_config.setConstraintGroups(null);
+        try {
+            ConfigSerializable wire_config = new ConfigSerializable();
+            String dsid = Util.getDSID(xpaths[0]);
+            String varid = Util.getVarID(xpaths[0]);
+            List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
+            if ( constraintGroups != null && constraintGroups.size() > 0) {
+                wire_config.setConstraintGroups(constraintGroups);
+            } else {
+                wire_config.setConstraintGroups(null);
+            }
+            GridSerializable wire_grid = getGridSerializable(dsid, varid);
+            wire_config.setGrid(wire_grid);
+            OperationSerializable[] wire_operations = getOperations(view, xpaths);
+            wire_config.setOperations(wire_operations);
+            RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
+            wire_config.setRegions(wire_regions);
+            wire_config.setDsid(dsid);
+            wire_config.setVarid(varid);
+            return wire_config;
+        } catch (RPCException e) {
+            System.out.println(e.getMessage());
+            throw e;
         }
-        GridSerializable wire_grid = getGridSerializable(dsid, varid);
-        wire_config.setGrid(wire_grid);
-        OperationSerializable[] wire_operations = getOperations(view, xpaths);
-        wire_config.setOperations(wire_operations);
-        RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
-        wire_config.setRegions(wire_regions);
-        wire_config.setDsid(dsid);
-        wire_config.setVarid(varid);
-        return wire_config;
     }
     public ConfigSerializable getConfig(String view, String catid, String dsid, String varid) throws RPCException {
-        ConfigSerializable wire_config = new ConfigSerializable();
-        CategorySerializable cat= getCategoryWithGrids(catid, dsid);
-        wire_config.setCategorySerializable(cat);
-        List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
-        if ( constraintGroups != null && constraintGroups.size() > 0) {
-            wire_config.setConstraintGroups(constraintGroups);
-        } else {
-            wire_config.setConstraintGroups(null);
+        try {
+            ConfigSerializable wire_config = new ConfigSerializable();
+            CategorySerializable cat= getCategoryWithGrids(catid, dsid);
+            wire_config.setCategorySerializable(cat);
+            List<ERDDAPConstraintGroup> constraintGroups = getERRDAPConstraintGroups(dsid);
+            if ( constraintGroups != null && constraintGroups.size() > 0) {
+                wire_config.setConstraintGroups(constraintGroups);
+            } else {
+                wire_config.setConstraintGroups(null);
+            }
+            GridSerializable wire_grid = getGridSerializable(dsid, varid);
+            wire_config.setGrid(wire_grid);
+            OperationSerializable[] wire_operations = getOperationsSerialziable(view, dsid, varid);
+            wire_config.setOperations(wire_operations);
+            RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
+            wire_config.setRegions(wire_regions);
+            wire_config.setDsid(dsid);
+            wire_config.setVarid(varid);
+            return wire_config;
+        } catch (RPCException e) {
+            System.out.println(e.getMessage());
+            throw e;
         }
-        GridSerializable wire_grid = getGridSerializable(dsid, varid);
-        wire_config.setGrid(wire_grid);
-        OperationSerializable[] wire_operations = getOperationsSerialziable(view, dsid, varid);
-        wire_config.setOperations(wire_operations);
-        RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
-        wire_config.setRegions(wire_regions);
-        wire_config.setDsid(dsid);
-        wire_config.setVarid(varid);
-        return wire_config;
     }
     public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
         LASConfig lasConfig = getLASConfig();
