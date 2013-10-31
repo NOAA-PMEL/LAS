@@ -55,7 +55,9 @@ IF `(($region_x_range) LT topo_dx) OR  (($region_y_range) LT topo_dx)` THEN
    DEFINE SYMBOL topo_regrid = 1
    DEFINE AXIS/UNITS=degrees_east/MODULO/($region_x)/NPOINTS=5 x_super_fine
    DEFINE AXIS/UNITS=degrees_north/($region_y)/NPOINTS=5 y_super_fine
-   LET basevar = ($basemap_var)[d=($basemap_data_num),GX=x_super_fine,GY=y_super_fine,($basemap_region_z),($basemap_region_t)]
+   DEFINE GRID/X=x_super_fine/y=y_super_fine g_super_fine
+
+   LET basevar = ($basemap_var)[d=($basemap_data_num),GXY=g_super_fine,($basemap_region_z),($basemap_region_t)]
 !   DEFINE SYMBOL basemap_xformat = PPL XFOR (dms)
 !   DEFINE SYMBOL basemap_yformat = PPL YFOR (dms)
 ENDIF

@@ -31,7 +31,7 @@ IF `($fland_area) LT 0.25` THEN DEFINE SYMBOL fland_resolution 05
 ! the LAS running such that we cant open an opendap datset.
 
 LET use_landmask = 0
-IF `($basemap_area) LT 0.1` THEN
+IF `($basemap_area) LT 0.005` THEN
    LET use_landmask = 1
    IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc") NE 0` THEN\
     LET use_landmask = 0
@@ -45,7 +45,7 @@ IF `use_landmask EQ 1` THEN
    LET landvar = landmask($map_reg)
 
    IF ($topo_regrid"0|*>1") THEN 
-      LET landvar = landmask[GX=x_super_fine,GY=y_super_fine]
+      LET landvar = landmask[GXY=g_super_fine]
    ENDIF
 
    SHADE/NOLAB/NOKEY/LEV=(0,10,10)/PAL=($fland_palette)/OVERLAY  landvar
@@ -58,3 +58,4 @@ ENDIF
 CANCEL MEMORY
 
 ! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
+
