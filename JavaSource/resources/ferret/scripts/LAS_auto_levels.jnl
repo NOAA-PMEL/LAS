@@ -33,7 +33,7 @@ IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with F
 
 DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
 
-IF `STRLEN("($ferret_view)") NE 2` THEN EXIT/SCRIPT
+IF `STRLEN("($ferret_view)") LT 2` THEN EXIT/SCRIPT
 IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
 
 IF `STRINDEX("($op)", "PLOT") EQ 0 AND \
