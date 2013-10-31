@@ -44,6 +44,3 @@ IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with F
 
 PPL TICS,,,,,1,1
 PPL AXLSZE ($text_size),($text_size)
-
-
-pause
