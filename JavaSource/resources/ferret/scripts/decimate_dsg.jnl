@@ -33,7 +33,10 @@ ELSE
    LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 0)
 ENDIF
 LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)
-LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)
+
+! DSG files come in with acutal_range attribute but no _FillValue or missing att.
+LET data_with_bad = IF ($data_var) GT -1.e33 then ($data_var)
+LET var_with_gaps = SEPARATE(data_with_bad[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
@@ -61,17 +64,42 @@ LET control = 2
 LET lontol = ($2"0.01")
 LET lattol = ($3"0.01")
 
-stat var_with_gaps
-LET var_tol = 0.5* (($stat_std)^0.5)
+! stat var_with_gaps
+! LET var_tol = 0.5* (($stat_std)^0.5)
+
+
+LET ranger = MINMAX(var_with_gaps)
+
+IF `ABS(ranger[i=2]) GT 1.e20 OR ABS(ranger[i=2]) LT -1.e20 OR \
+ ABS(ranger[i=1]) GT 1.e20 OR ABS(ranger[i=1]) LT -1.e20` THEN
+   LET newvar1 = IF var_with_gaps GT  -1.e20 THEN var_with_gaps
+   LET newvar =  IF newvar1 LT 1.e20 then newvar1
+   LET ranger = MINMAX(newvar)
+   list ranger
+ENDIF
+
+LET var_tol = `0.001* (ranger[i=2] - ranger[i=1])`
+
 LET vartol = ($4"`var_tol`")
 
+
+SAY _________________ JUST THE DECIMATE CALL ITSELF clock seconds:   ($clock_secs)
 LET decimate_lonlat = PIECEWISE3(\
  lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, vartol)
 
-LET nout_lonlat = `decimate_lonlat[i=@ngd]`
+! This makes entirely sure we will call PIECEWISE3 only once.
+SAVE/FILE="($result_annotations_filename).nc"/clobber decimate_lonlat
+can var decimate_lonlat
+USE "($result_annotations_filename).nc"
+set data 1
+
+LET nout_lonlat = `decimate_lonlat[d=2,i=@ngd]`
+
+SAY _________________ AFTER THE DECIMATE CALL ITSELF  clock seconds:   ($clock_secs)
+
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
 
-LET xsamplepts = XSEQUENCE(decimate_lonlat[i=1:($nout_lonlat)])
+LET xsamplepts = XSEQUENCE(decimate_lonlat[d=2,i=1:($nout_lonlat)])
 
 LET good_sample = IF xsamplepts GT 0 THEN xsamplepts
 LEt nsample = `good_sample[i=@ngd]`
@@ -84,11 +112,12 @@ DEFINE AXIS/X=1:($nout_lonlat):1 xsample_axis
 LET samplepts = xsamplepts[gx=xsample_axis@asn] 
 
 ! Prevent calling decimation function later for a second time
-SAVE/FILE="($result_annotations_filename).nc"/clobber samplepts
-CANCEL VAR samplepts
 
+SAVE/APPEND/FILE="($result_annotations_filename).nc" samplepts
+CAN DATA 2
+CANCEL VAR samplepts
 USE "($result_annotations_filename).nc"
-LET filesample = `samplepts,RETURN=dsetnum`
+LET filesample = 2
 SET DATA 1
 
 ! If the decimation returns most of the data, don't do it.
@@ -101,7 +130,7 @@ IF `(nout_lonlat/($ngood_data)) GT 0.8` THEN
    DEFINE SYMBOL data_x_var = lon_with_gaps
    DEFINE SYMBOL data_y_var = lat_with_gaps
    
-   LET nout_lonlat = `n_good_sampled`
+   LET nout_lonlat = `ngood_sampled`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
    CANCEL SYMBOL piecewise_decimation
 
