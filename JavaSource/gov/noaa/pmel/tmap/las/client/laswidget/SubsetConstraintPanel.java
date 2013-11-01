@@ -90,11 +90,13 @@ public class SubsetConstraintPanel extends Composite {
             @Override
             public void onChange(ChangeEvent event) {
                 int index = valuesList.getSelectedIndex();
-                String key_value = valuesList.getValue(index);
-                String value = valuesList.getItemText(index);
-                String shortName = getShortName(currentVariable);
-                //  the key and the variable are always the same in this case.
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(shortName, value, shortName, key_value), SubsetConstraintPanel.this);
+                if ( index >= 0 ) {
+                    String key_value = valuesList.getValue(index);
+                    String value = valuesList.getItemText(index);
+                    String shortName = getShortName(currentVariable);
+                    //  the key and the variable are always the same in this case.
+                    eventBus.fireEventFromSource(new AddSelectionConstraintEvent(shortName, value, shortName, key_value), SubsetConstraintPanel.this);
+                }
             }
         });
         rightPanel.add(valuesList);
@@ -180,5 +182,11 @@ public class SubsetConstraintPanel extends Composite {
 //    }
     public void scrollToBottom() {
         outerScroller.scrollToBottom();
+    }
+    public void clearSelection() {
+        int index = valuesList.getSelectedIndex();
+        if ( index >= 0 ) {
+            valuesList.setItemSelected(index, false);
+        }
     }
 }

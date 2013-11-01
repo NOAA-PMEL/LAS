@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SetSelectionModel;
 
 public class SelectionConstraintPanel extends Composite {
     
@@ -176,5 +177,11 @@ public class SelectionConstraintPanel extends Composite {
             }
         }
         return null;
+    }
+    public void clearSelection() {
+        int index = valuesList.getSelectedIndex();
+        if ( index >= 0 ) {
+            valuesList.setItemSelected(index, false);
+        }
     }
 }
