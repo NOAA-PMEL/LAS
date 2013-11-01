@@ -91,6 +91,16 @@ public class ConstraintWidgetGroup extends Composite {
                     VariableSerializable variable = vcw.getVariable();
                     // Set the current values for the variable if it's already constrainted.
                     eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getName(), "", "le", false), ConstraintWidgetGroup.this);
+                } else if ( opened instanceof ERDDAPValidDataConstraintPanel ) {
+                    ERDDAPValidDataConstraintPanel vdcp = (ERDDAPValidDataConstraintPanel) opened;
+                    vdcp.clearSelection();
+                } else if ( opened instanceof SelectionConstraintPanel ) { 
+                    SelectionConstraintPanel scp = (SelectionConstraintPanel) opened;
+                    scp.clearSelection();
+                } else if ( opened instanceof SubsetConstraintPanel ) {
+                    SubsetConstraintPanel scp = (SubsetConstraintPanel) opened;
+                    scp.clearSelection();
+    
                 }
                 
             }
@@ -218,9 +228,24 @@ public class ConstraintWidgetGroup extends Composite {
                 if ( source instanceof TextConstraintAnchor ) {
                     TextConstraintAnchor anchor = (TextConstraintAnchor) source;
                     displayPanel.remove(anchor);
-                    if ( anchor.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
-                        variableConstraints.clearTextField(anchor);
+                    // Clear the menu selection when an anchor is removed.
+                    int index = constraintPanel.getVisibleIndex();
+                    if ( index >= 0 ) {
+                        Widget opened = constraintPanel.getWidget(index);
+                        // If one of the text panels is open and an anchor is removed, clear the selection.
+                        if ( opened instanceof ERDDAPValidDataConstraintPanel ) {
+                            ERDDAPValidDataConstraintPanel vdcp = (ERDDAPValidDataConstraintPanel) opened;
+                            vdcp.clearSelection();
+                        } else if ( opened instanceof SelectionConstraintPanel ) { 
+                            SelectionConstraintPanel scp = (SelectionConstraintPanel) opened;
+                            scp.clearSelection();
+                        } else if ( opened instanceof SubsetConstraintPanel ) {
+                            SubsetConstraintPanel scp = (SubsetConstraintPanel) opened;
+                            scp.clearSelection();
+
+                        }
                     }
+                    
                 } else if ( source instanceof SeasonConstraintPanel ) {
                     String variable = event.getVariable();
                     String value = event.getValue();

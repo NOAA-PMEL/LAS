@@ -31,6 +31,7 @@ import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -165,6 +166,8 @@ public class OutputPanel extends Composite implements HasName {
 
         @Override
         public void onSuccess(ConfigSerializable config) {
+            VariableSerializable[] nvarlist = config.getCategorySerializable().getDatasetSerializable().getVariablesSerializable();
+            List<VariableSerializable> vlst = Arrays.asList(nvarlist);
             ngrid = config.getGrid();
             nvar.setGrid(ngrid);
             ops = config.getOperations();
@@ -179,6 +182,7 @@ public class OutputPanel extends Composite implements HasName {
             if (isChangeDataset()) {
                 // In the case of where multiple variables are being used in
                 // a panel, we need to change the 1st UserList
+                setVariables(vlst, nvar);
                 setVariable(nvar, true);
                 setChangeDataset(false);
 
@@ -764,7 +768,11 @@ public class OutputPanel extends Composite implements HasName {
                     // TODO: Replace this with a higher level method or use
                     // events
                     variableControls.removeListBoxesExceptFirst();
-                    applyVariableChange(variable, true);
+                    if ( variable.getAttributes().get("grid_type").equals(vizGalVariable.getAttributes().get("grid_type") )) {
+                        applyVariableChange(variable, true);
+                    } else {
+                        Window.alert("The grid type of the new varible must match the grid type of the varible in the upper left.");
+                    }
                 }
             }
         }

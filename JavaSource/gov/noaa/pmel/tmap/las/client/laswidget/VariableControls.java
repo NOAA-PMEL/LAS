@@ -119,8 +119,11 @@ public class VariableControls extends Composite {
                     layout.add(newlist);
                     if ( layout.getWidgetCount() > 1 ) {
                         newlist.setRemoveButtonVisible(true);
+                        eventBus.fireEventFromSource(new VariablePluralityEvent(true), VariableControls.this);
+                    } else {
+                        eventBus.fireEventFromSource(new VariablePluralityEvent(false), VariableControls.this);
                     }
-                    eventBus.fireEventFromSource(new VariablePluralityEvent(event.isPlural()), VariableControls.this);
+                    
                 }
             }
         }

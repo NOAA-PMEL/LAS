@@ -65,4 +65,10 @@ public class VariableListBox extends ListBox {
 			addItem(var.getName(), var.getID());
 		}
 	}
+	public void clearSelection() {
+	    int index = getSelectedIndex();
+        if ( index >= 0 ) {
+            setItemSelected(index, false);
+        }
+	}
 }

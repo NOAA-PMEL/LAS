@@ -113,4 +113,7 @@ public class ERDDAPValidDataConstraintPanel extends Composite {
             
         eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "NaN", op1, variable.getName(), "NaN", op2, true), ERDDAPValidDataConstraintPanel.this);
     }
+    public void clearSelection() {
+        variablesListBox.clearSelection();
+    }
 }
