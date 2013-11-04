@@ -263,7 +263,8 @@ public class UserListBox extends Composite {
          allVariables.clear();
          for ( int i = 0; i < variables.size(); i++ ) {
              VariableSerializable v = variables.get(i);
-             if ( v.getAttributes().get("subset_variable") == null || !v.getAttributes().get("subset_variable").equals("true") ) {
+             // TODO eventually we will be able to plot "text" variables on the map, but now we can't plot them anywhere so remove them from the list.
+             if ( (v.getAttributes().get("subset_variable") == null || !v.getAttributes().get("subset_variable").equals("true")) && !v.getAttributes().get("units").equals("text") ) {
                 add(v);
                 if((i==0) && (variableMetadataView!=null)){
                     variableMetadataView.setDSID(v.getDSID());
