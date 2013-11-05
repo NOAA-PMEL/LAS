@@ -698,7 +698,7 @@ public class SimplePropPropViewer implements EntryPoint {
             // We need to make the initial netCDF file with *all* the variables in each row.
 
             // Grab the existing variable
-            String v0 = lasRequest.getVariable(0);
+            String v0 = varid;
             lasRequest.removeVariables();
             // Find the first non-sub-set variable that is not already included
 
@@ -1175,7 +1175,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 Window.alert("Could not get the variables list from the server.");
             } else {
 
-                int index = -1;
+                VariableSerializable vtosety = null;
                 int time_index = -1;
                 
                 for (int i = 0; i < variables.length; i++) {
@@ -1199,18 +1199,19 @@ public class SimplePropPropViewer implements EntryPoint {
                 
                 // These are the variables filtered for vectors and sub-set variables
                 List<VariableSerializable> filtered = xVariables.getVariables();
-                for (Iterator iterator = filtered.iterator(); iterator.hasNext();) {
-                    VariableSerializable variableSerializable = (VariableSerializable) iterator.next();
+                for (int n = 0; n < filtered.size(); n++) {
+                    VariableSerializable variableSerializable = (VariableSerializable) filtered.get(n);
                     xFilteredDatasetVariables.put(variableSerializable.getID(), variableSerializable);
                 }
+                vtosety = xFilteredDatasetVariables.get(varid);
                 xVariables.setAddButtonVisible(false);
                 yVariables.setAddButtonVisible(false);
                 colorVariables.setAddButtonVisible(false);
                 
-                if (index > 0) {
-                    yVariables.setSelectedIndex(index);
+                if (vtosety != null) {
+                    yVariables.setVariable(vtosety);
                 }
-                if (time_index > 0) {
+                if (time_index >= 0) {
                     xVariables.setSelectedIndex(time_index);
                 }
                 String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
