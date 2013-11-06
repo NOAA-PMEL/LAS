@@ -141,7 +141,7 @@ IF `(($numobs) GE num_decimate)` THEN
    LET decimated_mask1 = IF new_feature NE 0 THEN 1 ELSE 0
    LET decimated_mask2 = IF I[gx=($data_var)] EQ 1 THEN 1 ELSE 0
    LET ndmask = `pvar,return=isize`
-   LET decimated_mask  = IF (decimated_mask1 + decimated_mask2) EQ 1 THEN 1
+   LET decimated_mask  = IF (decimated_mask1[i=1:`ndmask`] + decimated_mask2[i=1:`ndmask`]) EQ 1 THEN 1
    
    ! This value of longest is now wrong, but it's too big so should be harmless.
    
