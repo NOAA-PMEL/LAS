@@ -35,9 +35,9 @@ public class ConstraintTextDisplay extends FlowPanel {
                 String dsid = anchor.getDsid();
                 String varid = anchor.getVarid();
                 String op = anchor.getOp();
-                String lhs = anchor.getValue();
+                String rhs = anchor.getValue();
                 String type = anchor.getType();
-                ConstraintSerializable con = new ConstraintSerializable(type, dsid, varid, varid, op, lhs, dsid+"_"+varid);
+                ConstraintSerializable con = new ConstraintSerializable(type, dsid, varid, varid, op, rhs, dsid+"_"+varid);
                 constraints.add(con);
             }
         }
