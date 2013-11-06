@@ -705,10 +705,9 @@ public class SimplePropPropViewer implements EntryPoint {
             String v1 = null;
             String v2 = null;
             String vds = null;
-            for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
-                String key = (String) allIt.next();
-                VariableSerializable v = xAllDatasetVariables.get(key);
-                if ( !v.getID().equals(v0) && v.getAttributes().get("subset_variable") == null ) {
+            for (int yi = 0; yi < yVariables.getItemCount(); yi++) {
+                VariableSerializable v = (VariableSerializable) yVariables.getUserObject(yi);               
+                if ( v1 == null && !v.getID().equals(v0) && v.getAttributes().get("subset_variable") == null ) {
                     v1 = v.getID();
                     vds = v.getDSID();
                 }
