@@ -130,7 +130,9 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			String doc = response.getText();
-            load(doc);
+			if ( doc != null && doc.contains("<?xml") ) {
+			    load(doc);
+			}
             setCheckedIcons(checkedIcons);
 		}
     	
