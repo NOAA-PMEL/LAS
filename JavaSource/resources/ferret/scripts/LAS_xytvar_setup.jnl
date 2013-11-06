@@ -442,7 +442,28 @@ ELSE
 ENDIF
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
-   LABEL/NOUSER 0.2, ($ppl$ylen), -1, 0, 0.12, @AS($put_label)
+
+   LABEL/NOUSER 0.2, `($ppl$ylen)-1`, -1, 0, 0.12, @AS($put_label)
+
+! add labels if a whole variable is all-bad
+! p is masked XVAR
+
+   DEFINE SYMBOL ax_lo = `($ferret_plot_var_0)[i=@MIN]`
+   DEFINE SYMBOL ax_hi = `($ferret_plot_var_0)[i=@MAX]`
+
+   LET ylab_bad = ($ppl$ylen)
+   IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
+      LABEL/NOUSER 0.2, `($ppl$ylen)-1.2`, -1, 0, 0.12, @AS($ferret_plot_var_0) is all-missing
+      let ylab_bad = `($ppl$ylen)-1.2`
+   ENDIF
+
+! q is masked YVAR
+
+   DEFINE SYMBOL ax_lo = `($ferret_plot_var_1)[i=@MIN]`
+   DEFINE SYMBOL ax_hi = `($ferret_plot_var_1)[i=@MAX]`
+   IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN \
+      LABEL/NOUSER 0.2, `ylab_bad-1.2`, -1, 0, 0.12, @AS($ferret_plot_var_1) is all-missing
+
    DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
    EXIT/SCRIPT
 ENDIF
