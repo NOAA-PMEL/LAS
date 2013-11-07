@@ -17,9 +17,6 @@
 ! - If no margins (WMS style plot) is requested, set that up, 
 !   including the /NOYADJUST plot qualifier.
 
-
-IF `($PROGRAM_NAME"0|PyFerret>1|*>0")` THEN DEFINE SYMBOL ferret_size = 1.5
-
 SET WINDOW/SIZE = ($ferret_size"0.5")
 CANCEL MODE LOGO
 
