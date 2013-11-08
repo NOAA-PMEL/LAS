@@ -22,9 +22,9 @@
 ! For Google Earth plots, use transparency for white background if the 
 ! ferret version has that option available.
 
-IF `($its_GE"0|*>1") AND ($ferret_version) GE 6.12` THEN DEFINE SYMBOL trans = /TRANS
+IF `($its_GE"0|*>1")` THEN DEFINE SYMBOL trans = /TRANS
 
-IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
+IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
 
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
@@ -250,6 +250,7 @@ ENDIF
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
+
       IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
          DEFINE SYMBOL DATA_EXISTS = 0
          CANCEL SYMBOL DATA_MIN
@@ -263,6 +264,10 @@ ENDIF
       IF ($its_prop_prop_plot"0|*>1") THEN
           DEFINE SYMBOL ax_horiz = ($data_0_id)
 	  DEFINE SYMBOL ax_vert = ($data_1_id)
+	  CANCEL SYMBOL DATA_MAX
+	  CANCEL SYMBOL DATA_MIN
+	  DEFINE SYMBOL DATA_EXISTS = 1
+	  IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
