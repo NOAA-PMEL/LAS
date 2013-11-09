@@ -26,7 +26,7 @@ IF ($feature_variable"0|*>1") THEN
 
 ! If writing the whole key, we can use write_webrow:
 
-   LOAD write_webrow(XSEQUENCE(($feature_variable)), XSEQUENCE(($feature_variable)), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
+   LOAD write_webrow_gwt(XSEQUENCE(($feature_variable)), XSEQUENCE(($feature_variable)), XSEQUENCE(imask), "($result_icon_webrowset_filename)")
 
 ENDIF
 
