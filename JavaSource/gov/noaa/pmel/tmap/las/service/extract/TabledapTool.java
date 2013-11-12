@@ -252,10 +252,12 @@ public class TabledapTool extends TemplateTool {
             if (thi.length() > 0) query.append("&time<=" + thi);
             
             if ( orderby != null ) {
-                if ( !orderby.equals("") ) {
+                if ( !orderby.equals("") && !orderby.equals("none") ) {
                     query.append("&orderBy(\""+orderby+"\")");
                 } else {
-                    query.append("&orderBy(\""+cruiseid+","+time+"\")");
+                    if ( !orderby.equals("none") ) {
+                        query.append("&orderBy(\""+cruiseid+","+time+"\")");
+                    }
                 }
             } else {
                 query.append("&orderBy(\""+cruiseid+","+time+"\")");
