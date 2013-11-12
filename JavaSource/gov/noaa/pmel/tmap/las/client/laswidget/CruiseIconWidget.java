@@ -130,7 +130,7 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			String doc = response.getText();
-			if ( doc != null && doc.contains("<?xml") ) {
+			if ( doc != null && !doc.equals("") && doc.contains("<?xml") ) {
 			    load(doc);
 			}
             setCheckedIcons(checkedIcons);
@@ -159,6 +159,13 @@ public class CruiseIconWidget extends Composite {
         icons.clear();
         interior.clear();
         ids.clear();
+        /*
+         * Using the new external function to write the web rowset for icons so the parser can swallow it.
+         * 
+         * Don't need to to remove these declarations.
+         */
+//        doc = doc.replace("xmlns='http://java.sun.com/xml/ns/jdbc' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'", "");
+//        doc = doc.replace("xsi:schemaLocation='http://java.sun.com/xml/ns/jdbc http://java.sun.com/xml/ns/jdbc/webrowset.xsd'","");
         doc = doc.replaceAll("\n", "").trim();
         Document responseXML = XMLParser.parse(doc);
         NodeList rows = responseXML.getElementsByTagName("currentRow");

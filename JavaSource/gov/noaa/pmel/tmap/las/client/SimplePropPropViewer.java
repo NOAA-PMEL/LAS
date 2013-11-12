@@ -185,6 +185,7 @@ public class SimplePropPropViewer implements EntryPoint {
     protected double world_endy;
     protected double x_per_pixel;
     protected double y_per_pixel;
+    protected boolean hasData = false;
     protected String printURL;
     protected String xlo;
     protected String xhi;
@@ -560,8 +561,10 @@ public class SimplePropPropViewer implements EntryPoint {
        
         frontCanvas = Canvas.createIfSupported();
         if (frontCanvas != null) {
+            outputPanel.setWidget(1, 0, frontCanvas);
             frontCanvasContext = frontCanvas.getContext2d();
         } else {
+            outputPanel.setWidget(1, 0 , new HTML(""));
             Window.alert("You are accessing this site with an older, no longer supported browser. "
                     + "Some or all features of this site will not work correctly using your browser. " + "Recommended browsers include these or higher versions of these: "
                     + "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
@@ -581,7 +584,7 @@ public class SimplePropPropViewer implements EntryPoint {
             sendRequest.sendRequest(null, lasRequestCallback);
         } catch (RequestException e) {
             HTML error = new HTML(e.toString());
-            outputPanel.setWidget(1, 0, error);
+            outputPanel.setWidget(2, 0, error);
         }
 
     }
@@ -782,6 +785,8 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
                 VerticalPanel p = new VerticalPanel();
                 ScrollPanel sp = new ScrollPanel();
+                // Make the native java script in the HTML error page active.
+                evalScripts(new HTML(response.getText()).getElement());
                 HTML result = new HTML(doc);
                 p.add(result);
                 PushButton again = new PushButton("Try Again");
@@ -798,7 +803,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 sp.add(p);
                 sp.setSize((int) image_w + "px", (int) image_h + "px");
 
-                outputPanel.setWidget(1, 0, sp);
+                outputPanel.setWidget(2, 0, sp);
             } else {
                 doc = doc.replaceAll("\n", "").trim();
                 Document responseXML = XMLParser.parse(doc);
@@ -813,7 +818,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             String elapsed_time = result.getAttribute("elapsed_time");
                             cancelButton.setTime(Integer.valueOf(elapsed_time));
                             cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                            outputPanel.setWidget(1, 0, cancelButton);
+                            outputPanel.setWidget(2, 0, cancelButton);
                             lasRequest.setProperty("product_server", "ui_timeout", "3");
                             String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
                             if (currentURL.contains("cancel"))
@@ -835,7 +840,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             } catch (RequestException e) {
                                 HTML error = new HTML(e.toString());
                                 error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                                outputPanel.setWidget(1, 0, error);
+                                outputPanel.setWidget(2, 0, error);
                             }
                         } else if (result.getAttribute("type").equals("error")) {
                             if (result.getAttribute("ID").equals("las_message")) {
@@ -843,7 +848,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                 if (text instanceof Text) {
                                     Text t = (Text) text;
                                     HTML error = new HTML(t.getData().toString().trim());
-                                    outputPanel.setWidget(1, 0, error);
+                                    outputPanel.setWidget(2, 0, error);
                                 }
                             }
                         } else if (result.getAttribute("type").equals("annotations")) {
@@ -889,6 +894,13 @@ public class SimplePropPropViewer implements EntryPoint {
                                                 x_axis_upper_right = getDouble(child.getFirstChild());
                                             } else if (child.getNodeName().equals("y_axis_upper_right")) {
                                                 y_axis_upper_right = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("data_exists")) {
+                                                int ex = getNumber(child.getFirstChild());
+                                                if ( ex == 1 ) {
+                                                    hasData = true;
+                                                } else {
+                                                    hasData = false;
+                                                }
                                             }
                                         }
                                     }
@@ -998,7 +1010,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                         logger.setLevel(Level.ALL);
                                     }
                                 });
-                                outputPanel.setWidget(1, 0, frontCanvas);
+                                
                                 resize(Window.getClientWidth(), Window.getClientHeight());
                             }
 
@@ -1023,7 +1035,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     } else {
                         // Browser cannot handle a canvas tag, so just put up
                         // the image.
-                        outputPanel.setWidget(1, 0, plotImage);
+                        outputPanel.setWidget(2, 0, plotImage);
                         plotImage.addLoadHandler(new LoadHandler() {
 
                             @Override
@@ -1047,7 +1059,9 @@ public class SimplePropPropViewer implements EntryPoint {
                     world_endy = y_axis_upper_right;
                    
                     printURL = Util.getAnnotationsFrag(annourl, imageurl);
-                    setTextValues();  
+                    if ( hasData ) {
+                        setTextValues();
+                    }
                 }
 
             }
@@ -1674,7 +1688,11 @@ public class SimplePropPropViewer implements EntryPoint {
     void resize(int windowWidth, int windowHeight) {
         logger.info("resize called with windowWidth=" + windowWidth + " and windowHeight=" + windowHeight);
         try {
-            IESafeImage plotImage = (IESafeImage) outputPanel.getWidget(2, 0);
+            
+            IESafeImage plotImage = null;
+            if ( outputPanel.getRowCount() > 2 ) {
+                plotImage = (IESafeImage) outputPanel.getWidget(2, 0);
+            }
             if (plotImage != null) {
                 // Check width first
                 int leftPaddingWidth = RootPanel.get("leftPadding").getOffsetWidth();
@@ -1808,4 +1826,27 @@ public class SimplePropPropViewer implements EntryPoint {
         xml = xml.replace("op=\"<\"", "op=\"lt\"");
         return xml;
     }
+    /**
+     * Evaluate scripts in an HTML string. Will eval both <script
+     * src=""></script> and <script>javascript here</scripts>.
+     * 
+     * @param element
+     *            a new HTML(text).getElement()
+     */
+    public static native void evalScripts(com.google.gwt.user.client.Element element)
+    /*-{
+        var scripts = element.getElementsByTagName("script");
+
+        for (i = 0; i < scripts.length; i++) {
+            // if src, eval it, otherwise eval the body
+            if (scripts[i].hasAttribute("src")) {
+                var src = scripts[i].getAttribute("src");
+                var script = $doc.createElement('script');
+                script.setAttribute("src", src);
+                $doc.getElementsByTagName('body')[0].appendChild(script);
+            } else {
+                $wnd.eval(scripts[i].innerHTML);
+            }
+        }
+    }-*/;
 }
