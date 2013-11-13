@@ -26,6 +26,8 @@ LET p = ($xvar)
 LET q = ($yvar)
 
 
+CANCEL SYMBOL set_window_quals
+
 ! If they are not lon, lat, or time, put axis labels on the plot.
 ! (easier to understand, e.g. SST as a fcn of AIRT)
 
@@ -59,16 +61,14 @@ IF `($axes_already_defined"0|*>1") EQ 0` THEN
 IF ($ferret_prop_var"0|time>1|TIME>1|*>0") THEN 
 ! Open the window and set aspect ratio
    DEFINE SYMBOL win_asp = /ASPECT=0.75
-   DEFINE SYMBOL set_window_command = SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
-   ($set_window_command)
+   DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
 ENDIF
 
 
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0 ` THEN
 IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN 
    DEFINE SYMBOL win_asp = /ASPECT=1.5
-   DEFINE SYMBOL set_window_command = SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
-   ($set_window_command)
+   DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
 ENDIF
 ENDIF
 
@@ -258,7 +258,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       DEFINE AXIS/t=0:2:1/t0=1-jan-0000/units=seconds haxis
       LET tt = t[gt=haxis]
       DEFINE SYMBOL win_asp = /ASPECT=0.75
-      SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
+      DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
    ELSE
 
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
@@ -386,7 +386,7 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
       DEFINE AXIS/t=1:2:1 vaxis
 
       DEFINE SYMBOL win_asp = /ASPECT=0.75
-      SET WINDOW/SIZE = ($ferret_size"0.5")($win_asp)
+      DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
       LET tt = t[gt=vaxis]
    ELSE
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
@@ -425,6 +425,8 @@ DEFINE SYMBOL axes_already_defined = 1
 ENDIF  ! axes_already_defined, make the underlay plot.
 
 ! Make a blank plot to put the horizontal and vertical axes on the page
+
+GO LAS_open_window
 
 LET bvar = dep_var + indep_var
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
