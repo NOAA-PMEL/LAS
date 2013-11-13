@@ -109,7 +109,7 @@ DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
-   LET compute_good = zvar
+   LET compute_good = ($zvar)
    DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
 ENDIF
 
@@ -129,6 +129,7 @@ DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2
+   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=1/COLOR=6
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
       DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow/MISSING=blank
@@ -160,16 +161,41 @@ ELSE
          DEFINE SYMBOL data_var = zvar
 
          LET ranger = MINMAX(pxvar)
-         LET tol1 = `0.1* (ranger[i=2] - ranger[i=1])`
-         IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+
+	 DEF SYM range2 = `ranger[i=2]`
+	 DEF SYM range1 = `ranger[i=1]`
+	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
+	    LET tol1 = 0.1
+	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN
+	    LET tol1 = 0.1
+	 ELSE
+            LET tol1 = `0.1* (ranger[i=2] - ranger[i=1])`
+            IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+	 ENDIF
 
          LET ranger = MINMAX(qyvar)
-         LET tol2 = `0.1* (ranger[i=2] - ranger[i=1])`
-         IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
+	 DEF SYM range2 = `ranger[i=2]`
+	 DEF SYM range1 = `ranger[i=1]`
+	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
+	    LET tol1 = 0.1
+	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN  
+	    LET tol1 = 0.1
+	 ELSE
+            LET tol2 = `0.1* (ranger[i=2] - ranger[i=1])`
+            IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
+	 ENDIF
 
          LET ranger = MINMAX(zvar)
-         LET tol3 = `0.1* (ranger[i=2] - ranger[i=1])`
-         IF `tol3 LT 1.e-6` THEN LET tol2 = 1.e-6
+	 DEF SYM range2 = `ranger[i=2]`
+	 DEF SYM range1 = `ranger[i=1]`
+	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
+	    LET tol3 = 0.1
+	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN 
+	    LET tol3 = 0.1
+	 ELSE
+            LET tol3 = `0.1* (ranger[i=2] - ranger[i=1])`
+            IF `tol3 LT 1.e-6` THEN LET tol2 = 1.e-6
+	 ENDIF
 
          GO decimate_dsg 200000 tol1 tol2 tol3
 
@@ -209,6 +235,9 @@ ELSE
 ! on lat/lon plots, draw a gray line on the cruise tracks.
 ! (but the cruise tracks have not been separated for these plots... Don't do it after all.)
 !   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  ($xvar), ($yvar)
+
+! ?? show locations where the color-by variable is missing...
+   IF `($data_count"0") GT 2` THEN ($underlay_command) ($xvar), ($yvar)
 
    DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($poly_qual)
