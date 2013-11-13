@@ -302,9 +302,10 @@ public class TabledapTool extends TemplateTool {
                         } // the else block is that you overlapped so leave off the longitude constraint all teogether
 
                     } else {
-                        // This else block is the case where it a query that does not cross the date line
-                        query.append("&longitude>=" + xlo);
-                        query.append("&longitude<=" + xhi);
+                        // This else block is the case where it a query that does not cross the date line.
+                        // Still have to use the normalized values.
+                        query.append("&longitude>=" + xloDbl);
+                        query.append("&longitude<=" + xhiDbl);
                     }
                 }// Span the whole globe so leave off the lon query all together.
             } else {
