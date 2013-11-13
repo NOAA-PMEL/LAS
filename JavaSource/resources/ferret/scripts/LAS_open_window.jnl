@@ -21,13 +21,14 @@ SET WINDOW/SIZE = ($ferret_size"0.5")
 CANCEL MODE LOGO
 
 IF ($ferret_view"|xy>1|xyt>1|*>0") THEN
+  DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
   IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
      IF `($region_x_range"0") NE 0 AND ($region_y_range"0") NE 0` THEN \
-     SET WINDOW/ASPECT = `($region_Y_range)/($region_X_range)`:axis
+     SET WINDOW/ASPECT = `($win_aspect)`:axis
   ENDIF
-  IF `($region_Y_range)/($region_X_range) GT 100` THEN \
+  IF `($win_aspect) GT 100` THEN \
      SET WINDOW/ASPECT = 1:axis
-  IF `($region_Y_range)/($region_X_range) LT 0.01` THEN \
+  IF `($win_aspect) LT 0.01` THEN \
      SET WINDOW/ASPECT = 1:axis
 ENDIF
 
