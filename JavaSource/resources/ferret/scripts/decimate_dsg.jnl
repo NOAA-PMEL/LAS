@@ -43,11 +43,14 @@ LET npts = `lat_with_gaps,RETURN=isize`
 ! Only decimate if there is a lot of data
 
 LET min_decimate = ($1"200000")
-IF `npts LT min_decimate` THEN 
-   DEFINE SYMBOL data_var = var_with_gaps
-   DEFINE SYMBOL data_x_var = lon_with_gaps
-   DEFINE SYMBOL data_y_var = lat_with_gaps
-   
+IF `npts LT min_decimate OR min_decimate LT 0` THEN 
+   LET nrow = `rowsize,return=msize`
+   IF `nrow GT 1` THEN
+      DEFINE SYMBOL data_var = var_with_gaps
+      DEFINE SYMBOL data_x_var = lon_with_gaps
+      DEFINE SYMBOL data_y_var = lat_with_gaps
+   ENDIF
+
    LET nout_lonlat = `($data_var)[i=@ngd]`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
 
@@ -67,11 +70,14 @@ LET lattol = ($3"0.01")
 ! stat var_with_gaps
 ! LET var_tol = 0.5* (($stat_std)^0.5)
 
-
 LET ranger = MINMAX(var_with_gaps)
 
-IF `ABS(ranger[i=2]) GT 1.e20 OR ABS(ranger[i=2]) LT -1.e20 OR \
- ABS(ranger[i=1]) GT 1.e20 OR ABS(ranger[i=1]) LT -1.e20` THEN
+DEF SYM range2 = `ranger[i=2]`
+DEF SYM range1 = `ranger[i=1]`
+IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
+   LET newvar = {0,10}
+   LET ranger = MINMAX(newvar)
+ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN
    LET newvar1 = IF var_with_gaps GT  -1.e20 THEN var_with_gaps
    LET newvar =  IF newvar1 LT 1.e20 then newvar1
    LET ranger = MINMAX(newvar)
