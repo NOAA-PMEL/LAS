@@ -66,14 +66,14 @@ CANCEL SYMBOL c_s
 IF `($cruises_shown"0") GT 1` THEN DEFINE SYMBOL c_s = s
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab =  ($cruises_shown) cruise($c_s), ($ngood_data) obs
+DEFINE SYMBOL note_($note_num)_lab =  ($cruises_shown) cruise($c_s), ($ngood_data) valid obs
 IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
- ($cruises_shown) cruise($c_s), ($ngood_data) obs (($nbad_data) missing)
+ ($cruises_shown) cruise($c_s), ($ngood_data) valid obs (($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
 IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
- DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) obs
+ DEFINE SYMBOL note_($note_num)_lab = ($cruises_shown) cruise($c_s), ($ngood_data) valid obs
 
 ! Notation about the decimation
 IF ($piecewise_decimation"0|*>1") THEN 
