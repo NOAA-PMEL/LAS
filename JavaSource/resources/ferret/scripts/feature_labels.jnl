@@ -66,9 +66,9 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
  DEFINE SYMBOL feature_type = trajectorie
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) obs
+DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs
 IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
- ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) obs (($nbad_data) missing)
+ ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs (($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
