@@ -202,6 +202,30 @@ public class LASMapScale extends LASDocument {
         if ( s1 != null ) {
             yStride = Integer.valueOf(s1).intValue();
         }
+        
+        String time_min = null;
+        s1 = scale.get("HAXIS_TSTART");
+        if ( s1 != null ) {
+            time_min = s1;
+        }
+        
+        String time_max = null;
+        s1 = scale.get("HAXIS_TEND");
+        if ( s1 != null ) {
+            time_max = s1;
+        }
+        
+        if ( time_min == null || time_max == null ) {
+            s1 = scale.get("VAXIS_TSTART");
+            if ( s1 != null ) {
+                time_min = s1;
+            }
+            
+            s1 = scale.get("VAXIS_TEND");
+            if ( s1 != null ) {
+                time_max = s1;
+            }
+        }
 
         Element map_scaleE = new Element("map_scale");
         this.setRootElement(map_scaleE);
@@ -228,8 +252,20 @@ public class LASMapScale extends LASDocument {
         map_scaleE.addContent(makeElement("data_exists", data_exists));
         map_scaleE.addContent(makeElement("xstride", scale.get("XSTRIDE")));
         map_scaleE.addContent(makeElement("ystride", scale.get("YSTRIDE")));
+        if ( time_min != null ) {
+            map_scaleE.addContent(makeElement("time_min", time_min));
+        }
+        if ( time_max != null ) {
+            map_scaleE.addContent(makeElement("time_max", time_max));
+        }
         if ( f != null ) f.close();
         if (scaleReader != null ) scaleReader.close();
+    }
+    
+    private Element makeElement(String name, double value) {
+        Element element = new Element(name);
+        element.setText(String.valueOf(value));
+        return element;
     }
     
     private Element makeElement(String name, float value) {
