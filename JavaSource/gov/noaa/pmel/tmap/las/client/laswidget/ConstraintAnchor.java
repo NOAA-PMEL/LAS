@@ -15,7 +15,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-
+/**
+ * A clickable display for a constraint which is shown of the form value op variable.
+ * @author rhs
+ *
+ */
 public class ConstraintAnchor extends ConstraintDisplay {
     
     Anchor a = new Anchor();

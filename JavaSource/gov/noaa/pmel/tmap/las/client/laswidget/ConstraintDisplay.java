@@ -15,7 +15,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
-
+/**
+ * Shows a constraint of the form value op variable (@see ConstraintAnchor) expect that this one is not clickable.
+ * @author rhs
+ *
+ */
 public class ConstraintDisplay extends Composite {
     String variable;
     String value;

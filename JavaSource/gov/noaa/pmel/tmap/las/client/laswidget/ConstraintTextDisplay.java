@@ -35,7 +35,8 @@ public class ConstraintTextDisplay extends FlowPanel {
                 String dsid = anchor.getDsid();
                 String varid = anchor.getVarid();
                 String op = anchor.getOp();
-                String rhs = anchor.getValue();
+                // The value and key value are the same except in the case of time where the value is a calendar string and the key value is double.
+                String rhs = anchor.getKeyValue();
                 String type = anchor.getType();
                 ConstraintSerializable con = new ConstraintSerializable(type, dsid, varid, varid, op, rhs, dsid+"_"+varid);
                 constraints.add(con);
