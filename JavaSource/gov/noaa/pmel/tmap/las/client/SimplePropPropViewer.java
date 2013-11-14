@@ -1118,8 +1118,8 @@ public class SimplePropPropViewer implements EntryPoint {
         boundByFixed(ctax2);
 
         if ( v.getName().equals(xname) ) {
-            constraintWidgetGroup.setLhs(ctax1.getValue());
-            constraintWidgetGroup.setRhs(ctax2.getValue());
+            constraintWidgetGroup.setLhs(ctax1.getKeyValue());
+            constraintWidgetGroup.setRhs(ctax2.getKeyValue());
         }
 
 
@@ -1159,8 +1159,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
 
         if ( v.getName().equals(yname) ) {
-            constraintWidgetGroup.setLhs(ctay1.getValue());
-            constraintWidgetGroup.setRhs(ctay2.getValue());
+            constraintWidgetGroup.setLhs(ctay1.getKeyValue());
+            constraintWidgetGroup.setRhs(ctay2.getKeyValue());
         }
 
         if ( constraintWidgetGroup.contains(ctay1) ) {
