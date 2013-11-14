@@ -185,6 +185,8 @@ public class SimplePropPropViewer implements EntryPoint {
     protected double world_endy;
     protected double x_per_pixel;
     protected double y_per_pixel;
+    protected String time_min;
+    protected String time_max;
     protected boolean hasData = false;
     protected String printURL;
     protected String xlo;
@@ -894,6 +896,10 @@ public class SimplePropPropViewer implements EntryPoint {
                                                 x_axis_upper_right = getDouble(child.getFirstChild());
                                             } else if (child.getNodeName().equals("y_axis_upper_right")) {
                                                 y_axis_upper_right = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("time_min")) {
+                                                time_min = getString(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("time_max")) {
+                                                time_max = getString(child.getFirstChild());
                                             } else if (child.getNodeName().equals("data_exists")) {
                                                 int ex = getNumber(child.getFirstChild());
                                                 if ( ex == 1 ) {
@@ -1028,6 +1034,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                     logger.info("(endx, endy):(" + endx + ", " + endy + ")");
                                 }
                                 draw = false;
+                                setTextValues();
                                 setConstraints();
                                 logger.setLevel(Level.ALL);
                             }
@@ -1074,12 +1081,21 @@ public class SimplePropPropViewer implements EntryPoint {
 
     private void setTextValues() {
         // The should get reset to the proper values by the events below...
+
+
+        // TODO treat an x or y axis with time differently.  First problem, how do you know it's time.  Check the id against the time id tabledap property?
+
         constraintWidgetGroup.clearTextFields();
         String xid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
         String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
         String yid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
         String yname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
         String dsid = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
+
+        VariableConstraintAnchor ctax1;  
+        VariableConstraintAnchor ctax2;
+        VariableSerializable v = constraintWidgetGroup.getVariable();
+
         double minx;
         double maxx;
         if ( world_endx > world_startx ) {
@@ -1089,30 +1105,40 @@ public class SimplePropPropViewer implements EntryPoint {
             minx = world_endx;
             maxx = world_startx;
         }
-        VariableSerializable v = constraintWidgetGroup.getVariable();
-        
-        
-        VariableConstraintAnchor ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
-        VariableConstraintAnchor ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
+
+
+        if ( xname.toLowerCase().contains("time") ) {
+            ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_min, xname, dFormat.format(minx), "gt");      
+            ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_max, xname, dFormat.format(maxx), "le");
+        } else {
+            ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
+            ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
+        }
         boundByFixed(ctax1);
         boundByFixed(ctax2);
-        
-        if ( constraintWidgetGroup.contains(ctax1)) {
-            constraintWidgetGroup.remove(ctax1);
-        }
-        constraintWidgetGroup.addConstraint(ctax1);
-        
-        if ( constraintWidgetGroup.contains(ctax2) ) {
-            constraintWidgetGroup.remove(ctax2);
-        }
-        constraintWidgetGroup.addConstraint(ctax2);
-        
+
         if ( v.getName().equals(xname) ) {
             constraintWidgetGroup.setLhs(ctax1.getValue());
             constraintWidgetGroup.setRhs(ctax2.getValue());
         }
+
+
+        if ( constraintWidgetGroup.contains(ctax1)) {
+            constraintWidgetGroup.remove(ctax1);
+        }
+        constraintWidgetGroup.addConstraint(ctax1);
+
+        if ( constraintWidgetGroup.contains(ctax2) ) {
+            constraintWidgetGroup.remove(ctax2);
+        }
+        constraintWidgetGroup.addConstraint(ctax2);
+
         double miny;
         double maxy;
+        VariableConstraintAnchor ctay1;
+        VariableConstraintAnchor ctay2;
+
+
         if ( world_endy > world_starty ) {
             miny = world_starty;
             maxy = world_endy;
@@ -1120,26 +1146,32 @@ public class SimplePropPropViewer implements EntryPoint {
             miny = world_endy;
             maxy = world_starty;
         }
-        
-        VariableConstraintAnchor ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
-        VariableConstraintAnchor ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
+        if ( yname.toLowerCase().contains("time") ) {
+            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, time_min, yname, dFormat.format(miny), "gt");
+            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, time_max, yname, dFormat.format(maxy), "le");
+        } else {
+            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
+            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
+        }
         boundByFixed(ctay1);
         boundByFixed(ctay2);    
-        
-        if ( constraintWidgetGroup.contains(ctay1) ) {
-            constraintWidgetGroup.remove(ctay1);
-        }
-        constraintWidgetGroup.addConstraint(ctay1);
-        
-        if ( constraintWidgetGroup.contains(ctay2) ) {
-            constraintWidgetGroup.remove(ctay2);
-        }
-        constraintWidgetGroup.addConstraint(ctay2);
-        
+
+
+
         if ( v.getName().equals(yname) ) {
             constraintWidgetGroup.setLhs(ctay1.getValue());
             constraintWidgetGroup.setRhs(ctay2.getValue());
         }
+
+        if ( constraintWidgetGroup.contains(ctay1) ) {
+            constraintWidgetGroup.remove(ctay1);
+        }
+        constraintWidgetGroup.addConstraint(ctay1);
+
+        if ( constraintWidgetGroup.contains(ctay2) ) {
+            constraintWidgetGroup.remove(ctay2);
+        }
+        constraintWidgetGroup.addConstraint(ctay2);
     }
     private void boundByFixed(VariableConstraintAnchor a) {
         VariableConstraintAnchor match = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(a);
@@ -1366,6 +1398,14 @@ public class SimplePropPropViewer implements EntryPoint {
         } else {
             return -999.;
         }
+    }
+    private String getString(Node firstChild) {
+        String value = "";
+        if (firstChild instanceof Text) {
+            Text content = (Text) firstChild;
+            value = content.getData().toString().trim();
+        }
+        return value;
     }
 
     ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
