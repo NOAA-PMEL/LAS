@@ -106,7 +106,9 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
             VariableSerializable variableSerializable = (VariableSerializable) varIt.next();
             // Filter out the subset variables since they don't have range values 
-            if ( variableSerializable.getAttributes().get("subset_variable") == null || !variableSerializable.getAttributes().get("subset_variable").equals("true") ) {
+            // TODO better way to identify the time variable.
+            if ( (variableSerializable.getAttributes().get("subset_variable") == null || !variableSerializable.getAttributes().get("subset_variable").equals("true")) 
+                    &&  !variableSerializable.getName().toLowerCase().contains("time") ) {
                 variablesListBox.addItem(variableSerializable);          
             }
         }
@@ -118,7 +120,8 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         Vector vs = new Vector();
         for (int i = 0; i < variables.length; i++) {
             // Filter subset variable which do not have a range...
-            if ( variables[i].getAttributes().get("subset_variable") == null || !variables[i].getAttributes().get("subset_variable").equals("true") ) {
+            if ( (variables[i].getAttributes().get("subset_variable") == null || !variables[i].getAttributes().get("subset_variable").equals("true"))
+                    && !variables[i].getName().toLowerCase().contains("time") ) {
                 variablesListBox.addItem(variables[i]);
             }
         }
