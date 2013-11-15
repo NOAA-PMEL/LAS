@@ -178,14 +178,14 @@ public class SeasonConstraintPanel extends Composite {
 
         for ( int i = 0; i < 12; i++ ) {
             if ( buttons.get(i).isDown() ) {
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getID(), months.get(i), var.getID(), months.get(i)), this);
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getShortname(), months.get(i), var.getShortname(), months.get(i)), this);
             }
         }
-        //eventBus.fireEventFromSource(new AddVariableConstraintEvent(var.getDSID(), var.getID(), String.valueOf(start), "ge", var.getName(), String.valueOf(end), "le", true), this);
+        //eventBus.fireEventFromSource(new AddVariableConstraintEvent(var.getDSID(), var.getShortname(), String.valueOf(start), "ge", var.getShortname(), String.valueOf(end), "le", true), this);
     }
     private void disable(int index, boolean fire) {
         if ( fire ) {
-            eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), months.get(index), var.getID(), months.get(index)), this);
+            eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getShortname(), months.get(index), var.getShortname(), months.get(index)), this);
         }
         // Special case of clicking the start of the sequence.  It won't make an orphan to just turn it off.
         int prev;
@@ -212,7 +212,7 @@ public class SeasonConstraintPanel extends Composite {
                 foundSecondEnabled = true;
             }
             if (  !foundSecondEnabled ) {
-                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getID(), months.get(i), var.getID(), months.get(i)), this);
+                eventBus.fireEventFromSource(new RemoveSelectionConstraintEvent(var.getShortname(), months.get(current), var.getShortname(), months.get(current)), this);
                 buttons.get(current).setDown(false);
                 buttons.get(current).setEnabled(false);
             }
