@@ -254,9 +254,12 @@ public class ConstraintWidgetGroup extends Composite {
 
                     TextConstraintAnchor anchor = new TextConstraintAnchor("text", null, null, variable, value, key, keyValue, "eq");
                     for (int i = 0; i < displayPanel.getWidgetCount(); i++ ) {
-                        TextConstraintAnchor a = (TextConstraintAnchor) displayPanel.getWidget(i);
-                        if ( a.equals(anchor) ) {
-                            displayPanel.remove(a);
+                        ConstraintAnchor a = (ConstraintAnchor) displayPanel.getWidget(i);
+                        if ( a instanceof TextConstraintAnchor ) {
+                            TextConstraintAnchor b = (TextConstraintAnchor) a;
+                            if ( b.equals(anchor) ) {
+                                displayPanel.remove(a);
+                            }
                         }
                     }
                 } else if ( source instanceof VariableConstraintAnchor ) {
