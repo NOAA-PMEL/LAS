@@ -83,9 +83,18 @@ public class Constraint {
         // Even stuff that looks like a number has to be enclosed in quotes for ERDDAP variables that come is a list of distinct values.
         if ( op.equals("is") || op.equals("like") ) {
             lhs = lhs.replaceAll("_ns_", "|");
-            rhs = rhs.replaceAll("_ns_", "|");
-            rhs = rhs.replaceAll("[(]", "\\\\(");
-            rhs = rhs.replaceAll("[)]", "\\\\)");
+            
+            String[] parts = rhs.split("_ns_");
+            StringBuilder r = new StringBuilder();
+            for (int i = 0; i < parts.length; i++) {
+                r.append(Pattern.quote(parts[i]));
+                if ( i < parts.length - 1 ) {
+                    r.append("|");
+                }
+            }
+            
+            rhs = r.toString();
+            
         }
         return lhs+getOpAsSymbol()+"\""+rhs+"\"";
     }
