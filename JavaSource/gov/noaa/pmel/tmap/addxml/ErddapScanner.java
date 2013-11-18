@@ -39,6 +39,7 @@ public class ErddapScanner {
     public static Map<String, AttributeTable> zVar = new HashMap<String, AttributeTable>();
     public static Map<String, AttributeTable> data = new HashMap<String, AttributeTable>();
     public static Map<String, AttributeTable> subsets = new HashMap<String, AttributeTable>();
+    public static Map<String, AttributeTable> monthOfYear = new HashMap<String, AttributeTable>();
     
     protected static ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
     protected static GridBean gb = new GridBean();
@@ -107,6 +108,9 @@ public class ErddapScanner {
                                 zVar.put(name, var);GridBean gb = new GridBean();
                             }
                         } else {
+                            if ( name.toLowerCase().contains("tmonth") ) {
+                                monthOfYear.put(name, var);
+                            }
                             data.put(name, var);
                         }
 
@@ -142,6 +146,11 @@ public class ErddapScanner {
                 if ( !zVar.keySet().isEmpty() ) {
                     String name = zVar.keySet().iterator().next();
                     System.out.println("Z variable:");
+                    System.out.println("\t "+name);
+                }
+                if ( !monthOfYear.keySet().isEmpty() ) {
+                    String name = monthOfYear.keySet().iterator().next();
+                    System.out.println("Month of year variable:");
                     System.out.println("\t "+name);
                 }
                 
@@ -250,6 +259,9 @@ public class ErddapScanner {
                     }
                     axes.add(ab);
                 }
+                /*
+                 * Right now we cannot do anything but surface trajectories so we're going to ignore the depth variable.
+                 
                 if ( !zVar.keySet().isEmpty() ) {
                     String name = zVar.keySet().iterator().next();
                     AttributeTable var = zVar.get(name);
@@ -280,6 +292,7 @@ public class ErddapScanner {
                     }
                     axes.add(ab);
                 }
+                */
                 gb.setAxes(axes);
 
                 Element cons = new Element("constraints");
@@ -378,6 +391,24 @@ public class ErddapScanner {
                 db.setProperty("tabledap_access", "id", id);
                 
                 db.setProperty("ui", "default", "file:ui.xml#Trajectories");
+                
+                if ( !monthOfYear.keySet().isEmpty() ) {
+                    String name = monthOfYear.keySet().iterator().next();
+                    String mid = id+"-"+name;
+                    Element season = new Element("constraint_group");
+                    season.setAttribute("type", "season");
+                    season.setAttribute("name", "by Season");
+                    Element con = new Element("constraint");
+                    con.setAttribute("widget", "month");
+                    Element variable = new Element("variable");
+                    variable.setAttribute("IDREF", mid);
+                    Element key = new Element("key");
+                    key.setText(name);
+                    con.addContent(key);
+                    con.addContent(variable);
+                    season.addContent(con);
+                    cons.addContent(season);
+                }
 
 
                 Element vrcg = new Element("constraint_group");
