@@ -3,6 +3,8 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import java.util.regex.Pattern;
+
 /**
  * A simple utility class that holds the three parts of a constraint, the left
  * hand side, the operation and the right hand side.
@@ -82,6 +84,8 @@ public class Constraint {
         if ( op.equals("is") || op.equals("like") ) {
             lhs = lhs.replaceAll("_ns_", "|");
             rhs = rhs.replaceAll("_ns_", "|");
+            rhs = rhs.replaceAll("[(]", "\\\\(");
+            rhs = rhs.replaceAll("[)]", "\\\\)");
         }
         return lhs+getOpAsSymbol()+"\""+rhs+"\"";
     }
