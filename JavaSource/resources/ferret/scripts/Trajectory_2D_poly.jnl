@@ -185,7 +185,7 @@ SAY _________________ Before land underlay clock seconds:   ($clock_secs)
 ! coastlines, EEZ's, etc.
 
 DEFINE SYMBOL basemap_palette = grayscale
-DEFINE SYMBOL basemap_levels = (-10000,-1000,1000)(-1000,0,100)
+DEFINE SYMBOL basemap_levels = (-inf)(-10000,-1000,1000)(-1000,0,100)
 GO LAS_XY_overlay_basemap
 
 PPL SHASET PROTECT
