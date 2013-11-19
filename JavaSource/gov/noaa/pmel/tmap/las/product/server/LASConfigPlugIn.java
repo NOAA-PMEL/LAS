@@ -280,6 +280,7 @@ public class LASConfigPlugIn implements PlugIn {
 	}
 	public void go_init() throws JDOMException, LASException, IOException {
 
+	    log.info("Starting initialization.");
 	    // If this is not a reinit, lock the product server here!!
 	    if ( !reinit_flag ) context.setAttribute(LAS_LOCK_KEY, "true");
 
@@ -687,7 +688,7 @@ public class LASConfigPlugIn implements PlugIn {
 	        Reload reload = new Reload(watcher, context);
 	        reload.start();
 	    }
-	    
+	    log.info("Initialization finished.");
 	}
 	public void destroy() {
 	    log.error("Shutting down LAS");
