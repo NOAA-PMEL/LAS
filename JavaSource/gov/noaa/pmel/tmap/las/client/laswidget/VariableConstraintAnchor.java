@@ -35,6 +35,9 @@ public class VariableConstraintAnchor extends ConstraintAnchor {
                     lhs = "";
                 } else if ( op.equals("gt") ) {
                     rhs = "";
+                } else if ( op.equals("ne") ) {
+                    lhs = "";
+                    rhs = "";
                 }
                 eventBus.fireEventFromSource(new VariableConstraintEvent(dsid, varid, lhs, op, variable, rhs, op, true), VariableConstraintAnchor.this);
             }
