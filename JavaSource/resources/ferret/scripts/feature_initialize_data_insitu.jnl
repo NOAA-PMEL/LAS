@@ -102,7 +102,7 @@ IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN
    DEFINE SYMBOL data_var ($data_($num)_var)
 ENDIF
 
-IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)")` THEN
+IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)")` THEN \
  GO feature_initialize_vars
 
 ! The x and y locations for insitu plots
@@ -168,7 +168,6 @@ ENDIF
 ! Set color levels for the data variable
 DEFINE SYMBOL data_num = 1
 GO LAS_initialize_var_levels
-
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 

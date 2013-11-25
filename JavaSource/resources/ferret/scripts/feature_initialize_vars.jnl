@@ -61,6 +61,8 @@ IF `($numobs) EQ 1` THEN
    LET feature_n = x[i=1:1]
    LET subset_mask = x[i=1:1]
 
+   LET feature_mask_obs = 1 
+
 ELSE
    LET nfeatures = 1
    IF `($rind"0|I>1|*>0")` THEN LET nfeatures = `($rowvar),RETURN=isize`
