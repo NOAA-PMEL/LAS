@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -63,6 +64,7 @@ public class OperationsWidget extends Composite {
     String initialOp;
     String initialView;
     String groupName;
+    GridSerializable grid;
 
     // Optional OperationsMenu. If set, then it is kept in sync with this
     // widget.
@@ -96,8 +98,9 @@ public class OperationsWidget extends Composite {
         Util.getRPCService().getOperations(null, dsID, varID, operationsCallback);
     }
 
-    public void setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
-        this.intervals = intervals;
+    public void setOperations(GridSerializable grid, String opID, String view, OperationSerializable[] ops) {
+        this.grid = grid;
+        this.intervals = grid.getIntervals();
         this.initialOp = opID;
         this.initialView = view;
         this.currentView = initialView;
@@ -146,7 +149,7 @@ public class OperationsWidget extends Composite {
         sectionPlots.clear();
         sectionPlots.add(new Label("Vertical Section Plots"));
         hofmullerPlots.clear();
-        hofmullerPlots.add(new Label("Hofmuller Plots"));
+        hofmullerPlots.add(new Label("Hovmöller Plots"));
         xyMapRow = 0;
         linePlotsRow = 0;
         sectionPlotsRow = 0;
@@ -184,12 +187,12 @@ public class OperationsWidget extends Composite {
                                 xyMapTable.setWidget(xyMapRow, 0, button);
                                 xyMapRow++;
                             } else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z"))
-                                    || (view.equals("t") && intervals.contains("t")) ) {
+                                    || (view.equals("t") && intervals.contains("t")) || (view.equals("e") && intervals.contains("e")) ) {
                                 if ( !hasLinePlots ) {
                                     linePlotsTable.clear();
                                     hasLinePlots = true;
                                 }
-                                OperationRadioButton button;
+                                OperationRadioButton button = null;
                                 if ( view.equals("x") ) {
                                     button = new OperationRadioButton(groupName, "Longitude");
                                 } else if ( view.equals("y") ) {
@@ -197,28 +200,63 @@ public class OperationsWidget extends Composite {
                                 } else if ( view.equals("z") ) {
                                     // TODO, get the grid and initialize from
                                     // the grid so you have the z-axis label.
-                                    button = new OperationRadioButton(groupName, "Z");
-                                } else {
+                                    String l = grid.getZAxis().getLabel();
+                                    String n = grid.getZAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, l);
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, n);
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Z");
+                                    }
+                                } else if ( view.equals("t") ) {
                                     button = new OperationRadioButton(groupName, "Time");
+                                } else if ( view.equals("e") ) {
+                                    String l = grid.getEAxis().getLabel();
+                                    String n = grid.getEAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, l);
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, n);
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Ensemble");
+                                    }
                                 }
-
-                                button.setView(view);
-                                button.setOperation(op);
-                                button.addClickListener(buttonListener);
-                                buttons.add(button);
-                                linePlotsTable.setWidget(linePlotsRow, 0, button);
-                                linePlotsRow++;
+                                if ( button != null ) {
+                                    button.setView(view);
+                                    button.setOperation(op);
+                                    button.addClickListener(buttonListener);
+                                    buttons.add(button);
+                                    linePlotsTable.setWidget(linePlotsRow, 0, button);
+                                    linePlotsRow++;
+                                }
                             } else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z")) ||
                                     (view.equals("yz") && intervals.contains("y") && intervals.contains("z")) ) {
                                 if ( !hasSectionPlots ) {
                                     sectionPlotsTable.clear();
                                     hasSectionPlots = true;
                                 }
-                                OperationRadioButton button;
+                                OperationRadioButton button = null;
                                 if ( view.equals("xz") ) {
-                                    button = new OperationRadioButton(groupName, "Longitude-z");
-                                } else {
-                                    button = new OperationRadioButton(groupName, "Latitude-z");
+                                    String l = grid.getZAxis().getLabel();
+                                    String n = grid.getZAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, "Longitue-"+l);
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, "Longitue-"+n);
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Longitude-z");
+                                    }
+                                } else if ( view.equals("yz") ) {
+                                    String l = grid.getZAxis().getLabel();
+                                    String n = grid.getZAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, "Latitude-"+l);
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, "Latitude-"+n);
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Latitude-z");
+                                    }
                                 }
 
                                 button.setOperation(op);
@@ -229,25 +267,46 @@ public class OperationsWidget extends Composite {
                                 sectionPlotsRow++;
                             } else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t")) ||
                                     (view.equals("yt") && intervals.contains("y") && intervals.contains("t")) ||
-                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) ) {
+                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) || 
+                                    (view.equals("et") && intervals.contains("e") && intervals.contains("t"))) {
                                 if ( !hasHofmullerPlots ) {
                                     hofmullerPlotsTable.clear();
                                     hasHofmullerPlots = true;
                                 }
-                                OperationRadioButton button;
+                                OperationRadioButton button = null;
                                 if ( view.equals("xt") ) {
                                     button = new OperationRadioButton(groupName, "Longitude-time");
                                 } else if ( view.equals("yt") ) {
                                     button = new OperationRadioButton(groupName, "Latitude-time");
-                                } else {
-                                    button = new OperationRadioButton(groupName, "Z-time");
+                                } else if ( view.equals("zt")) {
+                                    String l = grid.getZAxis().getLabel();
+                                    String n = grid.getZAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, l+"-time");
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, n+"-time");
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Z-time");
+                                    }      
+                                } else if ( view.equals("et")) {
+                                    String l = grid.getEAxis().getLabel();
+                                    String n = grid.getEAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, l+"-time");
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, n+"-time");
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "E-time");
+                                    }      
                                 }
-                                button.setView(view);
-                                button.setOperation(op);
-                                button.addClickListener(buttonListener);
-                                buttons.add(button);
-                                hofmullerPlotsTable.setWidget(hofmullerPlotsRow, 0, button);
-                                hofmullerPlotsRow++;
+                                if ( button != null ) {
+                                    button.setView(view);
+                                    button.setOperation(op);
+                                    button.addClickListener(buttonListener);
+                                    buttons.add(button);
+                                    hofmullerPlotsTable.setWidget(hofmullerPlotsRow, 0, button);
+                                    hofmullerPlotsRow++;
+                                }
                             }
                         }
                     }
@@ -336,7 +395,8 @@ public class OperationsWidget extends Composite {
         return set;
     }
 
-    public void setOpen(boolean open) {
+    public void setOpen(boolean open) {// TODO Auto-generated method stub
+        
         isOpen = open;
         xyMap.setVisible(open);// .setOpen(open);
         linePlots.setVisible(open);// .setOpen(open);
@@ -420,7 +480,8 @@ public class OperationsWidget extends Composite {
     }
     private String findZero(String view) {
         for ( Iterator buttonIt = buttons.iterator(); buttonIt.hasNext(); ) {
-            OperationRadioButton zero = (OperationRadioButton) buttonIt.next();
+            OperationRadioButton zero = (OperationRadioButton) buttonIt.next();// TODO Auto-generated method stub
+            
             if ( zero.getOperation().getViews().contains(view) && zero.getView().equals(view) ) {
                 currentOperation = zero.getOperation();
                 currentView = zero.getView();
@@ -466,5 +527,15 @@ public class OperationsWidget extends Composite {
             return true;
         }
         return false;
+    }
+
+    public void setOperationsForAnalysis(GridSerializable grid, String intervals, String id, String xView, OperationSerializable[] ops) {
+        this.grid = grid;
+        this.intervals = intervals;
+        this.initialOp = id;
+        this.initialView = xView;
+        this.currentView = initialView;
+        this.ops = ops;
+        setOps();
     }
 }

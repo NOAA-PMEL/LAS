@@ -99,6 +99,7 @@ public class AnalysisWidget extends Composite {
         AnalysisAxisSerializable yAxis = new AnalysisAxisSerializable();
         AnalysisAxisSerializable zAxis = new AnalysisAxisSerializable();
         AnalysisAxisSerializable tAxis = new AnalysisAxisSerializable();
+        AnalysisAxisSerializable eAxis = new AnalysisAxisSerializable();
 
         // The container
         AnalysisSerializable analysis = new AnalysisSerializable();
@@ -108,6 +109,7 @@ public class AnalysisWidget extends Composite {
         yAxis.setOp(null);
         zAxis.setOp(null);
         tAxis.setOp(null);
+        eAxis.setOp(null);
         if ( axis.equals("xy") ) {
             xAxis.setType("x");
             xAxis.setOp(op);
@@ -125,11 +127,15 @@ public class AnalysisWidget extends Composite {
         } else if ( axis.equals("t") ) {
             tAxis.setType("t");
             tAxis.setOp(op);
+        } else if ( axis.equals("e") ) {
+            eAxis.setType("e");
+            eAxis.setOp(op);
         }
         analysis.getAxes().put("x", xAxis);
         analysis.getAxes().put("y", yAxis);
         analysis.getAxes().put("z", zAxis);
         analysis.getAxes().put("t", tAxis);
+        analysis.getAxes().put("e", eAxis);
         return analysis;
     }
 
@@ -154,12 +160,25 @@ public class AnalysisWidget extends Composite {
         analysisAxis.addItem("Longitude", "x");
         analysisAxis.addItem("Latitude", "y");
         if ( grid.hasZ() ) {
-            analysisAxis.addItem("Height/Depth", "z");
+            String zl = grid.getZAxis().getLabel();
+            if ( zl != null && !zl.equals("") ) {
+                analysisAxis.addItem(zl, "z");
+            } else {
+                analysisAxis.addItem("Height/Depth", "z");
+            }
         }
         if ( grid.hasT() ) {
             analysisAxis.addItem("Time", "t");
         }
-
+        if ( grid.hasE() ) {
+            String el = grid.getEAxis().getLabel();
+            if ( el != null && !el.equals("") ) {
+                analysisAxis.addItem(el, "e");
+            } else {
+                analysisAxis.addItem("Ensemble", "e");
+            }
+            
+        }
     }
 
     public void setAnalysisType(String atype) {

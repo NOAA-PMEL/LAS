@@ -287,6 +287,14 @@ public class LASBackendRequest extends LASDocument {
             if (value != null) {
                 regions.put(regionID+"_"+"t_hi", value);
             }
+            value = region.getChildText("e_lo");
+            if (value != null) {
+                regions.put(regionID+"_"+"e_lo", value);
+            }
+            value = region.getChildText("e_hi");
+            if (value != null) {
+                regions.put(regionID+"_"+"e_hi", value);
+            }
         }
         return regions;
     }

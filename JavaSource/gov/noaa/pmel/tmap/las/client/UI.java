@@ -308,6 +308,10 @@ public class UI extends BaseUI {
                             analysis.getAxes().get("x").setLo(String.valueOf(xAxesWidget.getRefMap().getXlo()));
                             analysis.getAxes().get("x").setHi(String.valueOf(xAxesWidget.getRefMap().getXhi()));
                         }
+                        if ( analysis.isActive("e") ) {
+                            analysis.getAxes().get("e").setLo(xAxesWidget.getEAxis().getLo());
+                            analysis.getAxes().get("e").setHi(xAxesWidget.getEAxis().getHi());
+                        }
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
@@ -608,7 +612,7 @@ public class UI extends BaseUI {
                 // panel, we need to change the 1st UserList?
                 xPanels.get(0).setVariable(xVariable, true);
                 ops = config.getOperations();
-                xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
+                xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
                 xOperationID = xOperationsWidget.getCurrentOperation().getID();
                 xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
                 xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
@@ -1411,7 +1415,7 @@ public class UI extends BaseUI {
      */
     public boolean setupWidgets() {
 
-        xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
+        xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), xOptionsButton.getState());
         GridSerializable ds_grid = xVariable.getGrid();
@@ -1703,6 +1707,10 @@ public class UI extends BaseUI {
         token.append(";ylo=" + xAxesWidget.getRefMap().getYlo());
         token.append(";yhi=" + xAxesWidget.getRefMap().getYhi());
 
+        if ((xVariable.getGrid().hasE() && xView.contains("e")) || (xAnalysisWidget.isActive() && xAnalysisWidget.getAnalysisAxis().contains("e"))) {
+            token.append(";elo=" + xAxesWidget.getEAxis().getLo());
+            token.append(";ehi=" + xAxesWidget.getEAxis().getHi());
+        }
         if ((xVariable.getGrid().hasT() && xView.contains("t")) || (xAnalysisWidget.isActive() && xAnalysisWidget.getAnalysisAxis().contains("t"))) {
             token.append(";tlo=" + xAxesWidget.getTAxis().getFerretDateLo());
             token.append(";thi=" + xAxesWidget.getTAxis().getFerretDateHi());
@@ -1984,7 +1992,7 @@ public class UI extends BaseUI {
 
         // Get set the new operations that apply to the remaining views.
         xOperationID = ops[0].getID();
-        xOperationsWidget.setOperations(intervals, ops[0].getID(), xView, ops);
+        xOperationsWidget.setOperationsForAnalysis(xVariable.getGrid(), intervals, ops[0].getID(), xView, ops);
         tOperationsMenu.setMenus(ops, xView);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
 
@@ -2123,7 +2131,7 @@ public class UI extends BaseUI {
         } else {
             xAnalysisWidget.setVisible(true);
         }
-        xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
+        xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
         xOperationID = xOperationsWidget.getCurrentOperation().getID();
         xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
         xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
@@ -2397,7 +2405,7 @@ public class UI extends BaseUI {
             panel.setAnalysis(null);
         }
         xOperationID = ops[0].getID();
-        xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), ops[0].getID(), xView, ops);
+        xOperationsWidget.setOperations(xVariable.getGrid(), ops[0].getID(), xView, ops);
         tOperationsMenu.setMenus(ops, xView);
         tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
         tOperationsMenu.setCorrelationButtonEnabled(true);

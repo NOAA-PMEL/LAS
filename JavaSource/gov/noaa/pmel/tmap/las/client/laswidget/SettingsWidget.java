@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
@@ -105,8 +106,8 @@ public class SettingsWidget extends Composite {
 		operations.setOperations(intervals, dsID, varID, opID, view);
 	}
 	
-	public void setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
-		operations.setOperations(intervals, opID, view, ops);
+	public void setOperations(GridSerializable grid, String opID, String view, OperationSerializable[] ops) {
+		operations.setOperations(grid, opID, view, ops);
 	}
 
 	public boolean isUsePanelSettings() {

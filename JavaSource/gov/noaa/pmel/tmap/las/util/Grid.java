@@ -209,7 +209,7 @@ public class Grid extends Container implements Cloneable, GridInterface {
 		
 	}
 	public GridSerializable getGridSerializable() {
-		GridSerializable g = new GridSerializable();
+		GridSerializable g = new GridSerializable();	
 		if ( element != null ) {
 			String intervals = element.getAttributeValue("intervals");
 			if ( intervals != null ) {

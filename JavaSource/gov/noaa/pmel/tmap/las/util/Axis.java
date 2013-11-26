@@ -111,12 +111,14 @@ public class Axis extends Container implements AxisInterface {
     }
     public AxisSerializable getAxisSerializable() {
 		AxisSerializable a = new AxisSerializable();
+		
 		a.setType(getType());
 		a.setID(getID());
 		a.setHi(getHi());
 		a.setID(getID());
 		a.setLo(getLo());
 		a.setName(getName());
+		a.setLabel(getLabel());
 		a.setUnits(getAttributesAsMap().get("units"));
 		a.setAttributes(getAttributesAsMap());
 		if (hasV()) {
