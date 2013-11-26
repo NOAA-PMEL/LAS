@@ -1206,10 +1206,23 @@ public class SimplePropPropViewer implements EntryPoint {
             
             CategorySerializable cat = config.getCategorySerializable();
             
+            String defaultx = null;
+            String defaulty = null;
+            String defaultcb = null;
+            
             VariableSerializable[] variables = null;
             if (cat != null && cat.isVariableChildren()) {
                 DatasetSerializable ds = cat.getDatasetSerializable();
                 variables = ds.getVariablesSerializable();
+                
+                Map<String, String> cprops = ds.getProperties().get("correlation");
+                if ( cprops != null ) {
+                    defaultx = cprops.get("default_x");
+                    defaulty = cprops.get("default_y");
+                    defaultcb = cprops.get("default_color_by");
+                }
+                
+                
                 constraintWidgetGroup.init(gs, variables);
             } else {
                 Window.alert("Could not get the variables list from the server.");
@@ -1285,6 +1298,18 @@ public class SimplePropPropViewer implements EntryPoint {
                 List<Map<String, String>> vcs = lasRequest.getVariableConstraints();
                 
                 setFixedConstraintsFromRequest(vcs);
+                
+                // Now that we've done all that work to set up the state, we will over-ride the state with the values in the properties if they exist.
+                if ( defaultx != null ) {
+                    xVariables.setSelectedVariableById(defaultx);
+                }
+                if ( defaulty != null ) {
+                    yVariables.setSelectedVariableById(defaulty);
+                }
+                if ( defaultcb != null ) {
+                    colorVariables.setSelectedVariableById(defaultcb);
+                }
+                
                 
                 // The request is now set up like a property-property plot
                 // request,
