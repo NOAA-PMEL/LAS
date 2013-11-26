@@ -552,8 +552,8 @@ public class LASConfig extends LASDocument {
                         }
                     }
                 }
- 				String[] intervals = {"","","",""};
- 		        String[] points = {"","","",""};
+ 				String[] intervals = {"","","","",""};
+ 		        String[] points = {"","","","",""};
  		        for (Iterator gridAxesIt = gridAxes.iterator(); gridAxesIt.hasNext();) {
  		            Element axis = (Element) gridAxesIt.next();
  		            int size;
@@ -580,6 +580,8 @@ public class LASConfig extends LASDocument {
  		                    points[2] = type;
  		                } else if ( type.equals("t") ) {
  		                    points[3] = type;
+ 		                } else if ( type.equals("e") ) {
+ 		                    points[4] = type;
  		                }
  		            } else if ( size > 1 ) {
  		                if ( type.equals("x") ) {
@@ -594,6 +596,9 @@ public class LASConfig extends LASDocument {
  		                } else if ( type.equals("t") ) {
  		                    points[3] = type;
  		                    intervals[3] = type;
+ 		                } else if ( type.equals("e") ) {
+ 		                    points[4] = type;
+ 		                    intervals[4] = type;
  		                }
  		            }
 
@@ -605,10 +610,10 @@ public class LASConfig extends LASDocument {
                 String existingIntervals = gridElement.getAttributeValue("intervals");
                 // Set them only if they don't already exist in the variable definition.
                 if ( existingPoints == null ) {
-                    gridElement.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+                    gridElement.setAttribute("points", points[0]+points[1]+points[2]+points[3]+points[4]);
                 }
                 if ( existingIntervals == null ) {
-                    gridElement.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+                    gridElement.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]+intervals[4]);
                 }
 // 				Grid g = getGridById(gridElement.getAttributeValue("ID"));
 // 				setPointsAndIntervals(g, gridElement);

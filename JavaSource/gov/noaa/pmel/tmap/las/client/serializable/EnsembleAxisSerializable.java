@@ -5,6 +5,9 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class EnsembleAxisSerializable extends AxisSerializable implements IsSerializable {
 
 	EnsembleMemberSerializable[] members;
+	boolean hasMembers;
+	String[] names;
+	String[] values;
 
 	public EnsembleAxisSerializable() {
 		
@@ -32,5 +35,27 @@ public class EnsembleAxisSerializable extends AxisSerializable implements IsSeri
 	public void setMembers(EnsembleMemberSerializable[] members) {
 		this.members = members;
 	}
+	
+	public String[] getValues() {
+	    return values;
+	}
+	public String[] getNames() {
+	    return names;
+	}
+	
+	public void setValues(String[] v) {
+	    values = v;
+	}
+	public void setNames(String[] n) {
+	    names = n;
+	}
+
+    public boolean hasMembers() {
+        return hasMembers;
+    }
+
+    public void setHasMembers(boolean hasMembers) {
+        this.hasMembers = hasMembers;
+    }
 
 }

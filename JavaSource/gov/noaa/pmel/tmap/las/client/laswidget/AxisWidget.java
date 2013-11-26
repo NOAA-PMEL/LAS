@@ -123,16 +123,14 @@ public class AxisWidget extends Composite {
         hi_axis.addChangeHandler(hiAxisChangeHandler);
         String units = ax.getUnits();
         if (ax.getLabel() != null && !ax.getLabel().equals("")) {
-            if (units != null && !units.equals("")) {
+            if (units != null && !units.equals("") && !units.equals("null") ) {
+                lo_label_range.setText("Start " + ax.getLabel() + "(" + units + "):");
+                hi_label_range.setText("End " + ax.getLabel() + "(" + units + "):");
+                lo_label.setText(ax.getLabel() + "(" + units + "):");
+            } else {
                 lo_label_range.setText("Start " + ax.getLabel() + ":");
                 hi_label_range.setText("End " + ax.getLabel() + ":");
                 lo_label.setText(ax.getLabel() + ":");
-            } else {
-                lo_label_range.setText("Start " + ax.getLabel() + "(" + units
-                        + "):");
-                hi_label_range.setText("End " + ax.getLabel() + "(" + units
-                        + "):");
-                lo_label.setText(ax.getLabel() + "(" + units + "):");
             }
         } else {
             if (units != null && !units.equals("")) {

@@ -1264,6 +1264,10 @@ public class OutputPanel extends Composite implements HasName {
         Map<String, String> cpState = Util.getTokenMap(comparePanelState);
 
         if (analysis != null) {
+            if (analysis.isActive("e")) {
+                analysis.getAxes().get("e").setLo(cpState.get("elo"));
+                analysis.getAxes().get("e").setHi(cpState.get("ehi"));
+            }
             if (analysis.isActive("t")) {
                 analysis.getAxes().get("t").setLo(cpState.get("tlo"));
                 analysis.getAxes().get("t").setHi(cpState.get("thi"));
@@ -1373,6 +1377,16 @@ public class OutputPanel extends Composite implements HasName {
                 }
                 // Add the analysis computation to the variable from this panel
             } else {
+                if (analysis.isActive("e")) {
+                    analysis.getAxes().get("e").setLo(panelAxesWidgets.getEAxis().getLo());
+                    analysis.getAxes().get("e").setHi(panelAxesWidgets.getEAxis().getHi());
+                } else {
+                    if (!view.contains("e")) {
+                        if (panelVar.getGrid().hasE()) {
+                            lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 1);
+                        }
+                    }
+                }
                 if (analysis.isActive("t")) {
                     analysis.getAxes().get("t").setLo(panelAxesWidgets.getTAxis().getFerretDateLo());
                     analysis.getAxes().get("t").setHi(panelAxesWidgets.getTAxis().getFerretDateHi());
@@ -1562,6 +1576,17 @@ public class OutputPanel extends Composite implements HasName {
         if (wantT) {
             token.append(";tlo=" + panelAxesWidgets.getTAxis().getFerretDateLo() + ";thi=" + panelAxesWidgets.getTAxis().getFerretDateHi());
         }
+        
+        boolean wantE;
+        if (analysis == null) {
+            wantE = panelVar.getGrid().hasE() && !view.contains("e");
+        } else {
+            wantE = panelVar.getGrid().hasE() && !view.contains("e") && !analysis.isActive("e");
+        }
+        if (wantE) {
+            token.append(";elo=" + panelAxesWidgets.getEAxis().getLo() + ";ehi=" + panelAxesWidgets.getEAxis().getHi());
+        }
+        
         token.append(";catid="+panelVar.getCATID());
         token.append(";dsid=" + panelVar.getDSID());
         token.append(";varid=" + panelVar.getID());
@@ -1649,6 +1674,8 @@ public class OutputPanel extends Composite implements HasName {
         String local_zhi = null;
         String local_tlo = null;
         String local_thi = null;
+        String local_elo = null;
+        String local_ehi = null;
 
         if (view.contains("x") || isComparePanel()) {
             local_xlo = vgState.get("xlo");
@@ -1685,6 +1712,16 @@ public class OutputPanel extends Composite implements HasName {
                 local_thi = panelAxesWidgets.getTAxis().getFerretDateHi();
             }
         }
+        
+        if ( view.contains("e") ) {
+            local_elo = vgState.get("elo");
+            local_ehi = vgState.get("ehi");
+        } else {
+            if ( panelVar.getGrid().hasE() ) {
+                local_elo = panelAxesWidgets.getEAxis().getLo();
+                local_ehi = panelAxesWidgets.getEAxis().getHi();
+            }
+        }
 
         if (analysis != null) {
 
@@ -1706,6 +1743,11 @@ public class OutputPanel extends Composite implements HasName {
                     lasRequest.setRange("t", local_tlo, local_thi, 0);
                 }
             }
+            if ( panelVar.getGrid().getEAxis() != null ) {
+                if ( !analysis.isActive("e") ) {
+                    lasRequest.setRange("e", local_elo, local_ehi, 0);
+                }
+            }
         } else {
             lasRequest.setRange("x", local_xlo, local_xhi, 0);
             lasRequest.setRange("y", local_ylo, local_yhi, 0);
@@ -1714,6 +1756,9 @@ public class OutputPanel extends Composite implements HasName {
             }
             if (panelVar.getGrid().hasT()) {
                 lasRequest.setRange("t", local_tlo, local_thi, 0);
+            }
+            if ( panelVar.getGrid().hasE() ) {
+                lasRequest.setRange("e", local_elo, local_ehi, 0);
             }
         }
 
@@ -1731,7 +1776,9 @@ public class OutputPanel extends Composite implements HasName {
             if (panelVar.getGrid().getTAxis() != null) {
                 lasRequest.setRange("t", local_tlo, local_thi, 1);
             }
-
+            if ( panelVar.getGrid().getEAxis() != null ) {
+                lasRequest.setRange("e", local_elo, local_ehi, 1);
+            }
         }
 
         lasRequest.setProperty("ferret", "view", view);
@@ -1911,6 +1958,10 @@ public class OutputPanel extends Composite implements HasName {
         Map<String, String> vgState = Util.getTokenMap(vizGalState);
 
         if (analysis != null) {
+            if (analysis.isActive("e")) {
+                analysis.getAxes().get("e").setLo(vgState.get("elo"));
+                analysis.getAxes().get("e").setHi(vgState.get("ehi"));
+            }
             if (analysis.isActive("t")) {
                 analysis.getAxes().get("t").setLo(vgState.get("tlo"));
                 analysis.getAxes().get("t").setHi(vgState.get("thi"));

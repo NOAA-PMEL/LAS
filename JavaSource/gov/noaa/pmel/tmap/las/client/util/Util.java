@@ -31,6 +31,9 @@ public class Util {
 	}
 	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
 		List<String> ortho = new ArrayList<String>();
+		if ( !view.contains("e") && grid.hasE() ) {
+		    ortho.add("e");
+		}
 		if ( !view.contains("t") && grid.hasT() ) {
 			ortho.add("t");
 		}

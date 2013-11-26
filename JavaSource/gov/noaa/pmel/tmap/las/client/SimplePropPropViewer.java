@@ -135,8 +135,8 @@ public class SimplePropPropViewer implements EntryPoint {
     FlexTable controlPanel = new FlexTable();
     VerticalPanel topPanel = new VerticalPanel();
     FlexTable outputPanel = new FlexTable();
-    UserListBox xVariables = new UserListBox(XSELECTOR, true);
-    UserListBox yVariables = new UserListBox(YSELECTOR, true);
+    UserListBox yVariables = new UserListBox(XSELECTOR, true);
+    UserListBox xVariables = new UserListBox(YSELECTOR, true);
     UserListBox colorVariables = new UserListBox(COLORSELECTOR, true);
     AlertButton update = new AlertButton("Update Plot", Constants.UPDATE_NEEDED);
     PushButton print = new PushButton("Print");
@@ -320,8 +320,8 @@ public class SimplePropPropViewer implements EntryPoint {
         });
         
         // Never show the add button...
-        xVariables.setMinItemsForAddButtonToBeVisible(10000);
         yVariables.setMinItemsForAddButtonToBeVisible(10000);
+        xVariables.setMinItemsForAddButtonToBeVisible(10000);
         colorVariables.setMinItemsForAddButtonToBeVisible(10000);
 
         print.addStyleDependentName("SMALLER");
@@ -619,8 +619,8 @@ public class SimplePropPropViewer implements EntryPoint {
             zlo = zAxisWidget.getLo();
             zhi = zAxisWidget.getHi();
         }
-        String vix = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-        GridSerializable grid = xVariables.getUserObject(xVariables.getSelectedIndex()).getGrid();
+        String vix = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
+        GridSerializable grid = yVariables.getUserObject(yVariables.getSelectedIndex()).getGrid();
         if (grid.hasT()) {
 
             if (tlo != null && thi != null) {
@@ -662,7 +662,7 @@ public class SimplePropPropViewer implements EntryPoint {
         } else {
             lasRequest.removeProperty("las", "output_type");
         }
-        String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
+        String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
         if (netcdf != null && contained && grid_type.equals("trajectory")) {
             if ( plot ) {
                 operationID = "Trajectgory_correlation_plot"; // No data base access;
@@ -702,46 +702,46 @@ public class SimplePropPropViewer implements EntryPoint {
             }
             // We need to make the initial netCDF file with *all* the variables in each row.
 
-            // Grab the existing variable
-            String v0 = varid;
+            // Grab the existing variable to be used as y
+            String vy = varid;
             lasRequest.removeVariables();
             // Find the first non-sub-set variable that is not already included
 
-            String v1 = null;
-            String v2 = null;
+            String vx = null;
+            String vcb = null;
             String vds = null;
-            for (int yi = 0; yi < yVariables.getItemCount(); yi++) {
-                VariableSerializable v = (VariableSerializable) yVariables.getUserObject(yi);               
-                if ( v1 == null && !v.getID().equals(v0) && v.getAttributes().get("subset_variable") == null ) {
-                    v1 = v.getID();
+            for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
+                VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
+                if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null ) {
+                    vx = v.getID();
                     vds = v.getDSID();
                 }
             }
             if ( colorCheckBox.getValue() ) {
-                v2 = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
+                vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
                 lasRequest.setProperty("data", "count", "3");
             } else {
                 lasRequest.setProperty("data", "count", "2");
             }
             if ( vds != null ) {
-                lasRequest.addVariable(vds, v0, 0);
-                if ( v1 != null ) {
-                    lasRequest.addVariable(vds, v1, 0);
+                lasRequest.addVariable(vds, vx, 0);
+                if ( vx != null ) {
+                    lasRequest.addVariable(vds, vy, 0);
                 }
-                if ( v2 != null ) { 
-                    lasRequest.addVariable(vds, v2, 0);
+                if ( vcb != null ) { 
+                    lasRequest.addVariable(vds, vcb, 0);
                 }
                     for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
                         String key = (String) allIt.next();
                         VariableSerializable v = xAllDatasetVariables.get(key);
                         String vid = v.getID();
                         String did = v.getDSID();
-                        if (!vid.equals(v2) && !vid.equals(v1) && !vid.equals(v0) ) {
+                        if (!vid.equals(vcb) && !vid.equals(vx) && !vid.equals(vy) ) {
                             lasRequest.addVariable(v.getDSID(), v.getID(), 0);
                         }
                     }
-                    xVariables.setVariable(xAllDatasetVariables.get(v0));
-                    yVariables.setVariable(xAllDatasetVariables.get(v1));
+                    yVariables.setVariable(xAllDatasetVariables.get(vy));
+                    xVariables.setVariable(xAllDatasetVariables.get(vx));
                 
             }
         } else {
@@ -1086,11 +1086,11 @@ public class SimplePropPropViewer implements EntryPoint {
         // TODO treat an x or y axis with time differently.  First problem, how do you know it's time.  Check the id against the time id tabledap property?
 
         constraintWidgetGroup.clearTextFields();
-        String xid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-        String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
-        String yid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
-        String yname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
-        String dsid = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
+        String xid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
+        String xname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
+        String yid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
+        String yname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
+        String dsid = yVariables.getUserObject(yVariables.getSelectedIndex()).getDSID();
 
         VariableConstraintAnchor ctax1;  
         VariableConstraintAnchor ctax2;
@@ -1221,7 +1221,7 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
 
                 VariableSerializable vtosety = null;
-                int time_index = -1;
+                
                 
                 for (int i = 0; i < variables.length; i++) {
                     VariableSerializable vs = variables[i];
@@ -1233,8 +1233,8 @@ public class SimplePropPropViewer implements EntryPoint {
                         xAllDatasetVariables.put(vs.getID(), vs);
                     }
                 }
-                xVariables.setVariables(Arrays.asList(variables));
                 yVariables.setVariables(Arrays.asList(variables));
+                xVariables.setVariables(Arrays.asList(variables));
                 colorVariables.setVariables(Arrays.asList(variables));
                 if ( trajectory_id != null && !trajectory_id.equals("") ) {
                     colorVariables.setVariable(xAllDatasetVariables.get(trajectory_id));
@@ -1243,30 +1243,28 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
                 
                 // These are the variables filtered for vectors and sub-set variables
-                List<VariableSerializable> filtered = xVariables.getVariables();
+                List<VariableSerializable> filtered = yVariables.getVariables();
                 for (int n = 0; n < filtered.size(); n++) {
                     VariableSerializable variableSerializable = (VariableSerializable) filtered.get(n);
                     xFilteredDatasetVariables.put(variableSerializable.getID(), variableSerializable);
                 }
                 vtosety = xFilteredDatasetVariables.get(varid);
-                xVariables.setAddButtonVisible(false);
                 yVariables.setAddButtonVisible(false);
+                xVariables.setAddButtonVisible(false);
                 colorVariables.setAddButtonVisible(false);
                 
                 if (vtosety != null) {
-                    yVariables.setVariable(vtosety);
+                    xVariables.setVariable(vtosety);
                 }
-                if (time_index >= 0) {
-                    xVariables.setSelectedIndex(time_index);
-                }
-                String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
+                
+                String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
                 if (grid_type.equals("regular")) {
                     operationID = "prop_prop_plot";
                 } else if (grid_type.equals("trajectory")) {
                     operationID = "Trajectory_correlation_plot";
                 }
 
-                GridSerializable grid = xVariables.getUserObject(xVariables.getSelectedIndex()).getGrid();
+                GridSerializable grid = yVariables.getUserObject(yVariables.getSelectedIndex()).getGrid();
                 
 
                 // TODO this is not right for data with a z axis.  It needs to be analogous with the setFixedXY and setFixedT
@@ -1419,8 +1417,8 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
                 print.setEnabled(false);
                 outputPanel.removeCell(1, 0);
-                xVariables.setSelectedIndex(0);
                 yVariables.setSelectedIndex(0);
+                xVariables.setSelectedIndex(0);
             }
         }
 
@@ -1532,7 +1530,7 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     private void warn(String message) {
-        String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
+        String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
         // Don't warn if the grid type is regular...
         if (!grid_type.contains("reg")) {
             warnText.setText(message);
@@ -1834,8 +1832,8 @@ public class SimplePropPropViewer implements EntryPoint {
         }
     };
     private String plotVariable(String id) {
-        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
-        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
+        VariableSerializable varX = yVariables.getUserObject(yVariables.getSelectedIndex());
+        VariableSerializable varY = xVariables.getUserObject(xVariables.getSelectedIndex());
         
         if (varX.getID().equals(id))
             return "x";

@@ -284,13 +284,8 @@ public class UserListBox extends Composite {
          this.colorBy = colorBy;
      }
      public void setVariable(VariableSerializable variable) {
-         list.setSelectedIndex(0);
-         for ( int i = 0; i < allVariables.size(); i++ ) {
-             VariableSerializable v = allVariables.get(i);
-             if ( v.getID().equals(variable.getID()) && v.getDSID().equals(variable.getDSID())) {
-                 list.setSelectedIndex(i);
-             }
-         }
+         String id = variable.getID();
+         setSelectedVariableById(id);
      }
      public void setVariables(Vector<VariableSerializable> variables) {
          List<VariableSerializable> variableList = new ArrayList<VariableSerializable>(variables);

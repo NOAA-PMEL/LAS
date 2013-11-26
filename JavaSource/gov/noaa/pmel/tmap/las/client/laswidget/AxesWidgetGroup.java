@@ -34,6 +34,7 @@ public class AxesWidgetGroup extends Composite {
     OLMapWidget refMap;
     DateTimeWidget dateTimeWidget;
     AxisWidget zWidget;
+    AxisWidget eWidget;
     HorizontalPanel layout;
     FlexTable menuWidgets;
     FlowPanel panel;
@@ -63,6 +64,8 @@ public class AxesWidgetGroup extends Composite {
         refMap.activateNativeHooks();
         zWidget = new AxisWidget();
         zWidget.setVisible(false);
+        eWidget = new AxisWidget();
+        eWidget.setVisible(false);
         dateTimeWidget = new DateTimeWidget();
         dateTimeWidget.setVisible(false);
         panel = new FlowPanel();//new DisclosurePanel(title);
@@ -71,6 +74,7 @@ public class AxesWidgetGroup extends Composite {
             row.setWidget(0, 0, refMap);
             row.setWidget(0, 1, zWidget);
             row.setWidget(0, 2, dateTimeWidget);
+            row.setWidget(0, 3, eWidget);
             row.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
             row.getFlexCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
             row.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
@@ -81,6 +85,7 @@ public class AxesWidgetGroup extends Composite {
             panel.setVisible(true);//.setOpen(true);
             menuWidgets.setWidget(0, 0, zWidget);
             menuWidgets.setWidget(1, 0, dateTimeWidget);
+            menuWidgets.setWidget(2, 0, eWidget);
             menuWidgets.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
             menuWidgets.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
             layout.add(menuWidgets);      
@@ -91,6 +96,12 @@ public class AxesWidgetGroup extends Composite {
     public void init(GridSerializable grid) {
         hasZ = grid.hasZ();
         hasT = grid.hasT();
+        hasE = grid.hasE();
+        if ( grid.hasE() ) {
+            eWidget.init(grid.getEAxis());
+        } else {
+            eWidget.setVisible(false);
+        }
         if ( grid.hasZ() ) {
             zWidget.init(grid.getZAxis());
             // zWidget = new AxisWidget(grid.getZAxis());
@@ -126,10 +137,16 @@ public class AxesWidgetGroup extends Composite {
         if ( type.equals("t") && hasT ) {
             dateTimeWidget.setVisible(visible);
         }
+        if ( type.equals("e") && hasE ) {
+            eWidget.setVisible(visible);
+        }
     }
 
     public void setRange(String type, boolean range) {
         // Does not apply to x and y
+        if ( type.equals("e") ) {
+            eWidget.setRange(range);
+        }
         if ( type.equals("z") ) {
             zWidget.setRange(range);
         }
@@ -148,6 +165,10 @@ public class AxesWidgetGroup extends Composite {
 
     public AxisWidget getZAxis() {
         return zWidget;
+    }
+    
+    public AxisWidget getEAxis() {
+        return eWidget;
     }
 
     public void showOrthoAxes(String view, List<String> ortho, String analysis, boolean isComparePanel) {

@@ -38,6 +38,9 @@ public class Container {
     public String getName() {
         return element.getAttributeValue("name");
     }
+    public String getLabel() {
+        return element.getAttributeValue("label");
+    }
     public void setName(String name) {
         element.setAttribute("name", name);
     }
