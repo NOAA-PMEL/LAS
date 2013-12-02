@@ -81,10 +81,15 @@ public class ErddapScanner {
                             subsetNames.add(tv);
                         }
                     }
+                } else {
+                    System.err.println("No CDM trajectory variables found in the cdm_trajectory_variables global attribute.");
                 }
                 // Classify all of the variables...
 
                 Enumeration names = variableAttributes.getNames();
+                if ( !names.hasMoreElements() ) {
+                    System.out.println("No variables found in this data collection.");
+                }
                 while (names.hasMoreElements()) {
                     String name = (String) names.nextElement();
                     AttributeTable var = variableAttributes.getAttribute(name).getContainer();
@@ -167,7 +172,8 @@ public class ErddapScanner {
                 // Build the LAS configuration.
                 DatasetBean db = new DatasetBean();
                 db.setElement(id);
-                db.setName(id);
+                db.setName(id);            
+
                 db.setUrl(url);
                 // Build the grid...
                 
@@ -211,7 +217,8 @@ public class ErddapScanner {
                         String start = ar.getValueAt(0);
                         String end = ar.getValueAt(1);
                         double size = Double.valueOf(end) - Double.valueOf(start);
-                        ArangeBean arb = new ArangeBean();
+                        ArangeBean arb = new ArangeBean();          
+
                         arb.setStart(start);
                         arb.setStep("1.0");
                         arb.setSize(String.valueOf(size));
@@ -228,7 +235,8 @@ public class ErddapScanner {
                     }
                     axes.add(ab);
                 }
-                if ( !latVar.keySet().isEmpty() ) {
+                if ( !latVar.keySet().isEmpty() ) {           
+
                     String name = latVar.keySet().iterator().next();  
                     db.setProperty("tabledap_access", "latitude", name);
                     AttributeTable var = latVar.get(name);
@@ -290,7 +298,8 @@ public class ErddapScanner {
                         arb.setSize("UNKNOW_SIZE");
                         ab.setArange(arb);
                     }
-                    axes.add(ab);
+                    axes.add(ab);            System.err.println(e.getMessage());
+
                 }
                 */
                 gb.setAxes(axes);
@@ -345,7 +354,7 @@ public class ErddapScanner {
                     subsetcg.addContent(c);
                 }
                 cons.addContent(subsetcg);
-                
+
                 int i = 0;
                 for (Iterator dataIt = data.keySet().iterator(); dataIt.hasNext();) {
                     String name = (String) dataIt.next();
@@ -373,7 +382,8 @@ public class ErddapScanner {
                     vb.setUrl("#"+name);
                     vb.setGrid(gb);
                     vb.addAttribute("grid_type", "trajectory");
-                    variables.add(vb);
+                    variables.add(vb);            
+
                 }
                 
                 
@@ -396,7 +406,8 @@ public class ErddapScanner {
                     String name = monthOfYear.keySet().iterator().next();
                     String mid = id+"-"+name;
                     Element season = new Element("constraint_group");
-                    season.setAttribute("type", "season");
+                    season.setAttribute("type", "season");            
+
                     season.setAttribute("name", "by Season");
                     Element con = new Element("constraint");
                     con.setAttribute("widget", "month");
@@ -424,7 +435,8 @@ public class ErddapScanner {
                 
                 Element d = db.toXml();
                 d.addContent(cons);
-                datasetsE.addContent(d);
+                datasetsE.addContent(d);            
+
                 
                 
                 gridsE.addContent(gb.toXml());
@@ -436,24 +448,24 @@ public class ErddapScanner {
                 outputXML(outputFile, gridsE, true);
                 outputXML(outputFile, axesE, true);
             }
+            if ( cdm_trajectory_variables_attribute == null ) {
+                System.err.println("No cdm_trajectory_variables global attribute found in this data set.");
+            }
+            if ( variableAttributes == null ) {
+                System.err.println("No variables found.");
+            }
         } catch (NoSuchAttributeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (DAP2Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (org.apache.commons.cli.ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println("Error opening: "+url+id+" "+e.getMessage());
         }
     }
     static public VariableBean addSubset(String name, AttributeTable var) throws NoSuchAttributeException {
