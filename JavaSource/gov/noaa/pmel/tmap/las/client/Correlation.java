@@ -820,6 +820,7 @@ public class Correlation implements EntryPoint {
 				VerticalPanel p = new VerticalPanel();
 				ScrollPanel sp = new ScrollPanel();
 				HTML result = new HTML(doc);
+				evalScripts(new HTML(response.getText()).getElement());
 				p.add(result);
 				PushButton again = new PushButton("Try Again");
 				again.setWidth("75px");
@@ -2215,4 +2216,27 @@ public class Correlation implements EntryPoint {
 			}
 		}
 	};
+    /**
+     * Evaluate scripts in an HTML string. Will eval both <script
+     * src=""></script> and <script>javascript here</scripts>.
+     * 
+     * @param element
+     *            a new HTML(text).getElement()
+     */
+    public static native void evalScripts(com.google.gwt.user.client.Element element)
+    /*-{
+        var scripts = element.getElementsByTagName("script");
+
+        for (i = 0; i < scripts.length; i++) {
+            // if src, eval it, otherwise eval the body
+            if (scripts[i].hasAttribute("src")) {
+                var src = scripts[i].getAttribute("src");
+                var script = $doc.createElement('script');
+                script.setAttribute("src", src);
+                $doc.getElementsByTagName('body')[0].appendChild(script);
+            } else {
+                $wnd.eval(scripts[i].innerHTML);
+            }
+        }
+    }-*/;
 }
