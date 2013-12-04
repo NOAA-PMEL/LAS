@@ -3,7 +3,7 @@
 <!-- LAS SERVER OK -->
 <title>LAS Output -- $las_config.getTitle()</title>
 #set($id = $request.getParameter("catid"))
-<META http-equiv="refresh" content="0;URL=SPPV.vm?catid=$id&xml=$las_request.toEncodedURLString()"> 
+<META http-equiv="refresh" content="0;URL=productserver/templates/SPPV_plot.vm?catid=$id&xml=$las_request.toEncodedURLString()"> 
 </head>
 <body>
 </body>
