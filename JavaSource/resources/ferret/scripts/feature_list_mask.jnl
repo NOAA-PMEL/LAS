@@ -8,6 +8,7 @@
 
 IF `($ferret_cruise_list"0|*>1") EQ 0` THEN 
    LET feature_mask_obs = 1 
+   DEFINE SYMBOL have_feature_mask = 1
    EXIT/SCRIPT
 ENDIF
 
@@ -73,5 +74,6 @@ DEFINE SYMBOL subset_mask = 1  ! mask is defined
 LET feature_mask = subset_mask  ! used in the key when color-by-cruise
 
 LET feature_mask_obs = EXPND_BY_LEN(feature_mask,rowsize,`rowsize[m=@sum]`)
+DEFINE SYMBOL have_feature_mask = 1
 
 !---------------- end of feature_list_mask.jnl -------------------------

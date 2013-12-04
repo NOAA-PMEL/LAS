@@ -62,6 +62,7 @@ IF `($numobs) EQ 1` THEN
    LET subset_mask = x[i=1:1]
 
    LET feature_mask_obs = 1 
+   DEFINE SYMBOL have_feature_mask = 1
 
 ELSE
    LET nfeatures = 1

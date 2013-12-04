@@ -138,7 +138,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
    IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
 
-   LET/TITLE="($ferret_title_2)" zvar = ($ferret_plot_var_2)
+   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    
 ! Is it a varible on the E axis of a DSG file?
 
@@ -170,6 +170,12 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
    DEFINE SYMBOL zvar = zvar
    DEFINE SYMBOL color_by = 1
+
+   IF ($ferret_($ferret_plot_var_2)_palette"0|*>1") THEN \
+    DEFINE SYMBOL ferret_palette = ($ferret_($ferret_plot_var_2)_palette)
+
+   IF ($ferret_($ferret_plot_var_2)_fill_levels"0|*>1") THEN \
+    DEFINE SYMBOL color_by_levels = ($ferret_($ferret_plot_var_2)_fill_levels)
 
 ENDIF
 
@@ -230,8 +236,10 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO prop_prop_constraints
 ENDIF
 
-LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * feature_mask_obs[gx=time@asn]
-LET constraints_mask = text_mask * var_mask * feature_mask_obs
+!LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * feature_mask_obs[gx=time@asn]
+
+LET constraints_mask = text_mask * var_mask
+IF ($have_feature_mask"0|*>1") THEN LET constraints_mask = text_mask * var_mask * feature_mask_obs
 
 IF ($color_by"0|*>1") THEN 
 

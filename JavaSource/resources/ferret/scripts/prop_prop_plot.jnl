@@ -129,9 +129,10 @@ DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2
-   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=1/COLOR=6
+   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2/COLOR=6
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
+      IF ($color_by_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($color_by_levels)
       DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/pal=rainbow/MISSING=blank
       DEFINE SYMBOL plot_end_command = RIBBON/OVER
    ENDIF
@@ -204,7 +205,7 @@ ELSE
          LET dvar = ($data_var)
 
       ELSE   ! IF ($rowvar)
-         LET nout_lonlat = `var_data_masked[i=@ngd]`
+         LET nout_lonlat = `zvar[i=@ngd]`  ! ??
          DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
       ENDIF  ! IF ($rowvar)
 
@@ -221,7 +222,7 @@ ELSE
      DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
-     DEFINE SYMBOL color_by_title = `($zvar),RETURN=title`
+     DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 
    ELSE    ! IF ($color_by)
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
@@ -253,7 +254,6 @@ ELSE
    ENDIF
 
 ENDIF  ! color-by-trajectory or not...
-
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
@@ -337,7 +337,7 @@ IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_
 GO LAS_ferret_las_version_header
 
 ! If it's a color-by-ID plot, make the webrowset file for the cruise key
-IF `color_by_feature EQ 1` THEN GO feature_key
+IF ($color_by_feature"0|*>1") THEN THEN GO feature_key
 
 ! Save the results
 
