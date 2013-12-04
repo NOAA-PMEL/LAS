@@ -8,6 +8,9 @@
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
+! If it is not a feature-type dataset, exit
+IF `($feature_type"0|*>1") EQ 0` THEN EXIT/SCRIPT
+
 LET check_var = $1%($ferret_plot_var)%
 
 ! Fill with a known value to distinguish between input missing values
