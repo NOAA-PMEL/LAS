@@ -674,9 +674,9 @@
 		    <grid_type name="trajectory"/>
 		</grid_types>
     </operation>
-    <!--  This is a correlation plot chain specific to the Trajectory data where the netCDF file is made once and used over and over for plots. -->
-    <operation name="Correlation Plot" ID="SPPV"
-		service_action="" default="true" category="correlation" output_template="SPPV">
+    <!-- End of netCDF only trajectory operations -->
+	<operation name="Correlation Plot" ID="Correlation"
+		service_action="" default="true" category="correlation" output_template="Correlation">
 		<response ID="PlotResp" type="HTML" index="1">
 			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 			<result type="image" ID="plot_image" streamable="true"
@@ -708,9 +708,10 @@
 			<grid_type name="trajectory" />
 		</grid_types>
 	</operation>
-    <!-- End of netCDF only trajectory operations -->
-	<operation name="Correlation Plot" ID="Correlation"
-		service_action="" default="true" category="correlation" output_template="Correlation">
+    <!--  This is a correlation plot chain specific to the Trajectory data where the netCDF file is made once and used over and over for plots. -->
+    <!-- At the moment it MUST APPEAR AFTER the gridded correlation operaiton in this file.  -->
+    <operation name="Correlation Plot" ID="SPPV"
+		service_action="" default="true" category="correlation" output_template="SPPV">
 		<response ID="PlotResp" type="HTML" index="1">
 			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 			<result type="image" ID="plot_image" streamable="true"
