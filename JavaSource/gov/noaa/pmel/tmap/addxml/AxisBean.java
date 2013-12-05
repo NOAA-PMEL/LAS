@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.addxml;
 
+import java.util.List;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.*;
@@ -27,14 +29,28 @@ public class AxisBean extends LasBean {
 	private String display_hi;
 	private String ddefault;
 	private String[] v;
-	private boolean modulo;
+	private List<String> labels;
+	private String label;
+	
+
+    private boolean modulo;
 	private ArangeBean arange;
     private String calendar;
 	public AxisBean() {
 	}
 	
 	
-	public String getCalendar() {
+	public String getLabel() {
+        return label;
+    }
+
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+
+    public String getCalendar() {
 		return calendar;
 	}
 
@@ -104,6 +120,15 @@ public class AxisBean extends LasBean {
 		return v;
 	}
 
+	public List<String> getLabels() {
+        return labels;
+    }
+
+
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
+    }
+    
 	public ArangeBean getArange() {
 		return arange;
 	}
@@ -118,6 +143,9 @@ public class AxisBean extends LasBean {
         if ( this.type == null ) {
             System.err.println("Axis has no identifying type.  Setting to 'q'.  Check output.");
             this.type = "q";
+        }
+        if ( label != null ) {
+            axis.setAttribute("label", label);
         }
         axis.setAttribute("type", this.type);
         if ( this.units == null ) {
@@ -153,6 +181,10 @@ public class AxisBean extends LasBean {
             for (int vit = 0; vit < v.length; vit++) {
                 Element vElement = new Element("v");
                 vElement.addContent(String.valueOf(v[vit]));
+                if ( labels != null ) {
+                    String label = labels.get(vit);
+                    vElement.setAttribute("label", label);
+                }
                 axis.addContent(vElement);
             }
         }
