@@ -4,7 +4,7 @@
 	</menu>
 	<menu type="ops" name="Trajectory_operations_XY">
         <item values="Trajectory_interactive_plot,gif">map</item>
-        <item values="Correlation,gif">map</item>
+        <item values="SPPV,gif">map</item>
         <item values="Trajectory_Interactive_Download,gif">map</item>
     </menu>
 </menus>
