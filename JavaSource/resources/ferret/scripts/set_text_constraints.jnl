@@ -1,3 +1,6 @@
+! set_text_constraints.jnl
+
+
 let done = 0
 
 DEF SYM ic = `ic`
@@ -35,3 +38,5 @@ DEFINE SYMBOL text_mask = ($text_mask"0") +  text_mask_($cvar)_($($cvar)_itxt)
 
 ! We will use text_mask_trajectory in making an annotation about number of cruises
 DEFINE SYMBOL text_mask_($cvar) = ($text_mask_($cvar)"0") +  text_mask_($cvar)_($($cvar)_itxt)b
+
+! End of  ------------- set_text_constraints.jnl--------------------------
