@@ -60,8 +60,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -96,7 +94,13 @@ import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
 import thredds.catalog.ThreddsMetadata.Variable;
 import thredds.catalog.ThreddsMetadata.Variables;
+import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.IndexIterator;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.VariableSimpleIF;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -106,24 +110,13 @@ import ucar.nc2.dataset.CoordinateAxis2D;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.dt.GridDatatype;
-import ucar.nc2.dt.PointObsDataset;
 import ucar.nc2.dt.TrajectoryObsDataset;
-import ucar.nc2.dt.TrajectoryObsDatatype;
-import ucar.nc2.dt.TypedDatasetFactory;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
-import ucar.nc2.ft.FeatureDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
-import ucar.nc2.ft.NestedPointFeatureCollection;
-import ucar.nc2.ft.NestedPointFeatureCollectionIterator;
-import ucar.nc2.ft.PointFeatureCollection;
-import ucar.nc2.ft.PointFeatureCollectionIterator;
-import ucar.nc2.ft.TrajectoryFeature;
-import ucar.nc2.ft.TrajectoryFeatureCollection;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
-import ucar.unidata.geoloc.LatLonRect;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
@@ -2680,6 +2673,78 @@ public class ADDXMLProcessor {
                        System.out.println("\t\t No time axis");
                     }
                 }
+                
+                CoordinateAxis1D eAxis = gcs.getEnsembleAxis();
+                AxisBean eaxis = null;
+                if ( eAxis != null ) {
+                    eaxis = new AxisBean();
+                    grid_name = grid_name + "-" + eAxis.getShortName();
+                    if ( verbose ) {
+                        System.out.println("\t\t Ensemble Axis: ");
+                    }
+                    NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+                    DecimalFormat fmt = (DecimalFormat) nf;
+                    fmt.applyPattern("####.####");
+                    eaxis.setType("e");
+                    eaxis.setElement(eAxis.getShortName() + "-" + "e" + "-" + elementName);
+                    eaxis.setArange(null);
+
+                    // We want these axis values as strings...
+                    if ( eAxis.isNumeric() ) {
+                        double[] v = eAxis.getCoordValues();
+
+                        /** @todo we want to use 4-log[base10](max-min). */
+                        String[] vs = new String[v.length];
+                        for (int vvv = 0; vvv < v.length; vvv++) {
+                            vs[vvv] = fmt.format(v[vvv]);
+                        }
+                        eaxis.setV(vs);
+                    }
+                    if ( eaxis != null ) {
+                        GridAxisBeans.addUnique(eaxis);
+                        if (verbose) {
+                            System.out.println(eaxis.toString());
+                        }
+                    }
+                    // Search for a String variable that contains the labels for the ensemble axis.
+                    // It will have the same dimension as this axis in the first dimension and the size of the string in the second.
+                    List<Dimension> dims = eAxis.getDimensions();
+                    if ( dims.size() == 1 ) {
+                        String dimname = dims.get(0).getName();
+                        NetcdfFile nc = gridDs.getNetcdfFile();
+                        List<ucar.nc2.Variable> allvars = nc.getVariables();
+                        for (Iterator varIt = allvars.iterator(); varIt.hasNext();) {
+                                ucar.nc2.Variable v = (ucar.nc2.Variable) varIt.next();
+                                if ( v.getDataType() == DataType.STRING && v.getDimensions().size() == 1 ) {
+                                    List<String> labels = new ArrayList<String>();
+                                    if ( v.getDimensions().get(0).getName().equals(dimname) ) {
+                                        Attribute vatn = v.findAttributeIgnoreCase("long_name");
+                                        String van = v.getShortName();
+                                        if (vatn != null ) {
+                                            van = vatn.getStringValue();
+                                        }
+                                        if ( van != null ) {
+                                            eaxis.setLabel(van);
+                                        }
+                                        try {
+                                            Array vvalues = v.read();
+                                            for (IndexIterator vvIt = vvalues.getIndexIterator(); vvIt.hasNext(); ) {
+                                                String label = (String) vvIt.next();
+                                                labels.add(label);
+                                            }
+                                        } catch (IOException e) {
+                                            System.err.println("Warning: unable to get list of ensemble labels.");
+                                        }
+                                        if ( labels.size() > 0 ) {
+                                            eaxis.setLabels(labels);
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                        System.err.println("Warning: Ensemble axis has issue with size of dimensions list.");
+                    }
+                }
 
                 grid.setElement(grid_name + "-" + elementName);
                 grid.setAxes(GridAxisBeans);
@@ -3378,6 +3443,7 @@ public class ADDXMLProcessor {
         return axisbean;
 
     }
+    
 
     /**
      * The byte[] returned by MessageDigest does not have a nice
