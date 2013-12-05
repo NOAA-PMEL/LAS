@@ -23,7 +23,7 @@ IF ($error_status"0|*>1") THEN
 ENDIF
 
 ! Here is variable 0 title 
-DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($ferret_plot_var)")
+DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_0_var)")
 IF `(STRINDEX("($ferret_title_0%0%)", "Time") GT 0) AND (STRINDEX("($ferret_title_0%0%)", " since ") GT 0)` THEN \
 DEFINE SYMBOL variable_0_lab = Time
 DEFINE SYMBOL variable_0_lab = ($ferret_title_0)
@@ -81,7 +81,7 @@ IF ($error_status"0|*>1") THEN
 ENDIF
 
 ! Here is variable 1 title 
-DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($ferret_plot_var)")
+DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_1_var)")
 IF `(STRINDEX("($ferret_title_1%0%)", "Time") GT 0) AND (STRINDEX("($ferret_title_1%0%)", " since ") GT 0)` THEN \
 DEFINE SYMBOL variable_1_lab = Time
 DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
@@ -132,8 +132,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ENDIF
    
    ! Here is variable 2 title 
-   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($ferret_plot_var_2)")
-
+   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_2_var)")
    DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
    IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
    IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
@@ -171,11 +170,11 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL zvar = zvar
    DEFINE SYMBOL color_by = 1
 
-   IF ($ferret_($ferret_plot_var_2)_palette"0|*>1") THEN \
-    DEFINE SYMBOL ferret_palette = ($ferret_($ferret_plot_var_2)_palette)
+   IF ($ferret_($data_2_var)_palette"0|*>1") THEN \
+    DEFINE SYMBOL ferret_palette = ($ferret_($data_2_var)_palette)
 
-   IF ($ferret_($ferret_plot_var_2)_fill_levels"0|*>1") THEN \
-    DEFINE SYMBOL color_by_levels = ($ferret_($ferret_plot_var_2)_fill_levels)
+   IF ($ferret_($data_2_var)_fill_levels"0|*>1") THEN \
+    DEFINE SYMBOL color_by_levels = ($ferret_($data_2_var)_fill_levels)
 
 ENDIF
 

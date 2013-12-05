@@ -337,7 +337,7 @@ IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_
 GO LAS_ferret_las_version_header
 
 ! If it's a color-by-ID plot, make the webrowset file for the cruise key
-IF ($color_by_feature"0|*>1") THEN THEN GO feature_key
+IF ($color_by_feature"0|*>1") THEN GO feature_key
 
 ! Save the results
 
