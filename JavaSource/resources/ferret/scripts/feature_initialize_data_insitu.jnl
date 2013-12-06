@@ -171,6 +171,11 @@ GO LAS_initialize_var_levels
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 
+! Are there color levels or a palette for the color-by variable?
+
+IF ($ferret_($data_($num)_var)_palette"0|*>1") THEN DEFINE SYMBOL ferret_palette = ($ferret_($data_($num)_var)_palette)
+IF ($ferret_($data_($num)_var)_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_($data_($num)_var)_fill_levels)
+
 ! Define symbols rounding out the range of the data so points are 
 ! not plotted on top of the axes.
 
