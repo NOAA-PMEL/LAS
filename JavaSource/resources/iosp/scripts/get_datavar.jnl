@@ -2,6 +2,7 @@
 ! get_datavar.jnl  
 !
 !  1/2007 ACM
+! 12/2013 ACM Extend to grids with E and F axes
 !
 ! Issues a command to SAVE/FILE=$1/CLOBBER data from variable in dataset according 
 ! to indices and strides given as arguments. Assumes the dataset has already been opened.
@@ -9,7 +10,7 @@
 ! arguments:  1 output file name
 !             2 dataset URL
 !             3 variable name (data variable)
-!             4 the shape of the request, some subset of  IJKL
+!             4 the shape of the request, some subset of  IJKLMN
 !             5, 6, 7  low index, high index, stride for first dimension
 !             8, 9,10  low index, high index, stride for second dimension
 !            11,12,13  low index, high index, stride for third dimension
@@ -105,6 +106,30 @@ IF `STRINDEX("($shape)", "L") GT 0` THEN
 
    DEFINE SYMBOL region_l l=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_full)($comma)($region_l)
+   DEFINE SYMBOL comma = ,
+
+ENDIF
+
+IF `STRINDEX("($shape)", "M") GT 0` THEN
+!  There is an E axis. Add the E indices to the region spec.
+
+   LET count = `count+1`
+   DEFINE SYMBOL mdim = `count`
+
+   DEFINE SYMBOL region_m m=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
+   DEFINE SYMBOL region_full = ($region_full)($comma)($region_m)
+   DEFINE SYMBOL comma = ,
+
+ENDIF
+
+IF `STRINDEX("($shape)", "N") GT 0` THEN
+!  There is an F axis. Add the F indices to the region spec.
+
+   LET count = `count+1`
+   DEFINE SYMBOL mdim = `count`
+
+   DEFINE SYMBOL region_n n=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
+   DEFINE SYMBOL region_full = ($region_full)($comma)($region_n)
    DEFINE SYMBOL comma = ,
 
 ENDIF
