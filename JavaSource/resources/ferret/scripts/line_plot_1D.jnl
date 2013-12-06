@@ -115,12 +115,12 @@ ELSE
          GO reset_labels
       PPL PLOT
       IF ($ferret_view"0|e>1|*>0") THEN
-         let dely = 0.06*ABS(($ppl$ymax1)-($ppl$ymin1))
-	 let yloc =  ($ppl$ymin1)-dely
+         let dely = `0.04*ABS(($yaxis_max)-($yaxis_min))`
+	 let yloc = `($yaxis_min)-dely`
          REPEAT/E=($region_e_lo):($region_e_hi) (\
 	    LABEL/USER `_e`, `yloc`,0,0,0.1,`LABELS`)
       ENDIF
-pause
+
    ENDIF
 
    GO LAS_url_label 0
