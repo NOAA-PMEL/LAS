@@ -41,6 +41,27 @@ IF `($data_count"1") EQ 1` THEN
    IF ($labnum_year"0|*>1") THEN
       DEFINE SYMBOL year_lab ($lab($labnum_year))
    ENDIF
+
+! Get the E-axis label number(s) and/or name(s). If we do both, then the text should say two different 
+! things, Ensemble Member and Ensemble Name or Ensemble Label.
+   REPEAT/RANGE=1:($labnum_dset)/NAME=lnum (\
+     DEFINE SYMBOL lnum = `lnum`;\
+     SHOW SYMBOL lab($lnum);\
+     IF `STRINDEX("($lab($lnum))", "E :") EQ 1` THEN DEFINE SYMBOL labnum_e = ($lnum) )
+
+   IF ($labnum_e%0|*>1%) THEN
+!      DEFINE SYMBOL ensemble_lab Ensemble Member ($region_e_lo)
+      DEFINE SYMBOL ensemble_names Ensemble Member: `labels[e=($region_e_lo)]`
+      IF `($region_e_hi) NE ($region_e_lo)` THEN 
+!         DEFINE SYMBOL ensemble_lab Ensemble Members ($region_e_lo): ($region_e_hi)
+         DEFINE SYMBOL ensemble_names Ensemble Members `labels[e=($region_e_lo)]`
+	 REPEAT/E=`($region_e_lo)+1`:($region_e_hi) (\
+	     DEFINE SYMBOL ensemble_names ($ensemble_names) `labels` )
+      ENDIF
+   ENDIF
+   IF ($ferret_view"0|e>1|*>0") THEN
+      IF ($variable_lab"0|*>1") THEN DEFINE SYMBOL variable_lab = ($variable_lab) vs Ensemble Member
+   ENDIF
 ENDIF
 
 

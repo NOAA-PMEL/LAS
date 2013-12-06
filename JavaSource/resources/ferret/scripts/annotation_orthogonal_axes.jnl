@@ -49,5 +49,24 @@ IF ($year_lab"0|*>1") THEN
    GO write_to_xml;
 ENDIF
 
+! Do we want to write both the ensemble number and name(s) to the annotations?
+! Probably just one. If we do both, then the text should say two different 
+! things, Ensemble Member and Ensemble Name or Ensemble Label.
+
+!IF ($ensemble_lab"0|*>1") THEN
+!   DEFINE SYMBOL out = <annotation type="e-axis">
+!   GO write_to_xml
+!   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ensemble_lab)", 1, "($result_annotations_filename)" )`
+!   DEFINE SYMBOL out = </annotation>
+!   GO write_to_xml;
+!ENDIF
+IF ($ensemble_names"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="e-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ensemble_names)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml;
+ENDIF
+
 DEFINE SYMBOL out = </annotation_group>
 GO write_to_xml
