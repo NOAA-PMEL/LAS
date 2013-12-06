@@ -104,6 +104,17 @@ IF ($add_region_t"0|*>1") THEN
    DEFINE SYMBOL region_t = ($add_region_t)
 ENDIF
 
+IF ($($region)_e_lo"0|*>1") THEN
+  DEFINE SYMBOL region_e_lo = ($($region)_e_lo)
+  DEFINE SYMBOL region_e_hi = ($($region)_e_hi)
+  DEFINE SYMBOL limits_e \"($region_e_lo)\":\"($region_e_hi)\"
+  DEFINE SYMBOL region_e E=\"($region_e_lo)\":\"($region_e_hi)\"
+ENDIF
+IF ($add_region_e"0|*>1") THEN
+   IF ($($region)_e_lo"0|*>1") THEN DEFINE SYMBOL add_region_e = e=($($region)_e_lo)
+   DEFINE SYMBOL region_e = ($add_region_e)
+ENDIF
+
 ! Now build up all possible multi-axis regions, being careful not to use
 ! commas when a region is missing
 
@@ -237,7 +248,22 @@ ELSE
   ENDIF
 ENDIF
 
-DEFINE SYMBOL region_full = ($region_xyzt)
+! There should be more of these but we will add as needed.
+
+! region_xyzte
+IF ($region_xyzt"0|*>1") THEN
+  IF ($region_e"0|*>1") THEN
+    DEFINE SYMBOL region_xyzte = ($region_xyzt),($region_e)
+  ELSE
+    DEFINE SYMBOL region_xyzte = ($region_xyzt)
+  ENDIF
+ELSE
+  IF ($region_e"0|*>1") THEN
+    DEFINE SYMBOL region_xyzte = ($region_e)
+  ENDIF
+ENDIF
+
+DEFINE SYMBOL region_full = ($region_xyzte)
 
 
 ! For sampling from a curvilinear variable, save the region definitions with
