@@ -77,7 +77,7 @@ LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
 
 ! Decimation for longitude/latitude plots
 
-LET num_decimate = 10000
+LET num_decimate = 1000
 IF `($numobs) LT num_decimate` THEN LET num_decimate = -1  ! separate cruises but dont decimate
 
 IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1|*>0") AND\
@@ -106,25 +106,9 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    !  lon/lat tolerance for piecewise decimation
    !  var tolerance (var at lon/lat)
    
-   LET full_range = 360*90
-   LET max_range = ($region_x_range)* ($region_y_range)
-   LET max_range = MAX(($region_x_range), ($region_y_range))
-
-
-!   LET tol = `0.01*LOG(decimate_size)/max_range`
-!   LET tol = `0.01*LOG(decimate_size)`
-!   LET tol = `max_range/full_range)`
-
-   IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1|*>0")` THEN 
-      DEFINE SYMBOL  data_x_is_lon = 1
-      IF `num_decimate GT 0` THEN LET num_decimate = 100
-      LET tol1 = `(max_range/full_range)/LOG(decimate_size)`
-      IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
-      LET tol2 = `tol1`
-   ELSE
-      LET tol1 = 1./($region_x_range)
-      LET tol2 = 1./($region_y_range)
-   ENDIF
+   LET tol1 = MAX(($region_x_range)/($ppl$xpixel), ($region_y_range)/($ppl$ypixel))
+   let tol2 = 0.01
+   list tol1, tol2
 
    GO decimate_dsg `num_decimate` `tol1` `tol2` 0.1
 
