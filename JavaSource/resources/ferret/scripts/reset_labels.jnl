@@ -51,6 +51,10 @@ IF `($data_count"1") EQ 1` THEN
 
    IF ($labnum_e%0|*>1%) THEN
 !      DEFINE SYMBOL ensemble_lab Ensemble Member ($region_e_lo)
+      
+      LET varnames = ..varnames
+      IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN LET labels = _m[ge=($data_var)]
+
       DEFINE SYMBOL ensemble_names Ensemble Member: `labels[e=($region_e_lo)]`
       IF `($region_e_hi) NE ($region_e_lo)` THEN 
 !         DEFINE SYMBOL ensemble_lab Ensemble Members ($region_e_lo): ($region_e_hi)
