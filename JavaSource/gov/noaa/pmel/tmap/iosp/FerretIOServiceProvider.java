@@ -342,6 +342,8 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 									direc = "K";
 								} else if (axisType.equals("taxis")) {
 									direc = "L";
+								} else if ( axisType.equals("eaxis")) {
+								    direc = "M";
 								}
 								direction = direction + direc;
 							}
@@ -557,6 +559,11 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			nds = NetcdfDataset.open(filename, null);
 			log.debug("Attempting to find variable : " + readname);
 			Variable v = nds.findVariable(readname);
+			if ( v.getDataType() == DataType.CHAR ) {
+			    Dimension d = v.getDimension(1);
+			    int size = d.getLength();
+			    newsection.add(new Range(0, size - 1, 1));
+			}
 			if (readname.equals("COORDS")) {
 				List dims = v.getDimensions();
 				// Should be only 1.
