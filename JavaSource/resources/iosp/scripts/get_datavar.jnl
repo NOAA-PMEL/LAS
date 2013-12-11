@@ -138,19 +138,31 @@ ENDIF
 ! Set the variable that the F-TDS var is based on, to handle the Ferret default
 ! missing flag.
 
-LET attlist = ($3).attnames
-IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
-   DEFINE SYMBOL base_name = $3
-   LET loc_regrid = STRINDEX("($3)", "_1_regrid")
-   LET loc_transf = STRINDEX("($3)", "_1_transformed")
-   IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_regrid-1)`
-   IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_transf-1)`
-   SET VAR/NAME=temporary_get_datavar ($base_name)
-   LET ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
+! If the variable is type CHAR, just write it.
+
+DEFINE SYMBOL data_type = `($3),return=dtype`
+LET is_numeric = `STRCMP("($data_type)", "CHAR") NE 0`
+
+IF `is_numeric` THEN
+
+   LET attlist = ($3).attnames
+   IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
+      DEFINE SYMBOL base_name = $3
+      LET loc_regrid = STRINDEX("($3)", "_1_regrid")
+      LET loc_transf = STRINDEX("($3)", "_1_transformed")
+      IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_regrid-1)`
+      IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($3)", 1, loc_transf-1)`
+      SET VAR/NAME=temporary_get_datavar ($base_name)
+      LET ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
+   ENDIF
+   
+   SET VAR/OUTTYPE=float $3
+
 ENDIF
 
 ! All the region information has been gathered. Now write the file.  
-SET VAR/OUTTYPE=float $3
+
+
 SAVE/FILE="$1"/CLOBBER $3[($region_full)]
 
 ! Done writing data variable. Clean up.
