@@ -1,0 +1,303 @@
+! SOCAT_format_title_units.jnl
+! Sep 2011 Ansley Manke
+!
+! Edit title and units strings, so that if they contain CO2 then the 2 is subscripted,
+! and if the units are umol or uatm, then the micro- is written as the Greek letter.
+!
+! This script uses an ascii file escapeit.dat.  It's checked in to the SOCAT
+! customization but it should be installed in the Ferret datasets directory
+! as listed in the FER_DATA section of FerretBackendConfig.xml 
+
+
+! Deal with an empty units string
+IF `($data_($num)_units%1|"">1|*>0%) OR ($data_($num)_units%1|" ">1|*>0%)`  THEN 
+   CANCEL SYMBOL data_($num)_units
+ENDIF
+
+! There should never be a blank title
+IF `($data_($num)_title%1|"">1|*>0%) OR ($data_($num)_title%1|" ">1|*>0%)`  THEN 
+   DEFINE SYMBOL data_($num)_units = ($data_($num)_var)
+ENDIF
+
+LET uptitle = UPCASE("($data_($num)_title)")
+
+IF `STRCMP(uptitle, "FCO2_REC") EQ 0` THEN
+   DEFINE SYMBOL data_($num)_title = fCO2 recomputed
+   IF `($data_($num)_units"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_units = uatm
+ENDIF
+
+
+! Define a character variable containing the ESCAPE character
+columns/type=text/var=escchar escapeit.dat
+
+! Define the title string for use in an html annotations header.
+
+IF ($data_($num)_title"0|*>1") THEN
+
+   LET data_($num)_title = "($data_($num)_title)"
+
+   DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
+   IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_title)")`
+      LET n1 = `STRINDEX("($uptitle)", "CO2")`
+      LET n2 = `n1+3`
+      let str1 = SUBSTRING("($data_($num)_title)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_title)", n1+2, slen)
+
+      IF `n2 LT slen` THEN 
+         let str2 = SUBSTRING("($data_($num)_title)", n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING("($data_($num)_title)", n2, slen)
+	 list str2, str3
+      ENDIF
+      LET tit1 = str1
+      LET tit2 = STRCAT(tit1, "<sub>")
+
+      LET tit3 = STRCAT(tit2, str2); list/nohead tit3
+      LET tit4 = STRCAT(tit3, "</sub>"); list/nohead tit4
+      LET tit5 = tit4
+      IF `n2 GT 0` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
+      LET data_($num)_title = "`tit5`"
+   ENDIF
+
+! CO2 may appear twice in a title   
+   DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
+   IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_title)")`
+      LET n1 = `STRINDEX("($uptitle)", "CO2")`
+      LET n2 = `n1+3`
+      let str1 = SUBSTRING("($data_($num)_title)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_title)", n1+2, slen)
+      list str1, str2
+      IF `n2 LT slen` THEN 
+         let str2 = SUBSTRING("($data_($num)_title)", n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING("($data_($num)_title)", n2, slen)
+	 list str2, str3
+      ENDIF
+
+      LET tit1 = str1
+      LET tit2 = STRCAT(tit1, "<sub>")
+
+      LET tit3 = STRCAT(tit2, str2); list/nohead tit3
+      LET tit4 = STRCAT(tit3, "</sub>"); list/nohead tit4
+      LET tit5 = tit4
+      IF `n2 GT 0` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
+      LET data_($num)_title = "`tit5`"
+   ENDIF
+
+! Now define the title for use by Ferret on an axis in the prop-prop plots.  
+   IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_title)")`
+      LET n1 = `STRINDEX("($uptitle)", "CO2")`
+      LET n2 = `STRINDEX("($uptitle)", "RECOMPUTED")`
+      let str1 = SUBSTRING("($data_($num)_title)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_title)", n1+2, slen)
+      IF `n2 GT 0` THEN 
+         let str2 = SUBSTRING("($data_($num)_title)", n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING("($data_($num)_title)", n2, slen)
+      ENDIF
+
+      LET tit1 = STRCAT(str1, escchar)
+      LET tit2 = STRCAT(tit1, "@CR_")
+
+      LET tit3 = STRCAT(tit2, "@AC"); list/nohead tit3
+      LET tit4 = STRCAT(tit3, str2); list/nohead tit4
+      LET tit5 = STRCAT(tit4, escchar); list/nohead tit3
+      LET tit6 = STRCAT(tit5, "@CR"); list/nohead tit6
+      let tit7 = tit6
+      IF `n2 GT 0` THEN let tit7 = STRCAT(tit6, str3)
+      DEFINE SYMBOL data_($num)_title = `tit7`
+   ENDIF
+! CO2 may appear twice in a title   
+   DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
+   IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_title)")`
+      LET n1 = `STRINDEX("($uptitle)", "CO2")`
+      let str1 = SUBSTRING("($data_($num)_title)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_title)", n1+2, slen-(n1+2))
+      let str2 = SUBSTRING("($data_($num)_title)", n1+2, slen)
+
+      LET tit1 = STRCAT(str1, escchar)
+      LET tit2 = STRCAT(tit1, "@CR_")
+      LET tit3 = STRCAT(tit2, "@AC")
+      LET tit4 = STRCAT(tit3, str2)
+
+      DEFINE SYMBOL data_($num)_title = `tit4`
+
+!      LET tit3as = STRCAT(tit2, "@AS")
+!      LET tit4as = STRCAT(tit3as, str2)
+!      DEFINE SYMBOL data_($num)_title = `tit4as`
+   ENDIF
+
+ENDIF
+
+! If units contain CO2 then change formatting so 2 is subscripted
+! If units contain micro then change formatting so its drawn as a Greek letter 
+
+
+IF ($data_($num)_units"0|*>1") THEN
+   LET data_($num)_units = " (($data_($num)_units))"
+   IF ($data_($num)_units"0|text>1|*>0") THEN LET data_units = " "
+
+   DEFINE SYMBOL have_units_var = 1
+   DEFINE SYMBOL upunits = `UPCASE("($data_($num)_units)")`
+
+   IF `STRINDEX("($upunits)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_units)")`
+      LET n1 = `STRINDEX("($upunits)", "CO2")`
+      LET n2 = `n1+3`
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen)
+      list str1, str2
+      IF `n2 LT slen` THEN 
+         let str2 = SUBSTRING("($data_($num)_units)", n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING("($data_($num)_units)", n2, slen)
+	 list str2, str3
+      ENDIF
+
+      LET tit1 = str1
+      LET tit2 = STRCAT(tit1, "<sub>")
+
+      LET tit3 = STRCAT(tit2, str2); list/nohead tit3
+      LET tit4 = STRCAT(tit3, "</sub>"); list/nohead tit4
+      LET tit5 = tit4
+      IF `n2 GT 0` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
+      DEFINE SYMBOL data_($num)_units = `tit5`
+
+      LET data_($num)_units = " (($data_($num)_units))"   
+      DEFINE SYMBOL have_units_var = 1
+   ENDIF
+   
+   DEFINE SYMBOL upunits = `UPCASE("($data_($num)_units)")`
+   IF `STRINDEX("($upunits)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_units)")`
+
+      LET slen = `STRLEN("($data_($num)_units)")`
+      LET n1 = `STRINDEX("($upunits)", "CO2")`
+      LET n2 = `n1+1`
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen)
+      list str1, str2
+      IF `n2 LT slen` THEN 
+         let str2 = SUBSTRING("($data_($num)_units)", n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING("($data_($num)_units)", n2, slen)
+	 list str2, str3
+      ENDIF
+
+      LET tit1 = str1
+      LET tit2 = STRCAT(tit1, "<sub>")
+
+      LET tit3 = STRCAT(tit2, str2); list/nohead tit3
+      LET tit4 = STRCAT(tit3, "</sub>"); list/nohead tit4
+      LET tit5 = tit4
+      IF `n2 GT 0` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
+      DEFINE SYMBOL data_($num)_units = `tit5`
+
+      LET data_($num)_units = " (($data_($num)_units))"  
+      DEFINE SYMBOL have_units_var = 1
+   ENDIF
+
+   IF `STRCMP("($upunits)", "UATM") EQ 0` THEN
+      LET data_($num)_units= " (&mu\;atm)"  ! Write Greek letter code for html
+      DEFINE SYMBOL have_units_var = 1
+   ENDIF
+
+
+   IF `STRCMP("($upunits)", "UMOL") EQ 0` THEN
+      LET data_($num)_units = " (&mu\;mol)"  ! Write Greek letter code for html
+      DEFINE SYMBOL have_units_var = 1
+   ENDIF
+
+! Now define the units for use by Ferret on an axis in the prop-prop plots.  
+
+   IF `STRINDEX("($upunits)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_units)")`
+      LET n1 = `STRINDEX("($upunits)", "CO2")`
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen-(n1+2))
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen)
+
+      LET tit1 = STRCAT(str1, escchar)
+      LET tit2 = STRCAT(tit1, "@CR_")
+      LET tit3 = STRCAT(tit2, "@AC")
+      LET tit4 = STRCAT(tit3, str2)
+
+      DEFINE SYMBOL data_($num)_units = `tit4`
+   ENDIF
+   
+   DEFINE SYMBOL upunits = `UPCASE("($data_($num)_units)")`
+   IF `STRINDEX("($upunits)", "CO2") GT 0` THEN
+
+      LET slen = `STRLEN("($data_($num)_units)")`
+      LET n1 = `STRINDEX("($upunits)", "CO2")`
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1+1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen-(n1+2))
+      let str2 = SUBSTRING("($data_($num)_units)", n1+2, slen)
+
+      LET tit1 = STRCAT(str1, escchar)
+      LET tit2 = STRCAT(tit1, "@CR_")
+      LET tit3 = STRCAT(tit2, "@AC")
+      LET tit4 = STRCAT(tit3, str2)
+
+      DEFINE SYMBOL data_($num)_units = `tit4`
+   ENDIF
+
+   IF `STRINDEX("($upunits)", "UATM") GT 0` THEN
+      LET n1 = `STRINDEX("($upunits)", "UATM")`
+      LET slen = `STRLEN("($data_($num)_units)")`
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+4, slen-(n1+3))
+
+      let ustr1 = STRCAT(str1, escchar)
+      if `n1 LE 1` THEN let ustr1 = escchar
+      let ustr2 = strcat(ustr1, "@CGm@CRatm")
+      let ustr3 = strcat(ustr2, "@AC")  ! WHY
+      let ustr3 = ustr2
+      DEFINE SYMBOL data_($num)_units = `ustr3`
+   ENDIF
+
+   IF `STRINDEX("($upunits)", "UMOL") GT 0` THEN
+      LET n1 = `STRINDEX("($upunits)", "UMOL")`
+      LET slen = `STRLEN("($data_($num)_units)")`
+
+      let str1 = SUBSTRING("($data_($num)_units)", 1, n1)
+      let str2 = SUBSTRING("($data_($num)_units)", n1+4, slen-(n1+3))
+      let str2 = SUBSTRING("($data_($num)_units)", n1+4, slen)
+
+      let ustr1 = STRCAT(str1, escchar)
+      if `n1 LE 1` THEN let ustr1 = escchar
+      let ustr2 = strcat(ustr1, "@CGm@CRmol")
+      let ustr3 = strcat(ustr2, "@AC")  ! WHY
+      let ustr3 = ustr2
+      let ustr4 = strcat(ustr3, str2)
+      DEFINE SYMBOL data_($num)_units = `ustr4`
+   ENDIF
+
+ENDIF
+
+CANCEL DATA escapeit.dat
+
+! Update the values of data_title, data_units
+
+
+IF ($data_($num)_units"0|text>1|*>0") THEN LET data_($num)_units = " "
+
+IF `($num"0|0|*>1") EQ 0` THEN
+   IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+   IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
+
+IF `( ($its_prop_prop_plot"0|*>1") EQ 0) AND (($num"0|0|*>1") EQ 0)` THEN
+   IF ($data_($num)_title"0|1|*>1") THEN LET data_title data_($num)_title
+   IF ($data_($num)_units"0|1|*>1") THEN LET data_units = data_($num)_units 
+   DEFINE SYMBOL variable_lab_var = 1
+ENDIF
+
+
+! End of file ------------SOCAT_format_title_units.jnl--------------------------
