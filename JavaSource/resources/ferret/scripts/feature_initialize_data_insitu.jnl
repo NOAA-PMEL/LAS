@@ -9,7 +9,6 @@ DEFINE SYMBOL num ($1"0")
 
 DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
-
 ! The variable at the x and y locations
 
 IF ($data_($num)_var"0|1|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
@@ -157,14 +156,15 @@ IF `color_by_feature EQ 1` THEN
    EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF
 
-! Set color levels for the data variable
+! Set color levels for the data variable. Default levels, or apply a setting
+! given by ferret_fill_levels
 
 DEFINE SYMBOL data_num = 1
 GO LAS_initialize_var_levels
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 
-! Are there color levels or a palette for the color-by variable?
+! Are there color levels or a palette for the specific color-by variable?
 
 DEFINE SYMBOL set_colors = 1
 IF ($its_prop_prop_plot"0|*>1") THEN DEFINE SYMBOL set_colors = `($num) EQ 2`
