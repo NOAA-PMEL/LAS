@@ -12,8 +12,17 @@ LET vnames = ..varnames
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
 
+! Initialize : These may be reset for e.g. SOCAT dataset where we reformat lablels
+! and use Greek letters or subscripting.
+
 LET data_0_title = "($data_0_title)"
 LET data_0_units = " (($data_0_units))"
+LET data_1_title = "($data_1_title)"
+LET data_1_units = " (($data_1_units))"
+IF `($data_count"0") GE 3` THEN 
+   LET data_2_title = "($data_2_title)"
+   LET data_2_units = " (($data_2_units))"
+ENDIF
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
@@ -77,9 +86,6 @@ ENDIF
 ! In fact the region and dataset will be the
 ! same as for var 0 (for now anyway)
 
-LET data_1_title = "($data_1_title)"
-LET data_1_units = " (($data_1_units))"
-
 GO LAS_initialize_region 1
 GO LAS_initialize_data 1
 
@@ -131,9 +137,6 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ! Initialize the 3rd variable.
    ! In fact the region and dataset will be the
    ! same as for var 0 (for now anyway)
-   
-   LET data_2_title = "($data_2_title)"
-   LET data_2_units = " (($data_2_units))"
 
    GO LAS_initialize_region 2
    GO LAS_initialize_data 2
