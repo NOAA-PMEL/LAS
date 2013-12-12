@@ -15,7 +15,7 @@ ENDIF
 
 LET n_in_mask = constraints_mask[i=@ngd]
 IF `n_in_mask eq 0` THEN 
-  DEFINE SYMBOL put_label = Data All Missing or Inconsistent Variable Constraints
+  DEFINE SYMBOL put_label = 1
   EXIT/SCRIPT
 ENDIF
 

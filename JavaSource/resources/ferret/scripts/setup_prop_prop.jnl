@@ -12,6 +12,9 @@ LET vnames = ..varnames
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
 
+LET data_0_title = "($data_0_title)"
+LET data_0_units = " (($data_0_units))"
+
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
@@ -27,6 +30,8 @@ DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_0_var)")
 IF `(STRINDEX("($ferret_title_0%0%)", "Time") GT 0) AND (STRINDEX("($ferret_title_0%0%)", " since ") GT 0)` THEN \
 DEFINE SYMBOL variable_0_lab = Time
 DEFINE SYMBOL variable_0_lab = ($ferret_title_0)
+LET variable_0_lab = STRCAT(data_0_title, data_0_units)
+
 DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
@@ -72,6 +77,9 @@ ENDIF
 ! In fact the region and dataset will be the
 ! same as for var 0 (for now anyway)
 
+LET data_1_title = "($data_1_title)"
+LET data_1_units = " (($data_1_units))"
+
 GO LAS_initialize_region 1
 GO LAS_initialize_data 1
 
@@ -85,6 +93,7 @@ DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_1_var)")
 IF `(STRINDEX("($ferret_title_1%0%)", "Time") GT 0) AND (STRINDEX("($ferret_title_1%0%)", " since ") GT 0)` THEN \
 DEFINE SYMBOL variable_1_lab = Time
 DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
+LET variable_0_lab = STRCAT(data_1_title, data_1_units)
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
 LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($ferret_plot_var_1))
@@ -123,6 +132,9 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ! In fact the region and dataset will be the
    ! same as for var 0 (for now anyway)
    
+   LET data_2_title = "($data_2_title)"
+   LET data_2_units = " (($data_2_units))"
+
    GO LAS_initialize_region 2
    GO LAS_initialize_data 2
    
@@ -178,14 +190,28 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
 ENDIF
 
-IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
+! Define the label with title and units to be used in the annotations.
+can sym variable_lab
+IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN 
    DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
+   LET variable_0_lab = STRCAT(data_0_title, data_0_units)
+   LET variable_1_lab = STRCAT(data_1_title, data_1_units)
+   LET variable_lab_A = STRCAT(variable_1_lab, " vs ")
+   LET variable_lab_B = STRCAT(variable_lab_A, variable_0_lab)
+   LET variable_lab = STRCAT(variable_lab_A, variable_0_lab)
+   DEFINE SYMBOL variable_lab_var = 1
+ENDIF
 
 IF  ($color_by"0") THEN 
    IF ($data_2_var"0|time>1|*>0") THEN  DEFINE SYMBOL ferret_plot_key = date_key 
 
-   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
+   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN 
+      LET variable_2_lab = STRCAT(data_2_title, data_2_units)
       DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
+      DEFINE SYMBOL variable_lab_var = 1
+      LET variable_lab_C = STRCAT (variable_lab_B, " colored by ")
+      LET variable_lab = STRCAT (variable_lab_C, variable_2_lab)
+   ENDIF
 ENDIF
 
 ! Special color-by-time key
