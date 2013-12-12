@@ -1,7 +1,7 @@
 DEFINE SYMBOL out = <annotation_group type="data">
 GO write_to_xml
 
-IF `($variable_lab"0|*>1") OR ($variable_lab_var"0|*>1")` THEN
+IF `($variable_lab"0|*>1")  OR  ($variable_lab_var"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation type="variable_title">
    GO write_to_xml
    IF ($variable_lab_var"0|*>1") THEN

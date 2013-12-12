@@ -95,9 +95,6 @@ IF ($add_to_var($num)"0|*>1") THEN
    DEFINE SYMBOL data_var = dvar
 ENDIF
 
-!IF `($ferret_is_socat"0|0|1|*>0") AND (($data_count) EQ 1)` THEN GO LAS_socat_format_title_units
-
-
 ! Use the units passed in from the XML unless they are null; 
 ! in that case try to get from the dataset
 
