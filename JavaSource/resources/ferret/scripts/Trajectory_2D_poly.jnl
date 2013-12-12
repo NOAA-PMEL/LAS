@@ -8,6 +8,7 @@
 ! 1/2010 acm - For Cruise ID, thin out the icons which are too dense to see well.
 !              leave a thin dotted line at the original density
 !              add to the title, "from data sampled every xxx"
+! 12/2013 ACM  Always draw with ribbon plot style
 !
 
 
