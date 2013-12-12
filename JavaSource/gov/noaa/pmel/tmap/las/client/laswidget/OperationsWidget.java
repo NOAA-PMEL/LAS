@@ -231,7 +231,8 @@ public class OperationsWidget extends Composite {
                                     linePlotsRow++;
                                 }
                             } else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z")) ||
-                                    (view.equals("yz") && intervals.contains("y") && intervals.contains("z")) ) {
+                                    (view.equals("yz") && intervals.contains("y") && intervals.contains("z")) ||
+                                    (view.equals("ze") && intervals.contains("z") && intervals.contains("e"))) {
                                 if ( !hasSectionPlots ) {
                                     sectionPlotsTable.clear();
                                     hasSectionPlots = true;
@@ -257,8 +258,30 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Latitude-z");
                                     }
+                                } else if ( view.equals("ze") ) {
+                                    
+                                    // At the moment we won't consider the case where one has a name and one has a label.
+                                    String l = grid.getZAxis().getLabel();
+                                    String n = grid.getZAxis().getName();
+                                    String le = grid.getEAxis().getLabel();
+                                    String ne = grid.getEAxis().getName();
+                                    if ( l != null && !l.equals("") ) { 
+                                        if ( le != null && !le.equals("") ) {
+                                            button = new OperationRadioButton(groupName, l+"-"+le);
+                                        } else {
+                                            button = new OperationRadioButton(groupName, l+"-Ensemble");
+                                        }
+                                    } else if ( n != null && !n.equals("") ) {
+                                        
+                                        if ( ne != null && !ne.equals("") ) {
+                                            button = new OperationRadioButton(groupName, n+"-"+ne);
+                                        } else {
+                                            button = new OperationRadioButton(groupName, n+"-Ensemble");
+                                        }
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "Ensemble-z");
+                                    }
                                 }
-
                                 button.setOperation(op);
                                 button.setView(view);
                                 button.addClickListener(buttonListener);
