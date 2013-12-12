@@ -1623,7 +1623,7 @@
 		<region>
 			<intervals name="xz" type="Depth Profiles" title="Longitude-Depth" />
 			<intervals name="yz" type="Depth Profiles" title="Latitude-Depth" />
-			<intervals name="ez" type="Depth Proviles" title="Ensemble-Depth"/>
+			<intervals name="ze" type="Depth Proviles" title="Ensemble-Depth"/>
 		</region>
 		<grid_types>
 			<grid_type name="regular" />
