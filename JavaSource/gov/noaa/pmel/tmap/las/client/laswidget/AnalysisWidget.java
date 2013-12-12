@@ -115,6 +115,13 @@ public class AnalysisWidget extends Composite {
             xAxis.setOp(op);
             yAxis.setType("y");
             yAxis.setOp(op);
+        } else if ( axis.equals("xyt") ) {
+            xAxis.setType("x");
+            xAxis.setOp(op);
+            yAxis.setType("y");
+            yAxis.setOp(op);
+            tAxis.setType("t");
+            tAxis.setOp(op);
         } else if ( axis.equals("x") ) {
             xAxis.setType("x");
             xAxis.setOp(op);
@@ -157,6 +164,9 @@ public class AnalysisWidget extends Composite {
     public void setAnalysisAxes(GridSerializable grid) {
         analysisAxis.clear();
         analysisAxis.addItem("Area", "xy");
+        if ( grid.hasE() ) {
+            analysisAxis.addItem("Area and Time", "xyt");
+        }
         analysisAxis.addItem("Longitude", "x");
         analysisAxis.addItem("Latitude", "y");
         if ( grid.hasZ() ) {
