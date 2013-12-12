@@ -102,8 +102,9 @@ ENDIF
 ! in that case try to get from the dataset
 
 ! Do not define data_units with an empty string
-IF ($data_($num)_units%1|"">1|*>0%) THEN 
+IF `($data_($num)_units%1|"">1|*>0%) OR ($data_($num)_units%1|" ">1|*>0%)`  THEN 
    CANCEL SYMBOL data_units
+   CANCEL SYMBOL data_($num)_units
 ELIF ($data_($num)_units%1|" ">1|*>0%) THEN 
    CANCEL SYMBOL data_units
 ELSE
@@ -132,8 +133,10 @@ ELSE
 ENDIF
 
 IF `($num) GT 0` THEN DEFINE SYMBOL variable_($num)_lab = ($data_title)
-DEFINE SYMBOL units_lab = ($data_units)
-IF `($num) GT 0` THEN DEFINE SYMBOL units_($num)_lab = ($data_units)
+IF ($data_units"0|*>1") THEN 
+   DEFINE SYMBOL units_lab = ($data_units)
+   IF `($num) GT 0` THEN DEFINE SYMBOL units_($num)_lab = ($data_units)
+ENDIF
 
 DEFINE SYMBOL ferret_plot_title ($data_title) ($data_units)
 IF `($ferret_is_socat"0|0|1|*>0") AND (($data_count) EQ 1)` THEN \

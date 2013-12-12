@@ -25,7 +25,6 @@ DEFINE SYMBOL yvar = var_mask*text_mask*yvar
 LET p = ($xvar) 
 LET q = ($yvar)
 
-
 CANCEL SYMBOL set_window_quals
 
 ! If they are not lon, lat, or time, put axis labels on the plot.
@@ -103,7 +102,8 @@ LET amax = p_var[i=@MAX]
 
 DEFINE SYMBOL is_time = ($ferret_prop_var"0|time>1|TIME>1|*>0") 
 IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
-GO LAS_is_range amin amax 
+
+GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
 DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis 
@@ -116,8 +116,7 @@ LET amin = q_var[i=@MIN]
 LET amax = q_var[i=@MAX]
 DEFINE SYMBOL is_time = ($ferret_plot_var"0|time>1|TIME>1|*>0")
 IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
-
-GO LAS_is_range amin amax 
+GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
 DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
@@ -137,7 +136,6 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
-
 
 ! Initialize   
    LET ax_lo = ($region_x_lo)
@@ -198,7 +196,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    IF ($constr_lon_min"0|*>1") THEN
       LET amin = ($constr_lon_min)
       LET amax = ($constr_lon_max)
-      GO LAS_is_range amin amax
+      GO LAS_is_range amin amax H 
    ENDIF
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
@@ -442,10 +440,9 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
 ELSE
    SHADE/NOKEY/PAL=white($pqual)/title=" " allmiss
 ENDIF
+
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
-
-   LABEL/NOUSER 0.2, `($ppl$ylen)-1`, -1, 0, 0.12, @AS($put_label)
 
 ! add labels if a whole variable is all-bad
 ! p is masked XVAR
@@ -455,7 +452,7 @@ IF ($put_label"0|*>1") THEN
 
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @AS($ferret_plot_var_0) is all-missing
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.14, @AS($ferret_title_0) is all-missing
       let ylab_bad = `ylab_bad-0.2`
       define symbol bad_pp_var = 1
    ENDIF
@@ -465,14 +462,13 @@ IF ($put_label"0|*>1") THEN
    DEFINE SYMBOL ax_lo = `($ferret_plot_var_1)[i=@MIN]`
    DEFINE SYMBOL ax_hi = `($ferret_plot_var_1)[i=@MAX]`
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @AS($ferret_plot_var_1) is all-missing
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @AS($ferret_title_1) is all-missing
       define symbol bad_pp_var = 1
    ENDIF
 
    IF `($bad_pp_var"0") EQ 0` THEN 
       LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @ASConstraints result in no valid data
    ENDIF
-
    DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
    EXIT/SCRIPT
 ENDIF
@@ -533,5 +529,6 @@ DEFINE SYMBOL xvar = constraints_mask*xvar
 DEFINE SYMBOL yvar = constraints_mask*yvar
 LET p = ($xvar) 
 LET q = ($yvar)
+
 
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------

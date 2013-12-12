@@ -24,7 +24,7 @@ IF `IS_ELEMENT_OF_STR(varnames, "($data_($var_num)_var)") EQ 1` THEN
 ! data_($num)_var was renamed. Use original-name plus an underscore when writing.
 ELSE 
    DEFINE SYMBOL data_($var_num)_var_orig = ($data_($num)_var)_
-   LET ($data_($var_num)_var)_init = ($data_($num)_var)[($region_full)]
+   LET/title="`($data_($num)_var),return=title`"/units="`($data_($num)_var),return=units`" ($data_($var_num)_var)_init = ($data_($num)_var)[($region_full)]
    DEFINE SYMBOL data_($var_num)_var =  ($data_($var_num)_var)_init
    DEFINE SYMBOL ferret_plot_var = ($data_($var_num)_var)
 ENDIF

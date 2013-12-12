@@ -26,8 +26,6 @@ DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
 SET MODE verify:always  ! allows for debugging
 
-DEFINE SYMBOL ribbon = 1
-
 DEFINE SYMBOL its_insitu = 1
 DEFINE SYMBOL its_trajectory_map = 1
 GO LAS_initialize_region 0
@@ -55,9 +53,6 @@ GO LAS_url_label 0
 ! For the annotations
 DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
 DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
-
-! When the data crosses the branch cut, replicate the lon,lat,var variables 
-! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
@@ -99,7 +94,6 @@ SAY _________________ Starting decimate  on ($ngood_data) clock seconds:   ($clo
 SAY _________________ After decimate clock seconds:   ($clock_secs)
 
   LET/UNITS=degrees_east x_var_data = ($data_x_var)
-!  LET/UNITS=degrees_east x_var_data = IF ($data_x_var) LT 0 then ($data_x_var)+360 else ($data_x_var)
   IF `($nodata"0|*>1") EQ 0` THEN
      STAT x_var_data
   ELSE
@@ -111,16 +105,6 @@ SAY _________________ After decimate clock seconds:   ($clock_secs)
   IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
   LET var_data = ($data_var)
   DEFINE SYMBOL var_data = ($data_var)
-
-  IF `($STAT_MIN) LT ($REGION_X_LO)` THEN
-    DEFINE SYMBOL do_wrap = 360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + ($do_wrap)
-  ENDIF
-
-  IF `($REGION_X_HI) LT ($STAT_MAX)` THEN
-    DEFINE SYMBOL do_wrap = -360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + (($do_wrap))
-  ENDIF
 
 ENDIF
 
@@ -171,10 +155,8 @@ IF `STRINDEX("($ferret_plot_var)", "fCO2") GT 0` THEN
      DEFINE SYMBOL ferret_fill_levels = (-inf)(240,300,20)(300,405,5)(400,460,20)(inf)
 ENDIF
 
-
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers
-
 
 ! Open the window
 GO LAS_open_window
@@ -231,30 +213,20 @@ ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
-   IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
-ELSE
-   DEFINE SYMBOL plot_command = POLY
-   IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
-ENDIF
+! Ribbon plot
+DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
+IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
 
-! Make the polygon overlay plot
-
-! Points will mark location of missing data
-IF `($ribbon"0|*>1") EQ 0 AND ($has_missing"0")` THEN
-   LET missing_flag = -9999999
-   LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
-   LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
-
+! Points will mark location of missing data if needed
 ! Use color=1 for black...
-   PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
-   IF ($do_wrap"0|*>1") THEN\
-     PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad+(($do_wrap)),y_loc_bad 
-ENDIF
+LET missing_flag = -9999999
+LET/UNITS=degrees_east  x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
+LET/UNITS=degrees_north y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
 
-   DEFINE SYMBOL do_icons = 0
-   IF ($data_var"0|metadata_ID>1|($feature_variable)>1|*>0") THEN
+! Set up for polygon overlay plot
+
+DEFINE SYMBOL do_icons = 0
+IF ($data_var"0|metadata_ID>1|($feature_variable)>1|*>0") THEN
    IF (ntrajs LE ($traj_max_labels)) THEN
       GO Trajectory_map_icons
       DEFINE SYMBOL do_icons = 1
@@ -272,25 +244,11 @@ ELSE
       DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
    ENDIF
 
-   IF ($ribbon"0|*>1") THEN
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
-         IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-       PPL RIBBON/OVER
-
-       IF ($do_wrap"0|*>1") THEN \
-          ($plot_command)($qualifiers)/missing=black x_var_data+(($do_wrap)), y_var_data, var_data 
-
-   ELSE
-
-      LET ng = var_data[x=@ngd]
-      IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
-      DEFINE SYMBOL poly_command ($plot_command)($qualifiers)
-
-      GO ($polymark_script"polymark") ($poly_command)/SET x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
+   ! Draw the ribbon plot
+   ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL RIBBON/OVER
 
-      PPL POLYGON/OVER
-   ENDIF
 ENDIF
 
 SAY _________________ After RIBBON plot clock seconds:   ($clock_secs)
@@ -326,7 +284,6 @@ ENDIF ! ferret_label
 ! Add labels at the top for the dataset name etc if they exist  
 
 GO labels_above_plot
-
 
 ! Add any constraint labels in the lower left, or as annotation notes.
 ! (The constraints themselves are handled in the data request from ERDDAP.

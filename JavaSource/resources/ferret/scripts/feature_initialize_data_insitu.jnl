@@ -18,35 +18,27 @@ IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_tit
 IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
+IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+
+IF ($ferret_dataset_label"0|SOCAT>1|*>0") THEN GO SOCAT_format_title_units
 
 ! Text variables have units of "text". In this case don't include units with the title
 
 IF ($data_($num)_units"0|1|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
    IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
-   IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_title) (($data_units))
+   IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_($num)_title) (($data_($num)_units))
 ENDIF
 
 IF `(STRINDEX("($ferret_plot_title%0%)", "Time") GT 0) AND (STRINDEX("($ferret_plot_title%0%)", " since ") GT 0)` THEN \
 DEFINE SYMBOL ferret_plot_title = Time
 
+! Set up the variable title and units for single-variable plots.
+! The prop-prop plot title A vs B colored by C are set elsewhere.
+
 IF `($1"0") EQ 0` THEN 
    DEFINE SYMBOL variable_lab = ($ferret_plot_title)
-
-ELSE
-   IF `($1"0") EQ 1` THEN DEFINE SYMBOL variable_lab = \
-   ($ferret_plot_title) vs ($variable_lab)
-
-! When colored by time, will make a key with the dates.
-! In which case we dont need time units in the annotations.
-
-   IF `($1"0") EQ 2` THEN 
-      IF ($data_2_var"0|time>1|*>0") THEN 
-         DEFINE SYMBOL ferret_plot_key = date_key 
-         DEFINE SYMBOL ferret_plot_title = ($data_title) 
-      ENDIF
-      DEFINE SYMBOL variable_lab =  ($variable_lab) colored by ($ferret_plot_title)
-   ENDIF
+   LET variable_lab =  STRCAT(data_title, data_units)
 ENDIF
 
 ! SET DATA and check for errors
@@ -166,6 +158,7 @@ IF `color_by_feature EQ 1` THEN
 ENDIF
 
 ! Set color levels for the data variable
+
 DEFINE SYMBOL data_num = 1
 GO LAS_initialize_var_levels
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
