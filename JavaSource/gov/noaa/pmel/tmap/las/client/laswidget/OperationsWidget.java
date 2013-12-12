@@ -268,7 +268,7 @@ public class OperationsWidget extends Composite {
                             } else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t")) ||
                                     (view.equals("yt") && intervals.contains("y") && intervals.contains("t")) ||
                                     (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) || 
-                                    (view.equals("et") && intervals.contains("e") && intervals.contains("t"))) {
+                                    (view.equals("te") && intervals.contains("e") && intervals.contains("t"))) {
                                 if ( !hasHofmullerPlots ) {
                                     hofmullerPlotsTable.clear();
                                     hasHofmullerPlots = true;
@@ -288,7 +288,7 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Z-time");
                                     }      
-                                } else if ( view.equals("et")) {
+                                } else if ( view.equals("te")) {
                                     String l = grid.getEAxis().getLabel();
                                     String n = grid.getEAxis().getName();
                                     if ( l != null && !l.equals("") ) {
