@@ -166,8 +166,13 @@ DEFINE SYMBOL data_num = `data_num`
 
 ! Are there color levels or a palette for the color-by variable?
 
-IF ($ferret_($data_($num)_var)_palette"0|*>1") THEN DEFINE SYMBOL ferret_palette = ($ferret_($data_($num)_var)_palette)
-IF ($ferret_($data_($num)_var)_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_($data_($num)_var)_fill_levels)
+DEFINE SYMBOL set_colors = 1
+IF ($its_prop_prop_plot"0|*>1") THEN DEFINE SYMBOL set_colors = `($num) EQ 2`
+
+IF ($set_colors) THEN
+   IF ($ferret_($data_($num)_var)_palette"0|*>1") THEN DEFINE SYMBOL ferret_palette = ($ferret_($data_($num)_var)_palette)
+   IF ($ferret_($data_($num)_var)_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_($data_($num)_var)_fill_levels)
+ENDIF
 
 ! Define symbols rounding out the range of the data so points are 
 ! not plotted on top of the axes.
