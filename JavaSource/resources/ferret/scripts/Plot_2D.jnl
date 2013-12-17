@@ -9,7 +9,15 @@
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
 
-IF ($ferret_view"|xt>1|xz>1|yt>1|yz>1|zt>1|ze>1|te>1|*>0") THEN
+
+!  DEMO: if view is te make it a multi-line plot (In future will be
+!  its own product...
+IF ($ferret_view"0|te>1|*>0") THEN 
+   GO LAS_ensemble_tplot
+   EXIT/SCRIPT
+ENDIF
+
+IF ($ferret_view"|xt>1|xz>1|yt>1|yz>1|zt>1|te>1|*>0") THEN
 
    !! Make a 2d plot...
    go draw_plot_2D
