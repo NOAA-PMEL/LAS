@@ -51,6 +51,14 @@ LET lo_index_4 = ($14"1")
 LET hi_index_4 = ($15"1")
 LET stride_4 = ($16"1")
 
+LET lo_index_5 = ($17"1")
+LET hi_index_5 = ($18"1")
+LET stride_5 = ($19"1")
+
+LET lo_index_6 = ($20"1")
+LET hi_index_6 = ($21"1")
+LET stride_6 = ($22"1")
+
 ! Get the shape e.g. IJL. Use this to generate the indices required
 
 DEFINE SYMBOL shape = `UPCASE("($4"NONE")")`
