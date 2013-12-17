@@ -44,7 +44,7 @@ IF `($data_count"1") EQ 1` THEN
 
 ! Get the E-axis label number(s) and/or name(s). If we do both, then the text should say two different 
 ! things, Ensemble Member and Ensemble Name or Ensemble Label.
-   REPEAT/RANGE=1:($labnum_dset)/NAME=lnum (\
+   REPEAT/RANGE=1:($labnum_dset"0")/NAME=lnum (\
      DEFINE SYMBOL lnum = `lnum`;\
      SHOW SYMBOL lab($lnum);\
      IF `STRINDEX("($lab($lnum))", "E :") EQ 1` THEN DEFINE SYMBOL labnum_e = ($lnum) )
