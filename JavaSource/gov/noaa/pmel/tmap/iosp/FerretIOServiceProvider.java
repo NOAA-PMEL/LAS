@@ -297,6 +297,20 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 				ncfile.addVariable(null, coord);
 			}
 		}
+		// In some cases a variable has a grid with a dimension rather than an axis.  Collect the dimensions for later matching.
+		List dimensions = header.getRootElement().getChild("dimensions").getChildren("dimension");
+		for (Iterator dimIt = dimensions.iterator(); dimIt.hasNext();) {
+		    Element dimensionE = (Element) dimIt.next();
+		    Map<String, FerretAttribute> ferretAttributes = getAttributes(dimensionE);
+		    String length = ferretAttributes.get("length").getValue();
+		    String name = dimensionE.getAttributeValue("name").trim();
+		    if ( length != null ) {
+		        Dimension dim = new Dimension(name, Integer.valueOf(length).intValue(), true);
+		        allDims.add(dim);
+		        ncfile.addDimension(null, dim);
+		    }
+		}
+		
 
 		log.debug("Finished with coordinate axes variables.");
 
@@ -319,17 +333,15 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 					varNAMES.add(name);
 
 					Variable dataVar = new Variable(ncfile, null, null, name);
-					List var_axes = var.getChild("grid").getChild("axes")
-							.getChildren();
+					List var_axes = var.getChild("grid").getChild("axes").getChildren();
 					ArrayList<Dimension> varDims = new ArrayList<Dimension>();
 					String direction = "";
-					for (Iterator axisIt = var_axes.iterator(); axisIt
-							.hasNext();) {
+					// This can now be either an <axis> or a <dimension> element.
+					for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
 						Element axis = (Element) axisIt.next();
 						String axisType = axis.getName();
 						String axisName = axis.getTextNormalize();
-						for (Iterator dimIt = allDims.iterator(); dimIt
-								.hasNext();) {
+						for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
 							Dimension dim = (Dimension) dimIt.next();
 							if (dim.getName().equals(axisName)) {
 								varDims.add(dim);
@@ -348,6 +360,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 								direction = direction + direc;
 							}
 						}
+						
 					}
 					Collections.reverse(varDims);
 					dataVar.setDimensions(varDims);
@@ -559,11 +572,11 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			nds = NetcdfDataset.open(filename, null);
 			log.debug("Attempting to find variable : " + readname);
 			Variable v = nds.findVariable(readname);
-			if ( v.getDataType() == DataType.CHAR ) {
-			    Dimension d = v.getDimension(1);
-			    int size = d.getLength();
-			    newsection.add(new Range(0, size - 1, 1));
-			}
+//			if ( v.getDataType() == DataType.CHAR ) {
+//			    Dimension d = v.getDimension(1);
+//			    int size = d.getLength();
+//			    newsection.add(new Range(0, size - 1, 1));
+//			}
 			if (readname.equals("COORDS")) {
 				List dims = v.getDimensions();
 				// Should be only 1.
@@ -743,7 +756,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 	private Map<String, FerretAttribute> getAttributes(Element varE) {
 		Map<String, FerretAttribute> ferretAttributes = new HashMap<String, FerretAttribute>();
 		List attributeElements = varE.getChildren("attribute");
-		if (attributeElements != null && attributeElements.size() > 1) {
+		if (attributeElements != null && attributeElements.size() > 0) {
 			for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
 				Element attribute = (Element) attIt.next();
 				FerretAttribute fa = new FerretAttribute();
