@@ -298,16 +298,19 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			}
 		}
 		// In some cases a variable has a grid with a dimension rather than an axis.  Collect the dimensions for later matching.
-		List dimensions = header.getRootElement().getChild("dimensions").getChildren("dimension");
-		for (Iterator dimIt = dimensions.iterator(); dimIt.hasNext();) {
-		    Element dimensionE = (Element) dimIt.next();
-		    Map<String, FerretAttribute> ferretAttributes = getAttributes(dimensionE);
-		    String length = ferretAttributes.get("length").getValue();
-		    String name = dimensionE.getAttributeValue("name").trim();
-		    if ( length != null ) {
-		        Dimension dim = new Dimension(name, Integer.valueOf(length).intValue(), true);
-		        allDims.add(dim);
-		        ncfile.addDimension(null, dim);
+		Element dimE = header.getRootElement().getChild("dimensions");
+		if ( dimE != null ) {
+		    List dimensions = dimE.getChildren("dimension");
+		    for (Iterator dimIt = dimensions.iterator(); dimIt.hasNext();) {
+		        Element dimensionE = (Element) dimIt.next();
+		        Map<String, FerretAttribute> ferretAttributes = getAttributes(dimensionE);
+		        String length = ferretAttributes.get("length").getValue();
+		        String name = dimensionE.getAttributeValue("name").trim();
+		        if ( length != null ) {
+		            Dimension dim = new Dimension(name, Integer.valueOf(length).intValue(), true);
+		            allDims.add(dim);
+		            ncfile.addDimension(null, dim);
+		        }
 		    }
 		}
 		
