@@ -1316,7 +1316,13 @@ public class OutputPanel extends Composite implements HasName {
                 lasRequest.setRange("t", cpState.get("tlo"), cpState.get("thi"), 0);
             }
         }
-
+        if ( vizGalVariable.getGrid().hasE() ) {
+            if (view.contains("e")) {
+                lasRequest.setRange("e", vgState.get("elo"), vgState.get("ehi"), 0);
+            } else {
+                lasRequest.setRange("e", cpState.get("elo"), cpState.get("ehi"), 0);
+            }
+        }
         if (vizGalVariable.isVector()) {
             // Add the second component and its region to match the first
             // component.
@@ -1347,6 +1353,13 @@ public class OutputPanel extends Composite implements HasName {
                     lasRequest.setRange("t", cpState.get("tlo"), cpState.get("thi"), 1);
                 }
             }
+            if (panelVar.getGrid().hasE()) {
+                if (view.contains("e")) {
+                    lasRequest.setRange("e", vgState.get("elo"), vgState.get("ehi"), 1);
+                } else {
+                    lasRequest.setRange("e", cpState.get("elo"), cpState.get("ehi"), 1);
+                }
+            }
         } else {
 
             // The local variable only set what is unique to this variable. I.e.
@@ -1373,6 +1386,11 @@ public class OutputPanel extends Composite implements HasName {
                 if (!view.contains("t")) {
                     if (panelVar.getGrid().hasT()) {
                         lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+                    }
+                }
+                if (!view.contains("e")) {
+                    if (panelVar.getGrid().hasE()) {
+                        lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 1);
                     }
                 }
                 // Add the analysis computation to the variable from this panel
@@ -1456,7 +1474,9 @@ public class OutputPanel extends Composite implements HasName {
             if (panelVar.getGrid().hasT()) {
                 lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
             }
-
+            if (panelVar.getGrid().hasE()) {
+                lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 2);
+            }
             // And the other variable component. Same as above...
             lasRequest.addVariable(panelVar.getDSID(), panelVar.getComponents().get(1), 1);
             if (panelVar.getGrid().hasX()) {
@@ -1478,6 +1498,11 @@ public class OutputPanel extends Composite implements HasName {
             if (panelVar.getGrid().hasT()) {
                 if (!view.contains("t")) {
                     lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 3);
+                }
+            }
+            if (panelVar.getGrid().hasE()) {
+                if (!view.contains("e")) {
+                    lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 3);
                 }
             }
         }
