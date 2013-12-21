@@ -1,10 +1,11 @@
 
-sh sym longitude_lab, latitude_lab, depth_lab, time_lab
+sh sym longitude_lab, latitude_lab, depth_lab, time_lab, ens_lab, forecast_lab
 
 IF ($alt_x_lab%0|*>1%) THEN DEFINE SYMBOL longitude_lab = ($alt_x_lab)
 IF ($alt_y_lab%0|*>1%) THEN DEFINE SYMBOL latitude_lab  = ($alt_y_lab)
 IF ($alt_z_lab%0|*>1%) THEN DEFINE SYMBOL depth_lab     = ($alt_z_lab)
 IF ($alt_t_lab%0|*>1%) THEN DEFINE SYMBOL time_lab      = ($alt_t_lab)
+IF ($alt_e_lab%0|*>1%) THEN DEFINE SYMBOL ens_lab       = ($alt_e_lab)
 
 DEFINE SYMBOL out = 	<annotation_group type="orthogonal_axes">
 GO write_to_xml
@@ -12,7 +13,6 @@ IF ($longitude_lab%0|*>1%) THEN
    DEFINE SYMBOL out = <annotation type="x-axis">
    GO write_to_xml
    DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($longitude_lab)", 1, "($result_annotations_filename)" )`
-   IF ($alt_x_lab"0|*>1") THEN DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($alt_x_lab)", 1, "($result_annotations_filename)" )`
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
  ENDIF
@@ -20,7 +20,6 @@ IF ($latitude_lab%0|*>1%) THEN
    DEFINE SYMBOL out = <annotation type="y-axis">
    GO write_to_xml
    DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($latitude_lab)", 1, "($result_annotations_filename)" )`
-   IF ($alt_y_lab"0|*>1") THEN DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($alt_y_lab)", 1, "($result_annotations_filename)" )`
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
  ENDIF
@@ -28,7 +27,6 @@ IF ($depth_lab%0|*>1%) THEN
    DEFINE SYMBOL out = <annotation type="z-axis">
    GO write_to_xml
    DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($depth_lab)", 1, "($result_annotations_filename)" )`
-   IF ($alt_z_lab"0|*>1") THEN DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($alt_z_lab)", 1, "($result_annotations_filename)" )`
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
  ENDIF
@@ -36,7 +34,6 @@ IF ($time_lab%0|*>1%) THEN
    DEFINE SYMBOL out = <annotation type="t-axis">
    GO write_to_xml
    DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($time_lab)", 1, "($result_annotations_filename)" )`
-   IF ($alt_t_lab"0|*>1") THEN DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($alt_t_lab)", 1, "($result_annotations_filename)" )`
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
 ENDIF
@@ -48,18 +45,25 @@ IF ($year_lab"0|*>1") THEN
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml;
 ENDIF
+IF ($ens_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="e-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ens_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+IF ($forecast_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="f-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ens_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
 
 ! Do we want to write both the ensemble number and name(s) to the annotations?
 ! Probably just one. If we do both, then the text should say two different 
 ! things, Ensemble Member and Ensemble Name or Ensemble Label.
 
-!IF ($ensemble_lab"0|*>1") THEN
-!   DEFINE SYMBOL out = <annotation type="e-axis">
-!   GO write_to_xml
-!   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ensemble_lab)", 1, "($result_annotations_filename)" )`
-!   DEFINE SYMBOL out = </annotation>
-!   GO write_to_xml;
-!ENDIF
 IF ($ensemble_names"0|*>1") THEN
    DEFINE SYMBOL out = <annotation type="e-axis">
    GO write_to_xml
