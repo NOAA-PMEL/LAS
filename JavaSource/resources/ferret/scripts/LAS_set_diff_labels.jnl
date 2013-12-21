@@ -83,7 +83,20 @@ ENDIF
 	 DEFINE SYMBOL timelab1 = `SUBSTRING("($lab($labnum_t))", nc+1, llen-nc)`
    ENDIF
    IF ($labnum_year"0|*>1") THEN DEFINE SYMBOL year_lab1 ($lab($labnum_year))
-
+   IF ($labnum_e"0|*>1") THEN
+	 LET nc = STRINDEX("($lab($labnum_e))", ":")
+	 LET llen = STRLEN("($lab($labnum_e))")
+	 DEFINE SYMBOL ensnum = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
+         LET varnames = ..varnames
+         IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN \
+	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=tas], "(F3.0)") )
+	 DEFINE SYMBOL enslab1 = `labels[e=($ensnum)]`
+   ENDIF
+   IF ($labnum_f"0|*>1") THEN
+	 LET nc = STRINDEX("($lab($labnum_f))", ":")
+	 LET llen = STRLEN("($lab($labnum_f))")
+	 DEFINE SYMBOL forecastlab1 = `SUBSTRING("($lab($labnum_f))", nc+1, llen-nc)`
+   ENDIF
 ($plt_command)/SET ($test_plot_2)
    IF ($labnum_x"0|*>1") THEN
 	 LET nc = STRINDEX("($lab($labnum_x))", ":")
@@ -109,7 +122,22 @@ ENDIF
 	 DEFINE SYMBOL timelab2 = `SUBSTRING("($lab($labnum_t))", nc+1, llen-nc)`
    ENDIF
    IF ($labnum_year"0|*>1") THEN DEFINE SYMBOL year_lab2 ($lab($labnum_year))
-
+   IF ($labnum_e"0|*>1") THEN
+	 LET nc = STRINDEX("($lab($labnum_e))", ":")
+	 LET llen = STRLEN("($lab($labnum_e))")
+	 DEFINE SYMBOL enslab2 = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
+	 
+	 DEFINE SYMBOL ensnum = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
+         LET varnames = ..varnames
+         IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN \
+	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=tas], "(F3.0)") )
+	 DEFINE SYMBOL enslab2 = `labels[e=($ensnum)]`
+   ENDIF
+   IF ($labnum_f"0|*>1") THEN
+	 LET nc = STRINDEX("($lab($labnum_f))", ":")
+	 LET llen = STRLEN("($lab($labnum_f))")
+	 DEFINE SYMBOL forecastlab2 = `SUBSTRING("($lab($labnum_f))", nc+1, llen-nc)`
+   ENDIF
 LET add_urls = 1
 IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0
 
@@ -237,6 +265,41 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = TIME(2): ($timelab2)
       DEFINE SYMBOL time_lab = TIME: ($timelab2)
+   ENDIF
+ENDIF
+
+IF `STRINDEX("($plotshape)", "E") EQ 0` THEN   
+   IF ($region_0_e_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      
+      DEFINE SYMBOL upper_left_($n_left_labels) = Ensemble(1): ($enslab1) ($ipen)Ensemble(2): ($enslab2)
+      DEFINE SYMBOL ens_lab = Ensemble(1): ($enslab1) Ensemble(2): ($enslab2)
+      IF `(STRCMP("($enslab1)", "($enslab2)") NE 0)` THEN 
+         DEFINE SYMBOL ens_lab = ENSEMBLE: ($enslab2) minus ($enslab1)
+      ELSE
+         DEFINE SYMBOL ens_lab = ENSEMBLE: ($enslab2)
+      ENDIF
+   ELIF ($region_e_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Ensemble(2): ($enslab2)
+      DEFINE SYMBOL ens_lab = ENSEMBLE: ($enslab2)
+   ENDIF
+ENDIF
+
+IF `STRINDEX("($plotshape)", "F") EQ 0` THEN   
+   IF ($region_0_f_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Forecast(1): ($forcastlab1) ($ipen)Forecast(2): ($forcastlab2)
+      DEFINE SYMBOL Forecast_lab = Forecast(1): ($forcastlab1) Forecast(2): ($forcastlab2)
+      IF `(STRCMP("($forcastlab1)", "($forcastlab2)") NE 0)` THEN 
+         DEFINE SYMBOL Forecast_lab = Forecast: ($forcastlab2) minus ($forcastlab1)
+      ELSE
+         DEFINE SYMBOL Forecast_lab = Forecast: ($forcastlab2)
+      ENDIF
+   ELIF ($region_1_f_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Forecast(2): ($forcastlab2)
+      DEFINE SYMBOL forecast_lab = Forecast: ($forcastlab2)
    ENDIF
 ENDIF
 
