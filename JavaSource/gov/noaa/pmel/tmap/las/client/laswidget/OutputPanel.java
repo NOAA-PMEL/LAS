@@ -1823,10 +1823,21 @@ public class OutputPanel extends Composite implements HasName {
 
     public String getSettingsWidgetHistoryToken() {
         StringBuffer t = new StringBuffer();
-        if (!view.contains("x")) {
+        boolean xan = false;
+        boolean yan = false;
+        if ( analysis != null ) {
+            if ( analysis.isActive("x") ) {
+                xan = true;
+            }
+            if ( analysis.isActive("y") ) {
+                yan = true;
+            }
+        }
+        
+        if (!view.contains("x") && !xan ) {
             t.append(";xlo=" + panelAxesWidgets.getRefMap().getXlo() + ";xhi=" + panelAxesWidgets.getRefMap().getXhi());
         }
-        if (!view.contains("y")) {
+        if (!view.contains("y") && !yan ) {
             t.append(";ylo=" + panelAxesWidgets.getRefMap().getYlo() + ";yhi=" + panelAxesWidgets.getRefMap().getYhi());
         }
         return t.toString();
