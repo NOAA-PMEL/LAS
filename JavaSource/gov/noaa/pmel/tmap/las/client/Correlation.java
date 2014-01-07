@@ -2236,7 +2236,6 @@ public class Correlation implements EntryPoint {
                 $doc.getElementsByTagName('body')[0].appendChild(script);
             } else {
                 $wnd.eval(scripts[i].innerHTML);
-                alert("Eval "+scripts[i]);
             }
         }
     }-*/;
