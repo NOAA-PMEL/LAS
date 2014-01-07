@@ -820,7 +820,7 @@ public class Correlation implements EntryPoint {
 				VerticalPanel p = new VerticalPanel();
 				ScrollPanel sp = new ScrollPanel();
 				HTML result = new HTML(doc);
-				evalScripts(new HTML(response.getText()).getElement());
+				evalScripts(result.getElement());
 				p.add(result);
 				PushButton again = new PushButton("Try Again");
 				again.setWidth("75px");
@@ -2236,6 +2236,7 @@ public class Correlation implements EntryPoint {
                 $doc.getElementsByTagName('body')[0].appendChild(script);
             } else {
                 $wnd.eval(scripts[i].innerHTML);
+                alert("Eval "+scripts[i]);
             }
         }
     }-*/;
