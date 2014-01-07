@@ -76,6 +76,7 @@ public class AxesWidgetGroup extends Composite {
         dateTimeWidget.setVisible(false);
         panel = new FlowPanel();//new DisclosurePanel(title);
         mapPanel.add(refMap);
+        mapPanel.setOpen(true);
         if ( orientation.equals("horizontal") ) {
             row.setWidget(0, 0, mapPanel);
             row.setWidget(0, 1, zWidget);
