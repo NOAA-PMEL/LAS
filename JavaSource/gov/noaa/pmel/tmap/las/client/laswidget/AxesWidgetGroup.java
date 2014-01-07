@@ -1,7 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
-import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
@@ -9,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
@@ -18,9 +14,10 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ToggleButton;
+
 
 /**
  * This widget will create a map and a set of axes widgets to control all of the
@@ -30,6 +27,10 @@ import com.google.gwt.user.client.ui.PushButton;
  * 
  */
 public class AxesWidgetGroup extends Composite {
+    
+    int xControlsWidth = (int) Constants.CONTROLS_WIDTH;
+
+    String xControlsWidthPx = xControlsWidth + "px";
 
     OLMapWidget refMap;
     DateTimeWidget dateTimeWidget;
@@ -45,6 +46,10 @@ public class AxesWidgetGroup extends Composite {
     boolean hasT;
     boolean hasE;
     boolean panelIsOpen = true;
+    DisclosurePanel mapPanel;
+    ToggleButton toggleMapButton;
+    Image toggleUp;
+    Image toggleDown;
     List<String> viewAxes = new ArrayList<String>(); // This is just the view,
                                                      // but individual axes
 
@@ -58,7 +63,8 @@ public class AxesWidgetGroup extends Composite {
      * @param layout
      */
     public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server, EventBus eventBus) {
-        layout = new HorizontalPanel();
+        mapPanel = new DisclosurePanel("Map");
+        mapPanel.setWidth(xControlsWidthPx);
         menuWidgets = new FlexTable();
         refMap = new OLMapWidget("128px", "256px", tile_server);
         refMap.activateNativeHooks();
@@ -69,9 +75,9 @@ public class AxesWidgetGroup extends Composite {
         dateTimeWidget = new DateTimeWidget();
         dateTimeWidget.setVisible(false);
         panel = new FlowPanel();//new DisclosurePanel(title);
-        
+        mapPanel.add(refMap);
         if ( orientation.equals("horizontal") ) {
-            row.setWidget(0, 0, refMap);
+            row.setWidget(0, 0, mapPanel);
             row.setWidget(0, 1, zWidget);
             row.setWidget(0, 2, dateTimeWidget);
             row.setWidget(0, 3, eWidget);
@@ -80,7 +86,7 @@ public class AxesWidgetGroup extends Composite {
             row.getFlexCellFormatter().setVerticalAlignment(0, 2, HasVerticalAlignment.ALIGN_TOP);
             panel.add(row);
         } else {
-            layout.add(refMap);
+            layout.add(mapPanel);
             panel.add(layout);
             panel.setVisible(true);//.setOpen(true);
             menuWidgets.setWidget(0, 0, zWidget);
@@ -126,10 +132,10 @@ public class AxesWidgetGroup extends Composite {
 
     private void setAxisVisible(String type, boolean visible) {
         if ( type.contains("x") ) {
-            refMap.setVisible(visible);
+            mapPanel.setVisible(visible);
         }
         if ( type.contains("y") ) {
-            refMap.setVisible(visible);
+            mapPanel.setVisible(visible);
         }
         if ( type.equals("z") && hasZ ) {
             zWidget.setVisible(visible);
