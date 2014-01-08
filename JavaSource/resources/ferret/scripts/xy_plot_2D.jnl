@@ -116,7 +116,7 @@ IF `($data_count"0") EQ 1` THEN
    GO LAS_split_title
    DEFINE SYMBOL ferret_plot_title = ($split_title)
 
-   IF ($shade_underlay"0|*>1") THEN 
+   IF ($shade_underlay"0") THEN 
 
       SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
         GO reset_labels
