@@ -36,6 +36,10 @@
 !   ENDIF
 !ENDIF
 
+! If it's a line contour plot, just don't make the colorbar image. The product works without it.
+
+IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN  EXIT/SCRIPT
+
 IF ($native_curvilinear_xy"0|*>1") THEN  ! see LAS_transforms.jnl   
    GO get_curv_coord_bbox
    LET the_var = plot_var[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
