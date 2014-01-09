@@ -126,8 +126,8 @@ while (! $java){
             my $vstring = $pieces[$#pieces];
             $vstring =~ s/\"//g;
             my ($major,$minor) = split(/\./, $vstring);
-            if ($major < 2 && $minor < 6){
-                print "Java version is $vstring. Must have at least 1.6\n";
+            if ($major < 2 && $minor < 7){
+                print "Java version is $vstring. Must have at least 1.7\n";
             } else {
                 $isJava = 1;
             }
