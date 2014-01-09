@@ -19,7 +19,7 @@ if (-f $configp){
 }
 
 
-print "\n\nConfiguring V8.0 User Interface...\nIf you want to install the in-situ examples make sure you've loaded the sample data.\nSee the installation instructions at: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/installation/ for details.\n\n";
+print "\n\nConfiguring V8.x User Interface...\nIf you want to install the in-situ examples make sure you've loaded the sample data.\nSee the installation instructions at: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/installation/ for details.\n\n";
 #
 # Make sure Ferret environment variable has been set up
 #   
