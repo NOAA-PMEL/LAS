@@ -166,7 +166,7 @@ while (! $ferret){
         my $isFerret = 0;
         my $testres = `echo exit | $ferret -nojnl`;
         my @lines = split /^/m, $testres;
-        my $ferretVersion = "6.72";
+        my $ferretVersion = "6.852";
         foreach my $line (@lines){
             my @words = split(/\s+/,$line);
             if ($words[1] =~ /Version|FERRET/){
