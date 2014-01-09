@@ -7,6 +7,15 @@ search_dirs="`echo $PATH | sed '1,$s/:/ /g'`"
 
 ### Get python_executable and python_subdirectory
 use_pyferret() {
+#
+# UNTIL PyFerret is ready for prime time, skip the choice of executable.
+#
+#
+return 1
+#
+# remove the return above to ask the question and allow pyFerret as an LAS engine.
+#
+#
     echo " "
     echo "Do you want to use PyFerret (pyferret) or the regular Ferret (ferret)? "
     until [ 0 = 1 ]; do
