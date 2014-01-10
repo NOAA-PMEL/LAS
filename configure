@@ -11,6 +11,7 @@ use_pyferret() {
 # UNTIL PyFerret is ready for prime time, skip the choice of executable.
 #
 #
+ferrettype='ferret'
 return 1
 #
 # remove the return above to ask the question and allow pyFerret as an LAS engine.
