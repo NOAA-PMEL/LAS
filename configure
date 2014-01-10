@@ -8,7 +8,8 @@ search_dirs="`echo $PATH | sed '1,$s/:/ /g'`"
 ### Get python_executable and python_subdirectory
 use_pyferret() {
 #
-# UNTIL PyFerret is ready for prime time, skip the choice of executable.
+# UNTIL PyFerret is ready for prime time, skip the choice of executable
+# and set it to ferret.
 #
 #
 ferrettype='ferret'
