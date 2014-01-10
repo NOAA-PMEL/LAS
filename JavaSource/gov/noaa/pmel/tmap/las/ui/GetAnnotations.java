@@ -52,7 +52,8 @@ public class GetAnnotations extends ConfigService {
 	private static Logger log = LogManager.getLogger(GetAnnotations.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
 		log.info("START: "+request.getRequestURL());
-	
+        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        request.setAttribute("server_url", lasConfig.getServerURL());
 	
 		String template = request.getParameter("template");
 		if ( template == null ) {
@@ -66,6 +67,7 @@ public class GetAnnotations extends ConfigService {
 				LASAnnotations lasAnnotations = new LASAnnotations();
 				loadAnnotations(files[0], lasAnnotations);
 				request.setAttribute("las_annotations", lasAnnotations);
+				
 				if ( images != null && !images[0].equals("") ) {
 					request.setAttribute("image_file", images[0]);
 				}
