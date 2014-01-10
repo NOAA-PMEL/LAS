@@ -24,8 +24,8 @@
 				</div>
 			</TD>
                 	<TD id="headerBottomRight" bgcolor="#7391AD" width="55px" valign="top" style="align:right;border-bottom:1pt solid #FFFFFC">
-				<link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
-				<script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu/gov.noaa.pmel.tmap.las.HelpMenu.nocache.js"></script>
+				<link rel="stylesheet" href="../../JavaScript/ui/LASUI.css" type="text/css"/>
+				<script type="text/javascript" language="javascript" src="../../JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu/gov.noaa.pmel.tmap.las.HelpMenu.nocache.js"></script>
                 	</TD>
 		</TR>
 	</TBODY>
