@@ -53,7 +53,7 @@ public class GetAnnotations extends ConfigService {
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
 		log.info("START: "+request.getRequestURL());
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-        request.setAttribute("server_url", lasConfig.getServerURL());
+        request.setAttribute("base_server_url", lasConfig.getBaseServerURL());
 	
 		String template = request.getParameter("template");
 		if ( template == null ) {
