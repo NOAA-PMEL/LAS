@@ -17,18 +17,18 @@ CAN view
 LET y_up = 0.93
 IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN LET y_up = 0.9
 
-DEFINE VIEW/AXES/X=0.07:0.99/y=0.06:`y_up` full_view
-DEFINE VIEW/AXES/X=0.07:0.99/y=0.06:`y_up` full_view2
+DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:`y_up` full_view
+DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:`y_up` full_view2
 
 
 IF ($ferret_view%0|yt>1|zt>1|t>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.07:0.98/y=0.07:`y_up`  full_view
-   DEFINE VIEW/AXES/X=0.07:0.98/y=0.07:`y_up`  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:`y_up`  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:`y_up`  full_view2
 ENDIF
 
 if ($ferret_view%0|xt>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.07:0.98/y=0.06:`y_up`  full_view
-   DEFINE VIEW/AXES/X=0.07:0.98/y=0.06:`y_up`  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:`y_up`  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:`y_up`  full_view2
 ENDIF
 
 if ($ferret_view%0|t>1|*>0%) THEN 
