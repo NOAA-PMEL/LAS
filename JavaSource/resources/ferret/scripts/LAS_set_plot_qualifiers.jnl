@@ -67,6 +67,7 @@ IF ($twoDplot"0|*>1") THEN
        DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
    ENDIF
 
+
    ! Set the plot type (SHADE or CONTOUR)
 
    DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|\
@@ -81,7 +82,7 @@ color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|ra
    IF `($ferret_google_plot"0") EQ 0` THEN 
       IF `($degenerate_2d"0|0|*>1") EQ 0` THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/TRIM
    ENDIF
-   IF ($shade_underlay"0|*>1") THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/LEVELS=($ferret_fill_levels)
+   IF ($shade_underlay"0") THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/LEVELS=($ferret_fill_levels)
 
    ! Color palette
 
