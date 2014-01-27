@@ -12,6 +12,7 @@ package gov.noaa.pmel.tmap.iosp;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -951,5 +952,17 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public long readToOutputStream(Variable arg0, Section arg1, OutputStream arg2) throws IOException, InvalidRangeException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public long streamToByteChannel(Variable arg0, Section arg1, WritableByteChannel arg2) throws IOException, InvalidRangeException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
 }
