@@ -107,7 +107,7 @@ public class TabledapTool extends TemplateTool {
     String latname;
     String lonname;
     String zname;
-    List<String> all;
+    List<String> all = new ArrayList<String>();
     List<DataRow> datarows = new ArrayList<DataRow>();
     final Logger log = LogManager.getLogger(TabledapTool.class.getName());
     
@@ -195,8 +195,16 @@ public class TabledapTool extends TemplateTool {
             zname = getTabledapProperty(lasBackendRequest, "altitude");
             String orderby = getTabledapProperty(lasBackendRequest, "orderby");
             String dummy = getTabledapProperty(lasBackendRequest, "dummy");
+            List<String> modulo_vars = new ArrayList();
+            
+            String modulo_vars_comma_list = getTabledapProperty(lasBackendRequest, "modulo");
+            if ( modulo_vars_comma_list != null ) {
+                String[] mods = modulo_vars_comma_list.split(",");
 
-
+                for (int i = 0; i < mods.length; i++) {
+                    modulo_vars.add(mods[i].trim());
+                }
+            }
             causeOfError = "Could not get id."; 
             String id = getTabledapProperty(lasBackendRequest, "id");
             log.debug("Got id: " + id); 
@@ -210,7 +218,7 @@ public class TabledapTool extends TemplateTool {
             StringBuilder query = new StringBuilder();
             // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
             ArrayList<String> vars = lasBackendRequest.getVariables();
-            all = lasBackendRequest.getVariables();
+            
             // If lat, lon and z are included as data variables, knock them out of this list.
             vars.remove(latname);
             vars.remove(lonname);
@@ -237,6 +245,8 @@ public class TabledapTool extends TemplateTool {
                 query.append(dummy);
             }
 
+            Map<String, Constraint> constrained_modulo_vars_lt = new HashMap<String, Constraint>();
+            Map<String, Constraint> constrained_modulo_vars_gt = new HashMap<String, Constraint>();
 
 
             //then variable constraints  
@@ -246,17 +256,43 @@ public class TabledapTool extends TemplateTool {
                 Element constraint = (Element) cIt.next();
                 String tType = constraint.getAttributeValue("type");
                 if ( tType.equals("variable") ) {
+                    
                     String rhsString = constraint.getChildText("rhs");
                     String lhsString = constraint.getChildText("lhs");
                     String opString = constraint.getChildText("op");  //some sort of text format
                     Constraint c = new Constraint(lhsString, opString, rhsString);                
                     query.append("&" + c.getAsString());  //op is now <, <=, ...
+                    // Gather lt and gt constraint so see if modulo variable treatment is required.
+                    if ( modulo_vars.contains(lhsString) && (opString.equals("lt") || opString.equals("le")) ) {
+                        constrained_modulo_vars_lt.put(lhsString, c);
+                    }
+                    if ( modulo_vars.contains(lhsString) && (opString.equals("gt") || opString.equals("ge")) ) {
+                        constrained_modulo_vars_gt.put(lhsString, c);
+                    }
                 } else if ( tType.equals("text") ) {
                     String rhsString = constraint.getChildText("rhs");
                     String lhsString = constraint.getChildText("lhs");
                     String opString = constraint.getChildText("op");  //some sort of text format
                     Constraint c = new Constraint(lhsString, opString, rhsString);                
                     query.append("&" + c.getAsERDDAPString());  //op is now <, <=, ...
+                }
+            }
+            List<String> modulo_required = new ArrayList<String>();
+            for (Iterator cvarIt = constrained_modulo_vars_lt.keySet().iterator(); cvarIt.hasNext();) {
+                String cvar = (String) cvarIt.next();
+                if ( constrained_modulo_vars_gt.keySet().contains(cvar)) {
+                    // Potential for min to be > that max requiring a modulo treatment of the query.
+                    String max = constrained_modulo_vars_lt.get(cvar).getRhs();
+                    String min = constrained_modulo_vars_gt.get(cvar).getRhs();
+                    try {
+                        double mind = Double.valueOf(min);
+                        double maxd = Double.valueOf(max);
+                        if( mind > maxd ) {
+                            modulo_required.add(cvar);
+                        }
+                    } catch (Exception e) {
+                        // 
+                    }
                 }
             }
 
@@ -321,6 +357,9 @@ public class TabledapTool extends TemplateTool {
                 double xloDbl = String2.parseDouble(xlo);
                 // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
                 if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
+                    if ( modulo_required.size() > 0 ) {
+                        causeOfError = "Cannot handle two modulo variables in the same request (longitude and "+modulo_required.get(0)+")";
+                    }
                     LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
                     xhiDbl = p.getLongitude();
                     p = new LatLonPointImpl(0, xloDbl);
@@ -336,8 +375,8 @@ public class TabledapTool extends TemplateTool {
                            
                             query2 = new StringBuilder(query.toString());
                             // Get the "left" half.  The section between -180 and xhi
-                            query.append("&lon>=-180&lon<"+xhiDbl);
-                            query2.append("&lon>="+xloDbl+"&lon<180");
+                            query.append("&"+lonname+">=-180&"+lonname+"<"+xhiDbl);
+                            query2.append("&"+lonname+">="+xloDbl+"&"+lonname+"<180");
 //                            xhiDbl = xhiDbl + 360.0d;
 //                            query.append("&lon360>=" + xloDbl);
 //                            query.append("&lon360<=" + xhiDbl);
@@ -346,14 +385,14 @@ public class TabledapTool extends TemplateTool {
                     } else {
                         // This else block is the case where it a query that does not cross the date line.
                         // Still have to use the normalized values.
-                        query.append("&longitude>=" + xloDbl);
-                        query.append("&longitude<=" + xhiDbl);
+                        query.append("&"+lonname+">=" + xloDbl);
+                        query.append("&"+lonname+"<=" + xhiDbl);
                     }
                 }// Span the whole globe so leave off the lon query all together.
             } else {
                 //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
-                if (xlo.length() > 0) query.append("&longitude>=" + xlo);
-                if (xhi.length() > 0) query.append("&longitude<=" + xhi);
+                if (xlo.length() > 0) query.append("&"+lonname+">=" + xlo);
+                if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
             }
             
             
@@ -494,6 +533,8 @@ public class TabledapTool extends TemplateTool {
                 Variable v2 = trajset2.findVariable(variable.getShortName());
                 Array a2 = v2.read();
                 subsetvars2.put(v2.getShortName(), a2);
+            } else if ( variable.getDimension(0).getShortName().equals(obsdimname)) {
+                all.add(variable.getShortName());
             }
         }
 
@@ -1036,23 +1077,27 @@ public class TabledapTool extends TemplateTool {
                 // Bummer, but we'll deal.
             }
         }
-        
-        var = ncfile.findVariable(zname);
-        ar = var.findAttribute("actual_range");
-    
-        if ( ar != null ) {
-            try {
-                ncfile.updateAttribute(null, new Attribute("geospatial_vertical_min", ar.getNumericValue(0)));
-            } catch (Exception e) {
-                // Bummer, but we'll deal.
-            }
-            try {
-                ncfile.updateAttribute(null, new Attribute("geospatial_vertical_max", ar.getNumericValue(1)));
-            } catch (Exception e) {
-                // Bummer, but we'll deal.
+
+        if ( zname != null ) {
+            var = ncfile.findVariable(zname);
+            if ( var != null ) {   
+                ar = var.findAttribute("actual_range");
+
+                if ( ar != null ) {
+                    try {
+                        ncfile.updateAttribute(null, new Attribute("geospatial_vertical_min", ar.getNumericValue(0)));
+                    } catch (Exception e) {
+                        // Bummer, but we'll deal.
+                    }
+                    try {
+                        ncfile.updateAttribute(null, new Attribute("geospatial_vertical_max", ar.getNumericValue(1)));
+                    } catch (Exception e) {
+                        // Bummer, but we'll deal.
+                    }
+                }
             }
         }
-        
+
         var = ncfile.findVariable(time);
         ar = var.findAttribute("actual_range");
         if ( ar != null ) {
