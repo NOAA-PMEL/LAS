@@ -599,9 +599,9 @@ public class TabledapTool extends TemplateTool {
             }
         }
         if ( obsdim1 != null && obsdim2 != null ) {
-            int both = obsdim1.getLength()+obsdim2.getLength();
-            Dimension dim = ncfile.addDimension(null, "obs", both);           
+            int both = obsdim1.getLength()+obsdim2.getLength();    
             Dimension trajdim = ncfile.addDimension(null, "trajectory", trajIDs.size());
+            Dimension dim = ncfile.addDimension(null, "obs", both);  
             List<Variable> allvars = trajset1.getVariables();
             for (Iterator varsIt = allvars.iterator(); varsIt.hasNext(); ) {
                 Variable var1 = (Variable) varsIt.next();
