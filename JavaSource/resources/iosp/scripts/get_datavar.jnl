@@ -154,11 +154,15 @@ LET attnames = ($3).attnames
 ! These attributes are available for a transformed variable.
 IF `IS_ELEMENT_OF_STR_N(attnames, "ferret_datatype") NE 0` THEN
   DEFINE SYMBOL data_type = `($3).ferret_datatype`
-  LET is_numeric = `STRCMP("($data_type)", "CHAR") NE 0`
 ELIF `IS_ELEMENT_OF_STR_N(attnames, "infile_datatype") NE 0` THEN
   DEFINE SYMBOL data_type = `($3).ferret_datatype`
-  LET is_numeric = `STRCMP("($data_type)", "CHAR") NE 0`
+ELSE
+! If those attributes dont exist then it's not an FTDS dataset, and 
+! we can get the data type from the file safely.
+   DEFINE SYMBOL data_type = `($3),return=dtype`
 ENDIF
+   
+LET is_numeric = `(STRCMP("($data_type)", "CHAR") NE 0) AND (STRCMP("($data_type)", "STRING") NE 0)`
 
 IF `is_numeric` THEN
 
