@@ -536,7 +536,12 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 				// This is the get_data order XYZT
 				Section ferret_section = new Section(section);
 
-				for (int s = ferret_section.getRank() - 1; s >= 0; s--) {
+				int range_start = ferret_section.getRank() - 1;
+				if ( v2.getDataType() == DataType.CHAR && ferret_section.getRank() == 2 ) {
+				    // Skip the character array length dimension
+				    range_start = ferret_section.getRank() - 2;
+				}
+				for (int s = range_start; s >= 0; s--) {
 					Range range = (Range) ferret_section.getRange(s);
 					int start = range.first() + 1;
 					int end = range.last() + 1;
