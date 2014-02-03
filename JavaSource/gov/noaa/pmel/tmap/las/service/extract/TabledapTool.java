@@ -497,7 +497,9 @@ public class TabledapTool extends TemplateTool {
         
     }
     public void merge(String netcdfFilename, File temp_file1, File temp_file2) throws IOException, InvalidRangeException  {
-
+// DEBUG
+        time = "time";
+        // END OF DEBUG
         NetcdfFile trajset1 = (NetcdfFile) NetcdfDataset.open(temp_file1.getAbsolutePath());
         NetcdfFile trajset2 = (NetcdfFile) NetcdfDataset.open(temp_file2.getAbsolutePath());
         NetcdfFileWriter ncfile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, netcdfFilename);
@@ -508,6 +510,7 @@ public class TabledapTool extends TemplateTool {
         Variable obscount2 = null;
         String trajidname = null;
         Array trajids1 = null;
+        int trajidwidth = 64;
         Dimension trajdim_org = null;
         for (Iterator iterator = vars.iterator(); iterator.hasNext();) {
             Variable variable = (Variable) iterator.next();
@@ -641,6 +644,9 @@ public class TabledapTool extends TemplateTool {
                     if ( var1.getDataType() == DataType.CHAR ) {
                         Dimension chardim1 = var1.getDimension(1);
                         Dimension chardim2 = var2.getDimension(1);
+                        if ( var1.getShortName().equals(trajidname)) {
+                            trajidwidth = Math.max(chardim1.getLength(), chardim2.getLength());
+                        }
                         Dimension nchardim = ncfile.addDimension(null, chardim1.getShortName(), Math.max(chardim1.getLength(), chardim2.getLength()));
                         dimlist.add(nchardim);
                     }
@@ -664,13 +670,18 @@ public class TabledapTool extends TemplateTool {
         }
 
         Collections.sort(datarows, new DataRowComparator());
-        
+        List<String> sortedTraj = new ArrayList<String>();
+        for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();) {
+            String id = (String) idIt.next();
+            sortedTraj.add(id);
+        }
+        Collections.sort(sortedTraj);
         int total = 0;
         
         // Create the new data for the sample dimension
-        ArrayInt.D1 counts = new ArrayInt.D1(trajIDs.size());
+        ArrayInt.D1 counts = new ArrayInt.D1(sortedTraj.size());
         int index = 0;
-        for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+        for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
             String id = (String) idIt.next();
             int idcount = 0;
             for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
@@ -678,7 +689,7 @@ public class TabledapTool extends TemplateTool {
                 if ( dr.getId().equals(id) ) {
                     idcount++;
                 }
-
+                
             }
             counts.setInt(index, idcount);
             index++;
@@ -687,6 +698,17 @@ public class TabledapTool extends TemplateTool {
         // Write the lengths of the trajectories.
         Variable v = ncfile.findVariable(obscount1.getShortName());
         ncfile.write(v, counts);
+        
+        Variable ids = ncfile.findVariable(trajidname);
+        ArrayChar.D2 idsData = new ArrayChar.D2(sortedTraj.size(), trajidwidth);
+        int idindex = 0;
+        for (Iterator sortedIt = sortedTraj.iterator(); sortedIt.hasNext();) {
+            String id = (String) sortedIt.next();
+            idsData.setString(idindex, id);
+            idindex++;
+        }
+        ncfile.write(ids, idsData);
+        
         
         DataRow sampleRow = datarows.get(0);
         Map<String, Object> sampleSubsets = sampleRow.getSubsets();
@@ -700,7 +722,7 @@ public class TabledapTool extends TemplateTool {
                 if ( var.getDataType() == DataType.BOOLEAN ) {
                     ArrayBoolean.D1 a = new ArrayBoolean.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         // This is a named looped and named break to stop looking one the first matching row is found.
                         // A hack, but...
@@ -718,7 +740,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.BYTE ) {
                     ArrayByte.D1 a = new ArrayByte.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -736,7 +758,7 @@ public class TabledapTool extends TemplateTool {
                     int width = var.getShape(1);
                     ArrayChar.D2 a = new ArrayChar.D2(size, width);
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -752,7 +774,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.DOUBLE ) {
                     ArrayDouble.D1 a = new ArrayDouble.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -768,7 +790,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.FLOAT ) {
                     ArrayFloat.D1 a = new ArrayFloat.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -784,7 +806,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.INT ) {
                     ArrayInt.D1 a = new ArrayInt.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -800,7 +822,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.LONG ) {
                     ArrayLong.D1 a = new ArrayLong.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -816,7 +838,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.SHORT ) {
                     ArrayShort.D1 a = new ArrayShort.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
@@ -832,7 +854,7 @@ public class TabledapTool extends TemplateTool {
                 } else if ( var.getDataType() == DataType.STRING ) {
                     ArrayString.D1 a = new ArrayString.D1(var.getShape(0));
                     int trajindex = 0;
-                    for (Iterator idIt = trajIDs.iterator(); idIt.hasNext();){
+                    for (Iterator idIt = sortedTraj.iterator(); idIt.hasNext();){
                         String id = (String) idIt.next();
                         D: for (Iterator drIt = datarows.iterator(); drIt.hasNext();) {
                             DataRow dr = (DataRow) drIt.next();
