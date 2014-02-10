@@ -160,7 +160,8 @@ IF `reg EQ 0` THEN
   LET yy = y[gy=expr]
   LET y1 = `yy[y=@min]`
   LET yn = `yy[y=@max]`
-  DEFINE AXIS/Y=`y1`:`yn`:`xcell_size`/units="`($data_var),return=yunits`" y_axis_regrid  LET to_reg = 1
+  DEFINE AXIS/Y=`y1`:`yn`:`xcell_size`/units="`($data_var),return=yunits`" y_axis_regrid  
+  LET to_reg = 1
   DEFINE SYMBOL y_axis_out = y_axis_regrid
   LET to_reg = 1
 
