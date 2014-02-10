@@ -73,6 +73,8 @@ DEFINE SYMBOL plot_title = ($ferret_plot_title)
 ! Apply any expression only to the first variable not to subsequent ones
 CANCEL SYMBOL ferret_expression 
 
+! Ensemble plots are drawn in PLOT/STEP style.
+
 IF ($ferret_view"0|e>1|*>0") THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)/STEP=connected
    IF `($region_e_hi) - ($region_e_lo) LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
