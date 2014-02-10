@@ -11,6 +11,7 @@
 ! 8/2012 ACM Fixing ticket 1337, F-TDS bug. If there no _FillValue, set it 
 !            to a known value that matches the value used in get_datavar.jnl
 ! 10/10/2012 Reverse the sense of the difference; ticket 1377
+!  2/10/2014 For E-direction plots, make the line plot in PLOT/STEP style, ticket 1573
 !
 ! oneD_compare_difference.jnl creates a T line plot for use with the Back 
 ! End Server code that sits behind a Live Access Server (LAS). 
@@ -121,6 +122,13 @@ GO LAS_open_window
 
 GO LAS_set_diff_labels ($fview)
 
+
+IF ($ferret_view"0|e>1|*>0") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/STEP=connected
+   IF `($region_e_hi) - ($region_e_lo) LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+ENDIF
+
+
 ! Do the plot. 
 
 PLOT($qualifiers)/title="($ferret_diff_title)"/SET ($ferret_diff_var)
@@ -132,9 +140,27 @@ PLOT($qualifiers)/title="($ferret_diff_title)"/SET ($ferret_diff_var)
          PPL YAXIS ($ferret_dep_axis_scale)
       ENDIF
    ENDIF
+   IF ($ferret_view"0|e>1|*>0") THEN PPL axlint,0,  ! custom e-axis labels
 
    GO reset_labels
 PPL plot
+
+! For an ensemble-dataset plot in the E direction, label the horizontal axis with
+! the labels, if available.
+
+IF ($ferret_view"0|e>1|*>0") THEN
+   LET dely = `0.04*ABS(($yaxis_max)-($yaxis_min))`
+   LET yloc = `($yaxis_min)-dely`
+   LET varnames = ..varnames
+   IF `IS_ELEMENT_OF_STR_N(varnames, "labels") GT 0` THEN 
+      REPEAT/E=($region_e_lo):($region_e_hi) (\
+	      LABEL/USER `_e`, `yloc`,0,0,0.1,`LABELS`)
+   ELSE
+      REPEAT/E=($region_e_lo):($region_e_hi) (\
+	      LABEL/USER `_e`, `yloc`,0,0,0.1, "`_E`")
+   ENDIF
+ENDIF
+
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
