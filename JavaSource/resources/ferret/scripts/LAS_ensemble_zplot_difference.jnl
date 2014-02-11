@@ -91,27 +91,27 @@ LET num_ens = `mhi-mlo+1`
 
 ! If its a degenerate plot in E, make a nominal plot and a message and exit
 
-!c!IF `mlo EQ mhi` THEN 
-!c!   
-!c!   CANCEL SYMBOL n_left_labels
-!c!   CANCEL SYMBOL n_right_labels
-!c!   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-!c!   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested E region is smaller than 1 grid cell]
-!c!   DEFINE SYMBOL region_small_($n_left_labels"0") = yes
-!c!
-!c!   DEFINE SYMBOL note_num = `($note_num"0") + 1`
-!c!   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
-!c!
-!c!   ! Make a nominal plot and put the -no-valid-region label on  it.
-!c!   GO margins 2 2 2 2
-!c!   PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i
-!c!   GO labels_above_plot
-!c!   
-!c!! Save the results
-!c!   GO LAS_results box
-!c!
-!c!   EXIT/SCRIPT
-!c!ENDIF
+IF `mlo EQ mhi` THEN 
+   
+   CANCEL SYMBOL n_left_labels
+   CANCEL SYMBOL n_right_labels
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested E region is smaller than 1 grid cell]
+   DEFINE SYMBOL region_small_($n_left_labels"0") = yes
+
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
+
+   ! Make a nominal plot and put the -no-valid-region label on  it.
+   GO margins 2 2 2 2
+   PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i
+   GO labels_above_plot
+   
+! Save the results
+   GO LAS_results box
+
+   EXIT/SCRIPT
+ENDIF
 
 
 ! Set up the region info etc for the annotations.
