@@ -121,7 +121,7 @@ ENDIF ! end of options for twoDplot
 !                  Default is blue for line, vector, contour plots. 
 !                  Line-color is red for difference plots. 
 !                  
-
+IF `($line_drawn"0|*>1") EQ 0` THEN \
 DEFINE SYMBOL line_drawn = `($oneDplot"0|*>1") OR ($itsa_vector_plot"0|*>1") OR ($plot_type"0|CONTOUR>1|*>0")`
 
 IF `($line_drawn"0") AND ($itsa_multi_lineplot"0|*>1") EQ 0` THEN
