@@ -118,8 +118,8 @@ IF `STRINDEX("($ferret_view)", "z") GT 0` THEN \
    DEFINE SYMBOL region_z K=($kmin):($kmax)
 IF `STRINDEX("($ferret_view)", "t") GT 0` THEN \
    DEFINE SYMBOL region_t L=($lmin):($lmax)
-IF `STRINDEX("($ferret_view)", "e") GT 0` THEN \
-   DEFINE SYMBOL region_e M=($mmin):($mmax)
+!IF `STRINDEX("($ferret_view)", "e") GT 0` THEN \
+!   DEFINE SYMBOL region_e M=($mmin):($mmax)
 
 DEFINE SYMBOL xx = 0
 DEFINE SYMBOL yy = 0

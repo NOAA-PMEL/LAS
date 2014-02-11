@@ -1,15 +1,15 @@
 ! set_linesym.jnl
-! set plot type: line, symbols, or both.  By default,
-! if there are up to 120 points use line-and-symbol.
-! Use STAT rather than @NGD to get number of points.
-! NGD caused some requests with curvi grids to hang.
+! set plot type: line, symbols, or both.  If there are up to 120 
+! points use line-and-symbol.Use STAT to get # of points, and count 
+! both bad andgood -- avoids inconsistencies if there are a few 
+! missing points in one series and not in another.
 
 LET plotvar  = ($ferret_plot_var)
 LET filledvar = missing(plotvar,0)
 STAT plotvar
-LET npoints = ($stat_ngood)
+LET npoints = ($stat_ngood) + ($stat_nbad)
 
-IF `npoints LT 120` THEN
+IF `npoints LT 120 AND ($plotsymbol"0|*>1")` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
    DEFINE SYMBOL legend_qual = ($legend_qual)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
 ELSE 

@@ -10,25 +10,28 @@
 GO LAS_reset_gifname
 
 
-!  DEMO: if view is te make it a multi-line plot (In future will be
+!  DEMO: if view is te or ze make it a multi-line plot (In future will be
 !  its own product...
+
 IF ($ferret_view"0|te>1|*>0") THEN 
+
    GO LAS_ensemble_tplot
    EXIT/SCRIPT
-ENDIF
 
-IF ($ferret_view"0|ze>1|*>0") THEN 
+ELIF ($ferret_view"0|ze>1|*>0") THEN 
+
    GO LAS_ensemble_zplot
    EXIT/SCRIPT
-ENDIF
 
-IF ($ferret_view"|xt>1|xz>1|yt>1|yz>1|zt>1|*>0") THEN
+ELIF ($ferret_view"|xt>1|xz>1|yt>1|yz>1|zt>1|*>0") THEN
 
    !! Make a 2d plot...
    go draw_plot_2D
 
 ELSE
+
   say " **ERROR: Attempt to make a plot in ($ferret_view) with 2D plot script."
+
 ENDIF
 
 ! End of file ------------ Plot_2D.jnl--------------------------

@@ -45,6 +45,16 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
    IF ($ferret_view"0|xy>1|*>0") THEN
       go xy_compare_difference
+   ELIF ($ferret_view"0|te>1|*>0") THEN 
+
+      GO LAS_ensemble_tplot_difference
+      EXIT/SCRIPT
+
+   ELIF ($ferret_view"0|ze>1|*>0") THEN 
+
+      GO LAS_ensemble_zplot_difference
+      EXIT/SCRIPT
+
    ELSE
       go twoD_compare_difference
    ENDIF

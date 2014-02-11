@@ -1,10 +1,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! LAS_ensemble_tplot.jnl
+! LAS_ensemble_zplot.jnl
 ! 
 ! Author: ansley 
-! Date: 12/2013
+! Date:  2/2014
 !
-! Draw a set of time series plots, one for each ensemble member in the region.
+! Draw a set of profile plots, one for each ensemble member in the region.
 
 ! Set up parameters for defining the viewports and making the plots.
 
@@ -40,6 +40,33 @@ ENDIF
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 
+
+! Initialize next dataset. 
+! Assume the interface has returned correct, matching regions in the plot direction.
+
+! Apply any expression only to the first variable not to this one.
+CANCEL SYMBOL ferret_expression 
+
+GO LAS_initialize_region 1
+GO LAS_initialize_data 1
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Here is variable 1 and its title
+
+DEFINE SYMBOL ferret_var_1 = ($ferret_plot_var)
+DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
+
+
+! Define the difference variable 
+
+DEFINE SYMBOL ferret_diff_var = ($ferret_var_1)  -  ($ferret_var_0)
+
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
@@ -49,6 +76,13 @@ GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
+
+! Set the title, and the labels for the upper left listing the locations
+! and time in directions normal to the plot.
+
+GO LAS_set_diff_labels ($fview)
+
+
 
 LET mlo = ($region_e_lo)
 LET mhi = ($region_e_hi)
@@ -79,43 +113,58 @@ LET num_ens = `mhi-mlo+1`
 !c!   EXIT/SCRIPT
 !c!ENDIF
 
+
 ! Set up the region info etc for the annotations.
-SHADE/SET ($ferret_plot_var) 
+SHADE/SET ($ferret_diff_var) 
 GO reset_labels
 
-! Define viewports, one for each ensemble member being plotted 
-! as individual time series lines, all with the same vertical range
+
+! Define viewports for all the plots.
 
 GO LAS_define_ensemble_viewports
 
 
-! Define the vertical range based on all the ensembles in the plot
-PLOT/SET XSEQUENCE(($ferret_plot_var)) 
+
+! Define the horizontal range based on all the ensembles in the plot
+PLOT/SET XSEQUENCE(($ferret_diff_var)) 
 
 PPL %range ($ppl$ymin1) ($ppl$ymax1) 5
-DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=($ppl$range_low):($ppl$range_high)
-DEFINE SYMBOL yaxis_setting ($ppl$range_low) ($ppl$range_high) ($ppl$range_inc)
+DEFINE SYMBOL axlo = ($ppl$range_low)
+DEFINE SYMBOL axhi = ($ppl$range_high)
+DEFINE SYMBOL axinc = ($ppl$range_inc)
 
+IF `($axlo) EQ ($axhi)` THEN
+   DEFINE SYMBOL axlo = `($axlo) - 5`
+   DEFINE SYMBOL axhi = `($axhi) + 5`
+   DEFINE SYMBOL axinc = 5
+ENDIF
 
-! Draw the horizontal axis by plotting a variable having no data in the vertical range.
+DEFINE SYMBOL qualifiers = ($qualifiers)/HLIMITS=($axlo):($axhi)
+DEFINE SYMBOL xaxis_setting ($axlo) ($axhi) ($axinc)
+
+! Draw the vertical axis by plotting a variable having no data in the vertical range.
 
 CANCEL view
 SET VIEW bigview
 
-LET/BAD=9999 all_zero = IF MISSING(($ferret_plot_var),0) THEN 0 ELSE 0*($ferret_plot_var)
-PLOT/NOY/AX=0,1,0,0/M=`mhi`/VLIM=100:200/TITLE=" "/NOLAB/NOLAB all_zero 
+LET/BAD=9999 all_zero = IF MISSING(($ferret_plot_var),0) THEN 0 ELSE 0*($ferret_diff_var)
+PLOT/NOY/AX=0,0,1,0/M=`mhi`/HLIM=100:200/TITLE=" " all_zero 
 
-! Put on the title. If the title was split ineo two lines, move it up a bit.
+! Put on the title. If the title was split into two lines, move it up a bit.
 
-IF `($ferret_annotations"0|*>1") EQ 0` THEN 
-   LET yloc = `-0.7`
-   IF `STRINDEX("($ferret_plot_title)", "<NL>") GT 0` THEN LET yloc = -0.5
-   LABEL/NOUSER `($ppl$xlen)/2`,`yloc`, 0, 0, 0.14, ($ferret_plot_title)
-ENDIF
+! Overall header at the very top
+GO LAS_ferret_las_version_header
+
+! Add labels at the top for the location of overlaid lines
+! and for URLs IF they exist  
+
+GO labels_above_plot
 
 ! Draw a plot for each series, labeling on the left with the ensemble member.
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/NOY/AXES=0,0,1,1/NOLAB/COLOR=blue
+DEFINE SYMBOL qualifiers = ($qualifiers)/NOY/AXES=1,1,0,0/NOLAB/COLOR=red
+
+CANCEL SYMBOL ferret_plot_key
 
 LET varnames = ..varnames
 IF `IS_ELEMENT_OF_STR_N (varnames , "labels") EQ 0` THEN LET labels = _m[m=($data_var)]
@@ -123,36 +172,29 @@ IF `IS_ELEMENT_OF_STR_N (varnames , "labels") EQ 0` THEN LET labels = _m[m=($dat
 DEFINE SYMBOL mm = `mlo`
 SET VIEW rt_`mlo`
 
-PLOT/m=`mlo`($qualifiers)/SET ($ferret_plot_var)
-  PPL yaxis ($yaxis_setting)
+
+PLOT/m=`mlo`($qualifiers)/SET ($ferret_diff_var)
+  PPL xaxis ($xaxis_setting)
 PPL PLOT
-LABEL/NOUSER `-0.8*($ppl$xorg)`, `($ppl$ylen)/2`, 0, 90, 0.12, `labels[m=($mm)]`
+LABEL/NOUSER `0.5*($ppl$xlen)`, `($ppl$ylen)+0.2`, 0, 0, 0.12, `labels[m=($mm)]`
 
 LET count = 1
 REPEAT/RANGE=`mlo+delta_e`:`mhi`:`delta_e`/NAME=q (  \
    LET count = `count+1`;\
    IF `count GT ene` THEN EXIT/LOOP;  \
    SET VIEW rt_`q`; \
-   PLOT/M=`q`($qualifiers)/set ($ferret_plot_var); \
-     PPL yaxis ($yaxis_setting); \
+   PLOT/M=`q`($qualifiers)/set ($ferret_diff_var); \
+     PPL xaxis ($xaxis_setting); \
    PPL PLOT; \
    DEFINE SYMBOL mm = `q`;\
-   LABEL/NOUSER `-0.8*($ppl$xorg)`, `($ppl$ylen)/2`, 0, 90, 0.12, `labels[m=($mm)]` ;\
-    )
+   LABEL/NOUSER `0.5*($ppl$xlen)`, `($ppl$ylen)+0.2`, 0, 0, 0.12, `labels[m=($mm)]` ;\
+   ) 
 
 ! Make the big plot again to set the correct symbols for the RESULT.
 SET VIEW bigview2
-CANCEL MODE nodata_lab  ! so there isne a NO VALID DATA label on the plot.
-LET/BAD=9999 all_bad = IF MISSING(($ferret_plot_var),0) THEN 9999 ELSE 9999 + 0*($ferret_plot_var)
+CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
+LET/BAD=9999 all_bad = IF MISSING(($ferret_diff_var),0) THEN 9999 ELSE 9999 !+ 0*($ferret_diff_var)
 SHADE/NOLAB/NOAX all_bad
-
-! Overall header at the very top
-GO LAS_ferret_las_version_header
-
-! Add labels at the top for the location of overlaid lines
-! and for URLs if they exist  
-   
-GO labels_above_plot
 
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)
 ! or all to force marking all points. 
@@ -162,5 +204,5 @@ IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 ! Save the results
 GO LAS_results box
 
-!  ----------------- End of LAS_ensemble_tplot ------------------------------------
+!  ----------------- End of LAS_ensemble_zplot_difference ------------------------------------
 
