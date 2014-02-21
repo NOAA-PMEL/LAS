@@ -559,7 +559,17 @@ public class LASRequest {
             if ( var.getParentNode().getNodeName().equals("args") ) {
                 if ( counter == index ) {
                     // Found it, set the analysis.
-                    Element anE = document.createElement("analysis");
+                    NodeList existingAn = var.getChildNodes();
+                    Element anE = null;
+                    if ( existingAn != null && existingAn.getLength() > 0 ) {
+                        for (int eain = 0; eain < existingAn.getLength(); eain++ ) {
+                            anE = (Element) existingAn.item(0);
+                        }
+                    }
+                    if ( anE == null ) {
+                        anE = document.createElement("analysis");
+                        var.appendChild(anE);
+                    }
                     String label = analysis.getLabel();
                     if ( label != null )
                         anE.setAttribute("label", label);
@@ -576,7 +586,7 @@ public class LASRequest {
                             anE.appendChild(axE);
                         }
                     }
-                    var.appendChild(anE);
+                    
                 }
                 counter++;
             }

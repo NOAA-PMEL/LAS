@@ -35,7 +35,7 @@ public class AxesWidgetGroup extends Composite {
     OLMapWidget refMap;
     DateTimeWidget dateTimeWidget;
     AxisWidget zWidget;
-    AxisWidget eWidget;
+    EnsembleAxisWidget eWidget;
     HorizontalPanel layout;
     FlexTable menuWidgets;
     FlowPanel panel;
@@ -70,7 +70,7 @@ public class AxesWidgetGroup extends Composite {
         refMap.activateNativeHooks();
         zWidget = new AxisWidget();
         zWidget.setVisible(false);
-        eWidget = new AxisWidget();
+        eWidget = new EnsembleAxisWidget();
         eWidget.setVisible(false);
         dateTimeWidget = new DateTimeWidget();
         dateTimeWidget.setVisible(false);
@@ -174,7 +174,7 @@ public class AxesWidgetGroup extends Composite {
         return zWidget;
     }
     
-    public AxisWidget getEAxis() {
+    public EnsembleAxisWidget getEAxis() {
         return eWidget;
     }
 

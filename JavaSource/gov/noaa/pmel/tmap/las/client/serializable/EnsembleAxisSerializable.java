@@ -7,7 +7,6 @@ public class EnsembleAxisSerializable extends AxisSerializable implements IsSeri
 	EnsembleMemberSerializable[] members;
 	boolean hasMembers;
 	String[] names;
-	String[] values;
 
 	public EnsembleAxisSerializable() {
 		
@@ -36,15 +35,8 @@ public class EnsembleAxisSerializable extends AxisSerializable implements IsSeri
 		this.members = members;
 	}
 	
-	public String[] getValues() {
-	    return values;
-	}
 	public String[] getNames() {
 	    return names;
-	}
-	
-	public void setValues(String[] v) {
-	    values = v;
 	}
 	public void setNames(String[] n) {
 	    names = n;

@@ -27,12 +27,22 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	 * @return the hi
 	 */
 	public String getHi() {
+	    if ( hi == null ) {
+	        if ( values != null ) {
+	            hi = values[values.length - 1];
+	        }
+	    }
 		return hi;
 	}
 	/**
 	 * @return the lo
 	 */
 	public String getLo() {
+	    if ( lo == null ) {
+	        if ( values != null ) {
+	            lo = values[0];
+	        }
+	    }
 		return lo;
 	}
 	
