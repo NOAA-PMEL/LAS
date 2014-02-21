@@ -2,8 +2,10 @@ package gov.noaa.pmel.tmap.las.client.activity;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.InteractiveDownloadDataView;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.EnsembleAxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
@@ -33,6 +35,9 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 	 * Used to obtain views, eventBus, placeController. Alternatively, could be
 	 * injected via GIN.
 	 */
+    
+    EventBus eventBus;
+    
 	private ClientFactory clientFactory;
 
 	private ListBox dataFormatComboBox;
@@ -40,11 +45,15 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 	protected boolean dataHasT = false;
 
 	protected boolean dataHasZ = false;
+	
+	protected boolean dataHasE = false;
 
 	private DateTimeWidget dateWidget;
 
 	private AxisWidget depthWidget;
 
+	private EnsembleAxisWidget ensembleWidget;
+	
 	private String dsID;
 
 	protected GridSerializable grid = null;
@@ -93,6 +102,9 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 	private String zRangeHi;
 
 	private String zRangeLo;
+	
+	private String eRangeLo;
+	private String eRangeHi;
 
     public InteractiveDownloadDataViewActivity() {
         clientFactory = GWT.create(ClientFactory.class);
@@ -189,6 +201,21 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 			}
 		}
 	}
+	
+	private void genEnsembleWidgets() {
+	    
+	    ensembleWidget = new EnsembleAxisWidget();
+	    ensembleWidget.init(grid.getEAxis(), true);
+	    ensembleWidget.setLo(eRangeLo);
+	    ensembleWidget.setHi(eRangeHi);
+	    
+	    if ( ensembleWidget != null ) {
+	        FlowPanel axisPanel = view.getAxisPanel();
+	        axisPanel.setVisible(true);
+	        axisPanel.add(ensembleWidget);
+	    }
+	    
+	}
 
 	/**
 	 * Now that the relevant grid has been retrieved from the server, generate
@@ -199,6 +226,8 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 		// Then set dataHasT and dataHasZ
 		dataHasT = grid.hasT();
 		dataHasZ = grid.hasZ();
+		dataHasE = grid.hasE();
+		
 
 		// If dataHasT show the appropriate time selector
 		if (dataHasT)
@@ -207,6 +236,10 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 		// If dataHasZ show the appropriate depth selector
 		if (dataHasZ) {
 			genDepthWidgets();
+		}
+		
+		if ( dataHasE ) {
+		    genEnsembleWidgets();
 		}
 
 		dataFormatComboBox.setEnabled(true);
@@ -257,6 +290,17 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 				zRangeHi = lasRequestDocument.getRangeHi("z", 0);
 				if (zRangeHi == null)
 					zRangeHi = "";
+				
+				eRangeLo = lasRequestDocument.getRangeLo("e", 0);
+				if ( eRangeLo == null ) {
+				    eRangeLo = "";
+				}
+				
+				eRangeHi = lasRequestDocument.getRangeHi("e", 0);
+				if ( eRangeHi == null ) {
+				    eRangeHi = "";
+				}
+				
 			} catch (DOMParseException e) {
 				GWT.log(e.getLocalizedMessage(), e);
 				GWT.log(e.getContents());
@@ -361,6 +405,7 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 		 * onClick(ClickEvent event) { saveAction(); } });
 		 */
 		saveButton = view.getSaveButton();
+		
 	}
 
 	@Override
@@ -399,7 +444,7 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 
 	@Override
 	public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {
-		// TODO: Use eventBus
+		this.eventBus = eventBus;
 		view = clientFactory.getInteractiveDownloadDataView();
 		view.setName(name);
 		view.setPresenter(this);
@@ -462,6 +507,13 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 				lasRequestDocument.setRange("z", zLo, zHi, 0);
 			}
 		}
+		
+		if ( dataHasE ) {
+		    String eLo = ensembleWidget.getLo();
+		    String eHi = ensembleWidget.getHi();
+		    // TODO deal with mean, variance, min and max.
+		    lasRequestDocument.setRange("e", eLo, eHi, 0);
+		}
 
 		// set view
 		if (dataHasT) {
@@ -506,6 +558,20 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 
 		return lasRequestDocument;
 	}
+	
+    WidgetSelectionChangeEvent.Handler widgetSelection = new WidgetSelectionChangeEvent.Handler() {
+
+        @Override
+        public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
+            
+            Object s = event.getSource();
+            if ( s instanceof EnsembleAxisWidget ) {
+                Window.alert("Axis Change.");
+            }
+
+        }
+
+    };
 
 	/**
 	 * Update the UI such as when dataFormatComboBox changes.
