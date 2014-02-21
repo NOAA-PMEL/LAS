@@ -1278,9 +1278,7 @@ public class OutputPanel extends Composite implements HasName {
         if (view.contains("x")) {
             lasRequest.setRange("x", vgState.get("xlo"), vgState.get("xhi"), 0);
         } else {
-            if ( analysis != null && !analysis.isActive("x") ) {
-                lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 0);
-            }
+            lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 0);        
         }
 
         if (view.contains("y")) {
