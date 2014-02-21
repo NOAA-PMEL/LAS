@@ -113,12 +113,15 @@ public class AxisWidget extends Composite {
      */
     public void init(AxisSerializable ax) {
         this.range = false;
+        
         initialize(ax);
     }
-
-    private void initialize(AxisSerializable ax) {
+    protected void clear() {
         lo_axis.clear();
         hi_axis.clear();
+    }
+    protected void initialize(AxisSerializable ax) {
+        clear();
         lo_axis.addChangeHandler(loAxisChangeHandler);
         hi_axis.addChangeHandler(hiAxisChangeHandler);
         String units = ax.getUnits();
@@ -134,13 +137,13 @@ public class AxisWidget extends Composite {
             }
         } else {
             if (units != null && !units.equals("")) {
-                lo_label_range.setText("Start Z (" + units + "): ");
-                hi_label_range.setText("End Z (" + units + "): ");
+                lo_label_range.setText("Start (" + units + "): ");
+                hi_label_range.setText("End (" + units + "): ");
                 lo_label.setText("Z (" + units + "): ");
             } else {
-                lo_label_range.setText("Start Z:");
-                hi_label_range.setText("End Z:");
-                lo_label.setText("Z:");
+                lo_label_range.setText("Start :");
+                hi_label_range.setText("End :");
+                lo_label.setText("Axis:");
             }
         }
 
@@ -215,6 +218,9 @@ public class AxisWidget extends Composite {
         return lo_axis.getValue(i);
     }
 
+    public int getItemCount() {
+        return lo_axis.getItemCount();
+    }
     public void setEnabled(boolean b) {
         lo_axis.setEnabled(b);
     }

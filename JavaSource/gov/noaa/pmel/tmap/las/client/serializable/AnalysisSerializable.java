@@ -49,6 +49,9 @@ public class AnalysisSerializable {
         this.axes = axes;
     }
 
+    public void addAxis(AnalysisAxisSerializable axis) {
+        this.axes.put(axis.getType(), axis);
+    }
     public boolean isActive(String axis) {
         AnalysisAxisSerializable a = axes.get(axis);
         if ( a == null ) {

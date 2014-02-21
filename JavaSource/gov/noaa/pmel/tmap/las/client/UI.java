@@ -787,7 +787,7 @@ public class UI extends BaseUI {
 
         @Override
         public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
-
+            
             if (applyButton.getCheckBoxValue() || event.isAuto() || isUpdateRequired()) {
                 refresh(false, event.isPushHistory(), event.isForce());
             }
@@ -1890,12 +1890,12 @@ public class UI extends BaseUI {
 
                 comparePanel.setAnalysis(analysis);
                 comparePanel.setFillLevels(autoContourTextBox.getText());
-                comparePanel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
+                comparePanel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken()+addAnalysisMapValues());
                 comparePanel.refreshPlot(options, false, true, forceLASRequest);
                 for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                     OutputPanel panel = (OutputPanel) panelIt.next();
                     if (!panel.getID().equals(comparePanel.getID())) {
-                        panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
+                        panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken()+addAnalysisMapValues());
                         AnalysisSerializable a = null;
                         if (xAnalysisWidget.isActive()) {
                             a = xAnalysisWidget.getAnalysisSerializable();
@@ -1956,7 +1956,20 @@ public class UI extends BaseUI {
         // required_update = false;
         setUpdateRequired(false);
     }
-
+    private String addAnalysisMapValues() {
+        StringBuilder xy = new StringBuilder();
+        if ( xAnalysisWidget.isActive() ) {
+            if ( xAnalysisWidget.getAnalysisSerializable().isActive("x") ) {
+                xy.append(";xlo=" + xAxesWidget.getRefMap().getXlo());
+                xy.append(";xhi=" + xAxesWidget.getRefMap().getXhi());
+            }
+            if ( xAnalysisWidget.getAnalysisSerializable().isActive("y") ) {
+                xy.append(";ylo=" + xAxesWidget.getRefMap().getYlo());
+                xy.append(";yhi=" + xAxesWidget.getRefMap().getYhi());
+            }
+        }
+        return xy.toString();
+    }
     private void setAnalysisAxes(String v) {
 
         // Eliminate the transformed axis from the acceptable intervals for the

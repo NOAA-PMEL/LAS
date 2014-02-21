@@ -187,7 +187,9 @@ public class OperationsWidget extends Composite {
                                 xyMapTable.setWidget(xyMapRow, 0, button);
                                 xyMapRow++;
                             } else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z"))
-                                    || (view.equals("t") && intervals.contains("t")) || (view.equals("e") && intervals.contains("e")) ) {
+                                    || (view.equals("t") && intervals.contains("t")) || (view.equals("e") && intervals.contains("e")) 
+                                    // Special case where the TE is a bunch of line plots stacked on top of each other...
+                                    ||  (view.equals("te") && intervals.contains("e") && intervals.contains("t")) ) {
                                 if ( !hasLinePlots ) {
                                     linePlotsTable.clear();
                                     hasLinePlots = true;
@@ -221,6 +223,16 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Ensemble");
                                     }
+                                } else if ( view.equals("te")) {
+                                    String l = grid.getEAxis().getLabel();
+                                    String n = grid.getEAxis().getName();
+                                    if ( l != null && !l.equals("") ) {
+                                        button = new OperationRadioButton(groupName, l+"-time");
+                                    } else if ( n != null && !n.equals("") ) {
+                                        button = new OperationRadioButton(groupName, n+"-time");
+                                    } else {
+                                        button = new OperationRadioButton(groupName, "E-time");
+                                    }      
                                 }
                                 if ( button != null ) {
                                     button.setView(view);
@@ -290,8 +302,8 @@ public class OperationsWidget extends Composite {
                                 sectionPlotsRow++;
                             } else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t")) ||
                                     (view.equals("yt") && intervals.contains("y") && intervals.contains("t")) ||
-                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) || 
-                                    (view.equals("te") && intervals.contains("e") && intervals.contains("t"))) {
+                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) 
+                                   ) {
                                 if ( !hasHofmullerPlots ) {
                                     hofmullerPlotsTable.clear();
                                     hasHofmullerPlots = true;
@@ -311,17 +323,7 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Z-time");
                                     }      
-                                } else if ( view.equals("te")) {
-                                    String l = grid.getEAxis().getLabel();
-                                    String n = grid.getEAxis().getName();
-                                    if ( l != null && !l.equals("") ) {
-                                        button = new OperationRadioButton(groupName, l+"-time");
-                                    } else if ( n != null && !n.equals("") ) {
-                                        button = new OperationRadioButton(groupName, n+"-time");
-                                    } else {
-                                        button = new OperationRadioButton(groupName, "E-time");
-                                    }      
-                                }
+                                } 
                                 if ( button != null ) {
                                     button.setView(view);
                                     button.setOperation(op);

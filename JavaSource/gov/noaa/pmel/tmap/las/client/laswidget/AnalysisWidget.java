@@ -134,15 +134,11 @@ public class AnalysisWidget extends Composite {
         } else if ( axis.equals("t") ) {
             tAxis.setType("t");
             tAxis.setOp(op);
-        } else if ( axis.equals("e") ) {
-            eAxis.setType("e");
-            eAxis.setOp(op);
-        }
+        } 
         analysis.getAxes().put("x", xAxis);
         analysis.getAxes().put("y", yAxis);
         analysis.getAxes().put("z", zAxis);
         analysis.getAxes().put("t", tAxis);
-        analysis.getAxes().put("e", eAxis);
         return analysis;
     }
 
@@ -164,9 +160,6 @@ public class AnalysisWidget extends Composite {
     public void setAnalysisAxes(GridSerializable grid) {
         analysisAxis.clear();
         analysisAxis.addItem("Area", "xy");
-        if ( grid.hasE() ) {
-            analysisAxis.addItem("Area and Time", "xyt");
-        }
         analysisAxis.addItem("Longitude", "x");
         analysisAxis.addItem("Latitude", "y");
         if ( grid.hasZ() ) {
@@ -179,15 +172,6 @@ public class AnalysisWidget extends Composite {
         }
         if ( grid.hasT() ) {
             analysisAxis.addItem("Time", "t");
-        }
-        if ( grid.hasE() ) {
-            String el = grid.getEAxis().getLabel();
-            if ( el != null && !el.equals("") ) {
-                analysisAxis.addItem(el, "e");
-            } else {
-                analysisAxis.addItem("Ensemble", "e");
-            }
-            
         }
     }
 

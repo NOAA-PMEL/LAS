@@ -3,9 +3,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.AppConstants;
 import gov.noaa.pmel.tmap.las.client.BaseUI.Mouse;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
-import gov.noaa.pmel.tmap.las.client.activity.OutputControlPanelActivity;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
-import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
@@ -18,11 +16,13 @@ import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.EnsembleAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -46,8 +46,6 @@ import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ErrorEvent;
@@ -63,7 +61,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -73,7 +70,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasName;
@@ -1128,7 +1124,6 @@ public class OutputPanel extends Composite implements HasName {
         eventBus.addHandler(CancelEvent.TYPE, cancelRequestHandler);
         eventBus.addHandler(MapChangeEvent.TYPE, mapChangeHandler);
         eventBus.addHandler(FeatureModifiedEvent.TYPE, featureModifiedHandler);
-        eventBus.addHandler(ComparisonModeChangeEvent.TYPE, compareEventHandler);
         eventBus.addHandler(ControlVisibilityEvent.TYPE, hideControlsHandler);
         eventBus.addHandler(VariableSelectionChangeEvent.TYPE, variableChangeHandler);
         // TODO: move this logic into the AxesWidgetGroup (or its
@@ -1174,18 +1169,7 @@ public class OutputPanel extends Composite implements HasName {
             }
         }
     };
-    private ComparisonModeChangeEvent.Handler compareEventHandler = new ComparisonModeChangeEvent.Handler() {
-
-        @Override
-        public void onComparisonModeChange(ComparisonModeChangeEvent event) {
-            
-            if ( !event.isComparing() ) {
-                topControls.removeStyleName("map-size");
-            }
-            
-        }
-        
-    };
+   
     /**
      * Evaluate scripts in an HTML string. Will eval both <script
      * src=""></script> and <script>javascript here</scripts>.
@@ -1265,8 +1249,7 @@ public class OutputPanel extends Composite implements HasName {
 
         if (analysis != null) {
             if (analysis.isActive("e")) {
-                analysis.getAxes().get("e").setLo(cpState.get("elo"));
-                analysis.getAxes().get("e").setHi(cpState.get("ehi"));
+                // E-axis won't be in the analysis widget...
             }
             if (analysis.isActive("t")) {
                 analysis.getAxes().get("t").setLo(cpState.get("tlo"));
@@ -1276,6 +1259,7 @@ public class OutputPanel extends Composite implements HasName {
                 analysis.getAxes().get("z").setLo(cpState.get("zlo"));
                 analysis.getAxes().get("z").setHi(cpState.get("zhi"));
             }
+            // The map for the analysis is in the vg state.
             if (analysis.isActive("y")) {
                 analysis.getAxes().get("y").setLo(cpState.get("ylo"));
                 analysis.getAxes().get("y").setHi(cpState.get("yhi"));
@@ -1294,7 +1278,9 @@ public class OutputPanel extends Composite implements HasName {
         if (view.contains("x")) {
             lasRequest.setRange("x", vgState.get("xlo"), vgState.get("xhi"), 0);
         } else {
-            lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 0);
+            if ( analysis != null && !analysis.isActive("x") ) {
+                lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 0);
+            }
         }
 
         if (view.contains("y")) {
@@ -1317,10 +1303,24 @@ public class OutputPanel extends Composite implements HasName {
             }
         }
         if ( vizGalVariable.getGrid().hasE() ) {
+                        
             if (view.contains("e")) {
                 lasRequest.setRange("e", vgState.get("elo"), vgState.get("ehi"), 0);
             } else {
-                lasRequest.setRange("e", cpState.get("elo"), cpState.get("ehi"), 0);
+                String local_elo = cpState.get("elo");
+                if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(local_elo) ) {
+                    AnalysisAxisSerializable e = new AnalysisAxisSerializable();
+                    e.setLo(panelVar.getGrid().getEAxis().getLo());
+                    e.setHi(panelVar.getGrid().getEAxis().getHi());
+                    e.setType("e");
+                    e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(local_elo)));
+                    AnalysisSerializable cpe = new AnalysisSerializable();
+                    cpe.addAxis(e);
+                    lasRequest.setAnalysis(cpe, 0);
+                } else {
+                    // These are used in reverse of what you'd expect since we changed the order of the subtraction.  Confusing.
+                    lasRequest.setRange("e", cpState.get("elo"), cpState.get("ehi"), 0);
+                }
             }
         }
         if (vizGalVariable.isVector()) {
@@ -1354,6 +1354,7 @@ public class OutputPanel extends Composite implements HasName {
                 }
             }
             if (panelVar.getGrid().hasE()) {
+                // TODO E-AXIS mean, etc...
                 if (view.contains("e")) {
                     lasRequest.setRange("e", vgState.get("elo"), vgState.get("ehi"), 1);
                 } else {
@@ -1390,21 +1391,48 @@ public class OutputPanel extends Composite implements HasName {
                 }
                 if (!view.contains("e")) {
                     if (panelVar.getGrid().hasE()) {
-                        lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 1);
-                    }
-                }
-                // Add the analysis computation to the variable from this panel
-            } else {
-                if (analysis.isActive("e")) {
-                    analysis.getAxes().get("e").setLo(panelAxesWidgets.getEAxis().getLo());
-                    analysis.getAxes().get("e").setHi(panelAxesWidgets.getEAxis().getHi());
-                } else {
-                    if (!view.contains("e")) {
-                        if (panelVar.getGrid().hasE()) {
+                        // There is some question of whether analysis will be applied to the second variable.  There maybe work to do in the product server making the request.
+                        String locale = panelAxesWidgets.getEAxis().getLo();
+                        if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(locale) ) {
+                            AnalysisAxisSerializable e = new AnalysisAxisSerializable();
+                            e.setLo(panelVar.getGrid().getEAxis().getLo());
+                            e.setHi(panelVar.getGrid().getEAxis().getHi());
+                            e.setType("e");
+                            e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(locale)));
+                            AnalysisSerializable pae = new AnalysisSerializable();
+                            pae.addAxis(e);
+                            lasRequest.setAnalysis(pae, 1);
+                        } else {
                             lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 1);
                         }
                     }
                 }
+                // Add the analysis computation to the variable from this panel
+            } else {
+           
+                    if (!view.contains("e")) {
+                        if (panelVar.getGrid().hasE()) {
+                            String locale = panelAxesWidgets.getEAxis().getLo();
+                            if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(locale) ) {
+                                // This is analysis on the panel var only due to the menu value.
+                                AnalysisAxisSerializable e = new AnalysisAxisSerializable();
+                                e.setLo(panelVar.getGrid().getEAxis().getLo());
+                                e.setHi(panelVar.getGrid().getEAxis().getHi());
+                                e.setType("e");
+                                e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(locale)));
+                                if ( analysis == null ) {
+                                    analysis = new AnalysisSerializable();
+                                    analysis.addAxis(e);
+                                } else {
+                                    analysis.addAxis(e);
+                                }
+                            } else {
+                                // These are used in reverse of what you'd expect since we changed the order of the subtraction.  Confusing.
+                                lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 0);
+                            }
+                        }
+                    }
+                
                 if (analysis.isActive("t")) {
                     analysis.getAxes().get("t").setLo(panelAxesWidgets.getTAxis().getFerretDateLo());
                     analysis.getAxes().get("t").setHi(panelAxesWidgets.getTAxis().getFerretDateHi());
@@ -1475,6 +1503,7 @@ public class OutputPanel extends Composite implements HasName {
                 lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
             }
             if (panelVar.getGrid().hasE()) {
+             // TODO E-AXIS mean, etc...
                 lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 2);
             }
             // And the other variable component. Same as above...
@@ -1502,6 +1531,7 @@ public class OutputPanel extends Composite implements HasName {
             }
             if (panelVar.getGrid().hasE()) {
                 if (!view.contains("e")) {
+                 // TODO E-AXIS mean, etc...
                     lasRequest.setRange("e", panelAxesWidgets.getEAxis().getLo(), panelAxesWidgets.getEAxis().getHi(), 3);
                 }
             }
@@ -1582,6 +1612,7 @@ public class OutputPanel extends Composite implements HasName {
 
     public String getHistoryToken() {
         StringBuilder token = new StringBuilder();
+              
         boolean wantZ;
         if (analysis == null) {
             wantZ = panelVar.getGrid().hasZ() && !view.contains("z");
@@ -1602,12 +1633,9 @@ public class OutputPanel extends Composite implements HasName {
             token.append(";tlo=" + panelAxesWidgets.getTAxis().getFerretDateLo() + ";thi=" + panelAxesWidgets.getTAxis().getFerretDateHi());
         }
         
-        boolean wantE;
-        if (analysis == null) {
-            wantE = panelVar.getGrid().hasE() && !view.contains("e");
-        } else {
-            wantE = panelVar.getGrid().hasE() && !view.contains("e") && !analysis.isActive("e");
-        }
+        // E will not figure in the analysis so we always want it when it's not in the view.
+        boolean wantE = panelVar.getGrid().hasE() && !view.contains("e");;
+       
         if (wantE) {
             token.append(";elo=" + panelAxesWidgets.getEAxis().getLo() + ";ehi=" + panelAxesWidgets.getEAxis().getHi());
         }
@@ -1770,7 +1798,16 @@ public class OutputPanel extends Composite implements HasName {
             }
             if ( panelVar.getGrid().getEAxis() != null ) {
                 if ( !analysis.isActive("e") ) {
-                    lasRequest.setRange("e", local_elo, local_ehi, 0);
+                    if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(local_elo) ) {
+                        AnalysisAxisSerializable e = new AnalysisAxisSerializable();
+                        e.setLo(panelVar.getGrid().getEAxis().getLo());
+                        e.setHi(panelVar.getGrid().getEAxis().getHi());
+                        e.setType("e");
+                        e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(local_elo)));
+                        analysis.addAxis(e); 
+                    } else {
+                       lasRequest.setRange("e", local_elo, local_ehi, 0);
+                    }
                 }
             }
         } else {
@@ -1783,7 +1820,52 @@ public class OutputPanel extends Composite implements HasName {
                 lasRequest.setRange("t", local_tlo, local_thi, 0);
             }
             if ( panelVar.getGrid().hasE() ) {
-                lasRequest.setRange("e", local_elo, local_ehi, 0);
+                if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(local_elo) ) {
+                    AnalysisAxisSerializable e = new AnalysisAxisSerializable();
+                    e.setLo(panelVar.getGrid().getEAxis().getLo());
+                    e.setHi(panelVar.getGrid().getEAxis().getHi());
+                    e.setType("e");
+                    e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(local_elo)));
+                    analysis = new AnalysisSerializable();
+                    analysis.addAxis(e); 
+                    // For a line plot, add in the un-transformed variable as well with its own region if the e-axis is set to "All"
+                    if ( view.length() == 1 ) {
+                       int evarindex = 1;
+                        if ( panelAxesWidgets.getEAxis().getSelectedLabel().equals(EnsembleAxisWidget.MEAN) && view.length() == 1 ) {
+                            for ( int ei = 0; ei < panelAxesWidgets.getEAxis().getItemCount(); ei++ ) {
+                                String eval = panelAxesWidgets.getEAxis().getValue(ei);
+                                if ( !EnsembleAxisWidget.ANALYSIS_LABEL.contains(eval) ) {
+                                    lasRequest.addVariable(panelVar.getDSID(), panelVar.getID(), 1);
+                                    if (!analysis.isActive("x")) {
+                                        lasRequest.setRange("x", local_xlo, local_xhi, 1);
+                                    }
+
+                                    if (!analysis.isActive("y")) {
+                                        lasRequest.setRange("y", local_ylo, local_yhi, 1);
+                                    }
+
+                                    if (panelVar.getGrid().getZAxis() != null) {
+                                        if (!analysis.isActive("z")) {
+                                            lasRequest.setRange("z", local_zlo, local_zhi, 1);
+                                        }
+                                    }
+                                    if (panelVar.getGrid().getTAxis() != null) {
+                                        if (!analysis.isActive("t")) {
+                                            lasRequest.setRange("t", local_tlo, local_thi, 1);
+                                        }
+                                    }
+                                    if ( panelVar.getGrid().getEAxis() != null ) {
+                                        lasRequest.setRange("e", eval, eval, evarindex);
+                                    }
+                                    evarindex++;
+                                }
+                            }
+                        }
+                    }
+                    
+                } else {
+                   lasRequest.setRange("e", local_elo, local_ehi, 0);
+                }
             }
         }
 
@@ -1995,8 +2077,7 @@ public class OutputPanel extends Composite implements HasName {
 
         if (analysis != null) {
             if (analysis.isActive("e")) {
-                analysis.getAxes().get("e").setLo(vgState.get("elo"));
-                analysis.getAxes().get("e").setHi(vgState.get("ehi"));
+                // e is not set in the main analysis widget...
             }
             if (analysis.isActive("t")) {
                 analysis.getAxes().get("t").setLo(vgState.get("tlo"));
@@ -2532,11 +2613,6 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     public void showOrthoAxes(String view, List<String> ortho, String analysis, int panelCount) {
-        if ( (ortho.contains("x") || ortho.contains("y")) && panelCount > 1 ) {
-            topControls.addStyleName("map-size");
-        } else {
-            topControls.removeStyleName("map-size");
-        }
         panelAxesWidgets.showOrthoAxes(view, ortho, analysis, isComparePanel());
     }
 
