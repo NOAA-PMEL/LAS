@@ -39,11 +39,6 @@ text-align:left;
   <body >
      <table width="100%">
       
-    	#foreach ( $url in $las_annotations.getDatasetURLs() )
-           <tr width="100%">
-    		<td width="100%"class="url" >$url</td>
-           </tr>
-	    #end
     	#foreach ( $title in $las_annotations.getDatasetTitles() )
            <tr  width="100%">
     		<td class="title">
@@ -62,6 +57,11 @@ text-align:left;
     	#foreach ( $axis in $las_annotations.getOrthogonalAxes() )
            <tr width="100%">
     		<td class="regular">$axis</td>
+           </tr>
+	    #end
+    	#foreach ( $url in $las_annotations.getDatasetURLs() )
+           <tr width="100%">
+    		<td width="100%"class="url" >$url</td>
            </tr>
 	    #end
            <tr width="100%">
