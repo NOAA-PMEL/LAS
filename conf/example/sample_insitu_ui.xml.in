@@ -42,6 +42,25 @@
             <item values="Animation_1D,txt,2">Animation</item>
             <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
+	        <menu type="ops" name="Ops_Std1D_t_e">
+            <item values="Plot_1D_t_e,line,2">Line plot</item>
+            <item values="Plot_1D_SlideSorter,line,2">Line plot comparison</item>
+            <item values="Data_Extract,txt,20">Table of Values (text)</item>
+            <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
+            <item values="Data_Extract_File,asc,20">ASCII file</item>
+            <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
+        </menu>
+    <menu type="ops" name="Ops_Std1D_e">
+	    <item values="Plot_1D_e,line,2">Line plot</item>
+            <item values="Plot_1D_SlideSorter,line,2">Line plot comparison</item>
+	    <item values="Data_Extract,txt,20">Table of Values (text)</item>
+	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
+	    <item values="Data_Extract_File,asc,20">ASCII file</item>
+	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Animation_1D,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
+	</menu>
         <menu type="ops" name="Ops_Std1D_t">
             <item values="Plot_1D,line,2">Line plot</item>
             <item values="Plot_1D_SlideSorter,line,2">Line plot comparison</item>
@@ -51,6 +70,7 @@
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
+
 	<menu type="ops" name="Ops_Std2D">
 	    <item values="Plot_2D,shade,2">Color plot</item>
             <item values="Plot_2D_SlideSorter,shade,2">Color plot comparison</item>
@@ -338,6 +358,19 @@
             <ifmenu view="xyt" href="#Ops_Std3D_xyt"/>
 	    <ifmenu view="xyzt" href="#Ops_Std4D"/>
 	</map>
+    </map>
+        <map type="ops" name="EnsembleOperations">
+	    <ifmenu mode="comparison" href="#Ops_StdCompare"/>
+	     <ifmenu view="t" href="#Ops_Std1D_t_e"/>
+	    <ifmenu view="x,y,z" href="#Ops_Std1D_e"/>
+            <ifmenu view="xz,yz" href="#Ops_Std2D"/>
+            <ifmenu view="xt,yt,zt" href="#Ops_Std2D_t"/>
+	    <ifmenu view="xy" href="#Ops_Std2D_xy"/>
+            <ifmenu view="yzt,xzt" href="#Ops_Std3D"/>
+            <ifmenu view="xyz" href="#Ops_Std3D_xyz"/>
+            <ifmenu view="xyt" href="#Ops_Std3D_xyt"/>
+	    <ifmenu view="xyzt" href="#Ops_Std4D"/>
+	</map>
 	<map type="views" name="DefaultViews">
 	    <menu href="#Views_Std"/>
 	</map>
@@ -403,6 +436,13 @@
         </default>
         <default name="HybridZ">
 	    <map href="#DefaultOperations_HybridZ"/>
+	    <map href="#DefaultViews"/>
+            <map href="#DefaultLivemap"/>
+            <map href="#DefaultOptions"/>
+	    <map href="#DefaultAnalysis"/>
+        </default>
+         <default name="Ensemble">
+	    <map href="#EnsembleOperations"/>
 	    <map href="#DefaultViews"/>
             <map href="#DefaultLivemap"/>
             <map href="#DefaultOptions"/>
