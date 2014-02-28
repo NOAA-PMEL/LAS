@@ -947,13 +947,63 @@
       <intervals name="x" type="Line Plots" title="Longitude"/>
       <intervals name="y" type="Line Plots" title="Latitude"/>
       <intervals name="z" type="Line Plots" title="Depth"/>
-      <intervals name="e" type="Line Plots" title="Ensemble"/>
       <!--<intervals name="t" /> -->
     </region>
     <grid_types>
       <grid_type name="regular"/>
     </grid_types>
     <optiondef IDREF="Options_1D_7"/>
+  </operation>
+  <!-- default means it goes on the left nav panel, private means it only gets returned if requested as part of specific "UI Default". -->
+    <operation ID="Plot_1D_t_e" private="true" default="true" name="Line plot" minvars="1" maxvars="12" output_template="output" service_action="Plot_1D" order="0101" category="visualization" isZoomable="false">
+    <service>ferret</service>
+    <response ID="PlotResp">
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+      <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+      <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+      <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" 
+				file_suffix=".ps"/> -->
+      <result type="image" ID="ref_map" file_suffix=".png"/>
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="cancel" ID="cancel" file_suffix=".txt"/>
+    </response>
+    <region>
+      <!-- <intervals name="x" /> <intervals name="y" /> <intervals name="z" 
+				/> -->
+      <intervals name="t" type="Line Plots" title="Time Series"/>
+    </region>
+    <grid_types>
+      <grid_type name="regular"/>
+    </grid_types>
+    <optiondef IDREF="Options_1D_E_7"/>
+  </operation>
+  <operation ID="Plot_1D_e" private ="true" default="true" name="Line plot" minvars="1" maxvars="12" type="Line Plots" output_template="zoom" service_action="Plot_1D" order="0103" category="visualization" isZoomable="true">
+    <service>ferret</service>
+    <response ID="PlotResp">
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+      <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+      <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+      <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" 
+				file_suffix=".ps"/> -->
+      <result type="image" ID="ref_map" file_suffix=".png"/>
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="cancel" ID="cancel" file_suffix=".txt"/>
+    </response>
+    <region>
+      <intervals name="x" type="Line Plots" title="Longitude"/>
+      <intervals name="y" type="Line Plots" title="Latitude"/>
+      <intervals name="z" type="Line Plots" title="Depth"/>
+      <intervals name="e" type="Line Plots" title="Realizations"/>
+      <!--<intervals name="t" /> -->
+    </region>
+    <grid_types>
+      <grid_type name="regular"/>
+    </grid_types>
+    <optiondef IDREF="Options_1D_E_7"/>
   </operation>
   <operation name="Comparison" ID="Plot_2D_XY_SlideSorter" output_template="vizGal" service_action="" category="comparison">
     <service>template</service>

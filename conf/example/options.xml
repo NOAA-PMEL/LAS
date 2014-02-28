@@ -279,7 +279,26 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
       </menu>
     </option>
   </optiondef>
-
+  <optiondef name="show_all_ensembles">
+     <option>
+        <help>Show all ensemble members in a line plot.</help>
+        <title>Show all ensemble members.</title>
+        <menu type="options" name="show_all_ensembles">
+           <item values="yes">Yes</item>
+           <item values="no">No</item>
+        </menu>
+     </option>
+  </optiondef>
+  <optiondef name="show_stddev_band">
+    <option>
+      <help>Show the standard deviation around the ensemble mean in line plots.</help>
+      <title>Show the standard deviation.</title>
+      <menu type="options" name="show_stddev_band">
+        <item values="yes">Yes</item>
+        <item values="no">No</item>
+      </menu>
+    </option>
+  </optiondef>
   <optiondef name="dep_axis_scale">
     <option>
       <help>Set scale on the dependent axis lo,hi[,delta] where [,delta] is optional, units are data units. If a delta is given, it will determine the tic mark intervals. The dependent axis is the vertical axis for most plots; for plots of a variable vs height or depth it is the horizontal axis. If the scale is not set, Ferret determines this from the data.</help>
@@ -669,6 +688,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <!-- 1-dimensional plots -->
   <optiondef name="Options_1D" inherit="#Options_Default,#line_or_sym,#trend_line,#line_color,#line_thickness,#dep_axis_scale"/>
   <optiondef name="Options_1D_7" inherit="#Options_Default_7,#line_or_sym,#trend_line,#line_color,#line_thickness,#dep_axis_scale"/>
+  <optiondef name="Options_1D_E_7" inherit="#Options_1D_7,#show_all_ensembles,#show_stddev_band"/>
   <optiondef name="Options_1D_Animation" inherit="#Options_Default_Animation,#time_step,#line_or_sym,#trend_line,#line_color,#line_thickness,#dep_axis_scale"/>
 
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
