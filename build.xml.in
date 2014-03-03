@@ -137,6 +137,7 @@
 				<include name="**.jsp" />
                                 <exclude name="WEB-INF/lib/gwt-dev*.jar"/>
                                 <exclude name="WEB-INF/lib/gwt-user*.jar"/>
+                                <exclude name="WEB-INF/classes/resources/iosp/**"/>
 			</fileset>
 			<fileset dir="conf/server/custom/las_servlet/web">
 				<include name="images/**" />
@@ -252,11 +253,11 @@
 			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/joda-time-2.1.jar"
 			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/netcdfAll-4.2.jar"
+		<unjar src="WebContent/WEB-INF/lib/netcdfAll-4.3.jar"
 			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
 			dest="${addxml-build}" />
-		<unjar src="lib/commons-cli-1.2.jar" dest="${addxml-build}" />
+		<unjar src="WebContent/WEB-INF/lib/commons-cli-1.2.jar" dest="${addxml-build}" />
 		<javac
 			srcdir="${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
@@ -315,7 +316,7 @@
 			todir="dist/addxml/lib" />
 		<copy file="WebContent/WEB-INF/lib/JSAP_1.03a.jar"
 			todir="dist/addxml/lib" />
-		<copy file="WebContent/WEB-INF/lib/netcdfAll-4.2.jar"
+		<copy file="WebContent/WEB-INF/lib/netcdfAll-4.3.jar"
 			todir="dist/addxml/lib" />
 		<copy file="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
 			todir="dist/addxml/lib" />
@@ -331,7 +332,7 @@
 	<target name="addxml">
 		<unjar src="lib/joda-time-2.1.jar" dest="${addxml-build}" />
 		<unjar src="lib/JSAP_1.03a.jar" dest="${addxml-build}" />
-		<unjar src="lib/netcdfAll-4.2.jar" dest="${addxml-build}" />
+		<unjar src="lib/netcdfAll-4.3.jar" dest="${addxml-build}" />
 		<unjar src="lib/log4j-1.2.13.jar" dest="${addxml-build}" />
 		<unjar src="lib/commons-cli-1.2.jar" dest="${addxml-build}" />
 		<javac srcdir="src/gov/noaa/pmel/tmap/addxml:src/uk/ac/rdg/resc/edal"
