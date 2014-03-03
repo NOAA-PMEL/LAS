@@ -27,7 +27,8 @@ ENDIF
 ! TODO:  For time plots, either the configurer or the script might want to turn on 
 ! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
 
-SET MODE LINECOLORS:8
+DEFINE SYMBOL nlinecolors = 8
+SET MODE LINECOLORS:($nlinecolors)
 PPL COLOR,7,70,70,70     ! gray
 PPL COLOR,8,100,100,100  ! white
 
@@ -124,10 +125,16 @@ ENDIF ! end of options for twoDplot
 IF `($line_drawn"0|*>1") EQ 0` THEN \
 DEFINE SYMBOL line_drawn = `($oneDplot"0|*>1") OR ($itsa_vector_plot"0|*>1") OR ($plot_type"0|CONTOUR>1|*>0")`
 
+
+sh sym ferret_line_color
 IF `($line_drawn"0") AND ($itsa_multi_lineplot"0|*>1") EQ 0` THEN
 
    IF ($ferret_diff_var"0|*>1") THEN DEFINE SYMBOL ferret_line_color = red
-   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%blue|default>blue|black|red|blue|green|lightblue|purple|*%)
+   IF ($ferret_line_color"0|multi>1|*>0") THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR
+   ELSE
+      DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%blue|default>blue|black|red|blue|green|lightblue|purple|*%)
+   ENDIF
 
 ENDIF ! skipped color setting if its a multi-line plot
 
