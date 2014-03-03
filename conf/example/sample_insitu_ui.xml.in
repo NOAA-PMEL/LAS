@@ -358,7 +358,6 @@
             <ifmenu view="xyt" href="#Ops_Std3D_xyt"/>
 	    <ifmenu view="xyzt" href="#Ops_Std4D"/>
 	</map>
-    </map>
         <map type="ops" name="EnsembleOperations">
 	    <ifmenu mode="comparison" href="#Ops_StdCompare"/>
 	     <ifmenu view="t" href="#Ops_Std1D_t_e"/>
