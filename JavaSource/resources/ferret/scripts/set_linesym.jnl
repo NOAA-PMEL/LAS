@@ -9,7 +9,10 @@ LET filledvar = missing(plotvar,0)
 STAT plotvar
 LET npoints = ($stat_ngood) + ($stat_nbad)
 
-IF `npoints LT 120 AND ($plotsymbol"0|*>1")` THEN
+LET nminpts = 120
+IF ($itsa_multi_lineplot"0|*>1") THEN LET nminpts = 15
+
+IF `npoints LT nminpts AND ($plotsymbol"0|*>1")` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
    DEFINE SYMBOL legend_qual = ($legend_qual)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
 ELSE 

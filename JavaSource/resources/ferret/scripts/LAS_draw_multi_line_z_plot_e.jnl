@@ -29,7 +29,7 @@ IF `($data_count"0") GT 0` THEN
       LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
       IF `is_ensemble` THEN 
          LET labels_var = labels
-	 DEFINE SYMBOL ferret_title_0 = Mean
+!	 DEFINE SYMBOL ferret_title_0 = Mean
       ENDIF
    ENDIF
 ENDIF
@@ -125,6 +125,7 @@ IF `title_len GE 60 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.08
 
 DEFINE SYMBOL thicksave = ($thicknum)
 DEFINE SYMBOL thicknum = 2
+DEFINE SYMBOL legend_qual = /LINE
 
 REPEAT/range=1:`($data_count)`/NAME=m (; \
    DEFINE SYMBOL m = `m`;  \

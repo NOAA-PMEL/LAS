@@ -143,7 +143,8 @@ ENDIF ! skipped color setting if its a multi-line plot
 
 IF ($line_drawn) THEN
 
-   IF `($itsa_multi_lineplot"0|*>1") EQ 0` THEN DEFINE SYMBOL plotsymbol = 25
+   DEFINE SYMBOL plotsymbol = 25
+!   IF ($itsa_multi_lineplot"0|*>1") THEN DEFINE SYMBOL plotsymbol = dot
    DEFINE SYMBOL thicknum = 0
 
    IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
