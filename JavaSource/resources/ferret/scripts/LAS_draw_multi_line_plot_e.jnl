@@ -1,0 +1,155 @@
+! LAS_draw_multi_line_plot_e.jnl
+!  Do a multi-line 1-D plot for an ensemble dataset. 
+! Author: Ansley Manke
+! Date: 03/03/2014 
+
+set mode ver:always
+
+
+CANCEL MODE GRATICULE
+DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
+IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
+
+GO LAS_pp_set_region_labels  ! for first dataset/variable
+
+! Initialize datasets beyond the first one. Keep
+! titles for the plot legend and units for labeling 
+! the plot axes.
+
+IF `($data_count"0") GT 6` THEN 
+   DEFINE SYMBOL data_count = 6
+   DEFINE SYMBOL reset_count = 1
+ENDIF
+
+! Is this an ensemble dataset with a variable containing the ensemble lables?
+IF `($data_count"0") GT 0` THEN
+   DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
+
+   LET eattnames = ($eaxis).attnames
+   IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
+      LET axtype = "`($eaxis)._CoordinateAxisType`"
+      LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
+      IF `is_ensemble` THEN 
+         LET labels_var = labels
+	 DEFINE SYMBOL ferret_title_0 = Mean
+      ENDIF
+   ENDIF
+ENDIF
+
+REPEAT/range=1:`($data_count"0")-1`/NAME=qdat (  \
+  DEFINE SYMBOL qdat = `qdat`; \
+  IF `($qdat) GE 1 AND is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qdat)]` ;\
+  GO LAS_initialize_region ($qdat) ;  \
+  GO LAS_initialize_data  ($qdat) ; \
+  GO LAS_check_var_direction; \
+  IF ($error_status"0|*>1") THEN EXIT/LOOP; \
+  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
+  DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
+  DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
+  IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qdat) = ($enslab); \ 
+  LET tlen = STRLEN("($ferret_title_($qdat))"); \
+  LET title_len = `MAX(tlen, title_len)`; \
+  DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
+  GO LAS_pp_set_region_labels \
+)
+
+! If default graticules setting, put graticules on both axes.
+IF `($qualifiers_0"0|*>1")` THEN 
+   CANCEL SYMBOL qualifiers_0
+   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+ENDIF
+
+! SET WIN/ASP=0.6
+! SET VIEW full
+
+GO LAS_open_window
+
+LET margin_del = 0.08
+PPL AXLSZE,,0.08
+PPL AXNSIG,,2
+
+PLOT($qualifiers)($qualifiers_0)/NOKEY/SET ($plot_arg)
+   IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
+   IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
+   IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
+   IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+   IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
+   IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+   IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+   IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+   IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+   IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+   IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+   ppl txlsze,0.07
+   PPL xlab
+   PPL ylab ($data_0_units)
+PPL PLOT
+
+! Make the first line thick
+LET thicker = 2
+PLOT/OVER/NOLAB/THICK=`thicker`/COLOR=BLACK/LINE ($ferret_plot_var_0)
+
+IF ($labnum_calend%0|*>1%) THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = ($lab($labnum_calend))
+   DEFINE SYMBOL calendar_lab = ($upper_left_($n_left_labels"0"))
+ENDIF
+
+DEFINE SYMBOL ax_vert_save = ($ax_vert"D")
+DEFINE SYMBOL ax_horiz_save = ($ax_horiz"D")
+DEFINE SYMBOL xax_min_save = ($xaxis_min)
+DEFINE SYMBOL xax_max_save = ($xaxis_max)
+
+! Draw the legend.
+sh sym ppl$xorg, ppl$yorg
+
+! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
+
+DEFINE VIEWPORT/x=0:1/y=0:1/axes overview
+
+SET VIEW overview
+PLOT/NOYADJUST/NOLAB/NOAX/I=1:2/VLIM=100:102 i
+
+LET titlesiz = 0.09
+
+! The start (x,y) position for each line drawn on the key
+
+!LET x1 = -0.2
+!LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+
+!LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+!IF `($data_count) EQ 2` THEN LET ykey = \
+!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+
+
+LET x1 = 1.
+LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+
+LET ykey = {0.7, 0.5, 0.3, 0.7, 0.5, 0.3, 0.1, 0.1}
+!IF `($data_count) EQ 2` THEN LET ykey = \
+!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+
+DEFINE SYMBOL thicksave = ($thicknum)
+DEFINE SYMBOL thicknum = 2
+
+REPEAT/range=1:`($data_count)`/NAME=q (; \
+   DEFINE SYMBOL q = `q`; \
+   DEFINE SYMBOL lnum = `q-1`; \
+   LET xpos = xkey[i=($q)]; LET ypos = ykey[i=($q)]; \
+   GO LAS_legend_line \
+   `xpos-0.2` 0.3 `ypos` `q + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual); \
+   DEFINE SYMBOL thicknum = ($thicksave); \
+   )
+
+! The results script needs the actual axis directions. Restore them.
+
+DEFINE SYMBOL ax_vert = ($ax_vert_save)
+IF ($ax_vert"|D>1|*>0") THEN CANCEL SYMBOL ax_vert
+DEFINE SYMBOL ax_horiz = ($ax_horiz_save)
+IF ($ax_horiz"|D>1|*>0") THEN CANCEL SYMBOL ax_horiz
+
+DEFINE SYMBOL xaxis_min = ($xax_min_save)
+DEFINE SYMBOL xaxis_max = ($xax_max_save)
+
+! --------------- End of LAS_draw_multi_line_plot_e  ---------------------------
+
