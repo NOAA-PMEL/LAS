@@ -127,7 +127,6 @@ PPL PLOT
 
 ! Set up for plot key
 
-sh view; pause
 ! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
 
 DEFINE VIEWPORT/x=0:1/y=0:1/axes overview
@@ -146,10 +145,6 @@ LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($pp
 LET ykey = {0.7, 0.5, 0.3, 0.7, 0.5, 0.3, 0.1, 0.1}
 !IF `($data_count) EQ 2` THEN LET ykey = \
 !           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
-
-sh sym ppl$xorg, ppl$yorg, ppl$ylen
-list xkey
-pause
 
 REPEAT/RANGE=`mlo`:`mhi`/NAME=q  (; \
    DEFINE SYMBOL q = `q`;  \
