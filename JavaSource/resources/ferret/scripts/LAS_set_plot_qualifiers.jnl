@@ -143,18 +143,18 @@ ENDIF ! skipped color setting if its a multi-line plot
 
 IF ($line_drawn) THEN
 
-   DEFINE SYMBOL plotsymbol = 25
+   IF `($itsa_multi_lineplot"0|*>1") EQ 0` THEN DEFINE SYMBOL plotsymbol = 25
    DEFINE SYMBOL thicknum = 0
 
    IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
       DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
       IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 2` THEN 
-         DEFINE SYMBOL plotsymbol = 17/SIZ=0.12
+         IF ($plotsymbol"0|*>1") THEN DEFINE SYMBOL plotsymbol = 17/SIZ=0.12
          DEFINE SYMBOL thicknum = 1
       ENDIF
 
       IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 3` THEN 
-         DEFINE SYMBOL plotsymbol = 27/SIZ=0.15
+         IF ($plotsymbol"0|*>1") THEN DEFINE SYMBOL plotsymbol = 27/SIZ=0.15
          DEFINE SYMBOL thicknum = 2
       ENDIF
    ENDIF

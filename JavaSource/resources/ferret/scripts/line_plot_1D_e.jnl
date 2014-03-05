@@ -1,18 +1,12 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! line_plot_1D.jnl,v $
+! line_plot_1D_e.jnl,v $
 ! 
-! Author: ansley 
-! Date: 2006/07/11 22:40:08 
-! 3/7/2007: ACM. Put code to check that the region was not too small, resulting 
-!           in degenerate plot into LAS_initialize_data.jnl rather than in the 
-!           individual plot scripts.
-! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
-! 7/2010    ACM updates for V7.2 multi-variable plots
-!11/2011    ACM Consolidate line plots into one script.
+! Author: Ansley Manke
+! Date: 03/03/2014 
 !
-! line_plot_1D.jnl creates a line plot for use with the Back End Server
+! line_plot_1D_e.jnl creates a line plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
-!
+! Customizations for Ensemble datasets
 
 ! Set any Ferret modes
 !
@@ -73,14 +67,25 @@ DEFINE SYMBOL plot_title = ($ferret_plot_title)
 ! Apply any expression only to the first variable not to subsequent ones
 CANCEL SYMBOL ferret_expression 
 
+! Ensemble-direction plots are drawn in PLOT/STEP style.
+
+IF ($ferret_view"0|e>1|*>0") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/STEP=connected
+   IF `($region_e_hi) - ($region_e_lo) LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+ENDIF
+
+! Plots in other directions show a set of curves:
+! Mean is black, thick
+! other variables are thin
+
 ! Draw the plot
 
 IF `($data_count"0") GT 1` THEN
 
    IF ($ferret_view"0|z>1|*>0") THEN 
-      GO LAS_draw_multi_line_z_plot
+      GO LAS_draw_multi_line_z_plot_e
    ELSE
-      GO LAS_draw_multi_line_plot
+      GO LAS_draw_multi_line_plot_e
    ENDIF
    GO LAS_url_label `($data_count)-1`
 
@@ -109,6 +114,22 @@ ELSE
 
          GO reset_labels
       PPL PLOT
+
+! For an ensemble-dataset plot in the E direction, label the horizontal axis with
+! the labels, if available.
+
+      IF ($ferret_view"0|e>1|*>0") THEN
+         LET dely = `0.04*ABS(($yaxis_max)-($yaxis_min))`
+	 LET yloc = `($yaxis_min)-dely`
+	 LET varnames = ..varnames
+	 IF `IS_ELEMENT_OF_STR_N(varnames, "labels") GT 0` THEN 
+            REPEAT/E=($region_e_lo):($region_e_hi) (\
+	      LABEL/USER `_e`, `yloc`,0,0,0.1,`LABELS`)
+	 ELSE
+            REPEAT/E=($region_e_lo):($region_e_hi) (\
+	      LABEL/USER `_e`, `yloc`,0,0,0.1, "`_E`")
+	 ENDIF
+      ENDIF
 
    ENDIF
    GO LAS_url_label 0
