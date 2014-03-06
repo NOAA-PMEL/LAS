@@ -137,6 +137,9 @@ IF ($ferret_annotations"0|*>1") THEN
 ENDIF
 ENDIF
 
+! For an ensemble-z plot, make the Z axis in the vertical direction
+IF ($ferret_view"0|ze>1|*>0") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/TRANS
+
 ! Draw the plot
 IF ($shade_underlay) THEN 
    SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
@@ -144,6 +147,13 @@ IF ($shade_underlay) THEN
       IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          GO remove_xyzt_labels
       ENDIF
+      
+! For an ensemble-z plot, will make custom axis labels.
+      IF ($ferret_view"0|ze>1|*>0") THEN 
+         PPL axlabp,0,
+         PPL xaxis,`($xaxis_min)`,`($xaxis_max)`,1
+      ENDIF
+
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
    ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
@@ -153,9 +163,36 @@ ELSE
       IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          GO remove_xyzt_labels
       ENDIF
+      
+! For an ensemble-z plot, will make custom axis labels.
+      IF ($ferret_view"0|ze>1|*>0") THEN 
+         PPL axlabp,0,
+         PPL xaxis,`($xaxis_min)`,`($xaxis_max)`,1
+      ENDIF
+
    PPL ($plot_type)
 ENDIF
 
+
+! Put on the custom e-axis labels
+   IF ($ferret_view"0|ze>1|*>0") THEN
+      
+      LET dely = `0.04*ABS(($yaxis_max)-($yaxis_min))`
+      LET yloc = `($yaxis_max)+dely`
+      LET labsiz = 0.1
+      LET just = 0
+      
+      LET varnames = ..varnames
+      IF `IS_ELEMENT_OF_STR_N(varnames, "labels") GT 0` THEN 
+         REPEAT/E=($region_e_lo):($region_e_hi) (\
+	   LABEL/USER `_e`, `yloc`,`just`,0,`labsiz`,`LABELS`;\
+	   IF `($shade_underlay) AND (_e eq ($region_e_hi)-1)` THEN LET just = 1)
+      ELSE
+         REPEAT/E=($region_e_lo):($region_e_hi) (\
+	   LABEL/USER `_e`, `yloc`,0,0,($labsiz), "`_E`")
+      ENDIF
+
+pause
 ! One of the results is the data min and max. Save those here.
 DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
 DEFINE SYMBOL data_plotted_max = ($ppl$zmax)

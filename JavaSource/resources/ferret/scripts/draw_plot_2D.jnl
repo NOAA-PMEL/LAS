@@ -69,6 +69,11 @@ IF ($ferret_annotations"0|*>1") THEN
 ENDIF
 ENDIF
 
+
+! For an ensemble-z plot, make the Z axis in the vertical direction
+IF ($ferret_view"0|ze>1|*>0") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/TRANS
+
+
 ! Draw the plot and we are done
 
 IF `($data_count"0") EQ 1` THEN
@@ -83,6 +88,13 @@ IF `($data_count"0") EQ 1` THEN
          ppl yaxis,`($ppl$ymin)-0.5`,`($ppl$ymax)+0.5`,1
 	 ppl axlint,,1
       ENDIF
+
+! For an ensemble-z plot, will make custom axis labels.
+      IF ($ferret_view"0|ze>1|*>0") THEN 
+         PPL axlabp,0,
+         PPL xaxis,`($xaxis_min)`,`($xaxis_max)`,1
+      ENDIF
+
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
@@ -92,12 +104,39 @@ IF `($data_count"0") EQ 1` THEN
          IF ($ferret_view"0|te>1|*>0") THEN 
             ppl yaxis,`($ppl$ymin)-0.5`,`($ppl$ymax)+0.5`,1
 	    ppl axlint,,1
+	    ppl xaxis,`($ppl$ymin)-0.5`,`($ppl$ymax)+0.5`,1
          ENDIF
+! For an ensemble-z plot, will make custom axis labels.
+         IF ($ferret_view"0|ze>1|*>0") THEN 
+            PPL axlabp,0,
+	    ppl xaxis,`($xaxis_min)`,`($xaxis_max)`,1
+         ENDIF
+
       PPL ($plot_type)
    ENDIF
 
    IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN \
      CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
+
+! Put on the custom e-axis labels
+   IF ($ferret_view"0|ze>1|*>0") THEN
+      
+      LET dely = `0.04*ABS(($yaxis_max)-($yaxis_min))`
+      LET yloc = `($yaxis_max)+dely`
+      LET labsiz = 0.1
+      LET just = 0
+      
+      LET varnames = ..varnames
+      IF `IS_ELEMENT_OF_STR_N(varnames, "labels") GT 0` THEN 
+         REPEAT/E=($region_e_lo):($region_e_hi) (\
+	   LABEL/USER `_e`, `yloc`,`just`,0,`labsiz`,`LABELS`;\
+	   IF `($shade_underlay) AND (_e eq ($region_e_hi)-1)` THEN LET just = 1)
+      ELSE
+         REPEAT/E=($region_e_lo):($region_e_hi) (\
+	   LABEL/USER `_e`, `yloc`,0,0,($labsiz), "`_E`")
+      ENDIF
+
+   ENDIF
    
 ! One of the results is the data min and max. Save those here.
    DEFINE SYMBOL data_plotted_min = ($ppl$zmin)

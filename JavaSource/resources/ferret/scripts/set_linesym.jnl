@@ -6,8 +6,10 @@
 
 LET plotvar  = ($ferret_plot_var)
 LET filledvar = missing(plotvar,0)
-STAT plotvar
-LET npoints = ($stat_ngood) + ($stat_nbad)
+let ngood = plotvar[i=@ngd,j=@ngd,k=@ngd,l=@ngd,m=@ngd,n=@ngd]
+let nbad =  plotvar[i=@nbd,j=@nbd,k=@nbd,l=@nbd,m=@nbd,n=@nbd]
+
+LET npoints = ngood + nbad
 
 LET nminpts = 120
 IF ($itsa_multi_lineplot"0|*>1") THEN LET nminpts = 15
