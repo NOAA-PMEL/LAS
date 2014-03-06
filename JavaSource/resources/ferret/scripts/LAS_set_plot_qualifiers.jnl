@@ -8,6 +8,8 @@
 ! it sets LINECOLORS. The LINECOLORS setting needs a SET WIN to
 ! take effect.
 
+! Do a /TRIM only for color contour plots, not raster plots.
+
 IF `STRLEN("($ferret_view)") EQ 1` THEN  DEFINE SYMBOL oneDplot = 1
 IF `STRLEN("($ferret_view)") EQ 1 AND ($data_count"1") EQ 1` THEN  DEFINE SYMBOL oneD_1var = 1
 
