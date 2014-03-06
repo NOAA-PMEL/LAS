@@ -49,8 +49,6 @@ IF `($data_count) GT 1` THEN
    CANCEL SYMBOL ferret_trend_line
 ENDIF
 
-! Use Ferret properties to set up the plot qualifiers
-GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
@@ -74,14 +72,21 @@ IF ($ferret_view"0|e>1|*>0") THEN
    IF `($region_e_hi) - ($region_e_lo) LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
 ENDIF
 
-! Plots in other directions show a set of curves:
-! Mean is black, thick
-! other variables are thin
-
 ! Draw the plot
 
-IF `($data_count"0") GT 1` THEN
+! Plots of the mean in other directions show a set of curves:
+! Mean is black, thick. Other variables are thin
+! If ferret_show_all_ensembles = no then plot only the mean
 
+LET its_mean = `STRINDEX("($data_0_title)", "e=") GT 0` AND \
+ `STRINDEX("($data_0_title)", "Ave") GT 0` AND \
+ `STRINDEX("($data_0_var)", "_transformed") GT 0`
+
+LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
+
+IF `its_mean AND (only_mean EQ 0)` THEN
+
+   IF `STRINDEX("($data_0_title)", "[") EQ 1` THEN DEFINE SYMBOL data_0_title = ($data_0_name)(data_0_title)
    IF ($ferret_view"0|z>1|*>0") THEN 
       GO LAS_draw_multi_line_z_plot_e
    ELSE
@@ -90,6 +95,9 @@ IF `($data_count"0") GT 1` THEN
    GO LAS_url_label `($data_count)-1`
 
 ELSE
+
+! Use Ferret properties to set up the plot qualifiers
+   GO LAS_set_plot_qualifiers
 
    DEFINE SYMBOL split_title = ($ferret_title_0)
    GO LAS_split_title
