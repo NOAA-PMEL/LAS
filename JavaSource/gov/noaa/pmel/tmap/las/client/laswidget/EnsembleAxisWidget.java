@@ -14,17 +14,11 @@ public class EnsembleAxisWidget extends AxisWidget {
     static {
         ANALYSIS_LABEL.add("Mean");
         ///ANALYSIS.add("Weighted Mean");
-        ANALYSIS_LABEL.add("Variance");
-        ANALYSIS_LABEL.add("Minimum");
-        ANALYSIS_LABEL.add("Maximum");
     }
     public static List<String> ANALYSIS_VALUE = new ArrayList<String>();
     static {        
         ANALYSIS_VALUE.add("Average");
         ///ANALYSIS.add("Weighted Mean");
-        ANALYSIS_VALUE.add("Variance");
-        ANALYSIS_VALUE.add("Minimum");
-        ANALYSIS_VALUE.add("Maximum");
     }
     public EnsembleAxisWidget() {
         super();   
