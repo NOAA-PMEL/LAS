@@ -77,11 +77,12 @@ color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|ra
    ! For all FILL plots, we will first do a SHADE underlay to 
    ! get the plot to draw all the way to the edges.
 
-   DEFINE SYMBOL shade_underlay = FALSE
-   IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
+   DEFINE SYMBOL shade_underlay = 0
+   IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = 1
 
    IF `($ferret_google_plot"0") EQ 0` THEN 
-      IF `($degenerate_2d"0|0|*>1") EQ 0` THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/TRIM
+      IF `(($degenerate_2d"0|0|*>1") EQ 0) AND\
+           ($shade_underlay"0")` THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/TRIM
    ENDIF
    IF ($shade_underlay"0") THEN DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/LEVELS=($ferret_fill_levels)
 
