@@ -269,8 +269,9 @@ public class DatasetWidget extends Tree implements HasName {
             for ( int j = 0; j < vars.length; j++ ) {
                 // Do not include variables with subset_variable="true" used to denote "selector" variables in in-situ data sets like SOCAT
                 // TODO and for now no variables with character string values
+                String uu = vars[j].getAttributes().get("units");
                 if ( (vars[j].getAttributes().get("subset_variable") == null || !vars[j].getAttributes().get("subset_variable").equals("true")) && 
-                        !vars[j].getAttributes().get("units").equals("text")) {
+                        (uu == null || (uu != null && !uu.equals("text")) )) {
                     TreeItem item = new TreeItem();
                     item.setText(vars[j].getName());
                     item.setUserObject(vars[j]);
