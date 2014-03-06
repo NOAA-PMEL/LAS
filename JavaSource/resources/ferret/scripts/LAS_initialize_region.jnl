@@ -109,9 +109,10 @@ IF ($($region)_e_lo"0|*>1") THEN
   DEFINE SYMBOL region_e_hi = ($($region)_e_hi)
   DEFINE SYMBOL limits_e ($region_e_lo):($region_e_hi)
   DEFINE SYMBOL region_e E=($region_e_lo):($region_e_hi)
+  DEFINE SYMBOL region_e M=($region_e_lo):($region_e_hi)
 ENDIF
 IF ($add_region_e"0|*>1") THEN
-   IF ($($region)_e_lo"0|*>1") THEN DEFINE SYMBOL add_region_e = e=($($region)_e_lo)
+   IF ($($region)_e_lo"0|*>1") THEN DEFINE SYMBOL add_region_e = M=($($region)_e_lo)
    DEFINE SYMBOL region_e = ($add_region_e)
 ENDIF
 
