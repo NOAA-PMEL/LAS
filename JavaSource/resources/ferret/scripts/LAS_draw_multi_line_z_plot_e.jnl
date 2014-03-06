@@ -34,6 +34,10 @@ IF `($data_count"0") GT 0` THEN
    ENDIF
 ENDIF
 
+
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
+
 REPEAT/range=1:`($data_count"0")-1`/NAME=qdat (  \
   DEFINE SYMBOL qdat = `qdat`; \
   IF `($qdat) GE 1 AND is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qdat)]` ;\
