@@ -284,7 +284,6 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
         <help>Show all ensemble members in a line plot.</help>
         <title>Show all ensemble members.</title>
         <menu type="options" name="show_all_ensembles">
-           <item values="yes">Yes</item>
            <item values="no">No</item>
         </menu>
      </option>
