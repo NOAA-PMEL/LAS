@@ -683,7 +683,7 @@ public class OutputPanel extends Composite implements HasName {
 
                     lasAnnotationsPanel.setError("Fetching plot annotations...");
                     updating = true;
-                    // sendRequest.sendRequest(null, lasRequestCallback);
+                    // sendRequest.sendRequest(null, 33Callback);
                     // Using LASRequestEvent Controller so a cancel in one
                     // OutputPanel cancels related requests too
                     LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
@@ -1728,6 +1728,7 @@ public class OutputPanel extends Composite implements HasName {
         String local_elo = null;
         String local_ehi = null;
 
+        
         if (view.contains("x") || isComparePanel()) {
             local_xlo = vgState.get("xlo");
             local_xhi = vgState.get("xhi");
@@ -1818,55 +1819,29 @@ public class OutputPanel extends Composite implements HasName {
                 lasRequest.setRange("t", local_tlo, local_thi, 0);
             }
             if ( panelVar.getGrid().hasE() ) {
+                // Not an analysis e-axis choice...  
                 if ( EnsembleAxisWidget.ANALYSIS_LABEL.contains(local_elo) ) {
+                  
+                    // Add in the mean next
                     AnalysisAxisSerializable e = new AnalysisAxisSerializable();
                     e.setLo(panelVar.getGrid().getEAxis().getLo());
                     e.setHi(panelVar.getGrid().getEAxis().getHi());
                     e.setType("e");
                     e.setOp(EnsembleAxisWidget.ANALYSIS_VALUE.get(EnsembleAxisWidget.ANALYSIS_LABEL.indexOf(local_elo)));
                     analysis = new AnalysisSerializable();
-                    analysis.addAxis(e); 
-                    // For a line plot, add in the un-transformed variable as well with its own region if the e-axis is set to "All"
-                    if ( view.length() == 1 ) {
-                       int evarindex = 1;
-                        if ( panelAxesWidgets.getEAxis().getSelectedLabel().equals(EnsembleAxisWidget.MEAN) && view.length() == 1 ) {
-                            for ( int ei = 0; ei < panelAxesWidgets.getEAxis().getItemCount(); ei++ ) {
-                                String eval = panelAxesWidgets.getEAxis().getValue(ei);
-                                if ( !EnsembleAxisWidget.ANALYSIS_LABEL.contains(eval) ) {
-                                    lasRequest.addVariable(panelVar.getDSID(), panelVar.getID(), 1);
-                                    if (!analysis.isActive("x")) {
-                                        lasRequest.setRange("x", local_xlo, local_xhi, 1);
-                                    }
-
-                                    if (!analysis.isActive("y")) {
-                                        lasRequest.setRange("y", local_ylo, local_yhi, 1);
-                                    }
-
-                                    if (panelVar.getGrid().getZAxis() != null) {
-                                        if (!analysis.isActive("z")) {
-                                            lasRequest.setRange("z", local_zlo, local_zhi, 1);
-                                        }
-                                    }
-                                    if (panelVar.getGrid().getTAxis() != null) {
-                                        if (!analysis.isActive("t")) {
-                                            lasRequest.setRange("t", local_tlo, local_thi, 1);
-                                        }
-                                    }
-                                    if ( panelVar.getGrid().getEAxis() != null ) {
-                                        lasRequest.setRange("e", eval, eval, evarindex);
-                                    }
-                                    evarindex++;
-                                }
-                            }
-                        }
-                    }
+                    analysis.addAxis(e);            
+                    
                     
                 } else {
-                   lasRequest.setRange("e", local_elo, local_ehi, 0);
+                    // Put in the choice.
+                    lasRequest.setRange("e", local_elo, local_ehi, 0);
+                    
+                    
                 }
             }
         }
 
+        
         if (panelVar.isVector()) {
             // Add the second component...
             lasRequest.addVariable(panelVar.getDSID(), panelVar.getComponents().get(1), 1);
