@@ -192,7 +192,6 @@ ENDIF
 	   LABEL/USER `_e`, `yloc`,0,0,($labsiz), "`_E`")
       ENDIF
 
-pause
 ! One of the results is the data min and max. Save those here.
 DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
 DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
