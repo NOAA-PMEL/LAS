@@ -15,11 +15,7 @@ IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
 ! Initialize datasets beyond the first one. Keep
 ! titles for the plot legend and units for labeling 
 ! the plot axes.
-
-IF `($data_count"0") GT 6` THEN 
-   DEFINE SYMBOL data_count = 6
-   DEFINE SYMBOL reset_count = 1
-ENDIF
+define symbol data_count = 1
 
 LET attlist = ($data_0_var).attnames
 
