@@ -1,92 +1,25 @@
 ! LAS_draw_multi_line_z_plot_e.jnl
 !  Do a multi-line 1-D plot in z. 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
-set mode ver:always
+!  4/06/13 Input is an averaged variable. Plot it with
+!          all of the member variables as colored lines.
 
-
-CANCEL MODE GRATICULE
-DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
-IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
-
-GO LAS_pp_set_region_labels  ! for first dataset/variable
-
-! Initialize datasets beyond the first one. Keep
-! titles for the plot legend and units for labeling 
-! the plot axes.
-
-IF `($data_count"0") GT 6` THEN 
-   DEFINE SYMBOL data_count = 6
-   DEFINE SYMBOL reset_count = 1
-ENDIF
-
-! Is this an ensemble dataset with a variable containing the ensemble lables?
-IF `($data_count"0") GT 0` THEN
-   DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
-
-   LET eattnames = ($eaxis).attnames
-   IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
-      LET axtype = "`($eaxis)._CoordinateAxisType`"
-      LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
-      IF `is_ensemble` THEN 
-         LET labels_var = labels
-!	 DEFINE SYMBOL ferret_title_0 = Mean
-      ENDIF
-   ENDIF
-ENDIF
-
-
-! Use Ferret properties to set up the plot qualifiers
-GO LAS_set_plot_qualifiers
-
-REPEAT/range=1:`($data_count"0")-1`/NAME=qdat (  \
-  DEFINE SYMBOL qdat = `qdat`; \
-  IF `($qdat) GE 1 AND is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qdat)]` ;\
-  GO LAS_initialize_region ($qdat) ;  \
-  GO LAS_initialize_data  ($qdat) ; \
-  GO LAS_check_var_direction; \
-  IF ($error_status"0|*>1") THEN EXIT/LOOP; \
-  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
-  DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
-  DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
-  IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qdat) = ($enslab); \ 
-  LET tlen = STRLEN("($ferret_title_($qdat))"); \
-  LET title_len = `MAX(tlen, title_len)`; \
-  DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
-  GO LAS_pp_set_region_labels \
-)
-
-! If default graticules setting, put graticules on both axes.
-IF `($qualifiers_0"0|*>1")` THEN 
-   CANCEL SYMBOL qualifiers_0
-   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
-ENDIF
-
-
-
-! SET WIN/ASP=1.3
-!SET VIEW full
-! LET margin_del = 0.08
 GO LAS_open_window
 
 PPL AXLSZE,,0.08
 PPL AXNSIG,,2
 
+LET save_count = ($data_count)
 PLOT($qualifiers)($qualifiers_0)/NOKEY/SET ($plot_arg)
-   IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-   IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
-   IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
-   IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-   IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
-   IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-   IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-   IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-   IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-   IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
    IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
    ppl txlsze,0.07
    PPL xlab
    PPL ylab ($data_0_units)
+   DEFINE SYMBOL data_count = 1  ! just so the region labels script will work
+   GO reset_labels
 PPL PLOT
+
+DEFINE SYMBOL data_count = `save_count`
 
 ! Make the first line thick
 LET thicker = 2
@@ -139,10 +72,6 @@ REPEAT/range=1:`($data_count)`/NAME=m (; \
    `xpos+x1` 0.3 `ypos` `m + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
    DEFINE SYMBOL thicknum = ($thicksave); \
 )
-
-! IF ($reset_count"0|*>1") THEN 
-!   LABEL/nouser `xkey[i=@ave]` `ykey[i=@min]-0.1` 0 0  `titlesiz` "Plot maximum of 6 lines"
-
 
 ! The results script needs the actual axis directions. Restore them.
 
