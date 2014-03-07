@@ -28,6 +28,10 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+ can axis/depth  `zg,return=zaxis`
+sh grid zg; pause
+
+
 ! Check whether the region is too small; reduces to a single grid point.
 ! (Region is a point)
 GO LAS_check_1d_region
@@ -87,6 +91,75 @@ LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
 IF `its_mean AND (only_mean EQ 0)` THEN
 
    IF `STRINDEX("($data_0_title)", "[") EQ 1` THEN DEFINE SYMBOL data_0_title = ($data_0_name)(data_0_title)
+
+set mode ver:always
+
+
+CANCEL MODE GRATICULE
+DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
+IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
+
+! This should alwats be the case anyway
+
+DEFINE SYMBOL data_count = 1
+
+LET attlist = ($data_0_var).attnames
+
+IF `IS_ELEMENT_OF_STR_N(attlist, "definition") EQ 0` THEN
+   MESSAGE/ERROR **ERROR Cannot find definition attribute for ($data_0_var) LAS_draw_multi_line_z_plot_e.jnl
+   EXIT/PROGRAM
+ENDIF
+
+DEFINE SYMBOL ave_def = `($data_0_var).definition`
+LET bracket = STRINDEX("($ave_def)", "[")
+DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, bracket-1)`
+SHOW SYMBOL evariable
+LET ecount = `($evariable),RETURN=msize`
+
+REPEAT/RANGE=1:`ecount`/NAME=q (\
+   DEFINE SYMBOL data_($data_count)_var = ($evariable)[d=($dset($num)),($region_full),M=($data_count)]; \
+   DEFINE SYMBOL data_($data_count)_units = `($evariable),RETURN=units`; \
+   DEFINE SYMBOL data_count = `($data_count)+1` ; \
+   )
+
+! Is this an ensemble dataset with a variable containing the ensemble lables?
+IF `($data_count"0") GT 0` THEN
+   DEFINE SYMBOL itsa_multi_lineplot = 1
+   DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
+   LET labels_var =  _m[m=($data_1_var)]
+
+   LET eattnames = ($eaxis).attnames
+   IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
+      LET axtype = "`($eaxis)._CoordinateAxisType`"
+      LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
+      IF `is_ensemble` THEN 
+         LET labels_var = labels
+	 DEFINE SYMBOL ferret_title_0 = Mean
+      ENDIF
+   ENDIF
+ENDIF
+
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
+
+REPEAT/range=1:`($data_count"0")-1`/NAME=qq (  \
+  DEFINE SYMBOL qq = `qq`; \
+  IF `is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qq)]`; \
+  DEFINE SYMBOL ferret_plot_var = ($data_($qq)_var); \
+  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
+  DEFINE SYMBOL ferret_plot_var_($qq) = ($ferret_plot_var); \ 
+  IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
+  LET tlen = STRLEN("($ferret_title_($qq))"); \
+  LET title_len = `MAX(tlen, title_len)`; \
+  DEFINE SYMBOL units_($qq) = `UPCASE("($data_($qq)_units)")`; \
+   )
+
+! If default graticules setting, put graticules on both axes.
+IF `($qualifiers_0"0|*>1")` THEN 
+   CANCEL SYMBOL qualifiers_0
+   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+ENDIF
+
    IF ($ferret_view"0|z>1|*>0") THEN 
       GO LAS_draw_multi_line_z_plot_e
    ELSE
