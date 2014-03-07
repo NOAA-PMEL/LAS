@@ -13,6 +13,7 @@
 !  var2 tolerance (lat on map plots)
 !  var3 tolerance (var at lon/lat for map plots)
 
+
 IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 DEFINE SYMBOL ncruises = `($rowvar),RETURN=msize`
@@ -42,7 +43,14 @@ LET npts = `lat_with_gaps,RETURN=isize`
 
 ! Only decimate if there is a lot of data
 
+
 LET min_decimate = ($1"200000")
+
+! Allow for a Ferret property to turn this feature off
+!   <decimate_traj>0</decimate_traj>
+
+IF `($ferret_decimate_traj"1|0|*>1") EQ 0` THEN LET min_decimate = `npts + 1`
+
 IF `npts LT min_decimate OR min_decimate LT 0` THEN 
    LET nrow = `rowsize,return=msize`
    IF `nrow GT 1` THEN
