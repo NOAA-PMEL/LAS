@@ -1086,10 +1086,10 @@ public class SimplePropPropViewer implements EntryPoint {
         // TODO treat an x or y axis with time differently.  First problem, how do you know it's time.  Check the id against the time id tabledap property?
 
         constraintWidgetGroup.clearTextFields();
-        String xid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
-        String xname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
-        String yid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-        String yname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
+        String xid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
+        String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
+        String yid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
+        String yname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
         String dsid = yVariables.getUserObject(yVariables.getSelectedIndex()).getDSID();
 
         VariableConstraintAnchor ctax1;  
