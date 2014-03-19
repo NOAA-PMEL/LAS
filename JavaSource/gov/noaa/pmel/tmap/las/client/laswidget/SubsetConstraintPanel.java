@@ -95,7 +95,7 @@ public class SubsetConstraintPanel extends Composite {
                     String value = valuesList.getItemText(index);
                     String shortName = getShortName(currentVariable);
                     //  the key and the variable are always the same in this case.
-                    eventBus.fireEventFromSource(new AddSelectionConstraintEvent(shortName, value, shortName, key_value), SubsetConstraintPanel.this);
+                    eventBus.fireEventFromSource(new AddSelectionConstraintEvent(shortName, value, shortName, key_value, "eq"), SubsetConstraintPanel.this);
                 }
             }
         });

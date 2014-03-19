@@ -178,7 +178,7 @@ public class SeasonConstraintPanel extends Composite {
 
         for ( int i = 0; i < 12; i++ ) {
             if ( buttons.get(i).isDown() ) {
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getShortname(), months.get(i), var.getShortname(), months.get(i)), this);
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(var.getShortname(), months.get(i), var.getShortname(), months.get(i),"is"), this);
             }
         }
         //eventBus.fireEventFromSource(new AddVariableConstraintEvent(var.getDSID(), var.getShortname(), String.valueOf(start), "ge", var.getShortname(), String.valueOf(end), "le", true), this);
