@@ -816,6 +816,9 @@ public class ProductRequest {
         double lat_range;
         double yhi = -9999;
         double ylo = -9999;
+        String elo = null;
+        String ehi = null;
+        String eop = null;
         for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
             Element axis = (Element) axisIt.next();
             String type = axis.getAttributeValue("type");
@@ -825,16 +828,23 @@ public class ProductRequest {
             if ( type.equals("t") ) {
             	grid = grid+","+type+"=_q-t_"+lo+"_q-t_:_q-t_"+hi+"_q-t_@"+op;
             } else {
-            	grid = grid+","+type+"="+lo+":"+hi+"@"+op;
+                if ( !type.equals("e") ) { // e is done separately below
+                    grid = grid+","+type+"="+lo+":"+hi+"@"+op;
+                }
             }
             
             if ( type.equals("x") ) {
             	xhi = Double.valueOf(hi).doubleValue();
-            	xlo = Double.valueOf(hi).doubleValue();
+            	xlo = Double.valueOf(lo).doubleValue();
             }
             if ( type.equals("y") ) {
             	yhi = Double.valueOf(hi).doubleValue();
             	ylo = Double.valueOf(lo).doubleValue();
+            }
+            if ( type.equals("e") ) {
+                elo = axis.getAttributeValue("lo");
+                ehi = axis.getAttributeValue("hi");
+                eop = axis.getAttributeValue("op");
             }
         }
 
@@ -907,7 +917,17 @@ public class ProductRequest {
             jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask_cr_");
             jnl.append("letdeq1 "+var+"_"+var_count+"_transformed=masked_"+var+"[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+            if ( eop !=  null && grid.length() > 0) {
+                
+                jnl.append("letdeq1 "+var+"_"+var_count+"_etrans="+var+"[d="+dset+","+"e="+elo+":"+ehi+"@"+eop+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_etrans");
+                jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_"+var_count+"_etrans"+"[d="+dset+grid+"]_cr_ATTRCMD "+var+"_"+var_count+"_etrans"+" "+var+"_"+var_count+"_transformed");
+
+            } else {
+                if ( eop != null ) {
+                    grid = ",e="+elo+":"+ehi+"@"+eop;
+                }
+                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+            }
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);
