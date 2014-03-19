@@ -13,6 +13,7 @@ public class AddSelectionConstraintEvent extends GwtEvent<AddSelectionConstraint
     private String value;
     private String key;
     private String keyValue;
+    private String op;
     
     public static final Type<AddSelectionConstraintEvent.Handler> TYPE = new Type<AddSelectionConstraintEvent.Handler>();
 
@@ -23,11 +24,12 @@ public class AddSelectionConstraintEvent extends GwtEvent<AddSelectionConstraint
      * @param key the underlying unique key value upon which the search can be made
      * @param keyValue the value of the key that will constrain the search to the correct value of the variable.
      */
-    public AddSelectionConstraintEvent(String variable, String value, String key, String keyValue) {
+    public AddSelectionConstraintEvent(String variable, String value, String key, String keyValue, String op) {
         this.variable = variable;
         this.value = value;
         this.key = key;
         this.keyValue = keyValue;
+        this.op = op;
     }
     
     public interface Handler extends EventHandler {
@@ -74,6 +76,12 @@ public class AddSelectionConstraintEvent extends GwtEvent<AddSelectionConstraint
 
     public void setKeyValue(String keyValue) {
         this.keyValue = keyValue;
+    }
+    public void setOp(String op) {
+        this.op = op;
+    }
+    public String getOp() {
+        return op;
     }
    
 }

@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
@@ -9,6 +10,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintLabel;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
@@ -113,10 +115,8 @@ public class SimplePropPropViewer implements EntryPoint {
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
     NumberFormat dFormat = NumberFormat.getFormat("########.##");
     CruiseIconWidget cruiseIcons = new CruiseIconWidget();
-    FlexTable timePanel = new FlexTable();
-    AxisWidget zAxisWidget = new AxisWidget();
-    VerticalPanel spaceTimeConstraints = new VerticalPanel();
-    HorizontalPanel spaceTimeTopRow = new HorizontalPanel();
+    VerticalPanel fixedConstraintMainPanel = new VerticalPanel();
+    HorizontalPanel fixedConstraintTitle = new HorizontalPanel();
     Map<String, VariableSerializable> xFilteredDatasetVariables = new HashMap<String, VariableSerializable>();
     Map<String, VariableSerializable> xAllDatasetVariables = new HashMap<String, VariableSerializable>();
     ToggleButton annotationsButton;
@@ -261,7 +261,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
             }
         });
-
+       
         // Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
         eventBus.addHandler(StringValueChangeEvent.TYPE, new StringValueChangeEvent.Handler() {
             @Override
@@ -431,8 +431,8 @@ public class SimplePropPropViewer implements EntryPoint {
                 VariableConstraintAnchor anchor2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, varid, variable, rhs, variable, rhs, op2);
                 VariableConstraintAnchor a = (VariableConstraintAnchor) constraintWidgetGroup.findMatchingAnchor(anchor1);
                 VariableConstraintAnchor b = (VariableConstraintAnchor) constraintWidgetGroup.findMatchingAnchor(anchor2);
-                VariableConstraintAnchor afixed = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(anchor1);
-                VariableConstraintAnchor bfixed = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(anchor2);
+                ConstraintDisplay afixed = (ConstraintDisplay) fixedConstraintPanel.findMatchingAnchor(anchor1);
+                ConstraintDisplay bfixed = (ConstraintDisplay) fixedConstraintPanel.findMatchingAnchor(anchor2);
                 if ( afixed != null && !anchor1.getValue().equals("") && !a.getValue().equals("")) {
                     double v1 = Double.valueOf(anchor1.getValue());
                     double a1 = Double.valueOf(afixed.getValue());
@@ -455,22 +455,20 @@ public class SimplePropPropViewer implements EntryPoint {
         outputPanel.setWidget(0, 0, lasAnnotationsPanel);
         output.add(annotationsButton);
         output.add(outputPanel);
-        spaceTimeTopRow.add(new HTML("<b>Fixed Constraints from the main interface:</b>&nbsp;"));
-        spaceTimeConstraints.add(spaceTimeTopRow);
+        fixedConstraintTitle.add(new HTML("<b>Fixed Constraints from the main interface:</b>&nbsp;"));
+        fixedConstraintMainPanel.add(fixedConstraintTitle);
         // TODO style and label
         fixedConstraintPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         fixedScroller.addStyleName(Constants.ALLBORDER);
         fixedScroller.add(fixedConstraintPanel);
         fixedScroller.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
-        spaceTimeConstraints.add(fixedScroller);
-        spaceTimeConstraints.add(timePanel);
-        spaceTimeConstraints.add(zAxisWidget);
+        fixedConstraintMainPanel.add(fixedScroller);
         RootPanel.get("icons").add(cruiseIcons);
         RootPanel.get("button_panel").add(buttonPanel);
         RootPanel.get("data_selection").add(topPanel);
         RootPanel.get("data_constraints").add(constraintWidgetGroup);
         RootPanel.get("correlation").add(output);
-        RootPanel.get("space_time_constraints").add(spaceTimeConstraints);
+        RootPanel.get("space_time_constraints").add(fixedConstraintMainPanel);
         lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
         lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
 
@@ -615,10 +613,6 @@ public class SimplePropPropViewer implements EntryPoint {
 
         String zlo = null;
         String zhi = null;
-        if (zAxisWidget.isVisible()) {
-            zlo = zAxisWidget.getLo();
-            zhi = zAxisWidget.getHi();
-        }
         String vix = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
         GridSerializable grid = yVariables.getUserObject(yVariables.getSelectedIndex()).getGrid();
         if (grid.hasT()) {
@@ -653,7 +647,6 @@ public class SimplePropPropViewer implements EntryPoint {
             } else if (zhi != null) {
                 lasRequest.setRange("z", zhi, zhi, 0);
             }
-            contained = contained && zAxisWidget.isContainedBy(initialState.getRangeLo("z", 0), initialState.getRangeHi("z", 0));
         }
 
         lasRequest.setProperty("product_server", "ui_timeout", "20");
@@ -1114,25 +1107,26 @@ public class SimplePropPropViewer implements EntryPoint {
             ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
             ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
         }
-        boundByFixed(ctax1);
-        boundByFixed(ctax2);
-
-        if ( v.getName().equals(xname) ) {
-            constraintWidgetGroup.setLhs(ctax1.getKeyValue());
-            constraintWidgetGroup.setRhs(ctax2.getKeyValue());
+        if ( ctax1 != null ) {
+            boundByFixed(ctax1);
+            if ( v.getName().equals(xname) ) {
+                constraintWidgetGroup.setLhs(ctax1.getKeyValue());
+            }
+            if ( constraintWidgetGroup.contains(ctax1)) {
+                constraintWidgetGroup.remove(ctax1);
+            }
+            constraintWidgetGroup.addConstraint(ctax1);
         }
-
-
-        if ( constraintWidgetGroup.contains(ctax1)) {
-            constraintWidgetGroup.remove(ctax1);
+        if ( ctax2 != null ) {
+            boundByFixed(ctax2);
+            if ( v.getName().equals(xname) ) {
+                constraintWidgetGroup.setRhs(ctax2.getKeyValue());
+            }
+            if ( constraintWidgetGroup.contains(ctax2) ) {
+                constraintWidgetGroup.remove(ctax2);
+            }
+            constraintWidgetGroup.addConstraint(ctax2);
         }
-        constraintWidgetGroup.addConstraint(ctax1);
-
-        if ( constraintWidgetGroup.contains(ctax2) ) {
-            constraintWidgetGroup.remove(ctax2);
-        }
-        constraintWidgetGroup.addConstraint(ctax2);
-
         double miny;
         double maxy;
         VariableConstraintAnchor ctay1;
@@ -1153,28 +1147,29 @@ public class SimplePropPropViewer implements EntryPoint {
             ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
             ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
         }
-        boundByFixed(ctay1);
-        boundByFixed(ctay2);    
-
-
-
-        if ( v.getName().equals(yname) ) {
-            constraintWidgetGroup.setLhs(ctay1.getKeyValue());
-            constraintWidgetGroup.setRhs(ctay2.getKeyValue());
+        if ( ctay1 != null ) {
+            boundByFixed(ctay1);
+            if ( v.getName().equals(yname) ) {
+                constraintWidgetGroup.setLhs(ctay1.getKeyValue());
+            }
+            if ( constraintWidgetGroup.contains(ctay1) ) {
+                constraintWidgetGroup.remove(ctay1);
+            }
+            constraintWidgetGroup.addConstraint(ctay1);
         }
-
-        if ( constraintWidgetGroup.contains(ctay1) ) {
-            constraintWidgetGroup.remove(ctay1);
+        if ( ctay2 != null ) {
+            boundByFixed(ctay2);    
+            if ( v.getName().equals(yname) ) {
+                constraintWidgetGroup.setRhs(ctay2.getKeyValue());
+            }
+            if ( constraintWidgetGroup.contains(ctay2) ) {
+                constraintWidgetGroup.remove(ctay2);
+            }
+            constraintWidgetGroup.addConstraint(ctay2);
         }
-        constraintWidgetGroup.addConstraint(ctay1);
-
-        if ( constraintWidgetGroup.contains(ctay2) ) {
-            constraintWidgetGroup.remove(ctay2);
-        }
-        constraintWidgetGroup.addConstraint(ctay2);
     }
-    private void boundByFixed(VariableConstraintAnchor a) {
-        VariableConstraintAnchor match = (VariableConstraintAnchor) fixedConstraintPanel.findMatchingAnchor(a);
+    private void boundByFixed(VariableConstraintAnchor a) {        
+        ConstraintDisplay match = (ConstraintDisplay) fixedConstraintPanel.findMatchingAnchor(a);
         if ( match != null ) {
             double value = Double.valueOf(a.getValue());
             double matchV = Double.valueOf(match.getValue());
@@ -1221,9 +1216,15 @@ public class SimplePropPropViewer implements EntryPoint {
                     defaulty = cprops.get("default_y");
                     defaultcb = cprops.get("default_color_by");
                 }
+                List<ERDDAPConstraintGroup> variableOnly = new ArrayList<ERDDAPConstraintGroup>();
+                for (Iterator gsIt = gs.iterator(); gsIt.hasNext();) {
+                    ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) gsIt.next();
+                    if ( erddapConstraintGroup.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
+                        variableOnly.add(erddapConstraintGroup);
+                    }
+                }
                 
-                
-                constraintWidgetGroup.init(gs, variables);
+                constraintWidgetGroup.init(variableOnly, variables);
             } else {
                 Window.alert("Could not get the variables list from the server.");
 
@@ -1275,23 +1276,6 @@ public class SimplePropPropViewer implements EntryPoint {
                     operationID = "prop_prop_plot";
                 } else if (grid_type.equals("trajectory")) {
                     operationID = "Trajectory_correlation_plot";
-                }
-
-                GridSerializable grid = yVariables.getUserObject(yVariables.getSelectedIndex()).getGrid();
-                
-
-                // TODO this is not right for data with a z axis.  It needs to be analogous with the setFixedXY and setFixedT
-                if (grid.hasZ()) {
-                    zAxisWidget.init(grid.getZAxis());
-                    zAxisWidget.setVisible(true);
-                    zAxisWidget.setRange(true);
-                } else {
-                    zAxisWidget.setVisible(false);
-                }
-
-                if (zlo != null && zhi != null) {
-                    zAxisWidget.setLo(zlo);
-                    zAxisWidget.setHi(zhi);
                 }
 
                 setVariables();

@@ -99,7 +99,7 @@ public class SelectionConstraintPanel extends Composite {
                 String key_value = valuesList.getValue(index);
                 String value = valuesList.getItemText(index);
                 String variable = getShortName(currentVariable);
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value), SelectionConstraintPanel.this);
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value, "eq"), SelectionConstraintPanel.this);
             }
         });
         
