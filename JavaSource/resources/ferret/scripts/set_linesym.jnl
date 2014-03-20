@@ -6,11 +6,45 @@
 
 LET plotvar  = ($ferret_plot_var)
 LET filledvar = missing(plotvar,0)
-let ngood = plotvar[i=@ngd,j=@ngd,k=@ngd,l=@ngd,m=@ngd,n=@ngd]
-let nbad =  plotvar[i=@nbd,j=@nbd,k=@nbd,l=@nbd,m=@nbd,n=@nbd]
+
+! We could get this out of a STAT command, but @NGD and @NBD need less computation.
+DEFINE SYMBOL  VARSHAPE `plotvar,RETURN=shape`
+CANCEL SYMBOL comma
+IF `STRINDEX("($varshape)", "X") NE 0` THEN
+   DEFINE SYMBOL getgood = i=@ngd
+   DEFINE SYMBOL getbad = i=@nbd
+   DEFINE SYMBOL comma = ,
+ENDIF
+IF `STRINDEX("($varshape)", "Y") NE 0` THEN
+   DEFINE SYMBOL getgood = ($getgood)($comma)j=@ngd
+   DEFINE SYMBOL getbad = ($getbad)($comma)j=@nbd
+   DEFINE SYMBOL comma = ,
+ENDIF
+IF `STRINDEX("($varshape)", "Z") NE 0` THEN
+   DEFINE SYMBOL getgood = ($getgood)($comma)k=@ngd
+   DEFINE SYMBOL getbad = ($getbad)($comma)k=@nbd
+   DEFINE SYMBOL comma = ,
+ENDIF
+IF `STRINDEX("($varshape)", "T") NE 0` THEN
+   DEFINE SYMBOL getgood = ($getgood)($comma)l=@ngd
+   DEFINE SYMBOL getbad = ($getbad)($comma)l=@nbd
+   DEFINE SYMBOL comma = ,
+ENDIF
+IF `STRINDEX("($varshape)", "E") NE 0` THEN
+   DEFINE SYMBOL getgood = ($getgood)($comma)m=@ngd
+   DEFINE SYMBOL getbad = ($getbad)($comma)m=@nbd
+   DEFINE SYMBOL comma = ,
+ENDIF
+IF `STRINDEX("($varshape)", "F") NE 0` THEN
+   DEFINE SYMBOL getgood = ($getgood)($comma)n=@ngd
+   DEFINE SYMBOL getbad = ($getbad)($comma)n=@nbd
+ENDIF
+
+let ngood = plotvar[($getgood)]
+let nbad =  plotvar[($getbad)]
 
 LET npoints = ngood + nbad
-
+list npoints
 LET nminpts = 120
 IF ($itsa_multi_lineplot"0|*>1") THEN LET nminpts = 15
 

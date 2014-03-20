@@ -8,6 +8,10 @@
 ! code that sits behind a Live Access Server (LAS). 
 ! Customizations for Ensemble datasets
 
+set mode ver:always
+
+! An e-direction plot
+
 ! Set any Ferret modes
 !
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
@@ -21,15 +25,16 @@ GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
 
+LET bracket = `STRINDEX("($variable_lab)", "[")`
+IF `bracket EQ 1` THEN DEFINE SYMBOL variable_lab = ($data_0_name)($variable_lab)
+DEFINE SYMBOl variable_lab_0 = ($variable_lab)
+
 ! Check for errors (They often occur during dataset initialization.)
 
 IF ($error_status"0|*>1") THEN
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
-
- can axis/depth  `zg,return=zaxis`
-sh grid zg; pause
 
 
 ! Check whether the region is too small; reduces to a single grid point.
@@ -44,15 +49,13 @@ ENDIF
 
 ! Here is variable 0 title
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+
+LET bracket = `STRINDEX("($ferret_plot_title)", "[")`
+IF `bracket EQ 1` THEN DEFINE SYMBOL ferret_plot_title = ($data_0_name)($ferret_plot_title)
+
+DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+
 LET title_len = STRLEN("($ferret_title_0)")
-
-! Ignore line color if this is a multi-var plot.
-! Also ignore any request for trend-line plots.
-IF `($data_count) GT 1` THEN 
-   DEFINE SYMBOL itsa_multi_lineplot = 1
-   CANCEL SYMBOL ferret_trend_line
-ENDIF
-
 
 ! symbols and/or line
 GO set_linesym
@@ -77,105 +80,136 @@ IF ($ferret_view"0|e>1|*>0") THEN
 ENDIF
 
 ! Draw the plot
-
-! Plots of the mean in other directions show a set of curves:
-! Mean is black, thick. Other variables are thin
+! Mean is black, thick. Other variables are thin, colors.
 ! If ferret_show_all_ensembles = no then plot only the mean
 
 LET its_mean = `STRINDEX("($data_0_title)", "e=") GT 0` AND \
  `STRINDEX("($data_0_title)", "Ave") GT 0` AND \
  `STRINDEX("($data_0_var)", "_transformed") GT 0`
 
-LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
-
-IF `its_mean AND (only_mean EQ 0)` THEN
-
-   IF `STRINDEX("($data_0_title)", "[") EQ 1` THEN DEFINE SYMBOL data_0_title = ($data_0_name)(data_0_title)
-
-set mode ver:always
-
-
-CANCEL MODE GRATICULE
-DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
-IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
-
-! This should alwats be the case anyway
-
-DEFINE SYMBOL data_count = 1
-
-LET attlist = ($data_0_var).attnames
-
-IF `IS_ELEMENT_OF_STR_N(attlist, "definition") EQ 0` THEN
-   MESSAGE/ERROR **ERROR Cannot find definition attribute for ($data_0_var) LAS_draw_multi_line_z_plot_e.jnl
-   EXIT/PROGRAM
-ENDIF
 
 DEFINE SYMBOL ave_def = `($data_0_var).definition`
 LET bracket = STRINDEX("($ave_def)", "[")
 DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, bracket-1)`
+
+
+IF `its_mean` THEN 
+   DEFINE SYMBOL ens_lab = Realizations: averaged all
+   DEFINE SYMBOL variable_lab = ($data_0_name) (($data_0_units))
+
+! Get the name of the untransformed variable.
+   LET attlist = ($data_0_var).attnames
+   IF `IS_ELEMENT_OF_STR_N(attlist, "definition") EQ 0` THEN
+      MESSAGE/ERROR **ERROR Cannot find definition attribute for ($data_0_var) LAS_draw_multi_line_z_plot_e.jnl
+      EXIT/PROGRAM
+   ENDIF
+
+   DEFINE SYMBOL ave_def = `($data_0_var).definition`
+   LET etrans = STRINDEX("($ave_def)", ",E=")
+   DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, etrans-1)`]
+      
+   LET ecount = `($evariable),RETURN=msize`
+ENDIF
+
+! The variable with the E variation which we will plot.
+LET evar = ($evariable)
+
+! Do we need to add a non-E-direction transformation to the variable label?
 SHOW SYMBOL evariable
-LET ecount = `($evariable),RETURN=msize`
+IF `STRINDEX("($evariable)", "@") GT 0` THEN
+   LET etrans = `STRINDEX("($data_title)", " e=")`
+   DEFINE SYMBOl variable_lab = `substring("($data_title)", 1, etrans)`] (($data_0_units))
+ENDIF
 
-REPEAT/RANGE=1:`ecount`/NAME=q (\
-   DEFINE SYMBOL data_($data_count)_var = ($evariable)[d=($dset($num)),($region_full),M=($data_count)]; \
-   DEFINE SYMBOL data_($data_count)_units = `($evariable),RETURN=units`; \
-   DEFINE SYMBOL data_count = `($data_count)+1` ; \
-   )
+LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
 
-! Is this an ensemble dataset with a variable containing the ensemble lables?
-IF `($data_count"0") GT 0` THEN
-   DEFINE SYMBOL itsa_multi_lineplot = 1
-   DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
-   LET labels_var =  _m[m=($data_1_var)]
+! Plot the mean plus the members.
+IF `its_mean AND (only_mean EQ 0)` THEN
 
-   LET eattnames = ($eaxis).attnames
-   IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
-      LET axtype = "`($eaxis)._CoordinateAxisType`"
-      LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
-      IF `is_ensemble` THEN 
-         LET labels_var = labels
-	 DEFINE SYMBOL ferret_title_0 = Mean
+! This should alwats be the case anyway
+   DEFINE SYMBOL data_count = 1
+
+! Instead of the F-TDS Ensemble-mean variable, use a Ferret LET definition. 
+! Then we load the data only once for the mean and all the members.
+
+   LET meanvar = `($data_0_var).definition`
+   DEFINE SYMBOL plot_arg = meanvar[($region_full)]
+
+   REPEAT/RANGE=1:`ecount`/NAME=q (\
+      DEFINE SYMBOL data_($data_count)_var = evar[d=($dset($num)),($region_full),M=($data_count)]; \
+      DEFINE SYMBOL data_($data_count)_units = `($evariable),RETURN=units`; \
+      DEFINE SYMBOL data_count = `($data_count)+1` ; \
+      )
+   
+! Ignore line color if this is a multi-var plot.
+! Also ignore any request for trend-line plots.
+   IF `($data_count) GT 1` THEN 
+      DEFINE SYMBOL itsa_multi_lineplot = 1
+      CANCEL SYMBOL ferret_trend_line
+   ENDIF
+
+   ! Is this an ensemble dataset with a variable containing the ensemble lables?
+   IF `($data_count"0") GT 0` THEN
+      DEFINE SYMBOL itsa_multi_lineplot = 1
+      DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
+      LET labels_var =  _m[m=($data_1_var)]
+   
+      LET eattnames = ($eaxis).attnames
+      IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
+         LET axtype = "`($eaxis)._CoordinateAxisType`"
+         LET is_ensemble = `STRCMP(axtype, "Ensemble") EQ 0`
+         IF `is_ensemble` THEN 
+            LET labels_var = labels
+   	 DEFINE SYMBOL ferret_title_0 = ($ens_lab"Mean")
+         ENDIF
       ENDIF
    ENDIF
-ENDIF
+   
+   ! Use Ferret properties to set up the plot qualifiers
 
-! Use Ferret properties to set up the plot qualifiers
-GO LAS_set_plot_qualifiers
-
-REPEAT/range=1:`($data_count"0")-1`/NAME=qq (  \
-  DEFINE SYMBOL qq = `qq`; \
-  IF `is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qq)]`; \
-  DEFINE SYMBOL ferret_plot_var = ($data_($qq)_var); \
-  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
-  DEFINE SYMBOL ferret_plot_var_($qq) = ($ferret_plot_var); \ 
-  IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
-  LET tlen = STRLEN("($ferret_title_($qq))"); \
-  LET title_len = `MAX(tlen, title_len)`; \
-  DEFINE SYMBOL units_($qq) = `UPCASE("($data_($qq)_units)")`; \
-   )
-
-! If default graticules setting, put graticules on both axes.
-IF `($qualifiers_0"0|*>1")` THEN 
-   CANCEL SYMBOL qualifiers_0
-   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
-ENDIF
-
-   IF ($ferret_view"0|z>1|*>0") THEN 
-      GO LAS_draw_multi_line_z_plot_e
-   ELSE
-      GO LAS_draw_multi_line_plot_e
+   GO LAS_set_plot_qualifiers
+   
+   REPEAT/range=1:`($data_count"0")-1`/NAME=qq (  \
+     DEFINE SYMBOL qq = `qq`; \
+     IF `is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qq)]`; \
+     DEFINE SYMBOL ferret_plot_var = ($data_($qq)_var); \
+     DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
+     DEFINE SYMBOL ferret_plot_var_($qq) = ($ferret_plot_var); \ 
+     IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
+     LET tlen = STRLEN("($ferret_title_($qq))"); \
+     LET title_len = `MAX(tlen, title_len)`; \
+     DEFINE SYMBOL units_($qq) = `UPCASE("($data_($qq)_units)")`; \
+      )
+   
+   ! If default graticules setting, put graticules on both axes.
+   IF `($qualifiers_0"0|*>1")` THEN 
+      CANCEL SYMBOL qualifiers_0
+      SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
    ENDIF
-   GO LAS_url_label `($data_count)-1`
+   
+      IF ($ferret_view"0|z>1|*>0") THEN 
+         GO LAS_draw_multi_line_z_plot_e
+      ELSE
+         GO LAS_draw_multi_line_plot_e
+      ENDIF
+      GO LAS_url_label `($data_count)-1`
 
 ELSE
 
 ! Use Ferret properties to set up the plot qualifiers
+! If they didnt set up a line type, make a plot of the mean thick, black.
+
+   IF `its_mean` THEN
+      IF `($ferret_line_color"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_color = black
+      IF `($ferret_line_thickness"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_thickness = 2
+   ENDIF
+
    GO LAS_set_plot_qualifiers
 
    DEFINE SYMBOL split_title = ($ferret_title_0)
    GO LAS_split_title
    DEFINE SYMBOL ferret_title_0 = ($split_title)
-   
+   sh win; pause
    IF ($ferret_trend_line"0|*>1") THEN  
 
       GO trend_line
@@ -236,5 +270,5 @@ IF `STRINDEX("($ferret_view)", "t") GT 0 OR STRINDEX("($ferret_view)", "z") GT 0
 GO LAS_results ($result_type)
 
 
-! End of file ------------ line_plot_1D.jnl--------------------------
+! End of file ------------ line_plot_1D_e.jnl--------------------------
 
