@@ -36,7 +36,6 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-
 ! Check whether the region is too small; reduces to a single grid point.
 ! (Region is a point)
 GO LAS_check_1d_region
@@ -92,14 +91,13 @@ DEFINE SYMBOL ave_def = `($data_0_var).definition`
 LET bracket = STRINDEX("($ave_def)", "[")
 DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, bracket-1)`
 
-
 IF `its_mean` THEN 
    DEFINE SYMBOL ens_lab = Realizations: averaged all
    DEFINE SYMBOL variable_lab = ($data_0_name) (($data_0_units))
 
 ! Get the name of the untransformed variable.
    LET attlist = ($data_0_var).attnames
-   IF `IS_ELEMENT_OF_STR_N(attlist, "definition") EQ 0` THEN
+   IF `IS_ELEMENT_OF_STR_N(attlist, "definition") EQ 0` THEN ! e
       MESSAGE/ERROR **ERROR Cannot find definition attribute for ($data_0_var) LAS_draw_multi_line_z_plot_e.jnl
       EXIT/PROGRAM
    ENDIF
@@ -109,6 +107,31 @@ IF `its_mean` THEN
    DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, etrans-1)`]
       
    LET ecount = `($evariable),RETURN=msize`
+
+ELSE
+   
+! Is there a transformation in directions other than E?
+! 
+   LET attlist = ($evariable).attnames
+   IF `IS_ELEMENT_OF_STR_N(attlist, "definition") NE 0` THEN
+   
+   DEFINE SYMBOL e_ave_def = `($evariable).definition`
+   LET etrans = STRINDEX("($e_ave_def)", ",E=")
+   IF `etrans GT 1` THEN 
+      LET its_mean = 1
+      DEFINE SYMBOL ens_lab = Realizations: averaged all
+   
+      LET bracket = `STRINDEX("($e_ave_def)", "[")`
+      DEFINE SYMBOL evariable = `SUBSTRING("($e_ave_def)", 1, bracket-1)`
+
+      LET itrans = `STRINDEX("($ave_def)", "D=1,")`
+      LET bracket = `STRINDEX("($ave_def)", "]")`
+      DEFINE SYMBOL other_ave_def = `SUBSTRING("($ave_def)", itrans+4, bracket-itrans-4)`
+      DEFINE SYMBOL evariable = ($evariable)[d=1,($other_ave_def)]
+
+      LET ecount = `($evariable),RETURN=msize`
+   ENDIF
+   ENDIF
 ENDIF
 
 ! The variable with the E variation which we will plot.
@@ -118,13 +141,16 @@ LET evar = ($evariable)
 SHOW SYMBOL evariable
 IF `STRINDEX("($evariable)", "@") GT 0` THEN
    LET etrans = `STRINDEX("($data_title)", " e=")`
-   DEFINE SYMBOl variable_lab = `substring("($data_title)", 1, etrans)`] (($data_0_units))
+   IF `etrans GT 0` THEN \
+    DEFINE SYMBOl variable_lab = `SUBSTRING("($data_title)", 1, etrans)`] (($data_0_units))
 ENDIF
 
 LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
 
 ! Plot the mean plus the members.
 IF `its_mean AND (only_mean EQ 0)` THEN
+
+   DEFINE SYMBOL ens_lab = Realizations: averaged all
 
 ! This should alwats be the case anyway
    DEFINE SYMBOL data_count = 1
@@ -200,8 +226,9 @@ ELSE
 ! If they didnt set up a line type, make a plot of the mean thick, black.
 
    IF `its_mean` THEN
-      IF `($ferret_line_color"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_color = black
-      IF `($ferret_line_thickness"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_thickness = 2
+!      IF `($ferret_line_color"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_color = black
+!      IF `($ferret_line_thickness"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_line_thickness = 2
+      DEFINE SYMBOL ens_lab = Realizations: averaged all
    ENDIF
 
    GO LAS_set_plot_qualifiers
@@ -209,7 +236,6 @@ ELSE
    DEFINE SYMBOL split_title = ($ferret_title_0)
    GO LAS_split_title
    DEFINE SYMBOL ferret_title_0 = ($split_title)
-   sh win; pause
    IF ($ferret_trend_line"0|*>1") THEN  
 
       GO trend_line
@@ -250,6 +276,8 @@ ELSE
    GO LAS_url_label 0
 
 ENDIF
+
+   IF `its_mean` THEN DEFINE SYMBOL ens_lab = Realizations: averaged all
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
