@@ -6,6 +6,7 @@
 !
 ! Plot_1D.jnl decides which script to call to make a 1D plot.
 !
+
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
 
@@ -15,10 +16,10 @@ IF ($operation_ID"0|Plot_1D_e>1|*>0") THEN
    GO line_plot_1D_e
    EXIT/SCRIPT
 ENDIF
-IF ($operation_ID"0|Plot_1D_t_e>1|*>0") THEN 
-   GO line_plot_1D_e
-   EXIT/SCRIPT
-ENDIF
+!IF ($operation_ID"0|Plot_1D_t_e>1|*>0") THEN 
+!   GO line_plot_1D_e
+!   EXIT/SCRIPT
+!ENDIF
 
 IF `STRLEN("($ferret_view)") EQ 1` THEN 
 
