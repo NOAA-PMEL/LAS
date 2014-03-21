@@ -88,10 +88,11 @@ LET its_mean = `STRINDEX("($data_0_title)", "e=") GT 0` AND \
 
 
 DEFINE SYMBOL ave_def = `($data_0_var).definition`
-LET bracket = STRINDEX("($ave_def)", "[")
-DEFINE SYMBOL evariable = `SUBSTRING("($ave_def)", 1, bracket-1)`
+LET ave_def = ($data_0_var).definition
+LET bracket = STRINDEX(ave_def, "[")
+DEFINE SYMBOL evariable = `SUBSTRING(ave_def, 1, bracket-1)`
 
-IF `its_mean` THEN 
+IF `its_mean` THEN
    DEFINE SYMBOL ens_lab = Realizations: averaged all
    DEFINE SYMBOL variable_lab = ($data_0_name) (($data_0_units))
 
@@ -116,34 +117,30 @@ ELSE
    IF `IS_ELEMENT_OF_STR_N(attlist, "definition") NE 0` THEN
    
    DEFINE SYMBOL e_ave_def = `($evariable).definition`
-   LET etrans = STRINDEX("($e_ave_def)", ",E=")
-   IF `etrans GT 1` THEN 
-      LET its_mean = 1
-      DEFINE SYMBOL ens_lab = Realizations: averaged all
+      LET etrans = STRINDEX("($e_ave_def)", ",E=")
+      IF `etrans GT 1` THEN 
+         LET its_mean = 1
+         DEFINE SYMBOL ens_lab = Realizations: averaged all
    
-      LET bracket = `STRINDEX("($e_ave_def)", "[")`
-      DEFINE SYMBOL evariable = `SUBSTRING("($e_ave_def)", 1, bracket-1)`
+         LET bracket = `STRINDEX("($e_ave_def)", "[")`
+         DEFINE SYMBOL evariable = `SUBSTRING("($e_ave_def)", 1, bracket-1)`
 
-      LET itrans = `STRINDEX("($ave_def)", "D=1,")`
-      LET bracket = `STRINDEX("($ave_def)", "]")`
-      DEFINE SYMBOL other_ave_def = `SUBSTRING("($ave_def)", itrans+4, bracket-itrans-4)`
-      DEFINE SYMBOL evariable = ($evariable)[d=1,($other_ave_def)]
+         LET itrans = `STRINDEX(ave_def, "D=1,")`
+         LET bracket = `STRINDEX(ave_def, "]")`
+         DEFINE SYMBOL other_ave_def = `SUBSTRING(ave_def, itrans+4, bracket-itrans-4)`
+         DEFINE SYMBOL evariable = ($evariable)[d=1,($other_ave_def)]
 
-      LET ecount = `($evariable),RETURN=msize`
-   ENDIF
+         LET ecount = `($evariable),RETURN=msize`
+      
+         DEFINE SYMBOl variable_lab = ($data_title)  (($data_0_units))
+
+      ENDIF
+
    ENDIF
 ENDIF
 
 ! The variable with the E variation which we will plot.
 LET evar = ($evariable)
-
-! Do we need to add a non-E-direction transformation to the variable label?
-SHOW SYMBOL evariable
-IF `STRINDEX("($evariable)", "@") GT 0` THEN
-   LET etrans = `STRINDEX("($data_title)", " e=")`
-   IF `etrans GT 0` THEN \
-    DEFINE SYMBOl variable_lab = `SUBSTRING("($data_title)", 1, etrans)`] (($data_0_units))
-ENDIF
 
 LET only_mean = ($ferret_show_all_ensembles"0|no>1|*>0")
 
