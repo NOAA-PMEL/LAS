@@ -87,12 +87,15 @@ LET its_mean = `STRINDEX("($data_0_title)", "e=") GT 0` AND \
  `STRINDEX("($data_0_var)", "_transformed") GT 0`
 
 
-DEFINE SYMBOL ave_def = `($data_0_var).definition`
-LET ave_def = ($data_0_var).definition
-LET bracket = STRINDEX(ave_def, "[")
-DEFINE SYMBOL evariable = `SUBSTRING(ave_def, 1, bracket-1)`
+DEFINE SYMBOL evariable = ($data_0_var)
 
 IF `its_mean` THEN
+
+   DEFINE SYMBOL ave_def = `($data_0_var).definition`
+   LET ave_def = ($data_0_var).definition
+   LET bracket = STRINDEX(ave_def, "[")
+   DEFINE SYMBOL evariable = `SUBSTRING(ave_def, 1, bracket-1)`
+
    DEFINE SYMBOL ens_lab = Realizations: averaged all
    DEFINE SYMBOL variable_lab = ($data_0_name) (($data_0_units))
 
