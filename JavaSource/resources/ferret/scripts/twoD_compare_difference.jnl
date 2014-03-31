@@ -191,6 +191,7 @@ ENDIF
          REPEAT/E=($region_e_lo):($region_e_hi) (\
 	   LABEL/USER `_e`, `yloc`,0,0,($labsiz), "`_E`")
       ENDIF
+   ENDIF
 
 ! One of the results is the data min and max. Save those here.
 DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
