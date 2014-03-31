@@ -4,6 +4,7 @@
 ! 7-Oct-2008 Make the sets of the xpts and ypts (in whatever direction)
 !            based on the coordinates in the chosen region and with 
 !            striding applied.
+! March 2014 Check for degenerate regions
 
 
 !  XY view
@@ -23,12 +24,19 @@ IF ($ferret_view"|xy>1|*>0") THEN
    LET mark_xmax = `xpts[x=@max,y=@max]`
    LET mark_ymin = `ypts[x=@min,y=@min]`
    LET mark_ymax = `ypts[x=@max,y=@max]`
+
+   IF `(mark_xmin EQ mark_xmax) OR (mark_ymax EQ mark_ymin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
+
    LET xx =  X[GX=mvar]
    LET yy =  Y[GY=mvar]
    LET nx = `xx,return=isize`
    LET ny = `yy,return=jsize`
    LET x_pct = nx*($region_x_range)/(mark_xmax - mark_xmin)
    LET y_pct = ny*($region_y_range)/(mark_ymax - mark_ymin)
+
 
    LET subsample = `( x_pct GT ($PPL$XPIXEL)/10 ) + ( y_pct GT ($PPL$YPIXEL)/10) GT 0`
 
@@ -83,6 +91,12 @@ IF ($ferret_view"|xz>1|*>0") THEN
    LET mark_xmax = `xpts[x=@max,z=@max]`
    LET mark_zmin = `zpts[x=@min,z=@min]`
    LET mark_zmax = `zpts[x=@max,z=@max]`
+
+   IF `(mark_xmin EQ mark_xmax) OR (mark_zmax EQ mark_zmin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
+
    LET nx = `xpts,return=isize`
    LET nz = `xpts,return=ksize`
    LET x_pct = nx*($region_x_range)/(mark_xmax - mark_xmin)
@@ -145,6 +159,11 @@ IF ($ferret_view"|xt>1|*>0") THEN
    LET mark_xmax = `xpts[x=@max,t=@max]`
    LET mark_tmin = `tpts[x=@min,t=@min]`
    LET mark_tmax = `tpts[x=@max,t=@max]`
+
+   IF `(mark_xmin EQ mark_xmax) OR (mark_tmax EQ mark_tmin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
    
    LET tt =  T[GT=mvar]
    DEFINE SYMBOL region_t_range = `tt[t=@max] - tt[t=@min]`
@@ -199,6 +218,12 @@ IF ($ferret_view"|yz>1|*>0") THEN
    LET mark_ymax = `ypts[y=@max,z=@max]`
    LET mark_zmin = `zpts[y=@min,z=@min]`
    LET mark_zmax = `zpts[y=@max,z=@max]`
+
+   IF `(mark_ymin EQ mark_ymax) OR (mark_zmax EQ mark_zmin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
+ 
    LET ny = `ypts,return=jsize`
    LET nz = `ypts,return=ksize`
    LET y_pct = ny*($region_y_range)/(mark_ymax - mark_ymin)
@@ -254,6 +279,11 @@ IF ($ferret_view"|yt>1|*>0") THEN
    LET mark_tmin = `tpts[y=@min,t=@min]`
    LET mark_tmax = `tpts[y=@max,t=@max]`
 
+   IF `(mark_ymin EQ mark_ymax) OR (mark_tmax EQ mark_tmin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
+
    LET tt =  T[GT=mvar]
    DEFINE SYMBOL region_t_range = `tt[t=@max] - tt[t=@min]`
 
@@ -299,11 +329,15 @@ IF ($ferret_view"|zt>1|*>0") THEN
       LET tpts = 0*Z[GZ=mvar,($region_0_t)] + T[GT=mvar,($region_0_t)]
    ENDIF
 
-
    LET mark_zmin = `zpts[z=@min,t=@min]`
    LET mark_zmax = `zpts[z=@max,t=@max]`
    LET mark_tmin = `tpts[z=@min,t=@min]`
    LET mark_tmax = `tpts[z=@max,t=@max]`
+
+   IF `(mark_zmin EQ mark_zmax) OR (mark_tmax EQ mark_tmin)` THEN
+        LET subsample = 0
+	EXIT/SCRIPT
+   ENDIF
 
    LET tt =  T[GT=mvar]
    DEFINE SYMBOL region_t_range = `tt[t=@max] - tt[t=@min]`
