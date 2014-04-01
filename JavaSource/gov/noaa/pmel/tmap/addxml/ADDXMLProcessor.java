@@ -1420,13 +1420,22 @@ public class ADDXMLProcessor {
                                     // Same as DateTimeFormatter f = ISODateTimeFormat.basicTime();
                                     DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withChronology(chrono);
                                     if ( dateRange != null ) {
-
+                                        AxisBean tAxis = new AxisBean();
                                         DateType sd = dateRange.getStart();
+                                        
+                                           
                                         DateTime metadata_sd = null;
                                         if ( sd != null ) {
-                                            String date = sd.getText();
+                                            String date = sd.toDateTimeString();
+                                            if ( date.startsWith("0000") ) {
+                                                date = date.replace("0000", "0001");
+                                                tAxis.setModulo(true);
+                                            }
+                                            if ( date.startsWith("-0001") ) {
+                                                date = date.replace("-0001", "0001");
+                                            }
                                             try {
-                                                metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+                                                metadata_sd = f.parseDateTime(date).withChronology(chrono);
                                             } catch (Exception e) {
                                                 f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
                                                 metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
@@ -1435,12 +1444,19 @@ public class ADDXMLProcessor {
                                         DateType ed = dateRange.getEnd();
                                         DateTime metadata_ed = null;
                                         if ( ed != null ) {
-                                            String date = ed.getText();
+                                            String date = ed.toDateTimeString();
+                                            if ( date.startsWith("0000") ) {
+                                                date = date.replace("0000","0001");
+                                                tAxis.setModulo(true);
+                                            }
+                                            if ( date.startsWith("-0001") ) {
+                                                date = date.replace("-0001", "0001");
+                                            }
                                             if ( date.equalsIgnoreCase("present")) {
                                                 metadata_ed = new DateTime().withChronology(chrono);
                                             } else {
                                                 try {
-                                                    metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+                                                    metadata_ed = f.parseDateTime(date).withChronology(chrono);
                                                 } catch (Exception e) {
                                                     f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
                                                     metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
@@ -1450,7 +1466,7 @@ public class ADDXMLProcessor {
 
 
                                         
-                                        AxisBean tAxis = new AxisBean();
+                                      
                                         if ( timeUnits == null ) {
                                             // Something went wrong, do a regular scan...
                                             forceAxes.put("t", new Boolean(true));
