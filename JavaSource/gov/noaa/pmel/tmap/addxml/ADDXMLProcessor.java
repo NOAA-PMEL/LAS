@@ -1417,7 +1417,8 @@ public class ADDXMLProcessor {
                                         }
                                     }
                                     // Get the date time from the metadata TimeCoverage if it exists...
-                                    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ").withChronology(chrono);
+                                    // Same as DateTimeFormatter f = ISODateTimeFormat.basicTime();
+                                    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withChronology(chrono);
                                     if ( dateRange != null ) {
 
                                         DateType sd = dateRange.getStart();
@@ -1427,7 +1428,7 @@ public class ADDXMLProcessor {
                                             try {
                                                 metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
                                             } catch (Exception e) {
-                                                f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+                                                f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
                                                 metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
                                             }
                                         }
@@ -1441,7 +1442,7 @@ public class ADDXMLProcessor {
                                                 try {
                                                     metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
                                                 } catch (Exception e) {
-                                                    f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+                                                    f = DateTimeFormat.forPattern("yyyy-MM-ddTHH:mm:ss").withChronology(chrono);
                                                     metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
                                                 }
                                             }
@@ -1475,7 +1476,7 @@ public class ADDXMLProcessor {
                                         Duration duration = new Duration(delta_millis);
                                         if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
                                             DateTimeFormatter fmt;
-                                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
+                                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyyTHH:mm:ss");
                                             tAxis.setArange(null);
                                             tAxis.setUnits("time");
                                             String[] v = new String[1];
@@ -1521,9 +1522,9 @@ public class ADDXMLProcessor {
                                                     // LAS doesn't understand "week" so make it "day" and
                                                     // multiply the step by 7.
                                                     periods = periods + " " + tn;
-                                                    if (tn.equals("week")) {
-                                                        tn = "day";
-                                                        step = step * 7;
+                                                    if (tn.contains("week")) {
+                                                        typeName = "day";
+                                                        step = values[i] * 7;
                                                     }
                                                     // Keep only the largest whole period...
                                                     if ( typeName.equals("") ) {
