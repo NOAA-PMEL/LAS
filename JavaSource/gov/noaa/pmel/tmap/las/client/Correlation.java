@@ -224,22 +224,6 @@ public class Correlation implements EntryPoint {
 		ClientFactory cf = GWT.create(ClientFactory.class);
 		eventBus = cf.getEventBus();
 
-		eventBus.addHandler(WidgetSelectionChangeEvent.TYPE,
-				new WidgetSelectionChangeEvent.Handler() {
-					@Override
-					public void onAxisSelectionChange(
-							WidgetSelectionChangeEvent event) {
-						Object source = event.getSource();
-						if (source instanceof DateTimeWidget) {
-							String initiallo = initialState.getRangeLo("t", 0);
-							String initialhi = initialState.getRangeHi("t", 0);
-							if (!timeConstraint.isContainedBy(initiallo,
-									initialhi)) {
-								warn("Increasing the time range will require LAS to fetch new data from the database.");
-							}
-						}
-					}
-				});
 
 		// Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
 		eventBus.addHandler(StringValueChangeEvent.TYPE,
@@ -607,12 +591,6 @@ public class Correlation implements EntryPoint {
 		@Override
 		public void onFeatureChanged() {
 			update.addStyleDependentName("APPLY-NEEDED");
-			if (!mapConstraint.isContainedBy(initialState.getRangeLo("x", 0),
-					initialState.getRangeHi("x", 0),
-					initialState.getRangeLo("y", 0),
-					initialState.getRangeHi("y", 0))) {
-				warn("Increasing the lat/lon range will require LAS to fetch new data from the database.");
-			}
 		}
 	};
 	public ChangeHandler needApply = new ChangeHandler() {
@@ -642,7 +620,7 @@ public class Correlation implements EntryPoint {
 	private void updatePlot(boolean addHistory) {
 		// TODO Before submitting...
 
-		boolean contained = true;
+		
 		setConstraints();
 		update.removeStyleDependentName("APPLY-NEEDED");
 
@@ -684,12 +662,6 @@ public class Correlation implements EntryPoint {
 				lasRequest.setRange("t", tlo, thi, 0);
 
 			}
-			// Check to see if this time range is contained in the original time
-			// range...
-			contained = contained
-					&& timeConstraint.isContainedBy(
-							initialState.getRangeLo("t", 0),
-							initialState.getRangeHi("t", 0));
 		}
 		if (xlo != null && xhi != null) {
 			lasRequest.setRange("x", xlo, xhi, 0);
@@ -705,14 +677,6 @@ public class Correlation implements EntryPoint {
 			lasRequest.setRange("y", yhi, yhi, 0);
 		}
 
-		// Check if the current selection bounding box is contained in by
-		// original bounding box.
-
-		contained = contained
-				&& mapConstraint.isContainedBy(initialState.getRangeLo("x", 0),
-						initialState.getRangeHi("x", 0),
-						initialState.getRangeLo("y", 0),
-						initialState.getRangeHi("y", 0));
 		if (grid.hasZ()) {
 
 			if (zlo != null && zhi != null) {
@@ -720,17 +684,14 @@ public class Correlation implements EntryPoint {
 			} else if (zhi != null) {
 				lasRequest.setRange("z", zhi, zhi, 0);
 			}
-			contained = contained
-					&& zAxisWidget.isContainedBy(
-							initialState.getRangeLo("z", 0),
-							initialState.getRangeHi("z", 0));
+			
 		}
 
 		lasRequest.setProperty("product_server", "ui_timeout", "20");
 		lasRequest.setProperty("las", "output_type", "xml");
 		String grid_type = xVariables.getVariable(0).getAttributes()
 				.get("grid_type");
-		if (netcdf != null && contained && grid_type.equals("trajectory")) {
+		if (netcdf != null && grid_type.equals("trajectory")) {
 			operationID = "Trajectgory_correlation"; // No data base access;
 														// plot only from
 														// existing
@@ -750,8 +711,7 @@ public class Correlation implements EntryPoint {
 			if (!cruiseIcons.getIDs().equals(""))
 				lasRequest.setProperty("ferret", "cruise_list",
 						cruiseIcons.getIDs());
-		} else if ((!contained || netcdf == null)
-				&& grid_type.equals("trajectory")) {
+		} else if (netcdf == null && grid_type.equals("trajectory")) {
 			operationID = "Trajectory_correlation_plot";
 		} else {
 			operationID = "prop_prop_plot";
@@ -1270,19 +1230,16 @@ public class Correlation implements EntryPoint {
 	            int index = -1;
 	            int time_index = -1;
 	            constraintsLayout.setHeader("Add a variable constraint...");
+	           
 	            for (int i = 0; i < variables.length; i++) {
-	                if (!variables[i].getAttributes().get("grid_type")
-	                        .equals("vector")) {
+	                if (!variables[i].getAttributes().get("grid_type").equals("vector") ) {
 	                    xDatasetVariables.put(variables[i].getID(), variables[i]);
 	                    xVariables.addItem(variables[i]);
 	                    yVariables.addItem(variables[i]);
 	                    colorVariables.addItem(variables[i]);
-	                    if (!variables[i].getName().toLowerCase()
-	                            .equals("latitude")
-	                            && !variables[i].getName().toLowerCase()
-	                            .equals("longitude")
-	                            && !variables[i].getName().toLowerCase()
-	                            .equals("time")) {
+	                    if (!variables[i].getName().toLowerCase().equals("latitude")
+	                            && !variables[i].getName().toLowerCase().equals("longitude")
+	                            && !variables[i].getName().toLowerCase().equals("time") ) {
 	                        constraintsLayout.addItem(variables[i]);
 	                    }
 	                    if (variables[i].getID().equals(varid)) {
