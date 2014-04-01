@@ -1442,7 +1442,7 @@ public class ADDXMLProcessor {
                                                 try {
                                                     metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
                                                 } catch (Exception e) {
-                                                    f = DateTimeFormat.forPattern("yyyy-MM-ddTHH:mm:ss").withChronology(chrono);
+                                                    f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
                                                     metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
                                                 }
                                             }
@@ -1476,7 +1476,7 @@ public class ADDXMLProcessor {
                                         Duration duration = new Duration(delta_millis);
                                         if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
                                             DateTimeFormatter fmt;
-                                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyyTHH:mm:ss");
+                                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
                                             tAxis.setArange(null);
                                             tAxis.setUnits("time");
                                             String[] v = new String[1];
