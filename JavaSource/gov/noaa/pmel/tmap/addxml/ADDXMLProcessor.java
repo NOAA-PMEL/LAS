@@ -1417,8 +1417,9 @@ public class ADDXMLProcessor {
                                         }
                                     }
                                     // Get the date time from the metadata TimeCoverage if it exists...
-                                    // Same as DateTimeFormatter f = ISODateTimeFormat.basicTime();
-                                    DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withChronology(chrono);
+                                    // Try the generic parser
+                                    DateTimeFormatter f = ISODateTimeFormat.dateTimeParser().withChronology(chrono);
+                                    // DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ").withChronology(chrono);
                                     if ( dateRange != null ) {
                                         AxisBean tAxis = new AxisBean();
                                         DateType sd = dateRange.getStart();
@@ -1437,8 +1438,9 @@ public class ADDXMLProcessor {
                                             try {
                                                 metadata_sd = f.parseDateTime(date).withChronology(chrono);
                                             } catch (Exception e) {
-                                                f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
-                                                metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+                                                System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                                                System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" Trouble parsing time.");
+                                                return null;
                                             }
                                         }
                                         DateType ed = dateRange.getEnd();
@@ -1458,8 +1460,9 @@ public class ADDXMLProcessor {
                                                 try {
                                                     metadata_ed = f.parseDateTime(date).withChronology(chrono);
                                                 } catch (Exception e) {
-                                                    f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
-                                                    metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+                                                    System.out.println("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                                                    System.out.println("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" Trouble parsing time.");
+                                                    return null;
                                                 }
                                             }
                                         }
