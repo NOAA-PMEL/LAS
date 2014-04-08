@@ -11,6 +11,7 @@
 !              
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
+! 4/2014    ACM Add time units, origin and calendar to map scale file
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
@@ -148,6 +149,7 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
+	 SET DATA 1
          LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
@@ -167,6 +169,7 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
+	 SET DATA 1
          LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
