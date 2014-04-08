@@ -59,6 +59,23 @@ LET isvar = IS_ELEMENT_OF_STR (allvars, "($coordstring)")
 IF `isvar NE 0` THEN
 
 ! Is it 2D?  IF so does it have longitude or latitude units?
+
+sh sym coordstring
+
+   LET pseudo_names = {\
+"'i'", "'j'", "'k'", "'l'", "'x'", "'y'", "'z'", "'t'", "'xbox'", "'ybox'", "'zbox'", "'tbox'", \
+"'xboxlo'", "'yboxlo'", "'zboxlo'", "'tboxlo'", "'xboxhi'", "'yboxhi'", "'zboxhi'", "'tboxhi'",  \
+"'I'", "'J'", "'K'", "'L'", "'X'", "'Y'", "'Z'", "'T'", "'XBOX'", "'YBOX'", "'ZBOX'", "'TBOX'", \
+"'XBOXLO'", "'YBOXLO'", "'ZBOXLO'", "'TBOXLO'", "'XBOXHI'", "'YBOXHI'", "'ZBOXHI'", "'TBOXHI'"}
+
+   let is_p = IS_ELEMENT_OF_STR("'($coordstring)'",pseudo_names)
+   list is_p
+   IF `is_p GT 0`  THEN
+      DEFINE SYMBOL coordstring = `UPCASE("($coordstring)")`
+      SET VAR/NAME=($coordstring)_1 '($coordstring)'
+      DEFINE SYMBOL coordstring ($coordstring)_1
+   ENDIF
+
    DEFINE SYMBOL cshape = `($coordstring),RETURN=shape`
    IF `STRCMP("($cshape)", "XY") EQ 0` THEN 
       LET cunits = DNCASE("`($coordstring).units`")

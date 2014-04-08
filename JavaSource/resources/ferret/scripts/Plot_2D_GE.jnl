@@ -16,6 +16,7 @@
 ! a file variable, an error occurred the second time the init script was called.
 !
 
+set redirect/tee/journal
 ! Set the gif filename, changing it from .gif to the name from this request
 ! Why is there not a result filename sometimes?
 IF `($result_plot_image_filename"0|*>1") EQ 0` THEN\
@@ -25,7 +26,7 @@ GO LAS_reset_gifname
 IF ($ferret_view"|xt>1|*>0") THEN
 
    !! Make a plot in XT...
-   go xt_plot_2D
+   go draw_plot_2D
 
 ELIF ($ferret_view"|xy>1|*>0") THEN
 
@@ -103,22 +104,22 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
 ELIF ($ferret_view"|xz>1|*>0") THEN
 
    !! Make a plot in XZ...
-   go xz_plot_2D
+   go draw_plot_2D
 
 ELIF ($ferret_view"|yt>1|*>0") THEN
 
    !! Make a plot in YT...
-   go yt_plot_2D
+   go draw_plot_2D
 
 ELIF ($ferret_view"|yz>1|*>0") THEN
 
    !! Make a plot in YZ...
-   go yz_plot_2D
+   go draw_plot_2D
 
 ELIF ($ferret_view"|zt>1|*>0") THEN
 
    !! Make a plot in ZT...
-   go zt_plot_2D
+   go draw_plot_2D
 
 ELSE
   say " **ERROR: Attempt to make a plot in ($ferret_view) with 2D plot script."

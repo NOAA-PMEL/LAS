@@ -1,5 +1,6 @@
 ! LAS_set_curvi_plot_var.jnl
 !      4/2013 ACM Implement the Ferret property ferret_start_memory
+!      4/2014 ACM Difference plots needed tweaks to clon_imax and clat_jmax
 
 
 ! Unless its a prop/prop plot, label as a native curv plot.
@@ -44,9 +45,18 @@ IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND ( ($num)+1 EQ ($data_count) )
        DEFINE SYMBOL ferret_lon_modulo = 1 
        DEFINE SYMBOL clon_imin 1
        DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
+       
+       IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+	    
+	 DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
+         DEFINE SYMBOL clat_jmax = `MIN(jymax, INT(($clat_jmax)/($ystride)) )`
+	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
+	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+
    ENDIF
 ENDIF
- 
+
 ! Define the plot vars with computed lon and lat index range
 ! End of section moved from transform_curvi_xy
 
