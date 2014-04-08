@@ -184,10 +184,6 @@ public class Correlation implements EntryPoint {
 
 	// There are 3 states we want to track.
 
-	// The values for the first plot. This is used to determine if we need to
-	// warn the user about fetching new data.
-	LASRequest initialState;
-
 	// The state immediately previous to a widget change that might cause the
 	// prompt about new data.
 	// If the user cancels the change, revert to this state.
@@ -618,133 +614,135 @@ public class Correlation implements EntryPoint {
 	}
 
 	private void updatePlot(boolean addHistory) {
-		// TODO Before submitting...
+	    // TODO Before submitting...
 
-		
-		setConstraints();
-		update.removeStyleDependentName("APPLY-NEEDED");
 
-		lasAnnotationsPanel.setError("Fetching plot annotations...");
+	    setConstraints();
+	    update.removeStyleDependentName("APPLY-NEEDED");
 
-		spin.setPopupPosition(outputPanel.getAbsoluteLeft(),
-				outputPanel.getAbsoluteTop());
-		spin.show();
+	    lasAnnotationsPanel.setError("Fetching plot annotations...");
 
-		String tlo = null;
-		String thi = null;
-		if (timeConstraint.isVisible()) {
-			tlo = timeConstraint.getFerretDateLo();
-			thi = timeConstraint.getFerretDateHi();
-		}
-		String xlo = String.valueOf(mapConstraint.getXlo());
-		String xhi = String.valueOf(mapConstraint.getXhi());
-		String ylo = String.valueOf(mapConstraint.getYlo());
-		String yhi = String.valueOf(mapConstraint.getYhi());
+	    spin.setPopupPosition(outputPanel.getAbsoluteLeft(),
+	            outputPanel.getAbsoluteTop());
+	    spin.show();
 
-		String zlo = null;
-		String zhi = null;
-		if (zAxisWidget.isVisible()) {
-			zlo = zAxisWidget.getLo();
-			zhi = zAxisWidget.getHi();
-		}
-		String vix = xVariables.getVariable(xVariables.getSelectedIndex())
-				.getID();
-		GridSerializable grid = xVariables.getVariable(
-				xVariables.getSelectedIndex()).getGrid();
-		if (grid.hasT()) {
+	    String tlo = null;
+	    String thi = null;
+	    if (timeConstraint.isVisible()) {
+	        tlo = timeConstraint.getFerretDateLo();
+	        thi = timeConstraint.getFerretDateHi();
+	    }
+	    String xlo = String.valueOf(mapConstraint.getXlo());
+	    String xhi = String.valueOf(mapConstraint.getXhi());
+	    String ylo = String.valueOf(mapConstraint.getYlo());
+	    String yhi = String.valueOf(mapConstraint.getYhi());
 
-			if (tlo != null && thi != null) {
-				lasRequest.setRange("t", tlo, thi, 0);
-			} else {
-				// Set them to the min and max available in the data set.
-				tlo = timeConstraint.getFerretDateMin();
-				thi = timeConstraint.getFerretDateMax();
-				lasRequest.setRange("t", tlo, thi, 0);
+	    String zlo = null;
+	    String zhi = null;
+	    if (zAxisWidget.isVisible()) {
+	        zlo = zAxisWidget.getLo();
+	        zhi = zAxisWidget.getHi();
+	    }
+	    String vix = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
+	    GridSerializable grid = null;
 
-			}
-		}
-		if (xlo != null && xhi != null) {
-			lasRequest.setRange("x", xlo, xhi, 0);
-		} else if (xhi != null) {
-			xlo = xhi;
-			lasRequest.setRange("x", xhi, xhi, 0);
-		}
+	    if (xlo != null && xhi != null) {
+	        lasRequest.setRange("x", xlo, xhi, 0);
+	    } else if (xhi != null) {
+	        xlo = xhi;
+	        lasRequest.setRange("x", xhi, xhi, 0);
+	    }
 
-		if (ylo != null && yhi != null) {
-			lasRequest.setRange("y", ylo, yhi, 0);
-		} else if (yhi != null) {
-			ylo = yhi;
-			lasRequest.setRange("y", yhi, yhi, 0);
-		}
+	    if (ylo != null && yhi != null) {
+	        lasRequest.setRange("y", ylo, yhi, 0);
+	    } else if (yhi != null) {
+	        ylo = yhi;
+	        lasRequest.setRange("y", yhi, yhi, 0);
+	    }
 
-		if (grid.hasZ()) {
+	    // Check grids for all three variables to determine XYZT controls.
 
-			if (zlo != null && zhi != null) {
-				lasRequest.setRange("z", zlo, zhi, 0);
-			} else if (zhi != null) {
-				lasRequest.setRange("z", zhi, zhi, 0);
-			}
-			
-		}
 
-		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		lasRequest.setProperty("las", "output_type", "xml");
-		String grid_type = xVariables.getVariable(0).getAttributes()
-				.get("grid_type");
-		if (netcdf != null && grid_type.equals("trajectory")) {
-			operationID = "Trajectgory_correlation"; // No data base access;
-														// plot only from
-														// existing
-														// netCDF file.
-			String v0 = lasRequest.getVariable(0);
-			String v1 = lasRequest.getVariable(1);
-			String v2 = lasRequest.getVariable(2);
-			if (v0 != null) {
-				lasRequest.setProperty("data_0", "url", netcdf);
-			}
-			if (v1 != null) {
-				lasRequest.setProperty("data_1", "url", netcdf);
-			}
-			if (v2 != null) {
-				lasRequest.setProperty("data_2", "url", netcdf);
-			}
-			if (!cruiseIcons.getIDs().equals(""))
-				lasRequest.setProperty("ferret", "cruise_list",
-						cruiseIcons.getIDs());
-		} else if (netcdf == null && grid_type.equals("trajectory")) {
-			operationID = "Trajectory_correlation_plot";
-		} else {
-			operationID = "prop_prop_plot";
-		}
-		lasRequest.setOperation(operationID, operationType);
-		lasRequest.setProperty("ferret", "annotations", "file");
+	    GridSerializable xVarGrid = xVariables.getVariable(xVariables.getSelectedIndex()).getGrid();
+	    GridSerializable yVarGrid = yVariables.getVariable(yVariables.getSelectedIndex()).getGrid();
+	    GridSerializable colVarGrid = null;
+	    if ( colorCheckBox.getValue() ) {
+	        colVarGrid = colorVariables.getVariable(colorVariables.getSelectedIndex()).getGrid();
+	    }
 
-		frontCanvas = Canvas.createIfSupported();
-		if ( frontCanvas != null ) {
-		    frontCanvasContext = frontCanvas.getContext2d();
-		} else {
-		    Window.alert("You are accessing this site with an older, no longer supported browser. "+
-                         "Some or all features of this site will not work correctly using your browser. "+
-                         "Recommended browsers include these or higher versions of these: "+
-                         "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
-		}
+	    if ( xVarGrid.hasT() ) {
+	        grid = xVarGrid;
+	    } else if ( yVarGrid.hasT() ) {
+	        grid = yVarGrid;
+	    } else if ( colVarGrid != null && colVarGrid.hasT() ) {
+	        grid = colVarGrid;
+	    }
 
-		String url = Util.getProductServer() + "?xml="
-				+ URL.encode(lasRequest.toString());
+	    if ( grid != null ) {
 
-		currentURL = url;
+	        if (tlo != null && thi != null) {
+	            lasRequest.setRange("t", tlo, thi, 0);
+	        } else {
+	            // Set them to the min and max available in the data set.
+	            tlo = timeConstraint.getFerretDateMin();
+	            thi = timeConstraint.getFerretDateMax();
+	            lasRequest.setRange("t", tlo, thi, 0);
 
-		if (addHistory) {
-			pushHistory(lasRequest.toString());
-		}
+	        }
+	    }
+	    grid = null;
+	    if ( xVarGrid.hasZ() ) {
+	        grid = xVarGrid;
+	    } else if ( yVarGrid.hasZ() ) {
+	        grid = yVarGrid;
+	    } else if ( colVarGrid != null && colVarGrid.hasZ() ) {
+	        grid = colVarGrid;
+	    }
 
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-		try {
-			sendRequest.sendRequest(null, lasRequestCallback);
-		} catch (RequestException e) {
-			HTML error = new HTML(e.toString());
-			outputPanel.setWidget(1, 0, error);
-		}
+	    if ( grid != null) {
+
+	        if (zlo != null && zhi != null) {
+	            lasRequest.setRange("z", zlo, zhi, 0);
+	        } else if (zhi != null) {
+	            lasRequest.setRange("z", zhi, zhi, 0);
+	        }
+
+	    }
+
+	    lasRequest.setProperty("product_server", "ui_timeout", "20");
+	    lasRequest.setProperty("las", "output_type", "xml");
+
+	    operationID = "prop_prop_plot";
+
+	    lasRequest.setOperation(operationID, operationType);
+	    lasRequest.setProperty("ferret", "annotations", "file");
+
+	    frontCanvas = Canvas.createIfSupported();
+	    if ( frontCanvas != null ) {
+	        frontCanvasContext = frontCanvas.getContext2d();
+	    } else {
+	        Window.alert("You are accessing this site with an older, no longer supported browser. "+
+	                "Some or all features of this site will not work correctly using your browser. "+
+	                "Recommended browsers include these or higher versions of these: "+
+	                "IE 9.0   FF 17.0    Chorme 23.0    Safari 5.1");
+	    }
+
+	    String url = Util.getProductServer() + "?xml="
+	            + URL.encode(lasRequest.toString());
+
+	    currentURL = url;
+
+	    if (addHistory) {
+	        pushHistory(lasRequest.toString());
+	    }
+
+	    RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+	    try {
+	        sendRequest.sendRequest(null, lasRequestCallback);
+	    } catch (RequestException e) {
+	        HTML error = new HTML(e.toString());
+	        outputPanel.setWidget(1, 0, error);
+	    }
 
 	}
 
@@ -763,9 +761,7 @@ public class Correlation implements EntryPoint {
 			// If the submitted operation used the compound operation to
 			// pull a new data set, we need a new initial state
 			String plot_id = lasRequest.getOperation();
-			if (plot_id.equals("Trajectory_correlation_plot")) {
-				initialState = new LASRequest(lasRequest.toString());
-			}
+			
 			// Need to warn again...
 			youveBeenWarned = false;
 			spin.hide();
@@ -1256,16 +1252,11 @@ public class Correlation implements EntryPoint {
 	            if (time_index > 0) {
 	                xVariables.setSelectedIndex(time_index);
 	            }
-	            String grid_type = xVariables.getVariable(0).getAttributes()
-	                    .get("grid_type");
-	            if (grid_type.equals("regular")) {
-	                operationID = "prop_prop_plot";
-	            } else if (grid_type.equals("trajectory")) {
-	                operationID = "Trajectory_correlation_plot";
-	            }
 
-	            VariableSerializable varY = yVariables.getVariable(yVariables
-	                    .getSelectedIndex());
+	            operationID = "prop_prop_plot";
+	           
+
+	            VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
 	            constraintsLayout.addWidgetForY(yVariableConstraint);
 	            if (varY.getName().toLowerCase().equals("latitude")) {
 	                yVariableConstraint.setVariable(varY);
@@ -1284,8 +1275,7 @@ public class Correlation implements EntryPoint {
 	                yVariableConstraint.setVisible(true);
 	            }
 
-	            VariableSerializable varX = xVariables.getVariable(xVariables
-	                    .getSelectedIndex());
+	            VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
 	            constraintsLayout.addWidgetForX(xVariableConstraint);
 	            if (varX.getName().toLowerCase().equals("latitude")) {
 	                xVariableConstraint.setVariable(varX);
@@ -1304,19 +1294,25 @@ public class Correlation implements EntryPoint {
 	                xVariableConstraint.setVisible(true);
 	            }
 
-	            GridSerializable grid = varX.getGrid();
+	            GridSerializable xVarGrid = varX.getGrid();
+	            GridSerializable yVarGrid = varY.getGrid();
+	            
 	            mapConstraint.setTool("xy");
 	            mapConstraint.setDataExtent(
-	                    Double.valueOf(grid.getYAxis().getLo()),
-	                    Double.valueOf(grid.getYAxis().getHi()),
-	                    Double.valueOf(grid.getXAxis().getLo()),
-	                    Double.valueOf(grid.getXAxis().getHi()), 1.0);
+	                    Double.valueOf(xVarGrid.getYAxis().getLo()),
+	                    Double.valueOf(xVarGrid.getYAxis().getHi()),
+	                    Double.valueOf(xVarGrid.getXAxis().getLo()),
+	                    Double.valueOf(xVarGrid.getXAxis().getHi()), 1.0);
 	            if (xlo != null && xhi != null && ylo != null && yhi != null) {
-	                mapConstraint.setCurrentSelection(Double.valueOf(ylo),
-	                        Double.valueOf(yhi), Double.valueOf(xlo),
-	                        Double.valueOf(xhi));
+	                mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
 	            }
-	            if (grid.hasT()) {
+	            GridSerializable grid = null;
+	            if ( xVarGrid.hasT() ) {
+	                grid = xVarGrid;
+	            } else if ( yVarGrid.hasT() ) {
+	                grid = yVarGrid;
+	            }
+	            if ( grid != null ) {
 	                timeConstraint.init(grid.getTAxis(), true);
 	                if (tlo != null) {
 	                    timeConstraint.setLo(tlo);
@@ -1328,8 +1324,13 @@ public class Correlation implements EntryPoint {
 	            } else {
 	                timeConstraint.setVisible(false);
 	            }
-
-	            if (grid.hasZ()) {
+	            grid = null;
+	            if ( xVarGrid.hasZ() ) {
+	                grid = xVarGrid;
+	            } else if ( yVarGrid.hasZ() ) {
+	                grid = yVarGrid;
+	            }
+	            if (grid != null) {
 	                zAxisWidget.init(grid.getZAxis());
 	                zAxisWidget.setVisible(true);
 	                zAxisWidget.setRange(true);
@@ -1445,10 +1446,9 @@ public class Correlation implements EntryPoint {
 	                }
 	                setConstraints();
 	            }
-	            // The request is now set up like a property-property plot request,
-	            // so save it.
-	            initialState = new LASRequest(lasRequest.toString());
+
 	            updatePlot(true);
+	            
 	        }
 	    }
 	};
@@ -1495,37 +1495,77 @@ public class Correlation implements EntryPoint {
 	};
 
 	private void setVariables() {
-		update.addStyleDependentName("APPLY-NEEDED");
-		String vix = xVariables.getVariable(xVariables.getSelectedIndex())
-				.getID();
-		String viy = yVariables.getVariable(yVariables.getSelectedIndex())
-				.getID();
-		lasRequest.removeVariables();
-		lasRequest.addVariable(dsid, vix, 0);
-		lasRequest.addVariable(dsid, viy, 0);
-		lasRequest.setProperty("data", "count", "2");
-		if (colorCheckBox.getValue()) {
-			lasRequest.setProperty("data", "count", "3");
-			String varColor = colorVariables.getVariable(
-					colorVariables.getSelectedIndex()).getID();
-			lasRequest.addVariable(dsid, varColor, 0);
-		}
-		for (Iterator varIt = xDatasetVariables.keySet().iterator(); varIt
-				.hasNext();) {
-			String id = (String) varIt.next();
-			VariableSerializable var = xDatasetVariables.get(id);
-			if (!id.equals(vix) && !id.equals(viy)) {
-				if (colorCheckBox.getValue()) {
-					String varColor = colorVariables.getVariable(
-							colorVariables.getSelectedIndex()).getID();
-					if (!id.equals(varColor)) {
-						lasRequest.addVariable(dsid, id, 0);
-					}
-				} else {
-					lasRequest.addVariable(dsid, id, 0);
-				}
-			}
-		}
+	    update.addStyleDependentName("APPLY-NEEDED");
+	    String vix = xVariables.getVariable(xVariables.getSelectedIndex())
+	            .getID();
+	    String viy = yVariables.getVariable(yVariables.getSelectedIndex())
+	            .getID();
+	    lasRequest.removeVariables();
+	    lasRequest.addVariable(dsid, vix, 0);
+	    lasRequest.addVariable(dsid, viy, 0);
+	    lasRequest.setProperty("data", "count", "2");
+	    if (colorCheckBox.getValue()) {
+	        lasRequest.setProperty("data", "count", "3");
+	        String varColor = colorVariables.getVariable(
+	                colorVariables.getSelectedIndex()).getID();
+	        lasRequest.addVariable(dsid, varColor, 0);
+	    }
+	    for (Iterator varIt = xDatasetVariables.keySet().iterator(); varIt
+	            .hasNext();) {
+	        String id = (String) varIt.next();
+	        VariableSerializable var = xDatasetVariables.get(id);
+	        if (!id.equals(vix) && !id.equals(viy)) {
+	            if (colorCheckBox.getValue()) {
+	                String varColor = colorVariables.getVariable(
+	                        colorVariables.getSelectedIndex()).getID();
+	                if (!id.equals(varColor)) {
+	                    lasRequest.addVariable(dsid, id, 0);
+	                }
+	            } else {
+	                lasRequest.addVariable(dsid, id, 0);
+	            }
+	        }
+	    }
+	    GridSerializable grid = null;
+	    GridSerializable colVarGrid = null;
+	    GridSerializable xVarGrid = xVariables.getVariable(xVariables.getSelectedIndex()).getGrid();
+	    GridSerializable yVarGrid = yVariables.getVariable(yVariables.getSelectedIndex()).getGrid();
+	    if ( colorCheckBox.getValue() ) {
+	        colVarGrid = colorVariables.getVariable(colorVariables.getSelectedIndex()).getGrid();
+	    }
+
+	    if ( xVarGrid.hasT() ) {
+	        grid = xVarGrid;
+	    } else if ( yVarGrid.hasT() ) {
+	        grid = yVarGrid;
+	    } else if ( colVarGrid != null && colVarGrid.hasT() ) {
+	        grid = colVarGrid;
+	    }
+
+	    if ( grid != null ) {
+	        timeConstraint.setVisible(true);
+        } else {
+            timeConstraint.setVisible(false);
+        }
+	    grid = null;
+	    if ( xVarGrid.hasZ() ) {
+	        grid = xVarGrid;
+	    } else if ( yVarGrid.hasZ() ) {
+	        grid = yVarGrid;
+	    } else if ( colVarGrid != null && colVarGrid.hasZ() ) {
+	        grid = colVarGrid;
+	    }
+
+	    if ( grid != null) {
+	        // If it's the first time the type will be null and it needs to be set up.
+	        if ( zAxisWidget.getType() == null ) {
+                zAxisWidget.init(grid.getZAxis());
+	        }
+	        zAxisWidget.setVisible(true);
+            zAxisWidget.setRange(true);
+        } else {
+            zAxisWidget.setVisible(false);
+        }
 	}
 
 	private void resetConstraints(String vars) {
@@ -1543,86 +1583,20 @@ public class Correlation implements EntryPoint {
 		update.addStyleDependentName("APPLY-NEEDED");
 		undoState = new LASRequest(lasRequest.toString());
 		lasRequest.removeConstraints();
-		String varY = yVariables.getVariable(yVariables.getSelectedIndex())
-				.getID();
-		String varX = xVariables.getVariable(xVariables.getSelectedIndex())
-				.getID();
-		// The initialState is null the first time this is called when setting
-		// up the very first correlation plot.
-		String vx = null;
-		if (initialState != null) {
-			vx = initialState.getVariable(0);
-		}
-		if (xVariableConstraint.getApply().getValue()
-				&& xVariableConstraint.isActive()) {
-			String min = xVariableConstraint.getMin();
-			String max = xVariableConstraint.getMax();
-			if (min != null && !min.equals("")) {
-				lasRequest.addVariableConstraint(dsid, varX, "gt", min, "minx");
-				if (vx != null
-						&& vx.equals(varX)
-						&& Double.valueOf(min) < initialState
-								.getVariableConstraintMin(varX)) {
-					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
-				}
-			}
-			if (max != null && !max.equals("")) {
-				lasRequest.addVariableConstraint(dsid, varX, "le", max, "maxx");
-				if (vx != null
-						&& vx.equals(varX)
-						&& Double.valueOf(max) > initialState
-								.getVariableConstraintMax(varX)) {
-					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
-				}
-			}
-
-		}
-		String vy = null;
-		if (initialState != null) {
-			vy = initialState.getVariable(1);
-		}
-		if (yVariableConstraint.getApply().getValue()
-				&& yVariableConstraint.isActive()) {
-			String min = yVariableConstraint.getMin();
-			String max = yVariableConstraint.getMax();
-			if (min != null && !min.equals("")) {
-				lasRequest.addVariableConstraint(dsid, varY, "gt", min, "miny");
-				if (vy != null
-						&& vy.equals(varY)
-						&& Double.valueOf(min) < initialState
-								.getVariableConstraintMin(varY)) {
-					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
-				}
-			}
-			if (max != null && !max.equals("")) {
-				lasRequest.addVariableConstraint(dsid, varY, "le", max, "maxy");
-				if (vy != null
-						&& vy.equals(varY)
-						&& Double.valueOf(max) > initialState
-								.getVariableConstraintMax(varY)) {
-					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
-				}
-			}
-		}
-		String vc = null;
-		if (initialState != null) {
-			vc = initialState.getVariable(2);
-		}
+		String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
+		String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
 		List<VariableConstraintWidget> oc = constraintsLayout.getWidgets();
 		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
-			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt
-					.next();
+			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
 			if (cw.getApply().getValue()) {
 				String min = cw.getMin();
 				String max = cw.getMax();
 				String id = cw.getVariable().getID();
 				if (min != null && !min.equals("")) {
-					lasRequest.addVariableConstraint(dsid, id, "gt", min,
-							"min_" + id);
+					lasRequest.addVariableConstraint(dsid, id, "gt", min,"min_" + id);
 				}
 				if (max != null && !max.equals("")) {
-					lasRequest.addVariableConstraint(dsid, id, "le", max,
-							"max_" + id);
+					lasRequest.addVariableConstraint(dsid, id, "le", max,"max_" + id);
 				}
 			}
 		}
@@ -1631,8 +1605,7 @@ public class Correlation implements EntryPoint {
 		constraintsLayout.removeItem(xVariableConstraint.getVariable());
 		constraintsLayout.removeItem(yVariableConstraint.getVariable());
 		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
-			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt
-					.next();
+			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
 			constraintsLayout.removeItem(cw.getVariable());
 		}
 	}
