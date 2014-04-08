@@ -153,12 +153,14 @@ ENDIF
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
 	 DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
 	 DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
-         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
+	 DEFINE SYMBOL haxis_tunits = `($data_0_var),RETURN=tunits`
+	 DEFINE SYMBOL haxis_torigin = `($data_0_var),RETURN=t0`
+	 DEFINE SYMBOL haxis_tcalendar = `($data_0_var),RETURN=calendar`
+         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
          LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
-
    IF ($VAXIS_tstart"0|*>1") THEN
       LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
       LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
@@ -170,8 +172,11 @@ ENDIF
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
 	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
 	 DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
-         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
+	 DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
+	 DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
+	 DEFINE SYMBOL vaxis_tcalendar = `($data_0_var),RETURN=calendar`
+         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
          LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
