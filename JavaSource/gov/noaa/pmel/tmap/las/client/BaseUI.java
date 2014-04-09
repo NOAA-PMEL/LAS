@@ -1030,6 +1030,11 @@ public class BaseUI {
         public void updateMap(double ylo, double yhi, double xlo, double xhi) {
             xAxesWidget.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
         }
+        
+        public void updateTime(double tlo, double thi, String time_origin, String unitsString, String calendar) {
+            xAxesWidget.getTAxis().setLoByDouble(tlo, time_origin, unitsString, calendar);
+            xAxesWidget.getTAxis().setHiByDouble(thi, time_origin, unitsString, calendar);
+        }
     }
     protected String getAnchor() {
         String url = Window.Location.getHref();
