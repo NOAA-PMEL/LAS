@@ -181,4 +181,10 @@ public class NavAxesGroup extends Composite {
 		    eAxisWidget.setVisible(visible);
 		}
 	}
+	public void setLoByDouble(double tlo, String time_origin, String dateUnits, String calendar) {
+	    dateTimeWidget.setLoByDouble(tlo, time_origin, dateUnits, calendar);
+	}
+	public void setHiByDouble(double thi, String time_origin, String time_min, String dateUnits, String calendar) {
+	    dateTimeWidget.setHiByDouble(thi, time_origin, dateUnits, calendar);
+	}
 }

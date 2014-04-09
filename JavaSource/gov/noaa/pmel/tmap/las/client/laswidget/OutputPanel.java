@@ -312,6 +312,13 @@ public class OutputPanel extends Composite implements HasName {
 
     protected double y_per_pixel;
     protected int y_plot_size;
+    
+    protected String time_min;
+    protected String time_max;
+    protected String time_origin;
+    protected String time_units;
+    protected String calendar;
+    
     /**
      * True if a new data set has been selected with this OutputPanel's data set
      * button (in it's {@link OutputControlPanel}). This allows the data set
@@ -468,6 +475,21 @@ public class OutputPanel extends Composite implements HasName {
                                                 axisVertical = getString(child.getFirstChild());
                                             } else if (child.getNodeName().equals("axis_vertical_positive")) {
                                                 axisVerticalPositive = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_min") ) {
+                                                // This is the smallest value of time on the plot
+                                                time_min = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_max") ) {
+                                                // This is the largest value of time on the plot
+                                                time_max = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_origin") ) {
+                                                // This is the base date from the units string.
+                                                time_origin = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("calendar") ) {
+                                                // This is one of: GREGORIAN, NOLEAP, JULIAN, 360_DAY, ALL_LEAP
+                                                calendar = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_step_units") ) {
+                                                // This is one of: years, months, days, hours, minutes, seconds
+                                                time_units = getString(child.getFirstChild());
                                             }
                                         }
                                     }
@@ -815,35 +837,31 @@ public class OutputPanel extends Composite implements HasName {
             frontCanvas.addMouseDownHandler(new MouseDownHandler() {
                 @Override
                 public void onMouseDown(MouseDownEvent event) {
-                    if (!view.equals("t")) {
-                        outx = false;
-                        outy = false;
-                        startx = event.getX();
-                        starty = event.getY();
-                        if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size && starty < y_offset_from_top + y_plot_size) {
+                    outx = false;
+                    outy = false;
+                    startx = event.getX();
+                    starty = event.getY();
+                    if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size && starty < y_offset_from_top + y_plot_size) {
 
-                            draw = true;
-                            drawToScreen(scaledImage); // frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()),
-                            // 0, 0);
-                            double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
-                            double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
-                            world_startx = x_axis_lower_left + (startx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
-                            world_starty = y_axis_lower_left + ((y_image_size * imageScaleRatio - starty) - y_offset_from_bottom * imageScaleRatio) * scaled_y_per_pixel;
+                        draw = true;
+                        drawToScreen(scaledImage); // frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()),
+                        // 0, 0);
+                        double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
+                        double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
+                        world_startx = x_axis_lower_left + (startx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
+                        world_starty = y_axis_lower_left + ((y_image_size * imageScaleRatio - starty) - y_offset_from_bottom * imageScaleRatio) * scaled_y_per_pixel;
 
-                            world_endx = world_startx;
-                            world_endy = world_starty;
-                        }
-                    } else {
-                        draw = false;
+                        world_endx = world_startx;
+                        world_endy = world_starty;
                     }
+
                 }
             });
             frontCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
                 @Override
                 public void onMouseMove(MouseMoveEvent event) {
-                    if (view.equals("t"))
-                        draw = false;
+                  
                     int currentx = event.getX();
                     int currenty = event.getY();
                     // If you drag it out, we'll stop drawing.
@@ -932,9 +950,21 @@ public class OutputPanel extends Composite implements HasName {
                             mouse.setZ(minx, maxx);
                         }
                     }
-                    if (!view.equals("t")) {
-                        eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+                   
+                    if ( axisVertical.equals("t") ) {
+                        for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+                            Mouse mouse = mouseIt.next();
+                            mouse.updateTime(miny, maxy, time_origin, time_units, calendar);
+                        }
                     }
+                    if ( axisHorizontal.equals("t") ) {
+                        for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+                            Mouse mouse = mouseIt.next();
+                            mouse.updateTime(minx, maxx, time_origin, time_units, calendar);
+                        }
+                    } 
+                        eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+                    
                 }
             });
             grid.setWidget(plotRow, 0, frontCanvas);

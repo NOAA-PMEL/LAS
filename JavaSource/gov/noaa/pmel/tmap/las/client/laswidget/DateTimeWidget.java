@@ -12,6 +12,9 @@ import gov.noaa.pmel.tmap.las.client.time.ThreeSixtyDayChronology;
 import org.gwttime.time.Chronology;
 import org.gwttime.time.DateTime;
 import org.gwttime.time.DateTimeZone;
+import org.gwttime.time.Duration;
+import org.gwttime.time.Period;
+import org.gwttime.time.PeriodType;
 import org.gwttime.time.format.DateTimeFormat;
 import org.gwttime.time.format.DateTimeFormatter;
 import org.gwttime.time.format.ISODateTimeFormat;
@@ -27,6 +30,8 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.maps.jsio.rebind.LongFragmentGenerator;
+import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.regexp.shared.SplitResult;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -630,8 +635,9 @@ public class DateTimeWidget extends Composite {
 		
 		if ( isMenu ) {
 			for(int d = 0; d < lo_day.getItemCount(); d++) {
-				String value = lo_day.getValue(d);
-				if ( value.equalsIgnoreCase(tlo) ) {
+				String value = lo_day.getValue(d).toLowerCase();
+				String label = lo_day.getItemText(d).toLowerCase();
+				if ( tlo.toLowerCase().contains(value) || tlo.toLowerCase().contains(label) ) {
 					lo_day.setSelectedIndex(d);
 					loDayChange();
 				}
@@ -703,8 +709,9 @@ public class DateTimeWidget extends Composite {
 		
 		if ( isMenu ) {
 			for(int d = 0; d < hi_day.getItemCount(); d++) {
-				String value = hi_day.getValue(d);
-				if ( value.equalsIgnoreCase(thi) ) {
+				String value = hi_day.getValue(d).toLowerCase();
+				String label = hi_day.getItemText(d).toLowerCase();
+				if ( thi.toLowerCase().contains(value) || thi.toLowerCase().contains(label) ) {
 					hi_day.setSelectedIndex(d);
 				}
 			}
@@ -1062,6 +1069,116 @@ public class DateTimeWidget extends Composite {
 			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
+	public void setLoByDouble(double inlo, String time_origin, String unitsString, String calendar) {
+
+        String flo = formatDate(inlo, time_origin, unitsString, calendar);
+	    
+	    setLo(flo);
+
+	}
+	public void setHiByDouble(double inhi, String time_origin, String unitsString, String calendar) {
+	    
+	    String fhi = formatDate(inhi, time_origin, unitsString, calendar);
+	    
+	    setHi(fhi);
+	    
+	}
+	
+	private String formatDate(double in, String time_origin, String unitsString, String calendar) {
+	    Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+
+	    if ( calendar != null && !calendar.equals("") ) {
+	        if ( calendar.equalsIgnoreCase("proleptic_gregorian") ) {
+	            chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+	        } else if ( calendar.equalsIgnoreCase("noleap") || calendar.equals("365_day") ) {
+	            chrono = NoLeapChronology.getInstanceUTC();
+	        } else if (calendar.equals("julian") ) {
+	            chrono = JulianChronology.getInstanceUTC();
+	        } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+	            chrono = AllLeapChronology.getInstanceUTC();
+	        } else if ( calendar.equals("360_day") ) {
+	            chrono = ThreeSixtyDayChronology.getInstanceUTC();
+	        }
+	    } 
+
+	    boolean zeroOrigin;
+	    if (time_origin.indexOf("0000") >= 0) {
+	        time_origin.replaceFirst("0000", "0001");
+	        zeroOrigin = true;
+	    }
+
+	    DateTime baseDT = longFerretForm.parseDateTime(time_origin).withChronology(chrono).withZone(DateTimeZone.UTC);
+
+	    int insec = 0;
+
+	    Period p = null;
+
+	    double f = Math.floor(in);
+	    double frac = in - f;
+
+	    // years, months, days, hours, minutes, seconds
+	    if ( unitsString.toLowerCase().contains("year") ) {
+
+	        int years = (int) f;
+
+	        int days = (int)(frac*365.25);
+
+	        p = new Period(years, 0, 0, days, 0, 0, 0, 0);
+
+	    } else if ( unitsString.toLowerCase().contains("month") ) {
+
+	        int months = (int) f;
+	        int days = (int) (30.5*frac);
+
+	        p = new Period(0, months, 0, days, 0, 0, 0, 0);
+
+	    } else if (  unitsString.toLowerCase().contains("week")  ) {
+
+	        int weeks = (int) f;
+	        int days = (int) (7*frac);
+
+	        p = new Period(0, 0, weeks, days, 0, 0, 0, 0);
+
+	    } else if (  unitsString.toLowerCase().contains("day")  ) {
+
+	        int days = (int) f;
+	        int hours = (int) (24.*frac);
+
+	        p = new Period(0, 0, 0, days, hours, 0, 0, 0);
+
+	    } else if (  unitsString.toLowerCase().contains("hour")  ) {
+
+	        int hours = (int) f;
+	        int minutes = (int)(60.*frac);
+
+	        p = new Period(0, 0, 0, 0, hours, minutes, 0, 0);
+
+	    } else if (  unitsString.toLowerCase().contains("minute")  ) {
+
+	        int minutes = (int)f;
+
+	        p = new Period(0, 0, 0, 0, 0, minutes, 0, 0);
+
+	    } else if (  unitsString.toLowerCase().contains("second")  ) {
+
+	        int seconds = (int)f;
+
+	        p = new Period(0, 0, 0, 0, 0, 0, seconds, 0);
+
+	    }
+
+
+	    if ( p != null ) {
+
+	        DateTime target = baseDT.plus(p).withChronology(chrono).withZone(DateTimeZone.UTC);
+
+	        String fdate = longFerretForm.print(target.getMillis());
+
+	        return fdate;
+	    } else {
+	        return "0001-Jan-01 00:00:00";
+	    }
+	}
 	private void hiDayChange() {
 		if ( isMenu ) {
 			int lo_i = lo_day.getSelectedIndex();
@@ -1139,4 +1256,5 @@ public class DateTimeWidget extends Composite {
 		DateTime dt = monthFormat.parseDateTime(month_name);
 		return dt.getMonthOfYear();
 	}
+	
 }
