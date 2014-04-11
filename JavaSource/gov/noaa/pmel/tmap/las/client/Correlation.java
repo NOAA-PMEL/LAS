@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
-import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
@@ -31,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import ucar.nc2.grib.GribCollectionProto.VariableRecords;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
