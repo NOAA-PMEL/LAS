@@ -110,6 +110,9 @@ public class VariableConstraintLayout extends Composite {
 	public String getValue(int index) {
 		return constraintVariables.getValue(index);
 	}
+	public VariableListBox getConstraintVariables() {
+	    return constraintVariables;
+	}
 	public void reset() {
 		removeAll();
 		setWidgets(new ArrayList<VariableConstraintWidget>());

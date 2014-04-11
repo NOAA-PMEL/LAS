@@ -848,7 +848,7 @@ public class BaseUI {
             if (panelIt.hasNext())
                 urlfrag.append("&");
         }
-        Window.open(urlfrag.toString(), "_new", null);
+        Window.open(urlfrag.toString(), "_new", "scrollbars=1");
     }
 
     private void resizeOutputPanels() {
