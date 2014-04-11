@@ -1,9 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent;
 import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent.Handler;
@@ -13,8 +9,11 @@ import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.OpenEvent;
@@ -22,6 +21,7 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -29,13 +29,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasName;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -171,7 +169,7 @@ public class DatasetWidget extends Tree implements HasName {
                         if ( children != null && children.equals("none") ) empty = true;
                         if ( applyFilters(cat) && !empty ) {
                             TreeItem item = new TreeItem();
-                            item.addItem(DatasetWidget.LOADING);
+                            item.addItem(new SafeHtmlBuilder().appendEscaped(DatasetWidget.LOADING).toSafeHtml());
                             InnerItem inner = new InnerItem(cat);
                             item.setWidget(inner);
                             item.setUserObject(cat);
@@ -189,7 +187,7 @@ public class DatasetWidget extends Tree implements HasName {
                             } else {
                                 item = new TreeItem();
                             }
-                            item.addItem(DatasetWidget.LOADING);
+                            item.addItem(new SafeHtmlBuilder().appendEscaped(DatasetWidget.LOADING).toSafeHtml());
                             InnerItem inner = new InnerItem(cat);
                             item.setWidget(inner);
                             item.setUserObject(cat);

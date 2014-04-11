@@ -179,7 +179,7 @@ public class VariableMetadataActivity extends AbstractActivity implements Variab
     @Override
     public void openInfo(String dsid) {
         if ( dsid != null )
-            Window.open(URLUtil.getBaseURL()+"getMetadata.do?dsid=" + dsid, "_blank", "");
+            Window.open(URLUtil.getBaseURL()+"getMetadata.do?dsid=" + dsid, "_blank", "scrollbars=1");
     }
 
     @Override
