@@ -214,7 +214,7 @@ public class ClimateAnalysis implements EntryPoint {
 					String ar = (String) arIt.next();
 					lasRequest.setProperty("climate_analysis_regions", type+"_region_"+ar, ar);
 				}
-				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", "");
+				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", "scrollbars=1");
 			}
 		}
 		

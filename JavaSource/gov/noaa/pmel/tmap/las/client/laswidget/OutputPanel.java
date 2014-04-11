@@ -2288,7 +2288,7 @@ public class OutputPanel extends Composite implements HasName {
             @Override
             public void onClick(ClickEvent event) {
 
-                Window.open(url, "_blank", "");
+                Window.open(url, "_blank", "scrollbars=1");
 
             }
 

@@ -38,7 +38,7 @@ public class HelpMenuBarActivity extends AbstractActivity implements HelpMenuBar
         Command aboutCmd = new Command() {
             @Override
             public void execute() {
-                Window.open(Util.getProductServer(), "_blank", "");
+                Window.open(Util.getProductServer(), "_blank", "scrollbars=1");
             }
         };
         view.getAboutItem().setCommand(aboutCmd);
@@ -46,7 +46,7 @@ public class HelpMenuBarActivity extends AbstractActivity implements HelpMenuBar
         Command tutorialsCmd = new Command() {
             @Override
             public void execute() {
-                Window.open("http://ferret.pmel.noaa.gov/LAS/documentation/introduction/using-the-las-user-interface#videos", "_blank", "");
+                Window.open("http://ferret.pmel.noaa.gov/LAS/documentation/introduction/using-the-las-user-interface#videos", "_blank", "scrollbars=1");
             }
         };
         view.getVideoTutorialsItem().setCommand(tutorialsCmd);
@@ -54,7 +54,7 @@ public class HelpMenuBarActivity extends AbstractActivity implements HelpMenuBar
         Command docsCmd = new Command() {
             @Override
             public void execute() {
-                Window.open("http://ferret.pmel.noaa.gov/LAS/home/documentation/introduction/using-the-las-user-interface/", "_blank", "");
+                Window.open("http://ferret.pmel.noaa.gov/LAS/home/documentation/introduction/using-the-las-user-interface/", "_blank", "scrollbars=1");
             }
         };
         view.getOnlineDocsItem().setCommand(docsCmd);

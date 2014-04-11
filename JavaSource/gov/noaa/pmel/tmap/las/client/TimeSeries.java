@@ -296,7 +296,7 @@ public class TimeSeries implements EntryPoint {
 						output.setHTML(e.toString());
 					}
 					 */
-					Window.open(url,"_blank","resizable=yes,scrollbars=yes,status=yes"); 
+					Window.open(url,"_blank","resizable=yes,scrollbars=yes,status=yes,scrollbars=1"); 
 				} else if ( button_name.equals(PLOT_OPTIONS_BUTTON_NAME) ) {
 					options_state = options_widget.getState();
 					options_panel.center();
