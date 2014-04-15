@@ -24,6 +24,8 @@ LET vnames = ..varnames
 DEFINE SYMBOL var_mask = var_mask_0
 LET nmaskx = 0
 
+! Gridded variables and mask-by variables are handled with XSEQUENCE after the 
+! space/time region is applied
 DEFINE SYMBOL apply_region = 0
 IF ($shape0"0|*>1") THEN 
    IF `STRLEN("($shape0)") GT 1` THEN DEFINE SYMBOL apply_region = 1
