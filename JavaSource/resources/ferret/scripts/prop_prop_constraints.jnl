@@ -24,6 +24,11 @@ LET vnames = ..varnames
 DEFINE SYMBOL var_mask = var_mask_0
 LET nmaskx = 0
 
+DEFINE SYMBOL apply_region = 0
+IF ($shape0"0|*>1") THEN 
+   IF `STRLEN("($shape0)") GT 1` THEN DEFINE SYMBOL apply_region = 1
+ENDIF
+
 REPEAT/RANGE=0:100/NAME=ic (\
   DEF SYM ic = `ic`;\
   IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
@@ -33,6 +38,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_;\
   IF `($constraint_($ic)_type"0|variable>1|*>0") EQ 0` THEN EXIT/CYCLE;\
   LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
+  IF ($apply_region) THEN LET var_mask_($ic) = IF ($cvar)[($region_full)] ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
   IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
   IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
@@ -40,7 +46,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `($constraint_($ic)_lhs"0|longitude>1|*>0") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_lon_max = ($constraint_($ic)_rhs) ;\
   )
 
-IF `nmaskx GT 1` THEN LET var_mask = ($var_mask)
+IF `nmaskx GT 1` THEN LET var_mask = xsequence(($var_mask))
 
 ! Now look for text constraints.
 
