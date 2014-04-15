@@ -266,8 +266,8 @@ ENDIF
 
 !LET constraints_mask = text_mask[gx=time@asn] * var_mask[gx=time@asn] * feature_mask_obs[gx=time@asn]
 
-LET constraints_mask = text_mask * var_mask
-IF ($have_feature_mask"0|*>1") THEN LET constraints_mask = text_mask * var_mask * feature_mask_obs
+LET constraints_mask = text_mask * XSEQUENCE(var_mask[($region_full)])
+IF ($have_feature_mask"0|*>1") THEN LET constraints_mask = text_mask * XSEQUENCE(var_mask[($region_full)]) * feature_mask_obs
 
 IF ($color_by"0|*>1") THEN 
 
@@ -278,5 +278,9 @@ IF ($color_by"0|*>1") THEN
 
 ENDIF  ! color-by 3rd var
 
-DEFINE SYMBOL xvar = constraints_mask*xvar
-DEFINE SYMBOL yvar = constraints_mask*yvar
+DEFINE SYMBOL xvar = XSEQUENCE(constraints_mask)*xvar
+DEFINE SYMBOL yvar = XSEQUENCE(constraints_mask)*yvar
+
+
+! End of  ------------- setup_prop_prop.jnl--------------------------
+
