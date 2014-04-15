@@ -64,8 +64,7 @@ ENDIF
 LET feature_mask_obs = EXPND_BY_LEN(feature_mask,rowsize,`rowsize[m=@sum]`)
 DEFINE SYMBOL have_feature_mask = 1
 
-LET constraints_mask = var_mask* text_mask* feature_mask_obs
-
+LET constraints_mask = text_mask * XSEQUENCE(var_mask[($region_full)]) * feature_mask_obs
 
 ! Set up to list the trajectory variable with the metadata
 
