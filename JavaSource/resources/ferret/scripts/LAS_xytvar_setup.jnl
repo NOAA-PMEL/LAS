@@ -20,10 +20,8 @@ PPL axlabp,-1,-1
 !! TESTING; do we want to only constrain the map for constraints, not for
 !! chosen trajectories?
 
-DEFINE SYMBOL xvar = constraints_mask*xvar
-DEFINE SYMBOL yvar = constraints_mask*yvar
-
-sh var constraints_mask; pause
+DEFINE SYMBOL xvar = var_mask*text_mask*xvar
+DEFINE SYMBOL yvar = var_mask*text_mask*yvar
 LET p = ($xvar) 
 LET q = ($yvar)
 
@@ -529,14 +527,8 @@ SET MODE/LAST nodata_lab
 !!  See testing comment at top
 DEFINE SYMBOL xvar = constraints_mask*xvar
 DEFINE SYMBOL yvar = constraints_mask*yvar
-
-DEFINE SYMBOL xvar = XSEQUENCE(var_mask[($region_full)])*text_mask*xvar
-DEFINE SYMBOL yvar = XSEQUENCE(var_mask[($region_full)])*text_mask*yvar
-
-DEFINE SYMBOL xvar = constraints_mask*xvar
-DEFINE SYMBOL yvar = constraints_mask*yvar
-
 LET p = ($xvar) 
 LET q = ($yvar)
+
 
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------
