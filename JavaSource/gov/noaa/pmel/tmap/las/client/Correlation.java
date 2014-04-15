@@ -1692,18 +1692,33 @@ public class Correlation implements EntryPoint {
 	        }
 	    }
 	    List<VariableConstraintWidget> oc = constraintsLayout.getWidgets();
-	    constraintsLayout.removeItem(xVariableConstraint.getVariable());
-	    constraintsLayout.removeItem(yVariableConstraint.getVariable());
-	    for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
-	        VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
-	        constraintsLayout.removeItem(cw.getVariable());
-	    }
+	    
 	    update.addStyleDependentName("APPLY-NEEDED");
         undoState = new LASRequest(lasRequest.toString());
         lasRequest.removeConstraints();
-        String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
-        String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
-       
+        if ( yVariableConstraint.getApply().getValue() ) {
+            String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
+            String miny = yVariableConstraint.getMin();
+            String maxy = yVariableConstraint.getMax();
+            if ( miny != null && !miny.equals("") ) {
+                lasRequest.addVariableConstraint(dsid, varY, "gt", miny, "min_"+varY);
+            }
+            if ( maxy != null && !maxy.equals("") ) {
+                lasRequest.addVariableConstraint(dsid, varY, "le", maxy, "max_"+varY);
+            }
+        }
+        if ( xVariableConstraint.getApply().getValue() ) {
+            String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
+            String minx = xVariableConstraint.getMin();
+            String maxx = xVariableConstraint.getMax();
+            if ( minx != null && !minx.equals("") ) {
+                lasRequest.addVariableConstraint(dsid, varX, "gt", minx, "min_"+varX);
+            }
+            if ( maxx != null && !maxx.equals("") ) {
+                lasRequest.addVariableConstraint(dsid, varX, "le", maxx, "max_"+varX);
+            }
+        }
+        
         for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
             VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
             if (cw.getApply().getValue()) {
@@ -1717,6 +1732,12 @@ public class Correlation implements EntryPoint {
                     lasRequest.addVariableConstraint(dsid, id, "le", max,"max_" + id);
                 }
             }
+        }
+        constraintsLayout.removeItem(xVariableConstraint.getVariable());
+        constraintsLayout.removeItem(yVariableConstraint.getVariable());
+        for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
+            VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
+            constraintsLayout.removeItem(cw.getVariable());
         }
 	}
 
