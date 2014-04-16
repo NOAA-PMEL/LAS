@@ -1271,6 +1271,15 @@ public class Correlation implements EntryPoint {
 	                xVariables.setSelectedIndex(time_index);
 	            } else {
 	                VariableSerializable yvar = yVariables.getVariable(yVariables.getSelectedIndex());
+	                boolean done = false;
+	                // Set x to the first variable that is not y
+	                for (int i = 0; i < xVariables.getItemCount(); i++) {
+                        VariableSerializable v = xVariables.getVariable(i);
+                        if ( !done && !v.getID().equals(varid) ) {
+                            done = true;
+                            xVariables.setSelectedIndex(i);
+                        }
+                    }
 	               
 	            }
 
@@ -1592,22 +1601,7 @@ public class Correlation implements EntryPoint {
 	                colorVariables.getSelectedIndex()).getID();
 	        lasRequest.addVariable(dsid, varColor, 0);
 	    }
-	    for (Iterator varIt = xDatasetVariables.keySet().iterator(); varIt
-	            .hasNext();) {
-	        String id = (String) varIt.next();
-	        VariableSerializable var = xDatasetVariables.get(id);
-	        if (!id.equals(vix) && !id.equals(viy)) {
-	            if (colorCheckBox.getValue()) {
-	                String varColor = colorVariables.getVariable(
-	                        colorVariables.getSelectedIndex()).getID();
-	                if (!id.equals(varColor)) {
-	                    lasRequest.addVariable(dsid, id, 0);
-	                }
-	            } else {
-	                lasRequest.addVariable(dsid, id, 0);
-	            }
-	        }
-	    }
+	    
 	    GridSerializable grid = null;
 	    GridSerializable colVarGrid = null;
 	    GridSerializable xVarGrid = xVariables.getVariable(xVariables.getSelectedIndex()).getGrid();
