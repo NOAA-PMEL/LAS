@@ -1223,7 +1223,7 @@ public class UI extends BaseUI {
 
         // Initialize the gallery with an asynchronous call to the server to get
         // variable needed.
-        String profile = DOM.getElementProperty(DOM.getElementById("las-profile"), "content");
+        String profile = DOM.getElementById("las-profile").getPropertyString("content");
         if (profile != null && profile.equals(Constants.PROFILE_ESGF)) {
             xESGFSearchButton.setVisible(true);
         }
