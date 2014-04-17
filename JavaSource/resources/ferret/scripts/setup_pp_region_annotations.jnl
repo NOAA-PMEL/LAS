@@ -23,13 +23,13 @@ sh sym *lat*lab*
    LET reg_hi = ($region_y_hi)
    IF `reg_lo LT 0` THEN 
       DEFINE SYMBOL NorS = S
-      LET reg_lo = ABS(reg_lo)
+      LET reg_lo = ABS(`reg_lo,prec=6`)
    ENDIF
    DEFINE SYMBOL latitude_lab = ($ylabel): `reg_lo,prec=6`($NorS)
    DEFINE SYMBOL NorS = N
    IF `reg_hi LT 0` THEN 
       DEFINE SYMBOL NorS = S
-      LET reg_hi = ABS(reg_hi)
+      LET reg_hi = ABS(`reg_hi,prec=6`)
    ENDIF
    IF `($region_y_range"0") GT 0` THEN DEFINE SYMBOL latitude_lab = ($latitude_lab) to `reg_hi,prec=6`($NorS)
 ENDIF
@@ -47,7 +47,7 @@ ENDIF
 
 IF ($dim($idim)"0|T>1|*>0") THEN
    IF ($time_lab"0|*>1") THEN EXIT/SCRIPT
-   DEFINE SYMBOL time_lab = ($ylabel): ($region_t_lo)
+   DEFINE SYMBOL time_lab = ($tlabel): ($region_t_lo)
    IF `($region_y_range"0") GT 0` THEN DEFINE SYMBOL time_lab = ($time_lab) to ($region_t_hi)
 ENDIF
 
