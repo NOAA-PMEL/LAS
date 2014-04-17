@@ -200,6 +200,9 @@ public class OutputPanel extends Composite implements HasName {
                 // If not a history event, handle this ourselves.
                 panelAxesWidgets.showOrthoAxes(view, ortho, null, isComparePanel());
             }
+            if ( analysis != null ) {
+                setAnalysisAxes(analysis.getAnalysisAxes());
+            }
             if (!waitingForHistory) {
                 if (!isComparePanel()) {
                     
