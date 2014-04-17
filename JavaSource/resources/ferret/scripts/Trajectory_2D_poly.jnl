@@ -252,6 +252,12 @@ ELSE
 
 ENDIF
 
+IF ($ferret_plot_var"0|*>1") THEN
+   LET data_range = minmax(var_data)
+   DEFINE SYMBOL data_plotted_min = `data_range[i=1],prec=7`
+   DEFINE SYMBOL data_plotted_max = `data_range[i=2],prec=7`
+ENDIF
+
 SAY _________________ After RIBBON plot clock seconds:   ($clock_secs)
 
 ! Set the shape to what is used above it will be the same on the key
