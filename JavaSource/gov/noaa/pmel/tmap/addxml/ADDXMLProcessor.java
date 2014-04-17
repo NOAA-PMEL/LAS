@@ -541,7 +541,12 @@ public class ADDXMLProcessor {
         }
 
         for (int it = 0; it < thredds.length; it++) {
-            Document lasdoc = LASConfig(thredds[it], "thredds");
+            String xml = thredds[it];
+            if ( thredds[it].endsWith(".html") ) {
+                xml = thredds[it].replace(".html", ".xml");
+                System.err.println("Changeing "+thredds[it]+" to "+xml);
+            }
+            Document lasdoc = LASConfig(xml, "thredds");
             if (lasdoc != null) {
 
                 String ofile = getOutfileName(basename);
