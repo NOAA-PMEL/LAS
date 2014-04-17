@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +62,26 @@ public class AnalysisSerializable {
         }
     }
 
+    public String getAnalysisAxes() {
+        Set<String> keys = axes.keySet();
+        StringBuilder al = new StringBuilder();
+        if ( keys.contains("x") ) {
+            al.append("x");
+        }
+        if ( keys.contains("y") ) {
+            al.append("y");
+        }
+        if ( keys.contains("z") ) {
+            al.append("z");
+        }
+        if ( keys.contains("t") ) {
+            al.append("t");
+        }
+        if ( keys.contains("e") ) {
+            al.append("e");
+        }
+        return al.toString();
+    }
     public String toString() {
         StringBuilder ts = new StringBuilder();
         for ( Iterator keyIt = axes.keySet().iterator(); keyIt.hasNext(); ) {
