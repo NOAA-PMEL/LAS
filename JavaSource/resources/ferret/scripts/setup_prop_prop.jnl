@@ -41,22 +41,24 @@ DEFINE SYMBOL variable_0_lab = Time
 DEFINE SYMBOL variable_0_lab = ($ferret_title_0)
 LET variable_0_lab = STRCAT(data_0_title, data_0_units)
 
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
+DEFINE SYMBOL fer_sym = ferret_plot
+IF ($do_curvi_xy"0") THEN DEFINE SYMBOL fer_sym = ferret_plot_base
+DEFINE SYMBOL ferret_plot_var_0 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($($fer_sym)_var))
 
-LET nx_var = `($ferret_plot_var_0),return=isize`
-LET ny_var = `($ferret_plot_var_0),return=jsize`
-LET nz_var = `($ferret_plot_var_0),return=ksize`
-LET nt_var = `($ferret_plot_var_0),return=lsize`
-LET ne_var = `($ferret_plot_var_0),return=msize`
-LET nf_var = `($ferret_plot_var_0),return=nsize`
+LET nx_var = `($($fer_sym)_var_0),return=isize`
+LET ny_var = `($($fer_sym)_var_0),return=jsize`
+LET nz_var = `($($fer_sym)_var_0),return=ksize`
+LET nt_var = `($($fer_sym)_var_0),return=lsize`
+LET ne_var = `($($fer_sym)_var_0),return=msize`
+LET nf_var = `($($fer_sym)_var_0),return=nsize`
 
 LET nx_var = `nx_var*ny_var*nz_var*nt_var*ne_var*nf_var`
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEFINE SYMBOL vshape = `($ferret_plot_var_0),RETURN=shape`
+DEFINE SYMBOL vshape = `($($fer_sym)_var_0),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -100,13 +102,13 @@ IF `(STRINDEX("($ferret_title_1%0%)", "Time") GT 0) AND (STRINDEX("($ferret_titl
 DEFINE SYMBOL variable_1_lab = Time
 DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
 LET variable_0_lab = STRCAT(data_1_title, data_1_units)
-DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_var_1 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($ferret_plot_var_1))
+LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($($fer_sym)_var_1))
 
 ! Is it a varible on the E axis of a DSG file?
 
-DEFINE SYMBOL vshape = `($ferret_plot_var_1),RETURN=shape`
+DEFINE SYMBOL vshape = `($($fer_sym)_var_1),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
@@ -148,9 +150,8 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    
    ! Here is variable 2 title 
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_2_var)")
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
-   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
+   DEFINE SYMBOL ferret_plot_var_2 = ($($fer_sym)_var)
+   DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    
@@ -297,8 +298,8 @@ IF ($apply_region) THEN
 
    LET ndim = `STRLEN("($vshape)")`
    IF `NDIM LE 2` THEN
-      IF `ndim EQ 2` THEN SHADE/SET ($ferret_plot_var)
-      IF `ndim EQ 1` THEN PLOT/SET ($ferret_plot_var)
+      IF `ndim EQ 2` THEN SHADE/SET ($($fer_sym)_var)
+      IF `ndim EQ 1` THEN PLOT/SET ($($fer_sym)_var)
 
       IF ($labnum_x"0|*>1") THEN DEFINE SYMBOL longitude_lab = ($lab($labnum_x))
       IF ($labnum_y"0|*>1") THEN DEFINE SYMBOL latitude_lab = ($lab($labnum_y))
