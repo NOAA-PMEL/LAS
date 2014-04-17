@@ -1752,7 +1752,7 @@ public class UI extends BaseUI {
                     compareMenu.setSelectedIndex(0);
                     compareMenuChanged();
                 } else {
-                    setupPanelsAndRefreshNOforceLASRequestOFFanalysisWithCompareMenus(false);
+                    setupPanelsAndRefreshNOforceLASRequestWithCompareMenus(false);
                     if (settings.length - 1 == 2) {
                         compareMenu.setSelectedIndex(1);
                         compareMenuChanged();
@@ -2396,11 +2396,8 @@ public class UI extends BaseUI {
     /**
      * @param resetOnlyNewPanels
      */
-    private void setupPanelsAndRefreshNOforceLASRequestOFFanalysisWithCompareMenus(boolean resetOnlyNewPanels) {
-        if (xAnalysisWidget.isActive()) {
-            xAnalysisWidget.setActive(false);
-        }
-        xAnalysisWidget.setVisible(false);
+    private void setupPanelsAndRefreshNOforceLASRequestWithCompareMenus(boolean resetOnlyNewPanels) {
+        
         setupPanelsAndRefreshNOforceLASRequest(resetOnlyNewPanels);
         int buttonIndex = getButtonIndex();
         Widget tOpsMenu = xOtherControls.getWidget(0, buttonIndex);
@@ -2510,7 +2507,6 @@ public class UI extends BaseUI {
                     setupMainPanelAndRefreshForceLASRequest(resetOnlyNewPanels);
                     galleryTokens.put("autoContour", "false");
                 } else {
-                    turnOffAnalysis();
                     xNewPanels.clear();// clears the list and handles the case
                     // of numNewPanels == 0
                     if (numNewPanels == 1) {
@@ -2523,12 +2519,20 @@ public class UI extends BaseUI {
                         xNewPanels.add(xPanels.get(2));
                         xNewPanels.add(xPanels.get(3));
                     }
-                    setupPanelsAndRefreshNOforceLASRequestOFFanalysisWithCompareMenus(resetOnlyNewPanels);
+                    setupPanelsAndRefreshNOforceLASRequestWithCompareMenus(resetOnlyNewPanels);
                 }
 
                 setFromHistoryToken(tmComparePanel, omComparePanel);
                 xPanels.get(0).setFromHistoryToken(tmComparePanel, omComparePanel);
-                applyHistory(galleryTokens);
+               
+                
+                // We are leaving the analysis active so we need to reapply it.
+                if ( xAnalysisWidget.isActive() ) {
+                    String v = xAnalysisWidget.getAnalysisAxis();
+                    setAnalysisAxes(v);
+                    applyHistory(galleryTokens);
+                }
+                
                 // Set history tokens only to new OutputPanels
                 for (int i = 1; i < xPanels.size(); i++) {
                     OutputPanel panel = xPanels.get(i);
