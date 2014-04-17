@@ -260,7 +260,7 @@ ELSE
 ENDIF  ! color-by-trajectory or not...
 
 ! This allows for auto-levels on prop-prop plots.
-IF ($color_by) THEN
+IF ($color_by"0|*>1") THEN
    LET data_range = minmax(constraints_mask*zvar)
    DEFINE SYMBOL data_plotted_min = `data_range[i=1],prec=7`
    DEFINE SYMBOL data_plotted_max = `data_range[i=2],prec=7`
