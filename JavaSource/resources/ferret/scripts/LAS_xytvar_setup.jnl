@@ -48,6 +48,12 @@ IF `($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1` THEN
    SET VIEW full_view
 ENDIF
 
+! If the axis labels are long, make the text size smaller
+LET lab_fac = 1.
+if `(labwid("($ax_label_x)", 0.12) / ($ppl$xlen)) GT 1` THEN LET labfac = ($ppl$xlen)/labwid("($ax_label_x)",0.12)
+if `(labwid("($ax_label_y)", 0.12) / ($ppl$ylen)) GT 1` THEN LET labfac = MIN(`labfac`,`($ppl$ylen)/labwid("($ax_label_y)",0.12)`)
+IF `labfac LT 1 AND labfac GT 0.06` THEN DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
+
 ! Do not label axes with the words LONGITUDE, LATITUDE
 IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
@@ -434,6 +440,7 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
    SHADE/NOKEY/PAL=white($pqual)/SET/title=" " allmiss
    ($ax_label_x)
    ($ax_label_y)
+   ($ax_label_resize)
    PPL SHADE
    set view full_view2
    SHADE/NOKEY/PAL=white($pqual)/NOAX/title=" " allmiss
