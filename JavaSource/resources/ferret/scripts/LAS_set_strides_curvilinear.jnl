@@ -27,6 +27,7 @@ IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN EXIT/SCRIPT
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
 STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
+STRINDEX( "($operation_ID)", "prop" ) EQ 0 AND \
 STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
 STRINDEX( "($operation_ID)", "Grid_for_GE" ) EQ 0` THEN EXIT/SCRIPT
 
@@ -90,6 +91,7 @@ ENDIF
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
+    STRINDEX( "($operation_ID)", "prop" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND  \
     STRINDEX( "($operation_ID)", "_GE" ) EQ 0` THEN
    IF `($stride_for_mem"0") GT 1` THEN
