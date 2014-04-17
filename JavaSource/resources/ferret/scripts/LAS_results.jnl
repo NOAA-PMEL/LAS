@@ -272,8 +272,6 @@ ENDIF
       IF ($its_prop_prop_plot"0|*>1") THEN
           DEFINE SYMBOL ax_horiz = ($data_0_id)
 	  DEFINE SYMBOL ax_vert = ($data_1_id)
-	  CANCEL SYMBOL DATA_MAX
-	  CANCEL SYMBOL DATA_MIN
 	  DEFINE SYMBOL DATA_EXISTS = 1
 	  IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
       ENDIF
@@ -285,7 +283,6 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF  ! ax_horiz ax_vert defined
    ENDIF  ! ferret_plot_var defined
-
 
 ! If it was a color plot write the string needed to put into a /LEVELS qualifier,
 ! to duplicate the color levels from this plot.
