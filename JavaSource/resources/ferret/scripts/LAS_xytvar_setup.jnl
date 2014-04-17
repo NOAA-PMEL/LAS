@@ -49,7 +49,7 @@ IF `($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1` THEN
 ENDIF
 
 ! If the axis labels are long, make the text size smaller
-LET lab_fac = 1.
+LET labfac = 1.
 if `(labwid("($ax_label_x)", 0.12) / ($ppl$xlen)) GT 1` THEN LET labfac = ($ppl$xlen)/labwid("($ax_label_x)",0.12)
 if `(labwid("($ax_label_y)", 0.12) / ($ppl$ylen)) GT 1` THEN LET labfac = MIN(`labfac`,`($ppl$ylen)/labwid("($ax_label_y)",0.12)`)
 IF `labfac LT 1 AND labfac GT 0.06` THEN DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
