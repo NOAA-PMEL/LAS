@@ -223,6 +223,19 @@ ELSE
   ENDIF
 ENDIF
 
+! region_xzt
+IF ($region_xz"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xzt = ($region_xz),($region_t)
+  ELSE
+    DEFINE SYMBOL region_xzt = ($region_xz)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xzt = ($region_t)
+  ENDIF
+ENDIF
+
 ! region_yzt
 IF ($region_yz"0|*>1") THEN
   IF ($region_t"0|*>1") THEN
