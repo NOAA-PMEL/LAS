@@ -2004,8 +2004,7 @@ public class UI extends BaseUI {
         }
 
         // Get set the new operations that apply to the remaining views.
-        xOperationID = ops[0].getID();
-        xOperationsWidget.setOperationsForAnalysis(xVariable.getGrid(), intervals, ops[0].getID(), xView, ops);
+        xOperationsWidget.setOperationsForAnalysis(xVariable.getGrid(), intervals, xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
 

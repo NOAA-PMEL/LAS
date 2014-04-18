@@ -2928,24 +2928,6 @@ public class OutputPanel extends Composite implements HasName {
             view = newView;
         }
 
-        // Get set the new operations that apply to the remaining views.
-        operationID = ops[0].getID();
-        // xOperationsWidget.setOperations(intervals, ops[0].getID(), view,
-        // ops);
-        this.setOperation(operationID, view);
-        // tOperationsMenu.setMenus(ops, view);
-        // setOperationsClickHandler(xVizGalOperationsClickHandler);
-
-        // Set the default operation.
-        // operationID = xOperationsWidget.setZero(view);
-        ortho = Util.setOrthoAxes(view, ds_grid);
-
-        // for ( Iterator panIt = xPanels.iterator(); panIt.hasNext(); ) {
-        // OutputPanel panel = (OutputPanel) panIt.next();
-        // panel.setOperation(operationID, view);
-        // panel.showOrthoAxes(view, xOrtho);
-        // }
-
         String aAxis = null;
         StringBuilder ab = new StringBuilder();
         if (analysis != null) {
