@@ -436,6 +436,7 @@ public class ProductRequest {
                                     	String g = "g"+view;
                                     	if (gridTo.isAnalysis()) {   
                                     	    StringBuffer analysis_jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
+                                    	    jnl.append("_cr_");
                                     		jnl.append(gridTo.getJnl().toString());
                                     		analysis_jnl.append("_cr_"+jnl);
                                     		var = data.getAttributeValue("var");
@@ -905,7 +906,7 @@ public class ProductRequest {
             } else {
                 resolution = "60";
             }
-            jnl.append("set data etopo"+resolution+";");
+            jnl.append("set data etopo"+resolution+"_cr_");
             // Maybe we can skip this since we know how many datasets are open?
             jnl.append("let land_dsetnum = `rose,return=dsetnum`_cr_");
             jnl.append("let rose_on_grid = rose[d=`land_dsetnum`,gxy="+var+"[d="+var_count+"]]_cr_");
