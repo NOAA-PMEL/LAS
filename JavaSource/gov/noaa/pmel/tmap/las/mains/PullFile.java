@@ -29,6 +29,7 @@ public class PullFile {
                 DateTime dt = new DateTime();
                 System.out.println("TableDapTool starting file pull for the only file at "+fmt.print(dt));
                 lasProxy.executeGetMethodAndSaveResult(dsUrl, out, null);
+                dt = new DateTime();
                 System.out.println("TableDapTool finishing file pull for the only file at "+fmt.print(dt));
             } catch (HttpException e) {
                 // TODO Auto-generated catch block
