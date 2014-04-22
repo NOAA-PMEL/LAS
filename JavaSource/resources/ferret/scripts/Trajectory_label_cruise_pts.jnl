@@ -48,7 +48,7 @@ LET nbad_chosen_cruises = subset_mask* trajectory_mask*  nbad_in_cruise
 ! Just compute one of these, and subtract from the total in dataset
 
 IF `($ngood_data"0|*>1") EQ 0` THEN 
-   SET MEM/SIZ=700
+   IF `($ferret_memory"25.6") LT 700` THEN SET MEM/SIZ=700
    LET allsize = `check_var,RETURN=isize`
    DEFINE SYMBOL nbad_data = `nbad_chosen_cruises[i=@SUM]`
    DEFINE SYMBOL ngood_data = `allsize - ($nbad_data)`

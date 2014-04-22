@@ -7,7 +7,7 @@
 ! TRAJECTORY_COUNTS - number of points per trajectory  Now use symbol rowvar
 
 IF ($nodata"0|*>1") THEN EXIT/SCRIPT
-SET MEM/siz=200
+IF `($ferret_memory"25.6") LT 200` THEN SET MEM/siz=200
 
 ! Create the 'traj_evnt' variable which increments for each new trajectory.
 
