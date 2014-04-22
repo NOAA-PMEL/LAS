@@ -13,7 +13,7 @@
 ! Cancel the XY region.   These limits have nothing to do with the 
 ! I and J axes of the intermediate data file.
 
-SET MEM/siz=200
+IF `($ferret_memory"25.6") LT 200` THEN SET MEM/siz=200
 
 ! Create the 'feature_evnt' variable which increments for each new 
 ! trajectory or profile.

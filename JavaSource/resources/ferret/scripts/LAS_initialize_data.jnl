@@ -25,6 +25,6 @@ GO ($data_initialization_script) ($1)
 ! And if the configuration or initialization hasn't upped the memory,
 ! increase it somewhat.
 
-IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=100
+IF `($ferret_memory"25.6") LT 100` THEN SET MEM/SIZ=100
 
 ! End of ------------LAS_initialize_data.jnl--------------------------
