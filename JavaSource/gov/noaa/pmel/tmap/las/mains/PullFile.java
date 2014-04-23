@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.mains;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.apache.commons.httpclient.HttpException;
 import org.joda.time.DateTime;
@@ -24,8 +25,16 @@ public class PullFile {
 
         for (int i = 0; i < args.length; i++) {
             String dsUrl = args[i];
-            File out = new File("out"+String.valueOf(i));
+            
             try {
+               
+                if (dsUrl.startsWith("'") ) {
+                    dsUrl = dsUrl.substring(1);
+                }
+                if ( dsUrl.endsWith("'") ) {
+                    dsUrl = dsUrl.substring(0, dsUrl.length()-1);
+                }
+                File out = new File("out"+String.valueOf(i));
                 DateTime dt = new DateTime();
                 System.out.println("TableDapTool starting file pull for the only file at "+fmt.print(dt));
                 lasProxy.executeGetMethodAndSaveResult(dsUrl, out, null);
