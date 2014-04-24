@@ -11,7 +11,6 @@
 ! 12/2013 ACM  Always draw with ribbon plot style
 !
 
-IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=200
 
 DEFINE SYMBOL start_clock_seconds = ($clock_secs)
 
@@ -57,6 +56,43 @@ DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
 DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
+
+  IF ($rowvar"0|*>1") THEN 
+
+! DSG file. Do decimation if there are over num_decimate points.
+
+     LET decimate_size = ($ngood_data)
+     LET num_decimate = 200000
+
+SAY _________________ Starting decimate  on ($ngood_data) clock seconds:   ($clock_secs)
+     DEFINE SYMBOL  data_x_is_lon = 1
+   
+     LET full_range = 360*90
+     LET max_range = ($region_x_range)* ($region_y_range)
+     LET max_range = MAX(($region_x_range), ($region_y_range))
+
+      DEFINE SYMBOL  data_x_is_lon = 1
+!      LET tol1 = `(max_range/full_range)/LOG(decimate_size)`
+      LET tol1 = `(max_range/full_range)`
+      IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+      LET tol2 = `tol1`
+
+
+! Tolerances 10% of the data range over the approx pixel width of a plot.
+
+      LET tol1 = 0.1*($region_x_range)/200
+      IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
+
+      LET tol2 = 0.1*($region_y_range)/200
+      IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
+
+     GO decimate_dsg `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
+     
+  ELSE
+     LET nout_lonlat = `var_data_masked[i=@ngd]`
+     DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
+  ENDIF
+SAY _________________ After decimate clock seconds:   ($clock_secs)
 
   LET/UNITS=degrees_east x_var_data = ($data_x_var)
   IF `($nodata"0|*>1") EQ 0` THEN
@@ -115,7 +151,7 @@ GO LAS_initialize_var_levels
 
 ! Hack for SOCAT: if its fco2 and there are huge values, set to a standard set...
 
-IF `STRINDEX("($data_0_var)", "fCO2") GT 0` THEN 
+IF `STRINDEX("($ferret_plot_var)", "fCO2") GT 0` THEN 
    IF `($ferret_plot_var)[i=@max] GT 600` THEN \
      DEFINE SYMBOL ferret_fill_levels = (-inf)(240,300,20)(300,405,5)(400,460,20)(inf)
 ENDIF
@@ -126,7 +162,7 @@ GO LAS_set_plot_qualifiers
 ! Open the window
 GO LAS_open_window
 
-SAY _________________ Before land underlay clock seconds:                         ($clock_secs)
+SAY _________________ Before land underlay clock seconds:   ($clock_secs)
 
 ! Create the blank plot with bathymetries,
 ! coastlines, EEZ's, etc.
@@ -144,7 +180,7 @@ PPL SHASET PROTECT
 
 GO Jons_fland 20 green_deep
 PPL SHASET PROTECT
-SAY _________________ After land underlay clock seconds:                         ($clock_secs)
+SAY _________________ After land underlay clock seconds:   ($clock_secs)
 
 ! Turn on annotate_key, which persists until turned off
 ! (unless key_annoatate property tells us otherwise).
@@ -160,6 +196,12 @@ ENDIF
 !CANCEL SYMBOL qualifiers 
 DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
+! If undefined, set polygon scale according to number of points
+IF ($ferret_poly_scale"1|*>0") THEN
+   GO LAS_set_poly_scale
+   DEFINE SYMBOL ferret_poly_scale 0.5*($ferret_poly_scale)
+ENDIF
+
 ! Color key for the variable values.
 ! If there is no plot variable defined (only plotting locations),
 ! do not plot the key.
@@ -173,13 +215,8 @@ ELSE
 ENDIF
 
 ! Ribbon plot
-DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE
-!DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
+DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
 IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
-
-IF ($single_color"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
-ENDIF
 
 ! Points will mark location of missing data if needed
 ! Use color=1 for black...
@@ -208,25 +245,20 @@ ELSE
       DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
    ENDIF
 
-SAY _________________ Start plot: clock seconds:                                 ($clock_secs)
-let pre_plot = ($clock_secs)
    ! Draw the ribbon plot
-   IF ($single_color"0|*>1") THEN
-    ($plot_command)($qualifiers) x_var_data, y_var_data
-   ELSE
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+   ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-      PPL RIBBON/OVER
-   ENDIF
+   PPL RIBBON/OVER
+
 ENDIF
-SAY _________________ END plot: clock seconds:                                   ($clock_secs)
-SAY _________________ total time for line plot, seconds                          ----- `($clock_secs) - pre_plot`
 
 IF ($ferret_plot_var"0|*>1") THEN
    LET data_range = minmax(var_data)
    DEFINE SYMBOL data_plotted_min = `data_range[i=1],prec=7`
    DEFINE SYMBOL data_plotted_max = `data_range[i=2],prec=7`
 ENDIF
+
+SAY _________________ After RIBBON plot clock seconds:   ($clock_secs)
 
 ! Set the shape to what is used above it will be the same on the key
 DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
@@ -312,12 +344,7 @@ GO LAS_results box
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SAY _________________ exiting Trajectory_2D_poly.jnl product script: 
 
-SAY _________________ Product script total execution time, seconds:              ----- `($clock_secs) - ($start_clock_seconds)`
+   SAY _________________ Start clock seconds: ($start_clock_seconds)
+   SAY _________________ End clock seconds:   ($clock_secs)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-! NOTE Can get just the timing info from a log of this product with
-! grep seconds log.out | grep -v "SAY " | grep -v MESSAGE | grep -v independent 
-!
-! Or just the totals for decimating, plotting and the whole script with 
-! grep seconds log.out | grep -v "SAY " | grep -v MESSAGE | grep -v independent | grep total 
