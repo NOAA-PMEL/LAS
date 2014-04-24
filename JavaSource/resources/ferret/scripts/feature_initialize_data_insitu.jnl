@@ -122,14 +122,12 @@ IF `color_by_feature EQ 1` THEN
    DEFINE SYMBOL data_($num)_var = `varnames[i=1]`
    DEFINE SYMBOL is_vid = 1
    DEFINE SYMBOL data_var_only ($data_($num)_var)
-   DEFINE SYMBOL data_num `($data_($num)_var),RETURN=dsetnum`
+   DEFINE SYMBOL data_num `($data_($num)_var),RETURN=dset`
 
 ! Create the profile variables and symbols
 
    GO LAS_initialize_feature_id
 
-   IF ($its_prop_prop_plot"0|*>1") THEN
-   
    DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    IF ($its_listing"0|*>1") THEN
@@ -155,55 +153,8 @@ IF `color_by_feature EQ 1` THEN
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
    
    DEFINE SYMBOL color_by_feature = 1
-   EXIT/SCRIPT  ! dont need the rest of the setup for prop-prop plots
-   ENDIF ! its_prop_prop_plot!
-
+   EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF
-
-IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN  ! map plot, do decimation
-IF ($rowvar"0|*>1") THEN 
-
-   DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
-   DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
-
-! DSG file. Do decimation if there are over num_decimate points.
-
-   LET decimate_size = ($ngood_data)
-   LET num_decimate = 200000
-
-SAY _________________ Starting decimate  on ($ngood_data) clock seconds:         ($clock_secs)
-LET pre_decimate =  ($clock_secs)
-   DEFINE SYMBOL  data_x_is_lon = 1
-   
-   LET full_range = 360*90
-   LET max_range = ($region_x_range)* ($region_y_range)
-   LET max_range = MAX(($region_x_range), ($region_y_range))
-
-   DEFINE SYMBOL  data_x_is_lon = 1
-!   LET tol1 = `(max_range/full_range)/LOG(decimate_size)`
-   LET tol1 = `(max_range/full_range)`
-   IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
-   LET tol2 = `tol1`
-
-
-! Tolerances 10% of the data range over the approx pixel width of a plot.
-
-   LET tol1 = 0.1*($region_x_range)/200
-   IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
-
-   LET tol2 = 0.1*($region_y_range)/200
-   IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
-
-   GO decimate_dsg `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
-
-SAY _________________ After decimate clock seconds returns `nout_lonlat` pts:    ($clock_secs)
-SAY _________________ Total time to compute and apply decimation, seconds        ----- `($clock_secs) - pre_decimate`
-
-ELSE
-   LET nout_lonlat = `var_data_masked[i=@ngd]`
-   DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
-ENDIF
-ENDIF  ! map plot, do decimation
 
 ! Set color levels for the data variable. Default levels, or apply a setting
 ! given by ferret_fill_levels
@@ -230,26 +181,24 @@ ENDIF
 ! should be in the intermediate netCDF file. If its a profile set 
 ! then there should be a depth/height variable.
 
-IF ($its_prop_prop_plot"0|*>1") THEN
-   LET allvars = ..varnames
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_x_var)")` THEN 
-      STAT ($data_x_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL x_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_y_var)")` THEN 
-      STAT ($data_y_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL y_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_z_var)")` THEN 
-      STAT ($data_z_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL z_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
+LET allvars = ..varnames
+
+IF `IS_ELEMENT_OF_STR_N(allvars, "($data_x_var)")` THEN 
+   STAT ($data_x_var)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+   DEFINE SYMBOL x_rounded_range = ($ppl$range_low):($ppl$range_high)
+ENDIF
+
+IF `IS_ELEMENT_OF_STR_N(allvars, "($data_y_var)")` THEN 
+   STAT ($data_y_var)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+   DEFINE SYMBOL y_rounded_range = ($ppl$range_low):($ppl$range_high)
+ENDIF
+
+IF `IS_ELEMENT_OF_STR_N(allvars, "($data_z_var)")` THEN 
+   STAT ($data_z_var)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+   DEFINE SYMBOL z_rounded_range = ($ppl$range_low):($ppl$range_high)
 ENDIF
 
 IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")

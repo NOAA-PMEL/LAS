@@ -76,15 +76,12 @@ LET data_1_var_z =  EXPNDI_BY_Z(pvar, obs_mask, `nfeatures`, `longest`)
 LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
 
 ! Decimation for longitude/latitude plots
-! Dont decimate for prop-prop plots when we have a subset mask!
 
 LET num_decimate = 1000
-!LET num_decimate = 10000
 IF `($numobs) LT num_decimate` THEN LET num_decimate = -1  ! separate cruises but dont decimate
 
-
 IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1|*>0") AND\
-  (($numobs) GE num_decimate) AND (($subset_mask"0|*>1) EQ 0)` THEN
+  (($numobs) GE num_decimate)` THEN
 
 ! Decimation always?
 ! IF `(($numobs) GE num_decimate)` THEN
@@ -109,13 +106,10 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    !  lon/lat tolerance for piecewise decimation
    !  var tolerance (var at lon/lat)
    
-   LET tol1 = `MAX(($region_x_range)/($ppl$xpixel), ($region_y_range)/($ppl$ypixel))`
-   LET tol1 = `MIN(($region_x_range)/($ppl$xpixel), ($region_y_range)/($ppl$ypixel))`
-   LET tol1 = MAX(`tol1`,0.001)
+   LET tol1 = MAX(($region_x_range)/($ppl$xpixel), ($region_y_range)/($ppl$ypixel))
    let tol2 = 0.01
    list tol1, tol2
 
-   DEFINE SYMBOL decimate_fraction = 0.1
    GO decimate_dsg `num_decimate` `tol1` `tol2` 0.1
 
    LET pvar = ($data_x_var)
