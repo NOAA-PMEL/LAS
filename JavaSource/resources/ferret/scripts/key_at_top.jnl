@@ -3,7 +3,7 @@
 ! 
 ! Google Earth plots have their own, separate color bar image file.
 IF ($its_GE"0|*>1") THEN EXIT/SCRIPT
-IF `($ferret_plot_key"1") EQ 0` THEN EXIT/SCRIPT
+IF `($ferret_plot_key"1|0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 DEFINE SYMBOL horizontal_key = 1
 

@@ -8,7 +8,7 @@
 ! FEATURE_COUNTS - number of points per trajectory  Now use symbol rowvar
 
 IF ($nodata"0|*>1") THEN EXIT/SCRIPT
-SET MEM/siz=200
+IF `($ferret_memory"25.6") LT 200` THEN SET MEM/siz=200
 
 ! Create the 'feature_evnt' variable which increments for each new trajectory.
 
@@ -25,11 +25,18 @@ LET nfeatures = `featurevar,RETURN=($rind)size`
 DEFINE AXIS/X=1:`nfeatures`:1 xfeature_axis
 LET feature_numbers = x[gx=xfeature_axis]
 
-! rind direction of rowsize, defined in feature_initialize
+! rind is direction of rowsize, defined in feature_initialize
 LET longest = featurevar[($rind)=@max]+2
 
 LET data_var_z =  EXPNDI_BY_Z_COUNTS(longitude, xsequence(featurevar),`longest`)
 LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(featurevar),`longest`)
+
+IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN
+   LET data_var_id = EXPND_BY_LEN(feature_numbers,xsequence(featurevar), `featurevar[M=@sum]`)
+   IF ($feature_type"0|*>1") THEN SET VAR/TITLE="($feature_type) ID" data_var_id
+   DEFINE SYMBOL data_var = data_var_id
+   EXIT/SCRIPT
+ENDIF
 
 ! If  a subset of cruise ids is given then only plot those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.
