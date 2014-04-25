@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent.Handler;
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetFilter;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
@@ -214,7 +215,7 @@ public class ClimateAnalysis implements EntryPoint {
 					String ar = (String) arIt.next();
 					lasRequest.setProperty("climate_analysis_regions", type+"_region_"+ar, ar);
 				}
-				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", "scrollbars=1");
+				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", Constants.WINDOW_FEATURES);
 			}
 		}
 		
