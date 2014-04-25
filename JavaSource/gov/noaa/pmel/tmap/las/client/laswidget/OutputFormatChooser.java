@@ -151,6 +151,6 @@ public class OutputFormatChooser extends Composite {
 
 
     private void open(String url) {
-        Window.open(url, "_new", "scrollbars=1");
+        Window.open(url, "_blank", "scrollbars=1");
     }
 }
