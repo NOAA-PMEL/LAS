@@ -61,7 +61,7 @@ public class GetTrajectoryTable extends LASAction {
 	                            if (!url.endsWith("/") ) url = url + "/";
 	                            url = url + id + ".xhtml";
 	                            String table = tabledap.get("table_variables");
-	                            String document_base = "http://yahoo.com"; // Get it from the tabledap properties.
+	                            String document_base = tabledap.get("document_base");
 	                            if ( !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
 	                                url = url + "?" + table;
