@@ -606,7 +606,7 @@ public class SimplePropPropViewer implements EntryPoint {
         }
         tableRequest.setProperty("ferret", "data_format", "csv");
         String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
-        Window.open(url, "_new", "scrollbars=1");
+        Window.open(url, "_blank", "scrollbars=1");
     }
     private void makeRequest(boolean plot) {
         boolean contained = true;
