@@ -64,6 +64,7 @@
 			<forward name="ftds_down" path="/productserver/templates/ftds_down.vm" redirect="false"/>
 		  </action>
           <action path="/localGetMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
+          <action path="/localGetTrajectoryTable" type="gov.noaa.pmel.tmap.las.ui.GetTrajectoryTable"/>
           <action path="/localGetViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
           <action path="/localGetGrid" type="gov.noaa.pmel.tmap.las.ui.GetGrid" />
           <action path="/localGetOperations" type="gov.noaa.pmel.tmap.las.ui.GetOperations" />
@@ -85,6 +86,7 @@
 
           <!-- The definitions for normal operations -->
           <action path="/getAnnotations" type="gov.noaa.pmel.tmap.las.ui.GetAnnotations"/>
+          <action path="/getTrajectoryTable" type="gov.noaa.pmel.tmap.las.ui.GetTrajectoryTable"/>
           <action path="/ProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
 		      <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
 	          <forward name="batch_error" path="/productserver/templates/batch_error.vm" redirect="false" />
