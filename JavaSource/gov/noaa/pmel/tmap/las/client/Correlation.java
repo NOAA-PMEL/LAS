@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
@@ -627,7 +628,7 @@ public class Correlation implements EntryPoint {
 		StringBuilder urlfrag = new StringBuilder(URLUtil.getBaseURL()
 				+ "getAnnotations.do?template=image_w_annotations.vm&");
 		urlfrag.append(printURL);
-		Window.open(urlfrag.toString(), "_blank", "scrollbars=1");
+		Window.open(urlfrag.toString(), "_blank", Constants.WINDOW_FEATURES);
 	}
 
 	private void updatePlot(boolean addHistory) {
