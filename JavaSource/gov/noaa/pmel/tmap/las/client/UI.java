@@ -284,7 +284,7 @@ public class UI extends BaseUI {
                     }
                     lasRequest.setProperty("las", "output_type", "html");
                     lasRequest.setOperation(opid, "v7");
-                    String features = "toolbar=1,location=1,directories=1,status=1,menubar=1,scrollbars=1,resizable=1";
+                   
                     // We used to use the xOperationID.getName() instead of
                     // "_blank" as
                     // the Window name but IE respects only a narrow list of
@@ -315,7 +315,7 @@ public class UI extends BaseUI {
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
-                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), "_blank", features);
+                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), "_blank", Constants.WINDOW_FEATURES);
                     optionsDialog.hide();
                 }
             });
