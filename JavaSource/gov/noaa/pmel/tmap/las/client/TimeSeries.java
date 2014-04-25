@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.CheckBoxPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASDateWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
@@ -296,7 +297,7 @@ public class TimeSeries implements EntryPoint {
 						output.setHTML(e.toString());
 					}
 					 */
-					Window.open(url,"_blank","resizable=yes,scrollbars=yes,status=yes,scrollbars=1"); 
+					Window.open(url,"_blank",Constants.WINDOW_FEATURES); 
 				} else if ( button_name.equals(PLOT_OPTIONS_BUTTON_NAME) ) {
 					options_state = options_widget.getState();
 					options_panel.center();
