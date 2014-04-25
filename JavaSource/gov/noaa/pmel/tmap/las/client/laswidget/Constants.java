@@ -42,4 +42,5 @@ public class Constants {
     public static String X_CONSTRAINT = "x";
     public static String Y_CONSTRAINT = "y";
     public static String T_CONSTRAINT = "t";
+    public static String  WINDOW_FEATURES = "toolbar=1,location=1,directories=1,status=1,menubar=1,scrollbars=1,resizable=1";
 }
