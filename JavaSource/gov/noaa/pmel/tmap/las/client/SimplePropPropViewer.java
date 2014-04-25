@@ -540,7 +540,7 @@ public class SimplePropPropViewer implements EntryPoint {
     private void printerFriendly() {
         StringBuilder urlfrag = new StringBuilder(URLUtil.getBaseURL() + "getAnnotations.do?template=image_w_annotations.vm&");
         urlfrag.append(printURL);
-        Window.open(urlfrag.toString(), "_blank", "scrollbars=1");
+        Window.open(urlfrag.toString(), "_blank", Constants.WINDOW_FEATURES);
     }
 
     private void updatePlot(boolean addHistory) {
@@ -606,7 +606,7 @@ public class SimplePropPropViewer implements EntryPoint {
         }
         tableRequest.setProperty("ferret", "data_format", "csv");
         String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
-        Window.open(url, "_blank", "scrollbars=1");
+        Window.open(url, "_blank", Constants.WINDOW_FEATURES);
     }
     private void makeRequest(boolean plot) {
         boolean contained = true;
