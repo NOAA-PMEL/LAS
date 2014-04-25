@@ -502,7 +502,10 @@ public class UI extends BaseUI {
      */
 
     // Sometimes you need to keep the current map selection values.
-    double[] cs = null;
+//    double currentxlo;
+//    double currentxhi;
+//    double currentylo;
+//    double currentyhi;
 
     /*
      * Button to make slide sorter compute differences
@@ -865,7 +868,7 @@ public class UI extends BaseUI {
 
     public void applyChange() {
         if (changeDataset) {
-            cs = xAxesWidget.getRefMap().getCurrentSelection();
+            // cs = xAxesWidget.getRefMap().getCurrentSelection();
             // This involves a jump across the wire, so the finishApply gets
             // called in the callback from the getGrid.
             turnOffAnalysis();
@@ -983,7 +986,9 @@ public class UI extends BaseUI {
             if (panel.isComparePanel()) {
                 // Set both Lats and Longs because the current map selection in
                 // the non-attached axes group must match all four dimensions
-                panel.setLatLon(xAxesWidget.getRefMap().getCurrentSelection());
+                double ytlo = xAxesWidget.getRefMap().getYlo();
+                panel.getAxesWidgets().getRefMap().setCurrentSelection(ytlo, xAxesWidget.getRefMap().getYhi(), xAxesWidget.getRefMap().getXlo(), xAxesWidget.getRefMap().getXhi());
+                //panel.setLatLon(xAxesWidget.getRefMap().getCurrentSelection());
             } else if (xView.contains("x") && !xView.contains("y")) {
                 panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
             } else if (!xView.contains("x") && xView.contains("y")) {
@@ -1436,6 +1441,7 @@ public class UI extends BaseUI {
         }
         xAxesWidget.getRefMap().setTool(xView);
         xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
+        getComparePanel().getAxesWidgets().getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
@@ -1939,7 +1945,7 @@ public class UI extends BaseUI {
                 panel.refreshPlot(options, switchAxis, true, forceLASRequest);
             }
         }
-        tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy"));
+        tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy")||(xView.equals("xyt")&&xVariable.getAttributes().get("grid_type").equals("trajectory")));
         if (history) {
             logger.setLevel(Level.ALL);
             logger.info("refresh calling pushHistory()");
@@ -2365,14 +2371,14 @@ public class UI extends BaseUI {
                 panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
             }
         } else {
-            double tmp_xXlo = xAxesWidget.getRefMap().getXlo();
+            double tmp_xlo = xAxesWidget.getRefMap().getXlo();
             double tmp_xhi = xAxesWidget.getRefMap().getXhi();
             double tmp_ylo = xAxesWidget.getRefMap().getYlo();
             double tmp_yhi = xAxesWidget.getRefMap().getYhi();
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
                 panel.setMapTool(xView);
-                panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xXlo), String.valueOf(tmp_xhi));
+                panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
             }
         }
         List<Mouse> mice = new ArrayList<Mouse>();
