@@ -29,7 +29,8 @@ public class OperationsMenu extends Composite {
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
 	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
-
+	OperationPushButton trajectoryTable = new OperationPushButton("Table of Cruises");
+	
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
 	boolean hasCorrelation = false;
@@ -55,6 +56,8 @@ public class OperationsMenu extends Composite {
         saveAsButton.setTitle("Save data in various text and binary formats.");
         climateAnalysis.addStyleDependentName("SMALLER");
         climateAnalysis.setTitle("Perform time average spectrum and other advanced analysis.");
+        trajectoryTable.addStyleDependentName("SMALLER");
+        trajectoryTable.setTitle("See a table of current cruises and find crossovers.");
 		buttonBar.add(animationButton);
 		buttonBar.add(correlationButton);
 		buttonBar.add(googleEarthButton);
@@ -62,7 +65,9 @@ public class OperationsMenu extends Composite {
 		buttonBar.add(exportToDesktopButton);
 		buttonBar.add(saveAsButton);
 		buttonBar.add(climateAnalysis);
+		buttonBar.add(trajectoryTable);
 		climateAnalysis.setVisible(false);
+		trajectoryTable.setVisible(false);
 		initWidget(buttonBar);
 		buttonBar.setSize("100%", "100%");
 	}
@@ -83,6 +88,8 @@ public class OperationsMenu extends Composite {
 		correlationButton.setOperation(null);
 	    climateAnalysis.setEnabled(false);
 	    climateAnalysis.setOperation(null);
+	    trajectoryTable.setEnabled(false);
+	    trajectoryTable.setOperation(null);
 
     }
 	public void setMenus(OperationSerializable[] ops, String view) {
@@ -144,7 +151,7 @@ public class OperationsMenu extends Composite {
 							}
 						}
 					}
-				} else if ( category.contains("table") ) {
+				} else if ( category.contains("table") && !category.contains("trajectory") ) {
 					if ( op_view.equals(view) ) {
 						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
 							if ( op.getName().toLowerCase().contains("values") ) {
@@ -176,7 +183,17 @@ public class OperationsMenu extends Composite {
                             }
 				        }
 				    }
-				}
+				} else if ( category.equals("trajectory_table") ) {
+                    if ( op_view.equals(view) ) {
+                        if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
+                            if ( op.getName().toLowerCase().contains("trajectory table") ) {
+                                trajectoryTable.setOperation(op);
+                                trajectoryTable.setVisible(true);
+                                trajectoryTable.setEnabled(true);
+                            }
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -190,6 +207,7 @@ public class OperationsMenu extends Composite {
         saveAsButton.addClickHandler(clickHandler);
         exportToDesktopButton.addClickHandler(clickHandler);
         climateAnalysis.addClickHandler(clickHandler);
+        trajectoryTable.addClickHandler(clickHandler);
     }
     public void setGoogleEarthButtonEnabled(boolean enable) {
         googleEarthButton.setEnabled(enable);
@@ -244,6 +262,11 @@ public class OperationsMenu extends Composite {
         } else {
             climateAnalysis.setVisible(false);
         }
-        
+        if ( trajectoryTable != null && trajectoryTable.getOperation() != null && trajectoryTable.getOperation().getViews().contains(view) ) {
+            trajectoryTable.setEnabled(true);
+            trajectoryTable.setVisible(true);
+        } else {
+            trajectoryTable.setVisible(false);
+        }
     }
 }

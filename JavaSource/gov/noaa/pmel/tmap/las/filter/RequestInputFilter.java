@@ -121,6 +121,7 @@ public class RequestInputFilter implements Filter {
                 "zhi",
                 "tlo",
                 "thi",
+                "tid",
 		"xpath",
 		"gwt.codesvr"
     };
