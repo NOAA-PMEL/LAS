@@ -1,13 +1,5 @@
 package gov.noaa.pmel.tmap.las.ui;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -16,7 +8,17 @@ import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
-import gov.noaa.pmel.tmap.las.util.NameValuePair;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,13 +26,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.jdom.Content;
 import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.EntityRef;
-import org.jdom.Namespace;
-import org.jdom.Text;
-import org.jdom.output.XMLOutputter;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonStreamParser;
 
 public class GetTrajectoryTable extends LASAction {
 
@@ -41,9 +48,45 @@ public class GetTrajectoryTable extends LASAction {
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			        throws Exception {	
+	    
+	    
+	    DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
+	    
+        DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
+
+        DateTimeFormatter iso_fmt = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+        
 	    LASProxy lasProxy = new LASProxy();
 	    LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-	    String dsid = request.getParameter("dsid");
+	    String xml = request.getParameter("xml");
+	    String dsid;
+	    String xlo = null;
+	    String xhi = null;
+	    String ylo = null;
+	    String yhi = null;
+	    String zlo = null;
+	    String zhi = null;
+	    String tlo = null;
+	    String thi = null;
+	    if ( xml != null ) {
+	        LASUIRequest lasRequest = new LASUIRequest();
+            try {
+                JDOMUtils.XML2JDOM(xml, lasRequest);
+                dsid = lasRequest.getDatasetIDs().get(0);
+                xlo = lasRequest.getXlo();
+                xhi = lasRequest.getXhi();
+                ylo = lasRequest.getYlo();
+                yhi = lasRequest.getYhi();
+                zlo = lasRequest.getZhi();
+                zhi = lasRequest.getZlo();
+                tlo = lasRequest.getTlo();
+                thi = lasRequest.getThi();
+            } catch (Exception e) {
+                return null;
+            }
+	    } else {
+	        dsid = request.getParameter("dsid");
+	    }
 	    if ( dsid != null ) {
 	        List<Category> c = lasConfig.getCategories(dsid);
 	        Dataset dataset = c.get(0).getDataset();
@@ -51,77 +94,240 @@ public class GetTrajectoryTable extends LASAction {
 	        if ( properties != null ) {
 	            Map<String, String> tabledap = properties.get("tabledap_access");
 	            if ( tabledap != null ) {
+	                String table = tabledap.get("table_variables");
+                    String document_base = tabledap.get("document_base");
+                    String id = tabledap.get("id");
+                    String did = tabledap.get("decimated_id");
+                    // DEBUG
+                    did = "ddsg_files_badval_034c_f37d_432d";
+                    
 	                VariableSerializable[] vars = dataset.getVariablesSerializable();
 	                if ( vars.length > 0 ) {
-	                    String url = lasConfig.getDataAccessURL(dsid, vars[0].getID(), false);
-	                    if ( url != null && !url.equals("") ) {
-	                        if ( url.contains("#") ) url = url.substring(0, url.indexOf("#"));
-	                        String id = tabledap.get("id");
+	                    String dataurl = lasConfig.getDataAccessURL(dsid, vars[0].getID(), false);
+	                   
+	                    if ( dataurl != null && !dataurl.equals("") ) {
+	                        if ( dataurl.contains("#") ) dataurl = dataurl.substring(0, dataurl.indexOf("#"));
+	                        if (!dataurl.endsWith("/") ) dataurl = dataurl + "/";
+	                        
+	                        if ( did != null && !did.equals("") ) {
+	                            id = did;
+	                        }
+	                        dataurl = dataurl + id;
+	                        
+	                        
 	                        if ( id != null && !id.equals("") ) {
-	                            if (!url.endsWith("/") ) url = url + "/";
-	                            url = url + id + ".xhtml";
-	                            String table = tabledap.get("table_variables");
-	                            String document_base = tabledap.get("document_base");
-	                            if ( !document_base.endsWith("/") ) document_base = document_base + "/";
+	                            
+	                            String url = dataurl + ".csv";
+	                            
+	                            // DEBUG
+	                            document_base = "http://yahoo.com/";
+	                            if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
 	                                url = url + "?" + table;
 	                                response.setContentType("application/xhtml+xml");
 	                                Document doc = new Document();
-	                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-	                                lasProxy.executeGetMethodAndStreamResult(url+"&distinct()", stream);
-	                                JDOMUtils.XML2JDOM(stream.toString(), doc);
-	                                Element root = doc.getRootElement();
-	                                Namespace ns = root.getNamespace();
-	                                if ( root != null ) {
-	                                    Element body = root.getChild("body", ns);
-	                                    if ( body != null ) {
-	                                        // Chrome complains about the &nbsp; in the body
-	                                        List<Content> stuff = body.getContent();
-	                                        for ( int c1 = 0; c1 < stuff.size(); c1++ ) {
-	                                            Content s = stuff.get(c1);
-	                                            if ( s instanceof EntityRef ) {
-	                                                boolean out = body.removeContent(s);
-	                                            }
-	                                        }
-	                                        Element tableE = body.getChild("table", ns);
-	                                        List<Element> rows = tableE.getChildren("tr", ns);
-	                                        Element header = rows.get(0);
-	                                        Element th = new Element("th", ns);
-	                                        th.setText("Documentation");
-	                                        header.addContent(th);
-	                                        Element blank = rows.get(1);
-	                                        Element bh = new Element("th", ns);
-	                                        blank.addContent(bh);
-	                                        // This is a blank row of <th> elements we are skipping.
-	                                        for (int i = 2; i < rows.size(); i++) {
-	                                            Element row = rows.get(i);
+	                                
+	                                String query = "";
+	                                try {
+                                        double dxlo = Double.valueOf(xlo);
+                                        double dxhi = Double.valueOf(xhi);
+                                        // Do the full globle and two query dance...
+                                        
+                                        if ( Math.abs(dxhi - dxlo ) < 355. ) {
 
-	                                            List<Element> tds = row.getChildren("td", ns);
-	                                            Element first = tds.get(0);
-
-	                                            Element td = new Element("td", ns);
-	                                            td.setAttribute("nowrap", "nowrap");
-	                                            td.setAttribute("rowspan", "1");
-	                                            td.setAttribute("colspan", "1");
-	                                            if ( !first.getTextNormalize().equals("") ) {
-	                                                
-	                                                Element a = new Element("a", ns);
-	                                                a.setAttribute("href", document_base+first.getTextNormalize());
-	                                                a.setText("Documentation");
-
-	                                                td.setContent(a);
-
-	                                            }
-	                                            row.addContent(td);
-	                                        }
-	                                        org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
-	                                        format.setLineSeparator(System.getProperty("line.separator"));
-	                                        XMLOutputter outputter =
-	                                                new XMLOutputter(format);
-	                                        outputter.output(doc, response.getOutputStream());
-	                                        // http://dunkel.pmel.noaa.gov:8660/erddap/tabledap/dsg_files_badval_7f9a_0653_3fc1.xhtml?QC_flag,cruise_expocode,vessel_name,PIs&time>=2007-09-01&time<=2008-01-01&distinct()
-	                                    }
+                                            if ( xlo != null && !xlo.equals("") ) {
+                                                query = query + "&longitude>="+xlo;
+                                            }
+                                            if ( xhi != null && !xhi.equals("") ) {
+                                                query = query + "&longitude<="+xhi;
+                                            }
+                                            
+                                        }
+                                        
+                                    } catch (Exception e2) {
+                                        // live without x constraints.
+                                    }
+	                                
+	                                
+	                                if ( ylo != null && !ylo.equals("") ) {
+	                                    query = query + "&latitude>="+ylo;
 	                                }
+	                                if ( yhi != null && !yhi.equals("") ) {
+	                                    query = query + "&latitude<="+yhi;
+	                                }
+	                                if ( zlo != null && !zlo.equals("") ) {
+	                                    query = query + "&depth>="+zlo;
+	                                }
+	                                if ( zhi != null && !zhi.equals("") ) {
+	                                    query = query + "&depth<="+zhi;
+	                                }
+	                                if ( tlo != null && !tlo.equals("") ) {
+	                                    DateTime dlo;
+	                                    try {
+	                                        dlo = long_fmt.parseDateTime(tlo);
+                                        } catch (Exception e) {
+                                            try {
+                                                dlo = short_fmt.parseDateTime(tlo);
+                                            } catch (Exception e1) {
+                                                logerror(request, "Error parsing dates...", e);
+                                                return mapping.findForward("error");
+                                            }
+                                        }
+	                                    String dtlo = iso_fmt.print(dlo.getMillis());
+	                                    query = query + "&time>=\""+dtlo+"\"";
+	                                }
+	                                if ( thi != null && !thi.equals("") ) {
+	                                    DateTime dhi;
+                                        try {
+                                            dhi = long_fmt.parseDateTime(thi);
+                                        } catch (Exception e) {
+                                            try {
+                                                dhi = short_fmt.parseDateTime(thi);
+                                            } catch (Exception e1) {
+                                                logerror(request, "Error parsing dates...", e);
+                                                return mapping.findForward("error");
+                                            }
+                                        }
+                                        String dthi = iso_fmt.print(dhi.getMillis());
+                                        query = query + "&time<=\""+dthi+"\"";
+	                                }
+	                                query = query + "&distinct()";
+	                                query = URLEncoder.encode(query, "UTF-8");
+	                                url = url + query;
+	                                InputStream input = lasProxy.executeGetMethodAndReturnStream(url, response);
+	                                OutputStream output = response.getOutputStream();
+	                                
+	                                BufferedWriter bsw = new BufferedWriter(new OutputStreamWriter(output));
+	                                
+	                                String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+
+	                                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"+
+	                                "<html xmlns=\"http://www.w3.org/1999/xhtml\">"+
+	                                "<head>"+
+	                                "  <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"+
+	                                "  <title>dsg_files_badval_7f9a_0653_3fc1_cc1b_6a6c_c5e0</title>"+
+	                                "  <script src=\"JavaScript/frameworks/jquery-1.11.0.js\" type=\"text/javascript\"></script>"+
+	                                "</head>"+
+	                                "<body style=\"color:black; background:white; font-family:Arial,Helvetica,sans-serif; font-size:85%; line-height:130%;\">"+
+	                                "<table border=\"2\" cellpadding=\"4\" cellspacing=\"0\">";
+	                                
+	                                bsw.write(header);
+
+	                                
+	                                BufferedReader bsr = new BufferedReader(new InputStreamReader(input));
+	                                // The regex comes from the geniuses at: 
+	                                // http://stackoverflow.com/questions/1757065/splitting-a-comma-separated-string-but-ignoring-commas-in-quotes
+	                                // Holy mother...
+	                                
+	                                
+                                    // Process the column names.
+	                                String line = bsr.readLine();
+	                                String[] titles = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+	                                StringBuilder columnHeaders = new StringBuilder();
+	                                columnHeaders.append("<tr>\n");
+	                                columnHeaders.append("<th>row</th>\n");
+	                                for (int i = 0; i < titles.length; i++) {
+                                        columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
+                                    }
+	                                columnHeaders.append("<th>documentation</th>\n");
+	                                columnHeaders.append("<th>start</th>\n");
+	                                columnHeaders.append("<th>end</th>\n");
+	                                
+	                                columnHeaders.append("<th>crossovers</th>\n");
+	                                columnHeaders.append("</tr>\n");
+	                                bsw.write(columnHeaders.toString());
+	                                
+	                                // Process the units.
+	                                line = bsr.readLine();
+	                                String[] units = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                                    StringBuilder unitStrings = new StringBuilder();
+                                    unitStrings.append("<tr>\n");
+                                    unitStrings.append("<th></th>\n");
+
+                                    for (int i = 0; i < units.length; i++) {
+                                        unitStrings.append("<th>"+units[i]+"</th>\n");
+                                    }
+                                    unitStrings.append("<th></th>\n");
+                                    unitStrings.append("<th></th>\n");
+                                    unitStrings.append("<th></th>\n");
+                                    unitStrings.append("<th></th>\n");
+                                    unitStrings.append("</tr>\n");
+	                                bsw.write(unitStrings.toString());
+                                    
+                                    int index = 1;
+                                    line = bsr.readLine();
+
+	                                while ( line != null ) {
+	                                    String[] parts = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+	                                    StringBuilder row = new StringBuilder();
+	                                    if ( index%2 == 0 ) {
+	                                        row.append("<tr bgcolor=\"#FFFFFF\">");
+	                                    } else {
+                                            row.append("<tr bgcolor=\"#F3E7C9\">");
+	                                    }
+	                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+index+"</td>\n");
+	                                    for (int i = 0; i < parts.length; i++) {
+                                            try {
+                                                Double d = Double.valueOf(parts[i]);
+                                                row.append("<td align=\"right\">"+parts[i]+"</td>\n");
+                                            } catch (NumberFormatException e) {
+                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+parts[i]+"</td>\n");
+                                            }
+	                                    }
+	                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documenation</a>"+"</td>\n");
+
+                                       
+                                        // Call out to ERDDAP for the lat/lon/time box.
+                                        try {
+                                            InputStream stream = null;
+                                            JsonStreamParser jp = null;
+
+                                            String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
+                                            stream = null;
+
+                                            stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
+
+                                            jp = new JsonStreamParser(new InputStreamReader(stream));
+                                            JsonObject timebounds = (JsonObject) jp.next();
+                                            JsonArray timeminmax = getMinMax(timebounds);
+                                            stream.close();
+                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
+                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
+                                            // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
+                                        } catch ( Exception e ) {
+                                             row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
+                                             row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
+                                         }
+                                            
+                                            
+                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                // Add the link to load a list of potential crosses to the table.
+                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
+                                                row.append("\n</td>");
+                                                
+                                            
+                                        
+                                    
+                                        
+                                       
+                                        
+                                        
+                                        
+	                                    row.append("</tr>");
+	                                    bsw.write(row.toString());
+	                                    
+	                                    line = bsr.readLine();
+
+	                                    
+	                                    index++;
+	                                }
+	                                
+	                               bsw.write("</table>\n</body>\n</html>");
+	                                
+	                                
+	                                bsw.flush();
+	                                bsw.close();
+	                                bsr.close();
+	                                
 	                            }
 	                        }
 	                    }
@@ -130,6 +336,18 @@ public class GetTrajectoryTable extends LASAction {
 	        }
 	    }
 	    return null;
+	}
+	private JsonArray getMinMax(JsonObject bounds) {
+	    JsonArray rows = (JsonArray) ((JsonObject) (bounds.get("table"))).get("rows");
+        JsonArray row1 = (JsonArray) rows.get(0);
+        JsonArray row2 = (JsonArray) rows.get(1);
+        
+        String min = ((JsonElement) row1.get(1)).getAsString();
+        String max = ((JsonElement) row2.get(1)).getAsString();
+        JsonArray minmax = new JsonArray();
+        minmax.add(new JsonPrimitive(min));
+        minmax.add(new JsonPrimitive(max));
+        return minmax;
 	}
 	public static String prepareURL(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		String dsid = request.getParameter("dsid");

@@ -24,7 +24,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class LASProxy {
-	private int streamBufferSize = 8196;
+	public int streamBufferSize = 8196;
 	private static Logger log = LogManager.getLogger(LASProxy.class.getName());
 	public void executeGetMethodAndSaveResult(String url, File outfile, HttpServletResponse response) throws IOException, HttpException {
 		HttpClient client = new HttpClient();
@@ -94,6 +94,39 @@ public class LASProxy {
 	}
 	public String executeGetMethodAndReturnResult(String url) throws HttpException, IOException {
 		return executeGetMethodAndReturnResult(url, null);
+	}
+	   /**
+     * Makes HTTP GET request and writes result to response output stream.
+     * @param request fully qualified request URL.
+     * @param response the response
+     * @throws IOException
+     * @throws HttpException
+     */
+	public InputStream executeGetMethodAndReturnStream(String request, HttpServletResponse response) throws IOException, HttpException {
+
+	    HttpClient client = new HttpClient();
+	    HttpClientParams params = client.getParams();
+	    params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+	    client.setParams(params);
+	    GetMethod method = new GetMethod(request);
+
+	    method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
+
+
+	    log.info("method: " + method.getURI());
+
+	    int rc = client.executeMethod(method);
+
+	    if (rc != HttpStatus.SC_OK) {
+
+	        log.error("HttpGet Error Code: "+rc);
+
+	        //response.sendError(rc);
+
+	        return null;
+	    }
+	    return method.getResponseBodyAsStream();
+
 	}
 	/**
 	 * Makes HTTP GET request and writes result to response output stream.
