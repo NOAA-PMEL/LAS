@@ -205,7 +205,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                "<head>"+
 	                                "  <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"+
 	                                "  <title>dsg_files_badval_7f9a_0653_3fc1_cc1b_6a6c_c5e0</title>"+
-	                                "  <script src=\"JavaScript/frameworks/jquery-1.11.0.js\" type=\"text/javascript\"></script>"+
+	                                "  <script src=\"JavaScript/frameworks/jquery-1.11.0.min.js\" type=\"text/javascript\"></script>"+
 	                                "</head>"+
 	                                "<body style=\"color:black; background:white; font-family:Arial,Helvetica,sans-serif; font-size:85%; line-height:130%;\">"+
 	                                "<table border=\"2\" cellpadding=\"4\" cellspacing=\"0\">";
