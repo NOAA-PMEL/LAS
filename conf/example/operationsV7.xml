@@ -679,6 +679,53 @@
       <grid_type name="trajectory"/>
     </grid_types>
   </operation>
+  <!--  Trajctory Table	 -->
+  <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable">
+    <response ID="PlotResp" type="HTML" index="1">
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      <result type="cancel" ID="cancel"/>
+    </response>
+    <service>template</service>
+    <region>
+      <intervals name="x"/>
+      <intervals name="y"/>
+      <intervals name="z"/>
+      <intervals name="t"/>
+      <intervals name="e"/>
+      <intervals name="xy"/>
+      <intervals name="xz"/>
+      <intervals name="xt"/>
+      <intervals name="xe"/>
+      <intervals name="yz"/>
+      <intervals name="yt"/>
+      <intervals name="ye"/>
+      <intervals name="zt"/>
+      <intervals name="ze"/>
+      <intervals name="te"/>
+      <intervals name="xyz"/>
+      <intervals name="xyt"/>
+      <intervals name="xye"/>
+      <intervals name="xzt"/>
+      <intervals name="xze"/>
+      <intervals name="xte"/>
+      <intervals name="yzt"/>
+      <intervals name="yze"/>
+      <intervals name="yte"/>
+      <intervals name="zte"/>
+      <intervals name="xyzt"/>
+      <intervals name="xyze"/>
+      <intervals name="xyte"/>
+      <intervals name="xzte"/>
+      <intervals name="yzte"/>
+      <intervals name="xyzte"/>
+    </region>
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+  </operation>
   <!-- End of netCDF only trajectory operations -->
   <operation name="Correlation Plot" ID="Correlation" service_action="" default="true" category="correlation" output_template="Correlation">
     <response ID="PlotResp" type="HTML" index="1">
@@ -1162,6 +1209,44 @@
   <!-- Operations for Google Earth -->
   <!-- BEGIN: dynamic overlay on Google Earth -->
   <!-- for non-vector plots [public] -->
+    <!-- for non-vector plots [public] -->
+  <operation ID="Plot_GE_Overlay_Traj" default="true" name="Plot to Google Earth" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE_overlay" service_action="Plot_2D_GE" category="virtual_globe">
+    <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>extract</service>
+    </operation>
+    <operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly" output_template="output_GE_overlay" service_action="Trajectory_2D_poly">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+        <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+        <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+        <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+        <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+        <result type="js_total" ID="js_total" file_suffix=".js"/>
+        <result type="map_data" ID="map_data" file_suffix=".txt"/>
+        <result type="image" ID="ref_map" file_suffix=".png"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+        <result type="cancel" ID="cancel"/>
+        <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      </response>
+      <service>ferret</service>
+    </operation>
+    <region>
+      <intervals name="xyt"/>
+    </region>
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+    <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
+  </operation>
   <operation ID="Plot_GE_Overlay" default="true" name="Plot to Google Earth" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE_overlay" service_action="Plot_2D_GE" category="virtual_globe">
     <service>ferret</service>
     <response ID="PlotResp">
@@ -1194,6 +1279,56 @@
   <!-- Begin: static overlay -->
   <!-- overlay kml for non-vector plots [private]; it is used by the dynamic 
 		overlay -->
+  <operation name="Plot to Google Earth (static)" ID="Plot_GE_Traj_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
+    <!-- Extract and plot... -->
+     <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>extract</service>
+    </operation>
+    <operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly" output_template="output_GE_overlay" service_action="Trajectory_2D_poly">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+        <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+        <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+        <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+        <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+        <result type="js_total" ID="js_total" file_suffix=".js"/>
+        <result type="map_data" ID="map_data" file_suffix=".txt"/>
+        <result type="image" ID="ref_map" file_suffix=".png"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+        <result type="cancel" ID="cancel"/>
+        <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      </response>
+      <service>ferret</service>
+    </operation>
+    <operation chained="true" name="Make KML File" ID="kml" service_action="kml_overlay">
+      <args>
+        <arg chained="true" type="image" operation="Trajectory_2D_poly" result="plot_image"/>
+        <arg chained="true" type="image" operation="Trajectory_2D_poly" result="colorbar"/>
+        <arg chained="true" type="map_scale" operation="Trajectory_2D_poly" result="map_scale"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+        <result type="kmz" ID="kmz" streamable="true" mime_type="application/vnd.google-earth.kmz" file_suffix=".kmz"/>
+      </response>
+      <service>kml</service>
+    </operation>
+    <region>
+      <intervals name="xy"/>
+    </region>
+    <grid_types>
+      <grid_type name="regular"/>
+    </grid_types>
+    <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
+  </operation>
   <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
     <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
       <response ID="PlotResp">
