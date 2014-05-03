@@ -126,29 +126,29 @@ public class GetTrajectoryTable extends LASAction {
 	                                url = url + "?" + table;
 	                                response.setContentType("application/xhtml+xml");
 	                                Document doc = new Document();
-	                                
+
 	                                String query = "";
 	                                try {
-                                        double dxlo = Double.valueOf(xlo);
-                                        double dxhi = Double.valueOf(xhi);
-                                        // Do the full globle and two query dance...
-                                        
-                                        if ( Math.abs(dxhi - dxlo ) < 355. ) {
+	                                    double dxlo = Double.valueOf(xlo);
+	                                    double dxhi = Double.valueOf(xhi);
+	                                    // Do the full globle and two query dance...
 
-                                            if ( xlo != null && !xlo.equals("") ) {
-                                                query = query + "&longitude>="+xlo;
-                                            }
-                                            if ( xhi != null && !xhi.equals("") ) {
-                                                query = query + "&longitude<="+xhi;
-                                            }
-                                            
-                                        }
-                                        
-                                    } catch (Exception e2) {
-                                        // live without x constraints.
-                                    }
-	                                
-	                                
+	                                    if ( Math.abs(dxhi - dxlo ) < 355. ) {
+
+	                                        if ( xlo != null && !xlo.equals("") ) {
+	                                            query = query + "&longitude>="+xlo;
+	                                        }
+	                                        if ( xhi != null && !xhi.equals("") ) {
+	                                            query = query + "&longitude<="+xhi;
+	                                        }
+
+	                                    }
+
+	                                } catch (Exception e2) {
+	                                    // live without x constraints.
+	                                }
+
+
 	                                if ( ylo != null && !ylo.equals("") ) {
 	                                    query = query + "&latitude>="+ylo;
 	                                }
@@ -165,169 +165,173 @@ public class GetTrajectoryTable extends LASAction {
 	                                    DateTime dlo;
 	                                    try {
 	                                        dlo = long_fmt.parseDateTime(tlo);
-                                        } catch (Exception e) {
-                                            try {
-                                                dlo = short_fmt.parseDateTime(tlo);
-                                            } catch (Exception e1) {
-                                                logerror(request, "Error parsing dates...", e);
-                                                return mapping.findForward("error");
-                                            }
-                                        }
+	                                    } catch (Exception e) {
+	                                        try {
+	                                            dlo = short_fmt.parseDateTime(tlo);
+	                                        } catch (Exception e1) {
+	                                            logerror(request, "Error parsing dates...", e);
+	                                            return mapping.findForward("error");
+	                                        }
+	                                    }
 	                                    String dtlo = iso_fmt.print(dlo.getMillis());
 	                                    query = query + "&time>=\""+dtlo+"\"";
 	                                }
 	                                if ( thi != null && !thi.equals("") ) {
 	                                    DateTime dhi;
-                                        try {
-                                            dhi = long_fmt.parseDateTime(thi);
-                                        } catch (Exception e) {
-                                            try {
-                                                dhi = short_fmt.parseDateTime(thi);
-                                            } catch (Exception e1) {
-                                                logerror(request, "Error parsing dates...", e);
-                                                return mapping.findForward("error");
-                                            }
-                                        }
-                                        String dthi = iso_fmt.print(dhi.getMillis());
-                                        query = query + "&time<=\""+dthi+"\"";
+	                                    try {
+	                                        dhi = long_fmt.parseDateTime(thi);
+	                                    } catch (Exception e) {
+	                                        try {
+	                                            dhi = short_fmt.parseDateTime(thi);
+	                                        } catch (Exception e1) {
+	                                            logerror(request, "Error parsing dates...", e);
+	                                            return mapping.findForward("error");
+	                                        }
+	                                    }
+	                                    String dthi = iso_fmt.print(dhi.getMillis());
+	                                    query = query + "&time<=\""+dthi+"\"";
 	                                }
 	                                query = query + "&distinct()";
 	                                query = URLEncoder.encode(query, "UTF-8");
 	                                url = url + query;
 	                                InputStream input = lasProxy.executeGetMethodAndReturnStream(url, response);
 	                                OutputStream output = response.getOutputStream();
-	                                
+
 	                                BufferedWriter bsw = new BufferedWriter(new OutputStreamWriter(output));
-	                                
+
 	                                String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+
-	                                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"+
-	                                "<html xmlns=\"http://www.w3.org/1999/xhtml\">"+
-	                                "<head>"+
-	                                "  <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"+
-	                                "  <title>dsg_files_badval_7f9a_0653_3fc1_cc1b_6a6c_c5e0</title>"+
-	                                "  <script src=\"JavaScript/frameworks/jquery-1.11.0.min.js\" type=\"text/javascript\"></script>"+
-	                                "</head>"+
-	                                "<body style=\"color:black; background:white; font-family:Arial,Helvetica,sans-serif; font-size:85%; line-height:130%;\">"+
-	                                "<table border=\"2\" cellpadding=\"4\" cellspacing=\"0\">";
-	                                
+	                                        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"+
+	                                        "<html xmlns=\"http://www.w3.org/1999/xhtml\">"+
+	                                        "<head>"+
+	                                        "  <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"+
+	                                        "  <title>dsg_files_badval_7f9a_0653_3fc1_cc1b_6a6c_c5e0</title>"+
+	                                        "  <script src=\"JavaScript/frameworks/jquery-1.11.0.min.js\" type=\"text/javascript\"></script>"+
+	                                        "</head>"+
+	                                        "<body style=\"color:black; background:white; font-family:Arial,Helvetica,sans-serif; font-size:85%; line-height:130%;\">"+
+	                                        "<table border=\"2\" cellpadding=\"4\" cellspacing=\"0\">";
+
 	                                bsw.write(header);
 
-	                                
-	                                BufferedReader bsr = new BufferedReader(new InputStreamReader(input));
-	                                // The regex comes from the geniuses at: 
-	                                // http://stackoverflow.com/questions/1757065/splitting-a-comma-separated-string-but-ignoring-commas-in-quotes
-	                                // Holy mother...
-	                                
-	                                
-                                    // Process the column names.
-	                                String line = bsr.readLine();
-	                                String[] titles = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-	                                StringBuilder columnHeaders = new StringBuilder();
-	                                columnHeaders.append("<tr>\n");
-	                                columnHeaders.append("<th>row</th>\n");
-	                                for (int i = 0; i < titles.length; i++) {
-                                        columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
-                                    }
-	                                columnHeaders.append("<th>documentation</th>\n");
-	                                columnHeaders.append("<th>start</th>\n");
-	                                columnHeaders.append("<th>end</th>\n");
-	                                
-	                                columnHeaders.append("<th>crossovers</th>\n");
-	                                columnHeaders.append("</tr>\n");
-	                                bsw.write(columnHeaders.toString());
-	                                
-	                                // Process the units.
-	                                line = bsr.readLine();
-	                                String[] units = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                                    StringBuilder unitStrings = new StringBuilder();
-                                    unitStrings.append("<tr>\n");
-                                    unitStrings.append("<th></th>\n");
+	                                if ( input != null ) {
+	                                    BufferedReader bsr = new BufferedReader(new InputStreamReader(input));
+	                                    // The regex comes from the geniuses at: 
+	                                    // http://stackoverflow.com/questions/1757065/splitting-a-comma-separated-string-but-ignoring-commas-in-quotes
+	                                    // Holy mother...
 
-                                    for (int i = 0; i < units.length; i++) {
-                                        unitStrings.append("<th>"+units[i]+"</th>\n");
-                                    }
-                                    unitStrings.append("<th></th>\n");
-                                    unitStrings.append("<th></th>\n");
-                                    unitStrings.append("<th></th>\n");
-                                    unitStrings.append("<th></th>\n");
-                                    unitStrings.append("</tr>\n");
-	                                bsw.write(unitStrings.toString());
-                                    
-                                    int index = 1;
-                                    line = bsr.readLine();
 
-	                                while ( line != null ) {
-	                                    String[] parts = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-	                                    StringBuilder row = new StringBuilder();
-	                                    if ( index%2 == 0 ) {
-	                                        row.append("<tr bgcolor=\"#FFFFFF\">");
-	                                    } else {
-                                            row.append("<tr bgcolor=\"#F3E7C9\">");
+	                                    // Process the column names.
+	                                    String line = bsr.readLine();
+	                                    String[] titles = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+	                                    StringBuilder columnHeaders = new StringBuilder();
+	                                    columnHeaders.append("<tr>\n");
+	                                    columnHeaders.append("<th>row</th>\n");
+	                                    for (int i = 0; i < titles.length; i++) {
+	                                        columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                    }
-	                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+index+"</td>\n");
-	                                    for (int i = 0; i < parts.length; i++) {
-                                            try {
-                                                Double d = Double.valueOf(parts[i]);
-                                                row.append("<td align=\"right\">"+parts[i]+"</td>\n");
-                                            } catch (NumberFormatException e) {
-                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+parts[i]+"</td>\n");
-                                            }
+	                                    columnHeaders.append("<th>documentation</th>\n");
+	                                    columnHeaders.append("<th>start</th>\n");
+	                                    columnHeaders.append("<th>end</th>\n");
+
+	                                    columnHeaders.append("<th>crossovers</th>\n");
+	                                    columnHeaders.append("</tr>\n");
+	                                    bsw.write(columnHeaders.toString());
+
+	                                    // Process the units.
+	                                    line = bsr.readLine();
+	                                    String[] units = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+	                                    StringBuilder unitStrings = new StringBuilder();
+	                                    unitStrings.append("<tr>\n");
+	                                    unitStrings.append("<th></th>\n");
+
+	                                    for (int i = 0; i < units.length; i++) {
+	                                        unitStrings.append("<th>"+units[i]+"</th>\n");
 	                                    }
-	                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documenation</a>"+"</td>\n");
+	                                    unitStrings.append("<th></th>\n");
+	                                    unitStrings.append("<th></th>\n");
+	                                    unitStrings.append("<th></th>\n");
+	                                    unitStrings.append("<th></th>\n");
+	                                    unitStrings.append("</tr>\n");
+	                                    bsw.write(unitStrings.toString());
 
-                                       
-                                        // Call out to ERDDAP for the lat/lon/time box.
-                                        try {
-                                            InputStream stream = null;
-                                            JsonStreamParser jp = null;
-
-                                            String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
-                                            stream = null;
-
-                                            stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
-
-                                            jp = new JsonStreamParser(new InputStreamReader(stream));
-                                            JsonObject timebounds = (JsonObject) jp.next();
-                                            JsonArray timeminmax = getMinMax(timebounds);
-                                            stream.close();
-                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
-                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
-                                            // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
-                                        } catch ( Exception e ) {
-                                             row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
-                                             row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
-                                         }
-                                            
-                                            
-                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-                                                // Add the link to load a list of potential crosses to the table.
-                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
-                                                row.append("\n</td>");
-                                                
-                                            
-                                        
-                                    
-                                        
-                                       
-                                        
-                                        
-                                        
-	                                    row.append("</tr>");
-	                                    bsw.write(row.toString());
-	                                    
+	                                    int index = 1;
 	                                    line = bsr.readLine();
 
-	                                    
-	                                    index++;
+	                                    while ( line != null ) {
+	                                        String[] parts = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+	                                        StringBuilder row = new StringBuilder();
+	                                        if ( index%2 == 0 ) {
+	                                            row.append("<tr bgcolor=\"#FFFFFF\">");
+	                                        } else {
+	                                            row.append("<tr bgcolor=\"#F3E7C9\">");
+	                                        }
+	                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+index+"</td>\n");
+	                                        for (int i = 0; i < parts.length; i++) {
+	                                            try {
+	                                                Double d = Double.valueOf(parts[i]);
+	                                                row.append("<td align=\"right\">"+parts[i]+"</td>\n");
+	                                            } catch (NumberFormatException e) {
+	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+parts[i]+"</td>\n");
+	                                            }
+	                                        }
+	                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documenation</a>"+"</td>\n");
+
+
+	                                        // Call out to ERDDAP for the lat/lon/time box.
+	                                        try {
+	                                            InputStream stream = null;
+	                                            JsonStreamParser jp = null;
+
+	                                            String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
+	                                            stream = null;
+
+	                                            stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
+
+	                                            jp = new JsonStreamParser(new InputStreamReader(stream));
+	                                            JsonObject timebounds = (JsonObject) jp.next();
+	                                            JsonArray timeminmax = getMinMax(timebounds);
+	                                            stream.close();
+	                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
+	                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
+	                                            // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
+	                                        } catch ( Exception e ) {
+	                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
+	                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
+	                                        }
+
+
+	                                        row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+	                                        // Add the link to load a list of potential crosses to the table.
+	                                        row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
+	                                        row.append("\n</td>");
+
+
+
+
+
+
+
+
+
+	                                        row.append("</tr>");
+	                                        bsw.write(row.toString());
+
+	                                        line = bsr.readLine();
+
+
+	                                        index++;
+	                                    }
+
+	                                    bsw.write("</table>\n</body>\n</html>");
+
+
+	                                    bsw.flush();
+	                                    bsw.close();
+	                                    bsr.close();
+
 	                                }
-	                                
-	                               bsw.write("</table>\n</body>\n</html>");
-	                                
-	                                
-	                                bsw.flush();
-	                                bsw.close();
-	                                bsr.close();
-	                                
+	                            } else {
+	                                logerror(request, "Unable to fetch information from server...","Input stream was null.");
+                                    return mapping.findForward("error");
 	                            }
 	                        }
 	                    }
