@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
@@ -330,7 +331,7 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                }
 	                            } else {
-	                                logerror(request, "Unable to fetch information from server...","Input stream was null.");
+	                                logerror(request, "Unable to fetch information from server...","query = "+URLDecoder.decode(url, "UTF-8"));
                                     return mapping.findForward("error");
 	                            }
 	                        }
