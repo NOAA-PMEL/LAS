@@ -112,6 +112,24 @@ public class LASBackendRequest extends LASDocument {
         this.getRootElement().addContent(cancel);
     }
     /**
+     * Get operation that follows this operation in the chain (if any).
+     */
+    public String getChainedOperation() {
+        Element chainedop = getRootElement().getChild("chained_operation");
+        if ( chainedop != null ) {
+            return chainedop.getTextNormalize();
+        }
+        return "";
+    }
+    public void setChainedOperation(String id) {
+        Element chainedop = getRootElement().getChild("chained_operation");
+        if ( chainedop == null ) {
+            chainedop = new Element("chained_operation");
+            getRootElement().addContent(chainedop);
+        }
+        chainedop.setText(id);
+    }
+    /**
      * Create a hash map of all of the information in the dataObjects so they can be written out as Ferret symbols.
      * @return HashMap of symbol names and values.
      * @see gov.noaa.pmel.tmap.las.jdom.LASBackendRequest#getDataSymbols()
