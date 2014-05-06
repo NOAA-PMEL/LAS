@@ -209,6 +209,9 @@ public class TabledapTool extends TemplateTool {
             String id = getTabledapProperty(lasBackendRequest, "id");
             log.debug("Got id: " + id); 
             required(id, causeOfError);
+            
+            String decid = getTabledapProperty(lasBackendRequest, "decimated_id");
+           
             //get "debug" file name, may be null or ""
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
             causeOfError = "Unable to getResultAsFile(debug): ";
@@ -251,6 +254,13 @@ public class TabledapTool extends TemplateTool {
 
             //then variable constraints  
             List constraintElements = lasBackendRequest.getRootElement().getChildren("constraint");
+            
+            // For now we will not use the decimated data set when there is any constraint applied to the request.
+            // In the future we may need to distinguish between a sub-set variable constraint and a variable constraint.
+            // The two types below should be enough to tell the difference.
+            
+            boolean hasConstraints = constraintElements.size() > 0;
+            
             Iterator cIt = constraintElements.iterator(); 
             while (cIt.hasNext()) {
                 Element constraint = (Element) cIt.next();
@@ -332,15 +342,6 @@ public class TabledapTool extends TemplateTool {
                 query.append("&orderBy(\""+cruiseid+","+time+"\")");
             }
             
-            
-
-            //store constraint in debug file
-            causeOfError = "Could not create constraint expression in " + constraintFileName + ": ";
-            String querySummary = "query=" + query.toString() + " xlo=" + xlo + " xhi=" + xhi;
-            log.debug(querySummary);
-            
-            if (constraintFileName != null && constraintFileName.length() > 0)
-                Test.ensureEqual(String2.writeToFile(constraintFileName, querySummary), "", causeOfError);
 
             //get the data   
             causeOfError = "Could not convert the data source to a netCDF file: ";   
@@ -350,6 +351,7 @@ public class TabledapTool extends TemplateTool {
             DateTime dt = new DateTime();
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
             StringBuilder query2 = null;
+            boolean smallarea = false;
             if (xlo.length() > 0 && xhi.length() > 0 ) {
 
                 // This little exercise will normalize the x values to -180, 180.
@@ -364,6 +366,24 @@ public class TabledapTool extends TemplateTool {
                     xhiDbl = p.getLongitude();
                     p = new LatLonPointImpl(0, xloDbl);
                     xloDbl = p.getLongitude();
+                    
+                    double xspan = Math.abs(xhiDbl - xloDbl);
+                    double yloDbl = -90.d;
+                    double yhiDbl = 90.d;
+                    if (ylo.length() > 0) {
+                        yloDbl = Double.valueOf(ylo);
+                    }
+                    if (yhi.length() > 0) {
+                        yhiDbl = Double.valueOf(yhi);
+                    }
+                    double yspan = Math.abs(yhiDbl - yloDbl);
+                    
+                    double fraction = ((xspan+yspan)/(360.d + 180.d));
+                    
+                    if ( fraction < .1d ) {
+                        smallarea = true;
+                    }
+                    
 
                     // Now a wrap around from west to east should be have xhi < xlo;
                     if ( xhiDbl < xloDbl ) {
@@ -395,6 +415,11 @@ public class TabledapTool extends TemplateTool {
                 if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
             }
             
+            String operationID = lasBackendRequest.getChainedOperation();
+            
+            if ( !hasConstraints && !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("")) {
+                id = decid;
+            }
             
             // If there is no need for the second query, just do the thing and carry on...
           
