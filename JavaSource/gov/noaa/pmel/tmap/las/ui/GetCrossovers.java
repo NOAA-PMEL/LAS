@@ -204,7 +204,7 @@ public class GetCrossovers extends LASAction {
 	                                    bsw.close();
 	                                    return null;
 	                                }
-	                                StringBuilder crosslinks = new StringBuilder("none");
+	                                StringBuilder crosslinks = new StringBuilder("<div>none");
 	                                if ( candiateCruises.size() > 0 ) {
 	                                    // We found some.  Compute the cross overs.
 	                                    JsonObject selectedCruise = null;
@@ -271,7 +271,7 @@ public class GetCrossovers extends LASAction {
 	                                                    
 	                                                    lasRequest.setProperty("ferret", "view", "xyt");
 
-	                                                    if ( crosslinks.toString().equals("none") ) {
+	                                                    if ( crosslinks.toString().contains("none") ) {
 	                                                        crosslinks.replace(0, crosslinks.length(), "<div>");
 	                                                    }
 	                                                    
