@@ -267,8 +267,7 @@ public class GetCrossovers extends LASAction {
 	                                                    region.put("intervals", intervals);
 	                                                    lasRequest.setRegion(region);
 
-	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", tid);
-	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", cid);
+	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", tid + "|" + cid);
 	                                                    
 	                                                    lasRequest.setProperty("ferret", "view", "xyt");
 
