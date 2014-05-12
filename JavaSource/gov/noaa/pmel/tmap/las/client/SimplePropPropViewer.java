@@ -373,12 +373,12 @@ public class SimplePropPropViewer implements EntryPoint {
         if (xml != null && !xml.equals("")) {
             xml = decode(xml);
             lasRequest = new LASRequest(xml);
-            dsid = lasRequest.getDataset(0); 
-            dsid = dsid.substring(dsid.indexOf("\'")+1, dsid.lastIndexOf("\'"));
+            dsid = lasRequest.getDataset(0);
+            if ( dsid.contains("'") ) dsid = dsid.substring(dsid.indexOf("\'")+1, dsid.lastIndexOf("\'"));
             varid = lasRequest.getVariable(0);
-            varid = varid.substring(varid.indexOf("\'")+1, varid.lastIndexOf("\'"));
+            if ( varid.contains("'") ) varid = varid.substring(varid.indexOf("\'")+1, varid.lastIndexOf("\'"));
             varTwoId = lasRequest.getVariable(1);
-            varTwoId = varTwoId.substring(varTwoId.indexOf("\'")+1, varTwoId.lastIndexOf("\'"));
+            if ( varTwoId != null && varTwoId.contains("'") ) varTwoId = varTwoId.substring(varTwoId.indexOf("\'")+1, varTwoId.lastIndexOf("\'"));
             xlo = lasRequest.getRangeLo("x", 0);
             xhi = lasRequest.getRangeHi("x", 0);
             ylo = lasRequest.getRangeLo("y", 0);
