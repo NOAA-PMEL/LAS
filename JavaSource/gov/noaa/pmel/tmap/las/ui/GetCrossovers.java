@@ -221,7 +221,7 @@ public class GetCrossovers extends LASAction {
 	                                        for (Iterator cIt = candiateCruises.iterator(); cIt.hasNext();) {
 	                                            String cid = (String) cIt.next();
 	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
-	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
+	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
 	                                            if ( st != null ) {
 	                                                JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(st));
 	                                                JsonObject potentialCross = (JsonObject) jp.next();
@@ -343,6 +343,10 @@ public class GetCrossovers extends LASAction {
             for ( int j = 0; j < crossingRows.size(); j++ ) {
                 JsonArray crossingRow = (JsonArray) crossingRows.get(j);
                 String crossingID = crossingRow.get(0).getAsString();
+                // Don't care that it crosses itself
+                if ( id.equals(crossingID) ) {
+                    return null;
+                }
                 String crossingDate = crossingRow.get(1).getAsString();
                 if ( j == 0 ) {
                     cruiseMinDate = crossingDate;
