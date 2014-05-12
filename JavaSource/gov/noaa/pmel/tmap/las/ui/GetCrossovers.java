@@ -246,7 +246,7 @@ public class GetCrossovers extends LASAction {
 	                                                    allMinMaxDates.add(cross.cruiseTimeMax);
 	                                                    
 	                                                    allMinMaxDates.add(timeminmax.get(0).getAsString());
-	                                                    allMinMaxDates.add(timeminmax.get(0).getAsString());
+	                                                    allMinMaxDates.add(timeminmax.get(1).getAsString());
 
 	                                                    Collections.sort(allMinMaxDates);
 	                                                    
