@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
@@ -264,7 +266,10 @@ public class GetCrossovers extends LASAction {
 	                                                    region.put("points", points);
 	                                                    region.put("intervals", intervals);
 	                                                    lasRequest.setRegion(region);
-	                                                    
+
+	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", tid);
+	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", cid);
+
 	                                                    if ( crosslinks.toString().equals("none") ) {
 	                                                        crosslinks.replace(0, crosslinks.length(), "<div>");
 	                                                    }
