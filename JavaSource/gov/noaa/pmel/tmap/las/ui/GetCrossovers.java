@@ -256,7 +256,7 @@ public class GetCrossovers extends LASAction {
 	                                                    intervals.put("x", new String[] {String.valueOf(xmin), String.valueOf(xmax)});
 	                                                    intervals.put("y", new String[] {String.valueOf(ymin), String.valueOf(ymax)});
 	                                                    String tloAll = allMinMaxDates.get(0);
-	                                                    String thiAll = allMinMaxDates.get(1);
+	                                                    String thiAll = allMinMaxDates.get(3);
 	                                                    DateTime tloadt = iso_fmt.parseDateTime(tloAll);
 	                                                    DateTime thiadt = iso_fmt.parseDateTime(thiAll);
 	                                                    String ftmin = long_fmt.print(tloadt.getMillis());
