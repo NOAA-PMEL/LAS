@@ -152,6 +152,7 @@ public class SimplePropPropViewer implements EntryPoint {
     String netcdf = null;
     String dsid;
     String varid;
+    String varTwoId;
     String currentURL;
     String operationID;
     // Drawing start position
@@ -372,8 +373,12 @@ public class SimplePropPropViewer implements EntryPoint {
         if (xml != null && !xml.equals("")) {
             xml = decode(xml);
             lasRequest = new LASRequest(xml);
-            dsid = lasRequest.getDataset(0);
+            dsid = lasRequest.getDataset(0); 
+            dsid = dsid.substring(dsid.indexOf("\'")+1, dsid.lastIndexOf("\'"));
             varid = lasRequest.getVariable(0);
+            varid = varid.substring(varid.indexOf("\'")+1, varid.lastIndexOf("\'"));
+            varTwoId = lasRequest.getVariable(1);
+            varTwoId = varTwoId.substring(varTwoId.indexOf("\'")+1, varTwoId.lastIndexOf("\'"));
             xlo = lasRequest.getRangeLo("x", 0);
             xhi = lasRequest.getRangeHi("x", 0);
             ylo = lasRequest.getRangeLo("y", 0);
@@ -697,33 +702,39 @@ public class SimplePropPropViewer implements EntryPoint {
 
             // Grab the existing variable to be used as y
             String vy = varid;
-            lasRequest.removeVariables();
-            // Find the first non-sub-set variable that is not already included
+            
+            // Because there is no netCDF we know this is the first request.
+            
+            // If varTwoId
+            
+            if ( varTwoId == null || (varTwoId != null && varTwoId.equals("") ) ) {
+                lasRequest.removeVariables();
+                // Find the first non-sub-set variable that is not already included
 
-            String vx = null;
-            String vcb = null;
-            String vds = null;
-            for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
-                VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
-                if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null ) {
-                    vx = v.getID();
-                    vds = v.getDSID();
+                String vx = null;
+                String vcb = null;
+                String vds = null;
+                for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
+                    VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
+                    if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null ) {
+                        vx = v.getID();
+                        vds = v.getDSID();
+                    }
                 }
-            }
-            if ( colorCheckBox.getValue() ) {
-                vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
-                lasRequest.setProperty("data", "count", "3");
-            } else {
-                lasRequest.setProperty("data", "count", "2");
-            }
-            if ( vds != null ) {
-                lasRequest.addVariable(vds, vx, 0);
-                if ( vx != null ) {
-                    lasRequest.addVariable(vds, vy, 0);
+                if ( colorCheckBox.getValue() ) {
+                    vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
+                    lasRequest.setProperty("data", "count", "3");
+                } else {
+                    lasRequest.setProperty("data", "count", "2");
                 }
-                if ( vcb != null ) { 
-                    lasRequest.addVariable(vds, vcb, 0);
-                }
+                if ( vds != null ) {
+                    lasRequest.addVariable(vds, vx, 0);
+                    if ( vx != null ) {
+                        lasRequest.addVariable(vds, vy, 0);
+                    }
+                    if ( vcb != null ) { 
+                        lasRequest.addVariable(vds, vcb, 0);
+                    }
                     for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
                         String key = (String) allIt.next();
                         VariableSerializable v = xAllDatasetVariables.get(key);
@@ -735,7 +746,8 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                     yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
-                
+
+                }
             }
         } else {
             operationID = "prop_prop_plot";
@@ -1235,7 +1247,7 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
 
                 VariableSerializable vtosety = null;
-                
+                VariableSerializable vtosetx = null;
                 
                 for (int i = 0; i < variables.length; i++) {
                     VariableSerializable vs = variables[i];
@@ -1263,12 +1275,18 @@ public class SimplePropPropViewer implements EntryPoint {
                     xFilteredDatasetVariables.put(variableSerializable.getID(), variableSerializable);
                 }
                 vtosety = xFilteredDatasetVariables.get(varid);
+                if ( varTwoId != null ) {
+                  vtosetx = xFilteredDatasetVariables.get(varTwoId);
+                }
                 yVariables.setAddButtonVisible(false);
                 xVariables.setAddButtonVisible(false);
                 colorVariables.setAddButtonVisible(false);
                 
                 if (vtosety != null) {
                     xVariables.setVariable(vtosety);
+                }
+                if (vtosetx != null ) {
+                    yVariables.setVariable(vtosetx);
                 }
                 
                 String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
@@ -1284,17 +1302,24 @@ public class SimplePropPropViewer implements EntryPoint {
                 setFixedConstraintsFromRequest(vcs);
                 
                 // Now that we've done all that work to set up the state, we will over-ride the state with the values in the properties if they exist.
-                if ( defaultx != null ) {
-                    xVariables.setSelectedVariableById(defaultx);
+                // Unless we came in with two variables already selected.  :-)
+                
+                if ( vtosetx == null ) {
+                    if ( defaultx != null ) {
+                        xVariables.setSelectedVariableById(defaultx);
+                    }
                 }
-                if ( defaulty != null ) {
-                    yVariables.setSelectedVariableById(defaulty);
+                if ( vtosety == null ) {
+                    if ( defaulty != null ) {
+                        yVariables.setSelectedVariableById(defaulty);
+                    }
                 }
                 if ( defaultcb != null ) {
                     colorVariables.setSelectedVariableById(defaultcb);
                 }
-                
-                
+
+
+
                 // The request is now set up like a property-property plot
                 // request,
                 // so save it.
