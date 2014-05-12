@@ -239,7 +239,11 @@ public class GetTrajectoryTable extends LASAction {
 	                                List constraints = backRequest.getConstraints();
                                     for (Iterator conIt = constraints.iterator(); conIt.hasNext();) {
                                         Constraint con = (Constraint) conIt.next();
-                                        query = query + "&" + con.getAsString();
+                                        if ( con.getOp().equals("is") ) {
+                                            query = query + "&" + con.getAsERDDAPString();
+                                        } else {
+                                            query = query + "&" + con.getAsString();
+                                        }
                                         
                                     }
 	                                
