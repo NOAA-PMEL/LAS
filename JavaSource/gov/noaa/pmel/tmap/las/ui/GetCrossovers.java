@@ -97,8 +97,6 @@ public class GetCrossovers extends LASAction {
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
                     String did = tabledap.get("decimated_id");
-                    // DEBUG
-                    did = "ddsg_files_badval_034c_f37d_432d";
                     
                     String traj_id_name = tabledap.get("trajectory_id");
                    
@@ -120,9 +118,7 @@ public class GetCrossovers extends LASAction {
 	                        if ( id != null && !id.equals("") ) {
 	                            
 	                            String url = dataurl + ".csv";
-	                            
-	                            // DEBUG
-	                            document_base = "http://yahoo.com/";
+
 	                            if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
 	                                url = url + "?" + table;
@@ -231,8 +227,8 @@ public class GetCrossovers extends LASAction {
 	                                                st.close();
 	                                                if ( cross != null ) {
 	                                                    LASUIRequest lasRequest = new LASUIRequest();
-	                                                    lasRequest.addVariable(dsid, latid);
 	                                                    lasRequest.addVariable(dsid, lonid);
+	                                                    lasRequest.addVariable(dsid, latid);
                                                         
 	                                                    lasRequest.setOperation("SPPV");
 	                                                    double xmin = cross.lonAtMin - 5.0;
