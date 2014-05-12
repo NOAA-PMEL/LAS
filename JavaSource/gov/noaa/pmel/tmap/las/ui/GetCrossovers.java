@@ -269,6 +269,8 @@ public class GetCrossovers extends LASAction {
 
 	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", tid);
 	                                                    lasRequest.addTextConstraint(traj_id_name, "eq", cid);
+	                                                    
+	                                                    lasRequest.setProperty("ferret", "view", "xyt");
 
 	                                                    if ( crosslinks.toString().equals("none") ) {
 	                                                        crosslinks.replace(0, crosslinks.length(), "<div>");
