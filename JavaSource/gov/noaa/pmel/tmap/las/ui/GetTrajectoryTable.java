@@ -82,23 +82,19 @@ public class GetTrajectoryTable extends LASAction {
 	    String zhi = null;
 	    String tlo = null;
 	    String thi = null;
-	    LASUIRequest lasUIRequest = null;
-	    if ( xml != null ) {
-	        lasUIRequest = new LASUIRequest();
-            try {
-                JDOMUtils.XML2JDOM(xml, lasUIRequest);
-                dsid = lasUIRequest.getDatasetIDs().get(0);
-                xlo = lasUIRequest.getXlo();
-                xhi = lasUIRequest.getXhi();
-                ylo = lasUIRequest.getYlo();
-                yhi = lasUIRequest.getYhi();
-                zlo = lasUIRequest.getZhi();
-                zhi = lasUIRequest.getZlo();
-                tlo = lasUIRequest.getTlo();
-                thi = lasUIRequest.getThi();
-            } catch (Exception e) {
-                return null;
-            }
+	    LASUIRequest lasUIRequest = (LASUIRequest) request.getAttribute("las_request");
+	    if ( lasUIRequest != null ) {
+
+	        dsid = lasUIRequest.getDatasetIDs().get(0);
+	        xlo = lasUIRequest.getXlo();
+	        xhi = lasUIRequest.getXhi();
+	        ylo = lasUIRequest.getYlo();
+	        yhi = lasUIRequest.getYhi();
+	        zlo = lasUIRequest.getZhi();
+	        zhi = lasUIRequest.getZlo();
+	        tlo = lasUIRequest.getTlo();
+	        thi = lasUIRequest.getThi();
+
 	    } else {
 	        dsid = request.getParameter("dsid");
 	    }
@@ -133,8 +129,6 @@ public class GetTrajectoryTable extends LASAction {
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
                     String did = tabledap.get("decimated_id");
-                    // DEBUG
-                    did = "ddsg_files_badval_034c_f37d_432d";
                     
                     StringBuilder xquery2 = new StringBuilder();
                     StringBuilder xquery1 = new StringBuilder();
@@ -156,8 +150,7 @@ public class GetTrajectoryTable extends LASAction {
 	                            
 	                            String url = dataurl + ".csv";
 	                            
-	                            // DEBUG
-	                            document_base = "http://yahoo.com/";
+	                            
 	                            if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
 	                                url = url + "?" + table;
@@ -384,7 +377,7 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
 	                                                // Add the link to load a list of potential crosses to the table.
-	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
+	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
 	                                                row.append("\n</td>");
 	                                                row.append("</tr>");
 	                                                bsw.write(row.toString());
