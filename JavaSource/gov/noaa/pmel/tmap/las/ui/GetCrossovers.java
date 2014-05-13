@@ -270,6 +270,10 @@ public class GetCrossovers extends LASAction {
 	                                                    lasRequest.addTextConstraint(traj_id_name, "is", tid + "_ns_" + cid);
 	                                                    
 	                                                    lasRequest.setProperty("ferret", "view", "xyt");
+	                                                    //               DEFINE SYMBOL ferret_crossover_lat = 41.5
+	                                                    //               DEFINE SYMBOL ferret_crossover_lon = 145.58
+	                                                    lasRequest.setProperty("ferret", "crossover_lat", String.valueOf(cross.latAtMin));
+	                                                    lasRequest.setProperty("ferret", "crossover_lon", String.valueOf(cross.lonAtMin));
 
 	                                                    if ( crosslinks.toString().contains("none") ) {
 	                                                        crosslinks.replace(0, crosslinks.length(), "<div>");
