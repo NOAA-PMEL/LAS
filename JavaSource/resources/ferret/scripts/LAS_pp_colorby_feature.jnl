@@ -251,6 +251,41 @@ ELSE ! all features
    DEFINE SYMBOL ngood_data = `p[i=@ngd]`
 ENDIF
 
+
+   
+! If location(s) of a crossover has been sent, mark them.
+! This might be one point, or two, comma-separated.
+
+! Do the check this way because the ferret_crossover symbols may contain
+! a list of numbers, not just a single value.
+DEFINE SYMBOL crossover = "($ferret_crossover_lat%nothing%)" 
+IF `STRCMP(($crossover), "nothing") NE 0` THEN 
+   LET crosslon1 = {($ferret_crossover_lon)}
+   LET crosslon2 = IF crosslon1 LT ($xaxis_min) THEN crosslon1 + 360 ELSE crosslon1
+   LET cross_lon = IF crosslon2 GT ($xaxis_max) THEN crosslon2 - 360 ELSE crosslon2
+   LET cross_lat = {($ferret_crossover_lat)}
+   DEFINE SYMBOL cross_sym_siz = 0.2
+
+! Diamond inside a square
+!   PLOT/VS/OVER/NOKEY/SYM=30/siz=($cross_sym_siz)/color=12 `cross_lon`,`cross_lat`
+!   PLOT/VS/OVER/NOKEY/SYM=18/siz=`($cross_sym_siz)*1.2`/color=9 `cross_lon`,`cross_lat`
+
+! Or an arrow pointing up at the spot.
+!   LET cross_lat_lower = `cross_lat - ($cross_sym_siz)/(($ppl$ylen)/(($yaxis_max)-($yaxis_min)))`
+!   PLOT/VS/OVER/NOKEY/SYM=46/siz=`($cross_sym_siz)*1.5`/color=13 `cross_lon`,`cross_lat_lower`
+!   PLOT/VS/OVER/NOKEY/SYM=46/siz=`($cross_sym_siz)*1.2`/color=9 `cross_lon`,`cross_lat_lower`
+!   PLOT/VS/OVER/NOKEY/SYM=27/siz=0.08/color=3 `cross_lon`,`cross_lat`
+
+! Or a small circle inside a large one, green
+!   PLOT/VS/OVER/NOKEY/SYM=27/siz=0.04/color=3 cross_lon, cross_lat
+!   PLOT/VS/OVER/NOKEY/SYM=27/siz=0.28/color=9 cross_lon, cross_lat
+
+   
+! Or a light-blue fill inside a black circle
+   PLOT/VS/OVER/NOKEY/SYM=21/siz=0.26/color=LightBlue/thick=2 cross_lon, cross_lat
+   PLOT/VS/OVER/NOKEY/SYM=27/siz=0.26/color=LightBlue/thick=2 cross_lon, cross_lat
+ENDIF
+
 DEFINE SYMBOL nout_lonlat = ($ngood_data)
 DEFINE SYMBOL ngood_data = `count_orig`
 
