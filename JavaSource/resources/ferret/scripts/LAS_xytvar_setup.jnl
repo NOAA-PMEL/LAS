@@ -202,7 +202,6 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    IF ($constr_lon_min"0|*>1") THEN
       LET amin = ($constr_lon_min)
       LET amax = ($constr_lon_max)
-      GO LAS_is_range amin amax H 
    ENDIF
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
