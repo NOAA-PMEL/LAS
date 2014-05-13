@@ -11,6 +11,7 @@
 !              
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
+! 4/2014    ACM Add time units, origin and calendar to map scale file
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
@@ -22,12 +23,13 @@
 ! For Google Earth plots, use transparency for white background if the 
 ! ferret version has that option available.
 
-IF `($its_GE"0|*>1") AND ($ferret_version) GE 6.12` THEN DEFINE SYMBOL trans = /TRANS
+IF `($its_GE"0|*>1")` THEN DEFINE SYMBOL trans = /TRANS
 
 IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
 IF ($result_plot_ps_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
 IF ($result_plot_pdf_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_pdf_filename)"
 IF ($result_plot_svg_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_svg_filename)"
+
 
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
@@ -151,13 +153,17 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
+	 SET DATA 1
          LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
 	 DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
 	 DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
-         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
+	 DEFINE SYMBOL haxis_tunits = `($data_0_var),RETURN=tunits`
+	 DEFINE SYMBOL haxis_torigin = `($data_0_var),RETURN=t0`
+	 DEFINE SYMBOL haxis_tcalendar = `($data_0_var),RETURN=calendar`
+         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
          LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
@@ -168,13 +174,17 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
+	 SET DATA 1
          LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
 	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
 	 DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
-         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
+	 DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
+	 DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
+	 DEFINE SYMBOL vaxis_tcalendar = `($data_0_var),RETURN=calendar`
+         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
          LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
@@ -253,6 +263,7 @@ ENDIF
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
+
       IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
          DEFINE SYMBOL DATA_EXISTS = 0
          CANCEL SYMBOL DATA_MIN
@@ -266,6 +277,10 @@ ENDIF
       IF ($its_prop_prop_plot"0|*>1") THEN
           DEFINE SYMBOL ax_horiz = ($data_0_id)
 	  DEFINE SYMBOL ax_vert = ($data_1_id)
+	  CANCEL SYMBOL DATA_MAX
+	  CANCEL SYMBOL DATA_MIN
+	  DEFINE SYMBOL DATA_EXISTS = 1
+	  IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
