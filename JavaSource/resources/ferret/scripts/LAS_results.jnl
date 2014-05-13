@@ -272,6 +272,8 @@ ENDIF
       IF ($its_prop_prop_plot"0|*>1") THEN
           DEFINE SYMBOL ax_horiz = ($data_0_id)
 	  DEFINE SYMBOL ax_vert = ($data_1_id)
+	  CANCEL SYMBOL DATA_MAX
+	  CANCEL SYMBOL DATA_MIN
 	  DEFINE SYMBOL DATA_EXISTS = 1
 	  IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
       ENDIF
