@@ -35,23 +35,21 @@ LET lon_with_gaps = ($data_x_var)
 LET lat_with_gaps = ($data_y_var)
 LET var_with_gaps = data_with_bad
 
-IF `($ncruises"0") GT 1` THEN 
-   IF ($data_x_is_lon"0|*>1") THEN
-      LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
-   ELSE
-      LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 0)
-   ENDIF
-   LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)
-   
-   LET var_with_gaps = SEPARATE(data_with_bad[i=1:`npts`], ($rowvar), 0)
-   
+! Function separate puts gaps between cruises and also removes jumps in longitude
+! where it crosses the dateline
+
+IF ($data_x_is_lon"0|*>1") THEN
+   LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
+ELSE
+   LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 0)
 ENDIF
+
+LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
+LET var_with_gaps = SEPARATE(data_with_bad[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
-
 ! Only decimate if there is a lot of data
-
 
 LET min_decimate = ($1"200000")
 
@@ -61,12 +59,9 @@ LET min_decimate = ($1"200000")
 IF `($ferret_decimate_traj"1|0|*>1") EQ 0` THEN LET min_decimate = `npts + 1`
 
 IF `npts LT min_decimate OR min_decimate LT 0` THEN 
-   LET nrow = `rowsize,return=msize`
-   IF `nrow GT 1` THEN
-      DEFINE SYMBOL data_var = var_with_gaps
-      DEFINE SYMBOL data_x_var = lon_with_gaps
-      DEFINE SYMBOL data_y_var = lat_with_gaps
-   ENDIF
+   DEFINE SYMBOL data_var = var_with_gaps
+   DEFINE SYMBOL data_x_var = lon_with_gaps
+   DEFINE SYMBOL data_y_var = lat_with_gaps
 
    LET nout_lonlat = `($data_var)[i=@ngd]`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
