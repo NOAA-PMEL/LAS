@@ -97,7 +97,8 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
    LET ttvar = t[gt=time_axis]
    DEFINE SYMBOL datekey_time_arg = ttvar
 
-   DEFINE SYMBOL ferret_plot_levels = 30
+   DEFINE SYMBOL ferret_plot_levels = 60
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_plot_levels)
 
 ENDIF
 

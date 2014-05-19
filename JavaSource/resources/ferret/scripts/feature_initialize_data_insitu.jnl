@@ -205,11 +205,6 @@ ELSE
 ENDIF
 ENDIF  ! map plot, do decimation
 
-! Set color levels for the data variable. Default levels, or apply a setting
-! given by ferret_fill_levels
-
-DEFINE SYMBOL data_num = 1
-GO LAS_initialize_var_levels
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 
@@ -322,6 +317,14 @@ IF `data_num EQ 1` THEN
 
    IF `($ferret_poly_levels"0|*>1") EQ 0` THEN \
       IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_poly_levels ($ferret_fill_levels)
+ENDIF
+
+! Set color levels for the data variable. Default levels, or apply a setting
+! given by ferret_fill_levels
+
+IF `($ferret_plot_key"0|date_key>1|*>0") EQ 0` THEN
+   DEFINE SYMBOL data_num = 1
+   GO LAS_initialize_var_levels
 ENDIF
 
 ! Apply the expression in ferret_expression. $ represents the variable.
