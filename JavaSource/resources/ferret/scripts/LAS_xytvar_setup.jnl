@@ -112,6 +112,11 @@ IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
+IF `($ferret_prop_var"0|day_of_year>1|DAY_OF_YEAR>1|*>0") AND (baddat NE 1)` THEN 
+   LET ax_lo = MAX(0, `amin`)
+   LET ax_hi = MIN(366, `amax`)
+ENDIF
+
 DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis 
 DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis1 
 
@@ -124,6 +129,11 @@ DEFINE SYMBOL is_time = ($ferret_plot_var"0|time>1|TIME>1|*>0")
 IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
+
+IF `($ferret_plot_var"0|day_of_year>1|DAY_OF_YEAR>1|*>0") AND (baddat NE 1)` THEN 
+   LET ax_lo = MAX(0, `amin`)
+   LET ax_hi = MIN(366, `amax`)
+ENDIF
 
 DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
 DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1 
