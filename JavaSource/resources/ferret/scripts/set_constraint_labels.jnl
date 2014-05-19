@@ -23,9 +23,13 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/loop; \
   GO make_c_lab)
 
+! A set of cruises may have been selected on the map. Dont label them.
+! That info is documented elsewhere
+
 IF `($nmask_labels"0") GT 0` THEN
    REPEAT/RANGE=1:($nmask_labels)/NAME=mlab (\
    DEFINE SYMBOL mlab = `mlab`;\
+   IF `STRINDEX("($mask_title_($mlab))", "expocode") GT 0` THEN EXIT/CYCLE;\
    DEFINE SYMBOL note_num `($note_num"0") + 1`; \
    IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($mlab)); \
    IF `STRINDEX("($note_($note_num)_lab)", "expocode") GT 0` THEN DEFINE SYMBOL cruises_labeled = 1; \
@@ -43,11 +47,10 @@ IF `($ferret_cruise_list"0|*>1") AND (($cruises_labeled"0|*>1") EQ 0)` THEN
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
-   ELSE
+   ELSE 
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
    ENDIF
 
 ENDIF
 
 !-----------------End of set_constraint_labels ---------------------------------
-
