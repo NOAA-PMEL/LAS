@@ -217,35 +217,45 @@ public class TabledapTool extends TemplateTool {
             causeOfError = "Unable to getResultAsFile(debug): ";
             String constraintFileName = lasBackendRequest.getResultAsFile("debug"); 
 
+            // What operation follows this data extract.
+            String operationID = lasBackendRequest.getChainedOperation();
+            
             //create the query.   First: variables
             StringBuilder query = new StringBuilder();
-            // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
-            ArrayList<String> vars = lasBackendRequest.getVariables();
             
-            // If lat, lon and z are included as data variables, knock them out of this list.
-            vars.remove(latname);
-            vars.remove(lonname);
-            vars.remove(zname);
-            vars.remove(time);
-            String variables = "";
-            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                String variable = (String) varIt.next();
-                variables = variables+variable;
-                if (varIt.hasNext()) {
-                    variables = variables + ",";
-                }
-            }
-            // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
-            variables = variables.replace(cruiseid+",", "");
-            variables = variables.replace(cruiseid, "");
-            if ( variables.endsWith(",") ) {
-                variables = variables.substring(0, variables.length()-1);
-            }
+            // If the operation is the prop-prop plot, we need all the varaibles so skip this step.
+            if ( operationID != null && !operationID.equals("Trajectgory_correlation") ) {
+                // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
+                ArrayList<String> vars = lasBackendRequest.getVariables();
 
-            if ( !variables.equals("") ) {
-                query.append(String2.replaceAll(variables, " ", ""));
+                // If lat, lon and z are included as data variables, knock them out of this list.
+                vars.remove(latname);
+                vars.remove(lonname);
+                vars.remove(zname);
+                vars.remove(time);
+                String variables = "";
+                for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                    String variable = (String) varIt.next();
+                    variables = variables+variable;
+                    if (varIt.hasNext()) {
+                        variables = variables + ",";
+                    }
+                }
+                // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
+                variables = variables.replace(cruiseid+",", "");
+                variables = variables.replace(cruiseid, "");
+                if ( variables.endsWith(",") ) {
+                    variables = variables.substring(0, variables.length()-1);
+                }
+
+                if ( !variables.equals("") ) {
+                    query.append(String2.replaceAll(variables, " ", ""));
+                } else {
+                    query.append(dummy);
+                }
             } else {
-                query.append(dummy);
+                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                query.append(all);
             }
 
             Map<String, Constraint> constrained_modulo_vars_lt = new HashMap<String, Constraint>();
@@ -270,8 +280,8 @@ public class TabledapTool extends TemplateTool {
                     String rhsString = constraint.getChildText("rhs");
                     String lhsString = constraint.getChildText("lhs");
                     String opString = constraint.getChildText("op");  //some sort of text format
-                    Constraint c = new Constraint(lhsString, opString, rhsString);                
-                    query.append("&" + c.getAsString());  //op is now <, <=, ...
+                    Constraint c = new Constraint(lhsString, opString, rhsString);    
+                    query.append("&"+c.getAsString());  //op is now <, <=, ...
                     // Gather lt and gt constraint so see if modulo variable treatment is required.
                     if ( modulo_vars.contains(lhsString) && (opString.equals("lt") || opString.equals("le")) ) {
                         constrained_modulo_vars_lt.put(lhsString, c);
@@ -283,8 +293,8 @@ public class TabledapTool extends TemplateTool {
                     String rhsString = constraint.getChildText("rhs");
                     String lhsString = constraint.getChildText("lhs");
                     String opString = constraint.getChildText("op");  //some sort of text format
-                    Constraint c = new Constraint(lhsString, opString, rhsString);                
-                    query.append("&" + c.getAsERDDAPString());  //op is now <, <=, ...
+                    Constraint c = new Constraint(lhsString, opString, rhsString);          
+                    query.append("&"+c.getAsERDDAPString());  //op is now <, <=, ...
                 }
             }
             List<String> modulo_required = new ArrayList<String>();
@@ -415,11 +425,12 @@ public class TabledapTool extends TemplateTool {
                 if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
             }
             
-            String operationID = lasBackendRequest.getChainedOperation();
             
+            // This changes the data set to the decimated data set if it exists.
             if ( !hasConstraints && !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("")) {
                 id = decid;
             }
+            
             
             // If there is no need for the second query, just do the thing and carry on...
           
