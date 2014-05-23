@@ -1,4 +1,39 @@
 /** Add css rules here for your application. */
+.dirty {
+	background-color: yellow;
+}
+.nowrap {
+	white-space: nowrap;
+	font-size:18px;
+}
+.nowrap-brown {
+	white-space: nowrap;
+	background-color: #F3E7C9;
+	font-size:18px;
+}
+.menulabel {
+	white-space: nowrap;
+}
+.allnone {
+	font-size: 12px;
+}
+.current-item {
+	font-size:18px;
+}
+.current-item:hover {
+	cursor: pointer;
+}
+.dropdown-item {
+	font-size:18px;
+}
+.dropdown-item:hover {
+	background-color: #F3E7C9;
+	cursor: pointer;
+}
+.datatable {
+	border: 2px solid black;
+	padding: 4px;
+}
 .gwt-PushButton-APPLY-NEEDED {
 	color: red;
 }
@@ -17,6 +52,9 @@
 	display: inline-block;
 	width: 40px;
 }
+.IN-LINE {
+	display: inline-block;
+}
 
 .gwt-ToggleButton-SMALLER {
 	padding: 0px;
@@ -24,7 +62,7 @@
 	margin: 1px;
 	padding: 1px;
 }
-.gwt-StackPanel-SMALLER {
+.gwt-StackLayoutPanelHeader-SMALLER {
 	font-size: .8em;
 }
 /*
@@ -37,7 +75,6 @@
 .gwt-Anchor-CONSTRAINT {
 	cursor: pointer;
 }
-
 .gwt-ListBox-PADDING {
 	padding: 3px;
 }
@@ -158,4 +195,29 @@
 .gwt-ListBox {
 	font-size: 0.8em;
 	color: black;
+}
+.map-size {
+	height: 240px;
+}
+.no-map-size {
+	height: 18px;
+	line-height: 18px;
+}
+.footer {
+  position: absolute;
+  bottom: 30px;
+  clear: both;
+}
+.navbar {
+  width: 314px;
+  overflow: hidden;
+  float: left;
+}
+#output {
+   position: absolute;
+   left: 328px;  /* left nav is 300 + 3 + 3 (margin) + 2 + 2 (padding) + 3 + 3 (border) + 6 map margin + 2 pixels of gap.
+   padding: 2px;
+   margin: 3px;
+   border: 3px solid #ccc;
+   overflow: hidden;
 }
