@@ -76,16 +76,10 @@ IF `IS_ELEMENT_OF_STR_N(global_attnames, "query_result")` THEN
 ENDIF
 
 ! Is it a cruise dataset?
+! Is it a Profile or Trajectory dataset?
+GO LAS_setup_dsg
 
-LET varnames = ..varnames
-LET nvars = ..nvars
-IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
-    REPEAT/RANGE=1:`nvars`/name=q (\
-      DEF SYM q = `q`;\
-      DEF SYM vname = `varnames[i=($q)]`;\
-      GO Trajectory_find_roles)
-ENDIF
-
+IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
 
 IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN 
 
@@ -124,7 +118,7 @@ GO Trajectory_lon_lat_time
 LET color_by_traj = 0
 
 IF `($data_($num)_var"0|vid>1|($trajectory_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
-   DEF SYM rowvar = rowSize
+   DEF SYM rowvar = ($rowvar)
    LET color_by_traj = 1
 ENDIF
 

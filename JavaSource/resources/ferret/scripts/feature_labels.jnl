@@ -29,7 +29,7 @@ ELSE
 ENDIF
 
 LET var_fill = MISSING(check_var,`fillval`)
-LET var_fill_z =  EXPNDI_BY_Z_COUNTS(var_fill, xsequence(rowsize),`longest`)
+LET var_fill_z =  EXPNDI_BY_Z_COUNTS(var_fill, XSEQUENCE(($rowvar)),`longest`)
 
 LET var_flag_z = IF var_fill_z EQ `fillval` THEN 1
 LET nbad_in_prof_traj =  var_flag_z[K=@NGD]
@@ -59,7 +59,8 @@ ENDIF
 
 LET allvars = ..varnames
 
-IF ($prof_traj_shown"1|*>0") THEN DEFINE SYMBOL prof_traj_shown = `feature_mask[i=@sum]`
+DEFINE SYMBOL maskdir =  `feature_mask,return=shape`
+IF ($prof_traj_shown"1|*>0") THEN DEFINE SYMBOL prof_traj_shown = `feature_mask[($maskdir)=@sum]`
 DEFINE SYMBOL prof_traj_shown = ($prof_traj_shown"($prof_traj_max)")
 
 ! c_s used to add plural s to a label if more than one trajectory or profile.
