@@ -29,6 +29,30 @@ public class Util {
 	public static String getVarID(String xpath) {
 		return xpath.substring(xpath.indexOf("/variables/")+1, xpath.length());
 	}
+	public static boolean keep(String dsid, String name) {
+	    if ( dsid.equals("socatV3_c6c1_d431_8194") || dsid.equals("socatV3_decimated") ) {
+	        if ( name.equals("expocode") ) return true;
+	        if ( name.contains("WOCE") && !( name.contains("temp") || name.contains("hum") || name.equals("salinity") ) ) {
+	            return false;
+	        }
+	        if ( ( name.contains("temp") || name.contains("hum") || name.equals("salinity") ) && !name.contains("fCO")  ) {
+	            return true;
+	        }
+
+	        return false;
+	    } else {
+	        return true;
+	    }
+	}
+	public static boolean keep(String dsid, Map<String, String> attributes) {
+	    if ( dsid.equals("socatV3_c6c1_d431_8194") || dsid.equals("socatV3_decimated") ) {
+	        boolean subset = (attributes.get("subset_variable") == null || !attributes.get("subset_variable").equals("true"));
+	        boolean units = (attributes.get("units") == null || (attributes.get("units") != null && !attributes.get("units").equals("text")));
+	        return units && subset;
+	    } else { 
+	        return true;
+	    }
+	}
 	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
 		List<String> ortho = new ArrayList<String>();
 		if ( !view.contains("e") && grid.hasE() ) {
