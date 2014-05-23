@@ -1,0 +1,25 @@
+! LAS_setup_dsg.jnl
+!
+! Is it a Profile or Trajectory dataset?
+! Find the featureType attribute, and find which  variables
+! are marked with the cf_role and sample_dimension attributes
+
+LET global_attnames = ..attnames
+LET varnames = ..varnames
+LET nvars = ..nvars
+IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
+    DEFINE SYMBOL feature_type = `..featureType`
+    IF ($ferret_feature_label"0|*>1") THEN DEFINE SYMBOL feature_type = ($ferret_feature_label)
+    DEFINE SYMBOL feature_type = `DNCASE("($feature_type)")`
+    REPEAT/RANGE=1:`nvars`/name=q (\
+      DEF SYM q = `q`;\
+      DEF SYM vname = `varnames[i=($q)]`;\
+      GO DSG_find_roles;\
+      IF `STRCMP("($data_($num)_var)", "($feature_variable)") EQ 0` THEN \
+      DEFINE SYMBOL ferret_plot_title = `..featureType` ID;\
+    )
+ENDIF
+
+
+
+! End of file ------------ LAS_setup_dsg.jnl--------------------------
