@@ -174,7 +174,7 @@ ELSE
 ENDIF
 
 ! Ribbon plot
-DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE
+DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
 
@@ -215,6 +215,7 @@ let pre_plot = ($clock_secs)
    IF ($single_color"0|*>1") THEN
     ($plot_command)($qualifiers) x_var_data, y_var_data
    ELSE
+! or /missing=blank or leave off for gray...
       ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
       PPL RIBBON/OVER
