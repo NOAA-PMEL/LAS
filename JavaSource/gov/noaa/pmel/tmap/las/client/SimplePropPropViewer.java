@@ -147,6 +147,7 @@ public class SimplePropPropViewer implements EntryPoint {
     PushButton cancel;
     LinkButton link = new LinkButton();
     PushButton table = new PushButton("Data Table");
+    PushButton edit = new PushButton("Edit Flags");
     boolean youveBeenWarned = false;
     // The current intermediate file
     String netcdf = null;
@@ -320,6 +321,19 @@ public class SimplePropPropViewer implements EntryPoint {
             
         });
         
+        edit.setTitle("Edit Flags for the variable on the Y-axis.");
+        edit.addStyleDependentName("SMALLER");
+        edit.addClickHandler(new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                
+                editFlags();
+                
+            }
+            
+        });
+        
         // Never show the add button...
         yVariables.setMinItemsForAddButtonToBeVisible(10000);
         xVariables.setMinItemsForAddButtonToBeVisible(10000);
@@ -339,12 +353,15 @@ public class SimplePropPropViewer implements EntryPoint {
         buttonPanel.add(print);
         buttonPanel.add(link);
         buttonPanel.add(table);
+        buttonPanel.add(edit);
         topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
         controlPanel.setWidget(0, 0, topRow);
-        controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
+        controlPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
         controlPanel.setWidget(1, 0, yVariables);
-        controlPanel.setWidget(1, 1, new Label(" as a function of "));
-        controlPanel.setWidget(1, 2, xVariables);
+        controlPanel.getFlexCellFormatter().setColSpan(1, 0, 2);
+        controlPanel.setWidget(2, 0, new HTML(" as a function of "));
+        controlPanel.getFlexCellFormatter().addStyleName(2, 0, "menulabel");
+        controlPanel.setWidget(2, 1, xVariables);
 
         colorCheckBox.addClickHandler(new ClickHandler() {
 
@@ -363,8 +380,10 @@ public class SimplePropPropViewer implements EntryPoint {
         
         coloredBy.add(new Label("Colored By "));
         coloredBy.add(colorCheckBox);
-        controlPanel.setWidget(2, 1, coloredBy);
-        controlPanel.setWidget(2, 2, colorVariables);
+        
+        controlPanel.setWidget(3, 0, coloredBy);
+        controlPanel.getFlexCellFormatter().addStyleName(3, 0, "menulabel");
+        controlPanel.setWidget(3, 1, colorVariables);
         topPanel.add(controlPanel);
        
         update.addClickHandler(updateClick);
@@ -613,6 +632,21 @@ public class SimplePropPropViewer implements EntryPoint {
         String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
         Window.open(url, "_blank", Constants.WINDOW_FEATURES);
     }
+    private void editFlags() {
+        makeRequest(false);
+        LASRequest tableRequest = new LASRequest(lasRequest.toString());
+        tableRequest.setOperation("EditColumn_setup", "V7");
+        String dsid = tableRequest.getDataset(0);
+        String v0 = tableRequest.getVariable(1);
+        String v1 = "WOCE_"+v0;
+        
+        tableRequest.removeVariables();
+        tableRequest.addVariable(dsid, v0, 0);
+        tableRequest.addVariable(dsid, v1, 0);
+        
+        String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
+        Window.open(url, "_blank", Constants.WINDOW_FEATURES);
+    }
     private void makeRequest(boolean plot) {
         boolean contained = true;
 
@@ -663,9 +697,9 @@ public class SimplePropPropViewer implements EntryPoint {
         String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
         if (netcdf != null && contained && grid_type.equals("trajectory")) {
             if ( plot ) {
-                operationID = "Trajectgory_correlation_plot"; // No data base access;
+                operationID = "Trajectory_correlation_plot"; // No data base access;
             } else {
-                operationID = "Trajectgory_correlation_table";
+                operationID = "Trajectory_correlation_table";
             }
             // plot only from
             // existing
@@ -679,8 +713,11 @@ public class SimplePropPropViewer implements EntryPoint {
             if (v1 != null) {
                 lasRequest.setProperty("data_1", "url", netcdf);
             }
-            if (v2 != null) {
+            if (v2 != null && plot) {
                 lasRequest.setProperty("data_2", "url", netcdf);
+                lasRequest.setProperty("data", "count", "3");
+            } else {
+                lasRequest.setProperty("data", "count", "2");
             }
             lasRequest.removeProperty("ferret", "cruise_list");
             if (!cruiseIcons.getIDs().equals("") ) {
@@ -716,7 +753,8 @@ public class SimplePropPropViewer implements EntryPoint {
                 String vds = null;
                 for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
                     VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
-                    if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null ) {
+                                                                                                                    // DEBUG don't use WOCE flag as second variable
+                    if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") ) {
                         vx = v.getID();
                         vds = v.getDSID();
                     }
@@ -732,18 +770,10 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( vx != null ) {
                         lasRequest.addVariable(vds, vy, 0);
                     }
-                    if ( vcb != null ) { 
+                    if ( vcb != null && plot ) { 
                         lasRequest.addVariable(vds, vcb, 0);
                     }
-                    for (Iterator allIt = xAllDatasetVariables.keySet().iterator(); allIt.hasNext();) {
-                        String key = (String) allIt.next();
-                        VariableSerializable v = xAllDatasetVariables.get(key);
-                        String vid = v.getID();
-                        String did = v.getDSID();
-                        if (!vid.equals(vcb) && !vid.equals(vx) && !vid.equals(vy) ) {
-                            lasRequest.addVariable(v.getDSID(), v.getID(), 0);
-                        }
-                    }
+                    
                     yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
 
@@ -786,7 +816,7 @@ public class SimplePropPropViewer implements EntryPoint {
             String imageurl = "";
             String annourl = "";
             // Look at the doc. If it's not obviously XML, treat it as HTML.
-            if (!doc.substring(0, 100).contains("<?xml")) {
+            if (doc.length() <= 1 || !doc.substring(0, doc.length()/2).contains("<?xml")) {
                 if ( initialHistory == null || initialHistory.equals("") ) { 
                     spin.hide();
                 }
@@ -1465,26 +1495,11 @@ public class SimplePropPropViewer implements EntryPoint {
         lasRequest.removeVariables();
         lasRequest.addVariable(dsid, vix, 0);
         lasRequest.addVariable(dsid, viy, 0);
-        lasRequest.setProperty("data", "count", "2");
         if (colorCheckBox.getValue()) {
-            lasRequest.setProperty("data", "count", "3");
             String varColor = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
             lasRequest.addVariable(dsid, varColor, 0);
         }
-        for (Iterator varIt = xFilteredDatasetVariables.keySet().iterator(); varIt.hasNext();) {
-            String id = (String) varIt.next();
-            VariableSerializable var = xFilteredDatasetVariables.get(id);
-            if (!id.equals(vix) && !id.equals(viy)) {
-                if (colorCheckBox.getValue()) {
-                    String varColor = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
-                    if (!id.equals(varColor)) {
-                        lasRequest.addVariable(dsid, id, 0);
-                    }
-                } else {
-                    lasRequest.addVariable(dsid, id, 0);
-                }
-            }
-        }
+        
     }
 
     
