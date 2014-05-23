@@ -28,7 +28,7 @@ LET num_e = `($data_var),return = msize`
 IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 
 ! Are the rowsize variables in the E direction?
-DEFINE SYMBOL rdir = `rowsize,RETURN=shape` 
+DEFINE SYMBOL rdir = `($rowvar),RETURN=shape` 
 DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
 
 ! If (for prop-prop plots) there are mask-by settings, apply them
@@ -37,7 +37,7 @@ let nmask_labels = 0
 GO Trajectory_mask_by_var ($data_var)
 
 
-LET n_subset = `rowsize,RETURN=msize`
+LET n_subset = `($rowvar),RETURN=msize`
 DEFINE AXIS/X=1:`n_subset`:1 xmask_axis
 
 IF `nmask_labels GT 0` THEN
@@ -55,23 +55,23 @@ IF `($numobs) EQ 1` THEN
 
    LET longest = 1
 
-   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(rowsize),`longest`)
+   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(($rowvar)),`longest`)
 
    LET cruise_n = x[i=1:1]
    LET subset_mask = x[i=1:1]
 
 ELSE
    LET ncruises = 1
-   IF `($rind"0|I>1|*>0")` THEN LET ncruises = `rowsize,RETURN=isize`
-   IF `($rind"0|M>1|*>0")` THEN LET ncruises = `rowsize,RETURN=msize`
+   IF `($rind"0|I>1|*>0")` THEN LET ncruises = `($rowvar),RETURN=isize`
+   IF `($rind"0|M>1|*>0")` THEN LET ncruises = `($rowvar),RETURN=msize`
    LET cruise_numbers = i[gx=xmask_axis]
    IF `($subset_mask"0|*>1") EQ 0` THEN LET cruise_mask = 1 + 0*cruise_numbers  ! may redefine later
 
    DEF SYM cruise_max = `ncruises`
 
-   LET longest = rowsize[($rind)=@max]+2
+   LET longest = ($rowvar)[($rind)=@max]+2
 
-   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(rowsize),`longest`)
+   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(($rowvar)),`longest`)
 
 ! If  a subset of cruise ids is given then plot only those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.

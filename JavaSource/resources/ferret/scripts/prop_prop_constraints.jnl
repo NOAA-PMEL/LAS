@@ -60,7 +60,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
 
 
 DEF SYM ic = 0
-LET i_mask = _m[ge=rowsize]
+LET i_mask = _m[ge=($rowvar)]
 DEF SYM itxt = 0
 DEFINE SYMBOL text_mask = 0
 

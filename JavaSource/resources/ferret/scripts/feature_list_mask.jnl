@@ -65,7 +65,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)") NE 0` THEN
 ! apply mask as data_var_z* subset_mask
    LET subset_mask = XSEQUENCE(subm_ids) + 0*i[gx=xmask_axis]  ! put it on a non-abstract axis
 ELSE
-   LET n_subset = `rowsize,RETURN=msize`
+   LET n_subset = `($rowvar),RETURN=msize`
    LET subset_mask = 1 + 0*i[i=1:`n_subset`]
 ENDIF
 
@@ -73,7 +73,7 @@ DEFINE SYMBOL features_shown = `subset_mask[i=@sum]`
 DEFINE SYMBOL subset_mask = 1  ! mask is defined
 LET feature_mask = subset_mask  ! used in the key when color-by-cruise
 
-LET feature_mask_obs = EXPND_BY_LEN(feature_mask,rowsize,`rowsize[m=@sum]`)
+LET feature_mask_obs = EXPND_BY_LEN(feature_mask,($rowvar),`($rowvar)[m=@sum]`)
 DEFINE SYMBOL have_feature_mask = 1
 
 !---------------- end of feature_list_mask.jnl -------------------------

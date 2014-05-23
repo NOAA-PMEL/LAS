@@ -32,7 +32,7 @@ LET text_mask_($cvar)_($($cvar)_itxt)b = MISSING(text_mask_($cvar)_($($cvar)_itx
 
 DEFINE SYMBOL shape = `($cvar),RETURN=shape`
 IF ($shape"0|E>1|*>0") THEN \
- LET text_mask_($cvar)_($($cvar)_itxt) = EXPND_BY_LEN(text_mask_($cvar)_($($cvar)_itxt)b,rowsize,`rowsize[m=@sum]`)
+ LET text_mask_($cvar)_($($cvar)_itxt) = EXPND_BY_LEN(text_mask_($cvar)_($($cvar)_itxt)b,($rowvar),`($rowvar)[m=@sum]`)
 
 DEFINE SYMBOL text_mask = ($text_mask"0") +  text_mask_($cvar)_($($cvar)_itxt) 
 

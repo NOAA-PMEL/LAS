@@ -52,22 +52,7 @@ IF ($fer_last_error"0|*>1") THEN
 ENDIF
 
 ! Is it a Profile or Trajectory dataset?
-
-LET global_attnames = ..attnames
-LET varnames = ..varnames
-LET nvars = ..nvars
-IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
-    DEFINE SYMBOL feature_type = `..featureType`
-    IF ($ferret_feature_label"0|*>1") THEN DEFINE SYMBOL feature_type = ($ferret_feature_label)
-    DEFINE SYMBOL feature_type = `DNCASE("($feature_type)")`
-    REPEAT/RANGE=1:`nvars`/name=q (\
-      DEF SYM q = `q`;\
-      DEF SYM vname = `varnames[i=($q)]`;\
-      GO DSG_find_roles;\
-      IF `STRCMP("($data_($num)_var)", "($feature_variable)") EQ 0` THEN \
-      DEFINE SYMBOL ferret_plot_title = `..featureType` ID;\
-    )
-ENDIF
+GO LAS_setup_dsg
 
 IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN 
 
@@ -107,7 +92,7 @@ GO feature_lon_lat_time_depth
 LET color_by_feature = 0
 
 IF `($data_($num)_var"0|vid>1|($feature_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
-   DEF SYM rowvar = rowSize
+   IF `($rowvar"0|*>1") EQ 0` THEN DEFINE SYMBOL rowvar = rowSize
    LET color_by_feature = 1
 ENDIF
 

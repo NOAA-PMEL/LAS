@@ -62,11 +62,10 @@ DEFINE SYMBOL vshape = `($($fer_sym)_var_0),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is there a rowsize variable?
-
-   IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
-      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
-      EXIT/PROGRAM
-   ENDIF
+! Is it a Profile or Trajectory dataset?
+   GO LAS_setup_dsg
+   IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
+   DEFINE SYMBOL rowvar0 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
@@ -74,13 +73,13 @@ IF `($vshape"0|E>1|*>0)` THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
    IF ($is_string"0|*>1") THEN 
-      LET xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
+      LET xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), ($rowvar0),`($rowvar0)[m=@sum]`)
       IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
 	  LET mvar_0 = _m[ge=($ferret_plot_var_0)]
-	  LET xvar = EXPND_BY_LEN(mvar_0, rowsize,`rowsize[m=@sum]`)
+	  LET xvar = EXPND_BY_LEN(mvar_0, ($rowvar0),`($rowvar0)[m=@sum]`)
        ENDIF
    ELSE
-      LET xvar = EXPND_BY_LEN(($ferret_plot_var_0), rowsize,`rowsize[m=@sum]`)
+      LET xvar = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar0),`($rowvar0)[m=@sum]`)
    ENDIF
 ENDIF
 
@@ -111,12 +110,10 @@ LET/TITLE="($ferret_title_0)" yvar = XSEQUENCE(($($fer_sym)_var_1))
 DEFINE SYMBOL vshape = `($($fer_sym)_var_1),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
-! Is there a rowsize variable?
-
-   IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
-      MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
-      EXIT/PROGRAM
-   ENDIF
+! Is it a Profile or Trajectory dataset?
+   GO LAS_setup_dsg
+   IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
+   DEFINE SYMBOL rowvar1 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
@@ -124,13 +121,13 @@ IF `($vshape"0|E>1|*>0)` THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
    IF ($is_string"0|*>1") THEN 
-      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
+      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), ($rowvar1),`($rowvar1)[m=@sum]`)
       IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
 	 LET mvar_1 = _m[ge=($ferret_plot_var_1)]
-	 LET zvar = EXPND_BY_LEN(mvar_1, rowsize,`rowsize[m=@sum]`)
+	 LET zvar = EXPND_BY_LEN(mvar_1, ($rowvar1),`($rowvar1)[m=@sum]`)
       ENDIF
    ELSE
-      LET yvar = EXPND_BY_LEN(($ferret_plot_var_1), rowsize,`rowsize[m=@sum]`)
+      LET yvar = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar1),`($rowvar1)[m=@sum]`)
    ENDIF
 ENDIF
 
@@ -160,12 +157,10 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL vshape = `($ferret_plot_var_2),RETURN=shape`
    IF `($vshape"0|E>1|*>0)` THEN
 
-! Is there a rowsize variable?
-
-      IF `IS_ELEMENT_OF_STR_N(vnames, "rowsize") EQ 0` THEN
-         MESSAGE/ERROR **ERROR Expecting a RowSize variable in the file, not found
-         EXIT/PROGRAM
-      ENDIF
+! Is it a Profile or Trajectory dataset?
+   GO LAS_setup_dsg
+   IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
+   DEFINE SYMBOL rowvar2 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
       DEFINE SYMBOL vtype = 0
@@ -173,13 +168,13 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0`)
 
       IF ($is_string"0|*>1") THEN 
-         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
+         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar2),`($rowvar2)[m=@sum]`)
 	 IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
 	    LET mvar_2 = _m[ge=($ferret_plot_var_2)]
-	    LET zvar = EXPND_BY_LEN(mvar_2, rowsize,`rowsize[m=@sum]`)
+	    LET zvar = EXPND_BY_LEN(mvar_2, ($rowvar2),`($rowvar2)[m=@sum]`)
 	 ENDIF
       ELSE
-         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), rowsize,`rowsize[m=@sum]`)
+         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar2),`($rowvar2)[m=@sum]`)
       ENDIF
    ENDIF
 
