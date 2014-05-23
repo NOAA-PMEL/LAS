@@ -721,8 +721,7 @@
       <result type="xml" ID="webrowset" file_suffix=".xml"/>
       <result type="cancel" ID="cancel"/>
     </response>
-    <!-- Use a service name that allows us to produce the backend request XML via the ProductRequest so we can use it to get the constraints. -->
-    <service>tabledap</service>
+    <service>template</service>
     <region>
       <intervals name="x"/>
       <intervals name="y"/>
@@ -1592,7 +1591,6 @@
       <intervals name="xt" type="Hovmoller Plots" title="Longitude-Time"/>
       <intervals name="yt" type="Hovmoller Plots" title="Latitude-Time"/>
       <intervals name="zt" type="Hovmoller Plots" title="Depth-Time"/>
-      <intervals name="te" type="Hovmoller Plots" title="Ensemble-time"/>
     </region>
     <grid_types>
       <grid_type name="regular"/>
