@@ -201,7 +201,7 @@
   </operation>
   <!-- Private operation only invoked by correlation viewer when it knows 
 		the plot can be made from the existing netCDF file. -->
-  <operation name="Trajectory Correlation Plot" ID="Trajectgory_correlation_plot" service_action="Trajectory_correlation" private="true" output_template="zoom">
+  <operation name="Trajectory Correlation Plot" ID="Trajectory_correlation_plot" service_action="Trajectory_correlation" private="true" output_template="zoom">
     <args>
       <arg type="region" index="1" ID="in-situ-Region"/>
     </args>
@@ -221,7 +221,7 @@
       <grid_type name="trajectory"/>
     </grid_types>
   </operation>
-  <operation name="Trajectory Correlation Table" ID="Trajectgory_correlation_table" service_action="Trajectory_corr_File" private="true" output_template="datatable">
+  <operation name="Trajectory Correlation Table" ID="Trajectory_correlation_table" service_action="Trajectory_corr_File" private="true" output_template="datatable">
     <args>
       <arg type="region" index="1" ID="in-situ-Region"/>
     </args>
@@ -679,6 +679,39 @@
       <grid_type name="trajectory"/>
     </grid_types>
   </operation>
+    <!-- This is the column editor that will edit woce flags and such
+		it uses netCDF that has already been made. -->
+  <operation name="Column Editor" ID="EditColumn_setup" service_action="" default="true" category="correlation" output_template="EditColumn_setup">
+    <response ID="PlotResp" type="HTML" index="1">
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      <result type="cancel" ID="cancel"/>
+    </response>
+    <service>template</service>
+    <region>
+      <intervals name="x"/>
+      <intervals name="y"/>
+      <intervals name="z"/>
+      <intervals name="t"/>
+      <intervals name="xy"/>
+      <intervals name="xz"/>
+      <intervals name="xt"/>
+      <intervals name="yz"/>
+      <intervals name="yt"/>
+      <intervals name="zt"/>
+      <intervals name="xyz"/>
+      <intervals name="xyt"/>
+      <intervals name="xzt"/>
+      <intervals name="yzt"/>
+      <intervals name="xyzt"/>
+    </region>
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+  </operation>
+  
   <!--  Trajctory Table	 -->
   <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable">
     <response ID="PlotResp" type="HTML" index="1">
@@ -688,7 +721,8 @@
       <result type="xml" ID="webrowset" file_suffix=".xml"/>
       <result type="cancel" ID="cancel"/>
     </response>
-    <service>template</service>
+    <!-- Use a service name that allows us to produce the backend request XML via the ProductRequest so we can use it to get the constraints. -->
+    <service>tabledap</service>
     <region>
       <intervals name="x"/>
       <intervals name="y"/>
