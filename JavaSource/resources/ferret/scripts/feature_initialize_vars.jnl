@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! $Header$
-! Feature_initialize.jnl
+! Feature_initialize_vars.jnl
 !
 ! Define variables and symbols based on feature identification variables
 ! in a DSG dataset
@@ -37,7 +37,6 @@ DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
 let nmask_labels = 0
 GO feature_mask_by_var ($data_var)
 
-
 LET n_subset = `($rowvar),RETURN=msize`
 DEFINE AXIS/X=1:`n_subset`:1 xmask_axis
 
@@ -55,7 +54,6 @@ IF `($numobs) EQ 1` THEN
    LET feature_mask = 1 + 0*feature_numbers
 
    LET longest = 1
-
    LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), XSEQUENCE(($rowvar)),`longest`)
 
    LET feature_n = x[i=1:1]
@@ -63,16 +61,64 @@ IF `($numobs) EQ 1` THEN
 
    LET feature_mask_obs = 1 
    DEFINE SYMBOL have_feature_mask = 1
+   DEFINE SYMBOL have_feature_nums = 1
 
 ELSE
+
+! Create ID's feature_numbers = i on obs axis.
+
    LET nfeatures = 1
    IF `($rind"0|I>1|*>0")` THEN LET nfeatures = `($rowvar),RETURN=isize`
    IF `($rind"0|M>1|*>0")` THEN LET nfeatures = `($rowvar),RETURN=msize`
    LET feature_numbers = i[gx=xmask_axis]
    IF `($subset_mask"0|*>1") EQ 0` THEN LET feature_mask = 1 + 0*feature_numbers  ! may redefine later
 
-   DEFINE SYMBOL feature_max = `nfeatures`
+! Scramble the IDs if we are coloring by ID, scramble them so cruises nearby in the alphabet
+! more likely to get different colors.  Create a 2D variable, reshape to it, then unravel
+! that back out.
 
+   IF `STRCMP("($data_var)", "($feature_variable)") EQ 0` THEN
+
+      LET color_by_feature = 1
+      LET feature_numbers = _m[ge=($rowvar)]
+   ! scramble
+
+   define symbol factor = 0
+   let nf = nfeatures
+   
+   repeat/range=2:15/name=fac (if `mod(nf,fac) eq 0` THEN DEFINE SYMBOL factor = `fac`)
+   let factor = 3
+   IF `($factor"0") eq 0` then
+      let nf = `nf + 1`
+      repeat/range=2:15/name=fac (if `mod(nf,fac) eq 0` THEN DEFINE SYMBOL factor = `fac`)
+   ENDIF
+   IF `($factor"0") gt 2` THEN
+   
+      LET feature_numbers1 = _m[ge=($rowvar)]
+      let yfac = ($factor)
+      let xfac =  INT(nfeatures/yfac)
+      IF `xfac*yfac LT nfeatures` THEN LET xfac = `xfac+1`
+      DEFINE AXIS/x=1:`xfac`:1 xfaxis
+      DEFINE AXIS/y=1:`yfac`:1 yfaxis
+      LET xyvar = x[gx=xfaxis]+y[gy=yfaxis]
+
+      LET var2d = RESHAPE(feature_numbers1, xyvar)
+      LET feature_numbers2 = ESEQUENCE(TRANSPOSE_XY (var2d) )
+      LET feature_numbers = feature_numbers2[ge=feature_numbers1]
+
+   ENDIF
+
+   DEFINE SYMBOL have_feature_nums = 1
+! Large number of color levels, but not larger than # of features.
+
+      IF ($ferret_fill_levels"1|featurelevels>1|*>0") THEN 
+         DEFINE SYMBOL ferret_fill_levels = 55
+         IF `nfeatures LT 55` THEN DEFINE SYMBOL ferret_fill_levels = `nfeatures`
+      ENDIF
+
+   ENDIF ! feature var is the plot var
+
+   DEFINE SYMBOL feature_max = `nfeatures`
    LET longest = ($rowvar)[($rind)=@max]+2
 
    LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(($rowvar)),`longest`)
