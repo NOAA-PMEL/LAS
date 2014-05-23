@@ -48,7 +48,24 @@ public class LASRequest {
             op.setAttribute("match", "/lasdata/operations/operation[@ID='" + operation + "']");
         }
     }
-    
+    /**
+     * Get the data file for an operation that uses a temporary file.
+     * @param index
+     * @return the file name
+     */
+    public String getData(int index) {
+        NodeList l = document.getDocumentElement().getElementsByTagName("data_"+index);
+        Element data;
+        if ( l != null && l.getLength() > 0 ) {
+            if ( index > l.getLength() - 1 ) {
+                return null;
+            }
+            data = (Element) l.item(index);
+            Element url = (Element) data.getFirstChild();
+            return url.getFirstChild().getNodeValue();
+        }
+        return null;
+    }
     /**
      * Gets the value of a Property element in the named PropertyGroup of
      * the LASRequest. Null if the property is not found.
