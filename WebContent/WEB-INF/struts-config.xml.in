@@ -87,6 +87,7 @@
           <!-- The definitions for normal operations -->
           <action path="/getAnnotations" type="gov.noaa.pmel.tmap.las.ui.GetAnnotations"/>
           <action path="/getTrajectoryTable" type="gov.noaa.pmel.tmap.las.ui.GetTrajectoryTable"/>
+          <action path="/getCrossOvers" type="gov.noaa.pmel.tmap.las.ui.GetCrossOvers"/>
           <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits"/>
           <action path="/ProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
 		      <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
