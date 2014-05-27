@@ -398,6 +398,14 @@ public class ColumnEditor implements EntryPoint {
             HTML html = new HTML(flags[0]);
             html.setTitle(flags[0]);
             datatable.setWidget(widgetRow, 1, html);
+            // Put the old value back in the data structure used to make the JSON payload.
+            List<String[]> affectedrow = allrows.get(ids.getValue());
+            String[] parts = affectedrow.get(dataRow);
+            for (int i = 0; i < parts.length; i++) {
+                if ( headers[i].contains("WOCE") ) {
+                    parts[i] = flags[0];
+                }
+            }
             dirtyrows.remove(widgetRow);
             cellFormatter.removeStyleName(widgetRow, 1, "dirty");
         }
