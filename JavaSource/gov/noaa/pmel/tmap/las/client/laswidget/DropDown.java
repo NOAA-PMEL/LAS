@@ -72,7 +72,7 @@ public class DropDown extends Composite {
     public void setSelectedIndex(int index) {
         if (index >= 0 && index < items.size() ) {
             value = items.get(index);
-            HTML html = new HTML();
+            HTML html = new HTML(value);
             html.addStyleName("current-item");
             current.setWidget(0, 0, html);
             selectedIndex = index;
