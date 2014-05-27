@@ -117,12 +117,12 @@ public class SimplePropPropViewer implements EntryPoint {
     CruiseIconWidget cruiseIcons = new CruiseIconWidget();
     VerticalPanel fixedConstraintMainPanel = new VerticalPanel();
     HorizontalPanel fixedConstraintTitle = new HorizontalPanel();
+    HTML dataSection;
     Map<String, VariableSerializable> xFilteredDatasetVariables = new HashMap<String, VariableSerializable>();
     Map<String, VariableSerializable> xAllDatasetVariables = new HashMap<String, VariableSerializable>();
     ToggleButton annotationsButton;
     LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
     HorizontalPanel buttonPanel = new HorizontalPanel();
-    HorizontalPanel topRow = new HorizontalPanel();
     HorizontalPanel output = new HorizontalPanel();
     PopupPanel spin;
     HTML spinImage;
@@ -354,12 +354,13 @@ public class SimplePropPropViewer implements EntryPoint {
         buttonPanel.add(link);
         buttonPanel.add(table);
         buttonPanel.add(edit);
-        topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
-        controlPanel.setWidget(0, 0, topRow);
+        dataSection = new HTML("<b>&nbsp;&nbsp;Data Selection: </b>");
+        controlPanel.setWidget(0, 0, dataSection);
         controlPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
         controlPanel.setWidget(1, 0, yVariables);
         controlPanel.getFlexCellFormatter().setColSpan(1, 0, 2);
-        controlPanel.setWidget(2, 0, new HTML(" as a function of "));
+        HTML asA = new HTML(" a");
+        controlPanel.setWidget(2, 0, new HTML("&nbsp;&nbsp;&nbsp;as a function of "));
         controlPanel.getFlexCellFormatter().addStyleName(2, 0, "menulabel");
         controlPanel.setWidget(2, 1, xVariables);
 
@@ -378,7 +379,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
         });
         
-        coloredBy.add(new Label("Colored By "));
+        coloredBy.add(new HTML("&nbsp;&nbsp;&nbsp;Colored by "));
         coloredBy.add(colorCheckBox);
         
         controlPanel.setWidget(3, 0, coloredBy);
