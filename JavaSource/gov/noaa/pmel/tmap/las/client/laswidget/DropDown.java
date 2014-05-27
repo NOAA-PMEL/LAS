@@ -100,6 +100,7 @@ public class DropDown extends Composite {
                 @Override
                 public void onClick(ClickEvent event) {              
                     value = itemvalue;
+                    selectedIndex = items.indexOf(value);
                     HTML html = new HTML(itemvalue);
                     html.addStyleName("current-item");
                     current.setWidget(0, 0, html);
