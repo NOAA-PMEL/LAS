@@ -440,6 +440,38 @@ public class ColumnEditor implements EntryPoint {
             }
             dirtyrows.remove(widgetRow);
             cellFormatter.removeStyleName(widgetRow, 1, "dirty");
+            if ( shift ) {
+                int startrow = -10;
+                // Look back to first unchecked row and uncheck between.
+                for (int i = widgetRow - 1; i >= headerRows; i--) {
+                    CheckBox rowbox = (CheckBox) datatable.getWidget(i, 0);
+                    if ( !rowbox.getValue() ) {
+                        startrow = i;
+                        break;
+                    }
+                }
+                if ( startrow > 0 ) {
+                    for (int i = startrow + 1 ; i < widgetRow; i++ ) {
+                        // Do the same thing you do for the "none" button to these rows.
+                        cellFormatter.removeStyleName(i, 1, "dirty");
+                        CheckBox shiftbox = (CheckBox) datatable.getWidget(i, 0);
+                        shiftbox.setValue(false);
+                        String[] oldnew = dirtyrows.get(i);
+                        HTML shifthtml = new HTML(oldnew[0]);
+                        shifthtml.setTitle(oldnew[0]);
+                        // Put the old value back in the data structure used to make the JSON payload.
+                        List<String[]> shiftarow = allrows.get(ids.getValue());
+                        String[] shiftparts = shiftarow.get(dataRow);
+                        for (int j = 0; j < shiftparts.length; j++) {
+                            if ( headers[j].contains("WOCE") ) {
+                                shiftparts[j] = oldnew[0];
+                            }
+                        }
+                        datatable.setWidget(i, 1, shifthtml);
+                        dirtyrows.remove(i);
+                    }
+                }
+            }
         }
     }
     RequestCallback editCallback = new RequestCallback() {
