@@ -1102,9 +1102,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     world_endy = y_axis_upper_right;
                    
                     printURL = Util.getAnnotationsFrag(annourl, imageurl);
-                    if ( hasData ) {
-                        setTextValues();
-                    }
+                  
                 }
 
             }
