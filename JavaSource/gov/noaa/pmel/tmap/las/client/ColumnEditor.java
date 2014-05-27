@@ -83,10 +83,12 @@ public class ColumnEditor implements EntryPoint {
     DropDown flags = new DropDown();
     ScrollPanel datascroll = new ScrollPanel();
     HorizontalPanel toprow = new HorizontalPanel();
+    HorizontalPanel secondRow = new HorizontalPanel();
     DropDown ids = new DropDown();
     FlexTable datatable = new FlexTable();
     TextBox comment = new TextBox();
     PushButton submit = new PushButton("Save Flags");
+    HTML commentL;
     Map<String, List<String[]>> allrows = new HashMap<String, List<String[]>>();
 
     int windowWidth;
@@ -188,13 +190,13 @@ public class ColumnEditor implements EntryPoint {
         toprow.add(choose);
         ids.addStyleName("nowrap");
         toprow.add(ids);
-        HTML commentL = new HTML("&nbsp;&nbsp;Comment:&nbsp;&nbsp;");
+        commentL = new HTML("&nbsp;&nbsp;Comment:&nbsp;&nbsp;");
         commentL.addStyleName("nowrap");
-        toprow.add(commentL);
+        secondRow.add(commentL);
         comment.setWidth("160px");
         comment.setMaxLength(255);
         comment.setStyleName("nowrap");
-        toprow.add(comment);       
+        secondRow.add(comment);       
         flags.addItem("2");
         flags.addItem("3");
         flags.addItem("4");
@@ -250,7 +252,7 @@ public class ColumnEditor implements EntryPoint {
         toprow.add(submit);
         toprow.setStyleName("controls");
         RootPanel.get("id_list").add(toprow);
-        //        RootPanel.get("comment").add(comment);
+        RootPanel.get("comment").add(secondRow);
         datascroll.add(datatable);
         RootPanel.get("data").add(datascroll);
         datatable.setStyleName("datatable");
@@ -293,6 +295,8 @@ public class ColumnEditor implements EntryPoint {
         int height = Math.max(windowHeight - datascroll.getAbsoluteTop(), 0);
         height = height - 120;
         datascroll.setSize(width + "px", height + "px");
+        int cwidth = width - commentL.getOffsetWidth();
+        comment.setWidth(width+"px");
     }
 
     StringValueChangeEvent.Handler IdChangeHandler = new StringValueChangeEvent.Handler() {
