@@ -296,7 +296,7 @@ public class ColumnEditor implements EntryPoint {
         height = height - 120;
         datascroll.setSize(width + "px", height + "px");
         int cwidth = width - commentL.getOffsetWidth();
-        comment.setWidth(width+"px");
+        comment.setWidth(cwidth+"px");
     }
 
     StringValueChangeEvent.Handler IdChangeHandler = new StringValueChangeEvent.Handler() {
