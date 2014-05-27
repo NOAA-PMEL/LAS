@@ -144,12 +144,21 @@ public class ColumnEditor implements EntryPoint {
                CellFormatter formatter = datatable.getCellFormatter();
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer row = (Integer) dirtyIt.next();
+                    int dataRow = row - headerRows;
                     formatter.removeStyleName(row, 1, "dirty");
                     CheckBox box = (CheckBox) datatable.getWidget(row, 0);
                     box.setValue(false);
                     String[] oldnew = dirtyrows.get(row);
                     HTML html = new HTML(oldnew[0]);
                     html.setTitle(oldnew[0]);
+                    // Put the old value back in the data structure used to make the JSON payload.
+                    List<String[]> affectedrow = allrows.get(ids.getValue());
+                    String[] parts = affectedrow.get(dataRow);
+                    for (int i = 0; i < parts.length; i++) {
+                        if ( headers[i].contains("WOCE") ) {
+                            parts[i] = oldnew[0];
+                        }
+                    }
                     datatable.setWidget(row, 1, html);
                 }
                 dirtyrows.clear();
