@@ -198,6 +198,7 @@ public class ColumnEditor implements EntryPoint {
 
             @Override
             public void onClick(ClickEvent event) {
+               
                 String id = ids.getValue();
                 List<String[]> currentRows = allrows.get(id);
                 JSONObject message = new JSONObject();
@@ -208,7 +209,10 @@ public class ColumnEditor implements EntryPoint {
                 String comment_text = comment.getText();
                 if ( comment_text != null && !comment_text.equals("") ) {
                     message.put("comment", new JSONString(comment_text));
-                } 
+                } else {
+                    Window.alert("You must include a comment with your changes.");
+                    return;
+                }
                 JSONArray edits = new JSONArray();
                 int index = 0;
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
