@@ -131,10 +131,8 @@ public class ColumnEditor implements EntryPoint {
                 for (int i = headerRows; i < datatable.getRowCount(); i ++ ) {
                     CheckBox box = (CheckBox) datatable.getWidget(i, 0);
                     box.setValue(true);
-                    setValue(box);
+                    setValue(box, false);
                 }
-
-
             }
 
         });
@@ -328,7 +326,7 @@ public class ColumnEditor implements EntryPoint {
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer widgetRow = (Integer) dirtyIt.next();
                     CheckBox box = (CheckBox) datatable.getWidget(widgetRow, 0);
-                    setValue(box);
+                    setValue(box, false);
                 }
 
             }
@@ -345,7 +343,9 @@ public class ColumnEditor implements EntryPoint {
             @Override
             public void onClick(ClickEvent event) {
                 CheckBox box = (CheckBox) event.getSource();
-                setValue(box);
+                boolean shift = event.isShiftKeyDown();
+                setValue(box, shift);
+                
             }
 
         });
@@ -373,7 +373,7 @@ public class ColumnEditor implements EntryPoint {
             formatter.addStyleName(datarow, "nowrap-brown");
         }
     }
-    private void setValue(CheckBox box) {
+    private void setValue(CheckBox box, boolean shift) {
         String value = flags.getValue();
         String row = box.getFormValue();
         int widgetRow = Integer.valueOf(row);
@@ -405,6 +405,25 @@ public class ColumnEditor implements EntryPoint {
                 oldAndNew[1] = value;
             }
             dirtyrows.put(widgetRow, oldAndNew);
+            int startrow = -10;
+            if ( shift ) {
+                // Look backwards and set all between if found
+                for (int i = widgetRow - 1; i >= headerRows; i--) {
+                    CheckBox rowbox = (CheckBox) datatable.getWidget(i, 0);
+                    if ( rowbox.getValue() ) {
+                        startrow = i;
+                        break;
+                    }
+                }
+                if ( startrow > 0 ) {
+                    for (int i = startrow + 1 ; i < widgetRow; i++ ) {
+                        // Do the same thing you do for the "all" button to these rows.
+                        CheckBox shiftbox = (CheckBox) datatable.getWidget(i, 0);
+                        shiftbox.setValue(true);
+                        setValue(shiftbox, false);
+                    }
+                }
+            }
 
         } else {    
             String[] flags = dirtyrows.get(widgetRow);
