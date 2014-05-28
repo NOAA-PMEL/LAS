@@ -172,16 +172,7 @@ public class ClimateAnalysis implements EntryPoint {
 		RootPanel.get("SecondDataset").add(xSecondDataset);
 		RootPanel.get("CurrentDataset").add(xCurrentDataset);
 		if ( xml != null && !xml.equals("") ) {
-			xml = URL.decode(xml);
-			// Get rid of the entity values for > and <
-			xml = xml.replace("&gt;", ">");
-			xml = xml.replace("&lt;", "<");
-			// Replace the op value with gt ge eq lt le as needed.
-			xml = xml.replace("op=\">=\"", "op=\"ge\"");
-			xml = xml.replace("op=\">\"", "op=\"gt\"");
-			xml = xml.replace("op=\"=\"", "op=\"eq\"");
-			xml = xml.replace("op=\"<=\"", "op=\"le\"");
-			xml = xml.replace("op=\"<\"", "op=\"lt\"");
+			xml = Util.decode(xml);
 			lasRequest = new LASRequest(xml);
 			xFirstID = lasRequest.getDataset(0);
 			xFirstVarID = lasRequest.getVariable(0);

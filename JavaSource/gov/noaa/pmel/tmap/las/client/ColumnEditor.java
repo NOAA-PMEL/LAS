@@ -50,8 +50,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
- * A property property viewer that keeps the initial constraints constant and
- * allows new constraints to be added.
+ * A client interface for editing one of the values in a trajectory database
  * 
  * @author rhs
  * 
@@ -258,7 +257,7 @@ public class ColumnEditor implements EntryPoint {
         String xml = Util.getParameterString("xml");
         datatable.setWidget(0, 0, new HTML("Requesting data to edit..."));
         if (xml != null && !xml.equals("")) {
-            xml = decode(xml);
+            xml = Util.decode(xml);
             lasRequest = new LASRequest(xml);
             initialState = lasRequest;
             lasRequest.setProperty("ferret", "data_format", "csv");
@@ -583,25 +582,6 @@ public class ColumnEditor implements EntryPoint {
 
         }
     };
-    /**
-     * Take in the XML request string and prepare it to be used to construct and LASRequest object.
-     * @param xml -- the input XML off the servlet request.
-     * @return xml -- the converted string
-     */
-    private String decode(String xml) {
-        xml = URL.decode(xml);
-
-        // Get rid of the entity values for > and <
-        xml = xml.replace("&gt;", ">");
-        xml = xml.replace("&lt;", "<");
-        // Replace the op value with gt ge eq lt le as needed.
-        xml = xml.replace("op=\">=\"", "op=\"ge\"");
-        xml = xml.replace("op=\">\"", "op=\"gt\"");
-        xml = xml.replace("op=\"=\"", "op=\"eq\"");
-        xml = xml.replace("op=\"<=\"", "op=\"le\"");
-        xml = xml.replace("op=\"<\"", "op=\"lt\"");
-        return xml;
-    }
     /**
      * Set the column headers.
      * 

@@ -385,18 +385,7 @@ public class Correlation implements EntryPoint {
 		String catid = Util.getParameterString("catid");
 		String xml = Util.getParameterString("xml");
 		if (xml != null && !xml.equals("")) {
-			xml = URL.decode(xml);
-
-			// Get rid of the entity values for > and <
-			xml = xml.replace("&gt;", ">");
-			xml = xml.replace("&lt;", "<");
-			// Replace the op value with gt ge eq lt le as needed.
-			xml = xml.replace("op=\">=\"", "op=\"ge\"");
-			xml = xml.replace("op=\">\"", "op=\"gt\"");
-			xml = xml.replace("op=\"=\"", "op=\"eq\"");
-			xml = xml.replace("op=\"<=\"", "op=\"le\"");
-			xml = xml.replace("op=\"<\"", "op=\"lt\"");
-			lasRequest = new LASRequest(xml);
+		    xml = Util.decode(xml);
 			dsid = lasRequest.getDataset(0);
 			varid = lasRequest.getVariable(0);
 			xlo = lasRequest.getRangeLo("x", 0);

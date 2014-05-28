@@ -53,6 +53,25 @@ public class Util {
 	        return true;
 	    }
 	}
+    /**
+     * Take in the XML request string and prepare it to be used to construct and LASRequest object.
+     * @param xml -- the input XML off the servlet request.
+     * @return xml -- the converted string
+     */
+	public static String decode(String xml) {
+        xml = URL.decode(xml);
+
+        // Get rid of the entity values for > and <
+        xml = xml.replace("&gt;", ">");
+        xml = xml.replace("&lt;", "<");
+        // Replace the op value with gt ge eq lt le as needed.
+        xml = xml.replace("op=\">=\"", "op=\"ge\"");
+        xml = xml.replace("op=\">\"", "op=\"gt\"");
+        xml = xml.replace("op=\"=\"", "op=\"eq\"");
+        xml = xml.replace("op=\"<=\"", "op=\"le\"");
+        xml = xml.replace("op=\"<\"", "op=\"lt\"");
+        return xml;
+    }
 	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
 		List<String> ortho = new ArrayList<String>();
 		if ( !view.contains("e") && grid.hasE() ) {
