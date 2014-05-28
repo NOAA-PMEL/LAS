@@ -640,7 +640,12 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.setOperation("EditColumn_setup", "V7");
         String dsid = tableRequest.getDataset(0);
         String v0 = tableRequest.getVariable(1);
-        String v1 = "WOCE_"+v0;
+        String v1;
+        if ( v0.equals("latitude") || v0.equals("longitude") || v0.equals("time") ) {
+            v1 = "WOCE_geoposition";
+        } else {
+            v1 = "WOCE_"+v0;
+        }
         
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
