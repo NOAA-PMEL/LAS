@@ -263,6 +263,7 @@ public class ColumnEditor implements EntryPoint {
             initialState = lasRequest;
             lasRequest.setProperty("ferret", "data_format", "csv");
             lasRequest.setOperation("Trajectory_Corrrelation_File", "V7");
+            lasRequest.setProperty("product_server", "use_cache", "false");
             String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
             // Test file any CSV trajectory data: String url = Util.getProductServer().replace("/ProductServer.do", "")+"/output/short_ferret_listing.txt";
             RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
@@ -337,6 +338,7 @@ public class ColumnEditor implements EntryPoint {
         CheckBox box = new CheckBox();
         box.addStyleName("nowrap");
         box.setFormValue(String.valueOf(datarow));
+        box.setTitle("Shift-click to select multiple rows");
         datatable.setWidget(datarow, 0, box);
         box.addClickHandler(new ClickHandler() {
 
@@ -345,7 +347,6 @@ public class ColumnEditor implements EntryPoint {
                 CheckBox box = (CheckBox) event.getSource();
                 boolean shift = event.isShiftKeyDown();
                 setValue(box, shift);
-                
             }
 
         });
