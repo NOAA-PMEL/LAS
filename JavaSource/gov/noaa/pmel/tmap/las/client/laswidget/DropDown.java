@@ -34,7 +34,7 @@ public class DropDown extends Composite {
         current = new FlexTable();
         current.addStyleName("datatable");
         itemlist = new FlexTable();
-        dropdown = new PopupPanel();
+        dropdown = new PopupPanel(true);
         scroller = new ScrollPanel();
         scroller.add(itemlist);
         dropdown.add(scroller);
