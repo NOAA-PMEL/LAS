@@ -392,7 +392,7 @@ public class SimplePropPropViewer implements EntryPoint {
         String catid = Util.getParameterString("catid");
         String xml = Util.getParameterString("xml");
         if (xml != null && !xml.equals("")) {
-            xml = decode(xml);
+            xml = Util.decode(xml);
             lasRequest = new LASRequest(xml);
             dsid = lasRequest.getDataset(0);
             if ( dsid.contains("'") ) dsid = dsid.substring(dsid.indexOf("\'")+1, dsid.lastIndexOf("\'"));
@@ -422,7 +422,7 @@ public class SimplePropPropViewer implements EntryPoint {
         initialHistory = getAnchor();
         if ( initialHistory != null && !initialHistory.equals("") ) {
             hasInitialHistory = true;
-            initialHistory = decode(initialHistory);
+            initialHistory = Util.decode(initialHistory);
         } else {
             hasInitialHistory = false;
             initialHistory = "";
@@ -1910,20 +1910,7 @@ public class SimplePropPropViewer implements EntryPoint {
         }
 
     }
-    private String decode(String xml) {
-        xml = URL.decode(xml);
-
-        // Get rid of the entity values for > and <
-        xml = xml.replace("&gt;", ">");
-        xml = xml.replace("&lt;", "<");
-        // Replace the op value with gt ge eq lt le as needed.
-        xml = xml.replace("op=\">=\"", "op=\"ge\"");
-        xml = xml.replace("op=\">\"", "op=\"gt\"");
-        xml = xml.replace("op=\"=\"", "op=\"eq\"");
-        xml = xml.replace("op=\"<=\"", "op=\"le\"");
-        xml = xml.replace("op=\"<\"", "op=\"lt\"");
-        return xml;
-    }
+    
     /**
      * Evaluate scripts in an HTML string. Will eval both <script
      * src=""></script> and <script>javascript here</scripts>.
