@@ -90,8 +90,10 @@
 	</TBODY>
 </TABLE>
 
-  <div id="submit"></div><div id="id_list"></div><div id="comment"></div>
-  <p></p>
+  ><div id="id_list"></div>
+  <br>
+  <div id="comment"></div>
+  <br>
   <div id="data"></div>
 
  #parse("productserver/templates/V7UIFooter.vm")
