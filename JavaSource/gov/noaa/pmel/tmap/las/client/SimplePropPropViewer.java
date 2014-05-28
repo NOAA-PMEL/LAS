@@ -199,6 +199,7 @@ public class SimplePropPropViewer implements EntryPoint {
     protected String thi;
     protected String zlo;
     protected String zhi;
+    protected String defaultx;
     
     protected List<String> currentIconList = new ArrayList<String>();
 
@@ -749,16 +750,22 @@ public class SimplePropPropViewer implements EntryPoint {
                 lasRequest.removeVariables();
                 // Find the first non-sub-set variable that is not already included
 
-                String vx = null;
+                String vx = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
                 String vcb = null;
                 String vds = null;
-                for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
-                    VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
-                                                                                                                    // DEBUG don't use WOCE flag as second variable
-                    if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") ) {
-                        vx = v.getID();
-                        vds = v.getDSID();
+               
+                if ( vx == null || (vx != null && vx.equals(vy))) {
+
+                    for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
+                        VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
+                        // DEBUG don't use WOCE flag as second variable
+                        if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") ) {
+                            vx = v.getID();
+                            vds = v.getDSID();
+                        }
                     }
+                } else {
+                    vds = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
                 }
                 if ( colorCheckBox.getValue() ) {
                     vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
@@ -1242,7 +1249,7 @@ public class SimplePropPropViewer implements EntryPoint {
             
             CategorySerializable cat = config.getCategorySerializable();
             
-            String defaultx = null;
+            
             String defaulty = null;
             String defaultcb = null;
             
