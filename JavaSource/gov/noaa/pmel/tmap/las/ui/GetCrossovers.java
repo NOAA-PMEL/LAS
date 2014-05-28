@@ -85,9 +85,9 @@ public class GetCrossovers extends LASAction {
 	        List<Variable> variables =  lasConfig.getVariables(dsid);
 	        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                 Variable variable = (Variable) varIt.next();
-                if ( variable.getName().toLowerCase().contains("latitude") ) {
+                if ( variable.getName().toLowerCase().equals("latitude") ) {
                     latid = variable.getID();
-                } else if ( variable.getName().toLowerCase().contains("longitude") ) {
+                } else if ( variable.getName().toLowerCase().equals("longitude") ) {
                     lonid = variable.getID();
                 }
             }
