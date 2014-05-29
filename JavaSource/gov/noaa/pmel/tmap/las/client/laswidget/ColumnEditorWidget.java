@@ -395,7 +395,7 @@ public class ColumnEditorWidget extends Composite {
         for (int p = 0; p < parts.length; p++) {
             // The + columnOffset for the column with the check box and the column with flag
             String part = parts[p];
-            if ( part.equals("") ) part = "(none)";
+            if ( part.trim().equals("") ) part = "(none)";
             if ( headers[p].contains("WOCE") ) {
                 HTML html = new HTML(part);
                 html.setTitle(parts[p]);
