@@ -21,7 +21,8 @@ LET data_1_title = "($data_1_title)"
 LET data_1_units = " (($data_1_units))"
 IF `($data_count"0") GE 3` THEN 
    LET data_2_title = "($data_2_title)"
-   LET data_2_units = " (($data_2_units))"
+   LET data_2_units = " "
+   IF ($data_2_units"0|text>0|*>1") THEN LET data_2_units = " (($data_2_units))"
 ENDIF
 
 GO LAS_initialize_region 0

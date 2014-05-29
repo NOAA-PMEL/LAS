@@ -17,7 +17,11 @@ IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_tit
 IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
-IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+IF ($data_($num)_units"0|1|text>0|*>1") THEN 
+   DEFINE SYMBOL data_units ($data_($num)_units)
+ELSE 
+   CANCEL SYMBOL data_($num)_units
+ENDIF
 
 IF ($ferret_dataset_label"0|SOCAT>1|*>0") THEN GO SOCAT_format_title_units
 
@@ -25,6 +29,7 @@ IF ($ferret_dataset_label"0|SOCAT>1|*>0") THEN GO SOCAT_format_title_units
 
 IF ($data_($num)_units"0|1|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
+   IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
    IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_($num)_title) (($data_($num)_units))
 ENDIF
@@ -133,12 +138,12 @@ IF `color_by_feature EQ 1` THEN
 
    IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
-   IF `($data_($num)_units%0|" ">0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
+   IF `($data_($num)_units%0|" ">0|text>0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
 
    DEFINE SYMBOL ferret_plot_title ($data_title)
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
-   
+
    DEFINE SYMBOL color_by_feature = 1
    EXIT/SCRIPT  ! dont need the rest of the setup for prop-prop plots
    ENDIF ! its_prop_prop_plot!
@@ -169,7 +174,6 @@ LET pre_decimate =  ($clock_secs)
    LET tol1 = `(max_range/full_range)`
    IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
    LET tol2 = `tol1`
-
 
 ! Tolerances 10% of the data range over the approx pixel width of a plot.
 
@@ -237,7 +241,6 @@ IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
 ! There may be a variable representing measurements to use in coloring 
 ! a track plot, etc.
 
-
 IF ($data_var"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var = ($data_var)
 
@@ -270,14 +273,12 @@ ELSE
    ENDIF
 ENDIF
 
-
 ! Special setup for color-by-time on trajectory plot
 IF `($data_0_var"0|time>1|*>0") AND ($its_prop_plot"1|*>0")` THEN 
    DEFINE SYMBOL ferret_plot_key = date_key 
    SET VAR/TITLE="Time" ($data_var)[d=`data_num`] 
    SET VAR/TITLE="Time" ($ferret_plot_var)[d=`data_num`] 
 ENDIF
-
 
 ! Mark whether there are color levels set on first entry. 
 ! Compute automatic open-ended levels.
