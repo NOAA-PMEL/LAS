@@ -8,6 +8,9 @@
 ! property-property plot, using the data variable in symbol ferret_plot_var_0,
 ! the second variable from ferret_plot_var_1 and optionally colored by ferret_plot_var_2.
 
+! If the variables are strings, use SAMPLEI to apply any masks.
+! Use the original variable name when expanding a feature_variable to list.
+
 set mode ver:always
 
 
@@ -78,28 +81,29 @@ IF ($feature_variable"0|*>1") THEN
    DEF SYM trajshape = `($feature_variable),RETURN=shape`
    IF `($trajshape"0|E>1|*>0)` THEN
 
+         DEFINE SYMBOL feature_var_name = ($feature_variable)
+         SET VAR/NAME=($feature_variable)_in ($feature_variable)
+         DEFINE SYMBOL feature_variable ($feature_variable)_in
          ! Expand all strings into obs axis
          IF ($is_string"0|*>1") THEN 
-	    LET traj_obs = EXPND_BY_LEN_STR(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
+	    LET ($feature_var_name)_xpnd = EXPND_BY_LEN_STR(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
 	    
 	    LET ii = i[g=($timevar)]
 	    LET iindices = IF constraints_mask THEN ii
 	    LET compress_mask = COMPRESSI(iindices)
 	    LET nok = `compress_mask[i=@ngd]`
-	    LET trajectory_var = SAMPLEI (traj_obs, compress_mask[i=1:`nok`])
+	    LET  ($feature_var_name) = SAMPLEI (($feature_var_name)_xpnd, compress_mask[i=1:`nok`])
 
 	 ELSE
 	    LET traj_obs = EXPND_BY_LEN(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
-            LET trajectory_var = constraints_mask*traj_obs
+            LET ($feature_var_name) = constraints_mask*traj_obs
          ENDIF
-	 SET VAR/TITLE="`($feature_variable),RETURN=title`" trajectory_var
+	 SET VAR/TITLE="`($feature_variable),RETURN=title`" ($feature_var_name)
       ENDIF
 
    ENDIF
 
 !!!!!!!!!!!
-
-
 
 IF ($color_by"0|*>1") THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
@@ -170,7 +174,7 @@ LET size = `constraints_mask[i=@ngd]`
 
 ! Always list the trajectory id, e.g. cruise_expocode
 
-IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL vars_out = trajectory_var, 
+IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL vars_out = ($feature_var_name), 
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 
@@ -203,17 +207,38 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET nlist = `nlist + 2`
    DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude,  
 
-ENDIF  ! longitude, latitude8/27/2013
+ENDIF  ! longitude, latitude
 
 ! Define variables with titles
 
-LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_0))
+
+DEF SYM vtype = `($ferret_plot_var_0),RETURN=dtype`
+IF ($vtype"0|CHAR>1|*>0") THEN  
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="($data_0_title)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0), compress_mask[i=1:`nok`])
+ELSE
+   LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_0))
+ENDIF
 
 LET nlist = `nlist + 1`
 DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in)
 
 IF ($ferret_plot_var_1"0|*>1") THEN
-   LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
+
+   DEF SYM vtype = `($ferret_plot_var_1),RETURN=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN  
+      LET ii = i[g=($timevar)]
+      LET iindices = IF constraints_mask THEN ii
+      LET compress_mask = COMPRESSI(iindices)
+      LET nok = `compress_mask[i=@ngd]`
+      LET/TITLE="($data_2_title)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
+   ELSE
+      LET/TITLE="($data_0_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
+   ENDIF
+
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
 ENDIF
