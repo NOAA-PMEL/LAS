@@ -16,10 +16,10 @@ import java.util.Set;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -40,12 +40,12 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -85,7 +85,9 @@ public class ColumnEditor implements EntryPoint {
     HorizontalPanel secondRow = new HorizontalPanel();
     DropDown ids = new DropDown();
     FlexTable datatable = new FlexTable();
-    TextBox comment = new TextBox();
+    FlexTable headertable = new FlexTable();
+    SuggestBox comment; 
+    MultiWordSuggestOracle oracle; 
     PushButton submit = new PushButton("Save Flags");
     HTML commentL;
     Map<String, List<String[]>> allrows = new HashMap<String, List<String[]>>();
@@ -97,7 +99,9 @@ public class ColumnEditor implements EntryPoint {
 
     int columnOffset = 2;
     
-    int headerRows = 2;
+    int headerRows = 0;
+    
+    List<String> comments = new ArrayList<String>();
 
     // The dirty rows for the current ID.
     Map<Integer, String[]> dirtyrows = new HashMap<Integer, String[]>();
@@ -112,6 +116,9 @@ public class ColumnEditor implements EntryPoint {
     @Override
     public void onModuleLoad() {
 
+        oracle = new MultiWordSuggestOracle();
+        comment = new SuggestBox(oracle);
+        
         // Save the initial size of the browser.
         windowWidth = Window.getClientWidth();
         windowHeight = Window.getClientHeight();
@@ -144,20 +151,23 @@ public class ColumnEditor implements EntryPoint {
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer row = (Integer) dirtyIt.next();
                     int dataRow = row - headerRows;
-                    formatter.removeStyleName(row, 1, "dirty");
+                   
                     CheckBox box = (CheckBox) datatable.getWidget(row, 0);
                     box.setValue(false);
                     String[] oldnew = dirtyrows.get(row);
                     HTML html = new HTML(oldnew[0]);
                     html.setTitle(oldnew[0]);
+                    int width = headertable.getWidget(0, 1).getOffsetWidth();
+                    html.setWidth(width+"px");
                     // Put the old value back in the data structure used to make the JSON payload.
                     List<String[]> affectedrow = allrows.get(ids.getValue());
                     String[] parts = affectedrow.get(dataRow);
                     for (int i = 0; i < parts.length; i++) {
                         if ( headers[i].contains("WOCE") ) {
-                            parts[i] = oldnew[0];
+                            parts[i] = oldnew[0];                        
                         }
                     }
+                    formatter.removeStyleName(row, 1, "dirty");
                     datatable.setWidget(row, 1, html);
                 }
                 dirtyrows.clear();
@@ -182,7 +192,7 @@ public class ColumnEditor implements EntryPoint {
 
         });
 
-        HTML choose = new HTML("&nbsp;&nbsp;Choose and ID to edit:&nbsp;&nbsp;");
+        HTML choose = new HTML("&nbsp;&nbsp;Choose an EXPOCODE to edit:&nbsp;&nbsp;");
         choose.addStyleName("nowrap");
         toprow.add(choose);
         ids.addStyleName("nowrap");
@@ -191,8 +201,13 @@ public class ColumnEditor implements EntryPoint {
         commentL.addStyleName("nowrap");
         secondRow.add(commentL);
         comment.setWidth("160px");
-        comment.setMaxLength(255);
         comment.setStyleName("nowrap");
+        comment.getValueBox().addFocusHandler(new FocusHandler() {
+            @Override
+            public void onFocus(FocusEvent event) {
+              comment.showSuggestionList();
+            }
+          });
         secondRow.add(comment);       
         flags.addItem("2");
         flags.addItem("3");
@@ -217,8 +232,12 @@ public class ColumnEditor implements EntryPoint {
                 String comment_text = comment.getText();
                 if ( comment_text != null && !comment_text.equals("") ) {
                     message.put("comment", new JSONString(comment_text));
+                    oracle.add(comment_text);
+                    comments.add(comment_text);
+                    oracle.setDefaultSuggestionsFromText(comments);
+                    comment.setText("");
                 } else {
-                    Window.alert("You must include a comment with your changes.");
+                    Window.alert("You must include a comment with your flags.");
                     return;
                 }
                 JSONArray edits = new JSONArray();
@@ -250,6 +269,7 @@ public class ColumnEditor implements EntryPoint {
         toprow.setStyleName("controls");
         RootPanel.get("id_list").add(toprow);
         RootPanel.get("comment").add(secondRow);
+        RootPanel.get("table_header").add(headertable);
         datascroll.add(datatable);
         RootPanel.get("data").add(datascroll);
         datatable.setStyleName("datatable");
@@ -280,7 +300,7 @@ public class ColumnEditor implements EntryPoint {
         Window.addWindowClosingHandler(new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent closingEvent) {
                 if ( dirtyrows.size() > 0 ) {
-                    closingEvent.setMessage("If you close or refresh the page your edits will be lost.");
+                    closingEvent.setMessage("If you close or refresh the page your current changes will be lost.");
                 }
             }
         });
@@ -288,6 +308,30 @@ public class ColumnEditor implements EntryPoint {
 
 
     private void resize() {
+        CellFormatter cellFormatter = datatable.getCellFormatter();
+        for (int i = 0; i < headers.length; i++) {
+            int hwidth;
+            if ( i == 0 ) {
+                hwidth = headertable.getWidget(1, i).getOffsetWidth();
+            } else {
+                hwidth = headertable.getWidget(0, i).getOffsetWidth();
+            }
+            int dwidth = datatable.getWidget(0, i).getOffsetWidth();
+            int fwidth = Math.max(hwidth, dwidth) + 10;
+            if ( i == 0 ) {
+                headertable.getWidget(1, i).setWidth(fwidth+"px");
+            } else {
+                headertable.getWidget(0, i).setWidth(fwidth+"px");
+
+            }
+            for (int j = 0; j < datatable.getRowCount(); j++) {
+                if ( i == 0 ) {
+                    cellFormatter.setWidth(j, i, fwidth + "px");
+                } else {
+                    datatable.getWidget(j, i).setWidth(fwidth+"px");
+                }
+            }
+        }
         // Set the size of data display scroll panel so that it fills the browser. 
         int width = datatable.getOffsetWidth() + 20;
         int height = Math.max(windowHeight - datascroll.getAbsoluteTop(), 0);
@@ -305,7 +349,7 @@ public class ColumnEditor implements EntryPoint {
             if (source.equals(ids)) {
                 if ( dirtyrows.size() > 0 ) {
                     ids.setSelectedIndex(selectedIndex);
-                    Window.alert("You have unsaved changes. Clear your edits if you want to change cruises.");
+                    Window.alert("You have unsaved changes. Clear or save your edits if you want to change EXPOCODE.");
                 } else {
                     String id = event.getValue();
                     List<String[]> rows = allrows.get(id);
@@ -322,6 +366,7 @@ public class ColumnEditor implements EntryPoint {
                     }
                     selectedIndex = ids.getSelectedIndex();
                 }
+                resize();
             } else if ( source.equals(flags) ) {
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer widgetRow = (Integer) dirtyIt.next();
@@ -353,14 +398,15 @@ public class ColumnEditor implements EntryPoint {
         CellFormatter cellformatter = datatable.getCellFormatter();
         int column = 0;
         for (int p = 0; p < parts.length; p++) {
-            // The + 1 is for the column with the check box and the flag
+            // The + columnOffset for the column with the check box and the column with flag
             if ( headers[p].contains("WOCE") ) {
                 HTML html = new HTML(parts[p]);
                 html.setTitle(parts[p]);
                 datatable.setWidget(datarow, 1, html);
                 cellformatter.addStyleName(datarow, 1, "nowrap");
             } else {
-                datatable.setWidget(datarow, column + columnOffset, new HTML(parts[p]));
+                HTML html = new HTML(parts[p]);
+                datatable.setWidget(datarow, column + columnOffset, html);
                 cellformatter.addStyleName(datarow, column + columnOffset, "nowrap");
                 column++;
             }
@@ -383,10 +429,10 @@ public class ColumnEditor implements EntryPoint {
             String old = datatable.getWidget(widgetRow, 1).getTitle();
             HTML html = new HTML(value);
             html.setTitle(value);
+            int width = headertable.getWidget(0, 1).getOffsetWidth();
+            html.setWidth(width+"px");
             datatable.setWidget(widgetRow, 1, html);
             cellFormatter.addStyleName(widgetRow, 1, "dirty");
-            // Eventually the data collection will contain the value of the flag.
-
             // We're using this value for to build the save JSON payload.  :-)
             List<String[]> affectedrow = allrows.get(ids.getValue());
             String[] parts = affectedrow.get(dataRow);
@@ -396,7 +442,7 @@ public class ColumnEditor implements EntryPoint {
                 }
             }
             //
-
+            
             String[] oldAndNew = dirtyrows.get(widgetRow);
             if ( oldAndNew == null ) {
                 oldAndNew = new String[]{old, value};
@@ -429,17 +475,20 @@ public class ColumnEditor implements EntryPoint {
             String[] flags = dirtyrows.get(widgetRow);
             HTML html = new HTML(flags[0]);
             html.setTitle(flags[0]);
+            int width = headertable.getWidget(0, 1).getOffsetWidth();
+            html.setWidth(width+"px");
             datatable.setWidget(widgetRow, 1, html);
+            cellFormatter.removeStyleName(widgetRow, 1, "dirty");
             // Put the old value back in the data structure used to make the JSON payload.
             List<String[]> affectedrow = allrows.get(ids.getValue());
             String[] parts = affectedrow.get(dataRow);
             for (int i = 0; i < parts.length; i++) {
                 if ( headers[i].contains("WOCE") ) {
-                    parts[i] = flags[0];
+                    parts[i] = flags[0];                  
                 }
             }
             dirtyrows.remove(widgetRow);
-            cellFormatter.removeStyleName(widgetRow, 1, "dirty");
+            
             if ( shift ) {
                 int startrow = -10;
                 // Look back to first unchecked row and uncheck between.
@@ -453,12 +502,13 @@ public class ColumnEditor implements EntryPoint {
                 if ( startrow > 0 ) {
                     for (int i = startrow + 1 ; i < widgetRow; i++ ) {
                         // Do the same thing you do for the "none" button to these rows.
-                        cellFormatter.removeStyleName(i, 1, "dirty");
+                        
                         CheckBox shiftbox = (CheckBox) datatable.getWidget(i, 0);
                         shiftbox.setValue(false);
                         String[] oldnew = dirtyrows.get(i);
                         HTML shifthtml = new HTML(oldnew[0]);
                         shifthtml.setTitle(oldnew[0]);
+                        shifthtml.setWidth(width+"px");
                         // Put the old value back in the data structure used to make the JSON payload.
                         List<String[]> shiftarow = allrows.get(ids.getValue());
                         String[] shiftparts = shiftarow.get(dataRow);
@@ -467,6 +517,7 @@ public class ColumnEditor implements EntryPoint {
                                 shiftparts[j] = oldnew[0];
                             }
                         }
+                        cellFormatter.removeStyleName(i, 1, "dirty");
                         datatable.setWidget(i, 1, shifthtml);
                         dirtyrows.remove(i);
                     }
@@ -486,7 +537,10 @@ public class ColumnEditor implements EntryPoint {
             CellFormatter formatter = datatable.getCellFormatter();
             for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                 Integer widgetrow = (Integer) dirtyIt.next();
-                formatter.removeStyleName(widgetrow, 1, "dirty");
+                for (int i = 0; i < headers.length; i++) {
+                    formatter.removeStyleName(widgetrow, i, "dirty");
+                }
+                
                 CheckBox box = (CheckBox) datatable.getWidget(widgetrow, 0);
                 box.setValue(false);
             }
@@ -587,23 +641,23 @@ public class ColumnEditor implements EntryPoint {
      * 
      */
     private void setHeaders() {
-        CellFormatter cellFormatter = datatable.getCellFormatter();
-        datatable.setWidget(0, 0, new HTML(""));
+        CellFormatter cellFormatter = headertable.getCellFormatter();
+        headertable.setWidget(0, 0, new HTML(""));
         int column = 0;
         for (int p = 0; p < headers.length; p++) {
             if ( headers[p].startsWith("\"")) headers[p] = headers[p].substring(1, headers[p].length());
             if ( headers[p].endsWith("\"")) headers[p] = headers[p].substring(0,headers[p].length()-1);
             if ( headers[p].contains("WOCE") ) {
-                datatable.setWidget(0, 1, new HTML(headers[p]));
+                headertable.setWidget(0, 1, new HTML(headers[p]));
                 cellFormatter.addStyleName(0, 1, "nowrap");
             } else {
-                datatable.setWidget(0, column + columnOffset, new HTML(headers[p]));
+                headertable.setWidget(0, column + columnOffset, new HTML(headers[p]));
                 cellFormatter.addStyleName(0, column + columnOffset, "nowrap");
                 column++;
             }
         }
-        datatable.setWidget(1, 0, allNone);
-        RowFormatter formatter = datatable.getRowFormatter();
+        headertable.setWidget(1, 0, allNone);
+        RowFormatter formatter = headertable.getRowFormatter();
         formatter.addStyleName(0, "nowrap");
     }
 
