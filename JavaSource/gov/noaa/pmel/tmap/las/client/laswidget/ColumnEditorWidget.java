@@ -360,8 +360,9 @@ public class ColumnEditorWidget extends Composite {
                         datarow++;
                     }
                     selectedIndex = ids.getSelectedIndex();
+                    resize();
                 }
-                resize();
+               
             } else if ( source.equals(flags) ) {
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer widgetRow = (Integer) dirtyIt.next();
