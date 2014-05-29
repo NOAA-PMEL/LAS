@@ -394,13 +394,15 @@ public class ColumnEditorWidget extends Composite {
         int column = 0;
         for (int p = 0; p < parts.length; p++) {
             // The + columnOffset for the column with the check box and the column with flag
+            String part = parts[p];
+            if ( part.equals("") ) part = "(none)";
             if ( headers[p].contains("WOCE") ) {
-                HTML html = new HTML(parts[p]);
+                HTML html = new HTML(part);
                 html.setTitle(parts[p]);
                 datatable.setWidget(datarow, 1, html);
                 cellformatter.addStyleName(datarow, 1, "nowrap");
             } else {
-                HTML html = new HTML(parts[p]);
+                HTML html = new HTML(part);
                 datatable.setWidget(datarow, column + columnOffset, html);
                 cellformatter.addStyleName(datarow, column + columnOffset, "nowrap");
                 column++;
