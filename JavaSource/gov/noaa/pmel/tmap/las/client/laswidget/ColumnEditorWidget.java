@@ -398,7 +398,7 @@ public class ColumnEditorWidget extends Composite {
             if ( part.trim().equals("") ) part = "(none)";
             if ( headers[p].contains("WOCE") ) {
                 HTML html = new HTML(part);
-                html.setTitle(parts[p]);
+                html.setTitle(part);
                 datatable.setWidget(datarow, 1, html);
                 cellformatter.addStyleName(datarow, 1, "nowrap");
             } else {
