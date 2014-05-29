@@ -60,8 +60,12 @@ ENDIF
 LET allvars = ..varnames
 
 DEFINE SYMBOL maskdir =  `feature_mask,return=shape`
-IF ($prof_traj_shown"1|*>0") THEN DEFINE SYMBOL prof_traj_shown = `feature_mask[($maskdir)=@sum]`
-DEFINE SYMBOL prof_traj_shown = ($prof_traj_shown"($prof_traj_max)")
+IF ($maskdir"0|POINT>1|*>0") THEN 
+   DEFINE SYMBOL prof_traj_shown = 1
+ELSE
+   IF ($prof_traj_shown"1|*>0") THEN DEFINE SYMBOL prof_traj_shown = `feature_mask[($maskdir)=@sum]`
+   DEFINE SYMBOL prof_traj_shown = ($prof_traj_shown"($prof_traj_max)")
+ENDIF
 
 ! c_s used to add plural s to a label if more than one trajectory or profile.
 CANCEL SYMBOL c_s
