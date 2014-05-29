@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.ColumnEditorWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintLabel;
@@ -79,7 +80,9 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -148,6 +151,7 @@ public class SimplePropPropViewer implements EntryPoint {
     LinkButton link = new LinkButton();
     PushButton table = new PushButton("Data Table");
     PushButton edit = new PushButton("Edit Flags");
+    ColumnEditorWidget columnEditor;
     boolean youveBeenWarned = false;
     // The current intermediate file
     String netcdf = null;
@@ -540,6 +544,13 @@ public class SimplePropPropViewer implements EntryPoint {
                 resize(event.getWidth(), event.getHeight());
             }
         });
+        Window.addWindowClosingHandler(new Window.ClosingHandler() {
+            public void onWindowClosing(Window.ClosingEvent closingEvent) {
+                if ( columnEditor.isDirty() ) {
+                    closingEvent.setMessage("If you close or refresh the page your current flags will be lost.");
+                }
+            }
+        });
     }
 
    
@@ -558,7 +569,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
         @Override
         public void onClick(ClickEvent event) {
-            updatePlot(true);
+            updatePlot(true, true);
         }
 
     };
@@ -569,7 +580,7 @@ public class SimplePropPropViewer implements EntryPoint {
         Window.open(urlfrag.toString(), "_blank", Constants.WINDOW_FEATURES);
     }
 
-    private void updatePlot(boolean addHistory) {
+    private void updatePlot(boolean addHistory, boolean cache) {
         // TODO Before submitting...
 
         
@@ -599,6 +610,12 @@ public class SimplePropPropViewer implements EntryPoint {
         String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
 
         currentURL = url;
+        
+        if ( cache ) {
+            lasRequest.setProperty("product_server", "use_cache", "true");
+        } else {
+            lasRequest.setProperty("product_server", "use_cache", "false");
+        }
 
         if (addHistory) {
             String x = lasRequest.toString();
@@ -651,9 +668,54 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.addVariable(dsid, v0, 0);
         tableRequest.addVariable(dsid, v1, 0);
         
-        String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
-        Window.open(url, "_blank", Constants.WINDOW_FEATURES);
+        final DialogBox fdbox = new DialogBox();
+        final Anchor close = new Anchor("[ CLOSE ]");
+        close.addClickHandler( new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                if ( !columnEditor.isDirty() ) {
+                    fdbox.hide();
+                    updatePlot(false, false);
+                } else {
+                    Window.alert("You have unsaved changes. Clear or save your edits if you want to change EXPOCODE.");
+                }
+            }
+            
+        });
+        fdbox.setText(" ");
+        // Get caption element
+        final HTML caption = ((HTML)fdbox.getCaption());
+
+        // Add anchor to caption
+        caption.getElement().appendChild(close.getElement());
+        
+        // Add click handler to caption
+        caption.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            // Get x,y caption click relative to the anchor
+            final int x = event.getRelativeX(close.getElement());
+            final int y = event.getRelativeY(close.getElement());
+
+            // Check click was within bounds of anchor
+            if(x >= 0 && y >= 0 && 
+              x <= close.getOffsetWidth() && 
+              y <= close.getOffsetHeight()) {
+                // Raise event on anchor
+                close.fireEvent(event);
+            }
+          }
+        });
+        columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString());
+        fdbox.setWidget(columnEditor);
+        fdbox.show();
+        
+        
+//        String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
+//        Window.open(url, "_blank", Constants.WINDOW_FEATURES);
     }
+    
     private void makeRequest(boolean plot) {
         boolean contained = true;
 
@@ -846,7 +908,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
                     @Override
                     public void onClick(ClickEvent click) {
-                        updatePlot(false);
+                        updatePlot(false, true);
                     }
                 });
                 p.add(again);
@@ -1365,7 +1427,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 // request,
                 // so save it.
                 initialState = new LASRequest(lasRequest.toString());
-                updatePlot(true);
+                updatePlot(true, true);
             }
         }
 
@@ -1581,7 +1643,7 @@ public class SimplePropPropViewer implements EntryPoint {
         }
         initialHistory = "";
         hasInitialHistory = false;
-        updatePlot(false);
+        updatePlot(false, true);
 
     }
 
