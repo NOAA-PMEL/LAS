@@ -188,7 +188,7 @@ public class ColumnEditorWidget extends Composite {
                 windowWidth = width; 
                 windowHeight = height;
 
-                // Reformat everything for the new browser size.
+                // shorten the window for the new browser size.
                 resize();
             }
 
@@ -302,7 +302,7 @@ public class ColumnEditorWidget extends Composite {
     }
 
 
-    private void resize() {
+    private void columns() {
         CellFormatter cellFormatter = datatable.getCellFormatter();
         for (int i = 0; i < headers.length; i++) {
             int hwidth;
@@ -327,6 +327,9 @@ public class ColumnEditorWidget extends Composite {
                 }
             }
         }
+        resize();
+    }
+    private void resize() {
         // Set the size of data display scroll panel so that it fills the browser. 
         int width = datatable.getOffsetWidth() + 20;
         int height = Math.max(windowHeight - datascroll.getAbsoluteTop(), 0);
@@ -335,7 +338,6 @@ public class ColumnEditorWidget extends Composite {
         int cwidth = width - commentL.getOffsetWidth();
         comment.setWidth(cwidth+"px");
     }
-
     StringValueChangeEvent.Handler IdChangeHandler = new StringValueChangeEvent.Handler() {
 
         @Override
@@ -360,7 +362,7 @@ public class ColumnEditorWidget extends Composite {
                         datarow++;
                     }
                     selectedIndex = ids.getSelectedIndex();
-                    resize();
+                    columns();
                 }
                
             } else if ( source.equals(flags) ) {
@@ -630,7 +632,7 @@ public class ColumnEditorWidget extends Composite {
                     ids.addItem(id);
                 }
             }
-            resize();
+            columns();
 
         }
     };
