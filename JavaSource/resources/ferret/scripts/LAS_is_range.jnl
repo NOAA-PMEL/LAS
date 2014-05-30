@@ -25,19 +25,42 @@ IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN
   EXIT/SCRIPT ! Data All Missing or Inconsistent Variable Constraints
 ENDIF 
 
+! Time is in seconds.
 IF ($is_time"0|0|*>1") THEN
-   IF `ABS(ax_lo-ax_hi) LT 1` THEN
-      LET ax_lo = `ax_lo - 15`
-      LET ax_hi = `ax_hi + 15`
-   ENDIF
-   LET del_ax = 24
-   IF `ax_hi - ax_lo LT 26` THEN LET del_ax = 1
-   
    LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
    IF `since_loc GT 1` THEN 
       LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
       DEFINE SYMBOL tunits = `tunits`
    ENDIF
+   
+   IF `($tunits"0|seconds>1|*>0) EQ 0` THEN
+      MESSAGE/ERROR **ERROR Time is assumed to be in seconds, finding ($tunits)
+      EXIT/PROGRAM
+   ENDIF
+
+   let hrsec = 3600
+   let daysec = 24*3600
+   IF `ABS(ax_lo-ax_hi) LT 2*daysec` THEN
+      LET ax_lo = `ax_lo - .5*daysec,prec=12`
+      LET ax_hi = `ax_hi + .5*daysec,prec=12`
+   ELIF `ABS(ax_lo-ax_hi) LT 5*daysec` THEN
+      LET ax_lo = `ax_lo - 2*daysec,prec=12`
+      LET ax_hi = `ax_hi + 2*daysec,prec=12`
+   ELIF `ABS(ax_lo-ax_hi) LT 15*daysec` THEN
+      LET ax_lo = `ax_lo - 5*daysec,prec=12`
+      LET ax_hi = `ax_hi + 5*daysec,prec=12`
+   ELIF `ABS(ax_lo-ax_hi) LT 365*daysec` THEN
+      LET ax_lo = `ax_lo - 15*daysec,prec=12`
+      LET ax_hi = `ax_hi + 15*daysec,prec=12`
+   ELIF `ABS(ax_lo-ax_hi) LT 5*365*daysec` THEN
+      LET ax_lo = `ax_lo - 60*daysec,prec=12`
+      LET ax_hi = `ax_hi + 60*daysec,prec=12`
+   ELSE
+      LET ax_lo = `ax_lo - 180*daysec,prec=12`
+      LET ax_hi = `ax_hi + 180*daysec,prec=12`
+   ENDIF
+   LET del_ax = daysec
+   IF `ax_hi - ax_lo LT 26*hrsec` THEN LET del_ax = hrsec
    
    IF `STRINDEX("($tunits)", "sec") GT 0` THEN LET del_ax = 3600
 
