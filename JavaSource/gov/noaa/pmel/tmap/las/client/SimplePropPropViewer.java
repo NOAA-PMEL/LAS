@@ -657,12 +657,22 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.setOperation("EditColumn_setup", "V7");
         String dsid = tableRequest.getDataset(0);
         String v0 = tableRequest.getVariable(1);
-        String v1;
-        if ( v0.equals("latitude") || v0.equals("longitude") || v0.equals("time") ) {
-            v1 = "WOCE_geoposition";
-        } else {
-            v1 = "WOCE_"+v0;
-        }
+        // This is the variable ID.
+        
+        // Get the names...
+        VariableSerializable var0 = xAllDatasetVariables.get(v0);
+                   
+        String v1 = "WOCE_"+v0;
+        if ( var0.getName().toLowerCase().equals("latitude") || var0.getName().toLowerCase().equals("longitude") || var0.getName().toLowerCase().equals("time") ) {
+            for (Iterator varIt = xAllDatasetVariables.keySet().iterator(); varIt.hasNext();) {
+                String id = (String) varIt.next();
+                VariableSerializable v = (VariableSerializable) xAllDatasetVariables.get(id);
+                if ( v.getShortname().toLowerCase().contains("woce_geoposition") ) {
+                    v1 = v.getID();
+                }
+            }
+        } 
+        VariableSerializable var1 = xAllDatasetVariables.get(v1);
         
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
@@ -707,7 +717,7 @@ public class SimplePropPropViewer implements EntryPoint {
             }
           }
         });
-        columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString());
+        columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString(), var0.getShortname(), var1.getShortname());
         fdbox.setWidget(columnEditor);
         fdbox.show();
         
