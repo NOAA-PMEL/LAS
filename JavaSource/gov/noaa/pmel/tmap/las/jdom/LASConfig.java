@@ -236,7 +236,7 @@ public class LASConfig extends LASDocument {
      * @param s the string to scramble
      * @return the combinations
      */
-    private static ArrayList<String> combo(String prefix, String s) {
+    public static ArrayList<String> combo(String prefix, String s) {
         ArrayList<String> comboList = new ArrayList<String>();
 
         if (!prefix.equals("")) {
@@ -1448,6 +1448,7 @@ public class LASConfig extends LASDocument {
     		} else {
     			if ( wireCat.isVariableChildren() ) {
     				VariableSerializable[] wireVars = wireCat.getDatasetSerializable().getVariablesSerializable();
+    				//TODO Sort here on an attribute??
     				for (int j = 0; j < wireVars.length; j++) {
     					VariableSerializable var = wireVars[j];
     					Grid grid = getGrid(var.getDSID(), var.getID());
@@ -5553,6 +5554,7 @@ public class LASConfig extends LASDocument {
                 for (int i = 0; i < vars.length; i++) {
                     GridSerializable wire_grid = getGridSerializable(dsid, vars[i].getID());
                     vars[i].setGrid(wire_grid);
+                    vars[i].setShortname(getVariableName(dsid, vars[i].getID()));
                 }
             }
             return cat;
