@@ -94,13 +94,16 @@ public class ColumnEditorWidget extends Composite {
     PushButton submit = new PushButton("Save Flags");
     HTML commentL;
     Map<String, List<String[]>> allrows = new HashMap<String, List<String[]>>();
+    
+    String datavar; // This is the variable that was on the vertical axis.
+    String wocevar; // This is the corresponding woce flag variable.
 
     int windowWidth;
     int windowHeight;
 
     Random random = new Random();
 
-    int columnOffset = 2;
+    int columnOffset = 3;
     
     int headerRows = 0;
     
@@ -115,8 +118,9 @@ public class ColumnEditorWidget extends Composite {
     
     ClientFactory clientFactory = GWT.create(ClientFactory.class);
     EventBus eventBus = clientFactory.getEventBus();
+    
 
-    public ColumnEditorWidget(String catid, String xml) {
+    public ColumnEditorWidget(String catid, String xml, String datavarname, String wocename) {
 
         oracle = new MultiWordSuggestOracle();
         comment = new SuggestBox(oracle);
@@ -149,28 +153,14 @@ public class ColumnEditorWidget extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-               CellFormatter formatter = datatable.getCellFormatter();
+               
                 for (Iterator dirtyIt = dirtyrows.keySet().iterator(); dirtyIt.hasNext();) {
                     Integer row = (Integer) dirtyIt.next();
-                    int dataRow = row - headerRows;
-                   
+                    // Programatically turn off the check box.
                     CheckBox box = (CheckBox) datatable.getWidget(row, 0);
                     box.setValue(false);
-                    String[] oldnew = dirtyrows.get(row);
-                    HTML html = new HTML(oldnew[0]);
-                    html.setTitle(oldnew[0]);
-                    int width = headertable.getWidget(0, 1).getOffsetWidth();
-                    html.setWidth(width+"px");
-                    // Put the old value back in the data structure used to make the JSON payload.
-                    List<String[]> affectedrow = allrows.get(ids.getValue());
-                    String[] parts = affectedrow.get(dataRow);
-                    for (int i = 0; i < parts.length; i++) {
-                        if ( headers[i].contains("WOCE") ) {
-                            parts[i] = oldnew[0];                        
-                        }
-                    }
-                    formatter.removeStyleName(row, 1, "dirty");
-                    datatable.setWidget(row, 1, html);
+                    turnOffRow(row);
+                    
                 }
                 dirtyrows.clear();
             }
@@ -279,6 +269,8 @@ public class ColumnEditorWidget extends Composite {
         if (xml != null && !xml.equals("")) {
             xml = Util.decode(xml);
             lasRequest = new LASRequest(xml);
+            datavar = datavarname;
+            wocevar = wocename;
             initialState = lasRequest;
             lasRequest.setProperty("ferret", "data_format", "csv");
             lasRequest.setOperation("Trajectory_Corrrelation_File", "V7");
@@ -334,6 +326,7 @@ public class ColumnEditorWidget extends Composite {
         int width = datatable.getOffsetWidth() + 20;
         int height = Math.max(windowHeight - datascroll.getAbsoluteTop(), 0);
         height = height - 120;
+        if ( height < 0 ) height = 120;
         datascroll.setSize(width + "px", height + "px");
         int cwidth = width - commentL.getOffsetWidth();
         comment.setWidth(cwidth+"px");
@@ -376,6 +369,30 @@ public class ColumnEditorWidget extends Composite {
         }
 
     };
+    private void turnOffRow(int row) {
+        CellFormatter formatter = datatable.getCellFormatter();
+        int dataRow = row - headerRows;
+        
+        
+        String[] oldnew = dirtyrows.get(row);
+        HTML html = new HTML(oldnew[0]);
+        html.setTitle(oldnew[0]);
+        int width = headertable.getWidget(0, 1).getOffsetWidth();
+        html.setWidth(width+"px");
+        // Put the old value back in the data structure used to make the JSON payload.
+        List<String[]> affectedrow = allrows.get(ids.getValue());
+        String[] parts = affectedrow.get(dataRow);
+        for (int i = 0; i < parts.length; i++) {
+            if ( headers[i].contains("WOCE") ) {
+                parts[i] = oldnew[0];                        
+            }
+        }
+        formatter.removeStyleName(row, 1, "dirty");
+        datatable.setWidget(row, 1, html);
+      
+        
+        
+    }
     private void addRow(String[] parts, int datarow) {
         CheckBox box = new CheckBox();
         box.addStyleName("nowrap");
@@ -399,12 +416,19 @@ public class ColumnEditorWidget extends Composite {
             // The + columnOffset for the column with the check box and the column with flag
             String part = parts[p];
             if ( part.trim().equals("") ) part = "(none)";
-            if ( headers[p].contains("WOCE") ) {
+            if ( headers[p].toLowerCase().equals(wocevar.toLowerCase()) ) {
                 HTML html = new HTML(part);
                 html.setTitle(part);
                 datatable.setWidget(datarow, 1, html);
                 cellformatter.addStyleName(datarow, 1, "nowrap");
+            } else if ( headers[p].toLowerCase().equals(datavar.toLowerCase()) ) {
+                HTML html = new HTML(part);
+                html.setTitle(part);
+                datatable.setWidget(datarow, 2, html);
+                cellformatter.addStyleName(datarow, 2, "nowrap");
+
             } else {
+                
                 HTML html = new HTML(part);
                 datatable.setWidget(datarow, column + columnOffset, html);
                 cellformatter.addStyleName(datarow, column + columnOffset, "nowrap");
@@ -472,21 +496,7 @@ public class ColumnEditorWidget extends Composite {
             }
 
         } else {    
-            String[] flags = dirtyrows.get(widgetRow);
-            HTML html = new HTML(flags[0]);
-            html.setTitle(flags[0]);
-            int width = headertable.getWidget(0, 1).getOffsetWidth();
-            html.setWidth(width+"px");
-            datatable.setWidget(widgetRow, 1, html);
-            cellFormatter.removeStyleName(widgetRow, 1, "dirty");
-            // Put the old value back in the data structure used to make the JSON payload.
-            List<String[]> affectedrow = allrows.get(ids.getValue());
-            String[] parts = affectedrow.get(dataRow);
-            for (int i = 0; i < parts.length; i++) {
-                if ( headers[i].contains("WOCE") ) {
-                    parts[i] = flags[0];                  
-                }
-            }
+            turnOffRow(widgetRow);
             dirtyrows.remove(widgetRow);
             
             if ( shift ) {
@@ -501,25 +511,14 @@ public class ColumnEditorWidget extends Composite {
                 }
                 if ( startrow > 0 ) {
                     for (int i = startrow + 1 ; i < widgetRow; i++ ) {
+                        
                         // Do the same thing you do for the "none" button to these rows.
                         
                         CheckBox shiftbox = (CheckBox) datatable.getWidget(i, 0);
                         shiftbox.setValue(false);
-                        String[] oldnew = dirtyrows.get(i);
-                        HTML shifthtml = new HTML(oldnew[0]);
-                        shifthtml.setTitle(oldnew[0]);
-                        shifthtml.setWidth(width+"px");
-                        // Put the old value back in the data structure used to make the JSON payload.
-                        List<String[]> shiftarow = allrows.get(ids.getValue());
-                        String[] shiftparts = shiftarow.get(dataRow);
-                        for (int j = 0; j < shiftparts.length; j++) {
-                            if ( headers[j].contains("WOCE") ) {
-                                shiftparts[j] = oldnew[0];
-                            }
-                        }
-                        cellFormatter.removeStyleName(i, 1, "dirty");
-                        datatable.setWidget(i, 1, shifthtml);
+                        turnOffRow(i);
                         dirtyrows.remove(i);
+                        
                     }
                 }
             }
@@ -647,9 +646,12 @@ public class ColumnEditorWidget extends Composite {
         for (int p = 0; p < headers.length; p++) {
             if ( headers[p].startsWith("\"")) headers[p] = headers[p].substring(1, headers[p].length());
             if ( headers[p].endsWith("\"")) headers[p] = headers[p].substring(0,headers[p].length()-1);
-            if ( headers[p].contains("WOCE") ) {
+            if ( headers[p].toLowerCase().equals(wocevar.toLowerCase()) ) {
                 headertable.setWidget(0, 1, new HTML(headers[p]));
                 cellFormatter.addStyleName(0, 1, "nowrap");
+            } else if (headers[p].toLowerCase().equals(datavar.toLowerCase()) ) {
+                headertable.setWidget(0, 2, new HTML(headers[p]));
+                cellFormatter.addStyleName(0, 2, "nowrap");
             } else {
                 headertable.setWidget(0, column + columnOffset, new HTML(headers[p]));
                 cellFormatter.addStyleName(0, column + columnOffset, "nowrap");
