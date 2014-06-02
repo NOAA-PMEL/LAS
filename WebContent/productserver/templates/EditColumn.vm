@@ -90,9 +90,11 @@
 	</TBODY>
 </TABLE>
 
-  ><div id="id_list"></div>
+  <div id="id_list"></div>
   <br>
   <div id="comment"></div>
+  <br>
+  <div id="table_header"></div>
   <br>
   <div id="data"></div>
 
