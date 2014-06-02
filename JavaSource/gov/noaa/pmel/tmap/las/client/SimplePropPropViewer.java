@@ -24,6 +24,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.WindowBox;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
@@ -65,6 +66,8 @@ import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -678,12 +681,12 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.addVariable(dsid, v0, 0);
         tableRequest.addVariable(dsid, v1, 0);
         
-        final DialogBox fdbox = new DialogBox();
-        final Anchor close = new Anchor("[ CLOSE ]");
-        close.addClickHandler( new ClickHandler() {
+        final WindowBox fdbox = new WindowBox(false, true, true, true, false);
+        fdbox.setText("Edit Flags");
+        fdbox.addCloseHandler(new CloseHandler() {
 
             @Override
-            public void onClick(ClickEvent event) {
+            public void onClose(CloseEvent event) {
                 if ( !columnEditor.isDirty() ) {
                     fdbox.hide();
                     updatePlot(false, false);
@@ -693,30 +696,8 @@ public class SimplePropPropViewer implements EntryPoint {
             }
             
         });
-        fdbox.setText(" ");
-        // Get caption element
-        final HTML caption = ((HTML)fdbox.getCaption());
-
-        // Add anchor to caption
-        caption.getElement().appendChild(close.getElement());
         
-        // Add click handler to caption
-        caption.addClickHandler(new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            // Get x,y caption click relative to the anchor
-            final int x = event.getRelativeX(close.getElement());
-            final int y = event.getRelativeY(close.getElement());
-
-            // Check click was within bounds of anchor
-            if(x >= 0 && y >= 0 && 
-              x <= close.getOffsetWidth() && 
-              y <= close.getOffsetHeight()) {
-                // Raise event on anchor
-                close.fireEvent(event);
-            }
-          }
-        });
+       
         columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString(), var0.getShortname(), var1.getShortname());
         fdbox.setWidget(columnEditor);
         fdbox.show();
