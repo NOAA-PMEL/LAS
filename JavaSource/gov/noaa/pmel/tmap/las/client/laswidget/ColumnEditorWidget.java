@@ -296,28 +296,18 @@ public class ColumnEditorWidget extends Composite {
 
     private void columns() {
         CellFormatter cellFormatter = datatable.getCellFormatter();
-        for (int i = 0; i < headers.length; i++) {
-            int hwidth;
-            if ( i == 0 ) {
-                hwidth = headertable.getWidget(1, i).getOffsetWidth();
-            } else {
-                hwidth = headertable.getWidget(0, i).getOffsetWidth();
-            }
+        // The first thing is not a header, so you have to go one more.
+        for (int i = 0; i < headers.length + 1; i++) {
+            int hwidth = headertable.getWidget(0, i).getOffsetWidth();        
             int dwidth = datatable.getWidget(0, i).getOffsetWidth();
-            int fwidth = Math.max(hwidth, dwidth) + 10;
-            if ( i == 0 ) {
-                headertable.getWidget(1, i).setWidth(fwidth+"px");
-            } else {
-                headertable.getWidget(0, i).setWidth(fwidth+"px");
-
-            }
+            int fwidth = Math.max(hwidth, dwidth) + 10;        
+            headertable.getWidget(0, i).setWidth(fwidth+"px");
+            
             for (int j = 0; j < datatable.getRowCount(); j++) {
-                if ( i == 0 ) {
-                    cellFormatter.setWidth(j, i, fwidth + "px");
-                } else {
-                    datatable.getWidget(j, i).setWidth(fwidth+"px");
-                }
+                cellFormatter.setWidth(j, i, fwidth+"px");
+                //datatable.getWidget(j, i).setWidth(fwidth+"px");
             }
+            
         }
         resize();
     }
@@ -658,7 +648,7 @@ public class ColumnEditorWidget extends Composite {
                 column++;
             }
         }
-        headertable.setWidget(1, 0, allNone);
+        headertable.setWidget(0, 0, allNone);
         RowFormatter formatter = headertable.getRowFormatter();
         formatter.addStyleName(0, "nowrap");
     }

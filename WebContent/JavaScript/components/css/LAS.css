@@ -1,8 +1,40 @@
 /** Add css rules here for your application. */
+
+/* CSS for the WOCE flag editor. */
+a.gwt-extras-dialog-close {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/close_off.png");
+}
+a.gwt-extras-dialog-close:hover {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/close_on.png");
+}
+a.gwt-extras-dialog-minimize {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/minus_off.png");
+}
+a.gwt-extras-dialog-minimize:hover {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/minus_on.png");
+}
+a.gwt-extras-dialog-maximize {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/plus_off.png");
+}
+a.gwt-extras-dialog-maximize:hover {
+   border: 1px outset #ccc;
+   background: url("../images/hborder.png") repeat-x 0px -27px;
+   content: url("../images/plus_on.png");
+}
 .dirty {
 	background-color: yellow;
 }
-.nowrap {
+.nowrap {	
 	white-space: nowrap;
 	font-size:18px;
 }
@@ -11,6 +43,7 @@
 	background-color: #F3E7C9;
 	font-size:18px;
 }
+/* End of CSS for the WOCE flag editor. */
 .menulabel {
 	white-space: nowrap;
 }
