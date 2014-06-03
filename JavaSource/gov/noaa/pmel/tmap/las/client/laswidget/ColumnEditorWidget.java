@@ -302,7 +302,7 @@ public class ColumnEditorWidget extends Composite {
         for (int i = 0; i < headers.length + 1; i++) {
             int hwidth = headertable.getWidget(0, i).getOffsetWidth();        
             int dwidth = datatable.getWidget(0, i).getOffsetWidth();
-            int fwidth = Math.max(hwidth, dwidth) + 10;        
+            int fwidth = Math.max(hwidth, dwidth);        
             headertable.getWidget(0, i).setWidth(fwidth+"px");
             
             for (int j = 0; j < datatable.getRowCount(); j++) {
