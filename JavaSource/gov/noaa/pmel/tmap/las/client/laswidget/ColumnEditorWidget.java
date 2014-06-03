@@ -680,4 +680,19 @@ public class ColumnEditorWidget extends Composite {
             }
         }
     }-*/;
+
+
+    public boolean isTableVisible() {
+       return datascroll.isAttached();
+    }
+
+
+    public void setTableVisible(boolean b) {
+        // Remove it or add it back...
+        if ( b ) {
+            mainpanel.add(datascroll);
+        } else {
+            mainpanel.remove(datascroll);
+        }
+    }
 }
