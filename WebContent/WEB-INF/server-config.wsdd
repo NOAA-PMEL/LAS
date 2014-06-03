@@ -31,9 +31,9 @@
   <parameter name="allowedMethods" value="getVersion"/>
   <parameter name="className" value="org.apache.axis.Version"/>
  </service>
-  <service name="LASExtractBackend" provider="java:RPC">
+  <service name="LASTabledapBackend" provider="java:RPC">
   <parameter name="allowedMethods" value="*"/>
-  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.extract.ExtractBackendService"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.extract.TabledapBackendService"/>
   <parameter name="scope" value="Application"/>
  </service>
  <service name="LASDatabaseBackend" provider="java:RPC">
