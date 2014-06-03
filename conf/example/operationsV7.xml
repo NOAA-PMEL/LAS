@@ -38,7 +38,7 @@
         <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
     </operation>
     <operation name="ASCII file" chained="true" ID="Trajectory_Data_Extract_File" output_template="ascii" service_action="Trajectory_Data_Convert_File" order="0500" category="file">
       <args>
@@ -98,7 +98,7 @@
         <result type="webrowset" ID="webrowset" file_suffix=".xml"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
     </operation>
     <operation name="NetCDF file" ID="Trajectory_Data_Extract_netCDF" output_template="netcdf" service_action="Data_Download" order="0500" category="file">
       <args>
@@ -173,7 +173,7 @@
         <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
     </operation>
     <operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly" output_template="output" service_action="Trajectory_2D_poly">
       <args>
@@ -268,7 +268,7 @@
         <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
       <properties>
         <property_group type="backend_request">
           <property>
@@ -711,7 +711,53 @@
       <grid_type name="trajectory"/>
     </grid_types>
   </operation>
-  
+  <!-- Table of Property Property Thumbnails -->
+  <operation name="Table of Property-Property Thumbnails" ID="PropPropThumbTable" service_action="" default="true" category="thumbnails" output_template="PPT_setup">
+    <response ID="PlotResp" type="HTML" index="1">
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      <result type="cancel" ID="cancel"/>
+    </response>
+    <service>template</service>
+    <region>
+      <intervals name="x"/>
+      <intervals name="y"/>
+      <intervals name="z"/>
+      <intervals name="t"/>
+      <intervals name="e"/>
+      <intervals name="xy"/>
+      <intervals name="xz"/>
+      <intervals name="xt"/>
+      <intervals name="xe"/>
+      <intervals name="yz"/>
+      <intervals name="yt"/>
+      <intervals name="ye"/>
+      <intervals name="zt"/>
+      <intervals name="ze"/>
+      <intervals name="te"/>
+      <intervals name="xyz"/>
+      <intervals name="xyt"/>
+      <intervals name="xye"/>
+      <intervals name="xzt"/>
+      <intervals name="xze"/>
+      <intervals name="xte"/>
+      <intervals name="yzt"/>
+      <intervals name="yze"/>
+      <intervals name="yte"/>
+      <intervals name="zte"/>
+      <intervals name="xyzt"/>
+      <intervals name="xyze"/>
+      <intervals name="xyte"/>
+      <intervals name="xzte"/>
+      <intervals name="yzte"/>
+      <intervals name="xyzte"/>
+    </region>
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+  </operation>
   <!--  Trajctory Table	 -->
   <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable">
     <response ID="PlotResp" type="HTML" index="1">
@@ -1250,7 +1296,7 @@
         <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
     </operation>
     <operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly" output_template="output_GE_overlay" service_action="Trajectory_2D_poly">
       <args>
@@ -1320,7 +1366,7 @@
         <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
         <result type="cancel" ID="cancel"/>
       </response>
-      <service>extract</service>
+      <service>tabledap</service>
     </operation>
     <operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly" output_template="output_GE_overlay" service_action="Trajectory_2D_poly">
       <args>
