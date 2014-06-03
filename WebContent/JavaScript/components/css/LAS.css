@@ -37,11 +37,33 @@ a.gwt-extras-dialog-maximize:hover {
 .nowrap {	
 	white-space: nowrap;
 	font-size:18px;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-right:10px;
+    padding-left:8px;
 }
 .nowrap-brown {
 	white-space: nowrap;
 	background-color: #F3E7C9;
 	font-size:18px;
+    padding-top:5px;
+    padding-bottom:5px;
+    padding-right:10px;
+    padding-left:8px;
+}
+.datatable {
+    table-collapse: collapse;
+    border: 2px solid black;
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-right:4px;
+    padding-left:4px;
+}
+.headertable {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-right:4px;
+    padding-left:4px;
 }
 /* End of CSS for the WOCE flag editor. */
 .menulabel {
@@ -62,20 +84,6 @@ a.gwt-extras-dialog-maximize:hover {
 .dropdown-item:hover {
 	background-color: #F3E7C9;
 	cursor: pointer;
-}
-.datatable {
-	border: 2px solid black;
-    padding-top:5px;
-    padding-bottom:5px;
-    padding-right:25px;
-    padding-left:25px;
-}
-.headertable {
-	border: 2px solid black;
-    padding-top:5px;
-    padding-bottom:5px;
-    padding-right:25px;
-    padding-left:25px;
 }
 .gwt-PushButton-APPLY-NEEDED {
 	color: red;
