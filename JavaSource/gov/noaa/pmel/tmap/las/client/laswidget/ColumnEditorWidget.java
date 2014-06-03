@@ -263,6 +263,7 @@ public class ColumnEditorWidget extends Composite {
         toprow.setStyleName("controls");
         mainpanel.add(toprow);
         mainpanel.add(secondRow);
+        headertable.addStyleName("headertable");
         mainpanel.add(headertable);
         datascroll.add(datatable);
         mainpanel.add(datascroll);
