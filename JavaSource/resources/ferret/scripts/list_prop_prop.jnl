@@ -144,11 +144,11 @@ ENDIF  ! color-by 3rd var
 DEFINE SYMBOL xvar = constraints_mask* xvar
 DEFINE SYMBOL yvar = constraints_mask* yvar
 
+! Will list the date strings to the accuracy of the time units, or the timelab_res property.
+
 DEFINE SYMBOL t_units_string = `($timevar).units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
 IF `nsince GT 0` THEN DEFINE SYMBOl tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
-
-! Will list the date strings to the accuracy of the time units, or the timelab_res property.
 
 IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 
