@@ -134,6 +134,8 @@ public class ColumnEditorWidget extends Composite {
         all.addStyleName("nowrap");
         none.addStyleName("nowrap");
 
+        // Big font.
+        submit.addStyleName("nowrap");
         
         all.addClickHandler(new ClickHandler() {
 
