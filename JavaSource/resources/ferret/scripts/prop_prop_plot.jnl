@@ -33,7 +33,7 @@ DEFINE SYMBOL ribbon = 1
 ! CANCEL SYMBOL ferret_contour_levels
 ! CANCEL SYMBOL ferret_palette
 
-DEFINE SYMBOL ferret_fill_levels = v
+!DEFINE SYMBOL ferret_fill_levels = v
 
 ! Initialize data and variables
 ! Set up masks for constraints
@@ -129,8 +129,8 @@ ENDIF
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2
-   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/THICK=2/COLOR=6
+   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/siz=.12
+   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/siz=.08
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
       IF ($color_by_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($color_by_levels)
@@ -149,8 +149,6 @@ ELSE
    IF ($color_by"0|*>1") THEN 
    
       IF ($rowvar"0|*>1") THEN 
-
-         DEFINE SYMBOL is_decimate = 1
 
          LET pxvar = constraints_mask* ($ferret_plot_var_0)
          IF ($pvar_reset"0|*>1") THEN LET pxvar = constraints_mask*  ($pvar_reset) ! see LAS_xytvar_setup
@@ -199,7 +197,16 @@ ELSE
             IF `tol3 LT 1.e-6` THEN LET tol2 = 1.e-6
 	 ENDIF
 
-         GO decimate_dsg 200000 tol1 tol2 tol3
+! This script separates the cruises putting a gap between.
+! Call if first 2 variables are longitude and latitude. Symbol 
+! basemap_area is set if the underlay is a map.
+
+         IF ($basemap_area"0|*>1") THEN 
+            GO decimate_dsg 200000 tol1 tol2 tol3
+	    DEFINE SYMBOL plot_arg = ($data_x_var), ($data_y_var), ($data_var)
+	    DEFINE SYMBOL xvar = ($data_x_var)
+	    DEFINE SYMBOL yvar = ($data_y_var)
+	 ENDIF
 
          LET pvar = ($data_x_var)
          LET qvar = ($data_y_var)
@@ -237,8 +244,7 @@ ELSE
    ENDIF
 
 ! on lat/lon plots, draw a gray line on the cruise tracks.
-! (but the cruise tracks have not been separated for these plots... Don't do it after all.)
-!   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  ($xvar), ($yvar)
+   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  ($xvar), ($yvar)
 
 ! ?? show locations where the color-by variable is missing...
    IF `($data_count"0") GT 2` THEN ($underlay_command) ($xvar), ($yvar)
