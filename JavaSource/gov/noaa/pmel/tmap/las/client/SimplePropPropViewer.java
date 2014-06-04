@@ -544,7 +544,7 @@ public class SimplePropPropViewer implements EntryPoint {
         });
         Window.addWindowClosingHandler(new Window.ClosingHandler() {
             public void onWindowClosing(Window.ClosingEvent closingEvent) {
-                if ( columnEditor.isDirty() ) {
+                if ( columnEditor != null && columnEditor.isDirty() ) {
                     closingEvent.setMessage("If you close or refresh the page your current flags will be lost.");
                 }
             }
@@ -671,6 +671,10 @@ public class SimplePropPropViewer implements EntryPoint {
             }
         } 
         VariableSerializable var1 = xAllDatasetVariables.get(v1);
+        if ( var1 == null ) {
+            Window.alert("There is no WOCE variable assocated with "+var0.getShortname());
+            return;
+        }
 
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
@@ -1255,6 +1259,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
 
         if ( xname.toLowerCase().contains("time") ) {
+            // Calculate time from the map scale...
+            
             ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_min, xname, dFormat.format(minx), "gt");      
             ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_max, xname, dFormat.format(maxx), "le");
         } else {
@@ -1325,16 +1331,32 @@ public class SimplePropPropViewer implements EntryPoint {
     private void boundByFixed(VariableConstraintAnchor a) {        
         ConstraintDisplay match = (ConstraintDisplay) fixedConstraintPanel.findMatchingAnchor(a);
         if ( match != null ) {
-            double value = Double.valueOf(a.getValue());
-            double matchV = Double.valueOf(match.getValue());
-            String op = match.getOp();
-            if ( op.equals("gt") || op.equals("ge")) {
-                if ( value < matchV ) {
-                    a.setValue(match.getValue());
+            if ( a.getKey().toLowerCase().contains("time") ) {
+                String av = a.getValue();
+                String mv = match.getValue();
+                String op = match.getOp();
+                if (op.equals("gt") || op.equals("ge")) {
+                    if ( av.compareTo(mv) > 0 ) {
+                        a.setValue(mv);
+                    }
+                } else if ( op.equals("lt") || op.equals("le") ) {
+                    if ( av.compareTo(mv) < 0 ) {
+                        a.setValue(mv);
+                    }
+                    
                 }
-            } else if ( op.equals("lt") || op.equals("le") ) {
-                if ( value > matchV) {
-                    a.setValue(match.getValue());
+            } else {
+                double value = Double.valueOf(a.getValue());
+                double matchV = Double.valueOf(match.getValue());
+                String op = match.getOp();
+                if ( op.equals("gt") || op.equals("ge")) {
+                    if ( value < matchV ) {
+                        a.setValue(match.getValue());
+                    }
+                } else if ( op.equals("lt") || op.equals("le") ) {
+                    if ( value > matchV) {
+                        a.setValue(match.getValue());
+                    }
                 }
             }
         }
