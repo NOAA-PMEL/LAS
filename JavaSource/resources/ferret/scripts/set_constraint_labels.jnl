@@ -15,7 +15,7 @@ DEF SYM has_missing = 0
 
 REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL v = `v`; \
-  IF ($constraint_($v)_lhs"1|*>0") THEN EXIT/CYCLE ; \
+  IF ($constraint_($v)_lhs"1|*>0") THEN EXIT/LOOP ; \
   DEFINE SYMBOL lhs = ($constraint_($v)_lhs); \
   DEFINE SYMBOL op = ($constraint_($v)_op); \
   DEFINE SYMBOL rhs = ($constraint_($v)_rhs); \
