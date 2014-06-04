@@ -1,8 +1,6 @@
 package gov.noaa.pmel.tmap.las.ui;
 
-import gov.noaa.pmel.tmap.addxml.JDOMUtils;
 import gov.noaa.pmel.tmap.exception.LASException;
-import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -13,7 +11,6 @@ import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
-import gov.noaa.pmel.tmap.las.util.VariableConstraint;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -384,20 +381,20 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
 	                                                // Add the link to load a list of potential crosses to the table.
-	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers.</a>");
+	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers</a>");
 	                                                row.append("\n</td>");
 	                                                
 	                                                // Add the QC link
-	                                                LASRequest lasRequest = new LASRequest();
-	                                                lasRequest.addVariable(dsid, vars[0].getID(), 0);
-	                                                lasRequest.setOperation("SOCAT_QC_table", "V7");
-	                                                lasRequest.setProperty("qc", cruise_id, parts[0]);
-	                                                lasRequest.setProperty("las", "output_type", "xml");
+	                                                LASUIRequest qcRequest = new LASUIRequest();
+	                                                qcRequest.addVariable(dsid, vars[0].getID());
+	                                                qcRequest.setOperation("SOCAT_QC_table");
+	                                                qcRequest.setProperty("qc", cruise_id, parts[0]);
+	                                                qcRequest.setProperty("las", "output_type", "xml");
 	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
                                                     // Add the link to load a list of potential crosses to the table.
-	                                                String qc_url = "ProductServer.do?xml="+URLEncoder.encode(lasRequest.toString(), "UTF-8");
+	                                                String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
 	                                                
-                                                    row.append("<a href=\""+qc_url+"\">Edit QC Flag.</a>");
+                                                    row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
                                                     row.append("\n</td>");
 	                                                
 	                                                row.append("</tr>");
