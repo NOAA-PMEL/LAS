@@ -151,12 +151,8 @@ ENDIF
 IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN  ! map plot, do decimation
 IF ($rowvar"0|*>1") THEN 
 
-   DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
-   DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
-
 ! DSG file. Do decimation if there are over num_decimate points.
 
-   LET decimate_size = ($ngood_data)
    LET num_decimate = 200000
 
    DEFINE SYMBOL  data_x_is_lon = 1
@@ -166,7 +162,6 @@ IF ($rowvar"0|*>1") THEN
    LET max_range = MAX(($region_x_range), ($region_y_range))
 
    DEFINE SYMBOL  data_x_is_lon = 1
-!   LET tol1 = `(max_range/full_range)/LOG(decimate_size)`
    LET tol1 = `(max_range/full_range)`
    IF `tol1 LT 1.e-6` THEN LET tol1 = 1.e-6
    LET tol2 = `tol1`
