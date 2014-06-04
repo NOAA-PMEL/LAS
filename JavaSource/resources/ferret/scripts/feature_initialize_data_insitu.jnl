@@ -17,20 +17,18 @@ IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_tit
 IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
-IF ($data_($num)_units"0|1|text>0|*>1") THEN 
+IF ($data_($num)_units"0|1|text>0|none>0|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
 ELSE 
    CANCEL SYMBOL data_($num)_units
 ENDIF
 
-IF ($ferret_dataset_label"0|SOCAT>1|*>0") THEN GO SOCAT_format_title_units
 
 ! Text variables have units of "text". In this case don't include units with the title
 
 IF ($data_($num)_units"0|1|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
-   IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
-   IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
+   IF ($data_units"0|text>1|none>1|*>0") THEN CANCEL SYMBOL data_units
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_($num)_title) (($data_($num)_units))
 ENDIF
 
@@ -120,32 +118,32 @@ IF `color_by_feature EQ 1` THEN
 
    IF ($its_prop_prop_plot"0|*>1") THEN
    
-   DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
-   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
-   IF ($its_listing"0|*>1") THEN
-      LET/TITLE="($data_($num)_var)" var_data = ($data_($num)_var)
-      DEFINE SYMBOL data_($num)_var = ($data_($num)_var)
-      DEFINE SYMBOL data_var = ($data_($num)_var)
-      DEFINE SYMBOL ferret_plot_var = ($data_($num)_var)
-   ELSE
-      LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
-      DEFINE SYMBOL data_($num)_var = var_data
-      DEFINE SYMBOL data_var = var_data
-      DEFINE SYMBOL ferret_plot_var = var_data
-   ENDIF
+      DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
+      LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
+     IF ($its_listing"0|*>1") THEN
+         LET/TITLE="($data_($num)_var)" var_data = ($data_($num)_var)
+         DEFINE SYMBOL data_($num)_var = ($data_($num)_var)
+         DEFINE SYMBOL data_var = ($data_($num)_var)
+         DEFINE SYMBOL ferret_plot_var = ($data_($num)_var)
+      ELSE
+         LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+         DEFINE SYMBOL data_($num)_var = var_data
+         DEFINE SYMBOL data_var = var_data
+         DEFINE SYMBOL ferret_plot_var = var_data
+     ENDIF
 
-   IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+      IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
 
-   IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
+      IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
-   IF `($data_($num)_units%0|" ">0|text>0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
-   IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+      IF `($data_($num)_units%0|" ">0|text>0|none>0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
+      IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
 
-   DEFINE SYMBOL ferret_plot_title ($data_title)
-   IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
+      DEFINE SYMBOL ferret_plot_title ($data_title)
+      IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
 
-   DEFINE SYMBOL color_by_feature = 1
-   EXIT/SCRIPT  ! dont need the rest of the setup for prop-prop plots
+      DEFINE SYMBOL color_by_feature = 1
+      EXIT/SCRIPT  ! dont need the rest of the setup for prop-prop plots
    ENDIF ! its_prop_prop_plot!
 
 ENDIF
@@ -161,8 +159,6 @@ IF ($rowvar"0|*>1") THEN
    LET decimate_size = ($ngood_data)
    LET num_decimate = 200000
 
-SAY _________________ Starting decimate  on ($ngood_data) clock seconds:         ($clock_secs)
-LET pre_decimate =  ($clock_secs)
    DEFINE SYMBOL  data_x_is_lon = 1
    
    LET full_range = 360*90
@@ -185,9 +181,6 @@ LET pre_decimate =  ($clock_secs)
 
    GO decimate_dsg `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
 
-SAY _________________ After decimate clock seconds returns `nout_lonlat` pts:    ($clock_secs)
-SAY _________________ Total time to compute and apply decimation, seconds        ----- `($clock_secs) - pre_decimate`
-
 ELSE
    LET nout_lonlat = `var_data_masked[i=@ngd]`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
@@ -205,35 +198,6 @@ IF ($its_prop_prop_plot"0|*>1") THEN DEFINE SYMBOL set_colors = `($num) EQ 2`
 IF ($set_colors) THEN
    IF ($ferret_($data_($num)_var)_palette"0|*>1") THEN DEFINE SYMBOL ferret_palette = ($ferret_($data_($num)_var)_palette)
    IF ($ferret_($data_($num)_var)_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_($data_($num)_var)_fill_levels)
-ENDIF
-
-! Define symbols rounding out the range of the data so points are 
-! not plotted on top of the axes.
-
-! For property-property plots the longitude and latitude variables
-! should be in the intermediate netCDF file. If its a profile set 
-! then there should be a depth/height variable.
-
-IF ($its_prop_prop_plot"0|*>1") THEN
-   LET allvars = ..varnames
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_x_var)")` THEN 
-      STAT ($data_x_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL x_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_y_var)")` THEN 
-      STAT ($data_y_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL y_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
-   
-   IF `IS_ELEMENT_OF_STR_N(allvars, "($data_z_var)")` THEN 
-      STAT ($data_z_var)
-      PPL %RANGE `($stat_min)`, `($stat_max)`, 10
-      DEFINE SYMBOL z_rounded_range = ($ppl$range_low):($ppl$range_high)
-   ENDIF
 ENDIF
 
 IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
@@ -260,6 +224,8 @@ IF ($data_var"0|*>1") THEN
       DEFINE SYMBOL ferret_plot_title = ($ferret_plot_title)($mask_title)
       DEFINE SYMBOL data_title = ($data_title)($mask_title)
    ENDIF
+
+   IF ($ferret_dataset_label"0|SOCAT>1|*>0") THEN GO SOCAT_format_title_units
 
 ENDIF
 
