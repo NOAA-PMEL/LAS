@@ -23,7 +23,7 @@ DEFINE SYMBOL ferret_plot_title ($data_title)
 
 IF ($data_($num)_units"0|1|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
-   IF ($data_units"0|text>1|*>0") THEN CANCEL SYMBOL data_units
+   IF ($data_units"0|text>1|none>1|*>0") THEN CANCEL SYMBOL data_units
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) (($data_units))
 ENDIF
 
