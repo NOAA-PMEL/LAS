@@ -13,10 +13,16 @@
 !  var2 tolerance (lat on map plots)
 !  var3 tolerance (var at lon/lat for map plots)
 
-
 IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
+
+
+DEFINE SYMBOL data_var_in = ($data_var)
+DEFINE SYMBOL data_x_var_in = ($data_x_var)
+DEFINE SYMBOL data_y_var_in = ($data_y_var)
+
 DEFINE SYMBOL ncruises = `($rowvar),RETURN=msize`
+
 
 IF ($ncruises"0|*>1") THEN 
    LET mmax = `($rowvar)[m=1:($ncruises)@sum]` ! 1st m cruises
@@ -26,14 +32,19 @@ ELSE
 ENDIF
 
 ! DSG files come in with acutal_range attribute but no _FillValue or missing att.
-LET data_with_bad = IF ($data_var) GT -1.e33 then ($data_var)
+
+DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
+DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+ 
+LET datvar = ($data_var)
+IF `($is_string) EQ 0` THEN LET datvar = IF ($data_var) GT -1.e33 then ($data_var)
 
 ! Replace the last datum in each trajectory with the bad-value.
 ! For the longitudes, also fix the crossings of the dateline.
 
 LET lon_with_gaps = ($data_x_var)
 LET lat_with_gaps = ($data_y_var)
-LET var_with_gaps = data_with_bad
+LET var_with_gaps = datvar
 
 ! Function separate puts gaps between cruises and also removes jumps in longitude
 ! where it crosses the dateline
@@ -45,9 +56,31 @@ ELSE
 ENDIF
 
 LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
-LET var_with_gaps = SEPARATE(data_with_bad[i=1:`npts`], ($rowvar), 0)
+
+LET var_with_gaps = SEPARATE(datvar[i=1:`npts`], ($rowvar), 0)   
+IF ($is_string) THEN LET var_with_gaps = SEPARATE_STR(datvar[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
+
+DEFINE SYMBOL data_var = var_with_gaps
+DEFINE SYMBOL data_x_var = lon_with_gaps
+DEFINE SYMBOL data_y_var = lat_with_gaps
+
+LET nout_lonlat = `($data_var)[i=@ngd]`
+DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
+
+! Is the data pre-decimated?  If so set up things for the annotations and exit.
+
+LET attnames = ..attnames
+IF `IS_ELEMENT_OF_STR(attnames, "decimation") GT 0` THEN
+
+   DEFINE SYMBOL decimation_fraction = ($ferret_decimation_fraction"0.03257")
+   DEFINE SYMBOL piecewise_decimation = 1
+   LET ngood_sampled = `($ngood_data)`
+   EXIT/SCRIPT
+ENDIF
+
+EXIT/SCRIPT  ! do not decimate on the fly...
 
 ! Only decimate if there is a lot of data
 
@@ -59,16 +92,12 @@ LET min_decimate = ($1"200000")
 IF `($ferret_decimate_traj"1|0|*>1") EQ 0` THEN LET min_decimate = `npts + 1`
 
 IF `npts LT min_decimate OR min_decimate LT 0` THEN 
-   DEFINE SYMBOL data_var = var_with_gaps
-   DEFINE SYMBOL data_x_var = lon_with_gaps
-   DEFINE SYMBOL data_y_var = lat_with_gaps
-
-   LET nout_lonlat = `($data_var)[i=@ngd]`
-   DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
-
    CANCEL SYMBOL piecewise_decimation
    EXIT/SCRIPT
 ENDIF
+
+SAY _________________ Starting decimate  on ($ngood_data) clock seconds:         ($clock_secs)
+LET pre_decimate =  ($clock_secs)
 
 DEFINE SYMBOL piecewise_decimation = 1
 IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=200
@@ -112,9 +141,9 @@ LET decimate_lonlat = PIECEWISE3(\
  lon_with_gaps, lat_with_gaps, lat_with_gaps, control, lontol, lattol, lattol)
 
 ! This makes entirely sure we will call PIECEWISE3 only once.
-SAVE/FILE="($result_annotations_filename).nc"/clobber decimate_lonlat
+SAVE/FILE="($data_0_url).nc"/clobber decimate_lonlat
 can var decimate_lonlat
-USE "($result_annotations_filename).nc"
+USE "($data_0_url).nc"
 DEFINE SYMBOL filesample = `decimate_lonlat,RETURN=dsetnum`
 set data 1
 
@@ -132,6 +161,7 @@ LEt nsample = `good_sample[i=@ngd]`
 LET nout_lonlat =  `nsample`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
 SAY `nout_lonlat/npts` Decimation fraction
+DEFINE SYMBOL decimation_fraction = `nout_lonlat/npts,prec=4`
 
 DEFINE AXIS/X=1:($nout_lonlat):1 xsample_axis
 LET samplepts = xsamplepts[gx=xsample_axis@asn] 
@@ -156,13 +186,18 @@ IF `(nout_lonlat/($ngood_data)) GT 0.8` THEN
    LET nout_lonlat = `($data_var)[i=@ngd]`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
    CANCEL SYMBOL piecewise_decimation
-
+   CANCEL SYMBOL decimation_fraction
    EXIT/SCRIPT
 ENDIF
 
+
+SAY _________________ After decimate clock seconds returns `nout_lonlat` pts:    ($clock_secs)
+SAY _________________ Total time to compute and apply decimation, seconds        ----- `($clock_secs) - pre_decimate`
+
+
 ! If the decimation returns just about no data, don't do it.
-list (nout_lonlat/($ngood_data)) , ($decimate_fraction"0.005")
-IF `(nout_lonlat/($ngood_data)) LT ($decimate_fraction"0.005")` THEN
+list (nout_lonlat/($ngood_data)) ,0.005
+IF `(nout_lonlat/($ngood_data)) LT 0.005` THEN
    DEFINE SYMBOL data_var = var_with_gaps
    DEFINE SYMBOL data_x_var = lon_with_gaps
    DEFINE SYMBOL data_y_var = lat_with_gaps
@@ -170,6 +205,7 @@ IF `(nout_lonlat/($ngood_data)) LT ($decimate_fraction"0.005")` THEN
    LET nout_lonlat = `($data_var)[i=@ngd]`
    DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
    CANCEL SYMBOL piecewise_decimation
+   CANCEL SYMBOL decimation_fraction
 
    EXIT/SCRIPT
 ENDIF
@@ -193,3 +229,5 @@ load latsample
 load varsample
 
 ! End of file ------------ decimate_dsg.jnl--------------------------
+
+

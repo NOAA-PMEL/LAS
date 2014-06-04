@@ -11,7 +11,7 @@ IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 ! If it is not a feature-type dataset, exit
 IF `($feature_type"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
-LET check_var = $1%($ferret_plot_var)%
+LET check_var = $1%XSEQUENCE(($ferret_plot_var))%
 
 ! Fill with a known value to distinguish between input missing values
 ! and values missing because of the different length of trajectories or profiles.
@@ -74,21 +74,38 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
  DEFINE SYMBOL feature_type = trajectorie
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs
-IF ($nbad_data"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
- ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs (($nbad_data) missing)
+DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
+IF ($nbad_data"0|0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
+ ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown (plus ($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
 IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
- DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) valid obs
+ DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
+
 
 ! Notation about the decimation
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
+
+   LET approx_total = ($ngood_data)/($decimation_fraction)
+   LET approx_miss  = ($nbad_data)/($decimation_fraction)
+list approx_total, approx_miss
+   IF `approx_total GT 1.e6` THEN 
+      DEFINE SYMBOL approx_msg = `approx_total/1.e6,prec=2` million obs
+      IF `approx_miss GT 0` THEN DEFINE SYMBOL approx_msg = ($approx_msg) (plus `approx_miss/1.e6,prec=2` million missing)
+   ELIF `approx_total GT 1.e3` THEN 
+      DEFINE SYMBOL approx_msg = `approx_total/1.e3,prec=2` thousand obs 
+      IF `approx_miss GT 0` THEN DEFINE SYMBOL approx_msg = ($approx_msg) (plus `approx_miss/1.e3,prec=2` thousand missing)
+   ELSE
+      DEFINE SYMBOL approx_msg = `approx_total,prec=2` obs (plus `approx_miss,prec=2` missing)
+   ENDIF
+
+
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s)/ approx. ($approx_msg)
+
+
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   LET fraction = ($nout_lonlat)/ABS(($ngood_data))
-   DEFINE SYMBOL note_($note_num)_lab = Decimated with Piecewise Linear Method to ($nout_lonlat) \
-good points,  fraction `fraction,PREC=4`
+   DEFINE SYMBOL note_($note_num)_lab = Subsample of ($ngood_data) points shown (explanation)
 ENDIF
 
 !---------------- end of feature_labels.jnl -------------------------
