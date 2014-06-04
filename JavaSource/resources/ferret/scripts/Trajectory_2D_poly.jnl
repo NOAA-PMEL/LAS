@@ -69,7 +69,35 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
   IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
   LET var_data = ($data_var)
-  DEFINE SYMBOL var_data = ($data_var)
+
+   DEFINE SYMBOL var_data = ($data_var)
+   DEFINE SYMBOL vtype = 0
+   DEFINE SYMBOL vtype = `($var_data),RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+
+   IF `($is_string) AND ($ferret_strfloat"0|*>1")` THEN 
+      SET VAR/NAME = var_data_0  var_data 
+      LET var_data = STRFLOAT(var_data_0)
+      SET ATT/LIKE=var_data_0 var_data
+      DEFINE SYMBOL ferret_plot_var var_data
+   ENDIF
+   IF ($data_var_in"($data_var)|region_ID>1|qc_flag>1|*>0") THEN 
+      SET VAR/NAME=var_data_in var_data
+      GO SOCAT_custom_levs_keys ($data_var_in) var_data_in
+      DEFINE SYMBOL data_var = color_var
+      DEFINE SYMBOL ferret_plot_var = color_var
+      LET var_data = color_var
+   ENDIF
+   
+   IF ($data_var_in"($data_var)|tmonth>1|*>0") THEN 
+      LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+      SET VAR/NAME = var_data_0  var_data
+      LET var_data =  element_index_str_n(var_data_0, month_labels) 
+      SET ATT/LIKE=var_data_0 var_data
+      DEFINE SYMBOL ferret_plot_var var_data
+      DEFINE SYMBOL ferret_fill_levels = (0.5,12.5,1)
+      KEYMARK 0
+   ENDIF
 
 ENDIF
 
@@ -103,7 +131,6 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 ENDIF
 
 IF ($ferret_by_id"0|*>1") THEN
-   DEFINE SYMBOL ferret_palette = more_by_levels
    DEFINE SYMBOL ferret_plot_levels = `($rowvar),RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
    LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
@@ -178,6 +205,7 @@ DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
 
+
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
 ENDIF
@@ -221,6 +249,7 @@ let pre_plot = ($clock_secs)
       PPL RIBBON/OVER
    ENDIF
 ENDIF
+
 SAY _________________ END plot: clock seconds:                                   ($clock_secs)
 SAY _________________ total time for line plot, seconds                          ----- `($clock_secs) - pre_plot`
 
