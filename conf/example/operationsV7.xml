@@ -1,5 +1,16 @@
 <?xml version="1.0"?>
 <operations>
+
+    <operation name="Table of QC" ID="SOCAT_QC_table" output_template="SOCAT_QC_table" service_action="SOCAT_QC_table">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug"/>
+        <result type="webrowset" ID="webrowset" file_suffix=".xml"/>
+         <result type="cancel" ID="cancel" />
+      </response>
+      <service>database</service>
+    </operation>
+
+
   <operation name="Climate Analysis" ID="Climate_Analysis" private="true" service_action="" default="true" category="climate_analysis" output_template="Climate_Analysis">
     <response ID="PlotResp" type="HTML" index="1">
       <result type="cancel" ID="cancel"/>
