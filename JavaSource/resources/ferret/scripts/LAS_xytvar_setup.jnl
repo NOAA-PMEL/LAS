@@ -283,6 +283,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       LET tn = tboxhi[gt=haxis,L=`nt`]
       DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
       DEFINE SYMBOL haxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
+      DEFINE SYMBOL haxis_taxname = haxis
 
    ENDIF
 
@@ -404,6 +405,7 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
       LET tn = tboxhi[gt=vaxis,L=`nt`]
       DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
       DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
+      DEFINE SYMBOL vaxis_taxname = vaxis
 
    ENDIF
 
