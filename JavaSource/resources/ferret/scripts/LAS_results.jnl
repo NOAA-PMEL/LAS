@@ -146,6 +146,16 @@ ENDIF
    IF ($HAXIS_tstart"0|*>1") THEN
       LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
       LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
+      IF ($haxis_taxname"0|*>1") THEN 
+         LET tt= t[GT=($haxis_taxname)]
+	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
+	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
+	 DEFINE SYMBOL haxis_tunits = `tt,RETURN=tunits`
+	 DEFINE SYMBOL haxis_torigin = `tt,RETURN=t0`
+	 DEFINE SYMBOL haxis_tcalendar = `tt,RETURN=calendar`
+         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
+      ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
@@ -163,9 +173,20 @@ ENDIF
          LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
+
    IF ($VAXIS_tstart"0|*>1") THEN
       LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
       LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
+      IF ($vaxis_taxname"0|*>1") THEN 
+         LET tt= t[GT=($vaxis_taxname)]
+	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
+	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
+	 DEFINE SYMBOL vaxis_tunits = `tt,RETURN=tunits`
+	 DEFINE SYMBOL vaxis_torigin = `tt,RETURN=t0`
+	 DEFINE SYMBOL vaxis_tcalendar = `tt,RETURN=calendar`
+         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
+      ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
