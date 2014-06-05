@@ -16,11 +16,11 @@
 	  	<TR>
 			<TD bgcolor="#7391AD" valign="top" align="left">
 				<div style="position:relative;height:33px;overflow:hidden;width:100%;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
-					<span  style="color:Black;position:relative;left:10px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Correlation Viewer (Beta)</span>
-					<span  style="color:Black;position:relative;left:12px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Correlation Viewer (Beta)</span>
-					<span  style="color:Black;position:relative;left:10px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Correlation Viewer (Beta)</span>
-					<span  style="color:Black;position:relative;left:12px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Correlation Viewer (Beta)</span>
-					<span  style="color:#FFFFFC;position:relative;left:11px;top:1px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Correlation Viewer (Beta)</span>
+					<span  style="color:Black;position:relative;left:10px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Property-Property Viewer </span>
+					<span  style="color:Black;position:relative;left:12px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Property-Property Viewer </span>
+					<span  style="color:Black;position:relative;left:10px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Property-Property Viewer </span>
+					<span  style="color:Black;position:relative;left:12px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Property-Property Viewer </span>
+					<span  style="color:#FFFFFC;position:relative;left:11px;top:1px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle(): Property-Property Viewer </span>
 				</div>
 			</TD>
                 	<TD id="headerBottomRight" bgcolor="#7391AD" width="55px" valign="top" style="align:right;border-bottom:1pt solid #FFFFFC">
