@@ -298,7 +298,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                        String[] titles = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 	                                        StringBuilder columnHeaders = new StringBuilder();
 	                                        columnHeaders.append("<tr>\n");
-	                                        columnHeaders.append("<th>row</th>\n");
+	                                        
 	                                        for (int i = 0; i < titles.length; i++) {
 	                                            columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                        }
@@ -344,7 +344,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                                } else {
 	                                                    row.append("<tr bgcolor=\"#F3E7C9\">");
 	                                                }
-	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+index+"</td>\n");
+	                                                
 	                                                for (int i = 0; i < parts.length; i++) {
 	                                                    try {
 	                                                        Double d = Double.valueOf(parts[i]);

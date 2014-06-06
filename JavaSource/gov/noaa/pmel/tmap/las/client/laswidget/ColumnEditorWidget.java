@@ -639,6 +639,7 @@ public class ColumnEditorWidget extends Composite {
         for (int p = 0; p < headers.length; p++) {
             if ( headers[p].startsWith("\"")) headers[p] = headers[p].substring(1, headers[p].length());
             if ( headers[p].endsWith("\"")) headers[p] = headers[p].substring(0,headers[p].length()-1);
+            if ( headers[p].endsWith("_")) headers[p] = headers[p].substring(0, headers[p].length()-1);
             if ( headers[p].toLowerCase().equals(wocevar.toLowerCase()) ) {
                 headertable.setWidget(0, 1, new HTML(headers[p]));
                 cellFormatter.addStyleName(0, 1, "nowrap");
