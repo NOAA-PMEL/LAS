@@ -123,28 +123,28 @@ public class SaveEdits extends LASAction {
 				DataLocation datumLoc = new DataLocation();
 				for ( Entry<String,JsonElement> rowEntry : ((JsonObject) rowValues).entrySet() ) {
 					// Neither the name nor the value should be null
-					String name = rowEntry.getKey();
-					String value = rowEntry.getValue().getAsString();
-					if ( name.equals("EXPOCODE") ) {
+					String name = rowEntry.getKey().trim();
+					String value = rowEntry.getValue().getAsString().trim();
+					if ( name.equalsIgnoreCase("EXPOCODE") ) {
 						if ( expocode == null )
-							expocode = value;
+							expocode = value.toUpperCase();
 						else if ( ! expocode.equals(value) )
 							throw new IllegalArgumentException("Mismatch of expocodes; " +
 									"previous: '" + expocode + "'; current: '" + value + "'");
 					}
-					else if ( name.equals("DATE") ) {
+					else if ( name.equalsIgnoreCase("DATE") ) {
 						Date dataDate = fullDateParser.parse(value);
 						datumLoc.setDataDate(dataDate);
 					}
-					else if ( name.equals("LONGITUDE") ) {
+					else if ( name.equalsIgnoreCase("LONGITUDE") ) {
 						Double longitude = Double.parseDouble(value);
 						datumLoc.setLongitude(longitude);
 					}
-					else if ( name.equals("LATITUDE") ) {
+					else if ( name.equalsIgnoreCase("LATITUDE") ) {
 						Double latitude = Double.parseDouble(value);
 						datumLoc.setLatitude(latitude);
 					}
-					else if ( name.startsWith("WOCE_") ) {
+					else if ( name.toUpperCase().startsWith("WOCE_") ) {
 						// WOCE flag for the data variable
 						String woceDataName = name.substring(5);
 						if ( dataName == null )
@@ -177,6 +177,12 @@ public class SaveEdits extends LASAction {
 			}
 		} catch ( Exception ex ) {
 			logerror(request, "Problems interpreting the WOCE flags", ex);
+			if ( expocode != null )
+				logerror(request, "expocode = " + expocode, "");
+			if ( dataName != null )
+				logerror(request, "dataName = " + dataName, "");
+			if ( woceFlag != null )
+				logerror(request, "woceFlag = " + woceFlag, "");
 			return mapping.findForward("error");
 		}
 
@@ -211,6 +217,9 @@ public class SaveEdits extends LASAction {
 			dsgHandler.updateWoceFlags(woceEvent, tempname);
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to update DSG files with the WOCE flags", ex);
+			logerror(request, "expocode = " + expocode, "");
+			logerror(request, "dataName = " + dataName, "");
+			logerror(request, "woceFlag = " + woceFlag, "");
 			return mapping.findForward("error");
 		}
 
@@ -219,6 +228,9 @@ public class SaveEdits extends LASAction {
 			databaseHandler.addWoceEvent(woceEvent);
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to record the WOCE event in the database", ex);
+			logerror(request, "expocode = " + expocode, "");
+			logerror(request, "dataName = " + dataName, "");
+			logerror(request, "woceFlag = " + woceFlag, "");
 			return mapping.findForward("error");
 		}
 
