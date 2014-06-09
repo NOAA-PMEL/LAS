@@ -27,6 +27,8 @@ public class Constants {
     public static final String DEFAULT_SCALER_OP = "Plot_2D_XY_zoom";
     public static final String DEFAULT_VECTOR_OP = "Plot_vector";
     
+    public static final String PROFILE_DEFAULT = "LAS";
+    public static final String PROFILE_SOCAT = "LAS-SOCAT";
     public static final String PROFILE_ESGF = "LAS-ESGF";
     public static final double CONTROLS_WIDTH = 280.;
     public static final String ALLBORDER = "allBorderGray";
