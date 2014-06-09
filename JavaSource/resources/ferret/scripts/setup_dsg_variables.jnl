@@ -1,4 +1,4 @@
-! decimate_dsg.jnl
+! setup_dsg_variables.jnl
 !
 ! Redefine data_var, data_x_var, data_y_var
 ! * Insert gaps between cruises
@@ -31,23 +31,29 @@ ELSE
    LET npts = `($data_var),RETURN=isize`
 ENDIF
 
-! DSG files come in with acutal_range attribute but no _FillValue or missing att.
+! Check data type
 
 DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
 DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
  
-LET datvar = ($data_var)
-IF `($is_string) EQ 0` THEN LET datvar = IF ($data_var) GT -1.e33 then ($data_var)
 
 ! Replace the last datum in each trajectory with the bad-value.
 ! For the longitudes, also fix the crossings of the dateline.
 
 LET lon_with_gaps = ($data_x_var)
 LET lat_with_gaps = ($data_y_var)
-LET var_with_gaps = datvar
+LET var_with_gaps = ($data_var)
 
 ! Function separate puts gaps between cruises and also removes jumps in longitude
 ! where it crosses the dateline
+
+STAT ($data_var)
+DEFINE SYMBOL ngood_data = ($stat_ngood)
+DEFINE SYMBOL nbad_data = ($stat_nbad)
+
+IF ($ncruises"0|*>1") THEN 
+
+DEFINE SYMBOL n_gaps = `($ncruises) - 1`
 
 IF ($data_x_is_lon"0|*>1") THEN
    LET lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
@@ -57,14 +63,16 @@ ENDIF
 
 LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
 
-LET var_with_gaps = SEPARATE(datvar[i=1:`npts`], ($rowvar), 0)   
-IF ($is_string) THEN LET var_with_gaps = SEPARATE_STR(datvar[i=1:`npts`], ($rowvar), 0)
+LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)   
+IF ($is_string) THEN LET var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
 DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
 DEFINE SYMBOL data_y_var = lat_with_gaps
+
+ENDIF ! ncruises GT 1
 
 LET nout_lonlat = `($data_var)[i=@ngd]`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
@@ -228,6 +236,6 @@ load lonsample
 load latsample 
 load varsample
 
-! End of file ------------ decimate_dsg.jnl--------------------------
+! End of file ------------ setup_dsg_variables.jnl--------------------------
 
 
