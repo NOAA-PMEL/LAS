@@ -19,6 +19,9 @@ let y2 = `y1+0.2`
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
    ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
   GO color_datekey ttvar
+ELIF ($ferret_plot_key"0|qc_flag>1|*>0") THEN
+   ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
+  GO SOCAT_qckey ttvar
 ELSE
    ppl shakey ,0,`-1*key_label_size`,,,,`x1`,`x2`,`y1`,`y2`
 ENDIF

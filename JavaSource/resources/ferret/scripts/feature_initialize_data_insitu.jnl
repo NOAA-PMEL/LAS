@@ -94,6 +94,7 @@ GO feature_lon_lat_time_depth
 
 LET color_by_feature = 0
 
+IF `(($num)+1) eq ($data_count)` THEN
 IF `($data_($num)_var"0|vid>1|($feature_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
    IF `($rowvar"0|*>1") EQ 0` THEN DEFINE SYMBOL rowvar = rowSize
    LET color_by_feature = 1
@@ -102,6 +103,7 @@ ENDIF
 ! Or, is this a DSG file with the feature_variable we have already identified?
 
 IF `($data_($num)_var"0|($feature_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_feature = 1
+ENDIF
 
 IF `color_by_feature EQ 1` THEN
 
@@ -148,6 +150,28 @@ IF `color_by_feature EQ 1` THEN
 
 ENDIF
 
+! Is it a varible on the E axis of a DSG file?
+IF ($its_trajectory_map"0|*>1") THEN
+DEFINE SYMBOL vshape = `($data_var),RETURN=shape`
+IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)` THEN
+
+! Is there a rowsize variable?
+   IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
+
+! Expand trajectory variable into obs axis
+   DEFINE SYMBOL vtype = 0
+   DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+
+   IF ($is_string"0|0|*>1") THEN 
+      LET/TITLE="($ferret_title_0)" data_var_expand = EXPND_BY_LEN_STR(($data_var), ($rowvar),`($rowvar)[m=@sum]`)
+   ELSE
+      LET/TITLE="($ferret_title_0)" data_var_expand = EXPND_BY_LEN(($data_var), ($rowvar),`($rowvar)[m=@sum]`)
+   ENDIF
+   DEFINE SYMBOL data_var = data_var_expand
+ENDIF
+ENDIF
+
 IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN  ! map plot, do decimation
 IF ($rowvar"0|*>1") THEN 
 
@@ -174,7 +198,7 @@ IF ($rowvar"0|*>1") THEN
    LET tol2 = 0.1*($region_y_range)/200
    IF `tol2 LT 1.e-6` THEN LET tol2 = 1.e-6
 
-   GO decimate_dsg `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
+   GO setup_dsg_variables `num_decimate` `tol1` `tol2`  ! variable tolerance computed in the decimate script
 
 ELSE
    LET nout_lonlat = `var_data_masked[i=@ngd]`
@@ -184,16 +208,6 @@ ENDIF  ! map plot, do decimation
 
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
-
-! Are there color levels or a palette for the specific color-by variable?
-
-DEFINE SYMBOL set_colors = 1
-IF ($its_prop_prop_plot"0|*>1") THEN DEFINE SYMBOL set_colors = `($num) EQ 2`
-
-IF ($set_colors) THEN
-   IF ($ferret_($data_($num)_var)_palette"0|*>1") THEN DEFINE SYMBOL ferret_palette = ($ferret_($data_($num)_var)_palette)
-   IF ($ferret_($data_($num)_var)_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_($data_($num)_var)_fill_levels)
-ENDIF
 
 IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
 
@@ -268,6 +282,11 @@ ENDIF
 
 ! Set color levels for the data variable. Default levels, or apply a setting
 ! given by ferret_fill_levels
+
+
+LET data_id = UPCASE("($data_0_dataset_ID)")
+IF `STRINDEX(data_id, "SOCAT") GT 0` THEN \
+  GO SOCAT_custom_levs_keys ($data_name_in"($data_2_var_in)")
 
 IF `($ferret_plot_key"0|date_key>1|*>0") EQ 0` THEN
    DEFINE SYMBOL data_num = 1

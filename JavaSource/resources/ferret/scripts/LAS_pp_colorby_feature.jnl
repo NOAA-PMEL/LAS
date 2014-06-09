@@ -74,6 +74,9 @@ IF ($pvar_reset"0|*>1") THEN LET pvar = constraints_mask* ($pvar_reset)
 LET qvar = constraints_mask* ($ferret_plot_var_1)
 LET dvar =  idvar
 
+LET pvar = constraints_mask* (xvar)
+LET qvar = constraints_mask* (yvar)
+
 LET data_1_var_z =  EXPNDI_BY_Z(pvar, obs_mask, `nfeatures`, `longest`)
 LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
 
@@ -118,7 +121,7 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    list tol1, tol2
 
    DEFINE SYMBOL decimate_fraction = 0.1
-   GO decimate_dsg `num_decimate` `tol1` `tol2` 0.1
+   GO setup_dsg_variables `num_decimate` `tol1` `tol2` 0.1
 
    LET pvar = ($data_x_var)
    LET qvar = ($data_y_var)
@@ -137,6 +140,7 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    
    ! This value of longest is now wrong, but it's too big so should be harmless.
    
+
    LET data_1_var_z =  EXPNDI_BY_Z(pvar, decimated_mask, `nfeatures`, `longest`)
    LET data_var_z =  EXPNDI_BY_Z(qvar, decimated_mask, `nfeatures`, `longest`)
    LET data_var_d =  EXPNDI_BY_Z(dvar, decimated_mask, `nfeatures`, `longest`)

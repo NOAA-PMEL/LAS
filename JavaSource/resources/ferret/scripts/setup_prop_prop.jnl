@@ -54,7 +54,13 @@ DEFINE SYMBOL fer_sym = ferret_plot
 IF ($do_curvi_xy"0") THEN DEFINE SYMBOL fer_sym = ferret_plot_base
 DEFINE SYMBOL ferret_plot_var_0 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($($fer_sym)_var))
+LET/TITLE="($ferret_title_0)" xvar = ($($fer_sym)_var)
+DEFINE SYMBOL vshape = `($($fer_sym)_var),return=SHAPE`
+IF `STRCMP("($vshape)", "E") EQ 0` THEN 
+   DEFINE AXIS/x=1:`ne_var`:1 exaxis
+   LET xxex = x[gx=exaxis]
+   LET/TITLE="($ferret_title_0)" xvar = RESHAPE(($($fer_sym)_var), xxex)
+ENDIF
 
 LET nx_var = `($($fer_sym)_var_0),return=isize`
 LET ny_var = `($($fer_sym)_var_0),return=jsize`
@@ -74,7 +80,6 @@ IF `($vshape"0|E>1|*>0)` THEN
 ! Is it a Profile or Trajectory dataset?
    GO LAS_setup_dsg
    IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
-   DEFINE SYMBOL rowvar0 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
@@ -82,7 +87,7 @@ IF `($vshape"0|E>1|*>0)` THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    IF ($is_string"0|0|*>1") THEN 
-      LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), ($rowvar0),`($rowvar0)[m=@sum]`)
+      LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN_STR(($ferret_plot_var_0), ($rowvar),`($rowvar)[m=@sum]`)
 
       IF ($its_prop_plot"0|*>1") THEN
          IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
@@ -91,12 +96,11 @@ IF `($vshape"0|E>1|*>0)` THEN
 	    SET ATT/LIKE=xvar_0 xvar
          ELSE  ! cannot use a string as plot argument
 	     LET mvar_0 = _m[ge=($ferret_plot_var_0)]
-	     LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN(mvar_0, ($rowvar0),`($rowvar0)[m=@sum]`)
+	     LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN(mvar_0, ($rowvar),`($rowvar)[m=@sum]`)
          ENDIF
       ENDIF
-
    ELSE
-      LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar0),`($rowvar0)[m=@sum]`)
+      LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
 ENDIF
 
@@ -120,7 +124,13 @@ DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
 LET variable_0_lab = STRCAT(data_1_title, data_1_units)
 DEFINE SYMBOL ferret_plot_var_1 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($($fer_sym)_var_1))
+LET/TITLE="($ferret_title_0)" yvar = ($($fer_sym)_var_1)
+DEFINE SYMBOL vshape = `($($fer_sym)_var_1),return=SHAPE`
+IF `STRCMP("($vshape)", "E") EQ 0` THEN 
+   DEFINE AXIS/x=1:`ne_var`:1 exaxis
+   LET xxex = x[gx=exaxis]
+   LET/TITLE="($ferret_title_0)" yvar = RESHAPE(($($fer_sym)_var_1), xxex)
+ENDIF
 
 ! Is it a varible on the E axis of a DSG file?
 
@@ -128,9 +138,8 @@ DEFINE SYMBOL vshape = `($($fer_sym)_var_1),RETURN=shape`
 IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is it a Profile or Trajectory dataset?
-   GO LAS_setup_dsg
+   IF `($rowvar"0|*>1") EQ 0` THEN GO LAS_setup_dsg
    IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
-   DEFINE SYMBOL rowvar1 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
@@ -138,7 +147,7 @@ IF `($vshape"0|E>1|*>0)` THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    IF ($is_string"0|0|*>1") THEN 
-      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), ($rowvar1),`($rowvar1)[m=@sum]`)
+      LET yvar = EXPND_BY_LEN_STR(($ferret_plot_var_1), ($rowvar),`($rowvar)[m=@sum]`)
 
       IF ($its_prop_plot"0|*>1") THEN
          IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
@@ -146,65 +155,36 @@ IF `($vshape"0|E>1|*>0)` THEN
 	    LET/TITLE="($ferret_title_1)" yvar = STRFLOAT(yvar_0) 
 	    SET ATT/LIKE=yvar_0 yvar
          ELSE  ! cannot use a string as plot argument
-	     LET mvar_0 = _m[ge=($ferret_plot_var_0)]
-	     LET/TITLE="($ferret_title_1)" yvar = EXPND_BY_LEN(mvar_0, ($rowvar0),`($rowvar0)[m=@sum]`)
+	     LET mvar_1 = _m[ge=($ferret_plot_var_1)]
+	     LET/TITLE="($ferret_title_1)" yvar = EXPND_BY_LEN(mvar_1, ($rowvar),`($rowvar)[m=@sum]`)
          ENDIF
       ENDIF
+
 
    ELSE
-      LET/TITLE="($ferret_title_1)" yvar = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar1),`($rowvar1)[m=@sum]`)
+      LET/TITLE="($ferret_title_1)" yvar = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
-ELSE
+ENDIF
 
-   IF ($its_prop_plot"0|*>1") THEN
-   
-      DEFINE SYMBOL vtype = 0
-      DEFINE SYMBOL vtype = `($ferret_plot_var_0),RETURN=dtype`
-      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-      IF ($is_string"0|0|*>1") THEN 
-         IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
-            LET plot_var_0 = STRFLOAT(($ferret_plot_var_0) )
+IF ($its_prop_plot"0|*>1") THEN
+
+   DEFINE SYMBOL vtype = 0
+   DEFINE SYMBOL vtype = `($ferret_plot_var_0),RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+   IF ($is_string"0|0|*>1") THEN 
+      IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
+         LET plot_var_0 = STRFLOAT(($ferret_plot_var_0) )
 	    DEFINE SYMBOL ferret_plot_var_0 = plot_var_0
 	    LET/TITLE="($ferret_title_0)" xvar = plot_var_0
-         ENDIF
-         IF `STRINDEX("($ferret_plot_var_0)", "tmonth") GT 0` THEN 
-            LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-            LET plot_var_0 =  element_index_str_n( ($ferret_plot_var_0), month_labels) 
+      ENDIF
+      IF `STRINDEX("($ferret_plot_var_0)", "tmonth") GT 0` THEN 
+         LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+         LET plot_var_0 =  element_index_str_n( ($ferret_plot_var_0), month_labels) 
 	    DEFINE SYMBOL ferret_plot_var_0 = plot_var_0
 	    LET/TITLE="($ferret_title_0)" xvar = plot_var_0
 	 ENDIF
-      ENDIF
+   ENDIF
 
-      DEFINE SYMBOL vtype = 0
-      DEFINE SYMBOL vtype = `($ferret_plot_var_1),RETURN=dtype`
-      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-      IF ($is_string"0|0|*>1") THEN 
-         IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
-            LET plot_var_1 = STRFLOAT(($ferret_plot_var_1) )
-	    DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
-	    LET/TITLE="($ferret_title_1)" yvar = plot_var_1
-         ENDIF
-         IF `STRINDEX("($ferret_plot_var_1)", "tmonth") GT 0` THEN 
-            LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-            LET plot_var_1 =  element_index_str_n( ($ferret_plot_var_1), month_labels) 
-	    DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
-	    LET/TITLE="($ferret_title_1)" yvar = plot_var_1
-	 ENDIF
-      ENDIF
-
-      IF ($data_0_var_in"0|region_ID>1|qc_flag>1|*>0") THEN 
-         SET VAR/NAME=xvar_0 xvar
-         GO SOCAT_custom_levs_keys ($data_0_var_in) xvar_0
-	 DEFINE SYMBOL ferret_plot_var_0 = color_var
-	 LET/TITLE="($ferret_title_0)" xvar = color_var
-      ENDIF
-
-      IF ($data_1_var_in"0|region_ID>1|qc_flag>1|*>0") THEN 
-         SET VAR/NAME=yvar_0 yvar
-         GO SOCAT_custom_levs_keys ($data_1_var_in) yvar_0
-	 DEFINE SYMBOL ferret_plot_var_1 = color_var
-	 LET/TITLE="($ferret_title_1)" yvar = color_var
-      ENDIF
 ENDIF
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
@@ -233,9 +213,8 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    IF `($vshape"0|E>1|*>0)` THEN
 
 ! Is it a Profile or Trajectory dataset?
-      GO LAS_setup_dsg
+      IF `($rowvar"0|*>1") EQ 0` THEN GO LAS_setup_dsg
       IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
-      DEFINE SYMBOL rowvar2 = ($rowvar)
 
 ! Expand trajectory variable into obs axis
       DEFINE SYMBOL vtype = 0
@@ -243,65 +222,20 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
       IF ($is_string"0|0|*>1") THEN 
-         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar2),`($rowvar2)[m=@sum]`)
-	 IF ($its_prop_plot"0|*>1") THEN  ! cannot use a string as plot argument
+         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar),`($rowvar)[m=@sum]`)
+
+! Set string var to a sequence number, unless its the qc_flag or region id.
+
+	 IF `(($data_2_var_in"0|region_ID>1|qc_flag>1|*>0") EQ 0) AND ($its_prop_plot"0|*>1")` THEN 
 	    LET mvar_2 = _m[ge=($ferret_plot_var_2)]
-	    LET zvar = EXPND_BY_LEN(mvar_2, ($rowvar2),`($rowvar2)[m=@sum]`)
+	    LET zvar = EXPND_BY_LEN(mvar_2, ($rowvar),`($rowvar)[m=@sum]`)
 	 ENDIF
       ELSE
-         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar2),`($rowvar2)[m=@sum]`)
+         LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar),`($rowvar)[m=@sum]`)
       ENDIF
-   ELSE
 
-      DEFINE SYMBOL vtype = 0
-      DEFINE SYMBOL vtype = `zvar,RETURN=dtype`
-      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-      IF `($is_string) AND STRINDEX("($ferret_plot_var_2)", "WOCE") GT 0` THEN 
-         SET VAR/NAME = zvar_0 zvar
-	 LET zvar = STRFLOAT(zvar_0) 
-	 SET ATT/LIKE=zvar_0 zvar
-      ENDIF
    ENDIF
-   IF ($data_2_var_in"0|region_ID>1|qc_flag>1|*>0") THEN 
-      SET VAR/NAME = zvar_1 zvar
-      GO SOCAT_custom_levs_keys ($data_2_var_in) zvar_1
-      LET zvar = color_var
-      DEFINE SYMBOL ferret_plot_var = color_var
-      SET ATT/LIKE=zvar_1 zvar
-   ELSE
-   
-      ! Other string-variable handling
-      DEFINE SYMBOL vtype = 0
-      DEFINE SYMBOL vtype = `($ferret_plot_var),RETURN=dtype`
-      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-
-      IF ($is_string"0|0|*>1") THEN 
-         IF `STRINDEX("($ferret_plot_var)", "WOCE") GT 0` THEN 
-         SET VAR/NAME = zvar_0 zvar
-            LET plot_var_2 = STRFLOAT(zvar_0 )
-            LET plot_var   = STRFLOAT(zvar_0 )
-            DEFINE SYMBOL ferret_plot_var_2 = plot_var_2
-	    DEFINE SYMBOL ferret_plot_var   = plot_var
-	    LET zvar = plot_var_2
-	    SET ATT/LIKE=zvar_0 zvar
-	    DEFINE SYMBOL ferret_fill_levels = (1.5,4.5,1)
-         ENDIF
-
-         IF `STRINDEX("($ferret_plot_var)", "tmonth") GT 0` THEN 
-            LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-         SET VAR/NAME = zvar_0 zvar
-            LET plot_var_2 =  element_index_str_n(zvar_0, month_labels) 
-            LET plot_var   =  element_index_str_n(zvar_0, month_labels) 
-            DEFINE SYMBOL ferret_plot_var_2 = plot_var_2
-	    DEFINE SYMBOL ferret_plot_var   = plot_var
-	    LET zvar = plot_var_2
-	    SET ATT/LIKE=zvar_0 zvar
-	    DEFINE SYMBOL ferret_fill_levels = (0.5,12.5,1)
-	    KEYMARK 0
-	    sh sym 
-	 ENDIF
-      ENDIF
-   ENDIF
+   ! what about woce flags??
 
    DEFINE SYMBOL zvar = zvar
    DEFINE SYMBOL color_by = 1
@@ -313,6 +247,8 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
     DEFINE SYMBOL color_by_levels = ($ferret_($data_2_var)_fill_levels)
 
 ENDIF
+
+GO SOCAT_setup_variables
 
 ! Define the label with title and units to be used in the annotations.
 can sym variable_lab
