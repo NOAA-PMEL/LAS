@@ -1,0 +1,118 @@
+! SOCAT_custom_levs_keys.jnl
+! Special setup for colorbars and levels for some variables:
+! QC_FLAG (needs to be expanded)
+! region_id
+
+DEFINE SYMBOL var_name = $1
+
+! Note etopo is positive numbers indicating depth.
+sh sym ferret_palette
+IF ($var_name"0|etopo2>1|*>0") THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = pale_green_blue
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0,7000,200)(inf)
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+ENDIF
+
+IF ($var_name"0|latitude>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = 30
+   LET lrange = MINMAX(latitude)
+   IF `lrange[i=2] - lrange[i=1] LT 30` THEN \
+    DEFINE SYMBOL ferret_fill_levels = `INT(lrange[i=2] - lrange[i=1] +1)`
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+   CANCEL VARIABLE lrange
+   
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
+ENDIF
+
+IF ($var_name"0|longitude>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = 30
+   LET lrange = MINMAX(longitude)
+   IF `lrange[i=2] - lrange[i=1] LT 30` THEN \
+    DEFINE SYMBOL ferret_fill_levels = `INT(lrange[i=2] - lrange[i=1] +1)`
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+   CANCEL VARIAbBLE lrange
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
+ENDIF
+
+IF ($var_name"0|gvCO2>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = 30
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+ENDIF
+
+IF ($var_name"0|fCO2_source>1|*>0") THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = fifteen_by_levels
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0.5,14.5,1)
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
+ENDIF
+
+! This based on the full-range socat2 thru 2011
+
+IF ($var_name"0|fCO2_recommended>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+ENDIF
+
+! Set the rest of the fCO2, pCO2, and xCO2 the same 
+IF ($var_name"0|fCO2_atm>1|fCO2_water_equi_uatm>1|fCO2_water_sst_100humidity_uatm>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+ENDIF
+
+IF ($var_name"0|pCO2_atm>1|pCO2_water_equi_temp>1|pCO2_water_sst_100humidity_uatm>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+ENDIF
+
+
+IF ($var_name"0|xCO2_atm>1|xCO2_water_equi_temp_dry_ppm>1|xCO2_water_sst_dry_ppm>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+ENDIF
+
+! delta 
+
+IF ($var_name"0|delta_fCO2>1|delta_pCO2>1|delta_temp>1|delta_xCO2>1|*>0") THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = centered_diff
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = vc
+ENDIF
+
+! Direction variables all in degrees
+IF ($var_name"0|ship_dir>1|wind_dir_rel>1|wind_dir_true>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(0,360,5)(inf)
+ENDIF
+
+! Speed variables positive
+IF ($var_name"0|calc_speed>1|ship_speed>1|wind_speed_rel>1|wind_speed_true>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels =v,0min
+ENDIF
+
+! day_of_year
+IF ($var_name"0|day_of_year>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0,366,6)
+ENDIF
+
+! tmonth
+IF ($var_name"0|tmonth>1|*>0") THEN
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = ferret_fill_levels = (0.5,12.5,1)
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
+ENDIF
+
+IF `STRINDEX("($var_name)", "WOCE") GT 0` THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette =  ten_by_levels
+   DEFINE SYMBOL ferret_fill_levels = (1.5,4.5,1)
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate 0
+ENDIF
+
+IF ($var_name"0|qc_flag>1|*>0") THEN
+   DEFINE SYMBOL do_qc_key = 1
+   DEFINE SYMBOL ferret_palette = QC_V3_by_level
+   DEFINE SYMBOL ferret_fill_levels = (0.5,10.5,1)
+   
+ENDIF
+
+IF ($var_name"0|region_ID>1|*>0") THEN
+   DEFINE SYMBOL ferret_palette = ten_bright_levels
+   DEFINE SYMBOL ferret_fill_levels = (1,10,1)
+   DEFINE SYMBOL ferret_plot_key = 0
+ENDIF
+
+! End of file ------------ SOCAT_custom_levs_keys.jnl--------------------------
+
