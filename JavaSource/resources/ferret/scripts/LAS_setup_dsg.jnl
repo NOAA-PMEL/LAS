@@ -4,7 +4,7 @@
 ! Find the featureType attribute, and find which  variables
 ! are marked with the cf_role and sample_dimension attributes
 
-IF `( ($feature_variable"0|*>1") GT 0) AND ( ($rowvar"0|*>1") GT 0)` THEN  THEN EXIT/SCRIPT
+IF `( ($feature_variable"0|*>1") GT 0) AND ( ($rowvar"0|*>1") GT 0)` THEN EXIT/SCRIPT
 
 LET global_attnames = ..attnames
 LET varnames = ..varnames
