@@ -15,10 +15,11 @@
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta http-equiv="X-UA-Compatible" content="IE=9">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta content="LAS-SOCAT" name="LAS-Profile" id="las-profile" />
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
-    <title>LAS Column Editor</title>
+    <title>LAS Property-property Thumbnails</title>
     
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
