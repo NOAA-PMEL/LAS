@@ -30,6 +30,7 @@ public class OperationsMenu extends Composite {
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
 	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
 	OperationPushButton trajectoryTable = new OperationPushButton("Table of Cruises");
+	OperationPushButton thumbnailTable = new OperationPushButton("Table of Thumbnails");
 	
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
@@ -58,6 +59,8 @@ public class OperationsMenu extends Composite {
         climateAnalysis.setTitle("Perform time average spectrum and other advanced analysis.");
         trajectoryTable.addStyleDependentName("SMALLER");
         trajectoryTable.setTitle("See a table of current cruises and find crossovers.");
+        thumbnailTable.addStyleDependentName("SMALLER");
+        thumbnailTable.setTitle("See a table of select property-property plots.");
 		buttonBar.add(animationButton);
 		buttonBar.add(correlationButton);
 		buttonBar.add(googleEarthButton);
@@ -66,8 +69,10 @@ public class OperationsMenu extends Composite {
 		buttonBar.add(saveAsButton);
 		buttonBar.add(climateAnalysis);
 		buttonBar.add(trajectoryTable);
+		buttonBar.add(thumbnailTable);
 		climateAnalysis.setVisible(false);
 		trajectoryTable.setVisible(false);
+		thumbnailTable.setVisible(false);
 		initWidget(buttonBar);
 		buttonBar.setSize("100%", "100%");
 	}
@@ -90,7 +95,8 @@ public class OperationsMenu extends Composite {
 	    climateAnalysis.setOperation(null);
 	    trajectoryTable.setEnabled(false);
 	    trajectoryTable.setOperation(null);
-
+	    thumbnailTable.setEnabled(false);
+        thumbnailTable.setOperation(null);
     }
 	public void setMenus(OperationSerializable[] ops, String view) {
 		turnOffButtons();
@@ -193,6 +199,16 @@ public class OperationsMenu extends Composite {
                             }
                         }
                     }
+                } else if ( category.equals("thumbnails") ) {
+                    if ( op_view.equals(view) ) {
+                        if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
+                            if ( op.getName().toLowerCase().contains("thumbnail") ) {
+                               thumbnailTable.setOperation(op);
+                               thumbnailTable.setVisible(true);
+                               thumbnailTable.setEnabled(true);
+                            }
+                        }
+                    }
                 }
 			}
 		}
@@ -208,6 +224,7 @@ public class OperationsMenu extends Composite {
         exportToDesktopButton.addClickHandler(clickHandler);
         climateAnalysis.addClickHandler(clickHandler);
         trajectoryTable.addClickHandler(clickHandler);
+        thumbnailTable.addClickHandler(clickHandler);
     }
     public void setGoogleEarthButtonEnabled(boolean enable) {
         googleEarthButton.setEnabled(enable);
@@ -252,7 +269,7 @@ public class OperationsMenu extends Composite {
         } else {
             correlationButton.setEnabled(false);
         }
-        String profile = DOM.getElementProperty(DOM.getElementById("las-profile"), "content");
+        String profile = DOM.getElementById("las-profile").getPropertyString("content");
         if (profile != null && profile.equals("LAS-ESGF")) {
             if ( climateAnalysis != null && climateAnalysis.getOperation() != null && climateAnalysis.getOperation().getViews().contains(view) ) {
                 climateAnalysis.setEnabled(true);
@@ -267,6 +284,12 @@ public class OperationsMenu extends Composite {
             trajectoryTable.setVisible(true);
         } else {
             trajectoryTable.setVisible(false);
+        }
+        if ( thumbnailTable != null && thumbnailTable.getOperation() != null && thumbnailTable.getOperation().getViews().contains(view) ) {
+            thumbnailTable.setEnabled(true);
+            thumbnailTable.setVisible(true);
+        } else {
+            thumbnailTable.setVisible(false);
         }
     }
 }
