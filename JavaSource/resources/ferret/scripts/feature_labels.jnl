@@ -12,6 +12,8 @@ IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 IF `($feature_type"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 LET check_var = $1%XSEQUENCE(($ferret_plot_var))%
+DEFINE SYMBOL vtype = `check_var,return=dtype`
+IF ($vtype"0|char>1|*>0) THEN LET check_var = ($ferret_plot_var_2)
 
 ! Fill with a known value to distinguish between input missing values
 ! and values missing because of the different length of trajectories or profiles.
@@ -82,7 +84,6 @@ IF ($nbad_data"0|0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
 
 IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
  DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
-
 
 ! Notation about the decimation
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
