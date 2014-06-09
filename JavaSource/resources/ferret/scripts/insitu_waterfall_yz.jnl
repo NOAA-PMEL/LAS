@@ -80,7 +80,7 @@ DEFINE SYMBOL  nbad_data = `($data_var)[i=@NBD]`
 
 
 IF ($rowvar"0|*>1") THEN 
-   GO decimate_dsg
+   GO setup_dsg_variables
 ELSE
    LET nout_lonlat = `var_data_masked[i=@ngd]`
    DEFINE SYMBOL  nout_lonlat = `nout_lonlat` 
