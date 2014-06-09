@@ -1251,6 +1251,33 @@ public class DateTimeWidget extends Composite {
 	        }
 		return date;
 	}
+	/**
+	 * Take a date time string of the form,  and reformat it to the long ferret style. Assume a gregorian calendar.
+	 * @param in
+	 */
+	public static String reformat (String in) {
+	    Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+	    DateTimeFormatter lForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+	    DateTimeFormatter mForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+	    DateTimeFormatter sForm = DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(chrono).withZone(DateTimeZone.UTC);
+	    DateTimeFormatter lFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+
+	    DateTime td;
+        try {
+            td = lForm.parseDateTime(in).withZone(DateTimeZone.UTC).withChronology(chrono);
+        } catch (Exception e) {
+            try {
+                td = mForm.parseDateTime(in).withZone(DateTimeZone.UTC).withChronology(chrono);
+            } catch (Exception e1) {
+                td = sForm.parseDateTime(in).withZone(DateTimeZone.UTC).withChronology(chrono);
+            }
+        }
+        if ( td != null ) {
+            return lFerretForm.print(td.getMillis());
+        } else {
+            return null;
+        }
+	}
 	// In the weird calendars, the short names don't work so well so we force the issue a little bit.
 	private int monthToInt(String month_name) {
 		DateTime dt = monthFormat.parseDateTime(month_name);
