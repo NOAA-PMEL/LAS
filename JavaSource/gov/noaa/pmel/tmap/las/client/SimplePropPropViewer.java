@@ -74,6 +74,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -81,7 +82,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -356,7 +356,10 @@ public class SimplePropPropViewer implements EntryPoint {
         buttonPanel.add(print);
         buttonPanel.add(link);
         buttonPanel.add(table);
-        buttonPanel.add(edit);
+        String profile = DOM.getElementById("las-profile").getPropertyString("content");
+        if ( profile.equals(Constants.PROFILE_SOCAT) ) {
+            buttonPanel.add(edit);
+        }
         dataSection = new HTML("<b>&nbsp;&nbsp;Data Selection: </b>");
         controlPanel.setWidget(0, 0, dataSection);
         controlPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
@@ -555,6 +558,12 @@ public class SimplePropPropViewer implements EntryPoint {
 
    
 
+  
+
+
+
+
+
     /**
      * The LASAnnotationsPanel closed, so make sure the
      * {@link annotationsButton} down state is set appropriately.
@@ -587,7 +596,7 @@ public class SimplePropPropViewer implements EntryPoint {
         //TODO this should wait until the result comes back and is good and should be an event, right?
         update.removeStyleDependentName("APPLY-NEEDED");
 
-        lasAnnotationsPanel.setError("Fetching plot annotations...");
+        lasAnnotationsPanel.setError("Fetching plot...");
 
         spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
         spin.show();
