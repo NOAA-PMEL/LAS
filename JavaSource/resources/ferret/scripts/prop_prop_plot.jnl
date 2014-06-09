@@ -105,13 +105,15 @@ IF ($put_label"0|*>1") THEN DEFINE SYMBOL all_missing = 1
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
 
 LET compute_good = xvar
-DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@nbd]`
 
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
    LET compute_good = ($zvar)
-   DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+   IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
+   IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@nbd]`
 ENDIF
 
 IF `($all_missing"0") EQ 0` THEN
@@ -199,10 +201,10 @@ ELSE
 
 ! This script separates the cruises putting a gap between.
 ! Call if first 2 variables are longitude and latitude. Symbol 
-! basemap_area is set if the underlay is a map.
+! connect_dots is set if the underlay is a map or if its a time series plot.
 
-         IF ($basemap_area"0|*>1") THEN 
-            GO decimate_dsg 200000 tol1 tol2 tol3
+         IF ($connect_dots"0|*>1") THEN 
+            GO setup_dsg_variables 200000 tol1 tol2 tol3
 	    DEFINE SYMBOL plot_arg = ($data_x_var), ($data_y_var), ($data_var)
 	    DEFINE SYMBOL xvar = ($data_x_var)
 	    DEFINE SYMBOL yvar = ($data_y_var)
@@ -262,7 +264,6 @@ ELSE
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
       PPL POLYGON/OVER
    ENDIF
-
 ENDIF  ! color-by-trajectory or not...
 
 ! This allows for auto-levels on prop-prop plots.
