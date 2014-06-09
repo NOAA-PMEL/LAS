@@ -49,21 +49,22 @@ ENDIF
 ! This based on the full-range socat2 thru 2011
 
 IF ($var_name"0|fCO2_recommended>1|*>0") THEN
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+! (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 ! Set the rest of the fCO2, pCO2, and xCO2 the same 
 IF ($var_name"0|fCO2_atm>1|fCO2_water_equi_uatm>1|fCO2_water_sst_100humidity_uatm>1|*>0") THEN
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 IF ($var_name"0|pCO2_atm>1|pCO2_water_equi_temp>1|pCO2_water_sst_100humidity_uatm>1|*>0") THEN
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 
 IF ($var_name"0|xCO2_atm>1|xCO2_water_equi_temp_dry_ppm>1|xCO2_water_sst_dry_ppm>1|*>0") THEN
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(-50,100,50)(140,560,20)(550,800,50)(inf)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 ! delta 

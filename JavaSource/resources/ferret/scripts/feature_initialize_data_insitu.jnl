@@ -286,8 +286,12 @@ ENDIF
 
 LET data_id = UPCASE("($data_0_dataset_ID)")
 
-IF `(($data_count"0") GE 3) AND (STRINDEX(data_id, "SOCAT") GT 0)` THEN \
+IF `STRINDEX(data_id, "SOCAT") GT 0` THEN 
+  IF `($its_prop_plot"0|0|1|*>1") AND (($data_count"0") GE 3)` THEN \
   GO SOCAT_custom_levs_keys ($data_name_in"($data_2_var_in)")
+  IF `($its_trajectory_map"0|0|1|*>1") ` THEN \
+  GO SOCAT_custom_levs_keys ($data_name_in"($data_var_in)")
+ENDIF
 
 IF `($ferret_plot_key"0|date_key>1|*>0") EQ 0` THEN
    DEFINE SYMBOL data_num = 1
