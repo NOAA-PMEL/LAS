@@ -5,6 +5,7 @@
 	<menu type="ops" name="Trajectory_operations_XY">
         <item values="Trajectory_interactive_plot,gif">map</item>
         <item values="SPPV,gif">map</item>
+        <item values="PropPropThumbTable,gif">map</item>
         <item values="TrajectoryTable,gif">file</item>
         <item values="Trajectory_Interactive_Download,gif">map</item>
         <item values="Plot_GE_Overlay_Traj,html,2">Plot to Google Earth</item>
