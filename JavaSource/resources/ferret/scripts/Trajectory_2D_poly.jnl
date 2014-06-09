@@ -40,6 +40,8 @@ IF ($data_0_var"0|vid>1|*>0")  THEN
    DEFINE SYMBOL data_0_var = `varnames[i=1]`
    CANCEL DATA "($data_0_url)"
 ENDIF
+DEFINE SYMBOL data_name_in = ($data_0_var)
+
 GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
@@ -75,21 +77,25 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
    DEFINE SYMBOL vtype = `($var_data),RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
+   
+   IF `STRINDEX("($data_0_var)", "WOCE") GT 0` THEN DEFINE SYMBOL ferret_strfloat = 1
+
    IF `($is_string) AND ($ferret_strfloat"0|*>1")` THEN 
       SET VAR/NAME = var_data_0  var_data 
       LET var_data = STRFLOAT(var_data_0)
       SET ATT/LIKE=var_data_0 var_data
       DEFINE SYMBOL ferret_plot_var var_data
    ENDIF
-   IF ($data_var_in"($data_var)|region_ID>1|qc_flag>1|*>0") THEN 
+
+   IF ($data_0_var"|region_ID>1|qc_flag>1|*>0") THEN 
       SET VAR/NAME=var_data_in var_data
-      GO SOCAT_custom_levs_keys ($data_var_in) var_data_in
+      GO SOCAT_custom_vars ($data_0_var) var_data_in
       DEFINE SYMBOL data_var = color_var
       DEFINE SYMBOL ferret_plot_var = color_var
       LET var_data = color_var
    ENDIF
    
-   IF ($data_var_in"($data_var)|tmonth>1|*>0") THEN 
+   IF ($data_0_var"|tmonth>1|*>0") THEN 
       LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
       SET VAR/NAME = var_data_0  var_data
       LET var_data =  element_index_str_n(var_data_0, month_labels) 
@@ -100,6 +106,7 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
    ENDIF
 
 ENDIF
+
 
 ! Special color-by-time key
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
@@ -140,13 +147,6 @@ ENDIF
 
 ! Set color levels
 GO LAS_initialize_var_levels
-
-! Hack for SOCAT: if its fco2 and there are huge values, set to a standard set...
-
-IF `STRINDEX("($data_0_var)", "fCO2") GT 0` THEN 
-   IF `($ferret_plot_var)[i=@max] GT 600` THEN \
-     DEFINE SYMBOL ferret_fill_levels = (-inf)(240,300,20)(300,405,5)(400,460,20)(inf)
-ENDIF
 
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers
@@ -203,7 +203,7 @@ ENDIF
 ! Ribbon plot
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
-IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
+!IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
 
 
 IF ($single_color"0|*>1") THEN
