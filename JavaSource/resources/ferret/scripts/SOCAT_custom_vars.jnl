@@ -1,0 +1,71 @@
+! SOCAT_custom_vars.jnl
+! Special setup for variables:
+! QC_FLAG (needs to be expanded)
+! region_id
+
+DEFINE SYMBOL var_name = $1
+DEFINE SYMBOL color_var = $2
+
+
+IF ($var_name"0|qc_flag>1|*>0") THEN
+   DEFINE SYMBOL do_qc_key = 1
+   DEFINE SYMBOL ferret_palette = QC_V3_by_level
+   DEFINE SYMBOL ferret_fill_levels = (0.5,10.5,1)
+   
+! Do not annotate key with min and max data values.
+   KEYMARK 0
+
+!  on input they are strings  A  B  C  D  F  N  U  S  X
+
+   LET m1 = IF STRCMP(($color_var),"A") EQ 0 THEN 1 ELSE 0
+   LET m2 = IF STRCMP(($color_var),"B") EQ 0 THEN 2 ELSE 0 
+   LET m3 = IF STRCMP(($color_var),"C") EQ 0 THEN 3 ELSE 0 
+   LET m4 = IF STRCMP(($color_var),"D") EQ 0 THEN 4 ELSE 0
+   LET m5 = IF STRCMP(($color_var),"E") EQ 0 THEN 4 ELSE 0
+   LET m6 = IF STRCMP(($color_var),"F") EQ 0 THEN 5 ELSE 0 
+   LET m7 = IF STRCMP(($color_var),"N") EQ 0 THEN 6 ELSE 0 
+   LET m8 = IF STRCMP(($color_var),"X") EQ 0 THEN 7 ELSE 0 
+   LET m9 = IF STRCMP(($color_var),"U") EQ 0 THEN 8 ELSE 0 
+
+   LET color_var =  m1+m2+m3+m4+m5+m6+m7+m8+m9
+   DEFINE SYMBOL ($color_var) = color_var
+   CANCEL SYMBOL data_units
+ENDIF
+
+IF ($var_name"0|region_ID>1|*>0") THEN
+   DEFINE SYMBOL ferret_palette = ten_bright_levels
+   DEFINE SYMBOL ferret_fill_levels = (1,10,1)
+   DEFINE SYMBOL ferret_plot_key = 0
+
+! +-----------+-------------------+--------+
+! | region_ID | name              | region |
+! +-----------+-------------------+--------+
+! | N         | North Pacific     |      1 |
+! | T         | Tropical Pacific  |      2 |
+! | O         | Southern Ocean    |      4 |
+! | I         | Indian            |      5 |
+! | A         | North Atlantic    |      6 |
+! | C         | Coastal           |      7 |
+! | Z         | Tropical Atlantic |      8 |
+! | R         | Arctic            |     10 |
+! +-----------+-------------------+--------+
+
+! Change the values to represent the colors 1-8 in the order
+! such that ten_by_levels palette colors the regions as desired.
+
+   LET m1 = IF STRCMP(($color_var),"A") EQ 0 THEN 1 ELSE 0
+   LET m2 = IF STRCMP(($color_var),"C") EQ 0 THEN 2 ELSE 0
+   LET m3 = IF STRCMP(($color_var),"I") EQ 0 THEN 3 ELSE 0
+   LET m4 = IF STRCMP(($color_var),"N") EQ 0 THEN 4 ELSE 0
+   LET m5 = IF STRCMP(($color_var),"O") EQ 0 THEN 5 ELSE 0
+   LET m6 = IF STRCMP(($color_var),"T") EQ 0 THEN 7 ELSE 0
+   LET m7 = IF STRCMP(($color_var),"Z") EQ 0 THEN 8 ELSE 0
+   LET m8 = IF STRCMP(($color_var),"R") EQ 0 THEN 9 ELSE 0
+   LET m9 = m1+m2+m3+m4+m5+m6+m7+m8
+   LET color_var = m9
+   CANCEL SYMBOL data_units
+
+ENDIF
+
+! End of file ------------ SOCAT_custom_vars.jnl--------------------------
+
