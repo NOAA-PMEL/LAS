@@ -54,6 +54,7 @@ public interface RPCService extends RemoteService {
     public Map<String, String> getERDDAPOuterSequenceVariables(String dsid, String varid) throws RPCException;
     public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key, Map<String, String> xyzt) throws RPCException;
     public List<ERDDAPConstraintGroup> getERDDAPConstraintGroups(String dsid) throws RPCException;
+    public String getERDDAPJSON(String dsid, String varid, String trajectory_id, String variables) throws RPCException;
 	/*
 	 * Everything below is of the ESGF search interface.
 	 */
@@ -61,4 +62,5 @@ public interface RPCService extends RemoteService {
 	public List<ESGFDatasetSerializable> getESGFDatasets(String query) throws RPCException;
 	public String addESGFDataset(String id) throws RPCException;
     public String[] addESGFDatasets(List<String> ncats) throws RPCException;
+    
 }

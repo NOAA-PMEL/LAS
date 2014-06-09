@@ -862,6 +862,34 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return outerSequenceValues;
     }
     @Override
+    public String getERDDAPJSON(String dsid, String varid, String trajectory_id, String variables) throws RPCException {
+        LASConfig lasConfig = getLASConfig();
+        Dataset dataset;
+        InputStream jsonStream;
+       
+        try {
+            dataset = lasConfig.getDataset(dsid);
+            String url = lasConfig.getDataAccessURL(dsid, varid, false);
+            Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
+            String id = props.get("tabledap_access").get("id");
+            String id_name = props.get("tabledap_access").get("trajectory_id");
+            url = url + id + ".json" + "?" + variables + "&" + id_name + "=\""+trajectory_id+"\"" + "&distinct()";
+            jsonStream = new URL(url).openStream();
+            String jsonText = IOUtils.toString(jsonStream);
+            return jsonText;
+        } catch (JDOMException e) {
+            throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        } catch (MalformedURLException e) {
+            throw new RPCException(e.getMessage());
+        } catch (IOException e) {
+            throw new RPCException(e.getMessage());
+        }
+       
+    }
+   
+    @Override
     public Map<String, String> getERDDAPOuterSequenceVariables(String dsid, String varid) throws RPCException {
         Map<String, String> osv = new TreeMap<String, String>();
         DAS das = new DAS();
