@@ -16,6 +16,8 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -26,6 +28,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonStreamParser;
 
 public class SaveEdits extends LASAction {
+
+	private static Logger log = LogManager.getLogger(SaveEdits.class.getName());
 
 	private double socatQCVersion;
 	private DsgNcFileHandler dsgHandler;
@@ -122,29 +126,31 @@ public class SaveEdits extends LASAction {
 			for ( JsonElement rowValues : edits ) {
 				DataLocation datumLoc = new DataLocation();
 				for ( Entry<String,JsonElement> rowEntry : ((JsonObject) rowValues).entrySet() ) {
-					// Neither the name nor the value should be null
-					String name = rowEntry.getKey().trim();
-					String value = rowEntry.getValue().getAsString().trim();
-					if ( name.equalsIgnoreCase("EXPOCODE") ) {
+					// Neither the name nor the value should be null.
+					// Because of going through Ferret, everything will be uppercase
+					// but just to be sure....
+					String name = rowEntry.getKey().trim().toUpperCase();
+					String value = rowEntry.getValue().getAsString().trim().toUpperCase();
+					if ( name.equals("EXPOCODE") || name.equals("EXPOCODE_") ) {
 						if ( expocode == null )
-							expocode = value.toUpperCase();
+							expocode = value;
 						else if ( ! expocode.equals(value) )
 							throw new IllegalArgumentException("Mismatch of expocodes; " +
 									"previous: '" + expocode + "'; current: '" + value + "'");
 					}
-					else if ( name.equalsIgnoreCase("DATE") ) {
+					else if ( name.equals("DATE") ) {
 						Date dataDate = fullDateParser.parse(value);
 						datumLoc.setDataDate(dataDate);
 					}
-					else if ( name.equalsIgnoreCase("LONGITUDE") ) {
+					else if ( name.equals("LONGITUDE") ) {
 						Double longitude = Double.parseDouble(value);
 						datumLoc.setLongitude(longitude);
 					}
-					else if ( name.equalsIgnoreCase("LATITUDE") ) {
+					else if ( name.equals("LATITUDE") ) {
 						Double latitude = Double.parseDouble(value);
 						datumLoc.setLatitude(latitude);
 					}
-					else if ( name.toUpperCase().startsWith("WOCE_") ) {
+					else if ( name.startsWith("WOCE_") ) {
 						// WOCE flag for the data variable
 						String woceDataName = name.substring(5);
 						if ( dataName == null )
@@ -206,13 +212,13 @@ public class SaveEdits extends LASAction {
 		woceEvent.setUsername(username);
 		woceEvent.setComment(comment);
 		woceEvent.setExpocode(expocode);
-		woceEvent.setColumnName(dataName);
+		woceEvent.setColumnName(dataName);  // Note: all-uppercase
 		woceEvent.setFlag(woceFlag);
 		woceEvent.setFlagDate(new Date());
 		woceEvent.setLocations(locations);
 
-		// Update the DSG files with the WOCE flags, 
-		// filling in the missing information in the process
+		// Update the DSG files with the WOCE flags, filling in the missing 
+		// information and fixing the data variable name in the process
 		try {
 			dsgHandler.updateWoceFlags(woceEvent, tempname);
 		} catch ( Exception ex ) {
@@ -236,6 +242,9 @@ public class SaveEdits extends LASAction {
 
 		// Notify ERDDAP of the full DSG file update
 		dsgHandler.flagErddap(false);
+
+		log.info("Assigned WOCE event (also updated " + tempname + "): \n" + 
+				woceEvent.toString());
 
 		return null;
 	}
