@@ -75,7 +75,7 @@ ENDIF
 
 ! Direction variables all in degrees
 IF ($var_name"0|ship_dir>1|wind_dir_rel>1|wind_dir_true>1|*>0") THEN
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (-inf)(0,360,5)(inf)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0,360,10)
 ENDIF
 
 ! Speed variables positive
@@ -103,16 +103,20 @@ ENDIF
 
 IF ($var_name"0|qc_flag>1|*>0") THEN
    DEFINE SYMBOL do_qc_key = 1
+   sh sym ferret_plot_key
+   IF `($ferret_plot_key"0|0|1>0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = qc_flag
    DEFINE SYMBOL ferret_palette = QC_V3_by_level
    DEFINE SYMBOL ferret_fill_levels = (0.5,10.5,1)
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
    
 ENDIF
 
 IF ($var_name"0|region_ID>1|*>0") THEN
-   DEFINE SYMBOL ferret_palette = ten_bright_levels
-   DEFINE SYMBOL ferret_fill_levels = (1,10,1)
-   DEFINE SYMBOL ferret_plot_key = 0
+   DEFINE SYMBOL ferret_palette = QC_regions
+   DEFINE SYMBOL ferret_fill_levels = (1,9,1)
+   sh sym ferret_plot_key
+   IF `($ferret_plot_key"0|0|1>0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = region_id
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
 ENDIF
 
 ! End of file ------------ SOCAT_custom_levs_keys.jnl--------------------------
-
