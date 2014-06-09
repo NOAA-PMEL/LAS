@@ -156,8 +156,11 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
 
    LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
+   
+   LET amin360 = xvar_360[i=@MIN]
+   LET amax360 = xvar_360[i=@MAX]
 
-   IF `(ax_hi-ax_lo) LT 359` THEN 
+   IF `(amax360 - amin360) LT (amax - amin) ` THEN 
 
       LET ax_lo360 = `xvar_360[i=@MIN]`
       LET ax_hi360 = `xvar_360[i=@MAX]`
@@ -184,7 +187,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       ENDIF
 
    ELSE  ! case with 360 degree range
-      IF `ax_lo LT (-178)` THEN
+      IF `((ax_hi-ax_lo) LT 359) AND (ax_lo LT (-178))` THEN
          LET xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
          LET ax_lo = 0
