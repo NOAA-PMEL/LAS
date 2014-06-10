@@ -194,8 +194,12 @@ ENDIF  ! dates, times
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 
-   LET/TITLE="`longitude_,RETURN=title`"/UNITS="`longitude_,RETURN=units`" Longitude = COMPRESSI(constraints_mask*longitude_)
-   LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = COMPRESSI(constraints_mask*latitude_)
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="`longitude_,RETURN=title`"/UNITS="`longitude_,RETURN=units`" Longitude = SAMPLEI (longitude_, compress_mask[i=1:`nok`])
+   LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = SAMPLEI (latitude_, compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 2`
    DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude,  
@@ -206,15 +210,11 @@ ENDIF  ! longitude, latitude
 
 
 DEF SYM vtype = `($ferret_plot_var_0),RETURN=dtype`
-IF ($vtype"0|CHAR>1|*>0") THEN  
-   LET ii = i[g=($timevar)]
-   LET iindices = IF constraints_mask THEN ii
-   LET compress_mask = COMPRESSI(iindices)
-   LET nok = `compress_mask[i=@ngd]`
-   LET/TITLE="($data_0_title)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0), compress_mask[i=1:`nok`])
-ELSE
-   LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_0))
-ENDIF
+LET ii = i[g=($timevar)]
+LET iindices = IF constraints_mask THEN ii
+LET compress_mask = COMPRESSI(iindices)
+LET nok = `compress_mask[i=@ngd]`
+LET/TITLE="($data_0_title)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0), compress_mask[i=1:`nok`])
 
 LET nlist = `nlist + 1`
 DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in)
@@ -222,15 +222,11 @@ DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in)
 IF ($ferret_plot_var_1"0|*>1") THEN
 
    DEF SYM vtype = `($ferret_plot_var_1),RETURN=dtype`
-   IF ($vtype"0|CHAR>1|*>0") THEN  
-      LET ii = i[g=($timevar)]
-      LET iindices = IF constraints_mask THEN ii
-      LET compress_mask = COMPRESSI(iindices)
-      LET nok = `compress_mask[i=@ngd]`
-      LET/TITLE="($data_2_title)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
-   ELSE
-      LET/TITLE="($data_0_title)"/UNITS="($data_1_units)" ($data_1_var_in) = COMPRESSI(constraints_mask*($ferret_plot_var_1))
-   ENDIF
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="($data_2_title)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
@@ -240,15 +236,11 @@ ENDIF
 
 IF ($ferret_plot_var_2"0|*>1") THEN 
    
-   IF ($is_string"0|*>1") THEN  
-      LET ii = i[g=($timevar)]
-      LET iindices = IF constraints_mask THEN ii
-      LET compress_mask = COMPRESSI(iindices)
-      LEt nok = `compress_mask[i=@ngd]`
-      LET/TITLE="($data_2_title)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
-   ELSE
-      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = COMPRESSI(constraints_mask*zvar)
-   ENDIF
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="($data_2_title)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)
 ENDIF
