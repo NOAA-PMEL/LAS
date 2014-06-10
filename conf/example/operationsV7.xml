@@ -267,6 +267,49 @@
     </grid_types>
   </operation>
   <!-- END Trajectory_interactive_plot -->
+  <!--  Special prop-prop plot for making the thumbnails so we can get a smaller netCDF file at the start. -->
+    <operation name="Correlation Plot" ID="Trajectory_thumbnail_extract_and_plot" default="true" category="file" output_template="zoom">
+    <backend_service>
+      <exclude>ferret,propprop</exclude>
+    </backend_service>
+    <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+      <properties>
+        <property_group type="backend_request">
+          <property>
+            <name>exclude</name>
+            <value>ferret,prop_hist</value>
+          </property>
+        </property_group>
+      </properties>
+    </operation>
+    <operation chained="true" name="Trajectory Correlation Plot" ID="Trajectgory_thumbnails" service_action="Trajectory_correlation">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+        <result type="xml" ID="webrowset" file_suffix=".xml"/>
+        <result type="icon_webrowset" ID="icon_webrowset" file_suffix=".xml"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>ferret</service>
+    </operation>
+    <region>
+      <intervals name="xyt"/>
+    </region>
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+  </operation>
   <!-- This is the property-property operation for trajectory in-situ data. 
 		It gets called from the Correlation view defined below. -->
   <operation name="Correlation Plot" ID="Trajectory_correlation_extract_and_plot" default="true" category="file" output_template="zoom">
