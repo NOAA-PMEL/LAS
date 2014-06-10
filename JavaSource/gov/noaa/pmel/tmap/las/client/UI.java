@@ -1955,12 +1955,9 @@ public class UI extends BaseUI {
         if (initialHistory != null) {
             initialHistory = null;
         }
-        // resize OutputPanel(s) according to the current Window size
-        logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
-        resize(Window.getClientWidth(), Window.getClientHeight());
-
-        // required_update = false;
+        
         setUpdateRequired(false);
+        
     }
     private String addAnalysisMapValues() {
         StringBuilder xy = new StringBuilder();
