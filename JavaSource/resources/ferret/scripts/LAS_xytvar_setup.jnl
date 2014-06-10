@@ -43,7 +43,7 @@ IF ($variable_1_lab"0|*>1") THEN
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
    IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
 ENDIF
-IF `($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1` THEN 
+IF `(($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1) AND (($ferret_thumb"0|*>1") EQ 0)` THEN 
    DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view
    DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view2
    SET VIEW full_view
@@ -54,6 +54,33 @@ LET labfac = 1.
 if `(labwid("($ax_label_x)", 0.12) / ($ppl$xlen)) GT 1` THEN LET labfac = ($ppl$xlen)/labwid("($ax_label_x)",0.12)
 if `(labwid("($ax_label_y)", 0.12) / ($ppl$ylen)) GT 1` THEN LET labfac = MIN(`labfac`,`($ppl$ylen)/labwid("($ax_label_y)",0.12)`)
 IF `labfac LT 1 AND labfac GT 0.06` THEN DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
+
+! size for the label that says a variable is all-missing
+DEFINE SYMBOL miss_lab_siz = 0.14
+
+DEFINE SYMBOL mainlab_size = 0.14
+DEFINE SYMBOL errlab_size = 0.12
+
+! For thumbnail plots the margins have been made bigger. Set the label sizes larger.
+! Turn off the regression line.
+
+IF ($ferret_thumb"0|*>1") THEN  
+   DEFINE SYMBOL poly_size = 1.3
+   DEFINE SYMBOL is_thumb = 1
+   DEFINE SYMBOL mainlab_size = 0.22
+   DEFINE SYMBOL errlab_size = 0.2
+   PPL AXLSZE,.16,.16
+   PPL TXLSZE,.16
+   DEFINE SYMBOL labelsize_setting = 0.2,0.16,0.16,0.16
+   LET labfac = 1.4
+   DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
+   DEFINE SYMBOL miss_lab_siz = 0.18
+
+   DEFINE SYMBOL do_rsquare = 0
+ENDIF
+
+
+
 
 ! Do not label axes with the words LONGITUDE, LATITUDE
 IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
@@ -425,10 +452,6 @@ DEFINE SYMBOL axes_already_defined = 1
 
 ENDIF  ! axes_already_defined, make the underlay plot.
 
-! Make a blank plot to put the horizontal and vertical axes on the page
-
-GO LAS_open_window
-
 LET bvar = dep_var + indep_var
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
@@ -464,7 +487,7 @@ IF ($put_label"0|*>1") THEN
 
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.14, @AS($ferret_title_0) is all-missing
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
       let ylab_bad = `ylab_bad-0.2`
       define symbol bad_pp_var = 1
    ENDIF
@@ -474,7 +497,7 @@ IF ($put_label"0|*>1") THEN
    DEFINE SYMBOL ax_lo = `yvar[i=@MIN]`
    DEFINE SYMBOL ax_hi = `yvar[i=@MAX]`
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.14, @AS($ferret_title_1) is all-missing
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
       define symbol bad_pp_var = 1
    ENDIF
 
