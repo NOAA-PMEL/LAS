@@ -231,6 +231,8 @@ public class ThumbnailPropProp implements EntryPoint {
         LASRequest lr0 = lasRequest;
         if (plotindex == 0 ) {
             lr0.setOperation("Trajectory_thumbnail_extract_and_plot", "V7");
+            lr0.removeProperty("data_0", "url");
+            lr0.removeProperty("data_1", "url");
         } else {
             // Set the netcdf file and operation for a plot from the cached file.
             lr0.setOperation("Trajectory_correlation_plot", "V7");
@@ -331,6 +333,8 @@ public class ThumbnailPropProp implements EntryPoint {
                     LASRequest r = makePlot(currentPlot);
                     sendPlot(r);
                     plots.setWidget(row(currentPlot), column(currentPlot), new Image(spinurl));
+                } else {
+                    netcdf = null;
                 }
             }
         }
