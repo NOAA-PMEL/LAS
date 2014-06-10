@@ -1174,8 +1174,9 @@ public class SimplePropPropViewer implements EntryPoint {
                                             // frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
                                             // 0, 0);
                                             drawToScreenScaled(imageScaleRatio);
-                                            frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                             frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+                                            frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
+                                            
                                         }
                                         logger.setLevel(Level.ALL);
                                     }
