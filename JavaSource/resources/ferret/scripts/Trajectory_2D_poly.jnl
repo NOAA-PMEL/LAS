@@ -170,7 +170,7 @@ PPL SHASET PROTECT
 !  GO Jons_fland 20 navy
 !  GO Jons_fland 20 brown_dark
 
-GO Jons_fland 20 green_deep
+GO Jons_fland 20 green_pine
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
 
@@ -203,7 +203,7 @@ ENDIF
 ! Ribbon plot
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
-!IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL plot_command = ($plot_command)/THICK
+IF `nout_lonlat LT 5000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
 
 
 IF ($single_color"0|*>1") THEN
