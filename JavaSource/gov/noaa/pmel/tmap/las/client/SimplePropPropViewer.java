@@ -1108,7 +1108,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                 lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
                                 frontCanvas.setCoordinateSpaceHeight(height);
                                 frontCanvas.setCoordinateSpaceWidth(width);
-                                frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+                                drawToScreenScaled(imageScaleRatio); //frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
                                 frontCanvas.addMouseDownHandler(new MouseDownHandler() {
 
                                     @Override
@@ -1169,12 +1169,10 @@ public class SimplePropPropViewer implements EntryPoint {
                                                     * scaled_y_per_pixel;
                                             logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
                                             setTextValues();
-                                            logger.info("randomColor.value():" + randomColor.value());
-                                            frontCanvasContext.setFillStyle(randomColor);
-                                            // frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
-                                            // 0, 0);
+                                           // frontCanvasContext.setFillStyle(randomColor); 
+                                            // Can't get this to work for some reason. The rectangle is black.
                                             drawToScreenScaled(imageScaleRatio);
-                                            frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+                                            //frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
                                             frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                             
                                         }
@@ -1782,8 +1780,10 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     private void drawToScreenScaled(double scaleRatio) {
-        ImageData scaledImage = scaleImage(scaleRatio);
-        drawToScreen(scaledImage);
+        
+            ImageData scaledImage = scaleImage(scaleRatio);
+            drawToScreen(scaledImage);
+        
     }
 
     private ImageData scaleImage(double scaleToRatio) {
@@ -1876,7 +1876,7 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     private void drawToScreen(ImageData imageData) {
-        if (frontCanvasContext != null)
+        if (frontCanvasContext != null && imageData != null)
             frontCanvasContext.putImageData(imageData, 0, 0);
     }
 
