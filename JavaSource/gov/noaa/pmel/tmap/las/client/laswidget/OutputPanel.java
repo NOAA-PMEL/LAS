@@ -2180,7 +2180,7 @@ public class OutputPanel extends Composite implements HasName {
                 // RequestBuilder(RequestBuilder.GET, url);
                 try {
 
-                    lasAnnotationsPanel.setError("Fetching plot annotations...");
+                    lasAnnotationsPanel.setError("Fetching plot...");
                     updating = true;
                     historyTokenMap = null;
                     // sendRequest.sendRequest(null, lasRequestCallback);
@@ -2316,9 +2316,9 @@ public class OutputPanel extends Composite implements HasName {
         panelAxesWidgets.getRefMap().setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
     }
 
-    public void setLatLon(double[] selection) {
-        panelAxesWidgets.getRefMap().setCurrentSelection(selection[0], selection[1], selection[2], selection[3]);
-    }
+//    public void setLatLon(double[] selection) {
+//        panelAxesWidgets.getRefMap().setCurrentSelection(selection[0], selection[1], selection[2], selection[3]);
+//    }
 
     public void setLatLon(String ylo, String yhi, String xlo, String xhi) {
         panelAxesWidgets.getRefMap().setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
