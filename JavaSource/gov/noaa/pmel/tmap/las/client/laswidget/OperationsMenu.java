@@ -30,7 +30,7 @@ public class OperationsMenu extends Composite {
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
 	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
 	OperationPushButton trajectoryTable = new OperationPushButton("Table of Cruises");
-	OperationPushButton thumbnailTable = new OperationPushButton("Table of Thumbnails");
+	OperationPushButton thumbnailTable = new OperationPushButton("Thumbnails");
 	
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
