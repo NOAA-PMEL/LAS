@@ -458,6 +458,8 @@ public class TabledapTool extends TemplateTool {
                         return lasBackendResponse;
 
                     temp_file.renameTo(new File(netcdfFilename));
+                    dt = new DateTime();
+                    log.info("Tabledap tool renamed the netcdf file to "+netcdfFilename+" at "+fmt.print(dt));
                 } catch (Exception e) {
                     String message = e.getMessage();
                     if ( e.getMessage().contains("com.cohort") ) {
