@@ -223,8 +223,16 @@ public class TabledapTool extends TemplateTool {
             //create the query.   First: variables
             StringBuilder query = new StringBuilder();
             
-            // If the operation is the prop-prop plot, we need all the varaibles so skip this step.
-            if ( operationID != null && !operationID.equals("Trajectgory_correlation") ) {
+            // If the operation is the prop-prop plot, we need all the variables.
+           
+            if ( operationID != null && operationID.equals("Trajectgory_thumbnails") ) {
+                Map<String, String> thumbnail_properties = lasBackendRequest.getPropertyGroup("thumbnails");
+                String all = thumbnail_properties.get("variable_names").trim();
+                query.append(all);
+            } else if (operationID != null && operationID.equals("Trajectgory_correlation")) {
+                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                query.append(all);
+            }  else {
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
                 ArrayList<String> vars = lasBackendRequest.getVariables();
 
@@ -253,9 +261,6 @@ public class TabledapTool extends TemplateTool {
                 } else {
                     query.append(dummy);
                 }
-            } else {
-                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
-                query.append(all);
             }
 
             Map<String, Constraint> constrained_modulo_vars_lt = new HashMap<String, Constraint>();
