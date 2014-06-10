@@ -79,7 +79,7 @@ IF ($feature_variable"0|*>1") THEN
    IF ($trajtype"0|CHAR>1|*>0") THEN DEF SYM is_string = 1
 
    DEF SYM trajshape = `($feature_variable),RETURN=shape`
-   IF `($trajshape"0|E>1|*>0)` THEN
+   IF `($trajshape"0|E>1|POINT>1|*>0)` THEN
 
          ! Expand all strings into obs axis
          IF ($is_string"0|*>1") THEN 
@@ -96,11 +96,9 @@ IF ($feature_variable"0|*>1") THEN
             LET ($feature_variable)_ = constraints_mask*traj_obs
          ENDIF
 	 SET VAR/TITLE="`($feature_variable),RETURN=title`" ($feature_variable)_
-      ENDIF
-
    ENDIF
 
-!!!!!!!!!!!
+ENDIF
 
 IF ($color_by"0|*>1") THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
