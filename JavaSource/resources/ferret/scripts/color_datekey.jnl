@@ -101,6 +101,8 @@ ENDIF
 
 ! --------
 IF ($horizontal_key"0|*>1") THEN
+DEFINE SYMBOL datesize = 0.09
+IF `dates_same GT 0` THEN  DEFINE SYMBOL datesize = 0.07
 
 LET vht = (($ppl$ylen) + ($ppl$yorg)) * 1.15
 IF ($vp_height"0|*>1") THEN LET vht = ($vp_height)
@@ -122,25 +124,24 @@ let keystart = x1 - ($ppl$xorg)
 
 ! key_hi-0.07-1,0,.05,l
 
-LABEL/NOUSER `keydel*0+keystart`,`key_hi`,0,0,.09,($day_0_fourth)
+LABEL/NOUSER `keydel*0+keystart`,`key_hi`,0,0,($datesize),($day_0_fourth)
 LABEL/NOUSER `keydel*0+keystart`,`key_lo+key_inc`,0,0,.05,l
 
-LABEL/NOUSER `keydel*1+keystart`,`key_hi`,0,0,.09,($day_1_fourth)
+LABEL/NOUSER `keydel*1+keystart`,`key_hi`,0,0,($datesize),($day_1_fourth)
 LABEL/NOUSER `keydel*1+keystart`,`key_lo+key_inc`,0,0,.05,l
 
-LABEL/NOUSER `keydel*2+keystart`,`key_hi`,0,0,.09,($day_2_fourth)
+LABEL/NOUSER `keydel*2+keystart`,`key_hi`,0,0,($datesize),($day_2_fourth)
 LABEL/NOUSER `keydel*2+keystart`,`key_lo+key_inc`,0,0,.05,l
 
-LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,.09,($day_3_fourth)
+LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,($datesize),($day_3_fourth)
 LABEL/NOUSER `keydel*3+keystart`,`key_lo+key_inc`,0,0,.05,l
 
-LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,.09,($day_4_fourth)
+LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,($datesize),($day_4_fourth)
 LABEL/NOUSER `keydel*4+keystart`,`key_lo+key_inc`,0,0,.05,l
-
-
 
 ELSE ! vertical key
 
+DEFINE SYMBOL datesize = 0.1
    
 ! Based on what key.F does to define the upper x corner of the colorbar key.
 ! If we are in a viewport, start with vp_width
@@ -160,10 +161,11 @@ LET key_inc = `0.1 * (key_hi - key_lo)`
 LET key_hi = `key_lo + 4.0*key_inc`
 LET key_hi = `key_lo + 2.0*key_inc`
 
-LABEL/NOUSER `key_hi`,`(($ppl$ylen)*0)/4-.05`,-1,0,.10,($day_0_fourth)
-LABEL/NOUSER `key_hi`,`(($ppl$ylen)*1)/4-.05`,-1,0,.10,($day_1_fourth)
-LABEL/NOUSER `key_hi`,`(($ppl$ylen)*2)/4-.05`,-1,0,.10,($day_2_fourth)
-LABEL/NOUSER `key_hi`,`(($ppl$ylen)*3)/4-.05`,-1,0,.10,($day_3_fourth)
-LABEL/NOUSER `key_hi`,`(($ppl$ylen)*4)/4-.05`,-1,0,.10,($day_4_fourth)
+LABEL/NOUSER `key_hi`,`(($ppl$ylen)*0)/4-.05`,-1,0,($datesize),($day_0_fourth)
+LABEL/NOUSER `key_hi`,`(($ppl$ylen)*1)/4-.05`,-1,0,($datesize),($day_1_fourth)
+LABEL/NOUSER `key_hi`,`(($ppl$ylen)*2)/4-.05`,-1,0,($datesize),($day_2_fourth)
+LABEL/NOUSER `key_hi`,`(($ppl$ylen)*3)/4-.05`,-1,0,($datesize),($day_3_fourth)
+LABEL/NOUSER `key_hi`,`(($ppl$ylen)*4)/4-.05`,-1,0,($datesize),($day_4_fourth)
 
 ENDIF
+
