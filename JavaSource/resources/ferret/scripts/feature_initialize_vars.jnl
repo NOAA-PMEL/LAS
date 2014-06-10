@@ -111,9 +111,10 @@ ELSE
    DEFINE SYMBOL have_feature_nums = 1
 ! Large number of color levels, but not larger than # of features.
 
-      IF ($ferret_fill_levels"1|featurelevels>1|*>0") THEN 
+      IF ($ferret_fill_levels"1|*>0") THEN 
          DEFINE SYMBOL ferret_fill_levels = 55
          IF `nfeatures LT 55` THEN DEFINE SYMBOL ferret_fill_levels = `nfeatures`
+         IF `nfeatures LT 30` THEN DEFINE SYMBOL ferret_fill_levels = (1,`nfeatures+1`,1)
       ENDIF
 
    ENDIF ! feature var is the plot var
