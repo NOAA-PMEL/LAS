@@ -45,6 +45,13 @@ IF ($var_name"0|fCO2_source>1|*>0") THEN
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
 ENDIF
 
+IF ($var_name"0|socat_version>1|*>0") THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = ten_bright_levels
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (1.3)(1.4)(2,4,1)
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+   IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
+ENDIF
+
 ! This based on the full-range socat2 thru 2011
 
 IF ($var_name"0|fCO2_recommended>1|*>0") THEN
