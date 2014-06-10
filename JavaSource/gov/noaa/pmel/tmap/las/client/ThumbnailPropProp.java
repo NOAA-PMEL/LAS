@@ -329,12 +329,19 @@ public class ThumbnailPropProp implements EntryPoint {
                 plot.setTitle(currentTitle);
                 plots.setWidget(row(currentPlot), column(currentPlot), plot);              
                 currentPlot++;
-                if ( currentPlot < plot_pairs.size() ) {
-                    LASRequest r = makePlot(currentPlot);
-                    sendPlot(r);
-                    plots.setWidget(row(currentPlot), column(currentPlot), new Image(spinurl));
-                } else {
-                    netcdf = null;
+                if ( currentPlot > 0 ) {
+                    String stream = "&stream=true&stream_ID=plot_image";
+                    while ( currentPlot < plot_pairs.size() ) {
+                       LASRequest r = makePlot(currentPlot);
+                       String nexturl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + stream;
+                       Image nextplot = new Image(nexturl);
+                       nextplot.setSize(plotwidth+"px", plotheight+"px");
+                       nextplot.setTitle(currentTitle);
+                       plots.setWidget(row(currentPlot), column(currentPlot), nextplot);
+                       currentPlot++;
+                    } 
+                        netcdf = null;
+                    
                 }
             }
         }
