@@ -237,6 +237,7 @@ public class ThumbnailPropProp implements EntryPoint {
             lr0.setProperty("data_0", "url", netcdf);
             lr0.setProperty("data_1", "url", netcdf);
         }
+        lr0.setProperty("ferret", "thumb", "1");
         lr0.removeVariables();
         String id0 = plot_pairs.get(plotindex).get(0);
         String id1 = plot_pairs.get(plotindex).get(1);
