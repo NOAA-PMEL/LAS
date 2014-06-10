@@ -284,12 +284,13 @@ public class SimplePropPropViewer implements EntryPoint {
             }
         });
 
-        int rndRedColor = 190;
-        int rndGreenColor = 40;
-        int rndBlueColor = 40;
-        double rndAlpha = 0.25;
+        
+        int rndRedColor = 244;
+        int rndGreenColor = 154;
+        int rndBlueColor = 0;
+        double rndAlpha = .45;
         randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
-
+     
         cancelButton = new CancelButton("Correlation");
         eventBus.addHandler(CancelEvent.TYPE, cancelRequestHandler);
        
