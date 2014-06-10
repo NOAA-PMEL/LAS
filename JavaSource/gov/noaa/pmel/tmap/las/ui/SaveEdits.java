@@ -220,7 +220,7 @@ public class SaveEdits extends LASAction {
 		// Update the DSG files with the WOCE flags, filling in the missing 
 		// information and fixing the data variable name in the process
 		try {
-			dsgHandler.updateWoceFlags(woceEvent, tempname);
+			dsgHandler.updateWoceFlags(woceEvent, tempname, log);
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to update DSG files with the WOCE flags", ex);
 			logerror(request, "expocode = " + expocode, "");
