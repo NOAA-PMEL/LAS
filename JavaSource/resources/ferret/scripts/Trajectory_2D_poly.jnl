@@ -78,6 +78,7 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    
+! Woce flags come in a string, with un-set ones a blank. Count this as "bad".
    IF `STRINDEX("($data_0_var)", "WOCE") GT 0` THEN 
       DEFINE SYMBOL ferret_strfloat = 1
       LET getgood = STRFLOAT (($data_var_in))

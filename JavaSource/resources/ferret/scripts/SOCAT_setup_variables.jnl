@@ -64,6 +64,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL vtype = `($ferret_plot_var),RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
+! Woce flags come in a string, with un-set ones a blank. Count this as "bad".
    IF ($is_string"0|0|*>1") THEN 
       IF `STRINDEX("($ferret_plot_var)", "WOCE") GT 0` THEN 
          SET VAR/NAME = zvar_0 zvar
