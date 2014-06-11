@@ -112,7 +112,6 @@ public class SimplePropPropViewer implements EntryPoint {
     private static String YSELECTOR = "y-variable";
     private static String XSELECTOR = "x-variable";
     private static String COLORSELECTOR = "color-selector";
-    Logger logger = Logger.getLogger(Correlation.class.getName());
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
     NumberFormat dFormat = NumberFormat.getFormat("########.##");
     CruiseIconWidget cruiseIcons = new CruiseIconWidget();
@@ -202,9 +201,12 @@ public class SimplePropPropViewer implements EntryPoint {
     protected String zlo;
     protected String zhi;
     protected String defaultx;
+    protected String time_origin;
+    protected String calendar;
+    protected String time_units;
     
     protected List<String> currentIconList = new ArrayList<String>();
-
+    
     // There are 3 states we want to track.
 
     // The values for the first plot. This is used to determine if we need to
@@ -247,7 +249,6 @@ public class SimplePropPropViewer implements EntryPoint {
     String trajectory_id;
     @Override
     public void onModuleLoad() {
-        logger.setLevel(Level.ALL);
 
         colorVariables.setColorBy(true);
         // Turn it on by default...
@@ -996,11 +997,6 @@ public class SimplePropPropViewer implements EntryPoint {
                                 // infinite requests that always return 304
                                 sendRequest.setHeader("If-Modified-Since", new Date().toString());
                                 sendRequest.setHeader("max-age", "0");
-                                logger.info("Pragma:" + sendRequest.getHeader("Pragma"));
-                                logger.info("cache-directive:" + sendRequest.getHeader("cache-directive"));
-                                logger.info("max-age:" + sendRequest.getHeader("max-age"));
-                                logger.info("If-Modified-Since:" + sendRequest.getHeader("If-Modified-Since"));
-                                logger.info("calling sendRequest with url:" + url);
                                 sendRequest.sendRequest(null, lasRequestCallback);
                             } catch (RequestException e) {
                                 HTML error = new HTML(e.toString());
@@ -1070,6 +1066,15 @@ public class SimplePropPropViewer implements EntryPoint {
                                                 } else {
                                                     hasData = false;
                                                 }
+                                            } else if ( child.getNodeName().equals("time_origin") ) {
+                                                // This is the base date from the units string.
+                                                time_origin = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("calendar") ) {
+                                                // This is one of: GREGORIAN, NOLEAP, JULIAN, 360_DAY, ALL_LEAP
+                                                calendar = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_step_units") ) {
+                                                // This is one of: years, months, days, hours, minutes, seconds
+                                                time_units = getString(child.getFirstChild());
                                             }
                                         }
                                     }
@@ -1094,14 +1099,11 @@ public class SimplePropPropViewer implements EntryPoint {
 
                             @Override
                             public void onLoad(LoadEvent event) {
-                                logger.info("image onLoad called");
                                 int width = plotImage.getWidth();
                                 int height = plotImage.getHeight();
                                 // Set global maximums
                                 image_w = width;
-                                logger.info("image_w:" + image_w);
                                 image_h = height;
-                                logger.info("image_h:" + image_h);
                                 String w = width - 18 + "px";
                                 lasAnnotationsPanel.setPopupWidth(w);
                                 lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
@@ -1113,11 +1115,9 @@ public class SimplePropPropViewer implements EntryPoint {
 
                                     @Override
                                     public void onMouseDown(MouseDownEvent event) {
-                                        logger.setLevel(Level.ALL);
 
                                         startx = event.getX();
                                         starty = event.getY();
-                                        logger.info("(startx, starty):(" + startx + ", " + starty + ")");
                                         if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size
                                                 && starty < y_offset_from_top + y_plot_size) {
 
@@ -1133,21 +1133,17 @@ public class SimplePropPropViewer implements EntryPoint {
 
                                             world_endx = world_startx;
                                             world_endy = world_starty;
-                                            logger.info("(world_startx, world_starty):(" + world_startx + ", " + world_starty + ")");
-                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
 
                                             setTextValues();
                                        
 
                                         }
-                                        logger.setLevel(Level.ALL);
                                     }
                                 });
                                 frontCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
                                     @Override
                                     public void onMouseMove(MouseMoveEvent event) {
-                                        logger.setLevel(Level.ALL);
                                         int currentx = event.getX();
                                         int currenty = event.getY();
                                         // If you drag it out, we'll
@@ -1159,7 +1155,6 @@ public class SimplePropPropViewer implements EntryPoint {
                                             draw = false;
                                             endx = currentx;
                                             endy = currenty;
-                                            logger.info("(endx, endy):(" + endx + ", " + endy + ")");
                                         }
                                         if (draw) {
                                             double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
@@ -1167,7 +1162,6 @@ public class SimplePropPropViewer implements EntryPoint {
                                             world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
                                             world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
                                                     * scaled_y_per_pixel;
-                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
                                             setTextValues();
                                            // frontCanvasContext.setFillStyle(randomColor); 
                                             // Can't get this to work for some reason. The rectangle is black.
@@ -1176,7 +1170,6 @@ public class SimplePropPropViewer implements EntryPoint {
                                             frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                             
                                         }
-                                        logger.setLevel(Level.ALL);
                                     }
                                 });
                                 
@@ -1188,18 +1181,22 @@ public class SimplePropPropViewer implements EntryPoint {
 
                             @Override
                             public void onMouseUp(MouseUpEvent event) {
-                                logger.setLevel(Level.ALL);
                                 // If we're still drawing when the mouse goes
                                 // up, record the position.
                                 if (draw) {
-                                    endx = event.getX();
-                                    endy = event.getY();
-                                    logger.info("(endx, endy):(" + endx + ", " + endy + ")");
+                                    int currentx = event.getX();
+                                    int currenty = event.getY();
+                                    double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
+                                    double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
+                                    world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
+                                    world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
+                                            * scaled_y_per_pixel;
+                                    endx = currentx;
+                                    endy = currenty;
                                 }
                                 draw = false;
                                 setTextValues();
                                 setConstraints();
-                                logger.setLevel(Level.ALL);
                             }
                         });
                     } else {
@@ -1270,9 +1267,17 @@ public class SimplePropPropViewer implements EntryPoint {
 
         if ( xname.toLowerCase().contains("time") ) {
             // Calculate time from the map scale...
-            
-            ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_min, xname, dFormat.format(minx), "gt");      
-            ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, time_max, xname, dFormat.format(maxx), "le");
+            String tmin;
+            String tmax;
+            if (time_origin != null && time_units != null && calendar != null ) {
+                tmin = DateTimeWidget.formatDate(minx, time_origin, time_units, calendar);
+                tmax = DateTimeWidget.formatDate(maxx, time_origin, time_units, calendar);
+            } else {
+                tmin = time_min;
+                tmax = time_max;
+            }
+            ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmin, xname, dFormat.format(minx), "gt");      
+            ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmax, xname, dFormat.format(maxx), "le");
         } else {
             ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
             ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
@@ -1311,8 +1316,19 @@ public class SimplePropPropViewer implements EntryPoint {
             maxy = world_starty;
         }
         if ( yname.toLowerCase().contains("time") ) {
-            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, time_min, yname, dFormat.format(miny), "gt");
-            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, time_max, yname, dFormat.format(maxy), "le");
+            // Calculate time from the map scale...
+            
+            String tmin;
+            String tmax;
+            if (time_origin != null && time_units != null && calendar != null ) {
+                tmin = DateTimeWidget.formatDate(miny, time_origin, time_units, calendar);
+                tmax = DateTimeWidget.formatDate(maxy, time_origin, time_units, calendar);
+            } else {
+                tmin = time_min;
+                tmax = time_max;
+            }
+            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmin, yname, dFormat.format(miny), "gt");
+            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmax, yname, dFormat.format(maxy), "le");
         } else {
             ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
             ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
@@ -1787,19 +1803,12 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     private ImageData scaleImage(double scaleToRatio) {
-        logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
         Canvas canvasTmp = Canvas.createIfSupported();
         Context2d context = canvasTmp.getContext2d();
 
         int imageHeight = plotImage.getHeight();
-        if (imageHeight <= 0) {
-            logger.warning("imageHeight:" + imageHeight);
-        }
         double ch = (imageHeight * scaleToRatio);
         int imageWidth = plotImage.getWidth();
-        if (imageWidth <= 0) {
-            logger.warning("imageWidth:" + imageWidth);
-        }
         double cw = (imageWidth * scaleToRatio);
 
         canvasTmp.setCoordinateSpaceHeight((int) ch);
@@ -1814,16 +1823,12 @@ public class SimplePropPropViewer implements EntryPoint {
         double sy = 0;
         int imageElementWidth = imageElement.getWidth();
         if (imageElementWidth <= 0) {
-            logger.warning("imageElementWidth:" + imageElementWidth);
             imageElementWidth = imageWidth;
-            logger.info("imageElementWidth:" + imageElementWidth);
         }
         double sw = imageElementWidth;
         int imageElementHeight = imageElement.getHeight();
         if (imageElementHeight <= 0) {
-            logger.warning("imageElementHeight:" + imageElementHeight);
             imageElementHeight = imageHeight;
-            logger.info("imageElementHeight:" + imageElementHeight);
         }
         double sh = imageElementHeight;
 
@@ -1845,33 +1850,11 @@ public class SimplePropPropViewer implements EntryPoint {
         try {
             imageData = context.getImageData(0, 0, w, h);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            if (plotImage == null) {
-                logger.warning("image:null");
-            } else {
-                logger.warning("image:" + plotImage.toString());
-            }
-            logger.warning("scaleToRatio:" + scaleToRatio);
-            logger.warning("ch:" + ch);
-            logger.warning("cw:" + cw);
-            logger.warning("dw:" + dw);
-            logger.warning("w:" + w);
-            logger.warning("dh:" + dh);
-            logger.warning("h:" + h);
-            if (imageData == null) {
-                logger.warning("imageData:null");
-            } else {
-                logger.warning("imageData:" + imageData.toString());
-            }
-            e.printStackTrace();
+            // well, bummer
         }
 
         frontCanvas.setCoordinateSpaceHeight((int) h + 10);
         frontCanvas.setCoordinateSpaceWidth((int) w + 10);
-        if (imageData != null)
-            logger.info("scaleImage exiting returning imageData:" + imageData);
-        else
-            logger.severe("scaleImage exiting returning imageData:null");
         return imageData;
     }
 
@@ -1891,7 +1874,6 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     String getPlotWidth() {
-        logger.fine("entering getPlotWidth()");
         int antipadding = 0;// 100;
         String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
         if (plotImage != null) {
@@ -1900,7 +1882,6 @@ public class SimplePropPropViewer implements EntryPoint {
             int wt = (int) ((plotImage.getWidth() - antipadding) * imageScaleRatio);
             w = wt + "px";
         }
-        logger.fine("exiting getPlotWidth(), retuning w:" + w);
         return w;
     }
 
@@ -1919,7 +1900,6 @@ public class SimplePropPropViewer implements EntryPoint {
      * @param windowHeight
      */
     void resize(int windowWidth, int windowHeight) {
-        logger.info("resize called with windowWidth=" + windowWidth + " and windowHeight=" + windowHeight);
         try {
             
             IESafeImage plotImage = null;
@@ -1931,34 +1911,26 @@ public class SimplePropPropViewer implements EntryPoint {
                 int leftPaddingWidth = RootPanel.get("leftPadding").getOffsetWidth();
                 int leftControlsWidth = RootPanel.get("leftControls").getOffsetWidth();
                 int newPlotImageWidth = windowWidth - leftPaddingWidth - leftControlsWidth;
-                logger.info("newPlotImageWidth=" + newPlotImageWidth);
                 int plotImageWidth = plotImage.getWidth();
-                logger.info("plotImageWidth=" + plotImageWidth);
                 if (newPlotImageWidth != plotImageWidth) {
                     setPlotWidth(newPlotImageWidth);
                     // Check that height is still small enough
                     int newPlotImageHeight = windowHeight - topAndBottomPadding - lasAnnotationsPanel.getOffsetHeight();
-                    logger.info("newPlotImageHeight=" + newPlotImageHeight);
                     int plotImageHeight = plotImage.getHeight();
-                    logger.info("plotImageHeight=" + plotImageHeight);
                     if (newPlotImageHeight < plotImageHeight) {
                         setPlotHeight(plotImage, newPlotImageHeight);
                     }
                 } else {
                     // It's the correct width, so now check the height
                     int newPlotImageHeight = windowHeight - topAndBottomPadding - lasAnnotationsPanel.getOffsetHeight();
-                    logger.info("newPlotImageHeight=" + newPlotImageHeight);
                     int plotImageHeight = plotImage.getHeight();
-                    logger.info("plotImageHeight=" + plotImageHeight);
                     if (newPlotImageHeight != plotImageHeight) {
                         setPlotHeight(plotImage, newPlotImageHeight);
                         // Check that width is still small enough
                         leftPaddingWidth = RootPanel.get("leftPadding").getOffsetWidth();
                         leftControlsWidth = RootPanel.get("leftControls").getOffsetWidth();
                         newPlotImageWidth = windowWidth - leftPaddingWidth - leftControlsWidth;
-                        logger.info("newPlotImageWidth=" + newPlotImageWidth);
                         plotImageWidth = plotImage.getWidth();
-                        logger.info("plotImageWidth=" + plotImageWidth);
                         if (newPlotImageWidth < plotImageWidth) {
                             setPlotWidth(newPlotImageWidth);
                         }
@@ -1966,8 +1938,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            e.printStackTrace();
+            // Well, bummer
         }
     }
 

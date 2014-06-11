@@ -1084,7 +1084,7 @@ public class DateTimeWidget extends Composite {
 	    
 	}
 	
-	private String formatDate(double in, String time_origin, String unitsString, String calendar) {
+	public static String formatDate(double in, String time_origin, String unitsString, String calendar) {
 	    Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
 
 	    if ( calendar != null && !calendar.equals("") ) {
@@ -1106,8 +1106,8 @@ public class DateTimeWidget extends Composite {
 	        time_origin.replaceFirst("0000", "0001");
 	        zeroOrigin = true;
 	    }
-
-	    DateTime baseDT = longFerretForm.parseDateTime(time_origin).withChronology(chrono).withZone(DateTimeZone.UTC);
+	    DateTimeFormatter myLongFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+	    DateTime baseDT = myLongFerretForm.parseDateTime(time_origin).withChronology(chrono).withZone(DateTimeZone.UTC);
 
 	    int insec = 0;
 
@@ -1172,7 +1172,7 @@ public class DateTimeWidget extends Composite {
 
 	        DateTime target = baseDT.plus(p).withChronology(chrono).withZone(DateTimeZone.UTC);
 
-	        String fdate = longFerretForm.print(target.getMillis());
+	        String fdate = myLongFerretForm.print(target.getMillis());
 
 	        return fdate;
 	    } else {
