@@ -592,6 +592,8 @@ public class DateTimeWidget extends Composite {
 			}
 			if ( hasHour ) {
 				date.append(" "+lo_hour.getValue(lo_hour.getSelectedIndex()));
+			} else {
+			    date.append(" 00:00");
 			}
 			return date.toString();
 		}
@@ -624,6 +626,8 @@ public class DateTimeWidget extends Composite {
 				}
 				if ( hasHour ) {
 					date.append(" "+hi_hour.getValue(hi_hour.getSelectedIndex()));
+				} else {
+				    date.append(" 00:00");
 				}
 				return date.toString();
 			}
