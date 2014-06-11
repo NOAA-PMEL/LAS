@@ -239,7 +239,7 @@ ELSE
    ELSE    ! IF ($color_by)
       DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
 
-! Need to separate the different trajectories for time series or map plots      
+! Need to separate the different trajectories for 2-variable time series or map plots      
       IF ($connect_dots"0|*>1") THEN 
           DEFINE SYMBOL data_var = ($data_y_var)  !just so its defined.
           GO setup_dsg_variables 200000 tol1 tol2 tol3
