@@ -2,6 +2,7 @@
 ! Special setup for colorbars and levels for some variables:
 ! QC_FLAG (needs to be expanded)
 ! region_id
+! SOCAT version
 
 DEFINE SYMBOL var_name = $1
 
