@@ -1189,10 +1189,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                     double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
                                     double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
                                     world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
-                                    world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
-                                            * scaled_y_per_pixel;
-                                    endx = currentx;
-                                    endy = currenty;
+                                    world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)*scaled_y_per_pixel;                                 
                                 }
                                 draw = false;
                                 setTextValues();
@@ -1269,15 +1266,23 @@ public class SimplePropPropViewer implements EntryPoint {
             // Calculate time from the map scale...
             String tmin;
             String tmax;
-            if (time_origin != null && time_units != null && calendar != null ) {
-                tmin = DateTimeWidget.formatDate(minx, time_origin, time_units, calendar);
-                tmax = DateTimeWidget.formatDate(maxx, time_origin, time_units, calendar);
+            if ( !draw ) {
+                // Only do time calculation if you're not drawing. Too intense for mouse dragging.
+                
+                if (time_origin != null && time_units != null && calendar != null ) {
+                    tmin = DateTimeWidget.formatDate(minx, time_origin, time_units, calendar);
+                    tmax = DateTimeWidget.formatDate(maxx, time_origin, time_units, calendar);
+                } else {
+                    tmin = time_min;
+                    tmax = time_max;
+                }
             } else {
                 tmin = time_min;
                 tmax = time_max;
             }
-            ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmin, xname, dFormat.format(minx), "gt");      
-            ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmax, xname, dFormat.format(maxx), "le");
+                ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmin, xname, tmin, "gt");      
+                ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmax, xname, tmax, "le");
+            
         } else {
             ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
             ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(maxx), xname, dFormat.format(maxx), "le");
@@ -1317,18 +1322,23 @@ public class SimplePropPropViewer implements EntryPoint {
         }
         if ( yname.toLowerCase().contains("time") ) {
             // Calculate time from the map scale...
-            
+
             String tmin;
             String tmax;
-            if (time_origin != null && time_units != null && calendar != null ) {
-                tmin = DateTimeWidget.formatDate(miny, time_origin, time_units, calendar);
-                tmax = DateTimeWidget.formatDate(maxy, time_origin, time_units, calendar);
+            if ( !draw ) {
+                if (time_origin != null && time_units != null && calendar != null ) {
+                    tmin = DateTimeWidget.formatDate(miny, time_origin, time_units, calendar);
+                    tmax = DateTimeWidget.formatDate(maxy, time_origin, time_units, calendar);
+                } else {
+                    tmin = time_min;
+                    tmax = time_max;
+                }
             } else {
                 tmin = time_min;
                 tmax = time_max;
             }
-            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmin, yname, dFormat.format(miny), "gt");
-            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmax, yname, dFormat.format(maxy), "le");
+            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmin, yname, tmin, "gt");
+            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmax, yname, tmax, "le");
         } else {
             ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
             ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
@@ -1366,7 +1376,7 @@ public class SimplePropPropViewer implements EntryPoint {
                         a.setValue(mv);
                     }
                 } else if ( op.equals("lt") || op.equals("le") ) {
-                    if ( av.compareTo(mv) < 0 ) {
+                    if ( av.compareTo(mv) > 0 ) {
                         a.setValue(mv);
                     }
                     
