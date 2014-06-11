@@ -103,7 +103,7 @@ ENDIF
 
 IF `STRINDEX("($var_name)", "WOCE") GT 0` THEN
    IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette =  ten_by_levels
-   DEFINE SYMBOL ferret_fill_levels = (1.5,4.5,1)
+   DEFINE SYMBOL ferret_fill_levels = (1,4,1)
    IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate 0
 ENDIF
@@ -115,7 +115,6 @@ IF ($var_name"0|qc_flag>1|*>0") THEN
    DEFINE SYMBOL ferret_palette = QC_V3_by_level
    DEFINE SYMBOL ferret_fill_levels = (0.5,10.5,1)
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
-   
 ENDIF
 
 IF ($var_name"0|region_ID>1|*>0") THEN
@@ -130,10 +129,11 @@ ENDIF
 
 
 IF ($var_name"|($feature_variable)>1|*>0") THEN
+
    IF ($ferret_fill_levels"1|*>0") THEN 
       DEFINE SYMBOL ferret_fill_levels = 55
       IF `nfeatures LT 55` THEN DEFINE SYMBOL ferret_fill_levels = `nfeatures`
-      IF `nfeatures LT 30` THEN DEFINE SYMBOL ferret_fill_levels = (1,`nfeatures+1`,1)
+      IF `nfeatures LT 30` THEN DEFINE SYMBOL ferret_fill_levels = (1,`nfeatures`,1)
    ENDIF
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
    IF `($ferret_plot_key"0|*>1") NE 1` THEN DEFINE SYMBOL ferret_plot_key = 0

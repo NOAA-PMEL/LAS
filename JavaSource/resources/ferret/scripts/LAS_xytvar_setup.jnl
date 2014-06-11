@@ -34,13 +34,13 @@ CANCEL SYMBOL set_window_quals
 IF ($variable_0_lab"0|*>1") THEN 
    DEFINE SYMBOL ax_label_x PPL XLAB ($variable_0_lab)
    IF ($ferret_prop_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_x
-   IF ($ferret_prop_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_x
+   IF ($ferret_prop_var"0|longitude>1|lon360>1|*>0") THEN CANCEL SYMBOL ax_label_x
    IF ($ferret_prop_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_x
 ENDIF
 IF ($variable_1_lab"0|*>1") THEN 
    DEFINE SYMBOL ax_label_y PPL YLAB ($variable_1_lab)
    IF ($ferret_plot_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_y
-   IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
+   IF ($ferret_plot_var"0|longitude>1|lon360>1|*>0") THEN CANCEL SYMBOL ax_label_y
    IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
 ENDIF
 IF `(($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1) AND (($ferret_thumb"0|*>1") EQ 0)` THEN 
@@ -80,11 +80,9 @@ IF ($ferret_thumb"0|*>1") THEN
 ENDIF
 
 
-
-
 ! Do not label axes with the words LONGITUDE, LATITUDE
-IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
-IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
+IF ($ferret_prop_var"0|longitude>1|lon360>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
+IF ($ferret_plot_var"0|longitude>1|lon360>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
 IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
 
@@ -162,7 +160,7 @@ LET indep_var1 = y[gy=vaxis1]
 ! See if the independent axis is longitude, latitude, or time
 ! If so redefine those axes
 
-IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN 
+IF `($ferret_prop_var"0|longitude>1|lon360>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN 
 
    DEFINE SYMBOL is_lon = 1
 
@@ -222,7 +220,6 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
          DEFINE SYMBOl region_x_range = 360  ! reset this so Jons_fland.jnl chooses the right resolution
       ENDIF
 
-
    ENDIF  !`(ax_hi-ax_lo) LT 359`
 
    IF `amax GT 180` THEN 
@@ -249,6 +246,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    LET dep_var = x[gx=haxis]
    CANCEL SYMBOL data_1_units
    CANCEL SYMBOL ferret_title_0  ! dont need a horizontal axis label
+
 ENDIF
 
 IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN 
@@ -320,7 +318,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    LET dep_var = 0*t[gt=haxis]
 
    ! A time-lon plot would normally plot with time on the vertical
-   IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
+   IF ($ferret_plot_var"0|longitude>1|lon360>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
 
    DEFINE SYMBOL connect_dots = 1
    DEFINE SYMBOL do_rsquare = 0
@@ -332,8 +330,8 @@ ENDIF
 ! See if the independent axis is longitude, latitude, or time
 ! If so redefine those axes
 
-IF `($ferret_prop_var"0|longitude>1|*>0") EQ 0` THEN 
-IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
+IF `($ferret_prop_var"0|longitude>1|lon360>1|*>0") EQ 0` THEN 
+IF `($ferret_plot_var"0|longitude>1|lon360>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
 
    DEFINE SYMBOL is_lon = 1
 
@@ -370,7 +368,7 @@ IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN
       DEFINE SYMBOL do_rsquare = 0
    ENDIF
 
-   IF ($ferret_plot_var"0|Longitude>1|*>0") THEN DEFINE SYMBOL do_rsquare = 0
+   IF ($ferret_plot_var"0|longitude>1|lon360>1|*>0") THEN DEFINE SYMBOL do_rsquare = 0
 
 ENDIF
 ENDIF
@@ -532,7 +530,7 @@ ENDIF
 ! For latitudes, do a plot of the original variables to set the axis symbols
 
 IF `($ferret_prop_var"0|latitude>1|*>0") OR ($is_lat_prop"0|0|1|*>0")` THEN
-   IF `($ferret_plot_var"|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
+   IF `($ferret_plot_var"|longitude>1|lon360>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
       SET MODE/LAST nodata_lab
       EXIT/SCRIPT
    ENDIF
@@ -547,7 +545,7 @@ ENDIF
 ! done on a map, but with light gray.
 ! Only if longitude is on the horizontal axis
 
-IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
+IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|lon360>1|*>0")` THEN
    DEFINE SYMBOL basemap_area = `( (($xaxis_max)-($xaxis_min)) * (($yaxis_max)-($yaxis_min)) )/ (360 * 180)`
    DEFINE SYMBOL region_x_lo = ($ppl$xmin)
    DEFINE SYMBOL region_x_hi = ($ppl$xmax)

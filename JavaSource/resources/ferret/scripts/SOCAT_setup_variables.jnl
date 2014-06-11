@@ -73,6 +73,11 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
          DEFINE SYMBOL ferret_plot_var   = plot_var
          LET zvar = plot_var_2
          SET ATT/LIKE=zvar_0 zvar
+
+         LET getgood = STRFLOAT (($data_var))
+         DEFINE SYMBOL ngood_data = `getgood[i=@ngd]`
+         DEFINE SYMBOL nbad_data = `getgood[i=@nbd]`
+
       ENDIF
 
       IF `STRINDEX("($ferret_plot_var)", "tmonth") GT 0` THEN 
