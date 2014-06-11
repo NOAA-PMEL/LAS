@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASTabledapBackendConfig;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
+import gov.noaa.pmel.tmap.las.service.database.IntermediateNetcdfFile;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 
@@ -49,6 +50,7 @@ import ucar.ma2.StructureMembers.Member;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 import ucar.nc2.constants.FeatureType;
@@ -466,11 +468,16 @@ public class TabledapTool extends TemplateTool {
                         message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
                         message = message.substring(0, message.indexOf(")"));
                     }
-                    causeOfError = "Data source error: " + message;
-                    throw new Exception(message);
+                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                        writeEmpty(netcdfFilename);
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
                 }
             } else {
                 // We have to build our own netCDF file from the two queries.  In this case we will pull two DSG files make our own DSG ragged array file.
+
                 File temp_file1 = new File(netcdfFilename+".1.temp");
                 File temp_file2 = new File(netcdfFilename+".2.temp");
                 String q1 = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
@@ -480,7 +487,24 @@ public class TabledapTool extends TemplateTool {
                 dt = new DateTime();
                 log.debug("TableDapTool query="+dsUrl1);
                 log.info("{TableDapTool starting file pull for file 1 at "+fmt.print(dt));
-                lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
+                int number = 0;
+                try {
+
+                    lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                        // one empty search
+                        number++;
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
+                }
                 dt = new DateTime();
                 log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
                 //was the request canceled?
@@ -488,13 +512,33 @@ public class TabledapTool extends TemplateTool {
                     return lasBackendResponse;
                 log.debug("TableDapTool query="+dsUrl2);
                 log.info("{TableDapTool starting file pull for file 2 at "+fmt.print(dt));
-                lasProxy.executeGetMethodAndSaveResult(dsUrl2, temp_file2, null);
+                try {
+                    lasProxy.executeGetMethodAndSaveResult(dsUrl2, temp_file2, null);
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    if ( message.toLowerCase().contains("query produced no matching" ) ) {
+                        // two empty searches
+                        number++;
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
+                }
+                if ( number == 2 ) {
+                    // two empty searches, write the empty file
+                    writeEmpty(netcdfFilename);
+                }
                 dt = new DateTime();
                 log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
                 //was the request canceled?
                 if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
                     return lasBackendResponse;
                 merge(netcdfFilename, temp_file1, temp_file2);
+
             }
 
 
@@ -538,6 +582,25 @@ public class TabledapTool extends TemplateTool {
             System.out.println(dataRow.getId() + "   " + dataRow.getData().get(time));
         }
         
+    }
+    public void writeEmpty (String netcdfFilename) throws Exception {
+        ArrayList<Dimension> dimList = new ArrayList<Dimension>();
+        IntermediateNetcdfFile nfile;
+        try {
+            nfile = new IntermediateNetcdfFile(netcdfFilename, false);
+        } catch (LASException e) {
+            throw new Exception("Cannot create empty file.");
+        }
+        NetcdfFileWriteable netcdfFile = nfile.getNetcdfFile();
+        Dimension index = netcdfFile.addDimension("index", 1);
+        dimList.add(index);
+        netcdfFile.addVariable(time, DataType.DOUBLE, dimList);
+        ArrayDouble.D1 data = new ArrayDouble.D1(1);
+        Double d = new Double("-9999.");
+        data.set(0, d);
+        netcdfFile.addGlobalAttribute("query_result", "No data found to match this request.");
+        netcdfFile.create();
+        netcdfFile.write(time, data);
     }
     public void merge(String netcdfFilename, File temp_file1, File temp_file2) throws IOException, InvalidRangeException  {
 // DEBUG

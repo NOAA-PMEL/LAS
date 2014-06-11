@@ -874,4 +874,7 @@ public class IntermediateNetcdfFile {
    public void close() throws IOException {
        netcdfFile.close();
    }
+public NetcdfFileWriteable getNetcdfFile() {
+    return netcdfFile;
+}
 }
