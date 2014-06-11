@@ -249,7 +249,6 @@ ENDIF
 
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
-      LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
       IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
          DEFINE SYMBOL DATA_EXISTS = 0
          CANCEL SYMBOL DATA_MIN
@@ -258,6 +257,16 @@ ENDIF
          DEFINE SYMBOL DATA_EXISTS = 1
          DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
          DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
+	 IF ($data_max"0|bad>1|1.E+34>1|*>0") THEN 
+	    CANCEL SYMBOL data_min
+	    CANCEL SYMBOL data_max
+	    DEFINE SYMBOL DATA_EXISTS = 0
+	 ENDIF
+	 IF ($data_min"0|bad>1|1.E+34>1|*>0") THEN 
+	    CANCEL SYMBOL data_min
+	    CANCEL SYMBOL data_max
+	    DEFINE SYMBOL DATA_EXISTS = 0
+	 ENDIF
       ENDIF
 
       IF ($its_prop_prop_plot"0|*>1") THEN
