@@ -1,60 +1,69 @@
-<menus>
+  <menus>
     <menu type="views" name="Views_StdSurface_XY">
-	    <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
-	</menu>
-	<menu type="ops" name="Trajectory_operations_XY">
-        <item values="Trajectory_interactive_plot,gif">map</item>
-        <item values="SPPV,gif">map</item>
-        <item values="PropPropThumbTable,gif">map</item>
-        <item values="TrajectoryTable,gif">file</item>
-        <item values="Trajectory_Interactive_Download,gif">map</item>
-        <item values="Plot_GE_Overlay_Traj,html,2">Plot to Google Earth</item>
+      <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
     </menu>
-</menus>
-<maps>
-	<map type="options" name="Trajectory_ColorOptions">
-		<ifoptions op="Trajectory_interactive_plot" href="#Trajectory_Options" />
-	</map>
-	<map type="ops" name="Trajectory_Operations">
-        <ifmenu view="xy" href="#Trajectory_operations_XY"/>
-        <constraint type="variable"/>
+    <menu type="ops" name="Trajectory_operations_XY">
+      <item values="Trajectory_interactive_plot,gif">map</item>
+      <item values="SPPV,gif">map</item>
+      <item values="PropPropThumbTable,gif">map</item>
+      <item values="TrajectoryTable,gif">file</item>
+      <item values="Trajectory_Interactive_Download,gif">map</item>
+      <item values="Plot_GE_Overlay_Traj,html,2">Plot to Google Earth</item>
+    </menu>
+  </menus>
+  <maps>
+    <map type="options" name="Trajectory_ColorOptions">
+      <ifoptions op="Trajectory_interactive_plot" href="#Trajectory_Options"/>
+    </map>
+    <map type="ops" name="Trajectory_Operations">
+      <ifmenu view="xy" href="#Trajectory_operations_XY"/>
+      <constraint type="variable"/>
     </map>
     <map type="views" name="Trajectory_Views">
-        <menu href="#Views_StdSurface_XY"/>
+      <menu href="#Views_StdSurface_XY"/>
     </map>
-</maps>
-<options>
-	<optiondef name="Trajectory_palette">
-		<option>
-			<help>Set the color palette for the plot. </help>
-			<title>Palette</title>
-			<menu type="options" name="Trajectory_palette">
-				<item values="rainbow">rainbow</item>
-				<item values="rainbow">temperature rainbow</item>
-				<item values="light_rainbow">pastel rainbow</item>
-				<item values="rainbow_by_levels">rainbow by levels</item>
-				<item values="ocean_temp">ocean temperature</item>
-				<item values="light_centered">anomaly</item>
-				<item values="bluescale">range of blues</item>
-				<item values="inverse_bluescale">inverse range of blues</item>
-				<item values="redscale">range of reds</item>
-				<item values="inverse_redscale">inverse range of reds</item>
-				<item values="greenscale">range of greens</item>
-				<item values="inverse_greenscale">inverse range of greens</item>
-				<item values="grayscale">range of grays</item>
-				<item values="inverse_grayscale">inverse range of grays</item>
-			</menu>
-		</option>
-	</optiondef>
-	<optiondef name="Trajectory_Options"
-		inherit="#Trajectory_palette,#size,#margins,#deg_min_sec,#set_aspect,#use_graticules,#poly_levels,#full_data" />
-</options>
-<defaults>
-	<default name="Trajectories">
-		<map href="#Trajectory_Operations" />
-		<map href="#Trajectory_Views" />
-		<map href="#DefaultLivemap" />
-		<map href="#Trajectory_ColorOptions" />
-	</default>
-</defaults>
-
+  </maps>
+  <options>
+    <optiondef name="Trajectory_palette">
+      <option>
+        <help>Set the color palette for the plot. </help>
+        <title>Palette</title>
+        <menu type="options" name="Trajectory_palette">
+          <item values="rainbow">rainbow</item>
+          <item values="rainbow">temperature rainbow</item>
+          <item values="light_rainbow">pastel rainbow</item>
+          <item values="rainbow_by_levels">rainbow by levels</item>
+          <item values="ocean_temp">ocean temperature</item>
+          <item values="light_centered">anomaly</item>
+          <item values="bluescale">range of blues</item>
+          <item values="inverse_bluescale">inverse range of blues</item>
+          <item values="redscale">range of reds</item>
+          <item values="inverse_redscale">inverse range of reds</item>
+          <item values="greenscale">range of greens</item>
+          <item values="inverse_greenscale">inverse range of greens</item>
+          <item values="grayscale">range of grays</item>
+          <item values="inverse_grayscale">inverse range of grays</item>
+        </menu>
+      </option>
+    </optiondef>
+    <optiondef name="full_data">
+      <option>
+        <help>Use full undecimated data set for all operations.</help>
+        <title>Use full data set.</title>
+        <menu type="options" name="full_data">
+          <item values="default">Default</item>
+          <item values="yes">Yes</item>
+          <item values="no">no</item>
+        </menu>
+      </option>
+    </optiondef>
+    <optiondef name="Trajectory_Options" inherit="#Trajectory_palette,#size,#margins,#deg_min_sec,#set_aspect,#use_graticules,#poly_levels"/>
+  </options>
+  <defaults>
+    <default name="Trajectories">
+      <map href="#Trajectory_Operations"/>
+      <map href="#Trajectory_Views"/>
+      <map href="#DefaultLivemap"/>
+      <map href="#Trajectory_ColorOptions"/>
+    </default>
+  </defaults>
