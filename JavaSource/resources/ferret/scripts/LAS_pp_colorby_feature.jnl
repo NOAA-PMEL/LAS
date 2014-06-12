@@ -40,13 +40,20 @@ LET idvar = EXPND_BY_LEN(feature_id, ($rowvar), ($rowvar)[m=@sum])
 LET idvar_masked = idvar * var_mask
 LET count_nf = 0
 LET count_orig = 0
-REPEAT/RANGE=1:`($rowvar),RETURN=msize`/NAME=ic (\
- DEFINE SYMBOL ic = `ic` ;\
- DEFINE SYMBOL nf = `idvar_masked[I=@LOC:($ic)]` ;\
- DEFINE SYMBOL cruise_is = ($nf"0|bad>0|*>($ic)") ;\
- LET count_nf = `count_nf +  ($nf"0|bad>0|*>1")` ;\
- IF `($cruise_is) GT 0` THEN LET count_orig = `count_orig + ($rowvar)[m=($cruise_is)]`;\ 
-)
+
+IF `($feature_max) LE ($feature_max_labels)` THEN
+   REPEAT/RANGE=1:`($rowvar),RETURN=msize`/NAME=ic (\
+    DEFINE SYMBOL ic = `ic` ;\
+    DEFINE SYMBOL nf = `idvar_masked[I=@LOC:($ic)]` ;\
+    DEFINE SYMBOL cruise_is = ($nf"0|bad>0|*>($ic)") ;\
+    LET count_nf = `count_nf +  ($nf"0|bad>0|*>1")` ;\
+    IF `($cruise_is) GT 0` THEN LET count_orig = `count_orig + ($rowvar)[m=($cruise_is)]`;\ 
+   )
+ELSE
+   LET count_nf = `($rowvar),RETURN=msize`
+   LET count_orig = idvar_masked[i=@ngd]
+ENDIF
+
 DEFINE SYMBOL cruises_shown = `count_nf`
 DEFINE SYMBOL prof_traj_shown = `count_nf`
 
