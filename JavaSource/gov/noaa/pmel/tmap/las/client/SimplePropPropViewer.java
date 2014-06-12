@@ -1280,8 +1280,8 @@ public class SimplePropPropViewer implements EntryPoint {
                 tmin = time_min;
                 tmax = time_max;
             }
-                ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmin, xname, tmin, "gt");      
-                ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmax, xname, tmax, "le");
+                ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmin, xname, dFormat.format(minx), "gt");      
+                ctax2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, tmax, xname, dFormat.format(maxx), "le");
             
         } else {
             ctax1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, xid, xname, dFormat.format(minx), xname, dFormat.format(minx), "gt");      
@@ -1337,8 +1337,8 @@ public class SimplePropPropViewer implements EntryPoint {
                 tmin = time_min;
                 tmax = time_max;
             }
-            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmin, yname, tmin, "gt");
-            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmax, yname, tmax, "le");
+            ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmin, yname, dFormat.format(miny), "gt");
+            ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, tmax, yname, dFormat.format(maxy), "le");
         } else {
             ctay1 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(miny), yname, dFormat.format(miny), "gt");
             ctay2 = new VariableConstraintAnchor(Constants.VARIABLE_CONSTRAINT, dsid, yid, yname, dFormat.format(maxy), yname, dFormat.format(maxy), "le");
