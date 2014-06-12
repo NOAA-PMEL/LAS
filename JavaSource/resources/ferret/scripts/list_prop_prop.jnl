@@ -35,8 +35,7 @@ IF ($ferret_plot_var_2"0|($ferret_plot_var_0)>1|($ferret_plot_var_1)>1|*>0") THE
  CANCEL SYMBOL ferret_plot_var_2
 
 ! For that matter, if variable 0 matches variable 1, we can skip one of them.
-sh var xvar
-sh var yvar
+
 IF ($ferret_plot_var_1"0|($ferret_plot_var_0)>1|*>0") THEN \
  CANCEL SYMBOL ferret_plot_var_1
 
@@ -102,7 +101,6 @@ ENDIF
 
 IF ($color_by"0|*>1") THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
-   sh var zvar
    DEF SYM ztype = `zvar,RETURN=dtype`
    IF ($ztype"0|CHAR>1|*>0") THEN DEF SYM is_string = 1
 
@@ -270,8 +268,6 @@ IF `size* nlist GT max_size` THEN
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
-sh sym vars_out
-sh sym ferret_format
 IF `size* nlist LE max_size` THEN
 ! 
 ! ... list in one big chunk

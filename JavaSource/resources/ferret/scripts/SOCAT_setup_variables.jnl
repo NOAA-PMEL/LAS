@@ -10,6 +10,7 @@ DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 IF ($is_string"0|0|*>1") THEN 
    IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
       LET plot_var_0 = STRFLOAT(($ferret_plot_var_0) )
+      IF ($its_listing) THEN LET plot_var_0 = ($ferret_plot_var_0)
       DEFINE SYMBOL ferret_plot_var_0 = plot_var_0
       LET/TITLE="($ferret_title_0)" xvar = plot_var_0
    ENDIF
@@ -27,6 +28,7 @@ DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 IF ($is_string"0|0|*>1") THEN 
    IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
       LET plot_var_1 = STRFLOAT(($ferret_plot_var_1) )
+      IF ($its_listing) THEN LET plot_var_1 = ($ferret_plot_var_1)
       DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
       LET/TITLE="($ferret_title_1)" yvar = plot_var_1
    ENDIF
@@ -70,6 +72,8 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
          SET VAR/NAME = zvar_0 zvar
          LET plot_var_2 = STRFLOAT(zvar_0 )
          LET plot_var   = STRFLOAT(zvar_0 )
+         IF ($its_listing) THEN LET plot_var_2 = ($ferret_plot_var_2)
+         IF ($its_listing) THEN LET plot_var = ($ferret_plot_var_2)
          DEFINE SYMBOL ferret_plot_var_2 = plot_var_2
          DEFINE SYMBOL ferret_plot_var   = plot_var
          LET zvar = plot_var_2
