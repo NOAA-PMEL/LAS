@@ -177,13 +177,14 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
 ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=black
    DEFINE SYMBOL poly_scale = 0.4
+   DEFINE SYMBOL plot_using_sym = 1
 ENDIF
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
 DEFINE SYMBOL poly_command POLY($qualifiers)
 DEFINE SYMBOL line_color = blue
 
-IF `($feature_max) LE ($feature_max_labels)` THEN
+IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
 
    LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
    LET q = XSEQUENCE( subset_mask * data_var_z)
@@ -248,12 +249,9 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
 
 ! Note need to protect the colors from one set of 10 to the next
   
-ELSE ! all features
+ELSE ! all features, do as a PLOT not a POLY command, much faster
 
-   GO polymark ($poly_command) p q p \
-     ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") \
-     ($poly_scale)
-
+   PLOT/VS/NOLAB/over/sym=19/siz=.12 p,q
    DEFINE SYMBOL ngood_data = `p[i=@ngd]`
 ENDIF
 
