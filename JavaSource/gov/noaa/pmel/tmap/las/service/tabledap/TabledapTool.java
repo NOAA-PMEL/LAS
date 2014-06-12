@@ -188,7 +188,7 @@ public class TabledapTool extends TemplateTool {
             }
             required(cruiseid, causeOfError);
 
-            causeOfError = "Could not get tiem column name from backend request: "; 
+            causeOfError = "Could not get time column name from backend request: "; 
             time = getTabledapProperty(lasBackendRequest, "time");
             required(time, causeOfError);
 
@@ -213,6 +213,13 @@ public class TabledapTool extends TemplateTool {
             required(id, causeOfError);
             
             String decid = getTabledapProperty(lasBackendRequest, "decimated_id");
+            
+            Map<String, String> ferret_prop = lasBackendRequest.getPropertyGroup("ferret");
+            String full_option = ferret_prop.get("full_data");
+            boolean full = false;
+            if ( full_option != null && full_option.equalsIgnoreCase("yes") ) {
+                full = true;
+            }
            
             //get "debug" file name, may be null or ""
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
@@ -434,7 +441,7 @@ public class TabledapTool extends TemplateTool {
             
             
             // This changes the data set to the decimated data set if it exists.
-            if ( !hasConstraints && !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("")) {
+            if ( !hasConstraints && !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("") && !full ) {
                 id = decid;
             }
             
