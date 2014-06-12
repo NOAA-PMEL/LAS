@@ -45,15 +45,18 @@ LET lat_with_gaps = ($data_y_var)
 LET var_with_gaps = ($data_var)
 
 ! Function separate puts gaps between cruises and also removes jumps in longitude
-! where it crosses the dateline
+! where it crosses the dateline. Set ngood and nbad before adding these gaps.
+! Prop-prop plots compute ngood elsewhere, taking into account constraints.
 
-IF `($is_string) NE 1` THEN 
-   STAT ($data_var)
-   DEFINE SYMBOL ngood_data = ($stat_ngood)
-   DEFINE SYMBOL nbad_data = ($stat_nbad)
-ELSE
-   DEFINE SYMBOL ngood_data = `($data_var)[i=@ngd]`
-   DEFINE SYMBOL nbad_data = `($data_var)[i=@nbd]`
+IF `($its_prop_plot"0|0|1|*>1") EQ 0` THEN
+   IF `($is_string) NE 1` THEN 
+      STAT ($data_var)
+      DEFINE SYMBOL ngood_data = ($stat_ngood)
+      DEFINE SYMBOL nbad_data = ($stat_nbad)
+   ELSE
+      DEFINE SYMBOL ngood_data = `($data_var)[i=@ngd]`
+      DEFINE SYMBOL nbad_data = `($data_var)[i=@nbd]`
+   ENDIF
 ENDIF
 
 IF ($ncruises"0|*>1") THEN 

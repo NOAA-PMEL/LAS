@@ -293,6 +293,5 @@ IF `STRCMP(($crossover), "nothing") NE 0` THEN
 ENDIF
 
 DEFINE SYMBOL nout_lonlat = ($ngood_data)
-DEFINE SYMBOL ngood_data = `count_orig`
 
 ! End of file ------------ LAS_pp_colorby_feature.jnl--------------------------
