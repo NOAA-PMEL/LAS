@@ -178,6 +178,18 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
       </menu>
     </option>
   </optiondef>
+  
+  <optiondef name="full_data">
+    <option>
+      <help>Use full undecimated data set for all operations.</help>
+      <title>Use full data set.</title>
+      <menu type="options" name="full_data">
+        <item values="default">Default</item>
+        <item values="yes">Yes</item>
+        <item values="no">no</item>
+      </menu>
+    </option>
+  </optiondef>
 
   <optiondef name="use_ref_map">
     <option>
