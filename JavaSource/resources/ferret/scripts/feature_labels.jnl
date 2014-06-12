@@ -4,6 +4,8 @@
 !
 ! Add to annotations the upper right with number of trajectories or profiles
 ! and number of valid and missing points shown.
+! On prop-prop plots, don't show missing. The count of missing-values in the
+! data is not distinguishable from the missing data due to applying constraints. 
 
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
@@ -77,7 +79,7 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
 DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
-IF ($nbad_data"0|0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab = \
+IF `(($its_prop_plot"0|0|1|*>1") EQ 0) AND ($nbad_data"0|0|*>1")` THEN DEFINE SYMBOL note_($note_num)_lab = \
  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown (plus ($nbad_data) missing)
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
