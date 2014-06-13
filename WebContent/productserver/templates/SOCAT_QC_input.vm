@@ -1,0 +1,145 @@
+## Specialized version of output.vm for OCDMS QC entry
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- LAS SERVER OK -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<title>Enter QC for $las_request.getProperty("qc", "expocode") in the $las_request.getProperty("qc", "region_name") region -- $las_config.getTitle()</title>
+	<script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
+	<script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
+	<script launguage="JavaScript">
+                 
+                function checkForOverride() {
+                       if (document.getElementById("region").value == "G") {
+                             document.getElementById("OverrideQC").style.visibility = "visible";
+
+			} else {
+                             document.getElementById("OverrideQC").style.visibility = "hidden";
+                        }
+
+ 		}
+		function submit() {
+
+		#if (! $user_name )
+
+		  var reviewer_option_selected = document.getElementById("reviewer").selectedIndex;
+		  var reviewer = document.getElementById("reviewer").options[reviewer_option_selected].text;
+		#else
+		  var reviewer = "$user_name";
+		#end
+		  if(trim(reviewer).length==0){
+		  #if (! $user_name )
+		  	alert("Please select a reviewer name from the dropdown list");
+		  #else
+		  	alert("Invalid reviewer name");
+		  #end
+		  	return;
+		  }
+		  var flag_option_selected = document.getElementById("flag").selectedIndex;
+		  var flag = document.getElementById("flag").options[flag_option_selected].value;
+		  if(flag == 'U' || flag == 'N'){
+		  	alert("Please select a valid flag");
+		  	return;
+		  }
+		  var region_option_selected = document.getElementById("region").selectedIndex;
+		  var region_ID = document.getElementById("region").options[region_option_selected].value;
+		  if(region_ID == ''){
+			alert("Please select a valid region");
+			return;
+		  }
+		  var Req = new LASRequest('$las_request.toJavaScriptSafeString()');
+		  Req.setOperation("SOCAT_QC_submit");
+		  Req.setProperty("qc","cruise_ID","$las_request.getProperty("qc", "cruise_ID")");
+		  Req.setProperty("qc","region_ID",region_ID);
+		  Req.setProperty("qc","flag",flag);
+		  Req.setProperty("qc","comment",document.getElementById("comment").value.replace(/\'/g,"").replace(/\"/g,'').replace(/%/g," percent"));
+
+		  Req.setProperty("qc","reviewer",reviewer);
+//		  Req.setProperty("qc","reviewer_id",document.getElementById("reviewer").value);
+		  if(document.getElementById("override").checked)
+			  Req.setProperty("qc","override",reviewer);
+		  if(document.getElementById("remove_override"))
+			  if(document.getElementById("remove_override").checked)
+				  Req.setProperty("qc","remove_override","true");
+		  document.location="ProductServer.do?xml=" + escape(Req.getXMLText());
+		}
+	</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33678033-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+  <body>
+<div style="position:absolute;width:300px;height:400px">
+<h3>Enter QC for cruise ID <b>$las_request.getProperty("qc", "expocode")</b></h3>
+
+   	<strong>Reviewer</strong>
+
+   	#if (! $user_name )
+   	<select id="reviewer">
+		#include("reviewers.txt")
+	</select>
+ 	#else
+		<input type="text" readonly="true" value="$user_name" style="background-color: #eeeeee" />
+	#end
+	<br><br>
+
+	#if ($dc.getId() == "region1")
+
+	     		#foreach ($item in $dc.getRhs())
+	        		#if ( $las_request.getProperty("qc", "region_name") == $item.getName())
+					<option value="$item.getValue()">$item.getName()</option>
+					#end
+	     		#end
+     	#end
+
+	#set($last=$las_webrowset.last())
+	#set($size = $las_webrowset.getRow())
+	#set($first=$las_webrowset.beforeFirst())
+	#set ($first_frame='')
+	<strong>Region</strong>
+	<select id="region" onChange="javascript:checkForOverride()">
+	#set ($global = "false")	
+	#foreach ($row in [01..$size])
+	#set($next=$las_webrowset.next())
+            #if ($las_webrowset.getString('region_id') == "G")
+                #set ($global="true")
+            #end
+		<option id="$las_webrowset.getString('region_id')" value="$las_webrowset.getString('region_id')">$las_webrowset.getString('region_name')</option>
+	#end
+        #if ($global == "false")
+		<option id="G" value="G">Global</option>
+        #end
+	</select><br /> 
+        <strong>Quality Control Flag</strong>
+	     <select id="flag" >
+     	        <option value="N">No flag</option>
+        	<option value="A">A</option>
+        	<option value="B">B</option>
+        	<option value="C">C</option>
+        	<option value="D">D</option>
+        	<option value="F">F</option>
+        	<option value="X">EXCLUDE</option>
+        	<option value="S">SUSPEND</option>
+             </select><br/>
+	
+        <div id="OverrideQC" style="visibility:hidden"><input type="checkbox" id="override"><strong>Override Conflicting Flags</strong></div> <br>
+
+	<br>
+	<strong>Comment</strong><br>
+	<textarea id="comment" cols="40" rows="10"></textarea><br>
+	<button style="float:right" onclick="window.close()">Cancel</button>
+	<button onclick="submit()">Submit this QC Evaluation</button>
+	</div>
+  </body>
+</html>
+
