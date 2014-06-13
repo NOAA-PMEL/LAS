@@ -43,7 +43,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
@@ -51,6 +53,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
@@ -87,7 +90,7 @@ public class ColumnEditorWidget extends Composite {
     ScrollPanel datascroll = new ScrollPanel();
     HorizontalPanel idAndFlagControls = new HorizontalPanel();
     HorizontalPanel commentControls = new HorizontalPanel();
-    FlowPanel openMinimizeControls = new FlowPanel();
+    HorizontalPanel openMinimizeControls = new HorizontalPanel();
     VerticalPanel mainpanel = new VerticalPanel();
     DropDown ids = new DropDown();
     FlexTable datatable = new FlexTable();
@@ -267,15 +270,18 @@ public class ColumnEditorWidget extends Composite {
         
         openMinimizeControls.addStyleName("nowrap-brown");
         openMinimizeControls.setWidth("100%");
-        
+        openMinimizeControls.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         mainpanel.add(openMinimizeControls);
         mainpanel.add(idAndFlagControls);
         mainpanel.add(commentControls);
         
        
-        final Anchor close = new Anchor("");
-        close.setStyleName("gwt-extras-dialog-close");
-        close.addClickHandler( new ClickHandler() {         
+        PushButton close = new PushButton();
+        Image closeUp = new Image(GWT.getModuleBaseURL()
+                + "../images/close_off.png");
+        Image closeDown = new Image(GWT.getModuleBaseURL()
+                + "../images/close_on.png");
+        close = new PushButton(closeUp, closeDown,new ClickHandler() {         
             public void onClick(ClickEvent event) { 
                 if ( !isDirty() ) {
                     eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(true), ColumnEditorWidget.this);    
@@ -284,27 +290,37 @@ public class ColumnEditorWidget extends Composite {
                 }
             }
         });
-        final Anchor minimize = new Anchor("");
-        minimize.setStyleName("gwt-extras-dialog-minimize");
-        minimize.addClickHandler(new ClickHandler() {
+        close.setStylePrimaryName("EDITOR-PushButton");
+        close.setTitle("Close the editor");
+        close.setSize("22px", "22px");
+        close.addStyleName("top-right");
+        
+        Image minimizeUp = new Image(GWT.getModuleBaseURL()
+                + "../images/minus_off.png");
+        Image minimizeDown = new Image(GWT.getModuleBaseURL()
+                + "../images/plus_on.png");
+       
+        ToggleButton minimize = new ToggleButton(minimizeUp, minimizeDown,new ClickHandler() {
             
             @Override
             public void onClick(ClickEvent event) {
                 if ( isTableVisible() ) {
                     setTableVisible(false);
-                    minimize.setStyleName("gwt-extras-dialog-maximize");
                 } else {
                     setTableVisible(true);
-                    minimize.setStyleName("gwt-extras-dialog-minimize");     
                 }
                 
             }
         });
-        //openMinimizeControls.add(new HTML("<div style=\"font-weight: bold;font-size: large;float: left\">Flag Editor</div>"));
-        openMinimizeControls.add(close);
-        openMinimizeControls.add(minimize);
-       
+        minimize.setStylePrimaryName("EDITOR-PushButton");
+        minimize.setTitle("Hide the table to see the plot underneath");
+        minimize.setSize("22px", "22px");
+        HorizontalPanel buttons = new HorizontalPanel();
+        buttons.add(minimize);
+        buttons.add(close);
         
+        openMinimizeControls.add(buttons);
+               
         headertable.addStyleName("headertable");
         mainpanel.add(headertable);
         datascroll.add(datatable);
