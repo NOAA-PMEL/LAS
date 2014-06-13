@@ -57,7 +57,7 @@
         </menu>
       </option>
     </optiondef>
-    <optiondef name="Trajectory_Options" inherit="#Trajectory_palette,#size,#margins,#deg_min_sec,#set_aspect,#use_graticules,#full_data"/>
+    <optiondef name="Trajectory_Options" inherit="#Trajectory_palette,#size,#fill_levels,#deg_min_sec,#set_aspect,#use_graticules,#full_data"/>
   </options>
   <defaults>
     <default name="Trajectories">
