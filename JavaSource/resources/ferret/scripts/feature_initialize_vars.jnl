@@ -32,19 +32,8 @@ IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 DEFINE SYMBOL rdir = `($rowvar),RETURN=shape` 
 DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
 
-! If (for prop-prop plots) there are mask-by settings, apply them
-
-let nmask_labels = 0
-GO feature_mask_by_var ($data_var)
-
 LET n_subset = `($rowvar),RETURN=msize`
 DEFINE AXIS/X=1:`n_subset`:1 xmask_axis
-
-IF `nmask_labels GT 0` THEN
-   LET dvar_to_mask = ($data_var)
-   DEFINE SYMBOL data_var = mask_on_var* dvar_to_mask
-ENDIF
-
 
 IF `($numobs) EQ 1` THEN
    LET nfeatures = 1
