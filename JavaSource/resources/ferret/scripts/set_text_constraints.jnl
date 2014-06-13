@@ -10,7 +10,8 @@ IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN
      EXIT/SCRIPT
 ENDIF
 
-DEF SYM cvar = ($constraint_($ic)_lhs); \
+DEF SYM cvar = ($constraint_($ic)_lhs)
+
 LET has_var = `(IS_ELEMENT_OF_STR_N(vnames, "($cvar)") GT 0) OR (IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0)`
 IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_
 

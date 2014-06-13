@@ -55,12 +55,6 @@ IF ($do_curvi_xy"0") THEN DEFINE SYMBOL fer_sym = ferret_plot_base
 DEFINE SYMBOL ferret_plot_var_0 = ($($fer_sym)_var)
 
 LET/TITLE="($ferret_title_0)" xvar = ($($fer_sym)_var)
-DEFINE SYMBOL vshape = `($($fer_sym)_var),return=SHAPE`
-IF `STRCMP("($vshape)", "E") EQ 0` THEN 
-   DEFINE AXIS/x=1:`ne_var`:1 exaxis
-   LET xxex = x[gx=exaxis]
-   LET/TITLE="($ferret_title_0)" xvar = RESHAPE(($($fer_sym)_var), xxex)
-ENDIF
 
 LET nx_var = `($($fer_sym)_var_0),return=isize`
 LET ny_var = `($($fer_sym)_var_0),return=jsize`
@@ -70,6 +64,13 @@ LET ne_var = `($($fer_sym)_var_0),return=msize`
 LET nf_var = `($($fer_sym)_var_0),return=nsize`
 
 LET nx_var = `nx_var*ny_var*nz_var*nt_var*ne_var*nf_var`
+
+DEFINE SYMBOL vshape = `($($fer_sym)_var),return=SHAPE`
+IF `STRCMP("($vshape)", "E") EQ 0` THEN 
+   DEFINE AXIS/x=1:`ne_var`:1 exaxis
+   LET xxex = x[gx=exaxis]
+   LET/TITLE="($ferret_title_0)" xvar = RESHAPE(($($fer_sym)_var), xxex)
+ENDIF
 
 ! Is it a varible on the E axis of a DSG file?
 
@@ -102,6 +103,7 @@ IF `($vshape"0|E>1|*>0)` THEN
    ELSE
       LET/TITLE="($ferret_title_0)" xvar = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
+   LET nx_var = `($rowvar)[m=@sum]`
 ENDIF
 
 ! Initialize the second variable.

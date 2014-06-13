@@ -307,7 +307,7 @@ IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
 
 GO LAS_regressx
 
-IF `(p[x=@NGD] LE 1) OR (qhat[x=@NGD] LE 1)` THEN DEFINE SYMBOL do_rsquare = 0
+IF `(p[i=@NGD] LE 1)` THEN DEFINE SYMBOL do_rsquare = 0
 
 ! Note do_rsquare is set in LAS_xytvar_setup, where plots with time, lon, or 
 ! lat axes are set to NOT draw the regression line.

@@ -17,9 +17,9 @@ IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 
 
-DEFINE SYMBOL data_var_in = ($data_var)
-DEFINE SYMBOL data_x_var_in = ($data_x_var)
-DEFINE SYMBOL data_y_var_in = ($data_y_var)
+IF `($data_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_var_in = ($data_var)
+IF `($data_x_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_x_var_in = ($data_x_var)
+IF `($data_y_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_y_var_in = ($data_y_var)
 
 DEFINE SYMBOL ncruises = `($rowvar),RETURN=msize`
 
