@@ -44,8 +44,8 @@ IF ($variable_1_lab"0|*>1") THEN
    IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
 ENDIF
 IF `(($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1) AND (($ferret_thumb"0|*>1") EQ 0)` THEN 
-   DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view
-   DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:0.93 full_view2
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.06:0.93 full_view
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view2
    SET VIEW full_view
 ENDIF
 
@@ -60,20 +60,21 @@ DEFINE SYMBOL miss_lab_siz = 0.14
 
 ! For thumbnail plots
 DEFINE SYMBOL mainlab_size = 0.14
-DEFINE SYMBOL errlab_size = 0.12
+DEFINE SYMBOL errlab_size = 0.16
 IF ($ferret_thumb"0|*>1") THEN  
    DEFINE SYMBOL poly_size = 1.3
    DEFINE SYMBOL is_thumb = 1
    DEFINE SYMBOL mainlab_size = 0.22
    DEFINE SYMBOL errlab_size = 0.2
-   PPL AXLSZE,.16,.16
-   PPL TXLSZE,.16
-   DEFINE SYMBOL labelsize_setting = 0.2,0.16,0.16,0.16
-   LET labfac = 1.4
+   PPL AXLSZE,.14,.14
+   DEFINE SYMBOL txl_lab_size = .14
+   PPL TXLSZE,($txl_lab_size)
+   LET labfac = 2.
    DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
-   DEFINE SYMBOL miss_lab_siz = 0.18
+   DEFINE SYMBOL miss_lab_siz = 0.24
 
    DEFINE SYMBOL do_rsquare = 0
+
 ENDIF
 
 
@@ -151,7 +152,7 @@ GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
 DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
-DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1 
+DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1
 
 LET indep_var = y[gy=vaxis]
 LET indep_var1 = y[gy=vaxis1]
@@ -172,12 +173,11 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    LET ax_lo = ($region_x_lo)
    LET ax_hi = ($region_x_hi)
 
-   
    IF `amax-amin LT ax_hi-ax_lo` THEN 
       LET ax_lo = amin
       let ax_hi = amax
+      GO LAS_is_range `ax_lo` `ax_hi`
    ENDIF
-
 
    LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
    
@@ -357,7 +357,7 @@ IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN
       LET amin = p_var[i=@MIN]
       LET amax = p_var[i=@MAX]
       GO LAS_is_range amin amax
-      DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis 
+      DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis
 
       LET dep_var = y[gy=haxis]
       DEFINE SYMBOL do_rsquare = 0
@@ -458,20 +458,24 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
    ($ax_label_x)
    ($ax_label_y)
    ($ax_label_resize)
-   IF `($lab1"0|*>1") AND (STRINDEX("($lab1)", "YEAR") GT 0)` THEN go unlabel 1
+   IF `($lab1"0|*>1")` THEN go unlabel 1
    PPL SHADE
-   set view full_view2
+   SET VIEW full_view2
 ENDIF
 
 SHADE/NOKEY/PAL=white($pqual)/NOAX/title=" "/SET allmiss
-IF `($lab1"0|*>1") AND (STRINDEX("($lab1)", "YEAR") GT 0)` THEN 
-   IF `STRINDEX("($note_($note_num%0%)_lab%0%)", "YEAR") EQ 0` THEN
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($lab1)
+IF ($lab1"0|*>1") THEN
+   IF `(STRINDEX("($lab1)", "YEAR") GT 0)` THEN 
+      IF `STRINDEX("($note_($note_num%0%)_lab%0%)", "YEAR") EQ 0` THEN
+         DEFINE SYMBOL note_num = `($note_num"0") + 1`
+         DEFINE SYMBOL note_($note_num)_lab = ($lab1)
+         IF ($ferret_thumb"0|*>1") THEN label/nouser `-0.2*($ppl$xorg)`,`-0.95*($ppl$yorg)`,-1,0,($txl_lab_size),($lab1)
+      ENDIF
    ENDIF
    GO unlabel 1
 ENDIF
 PPL SHADE
+pause
 
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
@@ -484,9 +488,13 @@ IF ($put_label"0|*>1") THEN
 
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
-      let ylab_bad = `ylab_bad-0.2`
-      define symbol bad_pp_var = 1
+      IF ($ferret_thumb"0|*>1") THEN  
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> is all-missing
+      ELSE
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
+      ENDIF
+      LET ylab_bad = `ylab_bad-0.2`
+      DEFINE SYMBOL bad_pp_var = 1
    ENDIF
 
 ! q is masked YVAR
@@ -494,7 +502,12 @@ IF ($put_label"0|*>1") THEN
    DEFINE SYMBOL ax_lo = `yvar[i=@MIN]`
    DEFINE SYMBOL ax_hi = `yvar[i=@MAX]`
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
+   
+      IF ($ferret_thumb"0|*>1") THEN  
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> is all-missing
+      ELSE
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
+      ENDIF
       define symbol bad_pp_var = 1
    ENDIF
 
@@ -544,6 +557,7 @@ ENDIF
 ! done on a map, but with light gray.
 ! Only if longitude is on the horizontal axis
 
+say `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` 
 IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
    DEFINE SYMBOL basemap_area = `( (($xaxis_max)-($xaxis_min)) * (($yaxis_max)-($yaxis_min)) )/ (360 * 180)`
    DEFINE SYMBOL region_x_lo = ($ppl$xmin)
