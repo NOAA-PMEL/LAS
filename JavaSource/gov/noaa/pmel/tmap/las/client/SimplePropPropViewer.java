@@ -247,8 +247,11 @@ public class SimplePropPropViewer implements EntryPoint {
     boolean hasInitialHistory = false;
     
     String trajectory_id;
+    DialogBox editDialog = new DialogBox(false);
     @Override
     public void onModuleLoad() {
+        editDialog.setText("Flag Editor");
+       
 
         colorVariables.setColorBy(true);
         // Turn it on by default...
@@ -260,10 +263,10 @@ public class SimplePropPropViewer implements EntryPoint {
             @Override
             public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
                 Object source = event.getSource();
-                if (source instanceof DateTimeWidget) {
-                    String initiallo = initialState.getRangeLo("t", 0);
-                    String initialhi = initialState.getRangeHi("t", 0);
-                    
+                // The only such event from this source is the close event.
+                if (source instanceof ColumnEditorWidget) {
+                    editDialog.hide();
+                    updatePlot(false, false);
                 }
             }
         });
@@ -691,79 +694,12 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.addVariable(dsid, v0, 0);
         tableRequest.addVariable(dsid, v1, 0);
         columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString(), var0.getShortname(), var1.getShortname());
-        final DialogBox fdbox = new DialogBox(false);
-        final Anchor close = new Anchor("");
-        close.setStyleName("gwt-extras-dialog-close");
-        close.addClickHandler( new ClickHandler() {         
-            public void onClick(ClickEvent event) { 
-                if ( !columnEditor.isDirty() ) {
-                    fdbox.hide();
-                    updatePlot(false, false);
-                } else {
-                    Window.alert("You have unsaved changes. Clear or save your edits if you want to change EXPOCODE.");
-                }
-            }
-        });
-        final Anchor minimize = new Anchor("");
-        minimize.setStyleName("gwt-extras-dialog-minimize");
-        minimize.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                if ( columnEditor.isTableVisible() ) {
-                    columnEditor.setTableVisible(false);
-                    minimize.setStyleName("gwt-extras-dialog-maximize");
-                } else {
-                    columnEditor.setTableVisible(true);
-                    minimize.setStyleName("gwt-extras-dialog-minimize");     
-                }
-                
-            }
-        });
-        fdbox.setText(" ");
-        // Get caption element
-        final HTML caption = ((HTML)fdbox.getCaption());
-
-        // Add anchor to caption
-        caption.getElement().appendChild(close.getElement());
-        caption.getElement().appendChild(minimize.getElement());
-
-        // Add click handler to caption
-        caption.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                
-
-                int x = event.getClientX();
-                int y = event.getClientY();
-                
-                int close_left = close.getAbsoluteLeft();
-                int close_top = close.getAbsoluteTop();
-                
-                int close_right = close_left + close.getOffsetWidth();
-                int close_bottom = close_top + close.getOffsetHeight();
-                
-                int minimize_left = minimize.getAbsoluteLeft();
-                int minimize_top = minimize.getAbsoluteTop();
-                
-                int minimize_right = minimize_left + minimize.getOffsetWidth();
-                int minimize_bottom = minimize_top + minimize.getOffsetHeight();
-
-                // Check click was within bounds of anchor
-                if( x >= close_left && x <= close_right && y >= close_top && y <= close_bottom ) {
-                    // Raise event on anchor
-                    close.fireEvent(event);
-                } else if ( x >= minimize_left && x <= minimize_right && y >= minimize_top && y <= minimize_bottom ) {
-                    minimize.fireEvent(event);
-                }
-            }
-        });
-
-
+        
+       
 
         
-        fdbox.setWidget(columnEditor);
-        fdbox.show();
+        editDialog.setWidget(columnEditor);
+        editDialog.show();
 
 
         //        String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
