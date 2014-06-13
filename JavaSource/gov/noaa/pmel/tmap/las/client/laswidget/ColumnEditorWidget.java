@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.DropDown;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -38,6 +39,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
@@ -83,8 +85,9 @@ public class ColumnEditorWidget extends Composite {
 
     DropDown flags = new DropDown();
     ScrollPanel datascroll = new ScrollPanel();
-    HorizontalPanel toprow = new HorizontalPanel();
-    HorizontalPanel secondRow = new HorizontalPanel();
+    HorizontalPanel idAndFlagControls = new HorizontalPanel();
+    HorizontalPanel commentControls = new HorizontalPanel();
+    FlowPanel openMinimizeControls = new FlowPanel();
     VerticalPanel mainpanel = new VerticalPanel();
     DropDown ids = new DropDown();
     FlexTable datatable = new FlexTable();
@@ -188,12 +191,12 @@ public class ColumnEditorWidget extends Composite {
 
         HTML choose = new HTML("&nbsp;&nbsp;Choose an EXPOCODE to edit:&nbsp;&nbsp;");
         choose.addStyleName("nowrap");
-        toprow.add(choose);
+        idAndFlagControls.add(choose);
         ids.addStyleName("nowrap");
-        toprow.add(ids);
+        idAndFlagControls.add(ids);
         commentL = new HTML("&nbsp;&nbsp;Comment:&nbsp;&nbsp;");
         commentL.addStyleName("nowrap");
-        secondRow.add(commentL);
+        commentControls.add(commentL);
         comment.setWidth("160px");
         comment.setStyleName("nowrap");
         comment.getValueBox().addFocusHandler(new FocusHandler() {
@@ -202,15 +205,15 @@ public class ColumnEditorWidget extends Composite {
               comment.showSuggestionList();
             }
           });
-        secondRow.add(comment);       
+        commentControls.add(comment);       
         flags.addItem("2");
         flags.addItem("3");
         flags.addItem("4");
         flags.addStyleName("nowrap");
         HTML flagL = new HTML("&nbsp;&nbsp;Set flag of selected rows to:&nbsp;&nbsp;");
         flagL.addStyleName("nowrap");
-        toprow.add(flagL);
-        toprow.add(flags);
+        idAndFlagControls.add(flagL);
+        idAndFlagControls.add(flags);
         submit.addClickHandler(new ClickHandler() {
 
             @Override
@@ -258,11 +261,50 @@ public class ColumnEditorWidget extends Composite {
             }
 
         });
-        toprow.add(new HTML("&nbsp;&nbsp"));
-        toprow.add(submit);
-        toprow.setStyleName("controls");
-        mainpanel.add(toprow);
-        mainpanel.add(secondRow);
+        idAndFlagControls.add(new HTML("&nbsp;&nbsp"));
+        idAndFlagControls.add(submit);
+        idAndFlagControls.setStyleName("controls");
+        
+        openMinimizeControls.addStyleName("nowrap-brown");
+        openMinimizeControls.setWidth("100%");
+        
+        mainpanel.add(openMinimizeControls);
+        mainpanel.add(idAndFlagControls);
+        mainpanel.add(commentControls);
+        
+       
+        final Anchor close = new Anchor("");
+        close.setStyleName("gwt-extras-dialog-close");
+        close.addClickHandler( new ClickHandler() {         
+            public void onClick(ClickEvent event) { 
+                if ( !isDirty() ) {
+                    eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(true), ColumnEditorWidget.this);    
+                } else {
+                    Window.alert("You have unsaved changes. Clear or save your edits if you want to change EXPOCODE.");
+                }
+            }
+        });
+        final Anchor minimize = new Anchor("");
+        minimize.setStyleName("gwt-extras-dialog-minimize");
+        minimize.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                if ( isTableVisible() ) {
+                    setTableVisible(false);
+                    minimize.setStyleName("gwt-extras-dialog-maximize");
+                } else {
+                    setTableVisible(true);
+                    minimize.setStyleName("gwt-extras-dialog-minimize");     
+                }
+                
+            }
+        });
+        //openMinimizeControls.add(new HTML("<div style=\"font-weight: bold;font-size: large;float: left\">Flag Editor</div>"));
+        openMinimizeControls.add(close);
+        openMinimizeControls.add(minimize);
+       
+        
         headertable.addStyleName("headertable");
         mainpanel.add(headertable);
         datascroll.add(datatable);
