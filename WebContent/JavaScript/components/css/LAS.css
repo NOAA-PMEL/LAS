@@ -1,36 +1,128 @@
 /** Add css rules here for your application. */
 
 /* CSS for the WOCE flag editor. */
-a.gwt-extras-dialog-close {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/close_off.png");
+.EDITOR-PushButton-up,
+.EDITOR-PushButton-up-hovering,
+.EDITOR-PushButton-up-disabled,
+.EDITOR-PushButton-down,
+.EDITOR-PushButton-down-hovering,
+.EDITOR-PushButton-down-disabled {
+  margin: 0;
+  text-decoration: none;
+  background: url("../images/hborder.png") repeat-x 0px -27px;
 }
-a.gwt-extras-dialog-close:hover {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/close_on.png");
+.EDITOR-PushButton-up,
+.EDITOR-PushButton-up-hovering,
+.EDITOR-PushButton-up-disabled {
+  padding: 1px 3px 1px 3px;
 }
-a.gwt-extras-dialog-minimize {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/minus_off.png");
+.EDITOR-PushButton-up {
+  border: 1px outset #ccc;
+  cursor: pointer;
+  cursor: hand;
 }
-a.gwt-extras-dialog-minimize:hover {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/minus_on.png");
+.EDITOR-PushButton-up-hovering {
+  border: 1px outset;
+  border-color: #9cf #69e #69e #7af;
+  cursor: pointer;
+  cursor: hand;
 }
-a.gwt-extras-dialog-maximize {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/plus_off.png");
+.EDITOR-PushButton-up-disabled {
+  border: 1px outset #ccc;
+  cursor: default;
+  opacity: .5;
+  filter: alpha(opacity=40);
+  zoom: 1;
 }
-a.gwt-extras-dialog-maximize:hover {
-   border: 1px outset #ccc;
-   background: url("../images/hborder.png") repeat-x 0px -27px;
-   content: url("../images/plus_on.png");
+.EDITOR-PushButton-down,
+.EDITOR-PushButton-down-hovering,
+.EDITOR-PushButton-down-disabled {
+  padding: 2px 2px 1px 3px;
 }
+.EDITOR-PushButton-down {
+  border: 1px inset #666;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-PushButton-down-hovering {
+  border: 1px inset;
+  border-color: #9cf #69e #69e #7af;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-PushButton-down-disabled {
+  border: 1px outset #ccc;
+  cursor: default;
+  opacity: 0.5;
+  filter: alpha(opacity=40);
+  zoom: 1;
+}
+
+
+
+.EDITOR-ToggleButton-up,
+.EDITOR-ToggleButton-up-hovering,
+.EDITOR-ToggleButton-up-disabled,
+.EDITOR-ToggleButton-down,
+.EDITOR-ToggleButton-down-hovering,
+.EDITOR-ToggleButton-down-disabled {
+  margin: 0;
+  text-decoration: none;
+  background: url("../images/hborder.png") repeat-x 0px -27px;
+}
+.EDITOR-ToggleButton-up,
+.EDITOR-ToggleButton-up-hovering,
+.EDITOR-ToggleButton-up-disabled {
+  padding: 1px 3px 1px 3px;
+}
+.EDITOR-ToggleButton-up {
+  border: 1px outset #ccc;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-ToggleButton-up-hovering {
+  border: 1px outset;
+  border-color: #9cf #69e #69e #7af;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-ToggleButton-up-disabled {
+  border: 1px outset #ccc;
+  cursor: default;
+  opacity: .5;
+  zoom: 1;
+  filter: alpha(opacity=40);
+}
+.EDITOR-ToggleButton-down,
+.EDITOR-ToggleButton-down-hovering,
+.EDITOR-ToggleButton-down-disabled {
+  padding: 2px 2px 1px 3px;
+}
+.EDITOR-ToggleButton-down {
+  background-position: 0 -513px;
+  border: 1px inset #ccc;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-ToggleButton-down-hovering {
+  background-position: 0 -513px;
+  border: 1px inset;
+  border-color: #9cf #69e #69e #7af;
+  cursor: pointer;
+  cursor: hand;
+}
+.EDITOR-ToggleButton-down-disabled {
+  background-position: 0 -513px;
+  border: 1px inset #ccc;
+  cursor: default;
+  opacity: .5;
+  zoom: 1;
+  filter: alpha(opacity=40);
+}
+.top-right {
+	float: right;
+}
+/*ENDOF WOCE Editor styles */
 .dirty {
 	background-color: yellow;
 }
