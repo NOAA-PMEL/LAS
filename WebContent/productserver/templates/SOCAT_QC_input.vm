@@ -140,6 +140,10 @@
 	<button style="float:right" onclick="window.close()">Cancel</button>
 	<button onclick="submit()">Submit this QC Evaluation</button>
 	</div>
+<script type='text/javascript'>
+     checkForOverride();
+</script>
+</body>
   </body>
 </html>
 
