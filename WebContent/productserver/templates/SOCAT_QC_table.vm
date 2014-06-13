@@ -54,18 +54,18 @@ function toggleConstraints () {
 	}
 }
 
-#if ($readonly == false)
+##if ($readonly == false)
 function submitQC (cruise_ID, region_name)
 {
   Req = new LASRequest('$las_request.toJavaScriptSafeString()');
-  Req.setOperation('OCDMS_QC_input');
+  Req.setOperation('SOCAT_QC_input');
   Req.setProperty('qc','cruise_ID',cruise_ID);
   Req.setProperty('qc','region_name',region_name);
   var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
   var features = 'alwaysRaised=1,width=400px,height=500px,menubar=no,location=no,status=no,resizeable=no';
   window.open(URL,"inputQC", features);
 }
-#end
+##end
 
 /*
  *
