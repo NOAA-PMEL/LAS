@@ -1102,7 +1102,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                             // frontCanvasContext.setFillStyle(randomColor); 
                                             // Can't get this to work for some reason. The rectangle is black.
                                             //frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
-                                            // drawToScreenScaled(imageScaleRatio);
+                                            drawToScreenScaled(imageScaleRatio);
 
                                             frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                             
