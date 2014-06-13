@@ -205,8 +205,8 @@
         <result type="xml" ID="webrowset" file_suffix=".xml"/>
       </response>
       <service>ferret</service>
-      <optiondef IDREF="Trajectory_Options"/>
     </operation>
+    <optiondef IDREF="Trajectory_Options"/>
     <region>
       <intervals name="xyt" type="Maps" title="Latitude-Longitude"/>
     </region>
