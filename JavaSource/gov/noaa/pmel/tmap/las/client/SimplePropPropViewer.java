@@ -78,10 +78,12 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -164,8 +166,10 @@ public class SimplePropPropViewer implements EntryPoint {
     int endy;
     boolean draw = false;
     IESafeImage plotImage;
-    Context2d frontCanvasContext;
-    Canvas frontCanvas;
+    Context2d imageCanvasContext;
+    Canvas imageCanvas;
+    Context2d drawingCanvasContext;
+    Canvas drawingCanvas;
     CssColor randomColor;
     // Have a cancel button ready to go for this panel.
     CancelButton cancelButton;
@@ -248,6 +252,8 @@ public class SimplePropPropViewer implements EntryPoint {
     
     String trajectory_id;
     DialogBox editDialog = new DialogBox(false);
+    
+    AbsolutePanel canvasDiv = new AbsolutePanel();
     @Override
     public void onModuleLoad() {
         editDialog.setText("Flag Editor");
@@ -608,10 +614,17 @@ public class SimplePropPropViewer implements EntryPoint {
 
         makeRequest(true);
        
-        frontCanvas = Canvas.createIfSupported();
-        if (frontCanvas != null) {
-            outputPanel.setWidget(1, 0, frontCanvas);
-            frontCanvasContext = frontCanvas.getContext2d();
+        imageCanvas = Canvas.createIfSupported();
+        drawingCanvas = Canvas.createIfSupported();
+
+        canvasDiv.add(imageCanvas, 0, 0);
+        canvasDiv.add(drawingCanvas, 0, 0);
+        
+        
+        if (imageCanvas != null) {
+            outputPanel.setWidget(1, 0, canvasDiv);
+            imageCanvasContext = imageCanvas.getContext2d();
+            drawingCanvasContext = drawingCanvas.getContext2d();
         } else {
             outputPanel.setWidget(1, 0 , new HTML(""));
             Window.alert("You are accessing this site with an older, no longer supported browser. "
@@ -1027,7 +1040,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( initialHistory == null || initialHistory.equals("") ) { 
                       spin.hide();
                     }
-                    if (frontCanvas != null) {
+                    if (imageCanvas != null) {
                         outputPanel.setWidget(2, 0, plotImage);
                         plotImage.setVisible(false);
                         
@@ -1044,14 +1057,14 @@ public class SimplePropPropViewer implements EntryPoint {
                                 lasAnnotationsPanel.setPopupWidth(w);
                                 lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
                                 lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
-                                frontCanvas.setCoordinateSpaceHeight(height);
-                                frontCanvas.setCoordinateSpaceWidth(width);
+                                imageCanvas.setCoordinateSpaceHeight(height);
+                                imageCanvas.setCoordinateSpaceWidth(width);
                                 drawToScreenScaled(imageScaleRatio); //frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
-                                frontCanvas.addMouseDownHandler(new MouseDownHandler() {
+                                drawingCanvas.addMouseDownHandler(new MouseDownHandler() {
 
                                     @Override
                                     public void onMouseDown(MouseDownEvent event) {
-
+                                        
                                         startx = event.getX();
                                         starty = event.getY();
                                         if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size
@@ -1060,7 +1073,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                             draw = true;
                                             // frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
                                             // 0, 0);
-                                            drawToScreenScaled(imageScaleRatio);
+                                            drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceWidth());
                                             double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
                                             double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
                                             world_startx = x_axis_lower_left + (startx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
@@ -1076,7 +1089,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                         }
                                     }
                                 });
-                                frontCanvas.addMouseMoveHandler(new MouseMoveHandler() {
+                                drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
                                     @Override
                                     public void onMouseMove(MouseMoveEvent event) {
@@ -1098,14 +1111,16 @@ public class SimplePropPropViewer implements EntryPoint {
                                             world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
                                             world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
                                                     * scaled_y_per_pixel;
-                                            //setTextValues();
+                                            setTextValues();
                                             // frontCanvasContext.setFillStyle(randomColor); 
                                             // Can't get this to work for some reason. The rectangle is black.
                                             //frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
-                                            drawToScreenScaled(imageScaleRatio);
-
-                                            frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                             
+                                            // This used to draw the image then the rectangle over and over again.
+                                            // drawToScreenScaled(imageScaleRatio);
+                                            // frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
+                                            drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceWidth());
+                                            drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                         }
                                     }
                                 });
@@ -1114,7 +1129,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             }
 
                         });
-                        frontCanvas.addMouseUpHandler(new MouseUpHandler() {
+                        drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
                             @Override
                             public void onMouseUp(MouseUpEvent event) {
@@ -1800,14 +1815,24 @@ public class SimplePropPropViewer implements EntryPoint {
             // well, bummer
         }
 
-        frontCanvas.setCoordinateSpaceHeight((int) h + 10);
-        frontCanvas.setCoordinateSpaceWidth((int) w + 10);
+        int ht = (int) h + 10;
+        int wt = (int) w + 10;
+        
+        imageCanvas.setCoordinateSpaceHeight(ht);
+        imageCanvas.setCoordinateSpaceWidth(wt);
+        
+        drawingCanvas.setCoordinateSpaceHeight(ht);
+        drawingCanvas.setCoordinateSpaceWidth(wt);
+        
+        
+        canvasDiv.setSize(wt+"px", ht+"px");
+        
         return imageData;
     }
 
     private void drawToScreen(ImageData imageData) {
-        if (frontCanvasContext != null && imageData != null)
-            frontCanvasContext.putImageData(imageData, 0, 0);
+        if (imageCanvasContext != null && imageData != null)
+            imageCanvasContext.putImageData(imageData, 0, 0);
     }
 
     public void setImageSize(int percent) {
