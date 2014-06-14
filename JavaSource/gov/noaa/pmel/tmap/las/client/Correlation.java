@@ -231,6 +231,9 @@ public class Correlation implements EntryPoint {
 
 	double imageScaleRatio = 1.0; // Keep track of the factor by which the image
 									// has been scaled.
+	
+	boolean outx;
+	boolean outy;
 
 	@Override
 	public void onModuleLoad() {
@@ -995,167 +998,142 @@ public class Correlation implements EntryPoint {
 								lasAnnotationsPanel.setPopupTop(outputPanel
 										.getAbsoluteTop());
 								drawToScreenScaled(imageScaleRatio);
-								drawingCanvas.addMouseDownHandler(new MouseDownHandler() {
+                                drawingCanvas.addMouseDownHandler(new MouseDownHandler() {
 
-											@Override
-											public void onMouseDown(
-													MouseDownEvent event) {
-												logger.setLevel(Level.ALL);
+                                    @Override
+                                    public void onMouseDown(MouseDownEvent event) {
+                                        logger.setLevel(Level.ALL);
 
-												startx = event.getX();
-												starty = event.getY();
-												logger.info("(startx, starty):("
-														+ startx
-														+ ", "
-														+ starty + ")");
-												if (startx > x_offset_from_left
-														&& starty > y_offset_from_top
-														&& startx < x_offset_from_left
-																+ x_plot_size
-														&& starty < y_offset_from_top
-																+ y_plot_size) {
+                                        startx = event.getX();
+                                        starty = event.getY();
+                                        outx = false;
+                                        outy = false;
+                                        
+                                        if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size
+                                                && starty < y_offset_from_top + y_plot_size) {
 
-													draw = true;
+                                            draw = true;
 
-													drawToScreenScaled(imageScaleRatio);
-													double scaled_x_per_pixel = x_per_pixel
-															/ imageScaleRatio;
-													double scaled_y_per_pixel = y_per_pixel
-															/ imageScaleRatio;
-													world_startx = x_axis_lower_left
-															+ (startx - x_offset_from_left
-																	* imageScaleRatio)
-															* scaled_x_per_pixel;
-													world_starty = y_axis_lower_left
-															+ ((y_image_size
-																	* imageScaleRatio - starty) - y_offset_from_bottom
-																	* imageScaleRatio)
-															* scaled_y_per_pixel;
+                                            drawToScreenScaled(imageScaleRatio);
+                                            double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
+                                            double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
+                                            world_startx = x_axis_lower_left + (startx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
+                                            world_starty = y_axis_lower_left + ((y_image_size * imageScaleRatio - starty) - y_offset_from_bottom * imageScaleRatio)
+                                                    * scaled_y_per_pixel;
 
-													world_endx = world_startx;
-													world_endy = world_starty;
-													logger.info("(world_startx, world_starty):("
-															+ world_startx
-															+ ", "
-															+ world_starty
-															+ ")");
-													logger.info("(world_endx, world_endy):("
-															+ world_endx
-															+ ", "
-															+ world_endy + ")");
+                                            world_endx = world_startx;
+                                            world_endy = world_starty;
+                                            logger.info("(world_startx, world_starty):(" + world_startx + ", " + world_starty + ")");
+                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
 
-													setTextValues();
-													xVariableConstraint
-															.setApply(true);
-													yVariableConstraint
-															.setApply(true);
+                                            setTextValues();
+                                            xVariableConstraint.setApply(true);
+                                            yVariableConstraint.setApply(true);
 
-												}
-												logger.setLevel(Level.ALL);
-											}
-										});
-								drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
+                                        }
+                                        logger.setLevel(Level.ALL);
+                                    }
+                                });
+                                drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
-											@Override
-											public void onMouseMove(
-													MouseMoveEvent event) {
-												logger.setLevel(Level.ALL);
-												int currentx = event.getX();
-												int currenty = event.getY();
-												// If you drag it out, we'll
-												// stop
-												// drawing.
-												if (currentx < x_offset_from_left
-														|| currenty < y_offset_from_top
-														|| currentx > x_offset_from_left
-																+ x_plot_size
-														|| currenty > y_offset_from_top
-																+ y_plot_size) {
+                                    @Override
+                                    public void onMouseMove(MouseMoveEvent event) {
+                                        logger.setLevel(Level.ALL);
+                                        int currentx = event.getX();
+                                        int currenty = event.getY();
+                                        // If you drag it out, we'll
+                                        // stop
+                                        // drawing.
+                                        if (currentx < x_offset_from_left || currenty < y_offset_from_top || currentx > x_offset_from_left + x_plot_size  || currenty > y_offset_from_top + y_plot_size) {
 
-													draw = false;
-													endx = currentx;
-													endy = currenty;
-													logger.info("(endx, endy):("
-															+ endx
-															+ ", "
-															+ endy + ")");
-												}
-												if (draw) {
-													double scaled_x_per_pixel = x_per_pixel
-															/ imageScaleRatio;
-													double scaled_y_per_pixel = y_per_pixel
-															/ imageScaleRatio;
-													world_endx = x_axis_lower_left
-															+ (currentx - x_offset_from_left
-																	* imageScaleRatio)
-															* scaled_x_per_pixel;
-													world_endy = y_axis_lower_left
-															+ ((y_image_size
-																	* imageScaleRatio - currenty) - y_offset_from_bottom
-																	* imageScaleRatio)
-															* scaled_y_per_pixel;
-													logger.info("(world_endx, world_endy):("
-															+ world_endx
-															+ ", "
-															+ world_endy + ")");
-													setTextValues();
-													logger.info("randomColor.value():"
-															+ randomColor
-																	.value());
-													drawingCanvasContext.setFillStyle(randomColor);
-													drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceHeight());
-							                        drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
-													drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
-												}
-												logger.setLevel(Level.ALL);
-											}
-										});
+                                            endx = currentx;
+                                            endy = currenty;
+
+                                           
+                                            // Set the limits for one last drawing of the selection
+                                            // rectangle.
+                                            if (currentx < x_offset_from_left) {
+                                                endx = x_offset_from_left;
+                                                currentx = x_offset_from_left;
+                                                outx = true;
+                                            }
+                                            if (currenty < y_offset_from_top) {
+                                                endy = y_offset_from_top;
+                                                currenty = y_offset_from_top;
+                                                outy = true;
+                                            }
+                                            if (currentx > x_offset_from_left + x_plot_size) {
+                                                endx = x_offset_from_left + x_plot_size;
+                                                currentx = x_offset_from_left + x_plot_size;
+                                                outx = true;
+                                            }
+                                            if (currenty > y_offset_from_top + y_plot_size) {
+                                                endy = y_offset_from_top + y_plot_size;
+                                                currenty = y_offset_from_top + y_plot_size;
+                                                outy = true;
+                                            }
+                                            
+                                        }
+                                        if (draw) {
+                                            double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
+                                            double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
+                                            world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
+                                            world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
+                                                    * scaled_y_per_pixel;
+                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
+                                            setTextValues();
+                                            logger.info("randomColor.value():" + randomColor.value());
+                                            drawingCanvasContext.setFillStyle(randomColor);
+                                            drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceHeight());
+                                            drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+                                            drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
+                                        }
+                                        if (outx && outy) {
+                                            draw = false;
+                                        }
+                                        logger.setLevel(Level.ALL);
+                                    }
+                                });
 								outputPanel.setWidget(outputPanelRow, 0, canvasDiv);
-								resize(Window.getClientWidth(),
-										Window.getClientHeight());
+								resize(Window.getClientWidth(),	Window.getClientHeight());
 							}
 
 						});
-						drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
+                        drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
-							@Override
-							public void onMouseUp(MouseUpEvent event) {
-								logger.setLevel(Level.ALL);
-								// If we're still drawing when the mouse goes
-								// up, record the position.
-								if (draw) {
-									endx = event.getX();
-									endy = event.getY();
-									logger.info("(endx, endy):(" + endx + ", "
-											+ endy + ")");
-								}
-								draw = false;
-								setConstraints();
-								logger.setLevel(Level.ALL);
-							}
-						});
-					} else {
-						// Browser cannot handle a canvas tag, so just put up
-						// the image.
-						outputPanel.setWidget(outputPanelRow, 0, plotImage);
-						plotImage.addLoadHandler(new LoadHandler() {
+                            @Override
+                            public void onMouseUp(MouseUpEvent event) {
+                                logger.setLevel(Level.ALL);
+                                // If we're still drawing when the mouse goes
+                                // up, record the position.
+                                if (draw) {
+                                    endx = event.getX();
+                                    endy = event.getY();
+                                    logger.info("(endx, endy):(" + endx + ", " + endy + ")");
+                                }
+                                draw = false;
+                                setConstraints();
+                                logger.setLevel(Level.ALL);
+                            }
+                        });
+                    } else {
+                        // Browser cannot handle a canvas tag, so just put up
+                        // the image.
+                        outputPanel.setWidget(outputPanelRow, 0, plotImage);
+                        plotImage.addLoadHandler(new LoadHandler() {
 
-							@Override
-							public void onLoad(LoadEvent event) {
-								resize(Window.getClientWidth(),
-										Window.getClientHeight());
-								String w = plotImage.getWidth() - 18 + "px";
-								lasAnnotationsPanel.setPopupLeft(outputPanel
-										.getAbsoluteLeft());
-								lasAnnotationsPanel.setPopupTop(outputPanel
-										.getAbsoluteTop());
-								lasAnnotationsPanel.setPopupWidth(w);
-							}
-						});
-						resize(Window.getClientWidth(),
-								Window.getClientHeight());
+                            @Override
+                            public void onLoad(LoadEvent event) {
+                                resize(Window.getClientWidth(), Window.getClientHeight());
+                                String w = plotImage.getWidth() - 18 + "px";
+                                lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
+                                lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
+                                lasAnnotationsPanel.setPopupWidth(w);
+                            }
+                        });
+                        resize(Window.getClientWidth(), Window.getClientHeight());
 
-					}
+                    }
 				}
 				logger.info("(world_startx, world_starty):(" + world_startx
 						+ ", " + world_starty + ")");
