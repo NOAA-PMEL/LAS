@@ -66,6 +66,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -147,8 +148,19 @@ public class Correlation implements EntryPoint {
 	int endy;
 	boolean draw = false;
 	IESafeImage plotImage;
-	Context2d frontCanvasContext;
-	Canvas frontCanvas;
+	
+	// This is the canvas and context for the image.
+	Context2d imageCanvasContext;
+	Canvas imageCanvas;
+	
+	// This is the canvas and context for the drawing rectangle.
+	Canvas drawingCanvas;
+	Context2d drawingCanvasContext;
+	
+	// This is the thingy that will hold them one on top of each other.
+	AbsolutePanel canvasDiv = new AbsolutePanel();
+	
+	
 	CssColor randomColor;
 	// Have a cancel button ready to go for this panel.
 	CancelButton cancelButton;
@@ -724,9 +736,11 @@ public class Correlation implements EntryPoint {
 	    lasRequest.setOperation(operationID, operationType);
 	    lasRequest.setProperty("ferret", "annotations", "file");
 
-	    frontCanvas = Canvas.createIfSupported();
-	    if ( frontCanvas != null ) {
-	        frontCanvasContext = frontCanvas.getContext2d();
+	    imageCanvas = Canvas.createIfSupported();
+	    drawingCanvas = Canvas.createIfSupported();
+	    if ( imageCanvas != null ) {
+	        imageCanvasContext = imageCanvas.getContext2d();
+	        drawingCanvasContext = drawingCanvas.getContext2d();
 	    } else {
 	        Window.alert("You are accessing this site with an older, no longer supported browser. "+
 	                "Some or all features of this site will not work correctly using your browser. "+
@@ -959,7 +973,7 @@ public class Correlation implements EntryPoint {
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)
 							/ Double.valueOf(y_plot_size);
 
-					if (frontCanvas != null) {
+					if (imageCanvas != null) {
 						outputPanel.setWidget(shadowCanvasRow, 0, plotImage);
 						plotImage.setVisible(false);
 						plotImage.addLoadHandler(new LoadHandler() {
@@ -980,13 +994,8 @@ public class Correlation implements EntryPoint {
 										.getAbsoluteLeft());
 								lasAnnotationsPanel.setPopupTop(outputPanel
 										.getAbsoluteTop());
-								frontCanvas.setCoordinateSpaceHeight(height);
-								frontCanvas.setCoordinateSpaceWidth(width);
-								frontCanvasContext.drawImage(
-										ImageElement.as(plotImage.getElement()),
-										0, 0);
-								frontCanvas
-										.addMouseDownHandler(new MouseDownHandler() {
+								drawToScreenScaled(imageScaleRatio);
+								drawingCanvas.addMouseDownHandler(new MouseDownHandler() {
 
 											@Override
 											public void onMouseDown(
@@ -1007,8 +1016,7 @@ public class Correlation implements EntryPoint {
 																+ y_plot_size) {
 
 													draw = true;
-													// frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
-													// 0, 0);
+
 													drawToScreenScaled(imageScaleRatio);
 													double scaled_x_per_pixel = x_per_pixel
 															/ imageScaleRatio;
@@ -1046,8 +1054,7 @@ public class Correlation implements EntryPoint {
 												logger.setLevel(Level.ALL);
 											}
 										});
-								frontCanvas
-										.addMouseMoveHandler(new MouseMoveHandler() {
+								drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
 											@Override
 											public void onMouseMove(
@@ -1095,30 +1102,21 @@ public class Correlation implements EntryPoint {
 													logger.info("randomColor.value():"
 															+ randomColor
 																	.value());
-													frontCanvasContext
-															.setFillStyle(randomColor);
-													// frontCanvasContext.drawImage(ImageElement.as(image.getElement()),
-													// 0, 0);
-													drawToScreenScaled(imageScaleRatio);
-													frontCanvasContext
-															.strokeRect(
-																	startx,
-																	starty,
-																	currentx
-																			- startx,
-																	currenty
-																			- starty);
+													drawingCanvasContext.setFillStyle(randomColor);
+													drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceHeight());
+							                        drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+													drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
 												}
 												logger.setLevel(Level.ALL);
 											}
 										});
-								outputPanel.setWidget(outputPanelRow, 0, frontCanvas);
+								outputPanel.setWidget(outputPanelRow, 0, canvasDiv);
 								resize(Window.getClientWidth(),
 										Window.getClientHeight());
 							}
 
 						});
-						frontCanvas.addMouseUpHandler(new MouseUpHandler() {
+						drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
 							@Override
 							public void onMouseUp(MouseUpEvent event) {
@@ -2090,9 +2088,16 @@ public class Correlation implements EntryPoint {
 			}
 			e.printStackTrace();
 		}
-
-		frontCanvas.setCoordinateSpaceHeight((int) h + 10);
-		frontCanvas.setCoordinateSpaceWidth((int) w + 10);
+        int ht = (int) h + 10;
+        int wt = (int) w + 10;
+		imageCanvas.setCoordinateSpaceHeight(ht);
+		imageCanvas.setCoordinateSpaceWidth(wt);
+		drawingCanvas.setCoordinateSpaceHeight(ht);
+		drawingCanvas.setCoordinateSpaceWidth(wt);
+		canvasDiv.setSize(wt + "px", ht + "px");
+		
+		
+		
 		if (imageData != null)
 			logger.info("scaleImage exiting returning imageData:" + imageData);
 		else
@@ -2101,8 +2106,8 @@ public class Correlation implements EntryPoint {
 	}
 
 	private void drawToScreen(ImageData imageData) {
-		if (frontCanvasContext != null)
-			frontCanvasContext.putImageData(imageData, 0, 0);
+		if (imageCanvasContext != null)
+			imageCanvasContext.putImageData(imageData, 0, 0);
 	}
 
 	public void setImageSize(int percent) {
