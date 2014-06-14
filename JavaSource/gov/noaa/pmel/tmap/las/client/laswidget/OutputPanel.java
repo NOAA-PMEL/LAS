@@ -68,6 +68,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
@@ -586,7 +587,7 @@ public class OutputPanel extends Composite implements HasName {
                         x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                         y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
-                        if (frontCanvas != null) {
+                        if (imageCanvas != null) {
                           
                             
                             
@@ -595,7 +596,7 @@ public class OutputPanel extends Composite implements HasName {
                             plotImage.setUrl(imageurl);
                             grid.setWidget(2, 0, plotImage);
                             plotImage.setVisible(false);
-                            frontCanvas.addMouseUpHandler(new MouseUpHandler() {
+                            drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
                                 @Override
                                 public void onMouseUp(MouseUpEvent event) {
@@ -810,9 +811,19 @@ public class OutputPanel extends Composite implements HasName {
     String fixedAxis;
     String fixedAxisValue;
     int fixedZoom;
-    Canvas frontCanvas;
+    
+    // Background canvas for the image
+    Canvas imageCanvas;
     // Canvas to allow drawing on the plot for zooming.
-    Context2d frontCanvasContext;
+    Context2d imageCanvasContext;
+    
+    
+    //Foreground canvas for the drawing rectangle.
+    Canvas drawingCanvas;
+    Context2d drawingCanvasContext;
+    
+    AbsolutePanel canvasDiv = new AbsolutePanel();
+    
     double globalMax = -99999999.;
     double globalMin = 99999999.;
     /* The base widget used to layout the panel. A single column of three rows. */
@@ -837,7 +848,7 @@ public class OutputPanel extends Composite implements HasName {
             // frontCanvasContext.drawImage(
             // ImageElement.as(plotImage.getElement()), 0, 0);
             // setPlotImageWidth();
-            frontCanvas.addMouseDownHandler(new MouseDownHandler() {
+            drawingCanvas.addMouseDownHandler(new MouseDownHandler() {
                 @Override
                 public void onMouseDown(MouseDownEvent event) {
                     outx = false;
@@ -860,7 +871,7 @@ public class OutputPanel extends Composite implements HasName {
 
                 }
             });
-            frontCanvas.addMouseMoveHandler(new MouseMoveHandler() {
+            drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
                 @Override
                 public void onMouseMove(MouseMoveEvent event) {
@@ -902,11 +913,10 @@ public class OutputPanel extends Composite implements HasName {
                         double scaled_y_per_pixel = y_per_pixel / imageScaleRatio;
                         world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
                         world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio) * scaled_y_per_pixel;
-                        frontCanvasContext.setFillStyle(randomColor);
-                        drawToScreen(scaledImage); // frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()),
-                        // 0, 0);
-                        frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
-                        frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
+                        drawingCanvasContext.setFillStyle(randomColor);
+                        drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceHeight());
+                        drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+                        drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             double minx = Math.min(world_startx, world_endx);
@@ -933,7 +943,7 @@ public class OutputPanel extends Composite implements HasName {
                     }
                 }
             });
-            frontCanvas.addMouseUpHandler(new MouseUpHandler() {
+            drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
                 @Override
                 public void onMouseUp(MouseUpEvent arg0) {
@@ -970,7 +980,7 @@ public class OutputPanel extends Composite implements HasName {
                     
                 }
             });
-            grid.setWidget(plotRow, 0, frontCanvas);
+            grid.setWidget(plotRow, 0, canvasDiv);
             logger.info("imageLoadHandler firing StringValueChangeEvent");
             eventBus.fireEventFromSource(new StringValueChangeEvent(plotImage.getUrl()), thisOutputPanel);
         }
@@ -1126,9 +1136,13 @@ public class OutputPanel extends Composite implements HasName {
         // Creating plotImage this early causes error in Chrome
         // plotImage = new Image();
         // Also init the front canvas and context
-        frontCanvas = Canvas.createIfSupported();
-        if ( frontCanvas != null ) {
-            frontCanvasContext = frontCanvas.getContext2d();
+        imageCanvas = Canvas.createIfSupported();
+        drawingCanvas = Canvas.createIfSupported();
+        canvasDiv.add(imageCanvas, 0, 0);
+        canvasDiv.add(drawingCanvas, 0, 0);
+        if ( imageCanvas != null ) {
+            imageCanvasContext = imageCanvas.getContext2d();
+            drawingCanvasContext = drawingCanvas.getContext2d();
         } else {
             if ( isComparePanel() ) {
                 Window.alert("You are accessing this site with an older, no longer supported browser. "+
@@ -2641,9 +2655,9 @@ public class OutputPanel extends Composite implements HasName {
 
     private void drawToScreen(ImageData imageData) {
         // Don't bother to use null imageData
-        if ((imageData != null) && (frontCanvasContext != null)) {
+        if ((imageData != null) && (imageCanvasContext != null)) {
             logger.info("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
-            frontCanvasContext.putImageData(imageData, 0, 0);
+            imageCanvasContext.putImageData(imageData, 0, 0);
         }
     }
 
@@ -2801,8 +2815,16 @@ public class OutputPanel extends Composite implements HasName {
             String b = e.getLocalizedMessage();
         }
 
-        frontCanvas.setCoordinateSpaceHeight((int) h + 10);
-        frontCanvas.setCoordinateSpaceWidth((int) w + 10);
+        int ht = (int) h + 10;
+        int wt = (int) w + 10;
+        imageCanvas.setCoordinateSpaceHeight(ht);
+        imageCanvas.setCoordinateSpaceWidth(wt);
+        
+        drawingCanvas.setCoordinateSpaceHeight(ht);
+        drawingCanvas.setCoordinateSpaceWidth(wt);
+        
+        canvasDiv.setSize(wt + "px", ht + "px");
+        
         if (imageData != null)
             logger.info("scaleImage exiting returning imageData:" + imageData);
         else
