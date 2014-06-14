@@ -1112,14 +1112,15 @@ public class SimplePropPropViewer implements EntryPoint {
                                             world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
                                                     * scaled_y_per_pixel;
                                             setTextValues();
-                                            // frontCanvasContext.setFillStyle(randomColor); 
+                                            drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceWidth());
+                                            drawingCanvasContext.setFillStyle(randomColor); 
                                             // Can't get this to work for some reason. The rectangle is black.
-                                            //frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
+                                            drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
                                             
                                             // This used to draw the image then the rectangle over and over again.
                                             // drawToScreenScaled(imageScaleRatio);
                                             // frontCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
-                                            drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceWidth());
+                                            
                                             drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                         }
                                     }
