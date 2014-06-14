@@ -1080,6 +1080,8 @@ public class Correlation implements EntryPoint {
                                     logger.info("(endx, endy):(" + endx + ", " + endy + ")");
                                 }
                                 draw = false;
+                                outx = false;
+                                outy = false;
                                 setConstraints();
                                 logger.setLevel(Level.ALL);
                             }

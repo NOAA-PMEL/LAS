@@ -1177,6 +1177,8 @@ public class SimplePropPropViewer implements EntryPoint {
                                     world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)*scaled_y_per_pixel;                                 
                                 }
                                 draw = false;
+                                outx = false;
+                                outy = false;
                                 setTextValues();
                                 setConstraints();
                             }
