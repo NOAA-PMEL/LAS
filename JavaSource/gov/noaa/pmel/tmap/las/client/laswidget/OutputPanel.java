@@ -880,31 +880,31 @@ public class OutputPanel extends Composite implements HasName {
                     int currenty = event.getY();
                     // If you drag it out, we'll stop drawing.
 
-                    if (currentx < x_offset_from_left || currenty < y_offset_from_top || currentx > x_offset_from_left + x_plot_size || currenty > y_offset_from_top + y_plot_size) {
+                    if (currentx < x_offset_from_left* imageScaleRatio || currenty < y_offset_from_top * imageScaleRatio || currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio || currenty > y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio) {
 
                         endx = currentx;
                         endy = currenty;
 
                         // Set the limits for one last drawing of the selection
                         // rectangle.
-                        if (currentx < x_offset_from_left) {
-                            endx = x_offset_from_left;
-                            currentx = x_offset_from_left;
+                        if (currentx < x_offset_from_left * imageScaleRatio ) {
+                            endx = (int) (x_offset_from_left * imageScaleRatio);
+                            currentx = (int) (x_offset_from_left * imageScaleRatio);
                             outx = true;
                         }
-                        if (currenty < y_offset_from_top) {
-                            endy = y_offset_from_top;
-                            currenty = y_offset_from_top;
+                        if (currenty < y_offset_from_top * imageScaleRatio) {
+                            endy = (int) (y_offset_from_top * imageScaleRatio);
+                            currenty = (int) (y_offset_from_top* imageScaleRatio);
                             outy = true;
                         }
-                        if (currentx > x_offset_from_left + x_plot_size) {
-                            endx = x_offset_from_left + x_plot_size;
-                            currentx = x_offset_from_left + x_plot_size;
+                        if (currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio) {
+                            endx = (int) (x_offset_from_left + x_plot_size * imageScaleRatio);
+                            currentx = (int) (x_offset_from_left + x_plot_size * imageScaleRatio);
                             outx = true;
                         }
-                        if (currenty > y_offset_from_top + y_plot_size) {
-                            endy = y_offset_from_top + y_plot_size;
-                            currenty = y_offset_from_top + y_plot_size;
+                        if (currenty > y_offset_from_top + y_plot_size * imageScaleRatio) {
+                            endy = (int) (y_offset_from_top + y_plot_size * imageScaleRatio);
+                            currenty = (int) (y_offset_from_top + y_plot_size * imageScaleRatio);
                             outy = true;
                         }
                     }
