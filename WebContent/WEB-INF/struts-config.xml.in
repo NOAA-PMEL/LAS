@@ -88,9 +88,11 @@
           <action path="/getAnnotations" type="gov.noaa.pmel.tmap.las.ui.GetAnnotations"/>
           <action path="/getTrajectoryTable" type="gov.noaa.pmel.tmap.las.ui.GetTrajectoryTable"/>
           <action path="/getCrossOvers" type="gov.noaa.pmel.tmap.las.ui.GetCrossOvers"/>
-          <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits"/>
+          <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits">
+		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
+          </action>
           <action path="/ProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
-		      <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
+		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
 	          <forward name="batch_error" path="/productserver/templates/batch_error.vm" redirect="false" />
 	          <forward name="maintenance" path="/productserver/templates/maintenance.vm" redirect="false" />
 	          <forward name="progress" path="/productserver/templates/progress.vm" redirect="false" />
@@ -130,7 +132,6 @@
           <!--  End of definitions for normal operation. -->
           
           
-                    
           <action path="/resolveURL" type="gov.noaa.pmel.tmap.las.ui.ResolveURL"/>
           
           
