@@ -46,6 +46,7 @@ public class SaveEdits extends LASAction {
 	public SaveEdits() throws IllegalArgumentException, SQLException {
 		super();
 
+		log.debug("Initializing SaveEdits with hard-coded values");
 		// TODO: All of the following values need to made into parameters retrieved from configuration file(s)
 		socatQCVersion = 3.0;
 
@@ -77,9 +78,8 @@ public class SaveEdits extends LASAction {
 		// Get the username of the reviewer assigning these WOCE flags
 		String username;
 		try {
-			// TODO: get the username from the request
-			// username = request.getUserPrincipal().getName();
-			username = "k.o'brien";
+			log.debug("Assigning SaveEdits username");
+			username = request.getUserPrincipal().getName();
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get the username for WOCE flagging", ex);
 			return mapping.findForward("error");
