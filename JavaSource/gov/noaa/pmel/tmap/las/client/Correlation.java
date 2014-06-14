@@ -903,67 +903,34 @@ public class Correlation implements EntryPoint {
 									Element map = (Element) map_scale.item(m);
 									NodeList children = map.getChildNodes();
 									for (int l = 0; l < children.getLength(); l++) {
-										if (children.item(l) instanceof Element) {
-											Element child = (Element) children
-													.item(l);
-											if (child.getNodeName().equals(
-													"x_image_size")) {
-												x_image_size = getNumber(child
-														.getFirstChild());
-											} else if (child.getNodeName()
-													.equals("y_image_size")) {
-												y_image_size = getNumber(child
-														.getFirstChild());
-											} else if (child.getNodeName()
-													.equals("x_plot_size")) {
-												x_plot_size = getNumber(child
-														.getFirstChild());
-											} else if (child.getNodeName()
-													.equals("y_plot_size")) {
-												y_plot_size = getNumber(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("x_offset_from_left")) {
-												x_offset_from_left = getNumber(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("y_offset_from_bottom")) {
-												y_offset_from_bottom = getNumber(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("x_offset_from_right")) {
-												x_offset_from_right = getNumber(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("y_offset_from_top")) {
-												y_offset_from_top = getNumber(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("x_axis_lower_left")) {
-												x_axis_lower_left = getDouble(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("y_axis_lower_left")) {
-												y_axis_lower_left = getDouble(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("x_axis_upper_right")) {
-												x_axis_upper_right = getDouble(child
-														.getFirstChild());
-											} else if (child
-													.getNodeName()
-													.equals("y_axis_upper_right")) {
-												y_axis_upper_right = getDouble(child
-														.getFirstChild());
-											}
-										}
+                                        if (children.item(l) instanceof Element) {
+                                            Element child = (Element) children.item(l);
+                                            if (child.getNodeName().equals("x_image_size")) {
+                                                x_image_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_image_size")) {
+                                                y_image_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_plot_size")) {
+                                                x_plot_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_plot_size")) {
+                                                y_plot_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_offset_from_left")) {
+                                                x_offset_from_left = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_offset_from_bottom")) {
+                                                y_offset_from_bottom = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_offset_from_right")) {
+                                                x_offset_from_right = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_offset_from_top")) {
+                                                y_offset_from_top = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_axis_lower_left")) {
+                                                x_axis_lower_left = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_axis_lower_left")) {
+                                                y_axis_lower_left = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_axis_upper_right")) {
+                                                x_axis_upper_right = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_axis_upper_right")) {
+                                                y_axis_upper_right = getDouble(child.getFirstChild());
+                                            }
+                                        }
 									}
 								}
 							}
@@ -1045,7 +1012,7 @@ public class Correlation implements EntryPoint {
                                         // If you drag it out, we'll
                                         // stop
                                         // drawing.
-                                        if (currentx < x_offset_from_left || currenty < y_offset_from_top || currentx > x_offset_from_left + x_plot_size  || currenty > y_offset_from_top + y_plot_size) {
+                                        if (currentx < x_offset_from_left * imageScaleRatio || currenty < y_offset_from_top * imageScaleRatio || currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio || currenty > y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio) {
 
                                             endx = currentx;
                                             endy = currenty;
@@ -1053,24 +1020,24 @@ public class Correlation implements EntryPoint {
                                            
                                             // Set the limits for one last drawing of the selection
                                             // rectangle.
-                                            if (currentx < x_offset_from_left) {
-                                                endx = x_offset_from_left;
-                                                currentx = x_offset_from_left;
+                                            if (currentx < x_offset_from_left * imageScaleRatio) {
+                                                endx = (int) (x_offset_from_left * imageScaleRatio);
+                                                currentx = (int) (x_offset_from_left * imageScaleRatio);
                                                 outx = true;
                                             }
-                                            if (currenty < y_offset_from_top) {
-                                                endy = y_offset_from_top;
-                                                currenty = y_offset_from_top;
+                                            if (currenty < y_offset_from_top * imageScaleRatio) {
+                                                endy = (int) (y_offset_from_top * imageScaleRatio);
+                                                currenty = (int) (y_offset_from_top * imageScaleRatio);
                                                 outy = true;
                                             }
-                                            if (currentx > x_offset_from_left + x_plot_size) {
-                                                endx = x_offset_from_left + x_plot_size;
-                                                currentx = x_offset_from_left + x_plot_size;
+                                            if (currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio) {
+                                                endx = (int) (x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio);
+                                                currentx = (int) (x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio);
                                                 outx = true;
                                             }
-                                            if (currenty > y_offset_from_top + y_plot_size) {
-                                                endy = y_offset_from_top + y_plot_size;
-                                                currenty = y_offset_from_top + y_plot_size;
+                                            if (currenty > y_offset_from_top * imageScaleRatio+ y_plot_size * imageScaleRatio) {
+                                                endy = (int) (y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio);
+                                                currenty = (int) (y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio);
                                                 outy = true;
                                             }
                                             
