@@ -401,6 +401,7 @@ public class Correlation implements EntryPoint {
 		String xml = Util.getParameterString("xml");
 		if (xml != null && !xml.equals("")) {
 		    xml = Util.decode(xml);
+		    lasRequest = new LASRequest(xml);
 			dsid = lasRequest.getDataset(0);
 			varid = lasRequest.getVariable(0);
 			xlo = lasRequest.getRangeLo("x", 0);
