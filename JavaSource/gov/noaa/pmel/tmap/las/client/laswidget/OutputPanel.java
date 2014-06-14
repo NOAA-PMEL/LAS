@@ -898,13 +898,13 @@ public class OutputPanel extends Composite implements HasName {
                             outy = true;
                         }
                         if (currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio) {
-                            endx = (int) (x_offset_from_left + x_plot_size * imageScaleRatio);
-                            currentx = (int) (x_offset_from_left + x_plot_size * imageScaleRatio);
+                            endx = (int) (x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio);
+                            currentx = (int) (x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio);
                             outx = true;
                         }
-                        if (currenty > y_offset_from_top + y_plot_size * imageScaleRatio) {
-                            endy = (int) (y_offset_from_top + y_plot_size * imageScaleRatio);
-                            currenty = (int) (y_offset_from_top + y_plot_size * imageScaleRatio);
+                        if (currenty > y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio) {
+                            endy = (int) (y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio);
+                            currenty = (int) (y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio);
                             outy = true;
                         }
                     }
