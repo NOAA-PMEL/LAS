@@ -254,6 +254,10 @@ public class SimplePropPropViewer implements EntryPoint {
     DialogBox editDialog = new DialogBox(false);
     
     AbsolutePanel canvasDiv = new AbsolutePanel();
+    
+    boolean outx = false;
+    boolean outy = false;
+    
     @Override
     public void onModuleLoad() {
         editDialog.setText("Flag Editor");
@@ -1064,6 +1068,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
                                     @Override
                                     public void onMouseDown(MouseDownEvent event) {
+                                        outx = false;
+                                        outy = false;
                                         
                                         startx = event.getX();
                                         starty = event.getY();
@@ -1098,12 +1104,35 @@ public class SimplePropPropViewer implements EntryPoint {
                                         // If you drag it out, we'll
                                         // stop
                                         // drawing.
-                                        if (currentx < x_offset_from_left || currenty < y_offset_from_top || currentx > x_offset_from_left + x_plot_size
-                                                || currenty > y_offset_from_top + y_plot_size) {
+                                        if (currentx < x_offset_from_left || currenty < y_offset_from_top || currentx > x_offset_from_left + x_plot_size || currenty > y_offset_from_top + y_plot_size) {
 
-                                            draw = false;
+
                                             endx = currentx;
                                             endy = currenty;
+
+                                            // Set the limits for one last drawing of the selection
+                                            // rectangle.
+                                            if (currentx < x_offset_from_left) {
+                                                endx = x_offset_from_left;
+                                                currentx = x_offset_from_left;
+                                                outx = true;
+                                            }
+                                            if (currenty < y_offset_from_top) {
+                                                endy = y_offset_from_top;
+                                                currenty = y_offset_from_top;
+                                                outy = true;
+                                            }
+                                            if (currentx > x_offset_from_left + x_plot_size) {
+                                                endx = x_offset_from_left + x_plot_size;
+                                                currentx = x_offset_from_left + x_plot_size;
+                                                outx = true;
+                                            }
+                                            if (currenty > y_offset_from_top + y_plot_size) {
+                                                endy = y_offset_from_top + y_plot_size;
+                                                currenty = y_offset_from_top + y_plot_size;
+                                                outy = true;
+                                            }
+                                            
                                         }
                                         if (draw) {
                                             double scaled_x_per_pixel = x_per_pixel / imageScaleRatio;
@@ -1123,7 +1152,11 @@ public class SimplePropPropViewer implements EntryPoint {
                                             
                                             drawingCanvasContext.strokeRect(startx, starty, currentx - startx, currenty - starty);
                                         }
+                                        if (outx && outy) {
+                                            draw = false;
+                                        }
                                     }
+                                    
                                 });
                                 
                                 resize(Window.getClientWidth(), Window.getClientHeight());
