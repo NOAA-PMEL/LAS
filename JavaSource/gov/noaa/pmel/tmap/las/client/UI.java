@@ -1256,7 +1256,7 @@ public class UI extends BaseUI {
                 logger.log(level, "Toggling xPanelHeaderHidden because panelHeaderHidden != xPanelHeaderHidden:" + xPanelHeaderHidden);
                 handlePanelShowHide();
             }
-            if (profile.equals(Constants.PROFILE_ESGF)) {
+            if (profile != null && profile.equals(Constants.PROFILE_ESGF)) {
                 List<String> ncats = new ArrayList<String>();
                 if (xCATID != null && !xCATID.equals("")) {
                     ncats.add(xCATID);
