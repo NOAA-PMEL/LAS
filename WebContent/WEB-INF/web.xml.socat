@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>Live Access Server</display-name>
+	<description />
+
+
+	<!-- Maximum interval of inactivity before a session becomes invalid
+		in minutes. -->
+	<session-config>
+		<session-timeout>180</session-timeout>
+	</session-config>
+	<listener>
+		<listener-class>
+			org.apache.axis.transport.http.AxisHTTPSessionListener
+		</listener-class>
+	</listener>
+	    <listener>
+        <description>LAS Session Listener for Confluence/Tributary Server (Sister Servers) Variable Clean-up</description>
+        <listener-class>gov.noaa.pmel.tmap.las.session.LASSessionListener</listener-class>
+    </listener>
+<!--  Apply an input filter every LAS request via the Struts Action class servlet. -->
+  <filter>
+    <filter-name>RequestInputFilter</filter-name>
+    <filter-class>gov.noaa.pmel.tmap.las.filter.RequestInputFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>RequestInputFilter</filter-name>
+    <servlet-name>action</servlet-name>
+  </filter-mapping>
+
+<!-- Add attribute user_name to authenticated sessions (for SOCAT) -->
+   <filter>
+     <filter-name>AddUsernameFilter</filter-name>
+     <filter-class>gov.noaa.pmel.tmap.las.filter.AddUsernameFilter</filter-class>
+   </filter>
+   <filter-mapping>
+     <filter-name>AddUsernameFilter</filter-name>
+     <servlet-name>action</servlet-name>
+   </filter-mapping>
+
+<!-- End of LAS input filters -->
+	<servlet>
+		<servlet-name>AxisServlet</servlet-name>
+		<servlet-class>
+			org.apache.axis.transport.http.AxisServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AdminServlet</servlet-name>
+		<servlet-class>
+			org.apache.axis.transport.http.AdminServlet
+		</servlet-class>
+		<load-on-startup>100</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>SOAPMonitorService</servlet-name>
+		<servlet-class>
+			org.apache.axis.monitor.SOAPMonitorService
+		</servlet-class>
+		<init-param>
+			<param-name>SOAPMonitorPort</param-name>
+			<param-value>5001</param-value>
+		</init-param>
+		<load-on-startup>100</load-on-startup>
+	</servlet>
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<servlet-class>
+			org.apache.struts.action.ActionServlet
+		</servlet-class>
+		<init-param>
+			<param-name>config</param-name>
+			<param-value>/WEB-INF/struts-config.xml</param-value>
+		</init-param>
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>3</param-value>
+		</init-param>
+		<init-param>
+			<param-name>detail</param-name>
+			<param-value>3</param-value>
+		</init-param>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
+	<!-- Define Velocity template compiler -->
+	<servlet>
+		<servlet-name>velocity</servlet-name>
+		<servlet-class>
+			gov.noaa.pmel.tmap.las.view.LASVelocityViewServlet
+		</servlet-class>
+
+		<init-param>
+			<param-name>org.apache.velocity.toolbox</param-name>
+			<param-value>/WEB-INF/toolbox.xml</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>org.apache.velocity.properties</param-name>
+			<param-value>/WEB-INF/velocity.properties</param-value>
+		</init-param>
+		<load-on-startup>10</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>*.jws</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>SOAPMonitorService</servlet-name>
+		<url-pattern>/SOAPMonitor</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+	<!-- Map *.vm files to Velocity -->
+	<servlet-mapping>
+		<servlet-name>velocity</servlet-name>
+		<url-pattern>*.vm</url-pattern>
+	</servlet-mapping>
+
+	<!-- currently the W3C havent settled on a media type for WSDL;
+		http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
+		for now we go with the basic 'it's XML' response -->
+	<mime-mapping>
+		<extension>wsdl</extension>
+		<mime-type>text/xml</mime-type>
+	</mime-mapping>
+
+
+	<mime-mapping>
+		<extension>xsd</extension>
+		<mime-type>text/xml</mime-type>
+	</mime-mapping>
+
+  <!-- ++++++++++ Setup security restrictions ++++++++++ -->
+  <!--   
+         This set up can be used in conjunction with any https access
+         you have configured for TDS.  If you want to use your own
+         LAS specific https access set up, mimic these configuration changes
+         and configure in your own users and roles in the tomcat config.
+    -->
+  <!-- Default is to not allow DELETE, PUT, POST -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>not allowed</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>DELETE</http-method>
+      <http-method>PUT</http-method>
+      <!-- http-method>POST</http-method -->
+    </web-resource-collection>
+    <auth-constraint/>
+  </security-constraint>
+
+  <!-- This allows "remote configuration":
+    /thredds/debug gives access to various debug and status info.
+    ThreddsDefault servlet aliases /thredds/root/ to "{tomcat_home}/webapps/thredds/"
+    ThreddsDefault servlet aliases /thredds/dataDir/path to "dirLocation/" where path is mapped to dirLocation through a
+      datasetRoot or datasetScan element in the catalog. -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>sensitive read access</web-resource-name>
+      <url-pattern>/ReInit.do</url-pattern>
+      <url-pattern>/admin.do</url-pattern>
+      <url-pattern>/CacheManager.do</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- ThreddsDefault servlet aliases /thredds/content/ to "{tomcat_home}/content/thredds/"   -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>sensitive read and write access</web-resource-name>
+      <url-pattern>/content/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>PUT</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- Setup security restrictions on THREDDS server HTTP POST capabilities in CatalogGen. -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>cataloggen configuration</web-resource-name>
+      <url-pattern>/cataloggen/admin/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- default restricted access uses DIGEST, but not HTTPS -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>restricted access datasets</web-resource-name>
+      <url-pattern>/restrictedAccess/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>restrictedDatasetUser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SOCATFlags database</web-resource-name>
+      <url-pattern>*.do</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>PUT</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>socatreviewer</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <!-- can only have one login-config for extire context. -->
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>SOCAT Reviewer</realm-name>
+      <form-login-config>
+        <form-login-page>/socatlogin.html</form-login-page>
+        <form-error-page>/socatloginerror.html</form-error-page>
+      </form-login-config>
+  </login-config>
+
+  <!-- Define security roles. -->
+  <security-role>
+    <description>The configuration role allows users to configure the THREDDS server.</description>
+    <role-name>tdsConfig</role-name>
+  </security-role>
+
+  <security-role>
+    <description>User who can access restricted datasets.</description>
+    <role-name>restrictedDatasetUser</role-name>
+  </security-role>
+
+  <security-role>
+    <description>SOCAT reviewer who can add flag events to SOCATFlags.</description>
+    <role-name>socatreviewer</role-name>
+  </security-role>
+</web-app>
