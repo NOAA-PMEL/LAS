@@ -353,7 +353,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+parts[i]+"</td>\n");
 	                                                    }
 	                                                }
-	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documenation</a>"+"</td>\n");
+	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documentation</a>"+"</td>\n");
 
 
 	                                                // Call out to ERDDAP for the lat/lon/time box.
