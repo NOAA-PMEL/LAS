@@ -30,7 +30,7 @@
     <servlet-name>action</servlet-name>
   </filter-mapping>
 
-<!-- Add attribute user_name to authenticated sessions (for SOCAT) -->
+<!-- Add attribute user_name to authenticated sessions for SOCAT QC -->
    <filter>
      <filter-name>AddUsernameFilter</filter-name>
      <filter-class>gov.noaa.pmel.tmap.las.filter.AddUsernameFilter</filter-class>
@@ -124,6 +124,15 @@
 	<servlet-mapping>
 		<servlet-name>velocity</servlet-name>
 		<url-pattern>*.vm</url-pattern>
+	</servlet-mapping>
+
+    <servlet>
+        <servlet-name>RPCServlet</servlet-name>
+        <servlet-class>gov.noaa.pmel.tmap.las.server.RPCServiceImpl</servlet-class>
+    </servlet>
+	<servlet-mapping>
+	    <servlet-name>RPCServlet</servlet-name>
+	    <url-pattern>/rpc</url-pattern>
 	</servlet-mapping>
 
 	<!-- currently the W3C havent settled on a media type for WSDL;
@@ -227,6 +236,7 @@
     </user-data-constraint>
   </security-constraint>
 
+  <!-- for SOCAT QC -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>SOCATFlags database</web-resource-name>
@@ -241,6 +251,14 @@
   </security-constraint>
 
   <!-- can only have one login-config for extire context. -->
+<!--
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>THREDDS Data Server</realm-name>
+  </login-config>
+-->
+
+  <!-- for SOCAT QC -->
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>SOCAT Reviewer</realm-name>
@@ -265,4 +283,5 @@
     <description>SOCAT reviewer who can add flag events to SOCATFlags.</description>
     <role-name>socatreviewer</role-name>
   </security-role>
+
 </web-app>

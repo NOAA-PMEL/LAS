@@ -4,8 +4,13 @@ import gov.noaa.pmel.socat.dashboard.nc.DsgNcFileHandler;
 import gov.noaa.pmel.socat.dashboard.server.DatabaseRequestHandler;
 import gov.noaa.pmel.socat.dashboard.shared.DataLocation;
 import gov.noaa.pmel.socat.dashboard.shared.SocatWoceEvent;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
+import gov.noaa.pmel.tmap.las.service.TemplateTool;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +26,8 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.jdom.Element;
+import org.jdom.JDOMException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -30,6 +37,8 @@ import com.google.gson.JsonStreamParser;
 public class SaveEdits extends LASAction {
 
 	private static Logger log = LogManager.getLogger(SaveEdits.class.getName());
+	private static final String DATABASE_CONFIG = "DatabaseBackendConfig.xml";
+	private static final String DATABASE_NAME = "SOCATFlags";
 
 	private double socatQCVersion;
 	private DsgNcFileHandler dsgHandler;
@@ -41,32 +50,48 @@ public class SaveEdits extends LASAction {
 	 * @throws IllegalArgumentException
 	 * 		if parameters are invalid
 	 * @throws SQLException
-	 * 		if one is thrown connecting to or querying the database
+	 * 		if one is thrown connecting to the database
+	 * @throws LASException 
+	 * 		if unable to get the database parameters
 	 */
-	public SaveEdits() throws IllegalArgumentException, SQLException {
+	public SaveEdits() throws IllegalArgumentException, SQLException, LASException {
 		super();
+		log.debug("Initializing SaveEdits from database configuraton");
 
-		log.debug("Initializing SaveEdits with hard-coded values");
-		// TODO: All of the following values need to made into parameters retrieved from configuration file(s)
-		socatQCVersion = 3.0;
+		Element dbParams;
+		try {
+			LASDocument dbConfig = new LASDocument();
+			TemplateTool tempTool = new TemplateTool("database", DATABASE_CONFIG);
+			JDOMUtils.XML2JDOM(tempTool.getConfigFile(), dbConfig);
+			dbParams = dbConfig.getElementByXPath(
+					"/databases/database[@name='" + DATABASE_NAME + "']");
+		} catch (Exception ex) {
+			throw new LASException(
+					"Could not parse " + DATABASE_CONFIG + ": " + ex.toString());
+		}
+		if ( dbParams == null )
+			throw new LASException("No database definition found for database " + 
+					DATABASE_NAME + " in " + DATABASE_CONFIG);
 
-		String dsgFileDir = "/home/data/socat/socatV3";
-		String decDsgFileDir = "/home/data/socat/socat3_decimated";
-		String erddapDsgFlag = "/home/data/kobrien/OSMC/erddap/flag/socatV3_c6c1_d431_8194";
-		String erddapDecDsgFlag = "/home/data/kobrien/OSMC/erddap/flag/socatV3_decimated";
-		dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag);
-
-		String databaseDriver = "com.mysql.jdbc.Driver";
-		String databaseUrl = "jdbc:mysql://localhost:3306/SOCATFlags";
-		String catalogName = "SOCATFlags";
-		String selectUsername = "erddap";
-		String selectPassword = "dapper";
-		String updateUsername = "scientist";
-		String updatePassword = "qc4socat3";
-		databaseHandler = new DatabaseRequestHandler(databaseDriver, databaseUrl, catalogName, 
+		String databaseDriver = dbParams.getAttributeValue("driver");
+		String databaseUrl = dbParams.getAttributeValue("connectionURL");
+		String selectUsername = dbParams.getAttributeValue("user");
+		String selectPassword = dbParams.getAttributeValue("password");
+		String updateUsername = dbParams.getAttributeValue("updateUser");
+		String updatePassword = dbParams.getAttributeValue("updatePassword");
+		// The database URLs in the LAS config files do not have the jdbc: prefix
+		databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
 				selectUsername, selectPassword, updateUsername, updatePassword);
+
+		socatQCVersion = Double.parseDouble(dbParams.getAttributeValue("socatQCVersion"));
+
+		String dsgFileDir = dbParams.getAttributeValue("dsgFileDir");
+		String decDsgFileDir = dbParams.getAttributeValue("decDsgFileDir");
+		String erddapDsgFlag = dbParams.getAttributeValue("erddapDsgFlag");
+		String erddapDecDsgFlag = dbParams.getAttributeValue("erddapDecDsgFlag");
+		dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag);
 	}
-	
+
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {

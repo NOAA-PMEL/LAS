@@ -55,8 +55,13 @@ public class AddUsernameFilter implements Filter {
 				}
 			} catch ( Exception ex ) {
 				// Probably null pointer exception - nothing to do
-				log.debug("AddUsernameFilter failed to find a username to assign");
+				log.debug("AddUsernameFilter failed to add session attribute " +
+						ATTRIBUTE_NAME);
 			}
+		}
+		else {
+			log.debug("AddUsernameFilter found existing session attribute " +
+					ATTRIBUTE_NAME + "=" + username);
 		}
 
 		chain.doFilter(request, response);
