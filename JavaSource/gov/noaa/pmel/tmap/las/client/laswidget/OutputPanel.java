@@ -116,167 +116,6 @@ public class OutputPanel extends Composite implements HasName {
     int annotationsRow = 0;
     int plotRow = 3;
     int controlPanelRow = 1;
-    VariableSelectionChangeEvent.Handler variableChangeHandler = new VariableSelectionChangeEvent.Handler() {
-
-        @Override
-        public void onVariableChange(VariableSelectionChangeEvent event) {
-            Object source = event.getSource();
-            if (source instanceof UserListBox) {
-                UserListBox variablesListBox = (UserListBox) source;
-                // Only proceed if the source was from the same panel or
-                // from the comparePanel
-                if (variablesListBox != null) {
-                    String sourceName = variablesListBox.getName();
-                    if (sourceName != null) {
-                        boolean isFromThisOutputPanel = (ID != null) && ID.equalsIgnoreCase(sourceName);
-                        boolean isFromComparePanel = (CONSTANTS.comparePanelName().equalsIgnoreCase(sourceName));
-                        if (isFromThisOutputPanel || isFromComparePanel) {
-                            int selectedIndex = variablesListBox.getSelectedIndex();
-                            Object variableUserObject = variablesListBox.getUserObject(selectedIndex);
-                            if (variableUserObject instanceof VariableSerializable) {
-                                if (isFromThisOutputPanel) {
-                                    // Update this OutputPanel's variable
-                                    VariableSerializable variable = (VariableSerializable) variableUserObject;
-                                    applyVariableChange(variable, false);
-                                    setChangeDataset(false);
-                                }
-                            }
-                            // Update OutputPanels if update check box is
-                            // checked
-                            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), variablesListBox);
-//                            if (isComparePanel()) {
-//                                // Change the variable at the app level.
-//                                eventBus.fireEventFromSource(new VariableSelectionChangeEvent(), variablesListBox);
-//                            }
-                        }
-                    }
-                }
-            }
-        }
-    };
-    public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Could not fetch grid for new variable.");
-        }
-
-        @Override
-        public void onSuccess(ConfigSerializable config) {
-            VariableSerializable[] nvarlist = config.getCategorySerializable().getDatasetSerializable().getVariablesSerializable();
-            List<VariableSerializable> vlst = Arrays.asList(nvarlist);
-            ngrid = config.getGrid();
-            nvar.setGrid(ngrid);
-            ops = config.getOperations();
-            ortho = Util.setOrthoAxes(view, ngrid);
-            // This is only for the history state...
-
-            if (ngrid == null) {
-                Window.alert("Still fetching grid for new variable.");
-                return;
-            }
-
-            if (isChangeDataset()) {
-                // In the case of where multiple variables are being used in
-                // a panel, we need to change the 1st UserList
-                setVariables(vlst, nvar);
-                setVariable(nvar, true);
-                setChangeDataset(false);
-
-            } else {
-                if (!nvar.getID().equals(panelVar.getID())) {
-                    // In the case of where multiple variables are being used in
-                    // a panel, we need to change the 1st UserList
-                    setVariable(nvar, true);
-                }
-            }
-
-            boolean pushHistory = true;
-            if (historyTokenMap != null) {
-                setOrthogonalAxesValues();
-                setExtraVariables();
-                waitingForHistory = false;
-                pushHistory = false;
-            } else {
-                // If not a history event, handle this ourselves.
-                panelAxesWidgets.showOrthoAxes(view, ortho, null, isComparePanel());
-            }
-            if ( analysis != null ) {
-                setAnalysisAxes(analysis.getAnalysisAxes());
-            }
-            if (!waitingForHistory) {
-                if (!isComparePanel()) {
-                    
-                    // TODO helper or higher level method?
-                    variableControls.getListBoxes().get(0).setAddButtonVisible(false);
-                }
-                // Make the update happen automatically, do not force a panel to
-                // update, push the history only if it's not a history event.
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, pushHistory));
-            }
-        }
-
-    };
-
-    public AsyncCallback<CategorySerializable[]> historyDatasetCallback = new AsyncCallback<CategorySerializable[]>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Failed to initalizes VizGal." + caught.toString());
-        }
-
-        @Override
-        public void onSuccess(CategorySerializable[] result) {
-            CategorySerializable[] cats = result;
-            if (cats.length > 1) {
-                Window.alert("Error getting variables for this dataset.");
-            } else {
-                if (cats[0].isVariableChildren()) {
-                    Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
-                    nvar = cats[0].getVariable(historyTokenMap.get("varid"));
-                    variableControls.setVariables(vars, nvar);
-                    if (panelVar != null && nvar != null && nvar.getDSID().equals(panelVar.getDSID())) {
-                        setChangeDataset(false);
-                    } else {
-                        setChangeDataset(true);
-                    }
-                    Util.getRPCService().getConfig(null, historyTokenMap.get("catid"), historyTokenMap.get("dsid"), historyTokenMap.get("varid"), configCallback);
-                } else {
-                    Window.alert("No variables found in this category");
-                }
-            }
-        }
-    };
-    // public AsyncCallback<VariableSerializable> variableCallback = new
-    // AsyncCallback<VariableSerializable>() {
-    //
-    // @Override
-    // public void onFailure(Throwable caught) {
-    //
-    // Window.alert("Could not initialize panel from URL history.");
-    //
-    // }
-    //
-    // @Override
-    // public void onSuccess(VariableSerializable result) {
-    // nvar = result;
-    // Util.getRPCService().getConfig(null, nvar.getDSID(), nvar.getID(),
-    // configCallback);
-    // }
-    //
-    // };
-    public MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
-
-        @Override
-        public void onFeatureChanged() {
-
-            eventBus.fireEventFromSource(new MapChangeEvent(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), panelAxesWidgets.getRefMap().getXlo(),
-                    panelAxesWidgets.getRefMap().getXhi()), thisOutputPanel);
-            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), thisOutputPanel);
-
-        }
-
-    };
     
     List<ConstraintSerializable> constraints = null;
 
@@ -338,348 +177,13 @@ public class OutputPanel extends Composite implements HasName {
     private ClientFactory clientFactory = GWT.create(ClientFactory.class);
     private EventBus eventBus;
 
-    private FeatureModifiedEvent.Handler featureModifiedHandler = new FeatureModifiedEvent.Handler() {
-
-        @Override
-        public void onFeatureModified(FeatureModifiedEvent event) {
-            OLMapWidget m = (OLMapWidget) event.getSource();
-            if (panelAxesWidgets.getRefMap().equals(m)) {
-                // Event from this map, re-fire it as a map change.
-                eventBus.fireEventFromSource(new MapChangeEvent(event.getYlo(), event.getYhi(), event.getXlo(), event.getXhi()), thisOutputPanel);
-            }
-
-        }
-    };
-
     private Map<String, String> historyOptionsMap;
     // Keep track of the passed in history for use after each server call back
     // in the cascade of calls needed to set the state from the history.
     private Map<String, String> historyTokenMap = null;
 
-    private RequestCallback lasRequestCallback = new RequestCallback() {
-        @Override
-        public void onError(Request request, Throwable exception) {
-            currentURL = currentURL + "&error=true";
-            logger.warning(getName() + ": entering lasRequestCallback.onError request:" + request + "\nexception:" + exception);
-            spin.hide();
-            updating = false;
-            HTML error = new HTML(exception.toString());
-            Widget size = grid.getWidget(plotRow, 0);
-            error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-            grid.setWidget(plotRow, 0, error);
-            if (pending) {
-                pending = false;
-            }
-            logger.warning("exiting lasRequestCallback.onError");
-        }
+    
 
-        @Override
-        public void onResponseReceived(Request request, Response response) {
-            logger.info(getName() + ": entering lasRequestCallback.onResponseReceived request:" + request + "\nresponse:" + response);
-            eventBus.fireEventFromSource(new UpdateFinishedEvent(), OutputPanel.this);
-            updating = false;
-            String doc = response.getText();
-            spin.hide();
-            // Look at the doc. If it's not obviously XML, treat it as HTML.
-            boolean isObviouslyXML = false;
-            if (doc != null) {
-                if (doc.length() > 99) {
-                    isObviouslyXML = doc.substring(0, 100).contains("<?xml");
-                } else if (doc.length() > 5) {
-                    isObviouslyXML = doc.contains("<?xml");
-                }
-            }
-            if (!isObviouslyXML) {
-                logger.info("The doc is not obviously XML, treat it as HTML");
-                currentURL = currentURL + "&error=true";
-                evalScripts(new HTML(response.getText()).getElement());
-                VerticalPanel p = new VerticalPanel();
-                p.ensureDebugId("VerticalPanel");
-                ScrollPanel sp = new ScrollPanel();
-                sp.ensureDebugId("ScrollPanel");
-                HTML result = new HTML(doc);
-                p.add(result);
-                HTML again = new HTML("<b>Push the Update Plots button when you're ready to make your next request.");
-                p.add(again);
-                sp.add(p);
-                sp.setSize("30em", "20em");
-                grid.setWidget(plotRow, 0, sp);
-            } else {
-                formatChooser.hide();
-                logger.info("The doc is obviously XML");
-                doc = doc.replaceAll("\n", "").trim();
-                Document responseXML = XMLParser.parse(doc);
-                NodeList results = responseXML.getElementsByTagName("result");
-                String annourl = "";
-                String imageurl = "";
-                boolean image_ready = false;
-                for (int n = 0; n < results.getLength(); n++) {
-                    if (results.item(n) instanceof Element) {
-                        logger.info("working on result n:" + n);
-                        Element result = (Element) results.item(n);
-                        String typeAttribute = result.getAttribute("type");
-                        if (typeAttribute == null)
-                            typeAttribute = "null";
-                        logger.info("result.getAttribute(\"type\"):" + typeAttribute);
-                        if (typeAttribute.equals("image")) {
-                            // HTML image = new
-                            // HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
-                            image_ready = true;
-                            imageurl = result.getAttribute("url");
-                            logger.info("imageurl = result.getAttribute(\"url\"):" + imageurl);
-                        } else if ( typeAttribute.equals("pdf") ) {
-                            formatChooser.setPdfUrl(result.getAttribute("url"));
-                        } else if ( typeAttribute.equals("svg") ) {
-                            formatChooser.setSvgUrl(result.getAttribute("url"));
-                        } else if ( typeAttribute.equals("ps") ) {
-                            formatChooser.setPsUrl(result.getAttribute("url"));
-                        } else if (typeAttribute.equals("annotations")) {
-                            annourl = result.getAttribute("url");
-                            lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl) + "&catid=" + panelVar.getDSID());
-                        } else if (typeAttribute.equals("map_scale")) {
-                            NodeList map_scale = result.getElementsByTagName("map_scale");
-                            for (int m = 0; m < map_scale.getLength(); m++) {
-                                if (map_scale.item(m) instanceof Element) {
-                                    Element map = (Element) map_scale.item(m);
-                                    NodeList children = map.getChildNodes();
-                                    for (int l = 0; l < children.getLength(); l++) {
-                                        if (children.item(l) instanceof Element) {
-                                            Element child = (Element) children.item(l);
-                                            if (child.getNodeName().equals("x_image_size")) {
-                                                x_image_size = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_image_size")) {
-                                                y_image_size = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("x_plot_size")) {
-                                                x_plot_size = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_plot_size")) {
-                                                y_plot_size = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("x_offset_from_left")) {
-                                                x_offset_from_left = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_offset_from_bottom")) {
-                                                y_offset_from_bottom = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("x_offset_from_right")) {
-                                                x_offset_from_right = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_offset_from_top")) {
-                                                y_offset_from_top = getNumber(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("x_axis_lower_left")) {
-                                                x_axis_lower_left = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_axis_lower_left")) {
-                                                y_axis_lower_left = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("x_axis_upper_right")) {
-                                                x_axis_upper_right = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("y_axis_upper_right")) {
-                                                y_axis_upper_right = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("data_min")) {
-                                                globalMin = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("data_max")) {
-                                                globalMax = getDouble(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("axis_horizontal")) {
-                                                axisHorizontal = getString(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("axis_vertical")) {
-                                                axisVertical = getString(child.getFirstChild());
-                                            } else if (child.getNodeName().equals("axis_vertical_positive")) {
-                                                axisVerticalPositive = getString(child.getFirstChild());
-                                            } else if ( child.getNodeName().equals("time_min") ) {
-                                                // This is the smallest value of time on the plot
-                                                time_min = getString(child.getFirstChild());
-                                            } else if ( child.getNodeName().equals("time_max") ) {
-                                                // This is the largest value of time on the plot
-                                                time_max = getString(child.getFirstChild());
-                                            } else if ( child.getNodeName().equals("time_origin") ) {
-                                                // This is the base date from the units string.
-                                                time_origin = getString(child.getFirstChild());
-                                            } else if ( child.getNodeName().equals("calendar") ) {
-                                                // This is one of: GREGORIAN, NOLEAP, JULIAN, 360_DAY, ALL_LEAP
-                                                calendar = getString(child.getFirstChild());
-                                            } else if ( child.getNodeName().equals("time_step_units") ) {
-                                                // This is one of: years, months, days, hours, minutes, seconds
-                                                time_units = getString(child.getFirstChild());
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } else if (typeAttribute.equals("error")) {
-                            /*
-                             * Unfortunately, we cannot provide what you have
-                             * asked for. A remote server was unable to deliver
-                             * the data LAS needs to make your product.
-                             * 
-                             * 
-                             * LAS was trying to access these servers:
-                             * 
-                             * http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP
-                             * /.EMC/.CMB/.Pacific/.monthly/dods
-                             * 
-                             * Advanced users may see more technical
-                             * information. Try your request again.
-                             * 
-                             * Email to the site administrator.
-                             */
-
-                            if (result.getAttribute("ID").equals("las_message")) {
-                                logger.info("result.getAttribute(\"ID\").equals(\"las_message\"");
-                                Node text = result.getFirstChild();
-                                if (text instanceof Text) {
-                                    Text t = (Text) text;
-                                    HTML error = new HTML(t.getData().toString().trim());
-                                    error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                                    grid.setWidget(plotRow, 0, error);
-                                }
-                            }
-                        } else if (typeAttribute.equals("batch")) {
-                            String elapsed_time = result.getAttribute("elapsed_time");
-                            cancelButton.setTime(Integer.valueOf(elapsed_time));
-                            cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                            grid.setWidget(plotRow, 0, cancelButton);
-                            lasRequest.setProperty("product_server", "ui_timeout", "3");
-                            String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
-                            if (currentURL.contains("cancel"))
-                                url = url + "&cancel=true";
-                            RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-                            try {
-                                updating = true;
-                                sendRequest.setHeader("Pragma", "no-cache");
-                                sendRequest.setHeader("cache-directive", "no-cache");
-                                // These are needed or IE will cache and make
-                                // infinite requests that always return 304
-                                sendRequest.setHeader("If-Modified-Since", new Date().toString());
-                                sendRequest.setHeader("max-age", "0");
-                                logger.info("Pragma:" + sendRequest.getHeader("Pragma"));
-                                logger.info("cache-directive:" + sendRequest.getHeader("cache-directive"));
-                                logger.info("max-age:" + sendRequest.getHeader("max-age"));
-                                logger.info("If-Modified-Since:" + sendRequest.getHeader("If-Modified-Since"));
-                                // logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
-                                // + url);
-                                // sendRequest.sendRequest(null,
-                                // lasRequestCallback);
-                                LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
-                                Logger.getLogger(this.getClass().getName()).info(
-                                        getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
-                                eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
-                                // } catch (RequestException e) {
-                            } catch (Exception e) {
-                                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-                                HTML error = new HTML(e.toString());
-                                error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
-                                grid.setWidget(plotRow, 0, error);
-                            }
-                        }
-                    }
-                }
-                if (axisVerticalPositive != null && axisVerticalPositive.equalsIgnoreCase("down") && axisVertical.equals("z")) {
-                    double t = y_axis_lower_left;
-                    y_axis_lower_left = y_axis_upper_right;
-                    y_axis_upper_right = t;
-                }
-                if (image_ready) {
-                    image_w = x_image_size;
-                    image_h = y_image_size;
-
-                    String urlfrag = URLUtil.getBaseURL() + "getAnnotations.do?template=image_w_annotations.vm&"+getPrintURL();
-                    formatChooser.setPrintUrl(urlfrag);
-                    
-                    // set the canvas with the image and get to drawin'
-
-                    if (!imageurl.equals("")) {
-                        currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                        plotImage = new IESafeImage(imageurl);
-                        x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
-                        y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
-
-                        if (imageCanvas != null) {
-                          
-                            
-                            
-                            plotImage.addLoadHandler(imageLoadHandler);
-                            plotImage.addErrorHandler(imageErrorHandler);
-                            plotImage.setUrl(imageurl);
-                            grid.setWidget(2, 0, plotImage);
-                            plotImage.setVisible(false);
-                            drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
-
-                                @Override
-                                public void onMouseUp(MouseUpEvent event) {
-                                    // If we're still drawing when the mouse
-                                    // goes up, record the position.
-                                    if (draw) {
-                                        endx = event.getX();
-                                        endy = event.getY();
-                                    }
-                                    draw = false;
-                                    outx = false;
-                                    outy = false;
-                                    for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
-                                        Mouse mouse = mouseIt.next();
-                                        mouse.applyNeeded();
-                                    }
-                                }
-                            });
-                            lasAnnotationsPanel.setPopupWidth(getPlotWidth());
-                        } else {
-                            // Browser cannot handle a canvas tag, so just put
-                            // up the image.
-                            // The old stuff if there is no canvas...
-                            currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                            setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-                        }
-                    }
-                    world_startx = x_axis_lower_left;
-                    world_endx = x_axis_upper_right;
-                    world_starty = y_axis_lower_left;
-                    world_endy = y_axis_upper_right;
-                }
-            }
-            if (pending) {
-                pending = false;
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
-            }
-            logger.info("exiting lasRequestCallback.onResponseReceived");
-        }
-    };
-
-    private LASResponseEvent.Handler lasResponseEventHandler = new LASResponseEvent.Handler() {
-        @Override
-        public void onResponse(LASResponseEvent event) {
-            try {
-                String thisOutputPanelName = getName();
-                if ((event != null) && (thisOutputPanelName != null) && (event.getCallerObjectName().equalsIgnoreCase(thisOutputPanelName))) {
-                    logger.info(thisOutputPanelName + " has accepted LASResponseEvent event:" + event);
-                    boolean isResponseReceived = event.isResponseReceived();
-                    logger.info("event.isResponseReceived():" + isResponseReceived);
-                    if (isResponseReceived) {
-                        if (event.getCallbackObjectName().equals("lasRequestCallback")) {
-                            lasRequestCallback.onResponseReceived(event.getRequest(), event.getResponse());
-                        }
-                    } else {
-                        if (event.getCallbackObjectName().equals("lasRequestCallback")) {
-                            lasRequestCallback.onError(event.getRequest(), event.getException());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            }
-        }
-    };
-
-    private MapChangeEvent.Handler mapChangeHandler = new MapChangeEvent.Handler() {
-
-        @Override
-        public void onMapSelectionChange(MapChangeEvent event) {
-            Object object = event.getSource();
-            if ( object instanceof OutputPanel ) {
-                OutputPanel p = (OutputPanel) object;
-                if (p.isComparePanel() && !isComparePanel()) {
-                    if (view.contains("x") && !view.contains("y")) {
-                        panelAxesWidgets.getRefMap().setCurrentSelection(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), event.getXlo(), event.getXhi());
-                    } else if (!view.contains("x") && view.contains("y")) {
-                        panelAxesWidgets.getRefMap().setCurrentSelection(event.getYlo(), event.getYhi(), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
-                    }
-                }
-            }
-        }
-    };
 
     //private OutputControlPanelTwo outputControlPanel;
     
@@ -698,32 +202,7 @@ public class OutputPanel extends Composite implements HasName {
     // Have a cancel button ready to go for this panel.
     CancelButton cancelButton;
 
-    CancelEvent.Handler cancelRequestHandler = new CancelEvent.Handler() {
-
-        @Override
-        public void onCancel(CancelEvent event) {
-            if (event.getID().equals(ID)) {
-                currentURL = currentURL + "&cancel=true";
-                RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, currentURL);
-                try {
-
-                    lasAnnotationsPanel.setError("Fetching plot annotations...");
-                    updating = true;
-                    // sendRequest.sendRequest(null, 33Callback);
-                    // Using LASRequestEvent Controller so a cancel in one
-                    // OutputPanel cancels related requests too
-                    LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
-                    Logger.getLogger(this.getClass().getName()).info(
-                            getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
-                    eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
-                    // } catch (RequestException e) {
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, e.getLocalizedMessage(), e);
-                    Window.alert("Unable to cancel request.");
-                }
-            }
-        }
-    };
+   
 
     // Keep track of the values that are currently being used as the fixed axis
     // and compare axis
@@ -775,30 +254,7 @@ public class OutputPanel extends Composite implements HasName {
 
     };
 
-    SelectionHandler<TreeItem> datasetSelctionHandler = new SelectionHandler<TreeItem>() {
-        @Override
-        public void onSelection(SelectionEvent<TreeItem> event) {
-            DatasetWidget datasetWidget = datasetButton.getDatasetWidget();
-            boolean isFromMyDatasetWidget = event.getSource().equals(datasetWidget);
-            if (isFromMyDatasetWidget) {
-                TreeItem item = event.getSelectedItem();
-                Object variableUserObject = item.getUserObject();
-                if (variableUserObject instanceof VariableSerializable) {
-                    VariableSerializable variable = (VariableSerializable) variableUserObject;
-                    // Remove extra variable UserLists before
-                    // applyVariableChange
-                    // TODO: Replace this with a higher level method or use
-                    // events
-                    variableControls.removeListBoxesExceptFirst();
-                    if ( variable.getAttributes().get("grid_type").equals(vizGalVariable.getAttributes().get("grid_type") )) {
-                        applyVariableChange(variable, true);
-                    } else {
-                        Window.alert("The grid type of the new varible must match the grid type of the varible in the upper left.");
-                    }
-                }
-            }
-        }
-    };
+   
     // Keep track of the difference state in case we change data sets.
     boolean difference = false;
     VariableSerializable differenceFromVariable;
@@ -810,7 +266,6 @@ public class OutputPanel extends Composite implements HasName {
     String fill_levels;
     String fixedAxis;
     String fixedAxisValue;
-    int fixedZoom;
     
     // Background canvas for the image
     Canvas imageCanvas;
@@ -2315,17 +1770,6 @@ public class OutputPanel extends Composite implements HasName {
         grid.setWidget(plotRow, 0, image);
     }
 
-    public void setImageSize(int percent) {
-        fixedZoom = percent;
-        double factor = percent / 100.;
-        Widget p = grid.getWidget(plotRow, 0);
-        int w = (int) (Double.valueOf(image_w).doubleValue() * factor);
-        int h = (int) (Double.valueOf(image_h).doubleValue() * factor);
-        p.setWidth(w + "px");
-        p.setHeight(h + "px");
-        autoZoom = false;
-    }
-
     public void setLat(String ylo, String yhi) {
         panelAxesWidgets.getRefMap().setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
     }
@@ -2432,9 +1876,7 @@ public class OutputPanel extends Composite implements HasName {
                 // imageElement will be valid
                 scale(plotImage, imageScaleRatio);
             }
-        } else {
-            setImageSize(fixedZoom);
-        }
+        } 
         if (spin.isVisible()) {
             spinSetPopupPositionCenter(plotWidget);
         }
@@ -3104,4 +2546,553 @@ public class OutputPanel extends Composite implements HasName {
     public VariableControls getVariableControls() {
         return variableControls;
     }
+    
+    private RequestCallback lasRequestCallback = new RequestCallback() {
+        @Override
+        public void onError(Request request, Throwable exception) {
+            currentURL = currentURL + "&error=true";
+            logger.warning(getName() + ": entering lasRequestCallback.onError request:" + request + "\nexception:" + exception);
+            spin.hide();
+            updating = false;
+            HTML error = new HTML(exception.toString());
+            Widget size = grid.getWidget(plotRow, 0);
+            error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
+            grid.setWidget(plotRow, 0, error);
+            if (pending) {
+                pending = false;
+            }
+            logger.warning("exiting lasRequestCallback.onError");
+        }
+
+        @Override
+        public void onResponseReceived(Request request, Response response) {
+            logger.info(getName() + ": entering lasRequestCallback.onResponseReceived request:" + request + "\nresponse:" + response);
+            eventBus.fireEventFromSource(new UpdateFinishedEvent(), OutputPanel.this);
+            updating = false;
+            String doc = response.getText();
+            spin.hide();
+            // Look at the doc. If it's not obviously XML, treat it as HTML.
+            boolean isObviouslyXML = false;
+            if (doc != null) {
+                if (doc.length() > 99) {
+                    isObviouslyXML = doc.substring(0, 100).contains("<?xml");
+                } else if (doc.length() > 5) {
+                    isObviouslyXML = doc.contains("<?xml");
+                }
+            }
+            if (!isObviouslyXML) {
+                logger.info("The doc is not obviously XML, treat it as HTML");
+                currentURL = currentURL + "&error=true";
+                evalScripts(new HTML(response.getText()).getElement());
+                VerticalPanel p = new VerticalPanel();
+                p.ensureDebugId("VerticalPanel");
+                ScrollPanel sp = new ScrollPanel();
+                sp.ensureDebugId("ScrollPanel");
+                HTML result = new HTML(doc);
+                p.add(result);
+                HTML again = new HTML("<b>Push the Update Plots button when you're ready to make your next request.");
+                p.add(again);
+                sp.add(p);
+                sp.setSize("30em", "20em");
+                grid.setWidget(plotRow, 0, sp);
+            } else {
+                formatChooser.hide();
+                logger.info("The doc is obviously XML");
+                doc = doc.replaceAll("\n", "").trim();
+                Document responseXML = XMLParser.parse(doc);
+                NodeList results = responseXML.getElementsByTagName("result");
+                String annourl = "";
+                String imageurl = "";
+                boolean image_ready = false;
+                for (int n = 0; n < results.getLength(); n++) {
+                    if (results.item(n) instanceof Element) {
+                        logger.info("working on result n:" + n);
+                        Element result = (Element) results.item(n);
+                        String typeAttribute = result.getAttribute("type");
+                        if (typeAttribute == null)
+                            typeAttribute = "null";
+                        logger.info("result.getAttribute(\"type\"):" + typeAttribute);
+                        if (typeAttribute.equals("image")) {
+                            // HTML image = new
+                            // HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
+                            image_ready = true;
+                            imageurl = result.getAttribute("url");
+                            logger.info("imageurl = result.getAttribute(\"url\"):" + imageurl);
+                        } else if ( typeAttribute.equals("pdf") ) {
+                            formatChooser.setPdfUrl(result.getAttribute("url"));
+                        } else if ( typeAttribute.equals("svg") ) {
+                            formatChooser.setSvgUrl(result.getAttribute("url"));
+                        } else if ( typeAttribute.equals("ps") ) {
+                            formatChooser.setPsUrl(result.getAttribute("url"));
+                        } else if (typeAttribute.equals("annotations")) {
+                            annourl = result.getAttribute("url");
+                            lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl) + "&catid=" + panelVar.getDSID());
+                        } else if (typeAttribute.equals("map_scale")) {
+                            NodeList map_scale = result.getElementsByTagName("map_scale");
+                            for (int m = 0; m < map_scale.getLength(); m++) {
+                                if (map_scale.item(m) instanceof Element) {
+                                    Element map = (Element) map_scale.item(m);
+                                    NodeList children = map.getChildNodes();
+                                    for (int l = 0; l < children.getLength(); l++) {
+                                        if (children.item(l) instanceof Element) {
+                                            Element child = (Element) children.item(l);
+                                            if (child.getNodeName().equals("x_image_size")) {
+                                                x_image_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_image_size")) {
+                                                y_image_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_plot_size")) {
+                                                x_plot_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_plot_size")) {
+                                                y_plot_size = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_offset_from_left")) {
+                                                x_offset_from_left = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_offset_from_bottom")) {
+                                                y_offset_from_bottom = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_offset_from_right")) {
+                                                x_offset_from_right = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_offset_from_top")) {
+                                                y_offset_from_top = getNumber(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_axis_lower_left")) {
+                                                x_axis_lower_left = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_axis_lower_left")) {
+                                                y_axis_lower_left = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("x_axis_upper_right")) {
+                                                x_axis_upper_right = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("y_axis_upper_right")) {
+                                                y_axis_upper_right = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("data_min")) {
+                                                globalMin = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("data_max")) {
+                                                globalMax = getDouble(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("axis_horizontal")) {
+                                                axisHorizontal = getString(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("axis_vertical")) {
+                                                axisVertical = getString(child.getFirstChild());
+                                            } else if (child.getNodeName().equals("axis_vertical_positive")) {
+                                                axisVerticalPositive = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_min") ) {
+                                                // This is the smallest value of time on the plot
+                                                time_min = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_max") ) {
+                                                // This is the largest value of time on the plot
+                                                time_max = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_origin") ) {
+                                                // This is the base date from the units string.
+                                                time_origin = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("calendar") ) {
+                                                // This is one of: GREGORIAN, NOLEAP, JULIAN, 360_DAY, ALL_LEAP
+                                                calendar = getString(child.getFirstChild());
+                                            } else if ( child.getNodeName().equals("time_step_units") ) {
+                                                // This is one of: years, months, days, hours, minutes, seconds
+                                                time_units = getString(child.getFirstChild());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (typeAttribute.equals("error")) {
+                            /*
+                             * Unfortunately, we cannot provide what you have
+                             * asked for. A remote server was unable to deliver
+                             * the data LAS needs to make your product.
+                             * 
+                             * 
+                             * LAS was trying to access these servers:
+                             * 
+                             * http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP
+                             * /.EMC/.CMB/.Pacific/.monthly/dods
+                             * 
+                             * Advanced users may see more technical
+                             * information. Try your request again.
+                             * 
+                             * Email to the site administrator.
+                             */
+
+                            if (result.getAttribute("ID").equals("las_message")) {
+                                logger.info("result.getAttribute(\"ID\").equals(\"las_message\"");
+                                Node text = result.getFirstChild();
+                                if (text instanceof Text) {
+                                    Text t = (Text) text;
+                                    HTML error = new HTML(t.getData().toString().trim());
+                                    error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
+                                    grid.setWidget(plotRow, 0, error);
+                                }
+                            }
+                        } else if (typeAttribute.equals("batch")) {
+                            String elapsed_time = result.getAttribute("elapsed_time");
+                            cancelButton.setTime(Integer.valueOf(elapsed_time));
+                            cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
+                            grid.setWidget(plotRow, 0, cancelButton);
+                            lasRequest.setProperty("product_server", "ui_timeout", "3");
+                            String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
+                            if (currentURL.contains("cancel"))
+                                url = url + "&cancel=true";
+                            RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+                            try {
+                                updating = true;
+                                sendRequest.setHeader("Pragma", "no-cache");
+                                sendRequest.setHeader("cache-directive", "no-cache");
+                                // These are needed or IE will cache and make
+                                // infinite requests that always return 304
+                                sendRequest.setHeader("If-Modified-Since", new Date().toString());
+                                sendRequest.setHeader("max-age", "0");
+                                logger.info("Pragma:" + sendRequest.getHeader("Pragma"));
+                                logger.info("cache-directive:" + sendRequest.getHeader("cache-directive"));
+                                logger.info("max-age:" + sendRequest.getHeader("max-age"));
+                                logger.info("If-Modified-Since:" + sendRequest.getHeader("If-Modified-Since"));
+                                // logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
+                                // + url);
+                                // sendRequest.sendRequest(null,
+                                // lasRequestCallback);
+                                LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
+                                Logger.getLogger(this.getClass().getName()).info(
+                                        getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
+                                eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
+                                // } catch (RequestException e) {
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+                                HTML error = new HTML(e.toString());
+                                error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
+                                grid.setWidget(plotRow, 0, error);
+                            }
+                        }
+                    }
+                }
+                if (axisVerticalPositive != null && axisVerticalPositive.equalsIgnoreCase("down") && axisVertical.equals("z")) {
+                    double t = y_axis_lower_left;
+                    y_axis_lower_left = y_axis_upper_right;
+                    y_axis_upper_right = t;
+                }
+                if (image_ready) {
+                    image_w = x_image_size;
+                    image_h = y_image_size;
+
+                    String urlfrag = URLUtil.getBaseURL() + "getAnnotations.do?template=image_w_annotations.vm&"+getPrintURL();
+                    formatChooser.setPrintUrl(urlfrag);
+                    
+                    // set the canvas with the image and get to drawin'
+
+                    if (!imageurl.equals("")) {
+                        currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+                        plotImage = new IESafeImage(imageurl);
+                        x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
+                        y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
+
+                        if (imageCanvas != null) {
+                          
+                            
+                            
+                            plotImage.addLoadHandler(imageLoadHandler);
+                            plotImage.addErrorHandler(imageErrorHandler);
+                            plotImage.setUrl(imageurl);
+                            grid.setWidget(2, 0, plotImage);
+                            plotImage.setVisible(false);
+                            drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
+
+                                @Override
+                                public void onMouseUp(MouseUpEvent event) {
+                                    // If we're still drawing when the mouse
+                                    // goes up, record the position.
+                                    if (draw) {
+                                        endx = event.getX();
+                                        endy = event.getY();
+                                    }
+                                    draw = false;
+                                    outx = false;
+                                    outy = false;
+                                    for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+                                        Mouse mouse = mouseIt.next();
+                                        mouse.applyNeeded();
+                                    }
+                                }
+                            });
+                            lasAnnotationsPanel.setPopupWidth(getPlotWidth());
+                        } else {
+                            // Browser cannot handle a canvas tag, so just put
+                            // up the image.
+                            // The old stuff if there is no canvas...
+                            currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+                            setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
+                        }
+                    }
+                    world_startx = x_axis_lower_left;
+                    world_endx = x_axis_upper_right;
+                    world_starty = y_axis_lower_left;
+                    world_endy = y_axis_upper_right;
+                }
+            }
+            if (pending) {
+                pending = false;
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+            }
+            logger.info("exiting lasRequestCallback.onResponseReceived");
+        }
+    };
+    public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Could not fetch grid for new variable.");
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+            VariableSerializable[] nvarlist = config.getCategorySerializable().getDatasetSerializable().getVariablesSerializable();
+            List<VariableSerializable> vlst = Arrays.asList(nvarlist);
+            ngrid = config.getGrid();
+            nvar.setGrid(ngrid);
+            ops = config.getOperations();
+            ortho = Util.setOrthoAxes(view, ngrid);
+            // This is only for the history state...
+
+            if (ngrid == null) {
+                Window.alert("Still fetching grid for new variable.");
+                return;
+            }
+
+            if (isChangeDataset()) {
+                // In the case of where multiple variables are being used in
+                // a panel, we need to change the 1st UserList
+                setVariables(vlst, nvar);
+                setVariable(nvar, true);
+                setChangeDataset(false);
+
+            } else {
+                if (!nvar.getID().equals(panelVar.getID())) {
+                    // In the case of where multiple variables are being used in
+                    // a panel, we need to change the 1st UserList
+                    setVariable(nvar, true);
+                }
+            }
+
+            boolean pushHistory = true;
+            if (historyTokenMap != null) {
+                setOrthogonalAxesValues();
+                setExtraVariables();
+                waitingForHistory = false;
+                pushHistory = false;
+            } else {
+                // If not a history event, handle this ourselves.
+                panelAxesWidgets.showOrthoAxes(view, ortho, null, isComparePanel());
+            }
+            if ( analysis != null ) {
+                setAnalysisAxes(analysis.getAnalysisAxes());
+            }
+            if (!waitingForHistory) {
+                if (!isComparePanel()) {
+                    
+                    // TODO helper or higher level method?
+                    variableControls.getListBoxes().get(0).setAddButtonVisible(false);
+                }
+                // Make the update happen automatically, do not force a panel to
+                // update, push the history only if it's not a history event.
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, pushHistory));
+            }
+        }
+
+    };
+
+    public AsyncCallback<CategorySerializable[]> historyDatasetCallback = new AsyncCallback<CategorySerializable[]>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Failed to initalizes VizGal." + caught.toString());
+        }
+
+        @Override
+        public void onSuccess(CategorySerializable[] result) {
+            CategorySerializable[] cats = result;
+            if (cats.length > 1) {
+                Window.alert("Error getting variables for this dataset.");
+            } else {
+                if (cats[0].isVariableChildren()) {
+                    Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
+                    nvar = cats[0].getVariable(historyTokenMap.get("varid"));
+                    variableControls.setVariables(vars, nvar);
+                    if (panelVar != null && nvar != null && nvar.getDSID().equals(panelVar.getDSID())) {
+                        setChangeDataset(false);
+                    } else {
+                        setChangeDataset(true);
+                    }
+                    Util.getRPCService().getConfig(null, historyTokenMap.get("catid"), historyTokenMap.get("dsid"), historyTokenMap.get("varid"), configCallback);
+                } else {
+                    Window.alert("No variables found in this category");
+                }
+            }
+        }
+    };
+    // public AsyncCallback<VariableSerializable> variableCallback = new
+    // AsyncCallback<VariableSerializable>() {
+    //
+    // @Override
+    // public void onFailure(Throwable caught) {
+    //
+    // Window.alert("Could not initialize panel from URL history.");
+    //
+    // }
+    //
+    // @Override
+    // public void onSuccess(VariableSerializable result) {
+    // nvar = result;
+    // Util.getRPCService().getConfig(null, nvar.getDSID(), nvar.getID(),
+    // configCallback);
+    // }
+    //
+    // };
+    public MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
+
+        @Override
+        public void onFeatureChanged() {
+
+            eventBus.fireEventFromSource(new MapChangeEvent(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), panelAxesWidgets.getRefMap().getXlo(),
+                    panelAxesWidgets.getRefMap().getXhi()), thisOutputPanel);
+            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), thisOutputPanel);
+
+        }
+
+    };
+    private FeatureModifiedEvent.Handler featureModifiedHandler = new FeatureModifiedEvent.Handler() {
+
+        @Override
+        public void onFeatureModified(FeatureModifiedEvent event) {
+            OLMapWidget m = (OLMapWidget) event.getSource();
+            if (panelAxesWidgets.getRefMap().equals(m)) {
+                // Event from this map, re-fire it as a map change.
+                eventBus.fireEventFromSource(new MapChangeEvent(event.getYlo(), event.getYhi(), event.getXlo(), event.getXhi()), thisOutputPanel);
+            }
+
+        }
+    };
+
+    VariableSelectionChangeEvent.Handler variableChangeHandler = new VariableSelectionChangeEvent.Handler() {
+
+        @Override
+        public void onVariableChange(VariableSelectionChangeEvent event) {
+            Object source = event.getSource();
+            if (source instanceof UserListBox) {
+                UserListBox variablesListBox = (UserListBox) source;
+                // Only proceed if the source was from the same panel or
+                // from the comparePanel
+                if (variablesListBox != null) {
+                    String sourceName = variablesListBox.getName();
+                    if (sourceName != null) {
+                        boolean isFromThisOutputPanel = (ID != null) && ID.equalsIgnoreCase(sourceName);
+                        boolean isFromComparePanel = (CONSTANTS.comparePanelName().equalsIgnoreCase(sourceName));
+                        if (isFromThisOutputPanel || isFromComparePanel) {
+                            int selectedIndex = variablesListBox.getSelectedIndex();
+                            Object variableUserObject = variablesListBox.getUserObject(selectedIndex);
+                            if (variableUserObject instanceof VariableSerializable) {
+                                if (isFromThisOutputPanel) {
+                                    // Update this OutputPanel's variable
+                                    VariableSerializable variable = (VariableSerializable) variableUserObject;
+                                    applyVariableChange(variable, false);
+                                    setChangeDataset(false);
+                                }
+                            }
+                            // Update OutputPanels if update check box is
+                            // checked
+                            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), variablesListBox);
+//                            if (isComparePanel()) {
+//                                // Change the variable at the app level.
+//                                eventBus.fireEventFromSource(new VariableSelectionChangeEvent(), variablesListBox);
+//                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    private LASResponseEvent.Handler lasResponseEventHandler = new LASResponseEvent.Handler() {
+        @Override
+        public void onResponse(LASResponseEvent event) {
+            try {
+                String thisOutputPanelName = getName();
+                if ((event != null) && (thisOutputPanelName != null) && (event.getCallerObjectName().equalsIgnoreCase(thisOutputPanelName))) {
+                    logger.info(thisOutputPanelName + " has accepted LASResponseEvent event:" + event);
+                    boolean isResponseReceived = event.isResponseReceived();
+                    logger.info("event.isResponseReceived():" + isResponseReceived);
+                    if (isResponseReceived) {
+                        if (event.getCallbackObjectName().equals("lasRequestCallback")) {
+                            lasRequestCallback.onResponseReceived(event.getRequest(), event.getResponse());
+                        }
+                    } else {
+                        if (event.getCallbackObjectName().equals("lasRequestCallback")) {
+                            lasRequestCallback.onError(event.getRequest(), event.getException());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+            }
+        }
+    };
+
+    private MapChangeEvent.Handler mapChangeHandler = new MapChangeEvent.Handler() {
+
+        @Override
+        public void onMapSelectionChange(MapChangeEvent event) {
+            Object object = event.getSource();
+            if ( object instanceof OutputPanel ) {
+                OutputPanel p = (OutputPanel) object;
+                if (p.isComparePanel() && !isComparePanel()) {
+                    if (view.contains("x") && !view.contains("y")) {
+                        panelAxesWidgets.getRefMap().setCurrentSelection(panelAxesWidgets.getRefMap().getYlo(), panelAxesWidgets.getRefMap().getYhi(), event.getXlo(), event.getXhi());
+                    } else if (!view.contains("x") && view.contains("y")) {
+                        panelAxesWidgets.getRefMap().setCurrentSelection(event.getYlo(), event.getYhi(), panelAxesWidgets.getRefMap().getXlo(), panelAxesWidgets.getRefMap().getXhi());
+                    }
+                }
+            }
+        }
+    };
+    SelectionHandler<TreeItem> datasetSelctionHandler = new SelectionHandler<TreeItem>() {
+        @Override
+        public void onSelection(SelectionEvent<TreeItem> event) {
+            DatasetWidget datasetWidget = datasetButton.getDatasetWidget();
+            boolean isFromMyDatasetWidget = event.getSource().equals(datasetWidget);
+            if (isFromMyDatasetWidget) {
+                TreeItem item = event.getSelectedItem();
+                Object variableUserObject = item.getUserObject();
+                if (variableUserObject instanceof VariableSerializable) {
+                    VariableSerializable variable = (VariableSerializable) variableUserObject;
+                    // Remove extra variable UserLists before
+                    // applyVariableChange
+                    // TODO: Replace this with a higher level method or use
+                    // events
+                    variableControls.removeListBoxesExceptFirst();
+                    if ( variable.getAttributes().get("grid_type").equals(vizGalVariable.getAttributes().get("grid_type") )) {
+                        applyVariableChange(variable, true);
+                    } else {
+                        Window.alert("The grid type of the new varible must match the grid type of the varible in the upper left.");
+                    }
+                }
+            }
+        }
+    };
+    CancelEvent.Handler cancelRequestHandler = new CancelEvent.Handler() {
+
+        @Override
+        public void onCancel(CancelEvent event) {
+            if (event.getID().equals(ID)) {
+                currentURL = currentURL + "&cancel=true";
+                RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, currentURL);
+                try {
+
+                    lasAnnotationsPanel.setError("Fetching plot annotations...");
+                    updating = true;
+                    // sendRequest.sendRequest(null, 33Callback);
+                    // Using LASRequestEvent Controller so a cancel in one
+                    // OutputPanel cancels related requests too
+                    LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
+                    Logger.getLogger(this.getClass().getName()).info(
+                            getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
+                    eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
+                    // } catch (RequestException e) {
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, e.getLocalizedMessage(), e);
+                    Window.alert("Unable to cancel request.");
+                }
+            }
+        }
+    };
 }
