@@ -53,6 +53,8 @@ public class AddUsernameFilter implements Filter {
 					log.debug("AddUsernameFilter added session attribute " + 
 							ATTRIBUTE_NAME + "=" + username);
 				} else {
+				    log.debug("AddUsernameFilter user name is empty. Go login. " +
+	                        ATTRIBUTE_NAME);
 				    response.sendRedirect("/socatlogin.html");
 				    return;
 				}
@@ -60,6 +62,8 @@ public class AddUsernameFilter implements Filter {
 				// Probably null pointer exception - nothing to do
 				log.debug("AddUsernameFilter failed to add session attribute " +
 						ATTRIBUTE_NAME);
+				response.sendRedirect("/socatlogin.html");
+                return;
 			}
 		}
 		else {
