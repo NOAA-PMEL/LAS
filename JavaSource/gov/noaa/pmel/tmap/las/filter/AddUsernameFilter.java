@@ -52,6 +52,8 @@ public class AddUsernameFilter implements Filter {
 					session.setAttribute(ATTRIBUTE_NAME, username);
 					log.debug("AddUsernameFilter added session attribute " + 
 							ATTRIBUTE_NAME + "=" + username);
+				} else {
+				    response.sendRedirect("/socatlogin.html");
 				}
 			} catch ( Exception ex ) {
 				// Probably null pointer exception - nothing to do
