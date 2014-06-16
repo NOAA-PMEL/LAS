@@ -92,6 +92,7 @@ import com.google.gwt.xml.client.XMLParser;
  * 
  */
 public class Correlation implements EntryPoint {
+    ImageData scaledImage;
 	Logger logger = Logger.getLogger(Correlation.class.getName());
 	private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
@@ -1953,7 +1954,7 @@ public class Correlation implements EntryPoint {
 	}
 
 	private void drawToScreenScaled(double scaleRatio) {
-		ImageData scaledImage = scaleImage(scaleRatio);
+		scaledImage = scaleImage(scaleRatio);
 		drawToScreen(scaledImage);
 	}
 
