@@ -110,6 +110,8 @@ import com.google.gwt.xml.client.XMLParser;
  * 
  */
 public class SimplePropPropViewer implements EntryPoint {
+    
+    ImageData scaledImage;
 
     private static String YSELECTOR = "y-variable";
     private static String XSELECTOR = "x-variable";
@@ -1794,7 +1796,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
     private void drawToScreenScaled(double scaleRatio) {
         
-            ImageData scaledImage = scaleImage(scaleRatio);
+            scaledImage = scaleImage(scaleRatio);
             drawToScreen(scaledImage);
         
     }
