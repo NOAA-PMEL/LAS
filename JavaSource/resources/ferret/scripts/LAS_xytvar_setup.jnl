@@ -43,11 +43,6 @@ IF ($variable_1_lab"0|*>1") THEN
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
    IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
 ENDIF
-IF `(($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1) AND (($ferret_thumb"0|*>1") EQ 0)` THEN 
-   DEFINE VIEW/AXES/X=0.12:0.99/y=0.06:0.93 full_view
-   DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view2
-   SET VIEW full_view
-ENDIF
 
 ! If the axis labels are long, make the text size smaller
 LET labfac = 1.
@@ -61,7 +56,7 @@ DEFINE SYMBOL miss_lab_siz = 0.14
 ! For thumbnail plots
 DEFINE SYMBOL mainlab_size = 0.14
 DEFINE SYMBOL errlab_size = 0.16
-IF ($ferret_thumb"0|*>1") THEN  
+IF ($ferret_thumb"0|0|*>1") THEN  
    DEFINE SYMBOL poly_size = 1.3
    DEFINE SYMBOL is_thumb = 1
    DEFINE SYMBOL mainlab_size = 0.22
@@ -449,6 +444,19 @@ DEFINE SYMBOL axes_already_defined = 1
 
 ENDIF  ! axes_already_defined, make the underlay plot.
 
+IF `(($ax_label_x"0|*>1") + ($ax_label_y"0|*>1") GE 1) AND (($ferret_thumb"0|0|*>1") EQ 0)` THEN 
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.06:0.93 full_view
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view2
+   SET VIEW full_view
+ENDIF
+
+GO LAS_open_window
+IF ($ferret_thumb"0|0|*>1") THEN 
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.06:0.93 full_view 
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view2 
+   SET VIEW full_view
+ENDIF
+
 LET bvar = dep_var + indep_var
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
@@ -469,13 +477,12 @@ IF ($lab1"0|*>1") THEN
       IF `STRINDEX("($note_($note_num%0%)_lab%0%)", "YEAR") EQ 0` THEN
          DEFINE SYMBOL note_num = `($note_num"0") + 1`
          DEFINE SYMBOL note_($note_num)_lab = ($lab1)
-         IF ($ferret_thumb"0|*>1") THEN label/nouser `-0.2*($ppl$xorg)`,`-0.95*($ppl$yorg)`,-1,0,($txl_lab_size),($lab1)
+         IF ($ferret_thumb"0|0|*>1") THEN label/nouser `-0.2*($ppl$xorg)`,`-0.95*($ppl$yorg)`,-1,0,($txl_lab_size),($lab1)
       ENDIF
    ENDIF
    GO unlabel 1
 ENDIF
 PPL SHADE
-pause
 
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
@@ -488,7 +495,7 @@ IF ($put_label"0|*>1") THEN
 
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      IF ($ferret_thumb"0|*>1") THEN  
+      IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> is all-missing
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
@@ -503,7 +510,7 @@ IF ($put_label"0|*>1") THEN
    DEFINE SYMBOL ax_hi = `yvar[i=@MAX]`
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
    
-      IF ($ferret_thumb"0|*>1") THEN  
+      IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> is all-missing
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
