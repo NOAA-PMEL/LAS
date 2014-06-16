@@ -241,6 +241,7 @@
     <web-resource-collection>
       <web-resource-name>SOCATFlags database</web-resource-name>
       <url-pattern>*.do</url-pattern>
+      <url-pattern>*.vm</url-pattern>
       <http-method>GET</http-method>
       <http-method>PUT</http-method>
       <http-method>POST</http-method>
