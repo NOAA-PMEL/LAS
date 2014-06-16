@@ -54,6 +54,7 @@ public class AddUsernameFilter implements Filter {
 							ATTRIBUTE_NAME + "=" + username);
 				} else {
 				    response.sendRedirect("/socatlogin.html");
+				    return;
 				}
 			} catch ( Exception ex ) {
 				// Probably null pointer exception - nothing to do
@@ -64,6 +65,7 @@ public class AddUsernameFilter implements Filter {
 		else {
 			log.debug("AddUsernameFilter found existing session attribute " +
 					ATTRIBUTE_NAME + "=" + username);
+			
 		}
 
 		chain.doFilter(request, response);
