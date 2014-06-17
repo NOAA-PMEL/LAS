@@ -98,6 +98,8 @@
   </div>
   <div id="controls"></div>
   <br>
+  <div id="constraints"></div>
+  <br>
   <div id="metadata"></div>
   <br>
   <div id="plots"></div>
