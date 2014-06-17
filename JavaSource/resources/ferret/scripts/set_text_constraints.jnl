@@ -3,26 +3,27 @@
 
 let done = 0
 
-DEF SYM ic = `ic`
+DEFINE SYMBOL ic = `ic`
 
 IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN 
      LET done = 1
      EXIT/SCRIPT
 ENDIF
 
-DEF SYM cvar = ($constraint_($ic)_lhs)
+DEFINE SYMBOL cvar = ($constraint_($ic)_lhs)
 
 LET has_var = `(IS_ELEMENT_OF_STR_N(vnames, "($cvar)") GT 0) OR (IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0)`
-IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_
+IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEFINE SYMBOL cvar = ($cvar)_
 
 IF `has_var EQ 0` THEN EXIT/SCRIPT
 sh sym constraint_($ic)_type
 
 IF `($constraint_($ic)_type"0|text>1|*>0") EQ 0` THEN EXIT/SCRIPT
 
-DEF SYM var_type = `($cvar),RETURN=dtype`
+LET gettype = ($cvar)
+DEFINE SYMBOL var_type = `gettype,RETURN=dtype`
 
-DEF SYM ($cvar)_itxt = `($($cvar)_itxt"0")+1`
+DEFINE SYMBOL ($cvar)_itxt = `($($cvar)_itxt"0")+1`
 
 ! Can the operation be Not-Equal?
 

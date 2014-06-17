@@ -164,8 +164,8 @@ ELSE
 
          LET ranger = MINMAX(pxvar)
 
-	 DEF SYM range2 = `ranger[i=2]`
-	 DEF SYM range1 = `ranger[i=1]`
+	 DEFINE SYMBOL range2 = `ranger[i=2]`
+	 DEFINE SYMBOL range1 = `ranger[i=1]`
 	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
 	    LET tol1 = 0.1
 	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN
@@ -176,8 +176,8 @@ ELSE
 	 ENDIF
 
          LET ranger = MINMAX(qyvar)
-	 DEF SYM range2 = `ranger[i=2]`
-	 DEF SYM range1 = `ranger[i=1]`
+	 DEFINE SYMBOL range2 = `ranger[i=2]`
+	 DEFINE SYMBOL range1 = `ranger[i=1]`
 	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
 	    LET tol1 = 0.1
 	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN  
@@ -188,8 +188,8 @@ ELSE
 	 ENDIF
 
          LET ranger = MINMAX(zvar)
-	 DEF SYM range2 = `ranger[i=2]`
-	 DEF SYM range1 = `ranger[i=1]`
+	 DEFINE SYMBOL range2 = `ranger[i=2]`
+	 DEFINE SYMBOL range1 = `ranger[i=1]`
 	 IF `($range2"|bad>1|*>0) OR ($range1"|bad>1|*>0)` THEN 
 	    LET tol3 = 0.1
 	 ELIF `ABS(($range2"|bad>1|*")) GT 1.e20 OR ABS(($range1"|bad>1|*")) GT 1.e20` THEN 

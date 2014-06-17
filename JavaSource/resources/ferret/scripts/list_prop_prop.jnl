@@ -74,10 +74,11 @@ LET constraints_mask = var_mask* text_mask* feature_mask_obs
 
 IF ($feature_variable"0|*>1") THEN
 
-   DEF SYM trajtype = `($feature_variable),RETURN=dtype`
-   IF ($trajtype"0|CHAR>1|*>0") THEN DEF SYM is_string = 1
+   LET gettype = ($feature_variable)
+   DEFINE SYMBOL trajtype = `gettype,RETURN=dtype`
+   IF ($trajtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
 
-   DEF SYM trajshape = `($feature_variable),RETURN=shape`
+   DEFINE SYMBOL trajshape = `($feature_variable),RETURN=shape`
    IF `($trajshape"0|E>1|POINT>1|*>0)` THEN
 
          ! Expand all strings into obs axis
@@ -101,8 +102,8 @@ ENDIF
 
 IF ($color_by"0|*>1") THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
-   DEF SYM ztype = `zvar,RETURN=dtype`
-   IF ($ztype"0|CHAR>1|*>0") THEN DEF SYM is_string = 1
+   DEFINE SYMBOL ztype = `zvar,RETURN=dtype`
+   IF ($ztype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
 
    LET zsize = `zvar,RETURN=isize`
    IF `zsize NE xsize` THEN
@@ -113,7 +114,7 @@ IF ($color_by"0|*>1") THEN
 ! If a variable on the M axis is a string, create a numeric ID variable, index 1,2,3, ...
 
 
-      DEF SYM zshape = `zvar,RETURN=shape`
+      DEFINE SYMBOL zshape = `zvar,RETURN=shape`
       IF `($zshape"0|E>1|*>0)` THEN
 
          ! Expand all strings into obs axis
@@ -144,7 +145,7 @@ DEFINE SYMBOL yvar = constraints_mask* yvar
 
 DEFINE SYMBOL t_units_string = `($timevar).units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
-IF `nsince GT 0` THEN DEFINE SYMBOl tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
+IF `nsince GT 0` THEN DEFINE SYMBOL tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
 
 IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 
@@ -206,8 +207,8 @@ ENDIF  ! longitude, latitude
 
 ! Define variables with titles
 
-
-DEF SYM vtype = `($ferret_plot_var_0),RETURN=dtype`
+LET gettype = ($ferret_plot_var_0)
+DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
 LET ii = i[g=($timevar)]
 LET iindices = IF constraints_mask THEN ii
 LET compress_mask = COMPRESSI(iindices)
@@ -219,7 +220,8 @@ DEFINE SYMBOL vars_out = ($vars_out) ($data_0_var_in)
 
 IF ($ferret_plot_var_1"0|*>1") THEN
 
-   DEF SYM vtype = `($ferret_plot_var_1),RETURN=dtype`
+   LET gettype = ($ferret_plot_var_1)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
    LET ii = i[g=($timevar)]
    LET iindices = IF constraints_mask THEN ii
    LET compress_mask = COMPRESSI(iindices)

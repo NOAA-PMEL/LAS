@@ -3,8 +3,12 @@
 
 ! Set up 2 or 3 varibles for prop-prop plots
 
+
+IF `($ferret_is_socat"0|*>1") EQ 0` THEN EXIT/SCRIPT 
+
 DEFINE SYMBOL vtype = 0
-DEFINE SYMBOL vtype = `($ferret_plot_var_0),RETURN=dtype`
+LET gettype = ($ferret_plot_var_0)
+DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
 DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
 IF ($is_string"0|0|*>1") THEN 
@@ -23,7 +27,8 @@ IF ($is_string"0|0|*>1") THEN
 ENDIF
 
 DEFINE SYMBOL vtype = 0
-DEFINE SYMBOL vtype = `($ferret_plot_var_1),RETURN=dtype`
+LET gettype = ($ferret_plot_var_1)
+DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
 DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 IF ($is_string"0|0|*>1") THEN 
    IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
@@ -63,7 +68,8 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL data_2_var_in = ($data_2_var)
 
    DEFINE SYMBOL vtype = 0
-   DEFINE SYMBOL vtype = `($ferret_plot_var),RETURN=dtype`
+   LET gettype = ($ferret_plot_var)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
 ! Woce flags come in a string, with un-set ones a blank. Count this as "bad".

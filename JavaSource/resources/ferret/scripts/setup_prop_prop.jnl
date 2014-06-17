@@ -54,7 +54,8 @@ DEFINE SYMBOL fer_sym = ferret_plot
 IF ($do_curvi_xy"0") THEN DEFINE SYMBOL fer_sym = ferret_plot_base
 DEFINE SYMBOL ferret_plot_var_0 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_0)" xvar = ($($fer_sym)_var)
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($($fer_sym)_var)) 
+IF ($its_trajectory_corr"0|*>1") THEN LET/TITLE="($ferret_title_0)" xvar = ($($fer_sym)_var)
 
 LET nx_var = `($($fer_sym)_var_0),return=isize`
 LET ny_var = `($($fer_sym)_var_0),return=jsize`
@@ -126,7 +127,9 @@ DEFINE SYMBOL variable_1_lab = ($ferret_title_1)
 LET variable_0_lab = STRCAT(data_1_title, data_1_units)
 DEFINE SYMBOL ferret_plot_var_1 = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_0)" yvar = ($($fer_sym)_var_1)
+LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($($fer_sym)_var)) 
+IF ($its_trajectory_corr"0|*>1") THEN LET/TITLE="($ferret_title_1)" yvar = ($($fer_sym)_var_1)
+
 DEFINE SYMBOL vshape = `($($fer_sym)_var_1),return=SHAPE`
 IF `STRCMP("($vshape)", "E") EQ 0` THEN 
    DEFINE AXIS/x=1:`ne_var`:1 exaxis
@@ -171,7 +174,8 @@ ENDIF
 IF ($its_prop_plot"0|*>1") THEN
 
    DEFINE SYMBOL vtype = 0
-   DEFINE SYMBOL vtype = `($ferret_plot_var_0),RETURN=dtype`
+   LET gettype = ($ferret_plot_var_0)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
    IF ($is_string"0|0|*>1") THEN 
       IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
@@ -250,7 +254,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
 ENDIF
 
-GO SOCAT_setup_variables
+IF ($ferret_is_socat"0|*>1") THEN GO SOCAT_setup_variables
 
 ! Define the label with title and units to be used in the annotations.
 can sym variable_lab
@@ -369,10 +373,10 @@ IF ($apply_region) THEN
 ! Now the labels that would be on the axes of a 1-D or 2-D plot, plus 
 ! region info for 3rd and 4th dimensions.
 
-   DEF SYM xlabel = LONGITUDE
-   DEF SYM ylabel = LATITUDE
-   DEF SYM zlabel = DEPTH
-   DEF SYM tlabel = TIME
+   DEFINE SYMBOL xlabel = LONGITUDE
+   DEFINE SYMBOL ylabel = LATITUDE
+   DEFINE SYMBOL zlabel = DEPTH
+   DEFINE SYMBOL tlabel = TIME
   
    LET ndim = `STRLEN("($shape0)")`
    DEFINE SYMBOL dim1 = `SUBSTRING ("($shape0)",1,1)`
