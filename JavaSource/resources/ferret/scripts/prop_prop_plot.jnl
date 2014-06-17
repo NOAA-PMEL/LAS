@@ -119,14 +119,14 @@ ENDIF
 IF `($all_missing"0") EQ 0` THEN
 
 ! If a time axis was defined, set symbols in the original time units for the map scale file.
-IF ($timeaxis"0|haxis>1|*>0) THEN 
-   DEFINE SYMBOL xaxis_min = `ax_lo`
-   DEFINE SYMBOL xaxis_max = `ax_hi`
-ENDIF
-IF ($timeaxis"0|vaxis>1|*>0) THEN 
-   DEFINE SYMBOL yaxis_min = `ax_lo`
-   DEFINE SYMBOL yaxis_max = `ax_hi`
-ENDIF
+!IF ($timeaxis"0|haxis>1|*>0) THEN 
+!   DEFINE SYMBOL xaxis_min = `ax_lo`
+!   DEFINE SYMBOL xaxis_max = `ax_hi`
+!ENDIF
+!IF ($timeaxis"0|vaxis>1|*>0) THEN 
+!   DEFINE SYMBOL yaxis_min = `ax_lo`
+!   DEFINE SYMBOL yaxis_max = `ax_hi`
+!ENDIF
 
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
