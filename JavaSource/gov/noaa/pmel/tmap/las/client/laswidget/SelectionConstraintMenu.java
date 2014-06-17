@@ -75,7 +75,7 @@ public class SelectionConstraintMenu extends Composite {
 
         @Override
         public void onFailure(Throwable caught) {
-            Window.alert("Unable to get variable values from the server.");
+            Window.alert("Unable to get variable values from the server. "+caught.getMessage());
         }
 
         @Override
