@@ -6,6 +6,8 @@ import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AlertButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintLabel;
+import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintTextDisplay;
 import gov.noaa.pmel.tmap.las.client.laswidget.ConstraintWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DropDown;
@@ -128,7 +130,17 @@ public class ThumbnailPropProp implements EntryPoint {
     String dataurl;
     String erddap_id;
     
+    String xlo;
+    String xhi;
+    String ylo;
+    String yhi;
+    String tlo;
+    String thi;
+    
     Map<String, String> thumbnail_properties;
+    
+    ConstraintTextDisplay fixedConstraintPanel = new ConstraintTextDisplay();
+    
 
     @Override
     public void onModuleLoad() {
@@ -155,6 +167,7 @@ public class ThumbnailPropProp implements EntryPoint {
         toprow.add(submit);
         toprow.setStyleName("controls");
         RootPanel.get("controls").add(toprow);
+        RootPanel.get("constraints").add(fixedConstraintPanel);
         RootPanel.get("metadata").add(metadataTable);
         RootPanel.get("plots").add(plots);
 
@@ -165,17 +178,38 @@ public class ThumbnailPropProp implements EntryPoint {
         catid = Util.getParameterString("catid");
         String xml = Util.getParameterString("xml");
         dataurl = Util.getParameterString("dataurl");
+        String varid = null;
         if (xml != null && !xml.equals("")) {
             xml = Util.decode(xml);
             lasRequest = new LASRequest(xml);
-
+            xlo = lasRequest.getRangeLo("x", 0);
+            xhi = lasRequest.getRangeHi("x", 0);
+            ylo = lasRequest.getRangeLo("y", 0);
+            yhi = lasRequest.getRangeHi("y", 0);
+            tlo = lasRequest.getRangeLo("t", 0);
+            thi = lasRequest.getRangeHi("t", 0);
             dsid = lasRequest.getDataset(0);
-            String varid = lasRequest.getVariable(0);
+            varid = lasRequest.getVariable(0);
             Util.getRPCService().getConfig(null, catid, dsid, varid, getGridCallback);
         } else {
             Window.alert("This app must be launched from the main interface.");
         }
-
+        
+        ConstraintLabel cta_xlo = new ConstraintLabel(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xlo, "longitude", xlo, "ge");
+        fixedConstraintPanel.add(cta_xlo);   
+        ConstraintLabel cta_xhi = new ConstraintLabel(Constants.X_CONSTRAINT, dsid, "longitude", "longitude", xhi, "longitude", xhi, "le");
+        fixedConstraintPanel.add(cta_xhi);   
+        ConstraintLabel cta_ylo = new ConstraintLabel(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", ylo, "latitude", ylo, "ge");
+        fixedConstraintPanel.add(cta_ylo);   
+        ConstraintLabel cta_yhi = new ConstraintLabel(Constants.Y_CONSTRAINT, dsid, "latitude", "latitude", yhi, "latitude", yhi, "le");
+        fixedConstraintPanel.add(cta_yhi);   
+        ConstraintLabel cta_tlo = new ConstraintLabel(Constants.T_CONSTRAINT, dsid, "time", "time", tlo, "time", tlo, "ge");
+        fixedConstraintPanel.add(cta_tlo);   
+        ConstraintLabel cta_thi = new ConstraintLabel(Constants.T_CONSTRAINT, dsid, "time", "time", thi, "time", thi, "le");
+        fixedConstraintPanel.add(cta_thi); 
+        
+        Util.getRPCService().getConfig(null, catid, dsid, varid, datasetCallback);
+        
         eventBus.addHandler(AddSelectionConstraintEvent.TYPE, new AddSelectionConstraintEvent.Handler() {
 
             @Override
@@ -203,6 +237,65 @@ public class ThumbnailPropProp implements EntryPoint {
         });
 
 
+    }
+    AsyncCallback<ConfigSerializable> datasetCallback = new AsyncCallback<ConfigSerializable>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+
+            Window.alert("Could not get the variables list from the server.");
+
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+            List<ERDDAPConstraintGroup> gs = config.getConstraintGroups();
+            
+            CategorySerializable cat = config.getCategorySerializable();
+            
+            
+            String defaulty = null;
+            String defaultcb = null;
+            
+            VariableSerializable[] variables = null;
+            if (cat != null && cat.isVariableChildren()) {
+                DatasetSerializable ds = cat.getDatasetSerializable();
+                variables = ds.getVariablesSerializable();
+                
+                
+            }
+            
+            
+        }
+    };
+    private void setFixedConstraintsFromRequest(List<Map<String, String>> vcs) {
+        for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
+            Map<String, String> con = (Map<String, String>) vcIt.next();
+            String varid = con.get("varID");
+            String op = con.get("op");
+            String value = con.get("value");
+            String id = con.get("id");
+            String type = con.get("type");
+            if ( type.equals(Constants.VARIABLE_CONSTRAINT) ) {
+                VariableSerializable v = xAllDatasetVariables.get(varid);
+                ConstraintLabel cta = new ConstraintLabel(Constants.VARIABLE_CONSTRAINT, dsid, varid, v.getName(), value, v.getName(), value, op);
+                fixedConstraintPanel.add(cta);
+            } else if ( type.equals(Constants.TEXT_CONSTRAINT) ) {
+                String lhs = con.get("lhs");
+                String rhs = con.get("rhs");
+                if ( rhs.contains("_ns_") ) {
+                    String[] r = rhs.split("_ns_");
+                    for (int i = 0; i < r.length; i++) {
+                        ConstraintLabel cta = new ConstraintLabel(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, r[i], lhs, r[i], "is");
+                        fixedConstraintPanel.add(cta);
+                    }
+
+                } else{
+                    ConstraintLabel cta = new ConstraintLabel(Constants.TEXT_CONSTRAINT, dsid, lhs, lhs, rhs, lhs, rhs, "eq");
+                    fixedConstraintPanel.add(cta);
+                }
+            }
+        }
     }
     private void firePlots() {
         if ( plot_pairs != null ) {
@@ -375,12 +468,16 @@ public class ThumbnailPropProp implements EntryPoint {
                     VariableSerializable vs = variables[i];
                     xAllDatasetVariables.put(vs.getID(), vs);
                 }
+                setFixedConstraintsFromRequest(lasRequest.getVariableConstraints());
+
                 List<ERDDAPConstraintGroup> constraintGroups = config.getConstraintGroups();
                 
                 for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
                     ERDDAPConstraintGroup constraintGroup = (ERDDAPConstraintGroup) iterator.next();
                     if ( constraintGroup.getType().equals("selection") ) {
                         idMenu.init(constraintGroup.getConstraints().get(0), constraintGroup.getDsid(), constraintGroup.getConstraints().get(0).getKey());
+                        // Constrain the list according of the incoming request.
+                        idMenu.setConstraints(fixedConstraintPanel.getConstraints());
                         idMenu.load(constraintGroup.getConstraints().get(0).getVariables().get(0).getID(), constraintGroup.getConstraints().get(0).getVariables().get(0).getName());
                     }
                 }

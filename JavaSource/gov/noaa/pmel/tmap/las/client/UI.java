@@ -26,7 +26,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
-import gov.noaa.pmel.tmap.las.client.laswidget.TrajectoryOuterSequenceConstraint;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;

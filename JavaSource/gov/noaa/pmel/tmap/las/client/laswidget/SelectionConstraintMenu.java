@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -68,6 +69,8 @@ public class SelectionConstraintMenu extends Composite {
     boolean adjust = true;
     boolean notify = false;
 
+    List<ConstraintSerializable> constraints = new ArrayList<ConstraintSerializable>();
+    
     protected AsyncCallback<Map<String, String>> outerSequenceValuesCallback = new AsyncCallback<Map<String,String>>() {
 
         @Override
@@ -178,7 +181,7 @@ public class SelectionConstraintMenu extends Composite {
         valuesList.clear();
         valuesList.addItem(Constants.LOADING);
         currentVariable = shortname;
-        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, new HashMap<String, String>(), outerSequenceValuesCallback);
+        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, constraints, outerSequenceValuesCallback);
         
     }
 
@@ -195,5 +198,8 @@ public class SelectionConstraintMenu extends Composite {
     }
     public void setNotify(boolean notify) {
         this.notify = notify;
+    }
+    public void setConstraints(List<ConstraintSerializable> constraints) {
+        this.constraints = constraints;     
     }
 }

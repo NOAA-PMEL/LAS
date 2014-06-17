@@ -2,11 +2,13 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -137,7 +139,8 @@ public class SubsetConstraintPanel extends Composite {
                         valuesList.clear();
                         valuesList.addItem(Constants.LOADING);
                         currentVariable = button.getText();
-                        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, new HashMap<String, String>(), outerSequenceValuesCallback);
+                                                                                         // For this part, we do not constrain on anything...
+                        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, new ArrayList<ConstraintSerializable>(), outerSequenceValuesCallback);
                     }
 
                 });
