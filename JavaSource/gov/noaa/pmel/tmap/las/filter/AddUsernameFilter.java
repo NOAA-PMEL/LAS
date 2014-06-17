@@ -32,9 +32,15 @@ public class AddUsernameFilter implements Filter {
 		log.debug("Entering AddUsernameFilter");
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		HttpSession session = request.getSession(false);
 
-		// Check if user_name is already assign for this session 
+		HttpSession session = request.getSession(false);
+		if ( session == null ) {
+			log.debug("AddUsernameFilter - no session; go login");
+			response.sendRedirect("/socatlogin.html");
+			return;
+		}
+
+		// Check if user_name is already assigned for this session 
 		String username;
 		try {
 			username = session.getAttribute(ATTRIBUTE_NAME).toString().trim();
@@ -42,37 +48,30 @@ public class AddUsernameFilter implements Filter {
 			// Probably null pointer exception
 			username = "";
 		}
-
-		if ( username.isEmpty() ) {
-			// Check if there is a username from authenticating
-			try {
-				username = request.getUserPrincipal().getName().trim();
-				if ( ! username.isEmpty() ) {
-					// Add user_name to the session 
-					session.setAttribute(ATTRIBUTE_NAME, username);
-					log.debug("AddUsernameFilter added session attribute " + 
-							ATTRIBUTE_NAME + "=" + username);
-				} else {
-				    log.debug("AddUsernameFilter user name is empty. Go login. " +
-	                        ATTRIBUTE_NAME);
-				    response.sendRedirect("/socatlogin.html");
-				    return;
-				}
-			} catch ( Exception ex ) {
-				// Probably null pointer exception - nothing to do
-				log.debug("AddUsernameFilter failed to add session attribute " +
-						ATTRIBUTE_NAME);
-				response.sendRedirect("/socatlogin.html");
-                return;
-			}
-		}
-		else {
-			log.debug("AddUsernameFilter found existing session attribute " +
+		if ( ! username.isEmpty() ) {
+			log.debug("AddUsernameFilter - found existing session attribute " +
 					ATTRIBUTE_NAME + "=" + username);
-			
+			chain.doFilter(request, response);
+			return;
 		}
 
-		chain.doFilter(request, response);
+		// Check if there is a username from authenticating
+		try {
+			username = request.getUserPrincipal().getName().trim();
+		} catch ( Exception ex ) {
+			// Probably null pointer exception - leave username empty
+		}
+		if ( ! username.isEmpty() ) {
+			session.setAttribute(ATTRIBUTE_NAME, username);
+			log.debug("AddUsernameFilter - added session attribute " + 
+						ATTRIBUTE_NAME + "=" + username);
+			chain.doFilter(request, response);
+			return;
+		}
+
+		log.debug("AddUsernameFilter - user name is empty; go login");
+		response.sendRedirect("/socatlogin.html");
+		return;
 	}
 
 	@Override
