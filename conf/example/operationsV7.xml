@@ -877,7 +877,7 @@
     </grid_types>
   </operation>
   <!-- End of netCDF only trajectory operations -->
-  <operation name="Correlation Plot" ID="Correlation" service_action="" default="true" category="correlation" output_template="Correlation">
+  <operation name="Correlation Plot" ID="Correlation" service_action="" default="true" category="correlation" output_template="Correlation_setup">
     <response ID="PlotResp" type="HTML" index="1">
       <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
       <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
