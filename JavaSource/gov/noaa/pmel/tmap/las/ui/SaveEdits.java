@@ -74,22 +74,35 @@ public class SaveEdits extends LASAction {
 					DATABASE_NAME + " in " + DATABASE_CONFIG);
 
 		String databaseDriver = dbParams.getAttributeValue("driver");
+		log.debug("driver=" + databaseDriver);
 		String databaseUrl = dbParams.getAttributeValue("connectionURL");
+		log.debug("databaseUrl=" + databaseUrl);
 		String selectUsername = dbParams.getAttributeValue("user");
+		log.debug("selectUsername=" + selectUsername);
 		String selectPassword = dbParams.getAttributeValue("password");
+		log.debug("selectPassword=" + selectPassword);
 		String updateUsername = dbParams.getAttributeValue("updateUser");
+		log.debug("updateUsername=" + updateUsername);
 		String updatePassword = dbParams.getAttributeValue("updatePassword");
+		log.debug("updatePassword=" + updatePassword);
 		// The database URLs in the LAS config files do not have the jdbc: prefix
 		databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
 				selectUsername, selectPassword, updateUsername, updatePassword);
+		log.debug("database request handler configuration successful");
 
 		socatQCVersion = Double.parseDouble(dbParams.getAttributeValue("socatQCVersion"));
+		log.debug("socatQCVersion=" + socatQCVersion);
 
 		String dsgFileDir = dbParams.getAttributeValue("dsgFileDir");
+		log.debug("dsgFileDir=" + dsgFileDir);
 		String decDsgFileDir = dbParams.getAttributeValue("decDsgFileDir");
+		log.debug("decDsgFileDir=" + decDsgFileDir);
 		String erddapDsgFlag = dbParams.getAttributeValue("erddapDsgFlag");
+		log.debug("erddapDsgFlag=" + erddapDsgFlag);
 		String erddapDecDsgFlag = dbParams.getAttributeValue("erddapDecDsgFlag");
+		log.debug("erddapDecDsgFlag=" + erddapDecDsgFlag);
 		dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag);
+		log.debug("DSG file handler configuration successful");
 	}
 
 	@Override
@@ -246,6 +259,7 @@ public class SaveEdits extends LASAction {
 		// information and fixing the data variable name in the process
 		try {
 			dsgHandler.updateWoceFlags(woceEvent, tempname, log);
+			log.debug("DSG files updated");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to update DSG files with the WOCE flags", ex);
 			logerror(request, "expocode = " + expocode, "");
@@ -257,6 +271,7 @@ public class SaveEdits extends LASAction {
 		// Save the (complete) WOCE event to the database
 		try {
 			databaseHandler.addWoceEvent(woceEvent);
+			log.debug("WOCE event added to the database");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to record the WOCE event in the database", ex);
 			logerror(request, "expocode = " + expocode, "");
@@ -267,6 +282,7 @@ public class SaveEdits extends LASAction {
 
 		// Notify ERDDAP of the full DSG file update
 		dsgHandler.flagErddap(false);
+		log.debug("ERDDAP flagged the the full DSG files were updated");
 
 		log.info("Assigned WOCE event (also updated " + tempname + "): \n" + 
 				woceEvent.toString());
