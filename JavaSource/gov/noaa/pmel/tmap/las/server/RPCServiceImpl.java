@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
@@ -28,6 +29,7 @@ import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
+import gov.noaa.pmel.tmap.las.util.Constraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
@@ -60,6 +62,13 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.io.IOUtils;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.GregorianChronology;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -785,7 +794,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      * 
      */
     @Override
-    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, Map<String, String> xyzt) throws RPCException {
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, List<ConstraintSerializable> constriants) throws RPCException {
         Map<String, String> outerSequenceValues = new TreeMap<String, String>();
         InputStream jsonStream;
         try {
@@ -800,39 +809,19 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             } else {
                 url = url + id+".json?"+key_variable+","+shortname+"&distinct()";
             }
-            for (Iterator keyIt = xyzt.keySet().iterator(); keyIt.hasNext();) {
-                String key = (String) keyIt.next();
-                String value = xyzt.get(key);
-                String param = null;
-                String op = null;
-                if ( key.equals("xlo") ) {
-                    param = props.get("tabledap_access").get("longitude");
-                    op = ">=";
-                } else if ( key.equals("xhi") ) {
-                    param = props.get("tabledap_access").get("longitude");
-                    op = "<=";
-                } else if ( key.equals("ylo") ) {
-                    param = props.get("tabledap_access").get("latitude");
-                    op = ">=";
-                } else if ( key.equals("yhi") ) {
-                    param = props.get("tabledap_access").get("latitude");
-                    op = "<=";
-                } else if ( key.equals("zlo") ) {
-                    param = props.get("tabledap_access").get("altitude");
-                    op = ">=";
-                } else if ( key.equals("zhi") ) {
-                    param = props.get("tabledap_access").get("atltitude");
-                    op = "<=";
-                } else if ( key.equals("tlo") ) {
-                    param = props.get("tabledap_access").get("time");
-                    op = ">=";
-                } else if ( key.equals("thi" ) ) {
-                    param = props.get("tabledap_access").get("time");
-                    op = "<=";
+            String time_name = lasConfig.getProperty("tabledap_access", "time");
+            // If they exist, add the other constraints...
+            for (Iterator iterator = constriants.iterator(); iterator.hasNext();) {
+                ConstraintSerializable constraintSerializable = (ConstraintSerializable) iterator.next();
+                
+                String lhs = constraintSerializable.getLhs();
+                String op = constraintSerializable.getOp();
+                String rhs = constraintSerializable.getRhs();
+                if ( lhs.equals(time_name) ) {
+                    rhs = reformatFerretToISO(rhs);
                 }
-                if ( param != null && op != null ) {
-                    url = url + "&" + param + op + xyzt.get(key);
-                }
+                Constraint c = new Constraint(lhs, op, rhs);
+                url = url + "&" + c.getAsString();
             }
             jsonStream = new URL(url).openStream();
             String jsonText = IOUtils.toString(jsonStream);
@@ -953,4 +942,26 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return getERDDAPConstraintGroups(dsid);
     }
    
+    private String reformatFerretToISO(String in) {
+        Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+        DateTimeFormatter iso = ISODateTimeFormat.dateTime().withChronology(chrono).withZone(DateTimeZone.UTC);;
+        DateTimeFormatter sFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
+        DateTimeFormatter lFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+
+        DateTime td;
+        try {
+            td = lFerretForm.parseDateTime(in).withZone(DateTimeZone.UTC).withChronology(chrono);
+        } catch (Exception e) {
+            try {
+                td = sFerretForm.parseDateTime(in).withZone(DateTimeZone.UTC).withChronology(chrono);
+            } catch (Exception e2) {
+                return null;
+            }
+        }
+        if ( td != null ) {
+            return iso.print(td.getMillis());
+        } else {
+            return null;
+        }
+    }
 }
