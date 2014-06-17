@@ -74,7 +74,8 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
    DEFINE SYMBOL var_data = ($data_var)
    DEFINE SYMBOL vtype = 0
-   DEFINE SYMBOL vtype = `($var_data),RETURN=dtype`
+   LET gettype= ($var_data)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    

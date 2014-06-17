@@ -54,6 +54,12 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
+LET global_attnames = ..attnames
+IF `IS_ELEMENT_OF_STR(global_attnames, "title") GT 0` THEN
+  DEFINE SYMBOL dataset_title_att = `..title`
+  IF `STRINDEX("($dataset_title_att)", "SOCAT") GT 0` THEN DEFINE SYMBOL ferret_is_socat = 1
+ENDIF
+
 ! Did the request return the no-data flag?
 LET global_attnames = ..attnames
 LET nglobal_atts = ..nattrs
@@ -180,7 +186,8 @@ IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
-   DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
+   LET gettype = ($data_var)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    IF ($is_string"0|0|*>1") THEN 
