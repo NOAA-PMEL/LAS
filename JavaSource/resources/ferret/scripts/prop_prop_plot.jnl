@@ -204,12 +204,13 @@ ELSE
 ! connect_dots is set if the underlay is a map or if its a time series plot.
 
          IF ($connect_dots"0|*>1") THEN 
-	    DEFINE SYMBOL data_x_var = ($data_0_var)
-	    DEFINE SYMBOL data_y_var = ($data_1_var)
+	    DEFINE SYMBOL data_x_var = ($data_0_var)* constraints_mask
+	    DEFINE SYMBOL data_y_var = ($data_1_var)* constraints_mask
             GO setup_dsg_variables 200000 tol1 tol2 tol3
-	    DEFINE SYMBOL plot_arg = ($data_x_var), ($data_y_var), ($data_var)
-	    DEFINE SYMBOL xvar = ($data_x_var)
-	    DEFINE SYMBOL yvar = ($data_y_var)
+	    LET constraints_mask_var =  SEPARATE(constraints_mask, ($rowvar), 0)
+	    DEFINE SYMBOL plot_arg = ($data_x_var)* constraints_mask_var, ($data_y_var)* constraints_mask_var, ($data_var)* constraints_mask_var
+	    DEFINE SYMBOL xvar = ($data_x_var)* constraints_mask_var
+	    DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var
 	 ENDIF
 
          LET pvar = ($data_x_var)
@@ -247,9 +248,10 @@ ELSE
           DEFINE SYMBOL data_y_var = ($data_1_var)
           DEFINE SYMBOL data_var = ($data_y_var)  !just so its defined.
           GO setup_dsg_variables 200000 tol1 tol2 tol3
-          DEFINE SYMBOL plot_arg = ($data_x_var), ($data_y_var), ($data_var)
-          DEFINE SYMBOL xvar = ($data_x_var)
-          DEFINE SYMBOL yvar = ($data_y_var)
+	  LET constraints_mask_var =  SEPARATE(constraints_mask, ($rowvar), 0)
+	  DEFINE SYMBOL plot_arg = ($data_x_var)* constraints_mask_var, ($data_y_var)* constraints_mask_var, ($data_var)* constraints_mask_var
+          DEFINE SYMBOL xvar = ($data_x_var)* constraints_mask_var
+          DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var
       ENDIF
 
    ENDIF   ! IF ($color_by)
