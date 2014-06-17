@@ -720,7 +720,7 @@
   </operation>
   <!-- This is a correlation plot chain specific to the Trajectory data where 
 		the netCDF file is made once and used over and over for plots. -->
-  <operation name="Correlation Plot" ID="SPPV" service_action="" default="true" category="correlation" output_template="SPPV">
+  <operation name="Correlation Plot" ID="SPPV" service_action="" default="true" category="correlation" output_template="SPPV_setup">
     <response ID="PlotResp" type="HTML" index="1">
       <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
       <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
