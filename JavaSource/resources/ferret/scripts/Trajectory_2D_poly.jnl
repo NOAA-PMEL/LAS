@@ -107,8 +107,6 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
       LET var_data =  element_index_str_n(var_data_0, month_labels) 
       SET ATT/LIKE=var_data_0 var_data
       DEFINE SYMBOL ferret_plot_var var_data
-      DEFINE SYMBOL ferret_fill_levels = (0.5,12.5,1)
-      KEYMARK 0
    ENDIF
 
 ENDIF
@@ -201,7 +199,11 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0
 
 IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+   IF ($keycentered"0|*>1") THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
+   ELSE
+      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+   ENDIF
 ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
