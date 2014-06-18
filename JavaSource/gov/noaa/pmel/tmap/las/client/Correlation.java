@@ -195,8 +195,8 @@ public class Correlation implements EntryPoint {
 	protected String zhi;
 	
 	protected int annotationsRow = 0;
-	protected int outputPanelRow = 3;
-	protected int shadowCanvasRow = 2;
+	protected int outputPanelRow = 2;
+	protected int shadowCanvasRow = 3;
 	protected int variablePanelRow = 1;
 	
 	HTML message = new HTML("Only variables with the same dimensions as the y-axis variable can be selected.");
@@ -265,10 +265,12 @@ public class Correlation implements EntryPoint {
 					}
 				});
 
-		int rndRedColor = 190;
-		int rndGreenColor = 40;
-		int rndBlueColor = 40;
-		double rndAlpha = 0.25;
+
+		
+		int rndRedColor = 244;
+		int rndGreenColor = 154;
+		int rndBlueColor = 0;
+		double rndAlpha = .45;
 		randomColor = CssColor.make("rgba(" + rndRedColor + ", "
 				+ rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
 
@@ -744,6 +746,11 @@ public class Correlation implements EntryPoint {
 	    imageCanvas = Canvas.createIfSupported();
 	    drawingCanvas = Canvas.createIfSupported();
 	    if ( imageCanvas != null ) {
+
+	        canvasDiv.add(imageCanvas, 0, 0);
+	        canvasDiv.add(drawingCanvas, 0, 0);
+	        
+	        outputPanel.setWidget(outputPanelRow, 0, canvasDiv);
 	        imageCanvasContext = imageCanvas.getContext2d();
 	        drawingCanvasContext = drawingCanvas.getContext2d();
 	    } else {
@@ -1063,12 +1070,12 @@ public class Correlation implements EntryPoint {
                                         logger.setLevel(Level.ALL);
                                     }
                                 });
-								outputPanel.setWidget(outputPanelRow, 0, canvasDiv);
-								resize(Window.getClientWidth(),	Window.getClientHeight());
+                                resize(Window.getClientWidth(), Window.getClientHeight());
 							}
 
 						});
-                        drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
+						
+						drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
 
                             @Override
                             public void onMouseUp(MouseUpEvent event) {
@@ -1102,7 +1109,6 @@ public class Correlation implements EntryPoint {
                                 lasAnnotationsPanel.setPopupWidth(w);
                             }
                         });
-                        resize(Window.getClientWidth(), Window.getClientHeight());
 
                     }
 				}
@@ -1955,24 +1961,23 @@ public class Correlation implements EntryPoint {
 
 	private void drawToScreenScaled(double scaleRatio) {
 		scaledImage = scaleImage(scaleRatio);
-		drawToScreen(scaledImage);
+		if ( scaledImage != null ) {
+		    drawToScreen(scaledImage);
+		}
 	}
 
 	private ImageData scaleImage(double scaleToRatio) {
-		logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
 		Canvas canvasTmp = Canvas.createIfSupported();
 		Context2d context = canvasTmp.getContext2d();
 
 		int imageHeight = plotImage.getHeight();
-		if (imageHeight <= 0) {
-			logger.warning("imageHeight:" + imageHeight);
-		}
 		double ch = (imageHeight * scaleToRatio);
 		int imageWidth = plotImage.getWidth();
-		if (imageWidth <= 0) {
-			logger.warning("imageWidth:" + imageWidth);
-		}
 		double cw = (imageWidth * scaleToRatio);
+		
+		if ( imageHeight <= 0 || imageWidth <=0 ) {
+		    return null;
+		}
 
 		canvasTmp.setCoordinateSpaceHeight((int) ch);
 		canvasTmp.setCoordinateSpaceWidth((int) cw);
@@ -1986,16 +1991,12 @@ public class Correlation implements EntryPoint {
 		double sy = 0;
 		int imageElementWidth = imageElement.getWidth();
 		if (imageElementWidth <= 0) {
-			logger.warning("imageElementWidth:" + imageElementWidth);
 			imageElementWidth = imageWidth;
-			logger.info("imageElementWidth:" + imageElementWidth);
 		}
 		double sw = imageElementWidth;
 		int imageElementHeight = imageElement.getHeight();
 		if (imageElementHeight <= 0) {
-			logger.warning("imageElementHeight:" + imageElementHeight);
 			imageElementHeight = imageHeight;
-			logger.info("imageElementHeight:" + imageElementHeight);
 		}
 		double sh = imageElementHeight;
 
@@ -2017,25 +2018,7 @@ public class Correlation implements EntryPoint {
 		try {
 			imageData = context.getImageData(0, 0, w, h);
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-			if (plotImage == null) {
-				logger.warning("image:null");
-			} else {
-				logger.warning("image:" + plotImage.toString());
-			}
-			logger.warning("scaleToRatio:" + scaleToRatio);
-			logger.warning("ch:" + ch);
-			logger.warning("cw:" + cw);
-			logger.warning("dw:" + dw);
-			logger.warning("w:" + w);
-			logger.warning("dh:" + dh);
-			logger.warning("h:" + h);
-			if (imageData == null) {
-				logger.warning("imageData:null");
-			} else {
-				logger.warning("imageData:" + imageData.toString());
-			}
-			e.printStackTrace();
+			// Well bummer
 		}
         int ht = (int) h + 10;
         int wt = (int) w + 10;
@@ -2044,13 +2027,7 @@ public class Correlation implements EntryPoint {
 		drawingCanvas.setCoordinateSpaceHeight(ht);
 		drawingCanvas.setCoordinateSpaceWidth(wt);
 		canvasDiv.setSize(wt + "px", ht + "px");
-		
-		
-		
-		if (imageData != null)
-			logger.info("scaleImage exiting returning imageData:" + imageData);
-		else
-			logger.severe("scaleImage exiting returning imageData:null");
+	
 		return imageData;
 	}
 
@@ -2102,7 +2079,7 @@ public class Correlation implements EntryPoint {
 		logger.info("resize called with windowWidth=" + windowWidth
 				+ " and windowHeight=" + windowHeight);
 		try {
-			IESafeImage plotImage = (IESafeImage) outputPanel.getWidget(2, 0);
+			IESafeImage plotImage = (IESafeImage) outputPanel.getWidget(shadowCanvasRow, 0);
 			if (plotImage != null) {
 				// Check width first
 				int leftPaddingWidth = RootPanel.get("leftPadding")
