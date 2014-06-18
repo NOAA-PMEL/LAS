@@ -111,16 +111,16 @@ public class SaveQC extends LASAction {
         
         
         // Pull out the QC parameters.
-        Map<String, String> qc = lasRequest.getPropertyGroup("qc");
-        String cruise_ID = qc.get("cruise_ID");
-        String region_ID = qc.get("region_ID");
-        String flag = qc.get("flag");
-        String comment = qc.get("comment");
-        String reviewer = qc.get("reviewer");
-        String override = qc.get("override");
         
-        Map<String, String> socat_vars = lasRequest.getPropertyGroup("socat_vars");
-        String version = socat_vars.get("version");
+        String cruise_ID = lasRequest.getProperty("qc", "cruise_ID");
+        String region_ID = lasRequest.getProperty("qc", "region_ID");
+        String flag = lasRequest.getProperty("qc", "flag");
+        String comment = lasRequest.getProperty("qc", "comment");
+        String reviewer = lasRequest.getProperty("qc", "reviewer");
+        String override = lasRequest.getProperty("qc", "override");
+        
+        
+        String version = lasRequest.getProperty("socat_vars", "version");
        
         // Write a bogus response.
         StringBuilder found = new StringBuilder();
