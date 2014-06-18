@@ -2,7 +2,7 @@
 <html>
 <!-- LAS SERVER OK -->
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=saveQC?xml=$las_request.toEncodedURLString()"> 
+<META http-equiv="refresh" content="0;URL=saveQC.do?xml=$las_request.toEncodedURLString()"> 
 </head>
 <body>
 </body>
