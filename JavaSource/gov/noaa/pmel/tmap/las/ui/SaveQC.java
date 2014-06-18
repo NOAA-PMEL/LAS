@@ -12,6 +12,8 @@ import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.product.server.ServerConfigPlugIn;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
@@ -119,7 +121,8 @@ public class SaveQC extends LASAction {
         
         Map<String, String> socat_vars = lasRequest.getPropertyGroup("socat_vars");
         String version = socat_vars.get("version");
-        
+       
+        // Write a bogus response.
         StringBuilder found = new StringBuilder();
         found.append("db_name="+db_name);
         found.append(" ");
@@ -137,8 +140,10 @@ public class SaveQC extends LASAction {
         found.append(" ");
         found.append("override="+override);
         found.append(" ");
-        log.info(found.toString());
-       
+        
+        response.setContentType("text/plain");
+        PrintWriter os = response.getWriter();
+        os.write(found.toString());
 		return null;
 	}
 
