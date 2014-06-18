@@ -330,7 +330,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	        } else {
 	            categories = lasConfig.getCategoriesSerializable(new String[]{id});
 	        }
-	        // Should already be category and variable sorted by the lasConfig method...
+	        for (int i = 0; i < categories.length; i++) {
+                categories[i].sortVariables();
+            }
 	        return categories; 
 	    } catch (Exception e) {
 	        throw new RPCException(e.getMessage());
