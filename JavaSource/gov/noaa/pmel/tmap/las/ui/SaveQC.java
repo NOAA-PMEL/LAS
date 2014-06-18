@@ -67,8 +67,11 @@ public class SaveQC extends LASAction {
         }
         
   
-        // You'l have to use the same tricks to get your DB parameters in here.
+        // We could add the database properties in the set up template, or by processing the request into a
+        // backend request as is done in the GetTrajectoryTable.
         
+        // Unless we do that, you'll have to set up your database here as you do in SaveEdits.
+
         
         // Pull out the QC parameters.
         
