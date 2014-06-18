@@ -29,9 +29,9 @@ DEFINE SYMBOL ribbon = 1
 ! This is a workaround for items 3 and 4 in ticket 1388; the issues will be 
 ! revisited in LAS 8.1 see ticket 1390.
 
-! CANCEL SYMBOL ferret_fill_levels
-! CANCEL SYMBOL ferret_contour_levels
-! CANCEL SYMBOL ferret_palette
+CANCEL SYMBOL ferret_fill_levels
+CANCEL SYMBOL ferret_contour_levels
+CANCEL SYMBOL ferret_palette
 
 !DEFINE SYMBOL ferret_fill_levels = v
 
