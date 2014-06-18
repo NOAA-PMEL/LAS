@@ -171,7 +171,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    IF `amax-amin LT ax_hi-ax_lo` THEN 
       LET ax_lo = amin
       let ax_hi = amax
-      GO LAS_is_range `ax_lo` `ax_hi`
+!      GO LAS_is_range `ax_lo` `ax_hi`
    ENDIF
 
    LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
@@ -198,7 +198,11 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       ENDIF
 
       CANCEL SYMBOL put_label  ! an all-missing label may not be needed if we are using LON+360
-      GO LAS_is_range ax_lo ax_hi
+      LET amin = `ax_lo`
+      LET amax = `ax_hi`
+      GO LAS_is_range ax_lo ax_hi ! get del_ax
+      LET ax_lo = `amin`
+      let ax_hi = `amax`
 
       IF `(ax_hi-ax_lo) GE 359` THEN 
          LET ax_lo = ($region_x_lo)
@@ -233,9 +237,11 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       LET amin = ($constr_lon_min)
       LET amax = ($constr_lon_max)
       GO LAS_is_range amin amax H 
+      LET ax_lo = `amin`
+      let ax_hi = `amax`
    ENDIF
 
-   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
+   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_x = ppl xfor (($dm_labels))
 
    LET dep_var = x[gx=haxis]
@@ -377,8 +383,10 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
 
    LET amin = q_var[i=@MIN]
    LET amax = q_var[i=@MAX]
-   GO LAS_is_range amin amax
-   DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis 
+   GO LAS_is_range amin amax  ! get del_ax
+   LET ax_lo = `amin`
+   LET ax_hi = `amax`
+   DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis
    DEFINE SYMBOL region_y_range = `ax_hi - ax_lo`  ! reset this so Jons_fland.jnl chooses the right resolution
 
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_y = ppl yfor (($dm_labels))
