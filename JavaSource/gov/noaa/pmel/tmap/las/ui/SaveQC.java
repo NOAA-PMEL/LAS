@@ -72,10 +72,10 @@ public class SaveQC extends LASAction {
         }
         
         // Pull out the database access information as provided by the configuration.
-        Map<String, String> db = lasRequest.getPropertyGroup("database_access");
-        
-        String db_name = db.get("db_name");
-        String db_table = db.get("db__table");
+        String db_name = lasRequest.getProperty("database_access", "db_name");
+        String db_table = lasRequest.getProperty("database_access", "db_table");
+
+       
         
         String resourcePath = "resources/database";
         String configPath = JDOMUtils.getResourcePath(this, resourcePath+"/DatabaseBackendConfig.xml");
@@ -125,21 +125,23 @@ public class SaveQC extends LASAction {
         // Write a bogus response.
         StringBuilder found = new StringBuilder();
         found.append("db_name="+db_name);
-        found.append(" ");
+        found.append("\n");
         found.append("db_table="+db_table);
-        found.append(" ");
+        found.append("\n");
+        found.append("driver="+driver);
+        found.append("\n");
         found.append("cruise_ID="+cruise_ID);
-        found.append(" ");
+        found.append("\n");
         found.append("region_ID="+region_ID);
-        found.append(" ");
+        found.append("\n");
         found.append("flag="+flag);
-        found.append(" ");
+        found.append("\n");
         found.append("comment="+comment);
-        found.append(" ");
+        found.append("\n");
         found.append("reviewer="+reviewer);
-        found.append(" ");
+        found.append("\n");
         found.append("override="+override);
-        found.append(" ");
+        found.append("\n");
         
         response.setContentType("text/plain");
         PrintWriter os = response.getWriter();
