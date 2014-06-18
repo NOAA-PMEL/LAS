@@ -18,12 +18,12 @@
                 </response>
                 <service>database</service>
     </operation>
-    <operation name="SOCAT QC Input Results" ID="SOCAT_QC_submit" output_template="SOCAT_QC_submit" service_action="SOCAT_QC_submit">
+    <operation name="SOCAT QC Input Results" ID="SOCAT_QC_submit" output_template="SOCAT_QC_setup" >
 		<response ID="DBExtractResponse">
 			<result type="debug" ID="db_debug" file_suffix=".txt" />
 			<result type="cancel" ID="cancel" />
 		</response>
-		<service>database</service>
+		<service>template</service>
     </operation>
 
 
