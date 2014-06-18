@@ -623,14 +623,16 @@ public class SimplePropPropViewer implements EntryPoint {
         imageCanvas = Canvas.createIfSupported();
         drawingCanvas = Canvas.createIfSupported();
 
-        canvasDiv.add(imageCanvas, 0, 0);
-        canvasDiv.add(drawingCanvas, 0, 0);
         
         
         if (imageCanvas != null) {
+
+            canvasDiv.add(imageCanvas, 0, 0);
+            canvasDiv.add(drawingCanvas, 0, 0);
             outputPanel.setWidget(1, 0, canvasDiv);
             imageCanvasContext = imageCanvas.getContext2d();
             drawingCanvasContext = drawingCanvas.getContext2d();
+            
         } else {
             outputPanel.setWidget(1, 0 , new HTML(""));
             Window.alert("You are accessing this site with an older, no longer supported browser. "
