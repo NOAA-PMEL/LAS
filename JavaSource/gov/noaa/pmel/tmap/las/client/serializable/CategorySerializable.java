@@ -144,6 +144,10 @@ public class CategorySerializable extends Serializable implements IsSerializable
 		return doc;
 	}
     public void sortVariables() {
-        Arrays.sort(datasetSerializable.getVariablesSerializable(), new VariableNameComparator());
+        if ( datasetSerializable != null ) {
+            if ( datasetSerializable.getVariablesSerializable() != null && datasetSerializable.getVariablesSerializable().length > 0 ) {
+                Arrays.sort(datasetSerializable.getVariablesSerializable(), new VariableNameOrSortOrderComparator());
+            }
+        }
     }
 }
