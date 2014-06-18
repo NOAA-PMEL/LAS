@@ -1,9 +1,7 @@
 package gov.noaa.pmel.tmap.las.ui;
 
-import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDatabaseBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.server.Cache;
@@ -11,12 +9,9 @@ import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.product.server.ServerConfigPlugIn;
 
-import java.io.File;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,43 +66,8 @@ public class SaveQC extends LASAction {
             }
         }
         
-        // Pull out the database access information as provided by the configuration.
-        String db_name = lasRequest.getProperty("database_access", "db_name");
-        String db_table = lasRequest.getProperty("database_access", "db_table");
-
-       
-        
-        String resourcePath = "resources/database";
-        String configPath = JDOMUtils.getResourcePath(this, resourcePath+"/DatabaseBackendConfig.xml");
-        File configFile;
-        if ( configPath != null ) {
-            configFile = new File(configPath);                               
-        } else {
-            throw new LASException("Config file "+ configPath +" not found.");
-        }
-        
-        LASDatabaseBackendConfig databaseBackendConfig = new LASDatabaseBackendConfig();
-
-        try {
-            JDOMUtils.XML2JDOM(configFile, databaseBackendConfig);
-        } catch (Exception e) {
-            throw new LASException("Could not parse Database config file: " + e.toString());
-        }
-        
-        String driver = null;
-        try {
-            driver = databaseBackendConfig.getDriver(db_name);
-        } catch (Exception e) {
-            // What to do now?
-        }
-        if ( driver != null ) {
-            try {
-                Class.forName(driver).newInstance();
-            } catch (Exception e) {
-                // Now what
-            }
-        }
-        
+  
+        // You'l have to use the same tricks to get your DB parameters in here.
         
         
         // Pull out the QC parameters.
@@ -124,12 +84,7 @@ public class SaveQC extends LASAction {
        
         // Write a bogus response.
         StringBuilder found = new StringBuilder();
-        found.append("db_name="+db_name);
-        found.append("\n");
-        found.append("db_table="+db_table);
-        found.append("\n");
-        found.append("driver="+driver);
-        found.append("\n");
+
         found.append("cruise_ID="+cruise_ID);
         found.append("\n");
         found.append("region_ID="+region_ID);
