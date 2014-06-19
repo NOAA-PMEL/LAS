@@ -129,6 +129,8 @@ public class GetTrajectoryTable extends LASAction {
                     String cruise_id = tabledap.get("trajectory_id");
                     StringBuilder xquery2 = new StringBuilder();
                     StringBuilder xquery1 = new StringBuilder();
+                    StringBuilder dsgQuery = new StringBuilder();
+                    StringBuilder csvQuery = new StringBuilder();
 	                VariableSerializable[] vars = dataset.getVariablesSerializable();
 	                if ( vars.length > 0 ) {
 	                    String dataurl = lasConfig.getDataAccessURL(dsid, vars[0].getID(), false);
@@ -146,7 +148,8 @@ public class GetTrajectoryTable extends LASAction {
 	                        if ( id != null && !id.equals("") ) {
 	                            
 	                            String url = dataurl + ".csv";
-	                            
+	                            String dsgurl = dataurl+".ncCF";
+	                            String csvurl = dataurl + ".csv";
 	                            
 	                            if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
@@ -303,6 +306,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                            columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                        }
 	                                        columnHeaders.append("<th>documentation</th>\n");
+	                                        columnHeaders.append("<th>download</th>\n");
 	                                        columnHeaders.append("<th>start</th>\n");
 	                                        columnHeaders.append("<th>end</th>\n");
 
@@ -353,8 +357,10 @@ public class GetTrajectoryTable extends LASAction {
 	                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+parts[i]+"</td>\n");
 	                                                    }
 	                                                }
+	                                                dsgQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
+	                                                csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
 	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documentation</a>"+"</td>\n");
-
+                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
 
 	                                                // Call out to ERDDAP for the lat/lon/time box.
 	                                                try {
