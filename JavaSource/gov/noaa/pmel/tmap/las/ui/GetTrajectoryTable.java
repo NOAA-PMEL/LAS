@@ -176,7 +176,9 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                            if ( dxhi < dxlo ) {
 	                                                if ( dxhi < 0 && dxlo >= 0 ) {
-	                                                    xquery1.append("&longitude>=180&longitude<"+dxhi);
+	                                                    dxhi = dxhi + 360.0d;
+	                                                    xquery1.append("&lon360>=" + dxlo);
+	                                                    xquery1.append("&lon360<=" + dxhi);
 	                                                    xquery2.append("&longitude>="+dxlo+"&longitude<"+180);
 	                                                } // else request overlaps, so leave it off
 	                                            } else {

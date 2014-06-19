@@ -419,11 +419,11 @@ public class TabledapTool extends TemplateTool {
                            
                             query2 = new StringBuilder(query.toString());
                             // Get the "left" half.  The section between -180 and xhi
-                            query.append("&"+lonname+">=-180&"+lonname+"<"+xhiDbl);
+                            xhiDbl = xhiDbl + 360.0d;
+                            query.append("&lon360>=" + xloDbl);
+                            query.append("&lon360<=" + xhiDbl);
                             query2.append("&"+lonname+">="+xloDbl+"&"+lonname+"<180");
-//                            xhiDbl = xhiDbl + 360.0d;
-//                            query.append("&lon360>=" + xloDbl);
-//                            query.append("&lon360<=" + xhiDbl);
+                           
                         } // the else block is that you overlapped so leave off the longitude constraint all teogether
 
                     } else {
