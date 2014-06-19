@@ -206,7 +206,9 @@ public class SimplePropPropViewer implements EntryPoint {
     protected String thi;
     protected String zlo;
     protected String zhi;
-    protected String defaultx;
+    protected String defaultx = null;
+    protected String defaulty = null;
+    protected String defaultcb = null;
     protected String time_origin;
     protected String calendar;
     protected String time_units;
@@ -821,6 +823,19 @@ public class SimplePropPropViewer implements EntryPoint {
             String vy = varid;
             
             // Because there is no netCDF we know this is the first request.
+            if ( varid.equals(trajectory_id) ) {
+                if ( defaulty != null ) {
+                    vy = defaulty;
+                } else {
+                    // Find one that's not the trajectory_id
+                    for (int yin = 0; yin < yVariables.getItemCount(); yin++) {
+                        VariableSerializable v = (VariableSerializable) yVariables.getUserObject(yin);
+                        if ( !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") ) {
+                            vy = v.getID();
+                        }
+                    }
+                }
+            }
             
             // If varTwoId
             
@@ -1405,8 +1420,7 @@ public class SimplePropPropViewer implements EntryPoint {
             CategorySerializable cat = config.getCategorySerializable();
             
             
-            String defaulty = null;
-            String defaultcb = null;
+          
             
             VariableSerializable[] variables = null;
             if (cat != null && cat.isVariableChildren()) {
