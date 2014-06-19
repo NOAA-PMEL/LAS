@@ -88,7 +88,7 @@
           <action path="/getAnnotations" type="gov.noaa.pmel.tmap.las.ui.GetAnnotations"/>
           <action path="/getTrajectoryTable" type="gov.noaa.pmel.tmap.las.ui.GetTrajectoryTable"/>
           <action path="/getCrossOvers" type="gov.noaa.pmel.tmap.las.ui.GetCrossOvers"/>
-          <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits">
+          <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits"/>
           <action path="/saveQC" type="gov.noaa.pmel.tmap.las.ui.SaveQC">
 		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
           </action>
