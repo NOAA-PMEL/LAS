@@ -49,7 +49,7 @@
     <optiondef name="full_data">
       <option>
         <help>Use full undecimated data set for all operations.</help>
-        <title>Use full data set.</title>
+        <title>Use full resolution data set.</title>
         <menu type="options" name="full_data">
           <item values="default">Default</item>
           <item values="yes">Yes</item>
