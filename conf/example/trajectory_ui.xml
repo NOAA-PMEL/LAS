@@ -51,7 +51,7 @@
         <help>Use full undecimated data set for all operations.</help>
         <title>Use full resolution data set.</title>
         <menu type="options" name="full_data">
-          <item values="default">Default</item>
+          <item values="default">Auto</item>
           <item values="yes">Yes</item>
           <item values="no">no</item>
         </menu>
