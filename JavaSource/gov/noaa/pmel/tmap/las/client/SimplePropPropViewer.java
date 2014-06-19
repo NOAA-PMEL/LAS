@@ -821,7 +821,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
             // Grab the existing variable to be used as y
             String vy = varid;
-            
+            String vds = null;
             // Because there is no netCDF we know this is the first request.
             if ( varid.equals(trajectory_id) ) {
                 if ( defaulty != null ) {
@@ -832,6 +832,7 @@ public class SimplePropPropViewer implements EntryPoint {
                         VariableSerializable v = (VariableSerializable) yVariables.getUserObject(yin);
                         if ( !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") ) {
                             vy = v.getID();
+                            vds = v.getDSID();
                         }
                     }
                 }
@@ -845,7 +846,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 String vx = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
                 String vcb = null;
-                String vds = null;
+                
                
                 if ( vx == null || (vx != null && vx.equals(vy))) {
 
