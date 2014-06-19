@@ -30,7 +30,7 @@ public class OptionsButton extends Composite {
     	optionsButton.addStyleDependentName("SMALLER");
     	optionsButton.addClickListener(openClick);
     	optionsDialog.add(options);
-    	optionsDialog.setText("Set Plot Options for all Plots.");
+    	optionsDialog.setText("Set Plot Options");
     	initWidget(optionsButton);
     	state = options.getState();
     }
