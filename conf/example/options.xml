@@ -457,7 +457,7 @@ Choices are:
 &lt;li>&lt;b>No&lt;/b> -- Do not change the aspect ratio based on the region.
 &lt;/ul>
       </help>
-      <title>Match aspect ratio of plot to aspect ratio of region</title>
+      <title>Keep aspect ratio region</title>
       <menu type="options" name="set_aspect">
         <item values="default">Default</item>
         <item values="1">Yes</item>
