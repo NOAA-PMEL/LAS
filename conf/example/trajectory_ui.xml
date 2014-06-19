@@ -48,7 +48,15 @@
     </optiondef>
     <optiondef name="full_data">
       <option>
-        <help>Use full undecimated data set for all operations.</help>
+        <help>
+Force LAS to use the full resultion of the data set instead of choosing.
+Choices are:
+&lt;ul>&lt;li>&lt;b>Default&lt;/b> -- let LAS decide whether to use the decimated data or the full resolution
+&lt;li>&lt;b>Yes&lt;/b> -- Force LAS to use the full resolution data set for all map plots
+&lt;li>&lt;b>No&lt;/b> -- same as default
+&lt;/ul>
+
+        </help>
         <title>Use full resolution data set.</title>
         <menu type="options" name="full_data">
           <item values="default">Default</item>
