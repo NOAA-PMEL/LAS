@@ -73,6 +73,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import ucar.unidata.geoloc.LatLonPoint;
+import ucar.unidata.geoloc.LatLonPointImpl;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
@@ -812,6 +815,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 url = url + id+".json?"+key_variable+","+shortname+"&distinct()";
             }
             String time_name = lasConfig.getProperty("tabledap_access", "time");
+            String lon_name = lasConfig.getProperty("tabledap_access", "longitude");
+
+            StringBuilder xquery1 = new StringBuilder();
+            StringBuilder xquery2 = new StringBuilder();
+            String xhi = null;
+            String xlo = null;
             // If they exist, add the other constraints...
             for (Iterator iterator = constriants.iterator(); iterator.hasNext();) {
                 ConstraintSerializable constraintSerializable = (ConstraintSerializable) iterator.next();
@@ -822,21 +831,85 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 if ( lhs.equals(time_name) ) {
                     rhs = reformatFerretToISO(rhs);
                 }
-                Constraint c = new Constraint(lhs, op, rhs);
-                url = url + "&" + c.getAsString();
-            }
-            jsonStream = new URL(url).openStream();
-            String jsonText = IOUtils.toString(jsonStream);
-            JSONObject json = new JSONObject(jsonText);
-            JSONArray v = json.getJSONObject("table").getJSONArray("rows");
-            for (int i = 0; i < v.length(); i++) {
-                JSONArray s = v.getJSONArray(i);
-                String t = s.getString(0);
-                if ( shortname.equals(key_variable) ) {
-                    outerSequenceValues.put(t,t);
+                if ( lhs.equals(lon_name) ) {
+                    if ( op.equals("lt") || op.equals("le") ) {
+                        xhi = rhs;
+                    } else {
+                        xlo = rhs;
+                    }
                 } else {
-                    String u = s.getString(1);
-                    outerSequenceValues.put(t, u);
+                    Constraint c = new Constraint(lhs, op, rhs);
+                    url = url + "&" + c.getAsString();
+                }
+              
+            }
+            
+            // Decide what to do about x now that we have the info.
+            if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
+                double dxlo = Double.valueOf(xlo);
+                double dxhi = Double.valueOf(xhi);
+                // Do the full globle and two query dance...
+
+                if ( Math.abs(dxhi - dxlo ) < 355. ) {
+
+                    LatLonPoint p = new LatLonPointImpl(0, dxhi);
+                    dxhi = p.getLongitude();
+                    p = new LatLonPointImpl(0, dxlo);
+                    dxlo = p.getLongitude();
+
+                    if ( dxhi < dxlo ) {
+                        if ( dxhi < 0 && dxlo >= 0 ) {
+                            dxhi = dxhi + 360.0d;
+                            xquery1.append("&lon360>=" + dxlo);
+                            xquery1.append("&lon360<=" + dxhi);                            
+                            xquery2.append("&longitude>="+dxlo+"&longitude<"+180);
+                        } // else request overlaps, so leave it off
+                    } else {
+                        xquery1.append("&longitude>="+dxlo);
+                        xquery1.append("&longitude<="+dxhi);
+                    }
+
+                }
+            } else {
+                // 
+                if ( xlo != null && xlo.length() > 0 ) xquery1.append("&longitude>="+xlo);
+                if ( xhi != null && xhi.length() > 0 ) xquery1.append("&longitude<="+xhi);
+            }
+            // Do the first longitude query
+            if ( xquery1.length() > 0 ) {
+                String q1url = url + xquery1.toString();
+
+                jsonStream = new URL(q1url).openStream();
+                String jsonText = IOUtils.toString(jsonStream);
+                JSONObject json = new JSONObject(jsonText);
+                JSONArray v = json.getJSONObject("table").getJSONArray("rows");
+                for (int i = 0; i < v.length(); i++) {
+                    JSONArray s = v.getJSONArray(i);
+                    String t = s.getString(0);
+                    if ( shortname.equals(key_variable) ) {
+                        outerSequenceValues.put(t,t);
+                    } else {
+                        String u = s.getString(1);
+                        outerSequenceValues.put(t, u);
+                    }
+                }
+            }
+            if ( xquery2.length() > 0 ) {
+                String q2url = url + xquery2.toString();
+
+                jsonStream = new URL(q2url).openStream();
+                String jsonText = IOUtils.toString(jsonStream);
+                JSONObject json = new JSONObject(jsonText);
+                JSONArray v = json.getJSONObject("table").getJSONArray("rows");
+                for (int i = 0; i < v.length(); i++) {
+                    JSONArray s = v.getJSONArray(i);
+                    String t = s.getString(0);
+                    if ( shortname.equals(key_variable) ) {
+                        outerSequenceValues.put(t,t);
+                    } else {
+                        String u = s.getString(1);
+                        outerSequenceValues.put(t, u);
+                    }
                 }
             }
         } catch (MalformedURLException e) {
