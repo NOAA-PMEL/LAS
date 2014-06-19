@@ -875,8 +875,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 if ( xlo != null && xlo.length() > 0 ) xquery1.append("&longitude>="+xlo);
                 if ( xhi != null && xhi.length() > 0 ) xquery1.append("&longitude<="+xhi);
             }
-            // Do the first longitude query
-            if ( xquery1.length() > 0 ) {
+            // Always to the first query.
                 String q1url = url + xquery1.toString();
 
                 jsonStream = new URL(q1url).openStream();
@@ -893,16 +892,16 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                         outerSequenceValues.put(t, u);
                     }
                 }
-            }
+            
             if ( xquery2.length() > 0 ) {
                 String q2url = url + xquery2.toString();
 
                 jsonStream = new URL(q2url).openStream();
-                String jsonText = IOUtils.toString(jsonStream);
-                JSONObject json = new JSONObject(jsonText);
-                JSONArray v = json.getJSONObject("table").getJSONArray("rows");
-                for (int i = 0; i < v.length(); i++) {
-                    JSONArray s = v.getJSONArray(i);
+                String jsonText2 = IOUtils.toString(jsonStream);
+                JSONObject json2 = new JSONObject(jsonText2);
+                JSONArray v2 = json.getJSONObject("table").getJSONArray("rows");
+                for (int i = 0; i < v2.length(); i++) {
+                    JSONArray s = v2.getJSONArray(i);
                     String t = s.getString(0);
                     if ( shortname.equals(key_variable) ) {
                         outerSequenceValues.put(t,t);
