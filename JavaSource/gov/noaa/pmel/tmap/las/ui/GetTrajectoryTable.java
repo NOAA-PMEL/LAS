@@ -139,17 +139,20 @@ public class GetTrajectoryTable extends LASAction {
 	                        if ( dataurl.contains("#") ) dataurl = dataurl.substring(0, dataurl.indexOf("#"));
 	                        if (!dataurl.endsWith("/") ) dataurl = dataurl + "/";
 	                        
+	                        // Use the full data for the downloads.
+                            String fulldataurl = dataurl + id;
+
+	                        // If available use the decimated URL for the other requests.
 	                        if ( did != null && !did.equals("") ) {
 	                            id = did;
 	                        }
 	                        dataurl = dataurl + id;
 	                        
-	                        
 	                        if ( id != null && !id.equals("") ) {
 	                            
 	                            String url = dataurl + ".csv";
-	                            String dsgurl = dataurl+".ncCF";
-	                            String csvurl = dataurl + ".csv";
+	                            String dsgurl = fulldataurl+".ncCF";
+	                            String csvurl = fulldataurl + ".csv";
 	                            
 	                            if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
 	                            if ( table != null && !table.equals("") ) {
@@ -361,7 +364,9 @@ public class GetTrajectoryTable extends LASAction {
 	                                                csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
 	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0]+"\">Documentation</a>"+"</td>\n");
                                                     row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
-
+                                                    dsgQuery.setLength(0);
+                                                    csvQuery.setLength(0);
+                                                    
 	                                                // Call out to ERDDAP for the lat/lon/time box.
 	                                                try {
 	                                                    InputStream stream = null;
