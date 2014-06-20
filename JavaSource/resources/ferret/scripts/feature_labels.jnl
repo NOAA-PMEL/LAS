@@ -104,7 +104,7 @@ list approx_total, approx_miss
    ENDIF
 
 
-   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s)/ approx. ($approx_msg)
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg)
 
 ! Put a link to the doc containing description of the decimation scheme. 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
