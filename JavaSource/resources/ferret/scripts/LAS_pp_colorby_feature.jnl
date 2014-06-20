@@ -238,6 +238,7 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
     LET dpolydat = XSEQUENCE(zd-`colorplus`);\
     LET all_mask = IF xpolydat+ypolydat+dpolydat THEN 1;\
     LET all_x = COMPRESSI(all_mask*xpolydat);\
+    IF ($lon_units"0|*>1") THEN LET/units=($lon_units) all_x = COMPRESSI(all_mask*xpolydat);\   
     LET all_y = COMPRESSI(all_mask*ypolydat);\
     LET all_d = COMPRESSI(all_mask*dpolydat);\
     LET do_it = `xpolydat[i=@ngd] GT 0`;\

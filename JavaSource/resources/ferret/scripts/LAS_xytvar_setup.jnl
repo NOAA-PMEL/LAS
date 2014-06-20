@@ -72,9 +72,6 @@ IF ($ferret_thumb"0|0|*>1") THEN
 
 ENDIF
 
-
-
-
 ! Do not label axes with the words LONGITUDE, LATITUDE
 IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
@@ -581,6 +578,7 @@ IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1
 
    GO Jons_fland 5 ($land_palette)
    SET DATA 1
+   DEFINE SYMBOL lon_units = degrees_east
 ENDIF
 
 SET MODE/LAST nodata_lab
