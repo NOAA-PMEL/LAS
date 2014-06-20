@@ -208,9 +208,15 @@ ELSE
 	    DEFINE SYMBOL data_y_var = ($data_1_var)* constraints_mask
             GO setup_dsg_variables 200000 tol1 tol2 tol3
 	    LET constraints_mask_var =  SEPARATE(constraints_mask, ($rowvar), 0)
-	    DEFINE SYMBOL plot_arg = ($data_x_var)* constraints_mask_var, ($data_y_var)* constraints_mask_var, ($data_var)* constraints_mask_var
+	    LET feature_size = `($rowvar),return=msize`
+	    IF `feature_size EQ 1` THEN LET constraints_mask_var = constraints_mask
+
 	    DEFINE SYMBOL xvar = ($data_x_var)* constraints_mask_var
-	    DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var
+	    DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var	    
+	    LET x_plot_var = ($xvar)
+	    IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
+	    LET y_plot_var = ($yvar)
+	    DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
 	 ENDIF
 
          LET pvar = ($data_x_var)
@@ -249,9 +255,15 @@ ELSE
           DEFINE SYMBOL data_var = ($data_y_var)  !just so its defined.
           GO setup_dsg_variables 200000 tol1 tol2 tol3
 	  LET constraints_mask_var =  SEPARATE(constraints_mask, ($rowvar), 0)
-	  DEFINE SYMBOL plot_arg = ($data_x_var)* constraints_mask_var, ($data_y_var)* constraints_mask_var, ($data_var)* constraints_mask_var
+	  LET feature_size = `($rowvar),return=msize`
+	  IF `feature_size EQ 1` THEN LET constraints_mask_var = constraints_mask
+
           DEFINE SYMBOL xvar = ($data_x_var)* constraints_mask_var
           DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var
+	  LET x_plot_var = ($xvar)
+	  IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
+	  LET y_plot_var = ($yvar)
+	  DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
       ENDIF
 
    ENDIF   ! IF ($color_by)
@@ -262,10 +274,10 @@ ELSE
    ENDIF
 
 ! on lat/lon plots, draw a gray line on the cruise tracks.
-   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  ($xvar), ($yvar)
+   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  x_plot_var, y_plot_var
 
 ! ?? show locations where the color-by variable is missing...
-   IF `($data_count"0") GT 2` THEN ($underlay_command) ($xvar), ($yvar)
+   IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var
 
    DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($poly_qual)
