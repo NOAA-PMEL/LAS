@@ -394,7 +394,7 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
 	                                                // Add the link to load a list of potential crosses to the table.
-	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\')\">Check for crossovers</a>");
+	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
 	                                                row.append("\n</td>");
 	                                                
 	                                                // Add the QC link
