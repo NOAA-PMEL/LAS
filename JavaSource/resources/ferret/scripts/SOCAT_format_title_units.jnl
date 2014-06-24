@@ -14,6 +14,8 @@ IF `($data_($num)_units%1|"">1|*>0%) OR ($data_($num)_units%1|" ">1|*>0%)`  THEN
    CANCEL SYMBOL data_($num)_units
 ENDIF
 
+IF `($data_($num)_units%0|" ">0|text>0|none>0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
+
 ! There should never be a blank title
 IF `($data_($num)_title%1|"">1|*>0%) OR ($data_($num)_title%1|" ">1|*>0%)`  THEN 
    DEFINE SYMBOL data_($num)_units = ($data_($num)_var)
@@ -50,6 +52,7 @@ columns/type=text/var=escchar escapeit.dat
 IF ($data_($num)_title"0|*>1") THEN
 
    LET data_($num)_title = "($data_($num)_title)"
+   LET data_($num)_title_new = "($data_($num)_title)"
 
    DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
    IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
@@ -72,12 +75,15 @@ IF ($data_($num)_title"0|*>1") THEN
       LET tit4 = STRCAT(tit3, "</sub>"); list/nohead tit4
       LET tit5 = tit4
       IF `n2 GT 0 AND n2 LT slen` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
+
       LET data_($num)_title = "`tit5`"
+      LET data_($num)_title_new = "`tit5`"
+      
+      DEFINE SYMBOL uptitle = `UPCASE(data_($num)_title_new)`
 
    ENDIF
 
 ! CO2 may appear twice in a title   
-   DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
    IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
 
       LET slen = `STRLEN("($uptitle)")`
@@ -100,10 +106,13 @@ IF ($data_($num)_title"0|*>1") THEN
       LET tit5 = tit4
       IF `n2 GT 0 AND n2 LT slen` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
       LET data_($num)_title = "`tit5`"
+   
    ENDIF
 
 ! Now define the title for use by Ferret on an axis in the prop-prop plots. 
 
+
+   DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title)")`
    IF `STRINDEX("($uptitle)", "CO2") GT 0` THEN
 
       LET slen = `STRLEN("($uptitle)")`
@@ -119,7 +128,9 @@ IF ($data_($num)_title"0|*>1") THEN
       LET tit6 = STRCAT(tit5, "@SR"); list/nohead tit6
       let tit7 = tit6
       DEFINE SYMBOL data_($num)_title_new = `tit7`
+      DEFINE SYMBOL data_($num)_title = `tit7`
       DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title_new)")`
+      
    ENDIF
 
 ! CO2 may appear twice in a title   
@@ -302,6 +313,10 @@ CANCEL DATA escapeit.dat
 ! Update the values of data_title, data_units
 
 
+DEFINE SYMBOL uptitle = `UPCASE("($data_($num)_title) ($data_($num)_units)" )`
+IF `(STRINDEX("($uptitle)", "TIME") GT 0) AND (STRINDEX("($uptitle)", " SINCE ") GT 0)` THEN \
+ LET data_($num)_units = " "
+
 IF ($data_($num)_units"0|text>1|*>0") THEN LET data_($num)_units = " "
 
 IF `($num"0|0|*>1") EQ 0` THEN
@@ -316,3 +331,6 @@ IF `( ($its_prop_prop_plot"0|*>1") EQ 0) AND (($num"0|0|*>1") EQ 0)` THEN
 ENDIF
 
 ! End of file ------------SOCAT_format_title_units.jnl--------------------------
+
+sh sym num, data_($num)_title ,data_($num)_units 
+

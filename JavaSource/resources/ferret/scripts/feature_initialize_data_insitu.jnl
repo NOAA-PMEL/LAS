@@ -35,8 +35,10 @@ IF ($data_($num)_units"0|1|*>1") THEN
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_($num)_title) (($data_($num)_units))
 ENDIF
 
-IF `(STRINDEX("($ferret_plot_title%0%)", "Time") GT 0) AND (STRINDEX("($ferret_plot_title%0%)", " since ") GT 0)` THEN \
+DEFINE SYMBOL uptitle = `UPCASE("($ferret_plot_title%0%)")`
+IF `(STRINDEX("($uptitle)", "TIME") GT 0) AND (STRINDEX("($uptitle)", " SINCE ") GT 0)` THEN \
 DEFINE SYMBOL ferret_plot_title = Time
+
 
 ! Set up the variable title and units for single-variable plots.
 ! The prop-prop plot title A vs B colored by C are set elsewhere.
