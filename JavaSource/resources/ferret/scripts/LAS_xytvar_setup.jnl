@@ -61,10 +61,10 @@ IF ($ferret_thumb"0|0|*>1") THEN
    DEFINE SYMBOL is_thumb = 1
    DEFINE SYMBOL mainlab_size = 0.22
    DEFINE SYMBOL errlab_size = 0.2
-   PPL AXLSZE,.14,.14
+   DEFINE SYMBOL thumb_alab_size = PPL AXLSZE,.14,.14
    DEFINE SYMBOL txl_lab_size = .14
    PPL TXLSZE,($txl_lab_size)
-   LET labfac = 2.
+   LET labfac = 1.8
    DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
    DEFINE SYMBOL miss_lab_siz = 0.24
 
@@ -77,6 +77,13 @@ IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xla
 IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
 IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
+
+IF ($ferret_thumb"0|*>1") THEN  
+   IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab longitude
+   IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab longitude
+   IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab latitude
+   IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab latitude
+ENDIF
 
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
@@ -292,10 +299,11 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    DEFINE SYMBOL data_1_title = Time
 
    IF `baddat EQ 1` THEN
-      DEFINE AXIS/t=0:2:1/t0=1-jan-0000/units=seconds haxis
+      DEFINE AXIS/t=1:2:1/t0=1-jan-1970/units=seconds haxis
       LET tt = t[gt=haxis]
       DEFINE SYMBOL win_asp = /ASPECT=0.75
       DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
+      ppl axlabp,0,0
    ELSE
 
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
@@ -457,7 +465,7 @@ ENDIF
 
 GO LAS_open_window
 IF ($ferret_thumb"0|0|*>1") THEN 
-   DEFINE VIEW/AXES/X=0.12:0.99/y=0.06:0.93 full_view 
+   DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view 
    DEFINE VIEW/AXES/X=0.12:0.99/y=0.1:0.93 full_view2 
    SET VIEW full_view
 ENDIF
@@ -471,12 +479,15 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
    ($ax_label_x)
    ($ax_label_y)
    ($ax_label_resize)
+   ($thumb_alab_size)
    IF `($lab1"0|*>1")` THEN go unlabel 1
    PPL SHADE
    SET VIEW full_view2
 ENDIF
 
 SHADE/NOKEY/PAL=white($pqual)/NOAX/title=" "/SET allmiss
+   ($thumb_alab_size)
+   ($ax_label_resize)
 IF ($lab1"0|*>1") THEN
    IF `(STRINDEX("($lab1)", "YEAR") GT 0)` THEN 
       IF `STRINDEX("($note_($note_num%0%)_lab%0%)", "YEAR") EQ 0` THEN
