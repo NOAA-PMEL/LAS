@@ -1,6 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! $Header$
-! Feature_initialize_vars.jnl
+! feature_initialize_vars.jnl
 !
 ! Define variables and symbols based on feature identification variables
 ! in a DSG dataset
@@ -23,7 +23,7 @@ IF `($ferret_memory"25.6") LT 200` THEN SET MEM/siz=200
 ! NOTE:  the SQL query (dsg request?) ends with:  'ORDER BY feature_ID'.
 
 DEFINE SYMBOL feature_max_labels = 200
-DEFINE SYMBOL numobs `($data_var),return = isize`
+DEFINE SYMBOL numobs = `($data_var),return = isize`
 LET num_e = `($data_var),return = msize`
 
 IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
@@ -72,32 +72,32 @@ ELSE
       LET feature_numbers = _m[ge=($rowvar)]
    ! scramble
 
-   define symbol factor = 0
-   let nf = nfeatures
+      define symbol factor = 0
+      let nf = nfeatures
    
-   repeat/range=2:15/name=fac (if `mod(nf,fac) eq 0` THEN DEFINE SYMBOL factor = `fac`)
-   let factor = 3
-   IF `($factor"0") eq 0` then
-      let nf = `nf + 1`
       repeat/range=2:15/name=fac (if `mod(nf,fac) eq 0` THEN DEFINE SYMBOL factor = `fac`)
-   ENDIF
-   IF `($factor"0") gt 2` THEN
+      let factor = 3
+      IF `($factor"0") eq 0` then
+         let nf = `nf + 1`
+         repeat/range=2:15/name=fac (if `mod(nf,fac) eq 0` THEN DEFINE SYMBOL factor = `fac`)
+      ENDIF
+      IF `($factor"0") gt 2` THEN
    
-      LET feature_numbers1 = _m[ge=($rowvar)]
-      let yfac = ($factor)
-      let xfac =  INT(nfeatures/yfac)
-      IF `xfac*yfac LT nfeatures` THEN LET xfac = `xfac+1`
-      DEFINE AXIS/x=1:`xfac`:1 xfaxis
-      DEFINE AXIS/y=1:`yfac`:1 yfaxis
-      LET xyvar = x[gx=xfaxis]+y[gy=yfaxis]
+         LET feature_numbers1 = _m[ge=($rowvar)]
+         let yfac = ($factor)
+         let xfac =  INT(nfeatures/yfac)
+         IF `xfac*yfac LT nfeatures` THEN LET xfac = `xfac+1`
+         DEFINE AXIS/x=1:`xfac`:1 xfaxis
+         DEFINE AXIS/y=1:`yfac`:1 yfaxis
+         LET xyvar = x[gx=xfaxis]+y[gy=yfaxis]
 
-      LET var2d = RESHAPE(feature_numbers1, xyvar)
-      LET feature_numbers2 = ESEQUENCE(TRANSPOSE_XY (var2d) )
-      LET feature_numbers = feature_numbers2[ge=feature_numbers1]
+         LET var2d = RESHAPE(feature_numbers1, xyvar)
+         LET feature_numbers2 = ESEQUENCE(TRANSPOSE_XY (var2d) )
+         LET feature_numbers = feature_numbers2[ge=feature_numbers1]
 
-   ENDIF
+      ENDIF
 
-   DEFINE SYMBOL have_feature_nums = 1
+      DEFINE SYMBOL have_feature_nums = 1
 ! Large number of color levels, but not larger than # of features.
 
       IF ($ferret_fill_levels"1|*>0") THEN 
@@ -120,30 +120,4 @@ ELSE
    GO feature_list_mask
 ENDIF
 
-! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
-
-IF ($region_0_t_lo"0|*>1") THEN
-   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
-   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
-   IF `iz GT 0` THEN 
-      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
-   ELSE
-      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
-      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
-   ENDIF
-ENDIF 
-
-IF `STRCMP("($region_0_t_lo)", "($region_0_t_hi)") EQ 0` THEN  EXIT/SCRIPT
-
-IF ($region_0_t_hi"0|*>1") THEN
-   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
-   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
-   IF `iz GT 0` THEN 
-      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
-   ELSE
-      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
-      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
-   ENDIF
-ENDIF
-
-!---------------- end of Feature_initialize.jnl -------------------------
+!---------------- end of feature_initialize_vars.jnl -------------------------

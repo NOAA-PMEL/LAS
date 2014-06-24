@@ -53,11 +53,11 @@ IF `($its_prop_plot"0|0|1|*>1") EQ 0` THEN
       DEFINE SYMBOL nbad_data = ($stat_nbad)
    ELSE
       DEFINE SYMBOL ngood_data = `($data_var)[i=@ngd]`
-      DEFINE SYMBOL nbad_data = `($data_var)[i=@nbd]`
+      DEFINE SYMBOL nbad_data = `($numobs) - ($ngood_data)`
    ENDIF
 ENDIF
 
-IF `($nfeatures"0") GT 1` THEN 
+!IF `($nfeatures"0") GT 1` THEN 
 
 DEFINE SYMBOL n_gaps = `($nfeatures) - 1`
 
@@ -78,7 +78,7 @@ DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
 DEFINE SYMBOL data_y_var = lat_with_gaps
 
-ENDIF ! nfeatures GT 1
+!ENDIF ! nfeatures GT 1
 
 LET nout_lonlat = `($data_var)[i=@ngd]`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat` 
@@ -110,9 +110,6 @@ IF `npts LT min_decimate OR min_decimate LT 0` THEN
    EXIT/SCRIPT
 ENDIF
 
-SAY _________________ Starting decimate  on ($ngood_data) clock seconds:         ($clock_secs)
-LET pre_decimate =  ($clock_secs)
-
 DEFINE SYMBOL piecewise_decimation = 1
 IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=200
 
@@ -143,9 +140,6 @@ LET var_tol = `0.001* (ranger[i=2] - ranger[i=1])`
 
 LET vartol = ($4"`var_tol`")
 
-
-SAY _________________ JUST THE DECIMATE CALL ITSELF clock seconds:               ($clock_secs)
-
 LET decimate_lonlat = PIECEWISE3(\
  lon_with_gaps, lat_with_gaps, var_with_gaps, control, lontol, lattol, vartol)
 
@@ -162,8 +156,6 @@ DEFINE SYMBOL filesample = `decimate_lonlat,RETURN=dsetnum`
 set data 1
 
 LET nout_lonlat = `decimate_lonlat[d=($filesample),i=@ngd]`
-
-SAY _________________ AFTER THE DECIMATE CALL ITSELF  clock seconds:             ($clock_secs)
 
 DEFINE SYMBOL nout_lonlat = `nout_lonlat`
 
@@ -204,13 +196,7 @@ IF `(nout_lonlat/($ngood_data)) GT 0.8` THEN
    EXIT/SCRIPT
 ENDIF
 
-
-SAY _________________ After decimate clock seconds returns `nout_lonlat` pts:    ($clock_secs)
-SAY _________________ Total time to compute and apply decimation, seconds        ----- `($clock_secs) - pre_decimate`
-
-
 ! If the decimation returns just about no data, don't do it.
-list (nout_lonlat/($ngood_data)) ,0.005
 IF `(nout_lonlat/($ngood_data)) LT 0.005` THEN
    DEFINE SYMBOL data_var = var_with_gaps
    DEFINE SYMBOL data_x_var = lon_with_gaps
