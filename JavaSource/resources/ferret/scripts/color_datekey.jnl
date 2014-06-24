@@ -108,36 +108,34 @@ LET vht = (($ppl$ylen) + ($ppl$yorg)) * 1.15
 IF ($vp_height"0|*>1") THEN LET vht = ($vp_height)
 
 LET rem = vht - (($ppl$ylen) + ($ppl$yorg))
-LET ymaxx = 0.25*($ppl$ylen)
+LET ymaxx = 0.22*($ppl$ylen)
 LET key_hi = MIN (`($ppl$yorg) + ($ppl$ylen) + ymaxx`,`vht-0.051*rem`)
 
-LET key_lo = (($ppl$yorg) + ($ppl$ylen) + 0.25*MIN (rem,ymaxx))
-LET key_lo = (($ppl$ylen) + 0.25*MIN (rem,ymaxx))
-LET key_inc = `0.1 * (key_hi - key_lo)`
+LET key_lo = (($ppl$yorg) + ($ppl$ylen) + 0.22*MIN (rem,ymaxx))
+LET key_lo = (($ppl$ylen) + 0.22*MIN (rem,ymaxx))
+LET key_inc = `0.1 * (key_hi - key_lo) + 0.05`
 
 LET key_hi = `key_lo + 4.0*key_inc`
-LET key_hi = `key_lo + 2.0*key_inc + 0.02`
+LET key_hi = `key_lo + 2.0*key_inc`
 
 let keylen = `x2-x1`
 let keydel = keylen/4
 let keystart = x1 - ($ppl$xorg)
 
-! key_hi-0.07-1,0,.05,l
-
 LABEL/NOUSER `keydel*0+keystart`,`key_hi`,0,0,($datesize),($day_0_fourth)
-LABEL/NOUSER `keydel*0+keystart`,`key_lo+key_inc`,0,0,.05,l
+LABEL/NOUSER `keydel*0+keystart`,`key_lo+key_inc`,0,0,.07,l
 
 LABEL/NOUSER `keydel*1+keystart`,`key_hi`,0,0,($datesize),($day_1_fourth)
-LABEL/NOUSER `keydel*1+keystart`,`key_lo+key_inc`,0,0,.05,l
+LABEL/NOUSER `keydel*1+keystart`,`key_lo+key_inc`,0,0,.07,l
 
 LABEL/NOUSER `keydel*2+keystart`,`key_hi`,0,0,($datesize),($day_2_fourth)
-LABEL/NOUSER `keydel*2+keystart`,`key_lo+key_inc`,0,0,.05,l
+LABEL/NOUSER `keydel*2+keystart`,`key_lo+key_inc`,0,0,.07,l
 
 LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,($datesize),($day_3_fourth)
-LABEL/NOUSER `keydel*3+keystart`,`key_lo+key_inc`,0,0,.05,l
+LABEL/NOUSER `keydel*3+keystart`,`key_lo+key_inc`,0,0,.07,l
 
 LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,($datesize),($day_4_fourth)
-LABEL/NOUSER `keydel*4+keystart`,`key_lo+key_inc`,0,0,.05,l
+LABEL/NOUSER `keydel*4+keystart`,`key_lo+key_inc`,0,0,.07,l
 
 ELSE ! vertical key
 
