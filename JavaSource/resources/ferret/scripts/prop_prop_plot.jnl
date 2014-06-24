@@ -128,7 +128,7 @@ IF `($all_missing"0") EQ 0` THEN
 !   DEFINE SYMBOL yaxis_max = `ax_hi`
 !ENDIF
 
-DEFINE SYMBOL poly_qual = /OVER/NOLAB
+DEFINE SYMBOL qualifiers = /OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/siz=.12
@@ -142,6 +142,9 @@ IF ($ribbon"0|*>1") THEN
 ENDIF
 
 IF `($ribbon"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
+
+LET x_plot_var = ($xvar)
+LET y_plot_var = ($yvar)
 
 IF ($color_by_feature"0|*>1") THEN 
    GO LAS_pp_colorby_feature
@@ -229,24 +232,27 @@ ELSE
       ENDIF  ! IF ($rowvar)
 
 ! Get color-plot qualifiers
-     DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels"v")
+     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels"v")
    
      IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
-        DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
+        DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 	DEFINE SYMBOL dokey = 0
      ELSE
-        DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
+        DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
 	DEFINE SYMBOL dokey = 1
      ENDIF
    
 ! Dont use the palette coming in. Its for variable 0
-     DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+     DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
-!      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
+     IF ($keycentered"0|*>1") THEN \
+	  DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
+
+!      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=rainbow
      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 
    ELSE    ! IF ($color_by)
-      DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
+      DEFINE SYMBOL qualifiers = ($qualifiers)/palette=($polycolor)
 
 ! Need to separate the different trajectories for 2-variable time series or map plots      
       IF ($connect_dots"0|*>1") THEN 
@@ -279,11 +285,11 @@ ELSE
 ! ?? show locations where the color-by variable is missing...
    IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var
 
-   DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
-   DEFINE SYMBOL poly_command POLYGON($poly_qual)
+   DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/SET
+   DEFINE SYMBOL poly_command POLYGON($qualifiers)
 
    IF ($ribbon"0") THEN
-      ($plot_command)($poly_qual) ($plot_arg)
+      ($plot_command)($qualifiers) ($plot_arg)
       IF `($ferret_annotations%0|*>1%) AND ($dokey"0|1>1|*>1")` THEN GO key_at_top
       ($ax_label_resize)
       PPL ($plot_end_command)
