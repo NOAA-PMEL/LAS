@@ -14,6 +14,7 @@ ppl xlab
 let x1 = `($ppl$xorg)+0.8`
 let x2 = `($ppl$xorg)+($ppl$xlen)-0.8`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
+let y1 = `($ppl$yorg)+($ppl$ylen)+0.04`
 let y2 = `y1+0.2`
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
