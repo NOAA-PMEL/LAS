@@ -6,6 +6,7 @@
 
 IF `($ferret_is_socat"0|*>1") EQ 0` THEN EXIT/SCRIPT 
 
+
 DEFINE SYMBOL vtype = 0
 LET gettype = ($ferret_plot_var_0)
 DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
@@ -63,8 +64,6 @@ ENDIF
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
-   GO SOCAT_custom_levs_keys ($data_2_var) 
-
    DEFINE SYMBOL data_2_var_in = ($data_2_var)
 
    DEFINE SYMBOL vtype = 0
@@ -113,6 +112,32 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
          SET ATT/LIKE=zvar_1 zvar
       ENDIF
       
+   ENDIF
+ENDIF
+
+! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
+
+IF ($region_0_t_lo"0|*>1") THEN
+   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
+   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ENDIF
+ENDIF 
+
+IF `STRCMP("($region_0_t_lo)", "($region_0_t_hi)") EQ 0` THEN  EXIT/SCRIPT
+
+IF ($region_0_t_hi"0|*>1") THEN
+   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
+   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
    ENDIF
 ENDIF
 
