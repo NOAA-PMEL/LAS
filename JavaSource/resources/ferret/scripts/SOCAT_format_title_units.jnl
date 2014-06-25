@@ -80,7 +80,7 @@ IF ($data_($num)_title"0|*>1") THEN
       LET data_($num)_title_new = "`tit5`"
       
       DEFINE SYMBOL uptitle = `UPCASE(data_($num)_title_new)`
-
+pause
    ENDIF
 
 ! CO2 may appear twice in a title   
@@ -89,12 +89,12 @@ IF ($data_($num)_title"0|*>1") THEN
       LET slen = `STRLEN("($uptitle)")`
       LET n1 = `STRINDEX("($uptitle)", "CO2")`
       LET n2 = `n1+3`
-      let str1 = SUBSTRING("($data_($num)_title_new)", 1, n1+1)
-      let str2 = SUBSTRING("($data_($num)_title_new)", n1+2, slen)
+      let str1 = SUBSTRING(data_($num)_title_new, 1, n1+1)
+      let str2 = SUBSTRING(data_($num)_title_new, n1+2, slen)
       list str1, str2
       IF `n2 LT slen` THEN 
-         let str2 = SUBSTRING("($data_($num)_title_new)", n1+2,  n2-(n1+2))
-         let str3 = SUBSTRING("($data_($num)_title_new)", n2, slen)
+         let str2 = SUBSTRING(data_($num)_title_new, n1+2,  n2-(n1+2))
+         let str3 = SUBSTRING(data_($num)_title_new, n2, slen)
 	 list str2, str3
       ENDIF
 
@@ -106,7 +106,7 @@ IF ($data_($num)_title"0|*>1") THEN
       LET tit5 = tit4
       IF `n2 GT 0 AND n2 LT slen` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
       LET data_($num)_title = "`tit5`"
-   
+pause
    ENDIF
 
 ! Now define the title for use by Ferret on an axis in the prop-prop plots. 
@@ -331,6 +331,3 @@ IF `( ($its_prop_prop_plot"0|*>1") EQ 0) AND (($num"0|0|*>1") EQ 0)` THEN
 ENDIF
 
 ! End of file ------------SOCAT_format_title_units.jnl--------------------------
-
-sh sym num, data_($num)_title ,data_($num)_units 
-
