@@ -80,7 +80,7 @@ IF ($data_($num)_title"0|*>1") THEN
       LET data_($num)_title_new = "`tit5`"
       
       DEFINE SYMBOL uptitle = `UPCASE(data_($num)_title_new)`
-pause
+
    ENDIF
 
 ! CO2 may appear twice in a title   
@@ -106,7 +106,7 @@ pause
       LET tit5 = tit4
       IF `n2 GT 0 AND n2 LT slen` THEN LET tit5 = STRCAT(tit4, str3); list/nohead tit5
       LET data_($num)_title = "`tit5`"
-pause
+
    ENDIF
 
 ! Now define the title for use by Ferret on an axis in the prop-prop plots. 
