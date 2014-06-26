@@ -2033,6 +2033,7 @@ public class Correlation implements EntryPoint {
 
 	private void drawToScreen(ImageData imageData) {
 		if (imageCanvasContext != null)
+            imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
 			imageCanvasContext.putImageData(imageData, 0, 0);
 	}
 
