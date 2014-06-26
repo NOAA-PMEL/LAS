@@ -2022,6 +2022,9 @@ public class Correlation implements EntryPoint {
 		}
         int ht = (int) h + 10;
         int wt = (int) w + 10;
+        
+        imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
+
 		imageCanvas.setCoordinateSpaceHeight(ht);
 		imageCanvas.setCoordinateSpaceWidth(wt);
 		drawingCanvas.setCoordinateSpaceHeight(ht);
@@ -2033,7 +2036,6 @@ public class Correlation implements EntryPoint {
 
 	private void drawToScreen(ImageData imageData) {
 		if (imageCanvasContext != null)
-            imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
 			imageCanvasContext.putImageData(imageData, 0, 0);
 	}
 

@@ -1875,6 +1875,8 @@ public class SimplePropPropViewer implements EntryPoint {
         int ht = (int) h + 10;
         int wt = (int) w + 10;
         
+        // Clear it before resetting the size
+        imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
         imageCanvas.setCoordinateSpaceHeight(ht);
         imageCanvas.setCoordinateSpaceWidth(wt);
         
