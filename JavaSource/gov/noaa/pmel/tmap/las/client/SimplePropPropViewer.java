@@ -1068,7 +1068,7 @@ public class SimplePropPropViewer implements EntryPoint {
                       spin.hide();
                     }
                     if (imageCanvas != null) {
-                        //outputPanel.setWidget(2, 0, plotImage);
+                        outputPanel.setWidget(2, 0, plotImage);
                         plotImage.setVisible(false);
                         
                         plotImage.addLoadHandler(new LoadHandler() {
@@ -1889,6 +1889,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
     private void drawToScreen(ImageData imageData) {
         if (imageCanvasContext != null && imageData != null)
+            imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
             imageCanvasContext.putImageData(imageData, 0, 0);
     }
 
