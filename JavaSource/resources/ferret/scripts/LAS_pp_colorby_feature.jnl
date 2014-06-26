@@ -231,22 +231,27 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
     LET zx = transpmask[k=`c1`:`cn`];\
     LET zy = transqmask[k=`c1`:`cn`];\
     LET zd = transdmask[k=`c1`:`cn`];\
-    LET xpolydat = XSEQUENCE(zx);\
-    LET ypolydat = XSEQUENCE(zy);\
+    DEFINE AXIS/X=1:`(cn-c1+1)*longest`:1 long_x;\
+    LET lxx = x[gx=long_x];\
+    LET xpolydat = RESHAPE(zx,lxx);\
+    LET ypolydat = RESHAPE(zy,lxx);\
     LET colorplus = 0;\
     IF ($is_decimate"0|*>1") THEN LET colorplus = (ishape-1)*ncolors;\
-    LET dpolydat = XSEQUENCE(zd-`colorplus`);\
+    LET dpolydat = RESHAPE(zd-`colorplus`, lxx);\
     LET all_mask = IF xpolydat+ypolydat+dpolydat THEN 1;\
-    LET all_x = COMPRESSI(all_mask*xpolydat);\
-    IF ($lon_units"0|*>1") THEN LET/units=($lon_units) all_x = COMPRESSI(all_mask*xpolydat);\   
+    LET all_x = COMPRESSI(all_mask*xpolydat);\   
     LET all_y = COMPRESSI(all_mask*ypolydat);\
     LET all_d = COMPRESSI(all_mask*dpolydat);\
-    LET do_it = `xpolydat[i=@ngd] GT 0`;\
+    LET ndo_it = `all_x[i=@ngd]`;\
+    LET do_it = `ndo_it GT 0`;\
+    LET/units=($lon_units"dum") plot_x = all_x[i=1:`ndo_it`];\   
+    LET plot_y = all_y[i=1:`ndo_it`];\
+    LET plot_d = all_d[i=1:`ndo_it`];\
      ;\
      IF `do_it AND ($connect_dots"0|0|1|*>1")` THEN \
      PLOT/NOAX/VS/OVER/LINE=6/NOLAB xpolydat, ypolydat ;\
      ;\
-    IF `do_it` THEN GO polymark ($poly_command) all_x, all_y, all_d, ($shape($ishape)), ($poly_scale) ;\
+    IF `do_it` THEN GO polymark ($poly_command) plot_x, plot_y, plot_d, ($shape($ishape)), ($poly_scale) ;\
      ;\
      LET c1 = `c1 + ncolors`;\
      LET cn = `cn + ncolors`;\
