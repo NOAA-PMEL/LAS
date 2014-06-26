@@ -1,4 +1,5 @@
 ! LAS_setup_dsg.jnl
+SAY _________________ START LAS_setup_dsg: clock seconds:    ($clock_secs)
 !
 ! Is it a Profile or Trajectory dataset?
 ! Find the featureType attribute, and find which  variables
@@ -24,3 +25,6 @@ IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
 ENDIF
 
 ! End of file ------------ LAS_setup_dsg.jnl--------------------------
+
+SAY _________________ END LAS_setup_dsg: clock seconds:    ($clock_secs)
+!
