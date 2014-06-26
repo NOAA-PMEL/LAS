@@ -21,8 +21,8 @@ PPL axlabp,-1,-1
 !! TESTING; do we want to only constrain the map for constraints, not for
 !! chosen trajectories?
 
-DEFINE SYMBOL xvar = var_mask*text_mask*xvar* constraints_mask
-DEFINE SYMBOL yvar = var_mask*text_mask*yvar* constraints_mask
+DEFINE SYMBOL xvar = constraints_mask*xvar
+DEFINE SYMBOL yvar = constraints_mask*yvar
 LET p = ($xvar) 
 LET q = ($yvar)
 
@@ -288,6 +288,8 @@ ENDIF
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN 
 
 ! Get min and max times and create a time axis.
+! use the result of LAS_is_range to determine the delta,
+! but use the limits from the data. 
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
@@ -306,9 +308,9 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       ppl axlabp,0,0
    ELSE
 
-      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
+      DEFINE AXIS/T=`amin`:`amax`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
       DEFINE SYMBOL timeaxis = haxis
-      DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
+      DEFINE AXIS/x=`amin`:`amax`:`del_ax` haxis1 
       LET tt = t[gt=haxis]
 
       LET nt = `tt,RETURN=size`
