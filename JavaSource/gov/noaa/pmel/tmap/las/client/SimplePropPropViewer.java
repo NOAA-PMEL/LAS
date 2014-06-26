@@ -867,9 +867,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( vx != null ) {
                         lasRequest.addVariable(vds, vy, 0);
                     }
-                    if ( vcb != null && plot ) { 
-                        lasRequest.addVariable(vds, vcb, 0);
-                    }
+                   
 
                     yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
@@ -879,6 +877,9 @@ public class SimplePropPropViewer implements EntryPoint {
                 if ( colorCheckBox.getValue() ) {
                     vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
                     lasRequest.setProperty("data", "count", "3");
+                    if ( vcb != null && plot ) { 
+                        lasRequest.addVariable(vds, vcb, 0);
+                    }
                 } else {
                     lasRequest.setProperty("data", "count", "2");
                 }
