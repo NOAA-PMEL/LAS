@@ -813,7 +813,7 @@ public class SimplePropPropViewer implements EntryPoint {
             if ( plot ) {
                 operationID = "Trajectory_correlation_extract_and_plot";
             } else {
-                
+
                 // This should never happen, but if it does.
                 Window.alert("Cannot make table.");
             }
@@ -837,17 +837,17 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                 }
             }
-            
+
             // If varTwoId
-            
+
             if ( varTwoId == null || (varTwoId != null && varTwoId.equals("") ) ) {
                 lasRequest.removeVariables();
                 // Find the first non-sub-set variable that is not already included
 
                 String vx = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
                 String vcb = null;
-                
-               
+
+
                 if ( vx == null || (vx != null && vx.equals(vy))) {
 
                     for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
@@ -861,12 +861,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 } else {
                     vds = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
                 }
-                if ( colorCheckBox.getValue() ) {
-                    vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
-                    lasRequest.setProperty("data", "count", "3");
-                } else {
-                    lasRequest.setProperty("data", "count", "2");
-                }
+
                 if ( vds != null ) {
                     lasRequest.addVariable(vds, vx, 0);
                     if ( vx != null ) {
@@ -875,10 +870,17 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( vcb != null && plot ) { 
                         lasRequest.addVariable(vds, vcb, 0);
                     }
-                    
+
                     yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
 
+                }
+
+                if ( colorCheckBox.getValue() ) {
+                    vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
+                    lasRequest.setProperty("data", "count", "3");
+                } else {
+                    lasRequest.setProperty("data", "count", "2");
                 }
             }
         } else {
@@ -1065,7 +1067,7 @@ public class SimplePropPropViewer implements EntryPoint {
                       spin.hide();
                     }
                     if (imageCanvas != null) {
-                        outputPanel.setWidget(2, 0, plotImage);
+                        //outputPanel.setWidget(2, 0, plotImage);
                         plotImage.setVisible(false);
                         
                         plotImage.addLoadHandler(new LoadHandler() {
