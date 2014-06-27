@@ -2259,6 +2259,15 @@ public class OutputPanel extends Composite implements HasName {
 
         int ht = (int) h + 10;
         int wt = (int) w + 10;
+        
+        // Clear the div, clear the drawing canvas then reinsert.  Otherwise, ghosts of the previous image appear.
+        canvasDiv.clear();
+                
+        imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
+        
+        canvasDiv.add(imageCanvas, 0, 0);
+        canvasDiv.add(drawingCanvas, 0, 0);
+        
         imageCanvas.setCoordinateSpaceHeight(ht);
         imageCanvas.setCoordinateSpaceWidth(wt);
         
