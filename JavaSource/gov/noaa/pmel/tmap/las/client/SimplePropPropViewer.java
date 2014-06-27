@@ -1657,12 +1657,9 @@ public class SimplePropPropViewer implements EntryPoint {
             String xml = event.getValue();
             if (!xml.equals("")) {
                 popHistory(xml);
-            } else {
-                print.setEnabled(false);
-                outputPanel.removeCell(1, 0);
-                yVariables.setSelectedIndex(0);
-                xVariables.setSelectedIndex(0);
-            }
+            } 
+            // Back to the beginning...
+            // Do we need an else?
         }
 
     };
