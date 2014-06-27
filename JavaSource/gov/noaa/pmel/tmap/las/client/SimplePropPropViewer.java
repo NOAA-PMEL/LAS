@@ -1875,11 +1875,9 @@ public class SimplePropPropViewer implements EntryPoint {
         int ht = (int) h + 10;
         int wt = (int) w + 10;
              
-        // Clear the div, clear the drawing canvas then reinsert.
+        // Clear the div, clear the drawing canvas then reinsert. Otherwise, ghosts of the previous image appear.
         canvasDiv.clear();
-        
-        // May try reconstucting the canvas, but I assume that is expensive.
-        
+                
         imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
         
         canvasDiv.add(imageCanvas, 0, 0);
