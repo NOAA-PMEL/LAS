@@ -1876,7 +1876,19 @@ public class SimplePropPropViewer implements EntryPoint {
         int wt = (int) w + 10;
         
         // Clear it before resetting the size
+        imageCanvas = Canvas.createIfSupported();
+        drawingCanvas = Canvas.createIfSupported();
+        
+        // Clear the div, clear the drawing canvas then reinsert.
+        canvasDiv.clear();
+        
+        // May try reconstucting the canvas, but I assume that is expensive.
+        
         imageCanvasContext.clearRect(0, 0, imageCanvas.getCoordinateSpaceWidth(), imageCanvas.getCoordinateSpaceHeight());
+        
+        canvasDiv.add(imageCanvas, 0, 0);
+        canvasDiv.add(drawingCanvas, 0, 0);
+        
         imageCanvas.setCoordinateSpaceHeight(ht);
         imageCanvas.setCoordinateSpaceWidth(wt);
         
