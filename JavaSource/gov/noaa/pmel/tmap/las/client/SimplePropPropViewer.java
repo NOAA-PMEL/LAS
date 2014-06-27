@@ -1658,8 +1658,7 @@ public class SimplePropPropViewer implements EntryPoint {
             if (!xml.equals("")) {
                 popHistory(xml);
             } 
-            // Back to the beginning...
-            // Do we need an else?
+            // We are back to the beginning. Do nothing.
         }
 
     };
