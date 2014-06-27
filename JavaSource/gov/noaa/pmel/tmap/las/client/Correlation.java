@@ -1515,15 +1515,8 @@ public class Correlation implements EntryPoint {
 			String xml = event.getValue();
 			if (!xml.equals("")) {
 				popHistory(xml);
-			} else {
-				print.setEnabled(false);
-				outputPanel.removeCell(1, 0);
-				xVariables.setSelectedIndex(0);
-				yVariables.setSelectedIndex(0);
-				resetConstraints("xy");
-				constraintsLayout.setVisible(false);
 			}
-
+			// Back to the beginning. Chill.
 		}
 
 	};
