@@ -508,10 +508,10 @@ public class SimplePropPropViewer implements EntryPoint {
         fixedConstraintTitle.add(new HTML("<b>Fixed Constraints from the main interface:</b>&nbsp;"));
         fixedConstraintMainPanel.add(fixedConstraintTitle);
         // TODO style and label
-        fixedConstraintPanel.setSize(Constants.CONTROLS_WIDTH-45+"px", "125px");
+        fixedConstraintPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
         fixedScroller.addStyleName(Constants.ALLBORDER);
         fixedScroller.add(fixedConstraintPanel);
-        fixedScroller.setSize(Constants.CONTROLS_WIDTH-30+"px", "100px");
+        fixedScroller.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
         fixedConstraintMainPanel.add(fixedScroller);
         RootPanel.get("icons").add(cruiseIcons);
         RootPanel.get("button_panel").add(buttonPanel);
