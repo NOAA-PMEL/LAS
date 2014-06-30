@@ -1944,7 +1944,7 @@ public class UI extends BaseUI {
                 panel.refreshPlot(options, switchAxis, true, forceLASRequest);
             }
         }
-        tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy")||(xView.equals("xyt")&&xVariable.getAttributes().get("grid_type").equals("trajectory")));
+        tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy")); // Why the config does not handle this I don't know. The view should be able to deal with this. Had trajectory code here, but off always now.
         if (history) {
             logger.setLevel(Level.ALL);
             logger.info("refresh calling pushHistory()");
