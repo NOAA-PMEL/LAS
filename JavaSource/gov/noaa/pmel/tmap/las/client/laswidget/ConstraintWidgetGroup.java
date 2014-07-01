@@ -368,10 +368,10 @@ public class ConstraintWidgetGroup extends Composite {
         constraintPanel.showWidget(panelIndex);
     }
     
-    public List<TextConstraintAnchor> getAnchors() {
-        List<TextConstraintAnchor> anchors = new ArrayList<TextConstraintAnchor>();
+    public List<ConstraintAnchor> getAnchors() {
+        List<ConstraintAnchor> anchors = new ArrayList<ConstraintAnchor>();
         for (int i=0; i < displayPanel.getWidgetCount(); i++ ) {
-            TextConstraintAnchor cta = (TextConstraintAnchor) displayPanel.getWidget(i);
+            ConstraintAnchor cta = (ConstraintAnchor) displayPanel.getWidget(i);
             anchors.add(cta);
         }
         return anchors;
