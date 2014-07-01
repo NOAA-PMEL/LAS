@@ -666,6 +666,7 @@ public class UI extends BaseUI {
      */
     String historyString;
     Map<String, String> historyTokens;
+    String previousHistory = "";
     /*
      * The initial variable for when we run off the top off the history stack.
      */
@@ -1795,7 +1796,13 @@ public class UI extends BaseUI {
         String historyTokenString = getHistoryTokenString();
         logger.severe("pushHistory() calling History.newItem with historyTokenString:\n" + historyTokenString);
         if (initialHistory == null) {
-            History.newItem(historyTokenString, false);
+            // Try not to add the same history more than once in a row
+            if ( !historyTokenString.equals(previousHistory) ) {
+               History.newItem(historyTokenString, false);
+               previousHistory = historyTokenString;
+            }
+        } else {
+            previousHistory = initialHistory;
         }
     }
 
