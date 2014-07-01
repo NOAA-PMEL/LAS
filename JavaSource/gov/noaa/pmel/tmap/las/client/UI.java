@@ -1686,13 +1686,13 @@ public class UI extends BaseUI {
         // Right now the constraints are in the gallery. That's gonna change, but...
         
         if ( xTrajectoryConstraint.isActive() ) {
-            List<TextConstraintAnchor> constraints = xTrajectoryConstraint.getAnchors();
+            List<ConstraintAnchor> constraints = xTrajectoryConstraint.getAnchors();
             if ( constraints.size() > 0 ) {
                 historyToken.append(";constraintCount="+constraints.size());
             }
             int index = 0;
             for (Iterator iterator = constraints.iterator(); iterator.hasNext();) {
-                TextConstraintAnchor cta = (TextConstraintAnchor) iterator.next();
+                ConstraintAnchor cta = (ConstraintAnchor) iterator.next();
                 historyToken.append(";constraint"+index+"="+cta.getType()+"_cr_"+cta.getVariable()+"_cr_"+cta.getValue()+"_cr_"+cta.getOp()+"_cr_"+cta.getKey()+"_cr_"+cta.getKeyValue());
                 index++;
             }
