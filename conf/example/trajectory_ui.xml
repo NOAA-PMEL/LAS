@@ -8,6 +8,7 @@
       <item values="PropPropThumbTable,gif">map</item>
       <item values="TrajectoryTable,gif">file</item>
       <item values="Trajectory_Interactive_Download,gif">map</item>
+      <item values="trajectory_show_values,gif">map</item>
     </menu>
   </menus>
   <maps>
