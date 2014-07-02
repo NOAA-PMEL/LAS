@@ -227,6 +227,36 @@
       <intervals name="xyt" type="Maps" title="Latitude-Longitude"/>
     </region>
   </operation>
+  <!--  This will be the "Show Values" operaton on the main interface. It will potentially make a huge mess, but it might be useful in many cases. -->
+   <operation name="Trajectory Values Table" ID="trajectory_show_values" output_template="datatable" default="true" category="table">
+    <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+    </operation>
+    <operation  chained="true" name="Show Values Table" ID="trajectory_table_compound" service_action="Trajectory_corr_File" private="false" output_template="datatable">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+    <response ID="FileResp" type="HTML" index="1">
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="DataTable" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+      <result type="cancel" ID="cancel"/>
+    </response>
+    <service>ferret</service> 
+    <grid_types>
+      <grid_type name="trajectory"/>
+    </grid_types>
+    </operation>
+     <region>
+      <intervals name="xyt"/>
+    </region>
+  </operation>
+  
   <!-- Private operation only invoked by correlation viewer when it knows 
 		the plot can be made from the existing netCDF file. -->
   <operation name="Trajectory Correlation Plot" ID="Trajectory_correlation_plot" service_action="Trajectory_correlation" private="true" output_template="zoom">
