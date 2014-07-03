@@ -39,6 +39,8 @@ IF ($ferret_plot_var_2"0|($ferret_plot_var_0)>1|($ferret_plot_var_1)>1|*>0") THE
 IF ($ferret_plot_var_1"0|($ferret_plot_var_0)>1|*>0") THEN \
  CANCEL SYMBOL ferret_plot_var_1
 
+IF `($ferret_plot_var_1"0|*>1") EQ 0` THEN LET yvar = xvar
+
 ! The variables must be the same size. Check and set up a nice message if not.
 
 LET xsize = `xvar,RETURN=isize`
@@ -149,7 +151,8 @@ IF `nsince GT 0` THEN DEFINE SYMBOL tunits = `SUBSTRING("($t_units_string)", 1, 
 
 IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 
-DEFINE SYMBOL plot_arg = ($xvar), ($xvar)
+DEFINE SYMBOL plot_arg = ($xvar)
+IF `($data_count"0") GE 2` THEN DEFINE SYMBOL plot_arg = ($xvar), ($xvar)
 
 IF ($ferret_plot_var_1"0|*>1") THEN
    IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
