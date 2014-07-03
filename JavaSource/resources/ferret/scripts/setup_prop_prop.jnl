@@ -1,6 +1,6 @@
 ! setup_prop_prop.jnl
 
-IF `($data_count"0") LT 2` THEN
+IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
   EXIT/PROGRAM
 ENDIF
@@ -17,14 +17,17 @@ LET vnames = ..varnames
 
 LET data_0_title = "($data_0_title)"
 LET data_0_units = " (($data_0_units))"
-LET data_1_title = "($data_1_title)"
-LET data_1_units = " (($data_1_units))"
 
 IF ($data_0_units"0|none>1|text>1|*>0") THEN LET data_0_units = ""
-IF ($data_1_units"0|none>1|text>1|*>0") THEN LET data_1_units = ""
 
 DEFINE SYMBOL data_0_var_in = ($data_0_var)
-DEFINE SYMBOL data_1_var_in = ($data_1_var)
+
+IF `($data_count"0") GE 2` THEN 
+   LET data_1_title = "($data_1_title)"
+   LET data_1_units = " (($data_1_units))"
+   IF ($data_1_units"0|none>1|text>1|*>0") THEN LET data_1_units = ""
+   DEFINE SYMBOL data_1_var_in = ($data_1_var)
+ENDIF
 
 IF `($data_count"0") GE 3` THEN 
    LET data_2_title = "($data_2_title)"
@@ -111,6 +114,8 @@ ENDIF
 ! In fact the region and dataset will be the
 ! same as for var 0 (for now anyway)
 
+IF `($data_count"0") GE 2` THEN 
+
 GO LAS_initialize_region 1
 GO LAS_initialize_data 1
 
@@ -192,6 +197,7 @@ IF ($its_prop_plot"0|*>1") THEN
    ENDIF
 
 ENDIF
+ENDIF   ! data_count ge 2
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
@@ -279,7 +285,6 @@ IF  ($color_by"0") THEN
       LET variable_lab = STRCAT (variable_lab_C, variable_2_lab)
    ENDIF
 ENDIF
-
 
 ! Special color-by-time key
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN 

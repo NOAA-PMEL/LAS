@@ -1,7 +1,7 @@
 !  SOCAT_setup_variables.jnl
 !  Special setup For SOCAT variables. Doesn't quite fit into an init script.
 
-! Set up 2 or 3 varibles for prop-prop plots
+! Set up varibles for prop-prop plots
 
 
 IF `($ferret_is_socat"0|*>1") EQ 0` THEN EXIT/SCRIPT 
@@ -27,22 +27,24 @@ IF ($is_string"0|0|*>1") THEN
    ENDIF
 ENDIF
 
-DEFINE SYMBOL vtype = 0
-LET gettype = ($ferret_plot_var_1)
-DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
-DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-IF ($is_string"0|0|*>1") THEN 
-   IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
-      LET plot_var_1 = STRFLOAT(($ferret_plot_var_1) )
-      IF ($its_listing"0|*>1") THEN LET plot_var_1 = ($ferret_plot_var_1)
-      DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
-      LET/TITLE="($ferret_title_1)" yvar = plot_var_1
-   ENDIF
-   IF `STRINDEX("($ferret_plot_var_1)", "tmonth") GT 0` THEN 
-      LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-      LET plot_var_1 =  element_index_str_n( ($ferret_plot_var_1), month_labels) 
-      DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
-      LET/TITLE="($ferret_title_1)" yvar = plot_var_1
+IF ($ferret_plot_var_1"0|*>1") THEN
+   DEFINE SYMBOL vtype = 0
+   LET gettype = ($ferret_plot_var_1)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+   IF ($is_string"0|0|*>1") THEN 
+      IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
+         LET plot_var_1 = STRFLOAT(($ferret_plot_var_1) )
+         IF ($its_listing"0|*>1") THEN LET plot_var_1 = ($ferret_plot_var_1)
+         DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
+         LET/TITLE="($ferret_title_1)" yvar = plot_var_1
+      ENDIF
+      IF `STRINDEX("($ferret_plot_var_1)", "tmonth") GT 0` THEN 
+         LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+         LET plot_var_1 =  element_index_str_n( ($ferret_plot_var_1), month_labels) 
+         DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
+         LET/TITLE="($ferret_title_1)" yvar = plot_var_1
+      ENDIF
    ENDIF
 ENDIF
 
@@ -59,7 +61,6 @@ IF ($data_1_var_in"0|region_ID>1|qc_flag>1|*>0") THEN
    DEFINE SYMBOL ferret_plot_var_1 = color_var
    LET/TITLE="($ferret_title_1)" yvar = color_var
 ENDIF
-
 
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
