@@ -953,7 +953,7 @@ public class Correlation implements EntryPoint {
 							/ Double.valueOf(y_plot_size);
 
 					if (imageCanvas != null) {
-						//outputPanel.setWidget(shadowCanvasRow, 0, plotImage);
+						outputPanel.setWidget(shadowCanvasRow, 0, plotImage);
 						plotImage.setVisible(false);
 						plotImage.addLoadHandler(new LoadHandler() {
 
