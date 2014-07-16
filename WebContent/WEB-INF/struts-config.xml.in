@@ -116,6 +116,8 @@
 	          <forward name="test_result_full" path="/productserver/templates/test_result_full.vm" redirect="false"/>
 	          <forward name="ui" path="/getUI.do"/>
 	      </action>
+          <!-- The getDatasets request is used by the LAS Test code to iterate through the data sets without categories. -->
+          <action path="/getDatasets" type="gov.noaa.pmel.tmap.las.ui.GetDatasets" />
           <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
           <action path="/resolveURL" type="gov.noaa.pmel.tmap.las.ui.ResolveURL"/>
           <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
