@@ -79,8 +79,11 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
 DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
-IF `(($its_prop_plot"0|0|1|*>1") EQ 0) AND ($nbad_data"0|0|*>1")` THEN DEFINE SYMBOL note_($note_num)_lab = \
- ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown (plus ($nbad_data) missing)
+IF `(($its_prop_plot"0|0|1|*>1") EQ 0) AND ($nbad_data"0|0|*>1")` THEN 
+   IF `($ngood_data) NE 0` THEN DEFINE SYMBOL plusmissing = (plus ($nbad_data) missing)
+   IF `($ngood_data) EQ 0` THEN DEFINE SYMBOL plusmissing = (($nbad_data) missing)
+   DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown ($plusmissing)
+ENDIF
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
