@@ -66,10 +66,15 @@ ELSE
 ! more likely to get different colors.  Create a 2D variable, reshape to it, then unravel
 ! that back out.
 
-   IF `STRCMP("($data_var)", "($feature_variable)") EQ 0` THEN
+   DEFINE SYMBOL vshape = `($data_var),RETURN=shape`
+   LET color_by_index = `($vshape"0|E>1|*>0)`
+   LET color_by_feature = `STRCMP("($data_var)", "($feature_variable)") EQ 0`
+
+   IF `color_by_feature EQ 1  OR  color_by_index EQ 1` THEN
 
       LET color_by_feature = 1
       LET feature_numbers = _m[ge=($rowvar)]
+
    ! scramble
 
       define symbol factor = 0
