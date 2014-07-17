@@ -34,6 +34,9 @@ ENDIF
 ! Rename variables, appending an underscore.  
 ! If a variable is listed twice, handle that.
 
+! Save the name of the feature variable.
+IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL feature_variable_in = ($feature_variable)
+
 REPEAT/RANGE=0:100/name=ivar (\
  DEFINE SYMBOL ivar = `ivar`;\
  IF `($data_($ivar)_var"0|*>1") EQ 0` THEN EXIT/LOOP;\
@@ -57,7 +60,14 @@ REPEAT/RANGE=1:`nvars`/name=ivar (\
     SET VAR/NAME=latitude_ latitude;\
     DEFINE SYMBOL latitude_in = latitude;\
  ENDIF;\
+ IF ($vname"0|($feature_variable)>1|*>0") THEN ;\
+    SET VAR/NAME=($feature_variable)_ ($feature_variable);\
+    DEFINE SYMBOL ($feature_variable)_in = ($feature_variable);\
+    DEFINE SYMBOL ($feature_variable)_done = 1;\
+ ENDIF;\
  )
+
+IF ($($feature_variable)_done"0|*>1") THEN  DEFINE SYMBOL feature_variable = ($feature_variable)_
 
 ! Fix constraints
 
