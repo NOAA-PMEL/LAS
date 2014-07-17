@@ -123,9 +123,10 @@ $las_response.toString()
   }
 
   function launch(){
-    genFormatMenu();  
-    if(dataHasT){genDateWidget();}
-    if(dataHasZ){genDepthWidget();}
+    genFormatMenu();
+    // For trajectory data just use the request and do not set up menus.  
+    // if(dataHasT){genDateWidget();}
+    // if(dataHasZ){genDepthWidget();}
   }
 
   function genFormatMenu(){
@@ -148,7 +149,8 @@ $las_response.toString()
     UIString += "<td>Longitude range: [" + initXLo+", "+initXHi+"]<br> ";
     UIString += "Latitude range: [" + initYLo+", "+initYHi+"]";
     if(dataHasT){
-      UIString +="<br>Time range: ["+ dataTLo + ", " + dataTHi+"]";
+      // As specified in the request. No widget will be built or used.
+      UIString +="<br>Time range: ["+ reqTLo + ", " + reqTHi+"]";
     }
     if(dataHasZ){
       UIString += "<br>Depth range: [" + dataZLo + ", " + dataZHi + "]";
@@ -189,8 +191,9 @@ $las_response.toString()
          document.getElementById('DepthWidgetEnd').style.visibility="hidden";
       }
     } else {
-      if(dataHasT){genDateWidget();}
-      if(dataHasZ){genDepthWidget();}
+      // For trajectory data just use the request and do not set up menus.  
+      // if(dataHasT){genDateWidget();}
+      // if(dataHasZ){genDepthWidget();}
     }
   }
 
