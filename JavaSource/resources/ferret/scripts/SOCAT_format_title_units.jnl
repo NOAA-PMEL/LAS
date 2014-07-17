@@ -14,23 +14,29 @@ IF `($data_($num)_units%1|"">1|*>0%) OR ($data_($num)_units%1|" ">1|*>0%)`  THEN
    CANCEL SYMBOL data_($num)_units
 ENDIF
 
+! The variables may have been renamed, if this is a listing, vname becomes vname_in.
+! Refer to the right name.
+
+DEFINE SYMBOL vcode = var
+IF ($its_listing"0|*>1") THEN DEFINE SYMBOL vcode var_in
+
 IF `($data_($num)_units%0|" ">0|text>0|none>0|*>1%) EQ 0` THEN CANCEL SYMBOL data_($num)_units
 
 ! There should never be a blank title
 IF `($data_($num)_title%1|"">1|*>0%) OR ($data_($num)_title%1|" ">1|*>0%)`  THEN 
-   DEFINE SYMBOL data_($num)_units = ($data_($num)_var)
+   DEFINE SYMBOL data_($num)_units = ($data_($num)_($vcode))
 ENDIF
 
 ! Not currently coloring by vessel_name or investigators 
 ! Investigators, vessel name should get one color per unique value.
 ! dataset_name is unique per cruise, so color it as if its expocode.
 
-! IF ($data_($num)_var"0|vessel_name>1|investigators>1|*>0") THEN 
-!   MESSAGE/ERROR **ERROR Color by --- ($data_($num)_var) --- is not implemented
+! IF ($data_($num)_($vcode)"0|vessel_name>1|investigators>1|*>0") THEN 
+!   MESSAGE/ERROR **ERROR Color by --- ($data_($num)_($vcode)) --- is not implemented
 !   EXIT/PROGRAM
 ! ENDIF
 
-IF ($data_($num)_var"0|dataset_name>1|vessel_name>1|investigators>1|*>0") THEN 
+IF ($data_($num)_($vcode)"0|dataset_name>1|vessel_name>1|investigators>1|*>0") THEN 
     DEFINE SYMBOL data_($num)_title = ($data_($num)_title) ID
     DEFINE SYMBOL ferret_plot_key = 0
     DEFINE SYMBOL ferret_key_annotate = 0
@@ -42,6 +48,13 @@ LET uptitle = UPCASE("($data_($num)_title)")
 IF `STRCMP(uptitle, "FCO2_REC") EQ 0` THEN
    DEFINE SYMBOL data_($num)_title = fCO2 RECOMMENDED
    IF `($data_($num)_units"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_units = uatm
+ENDIF
+
+IF `($data_($num)_($vcode)"0|region_id>1|*>0") AND (($its_trajectory_map"0|1|*>0) EQ 0)` THEN
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL r_id = 1=NPac,2=TPac,4=South,5=Ind,6=NAtl,7=Cst,8=TAtl,10=Arc
+   DEFINE SYMBOL note_($note_num)_lab = Region IDs: ($r_id)
+   IF ($its_listing"0|*>1") THEN DEFINE SYMBOL data_($num)_units = ($r_id)
 ENDIF
 
 IF ($its_listing"0|*>1") THEN EXIT/SCRIPT 
@@ -166,7 +179,7 @@ IF ($data_($num)_units"0|*>1") THEN
    LET data_($num)_units = " (($data_($num)_units))"
    IF ($data_($num)_units"0|text>1|*>0") THEN LET data_units = " "
 
-   DEFINE SYMBOL have_units_var = 1
+   DEFINE SYMBOL have_units_($vcode) = 1
    DEFINE SYMBOL upunits = `UPCASE("($data_($num)_units)")`
 
    IF `STRINDEX("($upunits)", "CO2") GT 0` THEN
@@ -193,7 +206,7 @@ IF ($data_($num)_units"0|*>1") THEN
       DEFINE SYMBOL data_($num)_units = `tit5`
 
       LET data_($num)_units = " (($data_($num)_units))"   
-      DEFINE SYMBOL have_units_var = 1
+      DEFINE SYMBOL have_units_($vcode) = 1
    ENDIF
    
    DEFINE SYMBOL upunits = `UPCASE("($data_($num)_units)")`
@@ -223,23 +236,23 @@ IF ($data_($num)_units"0|*>1") THEN
       DEFINE SYMBOL data_($num)_units = `tit5`
 
       LET data_($num)_units = " (($data_($num)_units))"  
-      DEFINE SYMBOL have_units_var = 1
+      DEFINE SYMBOL have_units_($vcode) = 1
    ENDIF
 
    IF `STRCMP("($upunits)", "UATM") EQ 0` THEN
       LET data_($num)_units = " (&mu\;atm)"  ! Write Greek letter code for html
-      DEFINE SYMBOL have_units_var = 1
+      DEFINE SYMBOL have_units_($vcode) = 1
    ENDIF
 
 
    IF `STRCMP("($upunits)", "UMOL") EQ 0` THEN
       LET data_($num)_units = " (&mu\;mol)"  ! Write Greek letter code for html
-      DEFINE SYMBOL have_units_var = 1
+      DEFINE SYMBOL have_units_($vcode) = 1
    ENDIF
 
    IF `STRCMP("($upunits)", "UMOL/MOL") EQ 0` THEN
       LET data_($num)_units = " (&mu\;mol/mol)"  ! Write Greek letter code for html
-      DEFINE SYMBOL have_units_var = 1
+      DEFINE SYMBOL have_units_($vcode) = 1
    ENDIF
 
 ! Now define the units for use by Ferret on an axis in the prop-prop plots.  
@@ -329,7 +342,7 @@ ENDIF
 IF `( ($its_prop_prop_plot"0|*>1") EQ 0) AND (($num"0|0|*>1") EQ 0)` THEN
    IF ($data_($num)_title"0|1|*>1") THEN LET data_title data_($num)_title
    IF ($data_($num)_units"0|1|*>1") THEN LET data_units = data_($num)_units 
-   DEFINE SYMBOL variable_lab_var = 1
+   DEFINE SYMBOL variable_lab_($vcode) = 1
 ENDIF
 
 ! End of file ------------SOCAT_format_title_units.jnl--------------------------

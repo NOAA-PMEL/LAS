@@ -26,14 +26,14 @@ IF `($data_count"0") GE 2` THEN
    LET data_1_title = "($data_1_title)"
    LET data_1_units = " (($data_1_units))"
    IF ($data_1_units"0|none>1|text>1|*>0") THEN LET data_1_units = ""
-   DEFINE SYMBOL data_1_var_in = ($data_1_var)
+   IF `($data_2_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_1_var_in = ($data_1_var)
 ENDIF
 
 IF `($data_count"0") GE 3` THEN 
    LET data_2_title = "($data_2_title)"
    LET data_2_units = ""
    IF ($data_2_units"0|text>0|none>0|*>1") THEN LET data_2_units = " (($data_2_units))"
-   DEFINE SYMBOL data_2_var_in = ($data_2_var)
+   IF `($data_2_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_2_var_in = ($data_2_var)
 ENDIF
 
 GO LAS_initialize_region 0

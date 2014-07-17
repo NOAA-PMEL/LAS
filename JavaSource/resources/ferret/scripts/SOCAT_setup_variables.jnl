@@ -65,7 +65,7 @@ ENDIF
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
-   DEFINE SYMBOL data_2_var_in = ($data_2_var)
+   IF `($data_2_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_2_var_in = ($data_2_var)
 
    DEFINE SYMBOL vtype = 0
    LET gettype = ($ferret_plot_var)
