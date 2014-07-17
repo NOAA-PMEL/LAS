@@ -100,10 +100,10 @@ IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN
     IF `($data_($ivar)_var"0|($feature_variable"A")>1|*>0")` THEN DEFINE SYMBOL iremove = `ivar`;\
     )
 
-   IF ($iremove"0|*>1) THEN 
-      cancel symbol data_($iremove)_*
-      DEFINE SYMBOL data_count = `($data_count) - 1`
-   ENDIF
+!   IF ($iremove"0|*>1) THEN 
+!      cancel symbol data_($iremove)_*
+!      DEFINE SYMBOL data_count = `($data_count) - 1`
+!   ENDIF
 
 ! Open the dataset. Rename the variables to varname_
 ! Keep original variable names as symbols data_0_var_orig, ...
@@ -126,17 +126,21 @@ IF `($data_x_var"0|*>1") EQ 0` THEN GO feature_lon_lat_time_depth
 ! If the plot is colored by profile ID then fake that variable, and exit
 
 LET color_by_feature = 0
+LET color_by_index = 0
 
 IF `(($num)+1) eq ($data_count)` THEN
-IF `($data_($num)_var"0|vid>1|($feature_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
-   IF `($rowvar"0|*>1") EQ 0` THEN DEFINE SYMBOL rowvar = rowSize
-   LET color_by_feature = 1
-ENDIF
+   IF `($data_($num)_var"0|vid>1|($feature_variable)>1|*>0") AND ($nodata"0|*>1) EQ 0` THEN 
+      IF `($rowvar"0|*>1") EQ 0` THEN DEFINE SYMBOL rowvar = rowSize
+      LET color_by_feature = 1
+   ENDIF
 
 ! Or, is this a DSG file with the feature_variable we have already identified?
 
-IF `($data_($num)_var"0|($feature_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_feature = 1
+   IF `($data_($num)_var"0|($feature_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_feature = 1
 ENDIF
+
+! Other variables on the E axis to be colored the same way.
+IF `color_by_index EQ 1` THEN let color_by_feature = 1
 
 IF `color_by_feature EQ 1` THEN
 
