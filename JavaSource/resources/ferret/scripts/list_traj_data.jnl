@@ -13,6 +13,7 @@
 ! write out name_1 e.g. Z_1 with all the same attributes.
 
 DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
+DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
 LET nlist = 0
 REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
