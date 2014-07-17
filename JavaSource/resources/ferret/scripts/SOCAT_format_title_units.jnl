@@ -25,12 +25,13 @@ ENDIF
 ! Investigators, vessel name should get one color per unique value.
 ! dataset_name is unique per cruise, so color it as if its expocode.
 
-IF ($data_($num)_var"0|vessel_name>1|investigators>1|*>0") THEN 
-  MESSAGE/ERROR **ERROR Color by --- ($data_($num)_var) --- is not implemented
-  EXIT/PROGRAM
-ENDIF
+! IF ($data_($num)_var"0|vessel_name>1|investigators>1|*>0") THEN 
+!   MESSAGE/ERROR **ERROR Color by --- ($data_($num)_var) --- is not implemented
+!   EXIT/PROGRAM
+! ENDIF
+
 IF ($data_($num)_var"0|dataset_name>1|vessel_name>1|investigators>1|*>0") THEN 
-    DEFINE SYMBOL data_($num)_var = expocode
+    DEFINE SYMBOL data_($num)_title = ($data_($num)_title) ID
     DEFINE SYMBOL ferret_plot_key = 0
     DEFINE SYMBOL ferret_key_annotate = 0
     DEFINE SYMBOL ferret_palette = ten_bright_levels
@@ -43,6 +44,7 @@ IF `STRCMP(uptitle, "FCO2_REC") EQ 0` THEN
    IF `($data_($num)_units"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_units = uatm
 ENDIF
 
+IF ($its_listing"0|*>1") THEN EXIT/SCRIPT 
 
 ! Define a character variable containing the ESCAPE character
 columns/type=text/var=escchar escapeit.dat
