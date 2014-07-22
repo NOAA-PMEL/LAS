@@ -188,6 +188,8 @@ public class TabledapTool extends TemplateTool {
             }
             required(cruiseid, causeOfError);
 
+            String lon_domain = getTabledapProperty(lasBackendRequest, "lon_domain");
+            
             causeOfError = "Could not get time column name from backend request: "; 
             time = getTabledapProperty(lasBackendRequest, "time");
             required(time, causeOfError);
@@ -376,69 +378,100 @@ public class TabledapTool extends TemplateTool {
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
             StringBuilder query2 = null;
             boolean smallarea = false;
-            if (xlo.length() > 0 && xhi.length() > 0 ) {
-
-                // This little exercise will normalize the x values to -180, 180.
-                double xhiDbl = String2.parseDouble(xhi);
-                double xloDbl = String2.parseDouble(xlo);
-                // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
-                if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
-                    if ( modulo_required.size() > 0 ) {
-                        causeOfError = "Cannot handle two modulo variables in the same request (longitude and "+modulo_required.get(0)+")";
-                    }
-                    LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
-                    xhiDbl = p.getLongitude();
-                    p = new LatLonPointImpl(0, xloDbl);
-                    xloDbl = p.getLongitude();
-                    
-                    double xspan = Math.abs(xhiDbl - xloDbl);
-                    double yloDbl = -90.d;
-                    double yhiDbl = 90.d;
-                    if (ylo.length() > 0) {
-                        yloDbl = Double.valueOf(ylo);
-                    }
-                    if (yhi.length() > 0) {
-                        yhiDbl = Double.valueOf(yhi);
-                    }
-                    double yspan = Math.abs(yhiDbl - yloDbl);
-                    
-                    double fraction = ((xspan+yspan)/(360.d + 180.d));
-                    
-                    if ( fraction < .1d ) {
-                        smallarea = true;
-                    }
-                    
-
-                    // Now a wrap around from west to east should be have xhi < xlo;
-                    if ( xhiDbl < xloDbl ) {
-                        if ( xhiDbl < 0 && xloDbl >=0 ) {
-                            
-                            
-                            // This should be true, otherwise how would to get into this situation unless you wrapped around the entire world and overlapped...
-                            
-                           
-                            query2 = new StringBuilder(query.toString());
-                            // Get the "left" half.  The section between -180 and xhi
-                            xhiDbl = xhiDbl + 360.0d;
-                            query.append("&lon360>=" + xloDbl);
-                            query.append("&lon360<=" + xhiDbl);
-                            query2.append("&"+lonname+">="+xloDbl+"&"+lonname+"<180");
-                           
-                        } // the else block is that you overlapped so leave off the longitude constraint all teogether
-
-                    } else {
-                        // This else block is the case where it a query that does not cross the date line.
-                        // Still have to use the normalized values.
-                        query.append("&"+lonname+">=" + xloDbl);
-                        query.append("&"+lonname+"<=" + xhiDbl);
-                    }
-                }// Span the whole globe so leave off the lon query all together.
-            } else {
-                //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
-                if (xlo.length() > 0) query.append("&"+lonname+">=" + xlo);
-                if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
-            }
             
+            if ( lon_domain.contains("180") ) {
+                if (xlo.length() > 0 && xhi.length() > 0 ) {
+
+                    double xhiDbl = String2.parseDouble(xhi);
+                    double xloDbl = String2.parseDouble(xlo);
+                    // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
+                    if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
+                        if ( modulo_required.size() > 0 ) {
+                            causeOfError = "Cannot handle two modulo variables in the same request (longitude and "+modulo_required.get(0)+")";
+                        }
+                        
+                        // This little exercise will normalize the x values to -180, 180.
+                        LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
+                        xhiDbl = p.getLongitude();
+                        p = new LatLonPointImpl(0, xloDbl);
+                        xloDbl = p.getLongitude();
+
+                        double xspan = Math.abs(xhiDbl - xloDbl);
+                        double yloDbl = -90.d;
+                        double yhiDbl = 90.d;
+                        if (ylo.length() > 0) {
+                            yloDbl = Double.valueOf(ylo);
+                        }
+                        if (yhi.length() > 0) {
+                            yhiDbl = Double.valueOf(yhi);
+                        }
+                        double yspan = Math.abs(yhiDbl - yloDbl);
+
+                        double fraction = ((xspan+yspan)/(360.d + 180.d));
+
+                        if ( fraction < .1d ) {
+                            smallarea = true;
+                        }
+
+
+                        // Now a wrap around from west to east should be have xhi < xlo;
+                        if ( xhiDbl < xloDbl ) {
+                            if ( xhiDbl < 0 && xloDbl >=0 ) {
+
+
+                                // This should be true, otherwise how would to get into this situation unless you wrapped around the entire world and overlapped...
+
+
+                                query2 = new StringBuilder(query.toString());
+                                // Get the "left" half.  The section between -180 and xhi
+                                xhiDbl = xhiDbl + 360.0d;
+                                query.append("&lon360>=" + xloDbl);
+                                query.append("&lon360<=" + xhiDbl);
+                                query2.append("&"+lonname+">="+xloDbl+"&"+lonname+"<180");
+
+                            } // the else block is that you overlapped so leave off the longitude constraint all teogether
+
+                        } else {
+                            // This else block is the case where it a query that does not cross the date line.
+                            // Still have to use the normalized values.
+                            query.append("&"+lonname+">=" + xloDbl);
+                            query.append("&"+lonname+"<=" + xhiDbl);
+                        }
+                    }// Span the whole globe so leave off the lon query all together.
+                } else {
+                    //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
+                    if (xlo.length() > 0) query.append("&"+lonname+">=" + xlo);
+                    if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
+                }
+            } else {
+
+                if (xlo.length() > 0 && xhi.length() > 0 ) {
+
+                    double xhiDbl = String2.parseDouble(xhi);
+                    double xloDbl = String2.parseDouble(xlo);
+                    
+                    if ( xloDbl < 0 ) xloDbl = xloDbl + 360;
+                    if ( xhiDbl < 0 ) xhiDbl = xhiDbl + 360;
+                    // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
+                    if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
+                        // Now a wrap around from west to east should be have xhi < xlo;
+                        if ( xhiDbl < xloDbl ) {
+                            query2 = new StringBuilder(query.toString());
+                            query2.append("&"+lonname+">"+0);
+                            query2.append("&"+lonname+">="+xhiDbl);
+                            query.append("&"+lonname+">"+xloDbl);
+                        } else {
+                            if (xlo.length() > 0) query.append("&"+lonname+">=" + xloDbl);
+                            if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhiDbl);
+                        }
+                    }
+                    // else it's a global request. Don't constraint on lon at all.
+                } else {
+                    //  If they are not both defined, add the one that is...  There will be no difficulties with dateline crossings...
+                    if (xlo.length() > 0) query.append("&"+lonname+">=" + xlo);
+                    if (xhi.length() > 0) query.append("&"+lonname+"<=" + xhi);
+                }
+            }
             
             // This changes the data set to the decimated data set if it exists.
             if ( !hasConstraints && !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("") && !full ) {
