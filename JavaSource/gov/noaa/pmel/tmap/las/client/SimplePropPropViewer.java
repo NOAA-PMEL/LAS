@@ -1488,7 +1488,10 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                     if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
                         xAllDatasetVariables.put(vs.getID(), vs);
-                        if ( allvariables.contains(vs.getShortname().trim()) ) {
+                        if ( allvariables.contains(vs.getShortname().trim()) ||
+                                vs.getShortname().trim().equals("longitude") ||
+                                vs.getShortname().trim().equals("latitude")  ||
+                                vs.getShortname().trim().equals("time")   ) {
                             included.add(vs);
                         }
                     }
