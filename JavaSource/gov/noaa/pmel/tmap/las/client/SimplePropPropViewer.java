@@ -674,7 +674,7 @@ public class SimplePropPropViewer implements EntryPoint {
         String v1 = tableRequest.getVariable(1);
         String v2 = null;
         if ( colorCheckBox.getValue() ) {
-            v2 = tableRequest.getVariable(2);
+            v2 = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
         }
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
