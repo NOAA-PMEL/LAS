@@ -213,6 +213,8 @@ public class SimplePropPropViewer implements EntryPoint {
     protected String calendar;
     protected String time_units;
     
+    protected String allvariables;
+    
     protected List<String> currentIconList = new ArrayList<String>();
     
     // There are 3 states we want to track.
@@ -1445,6 +1447,11 @@ public class SimplePropPropViewer implements EntryPoint {
                 DatasetSerializable ds = cat.getDatasetSerializable();
                 variables = ds.getVariablesSerializable();
                 
+                Map<String, String> tabledap = ds.getProperties().get("tabledap_access");
+                if ( tabledap != null ) {
+                    allvariables = tabledap.get("all_variables").trim();
+                }
+                
                 Map<String, String> cprops = ds.getProperties().get("correlation");
                 if ( cprops != null ) {
                     defaultx = cprops.get("default_x");
@@ -1471,7 +1478,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 VariableSerializable vtosety = null;
                 VariableSerializable vtosetx = null;
-                
+                // Only include variables that are in the all_variables tabledap_access property.
+                List<VariableSerializable> included = new ArrayList<VariableSerializable>();
                 for (int i = 0; i < variables.length; i++) {
                     VariableSerializable vs = variables[i];
                     String tid = vs.getAttributes().get("trajectory_id");
@@ -1480,11 +1488,14 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                     if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
                         xAllDatasetVariables.put(vs.getID(), vs);
+                        if ( allvariables.contains(vs.getName().trim()) ) {
+                            included.add(vs);
+                        }
                     }
                 }
-                yVariables.setVariables(Arrays.asList(variables));
-                xVariables.setVariables(Arrays.asList(variables));
-                colorVariables.setVariables(Arrays.asList(variables));
+                yVariables.setVariables(included);
+                xVariables.setVariables(included);
+                colorVariables.setVariables(included);
                 if ( trajectory_id != null && !trajectory_id.equals("") ) {
                     colorVariables.setVariable(xAllDatasetVariables.get(trajectory_id));
                 } else {
