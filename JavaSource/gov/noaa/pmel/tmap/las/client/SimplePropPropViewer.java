@@ -679,9 +679,21 @@ public class SimplePropPropViewer implements EntryPoint {
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
         tableRequest.addVariable(dsid, v1, 0);
-        if ( v2 != null ) {
-            tableRequest.addVariable(dsid, v2, 0);
+        
+        // Set the data property...
+        if (v0 != null) {
+            tableRequest.setProperty("data_0", "url", netcdf);
         }
+        if (v1 != null) {
+            tableRequest.setProperty("data_1", "url", netcdf);
+        }
+        if (v2 != null) {
+            tableRequest.setProperty("data_2", "url", netcdf);
+            tableRequest.setProperty("data", "count", "3");
+        } else {
+            tableRequest.setProperty("data", "count", "2");
+        }
+        
         tableRequest.setProperty("ferret", "data_format", "csv");
         String url = Util.getProductServer() + "?xml=" + URL.encode(tableRequest.toString());
         Window.open(url, "_blank", Constants.WINDOW_FEATURES);
