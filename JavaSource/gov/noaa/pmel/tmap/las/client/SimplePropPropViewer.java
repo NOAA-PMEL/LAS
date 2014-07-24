@@ -688,6 +688,7 @@ public class SimplePropPropViewer implements EntryPoint {
             tableRequest.setProperty("data_1", "url", netcdf);
         }
         if (v2 != null) {
+            tableRequest.addVariable(dsid, v2, 0);
             tableRequest.setProperty("data_2", "url", netcdf);
             tableRequest.setProperty("data", "count", "3");
         } else {
