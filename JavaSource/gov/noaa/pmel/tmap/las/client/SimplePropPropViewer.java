@@ -1491,7 +1491,8 @@ public class SimplePropPropViewer implements EntryPoint {
                         if ( allvariables.contains(vs.getShortname().trim()) ||
                                 vs.getShortname().trim().equals("longitude") ||
                                 vs.getShortname().trim().equals("latitude")  ||
-                                vs.getShortname().trim().equals("time")   ) {
+                                vs.getShortname().trim().equals("time") || 
+                                vs.getShortname().trim().equals(trajectory_id) ) {
                             included.add(vs);
                         }
                     }
