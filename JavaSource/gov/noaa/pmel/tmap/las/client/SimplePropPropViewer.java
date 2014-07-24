@@ -1488,7 +1488,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                     if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
                         xAllDatasetVariables.put(vs.getID(), vs);
-                        if ( allvariables.contains(vs.getName().trim()) ) {
+                        if ( allvariables.contains(vs.getShortname().trim()) ) {
                             included.add(vs);
                         }
                     }
