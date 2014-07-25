@@ -261,6 +261,7 @@ public class UI extends BaseUI {
         public void onClick(ClickEvent event) {
             OperationPushButton b = (OperationPushButton) event.getSource();
             OperationSerializable operation = b.getOperation();
+            final String target = operation.getAttributes().get("target");
             final String opid = operation.getID();
             final OptionsWidget op = new OptionsWidget();
             final DialogBox optionsDialog = new DialogBox(false);
@@ -314,7 +315,16 @@ public class UI extends BaseUI {
                         analysis.setLabel(xVariable.getName());
                         lasRequest.setAnalysis(analysis, 0);
                     }
-                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), "_blank", Constants.WINDOW_FEATURES);
+                    // Allow the operation stop specify a target of "_self" so that the new product
+                    // replaces the current window. This forces a back operation which will refresh a potentially stale plot.
+                    // No other target is allowed.
+                    String t = target;
+                    if ( t == null ) {
+                        t = "_blank";
+                    } else if ( t != null && !t.equals("_self") ) {
+                        t = "_blank";
+                    }
+                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), t, Constants.WINDOW_FEATURES);
                     optionsDialog.hide();
                 }
             });
