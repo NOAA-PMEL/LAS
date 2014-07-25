@@ -712,16 +712,10 @@ public class SimplePropPropViewer implements EntryPoint {
         // Get the names...
         VariableSerializable var0 = xAllDatasetVariables.get(v0);
 
-        String v1 = "WOCE_"+v0;
-        if ( var0.getName().toLowerCase().equals("latitude") || var0.getName().toLowerCase().equals("longitude") || var0.getName().toLowerCase().equals("time") ) {
-            for (Iterator varIt = xAllDatasetVariables.keySet().iterator(); varIt.hasNext();) {
-                String id = (String) varIt.next();
-                VariableSerializable v = (VariableSerializable) xAllDatasetVariables.get(id);
-                if ( v.getShortname().toLowerCase().contains("woce_geoposition") ) {
-                    v1 = v.getID();
-                }
-            }
-        } 
+        // There is one and only one WOCE flag that will be used for these data.
+      
+        String v1 = "WOCE_CO2_water";
+        
         VariableSerializable var1 = xAllDatasetVariables.get(v1);
         if ( var1 == null ) {
             Window.alert("There is no WOCE variable assocated with "+var0.getShortname());
