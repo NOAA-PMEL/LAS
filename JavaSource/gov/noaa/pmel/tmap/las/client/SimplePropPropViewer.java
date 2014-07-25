@@ -1497,7 +1497,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             vs.getShortname().trim().equals("longitude") ||
                             vs.getShortname().trim().equals("latitude")  ||
                             vs.getShortname().trim().equals("time") || 
-                            vs.getShortname().trim().equals(trajectory_id) ) {
+                            vs.getID().equals(trajectory_id) ) {
                         included.add(vs);
                     }
                 }
