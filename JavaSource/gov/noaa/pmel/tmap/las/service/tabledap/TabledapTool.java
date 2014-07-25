@@ -1088,18 +1088,22 @@ public class TabledapTool extends TemplateTool {
                     if ( b < min && !isMissing && !isFill ) {
                         min = b;
                     }
-                    if ( b > max ) {
+                    if ( b > max && !isMissing && !isFill ) {
                         max = b;
                     }
                     a.set(drindex, b);
                     drindex++;
                 }
                 ncfile.write(var, a);
-                ArrayDouble.D1 minmax = new ArrayDouble.D1(2);
-                minmax.set(0, min);
-                minmax.set(1, max);
-                Attribute actual_range = new Attribute("actual_range", minmax);
-                ncfile.updateAttribute(var, actual_range);
+                if ( !(min - Double.MAX_VALUE < .001 && max - Double.MIN_VALUE < .001) ) {
+                    ArrayDouble.D1 minmax = new ArrayDouble.D1(2);
+                    minmax.set(0, min);
+                    minmax.set(1, max);
+                    Attribute actual_range = new Attribute("actual_range", minmax);
+                    if ( var.findAttributeIgnoreCase("actual_range") != null ) {
+                        ncfile.updateAttribute(var, actual_range);
+                    }
+                }
             } else if ( var.getDataType() == DataType.FLOAT ) {
                 ArrayFloat.D1 a = new ArrayFloat.D1(var.getShape(0));
                 int drindex = 0;
