@@ -713,14 +713,15 @@ public class SimplePropPropViewer implements EntryPoint {
         VariableSerializable var0 = xAllDatasetVariables.get(v0);
 
         // There is one and only one WOCE flag that will be used for these data.
-      
-        String v1 = "WOCE_CO2_water";
+        String short_name = "WOCE_CO2_water";
+        String v1 = short_name+"-"+dsid;
+        
         // Just use it. No checks required.
 
         tableRequest.removeVariables();
         tableRequest.addVariable(dsid, v0, 0);
         tableRequest.addVariable(dsid, v1, 0);
-        columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString(), var0.getShortname(), v1);  // The V1 short name is the same as the id.
+        columnEditor = new ColumnEditorWidget(dsid, tableRequest.toString(), var0.getShortname(), short_name);  
         
        
 
