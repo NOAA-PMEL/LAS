@@ -112,7 +112,7 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
 ENDIF
 
-! IF ($ferret_is_socat) THEN GO SOCAT_check_dtime
+IF ($ferret_is_socat) THEN GO SOCAT_check_dtime
 
 
 ! Special color-by-time key
