@@ -49,6 +49,7 @@ public class ConstraintDisplay extends Composite {
     
 
     public ConstraintDisplay(String con) {
+        
         /* 
          * This is a string that looks like type_cr_variable_cr_op_value_cr_key_cr_keyValue
          * These are stuffed into this form so they can go on the token map for the history.
@@ -56,14 +57,15 @@ public class ConstraintDisplay extends Composite {
          */
         String[] parts = con.split("_cr_");
         this.type = parts[0];
-        this.variable = parts[1];
-        this.value = parts[2];
-        this.op = parts[3];
-        this.key = parts[4];
-        this.keyValue = parts[5];
+        this.dsid = parts[1];
+        this.varid = parts[2];
+        this.variable = parts[3];
+        this.value = parts[4]; 
+        this.key = parts[5];
+        this.keyValue = parts[6];
+        this.op = parts[7];
         
     }
-
 
     public String getVariable() {
         return variable;

@@ -104,7 +104,7 @@ public class ERDDAPVariableConstraint extends Composite {
         String op1 = "gt";
         String op2 = "le";
         String rhsText = rhs.getText();              
-        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getName(), rhsText, op2, true), ERDDAPVariableConstraint.this);
+        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), lhsText, op1, variable.getShortname(), rhsText, op2, true), ERDDAPVariableConstraint.this);
     }
     public VariableSerializable getVariable() {
         return variable;
