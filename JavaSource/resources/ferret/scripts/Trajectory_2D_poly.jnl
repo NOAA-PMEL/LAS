@@ -214,7 +214,7 @@ ENDIF
 ! Ribbon plot
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
-IF `nout_lonlat LT 5000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+IF `nout_lonlat LT 20000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
 
 
 IF ($single_color"0|*>1") THEN
