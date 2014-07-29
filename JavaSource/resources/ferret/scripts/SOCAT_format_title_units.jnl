@@ -345,4 +345,11 @@ IF `( ($its_prop_prop_plot"0|*>1") EQ 0) AND (($num"0|0|*>1") EQ 0)` THEN
    DEFINE SYMBOL variable_lab_($vcode) = 1
 ENDIF
 
+! A set of vars which we will treat for plotting only, as we do the expocode.
+IF ($data_($num)_var"0|dataset_name>1|vessel_name>1|investigators>1|organization>1|\
+socat_data_ref>1|orig_data_ref>1|addl_docs>1|socat_data_doi>1|*>0") THEN 
+   DEFINE SYMBOL data_($num)_var = expocode
+   IF ($data_name_in"0|*>1") THEN DEFINE SYMBOL data_name_in = expocode
+ENDIF
+
 ! End of file ------------SOCAT_format_title_units.jnl--------------------------

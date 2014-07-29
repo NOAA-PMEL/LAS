@@ -112,6 +112,8 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
 ENDIF
 
+IF ($ferret_is_socat) THEN GO SOCAT_check_dtime
+pause
 
 ! Special color-by-time key
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN 

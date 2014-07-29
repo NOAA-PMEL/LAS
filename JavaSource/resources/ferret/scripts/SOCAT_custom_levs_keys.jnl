@@ -162,7 +162,7 @@ ENDIF
 ! tmonth
 IF ($var_name"0|tmonth>1|*>0") THEN
    IF `($ferret_version) GE 6.92` THEN 
-      DEFINE SYMBOL ferret_fill_levels = (1,13,1)
+      DEFINE SYMBOL ferret_fill_levels = (1,12,1)
       DEFINE SYMBOL keycentered = 1
    ELSE
       DEFINE SYMBOL ferret_fill_levels = ferret_fill_levels = (0.5,12.5,1)
