@@ -115,6 +115,8 @@ color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|ra
       ENDIF
    ENDIF
 
+   IF ($ferret_key_centerlab"0|0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT,CENT
+
 ENDIF ! end of options for twoDplot
 
 ! -------- Options for line styles (Note currently we dont allow setting
