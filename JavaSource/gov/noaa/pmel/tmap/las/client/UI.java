@@ -1704,7 +1704,59 @@ public class UI extends BaseUI {
             int index = 0;
             for (Iterator iterator = constraints.iterator(); iterator.hasNext();) {
                 ConstraintAnchor cta = (ConstraintAnchor) iterator.next();
-                historyToken.append(";constraint"+index+"="+cta.getType()+"_cr_"+cta.getVariable()+"_cr_"+cta.getValue()+"_cr_"+cta.getOp()+"_cr_"+cta.getKey()+"_cr_"+cta.getKeyValue());
+                historyToken.append(";constraint"+index+"=");
+                /**
+                 * 
+                  String[] parts = con.split("_cr_");
+        this.type = parts[0];
+        this.dsid = parts[1];
+        this.varid = parts[2];
+        this.variable = parts[3];
+        this.value = parts[4]; 
+        this.key = parts[5];
+        this.keyValue = parts[6];
+        this.op = parts[7];
+                 */
+                if ( cta.getType() != null && !cta.getType().equals("") ) {
+                    historyToken.append(cta.getType()+"_cr_");                
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getDsid() != null && !cta.getDsid().equals("") ) {
+                    historyToken.append(cta.getDsid()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getVarid() != null && !cta.getVarid().equals("") ) {
+                    historyToken.append(cta.getVarid()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getVariable() != null && !cta.getVariable().equals("") ) {
+                    historyToken.append(cta.getVariable()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getValue() != null && !cta.getValue().equals("") ) {
+                    historyToken.append(cta.getValue()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getKey() != null && !cta.getKey().equals("") ) {
+                    historyToken.append(cta.getKey()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getKeyValue() != null && !cta.getKeyValue().equals("") ) {
+                    historyToken.append(cta.getKeyValue()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
+                if ( cta.getOp() != null && !cta.getOp().equals("") ) {
+                    historyToken.append(cta.getOp()+"_cr_");    
+                } else {
+                    historyToken.append("none_cr_");
+                }
                 index++;
             }
             int panelIndex = xTrajectoryConstraint.getConstraintPanelIndex();
