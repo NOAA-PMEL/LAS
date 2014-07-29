@@ -81,6 +81,12 @@ IF ($var_name"0|socat_version>1|*>0") THEN
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
 ENDIF
 
+! Note sample_number is positive numbers indicating count on trajectory.
+IF ($var_name"0|sample_number>1|*>0") THEN
+   IF `use_std_levels EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = 30
+   IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
+ENDIF
+
 ! This based on the full-range socat2 thru 2011
 
 IF ($var_name"0|fCO2_recommended>1|*>0") THEN
