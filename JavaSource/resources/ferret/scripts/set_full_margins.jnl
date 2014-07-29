@@ -14,7 +14,7 @@ DEFINE SYMBOL text_size = ($ferret_text_size"0.09")
 
 CAN view
 
-LET y_up = 0.93
+LET y_up = 0.92
 IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN LET y_up = 0.9
 
 DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:`y_up` full_view
