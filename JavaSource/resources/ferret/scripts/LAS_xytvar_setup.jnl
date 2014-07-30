@@ -294,6 +294,12 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
    DEFINE SYMBOL is_time = 1
+
+   IF ($constr_tim_min"0|*>1") THEN 
+      LET amin = ($constr_tim_min)
+      LET amax = ($constr_tim_max)
+   ENDIF
+
    GO LAS_is_range amin amax
    CANCEL SYMBOL is_time
    
@@ -308,9 +314,10 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       ppl axlabp,0,0
    ELSE
 
-      DEFINE AXIS/T=`amin`:`amax`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
+
       DEFINE SYMBOL timeaxis = haxis
-      DEFINE AXIS/x=`amin`:`amax`:`del_ax` haxis1 
+      DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
       LET tt = t[gt=haxis]
 
       LET nt = `tt,RETURN=size`

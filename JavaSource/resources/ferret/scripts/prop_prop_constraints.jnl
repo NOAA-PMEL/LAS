@@ -46,6 +46,8 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
   IF `($constraint_($ic)_lhs"0|longitude>1|*>0") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_lon_min = ($constraint_($ic)_rhs) ;\
   IF `($constraint_($ic)_lhs"0|longitude>1|*>0") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_lon_max = ($constraint_($ic)_rhs) ;\
+  IF `($constraint_($ic)_lhs"0|time>1|*>0") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_tim_min = ($constraint_($ic)_rhs) ;\
+  IF `($constraint_($ic)_lhs"0|time>1|*>0") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_tim_max = ($constraint_($ic)_rhs) ;\
   )
 
 IF `nmaskx GT 0` THEN LET var_mask = xsequence(($var_mask))
