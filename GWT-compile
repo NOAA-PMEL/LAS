@@ -16,3 +16,4 @@ java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" 
 java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.ClimateAnalysis
 java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.DateWidgetTest
 java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.SPPV
+java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.PPT
