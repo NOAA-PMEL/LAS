@@ -90,7 +90,9 @@ public class ConstraintWidgetGroup extends Composite {
                     ERDDAPVariableConstraintPanel vcw = (ERDDAPVariableConstraintPanel) opened;
                     VariableSerializable variable = vcw.getVariable();
                     // Set the current values for the variable if it's already constrainted.
-                    eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getShortname(), "", "le", false), ConstraintWidgetGroup.this);
+                    if ( variable != null ) {
+                        eventBus.fireEventFromSource(new VariableConstraintEvent(variable.getDSID(), variable.getID(), "", "gt", variable.getShortname(), "", "le", false), ConstraintWidgetGroup.this);
+                    }
                 } else if ( opened instanceof ERDDAPValidDataConstraintPanel ) {
                     ERDDAPValidDataConstraintPanel vdcp = (ERDDAPValidDataConstraintPanel) opened;
                     vdcp.clearSelection();
