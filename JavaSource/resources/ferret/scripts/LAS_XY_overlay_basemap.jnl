@@ -53,8 +53,16 @@ LET topo_dy = `ybox[GY=($basemap_var),J=1]`
 
 IF `(($region_x_range) LT topo_dx) OR  (($region_y_range) LT topo_dx)` THEN
    DEFINE SYMBOL topo_regrid = 1
-   DEFINE AXIS/UNITS=degrees_east/MODULO/($region_x)/NPOINTS=5 x_super_fine
-   DEFINE AXIS/UNITS=degrees_north/($region_y)/NPOINTS=5 y_super_fine
+   IF `($region_x_range) EQ 0` THEN  
+      DEFINE AXIS/UNITS=degrees_east/MODULO/x=`($region_x_lo)-topo_dx`:`($region_x_lo)+topo_dx`/NPOINTS=5 x_super_fine
+   ELSE
+      DEFINE AXIS/UNITS=degrees_east/MODULO/($region_x)/NPOINTS=5 x_super_fine
+   ENDIF
+   IF `($region_y_range) EQ 0` THEN  
+      DEFINE AXIS/UNITS=degrees_north/MODULO/y=`($region_y_lo)-topo_dx`:`($region_y_lo)+topo_dx`/NPOINTS=5 y_super_fine
+   ELSE
+      DEFINE AXIS/UNITS=degrees_north/($region_y)/NPOINTS=5 y_super_fine
+   ENDIF
    DEFINE GRID/X=x_super_fine/y=y_super_fine g_super_fine
 
    LET basevar = ($basemap_var)[d=($basemap_data_num),GXY=g_super_fine,($basemap_region_z),($basemap_region_t)]
