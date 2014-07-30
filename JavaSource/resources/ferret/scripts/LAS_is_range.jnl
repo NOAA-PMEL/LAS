@@ -42,25 +42,33 @@ IF ($is_time"0|0|*>1") THEN
 
    let hrsec = 3600
    let daysec = 24*3600
-   IF `ABS(ax_lo-ax_hi) LT 2*daysec` THEN
-      LET ax_lo = `ax_lo - .5*daysec,prec=12`
-      LET ax_hi = `ax_hi + .5*daysec,prec=12`
-   ELIF `ABS(ax_lo-ax_hi) LT 5*daysec` THEN
-      LET ax_lo = `ax_lo - 2*daysec,prec=12`
-      LET ax_hi = `ax_hi + 2*daysec,prec=12`
-   ELIF `ABS(ax_lo-ax_hi) LT 15*daysec` THEN
-      LET ax_lo = `ax_lo - 5*daysec,prec=12`
-      LET ax_hi = `ax_hi + 5*daysec,prec=12`
-   ELIF `ABS(ax_lo-ax_hi) LT 365*daysec` THEN
-      LET ax_lo = `ax_lo - 15*daysec,prec=12`
-      LET ax_hi = `ax_hi + 15*daysec,prec=12`
-   ELIF `ABS(ax_lo-ax_hi) LT 5*365*daysec` THEN
-      LET ax_lo = `ax_lo - 60*daysec,prec=12`
-      LET ax_hi = `ax_hi + 60*daysec,prec=12`
+
+   IF ($constr_tim_min"0|*>1") THEN
+      LET ax_lo = `(ax_lo - hrsec),prec=12`
+      LET ax_hi = `(ax_hi +hrsec),prec=12`
+
    ELSE
-      LET ax_lo = `ax_lo - 180*daysec,prec=12`
-      LET ax_hi = `ax_hi + 180*daysec,prec=12`
+      IF `ABS(($ax_hi)-($ax_lo)) LT 2*daysec` THEN
+         LET ax_lo = `(ax_lo - .5*daysec),prec=12`
+         LET ax_hi = `(ax_hi + .5*daysec),prec=12`
+      ELIF `ABS(($ax_hi)-($ax_lo)) LT 5*daysec` THEN
+         LET ax_lo = `(ax_lo - 2*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 2*daysec),prec=12`
+      ELIF `ABS(($ax_hi)-($ax_lo)) LT 15*daysec` THEN
+         LET ax_lo = `(ax_lo - 5*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 5*daysec),prec=12`
+      ELIF `ABS(($ax_hi)-($ax_lo)) LT 365*daysec` THEN
+         LET ax_lo = `(ax_lo - 15*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 15*daysec),prec=12`
+      ELIF `ABS(($ax_hi)-($ax_lo)) LT 5*365*daysec` THEN
+         LET ax_lo = `(ax_lo - 60*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 60*daysec),prec=12`
+      ELSE
+         LET ax_lo = `(ax_lo - 180*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 180*daysec),prec=12`
+      ENDIF
    ENDIF
+
    LET del_ax = daysec
    IF `ax_hi - ax_lo LT 26*hrsec` THEN LET del_ax = hrsec
    
