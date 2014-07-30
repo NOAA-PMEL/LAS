@@ -15,6 +15,8 @@ $las_response.toString()
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta http-equiv="X-UA-Compatible" content="IE=9">
     
+#set($data = $las_response.getResultAsFile("netcdf"))
+
   <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
   <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
   <script language="JavaScript">
@@ -24,12 +26,22 @@ $las_response.toString()
    }
    function gocsv() {
        outReq.setProperty("ferret", "data_format", "csv");
+       var d0 = outReq.getProperty("data_0", "url");
+       if (typeof d0 != 'string') {
+          outReq.setProperty("data_0", "url", "$data");
+          outReq.setProperty("data", "count", "1");
+       }
        outReq.setOperation("Trajectory_Corrrelation_File");
        var url = "ProductServer.do?xml=" + outReq.getXMLText();
        window.open(url, "_blank", "", false);
     }
     function gotsv() {
        outReq.setProperty("ferret", "data_format", "tsv");
+       var d0 = outReq.getProperty("data_0", "url");
+       if (typeof d0 != 'string') {
+          outReq.setProperty("data_0", "url", "$data");
+          outReq.setProperty("data", "count", "1");
+       }
        outReq.setOperation("Trajectory_Corrrelation_File");
        var url = "ProductServer.do?xml=" + outReq.getXMLText();
        window.open(url, "_blank", "", false);
@@ -37,9 +49,12 @@ $las_response.toString()
   </script>
 
 <title>LAS Output -- $las_config.getTitle()</title>
-##
 
 <body  onload="initializeLASRequest()">
+
+
+<h3>Test output: $data is the netCDF URL</h3>
+
 
 ## Write the preamble
 
@@ -78,13 +93,13 @@ Download these data <a href='javascript:gocsv()'>as a comma separated values (CS
           <tr bgcolor="$color">
              ## Add the row number
              #set($r = $row + 1)
-             <td align="right">$r</td>
+             <td nowrap="nowrap" align="right">$r</td>
              ## Loop the columns
              #foreach ($i in [0..$c])
                  ## Grab the column value as a string.
                  ## If you want more control you can check the column type in the metadata and use the Velocity Formatter tool
                  ## to format the each column value.
-                 <td align="right">$las_datatable.getData().get($metadata.get($i)).get($row)</td>
+                 <td nowrap="nowrap" align="right">$las_datatable.getData().get($metadata.get($i)).get($row)</td>
              #end  ## Done with columns
           </tr>
 
