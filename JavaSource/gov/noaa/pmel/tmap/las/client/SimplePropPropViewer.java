@@ -286,6 +286,15 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
             }
         });
+        
+        eventBus.addHandler(gov.noaa.pmel.tmap.las.client.event.ResizeEvent.TYPE, new gov.noaa.pmel.tmap.las.client.event.ResizeEvent.Handler() {
+
+            @Override
+            public void onResize(gov.noaa.pmel.tmap.las.client.event.ResizeEvent event) {
+                resize(Window.getClientWidth(), Window.getClientHeight());
+            }
+            
+        });
        
         // Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
         eventBus.addHandler(StringValueChangeEvent.TYPE, new StringValueChangeEvent.Handler() {
@@ -1186,7 +1195,6 @@ public class SimplePropPropViewer implements EntryPoint {
                                     }
                                     
                                 });
-                                
                                 resize(Window.getClientWidth(), Window.getClientHeight());
                             }
 
@@ -1967,6 +1975,8 @@ public class SimplePropPropViewer implements EntryPoint {
             if ( outputPanel.getRowCount() > 2 ) {
                 plotImage = (IESafeImage) outputPanel.getWidget(2, 0);
             }
+            Window.alert("resize: "+windowWidth+"x"+windowHeight);
+
             if (plotImage != null) {
                 // Check width first
                 int leftPaddingWidth = RootPanel.get("leftPadding").getOffsetWidth();
@@ -1978,9 +1988,8 @@ public class SimplePropPropViewer implements EntryPoint {
                     // Check that height is still small enough
                     int newPlotImageHeight = windowHeight - topAndBottomPadding - lasAnnotationsPanel.getOffsetHeight();
                     int plotImageHeight = plotImage.getHeight();
-                    if (newPlotImageHeight < plotImageHeight) {
-                        setPlotHeight(plotImage, newPlotImageHeight);
-                    }
+                    setPlotHeight(plotImage, newPlotImageHeight);
+                    
                 } else {
                     // It's the correct width, so now check the height
                     int newPlotImageHeight = windowHeight - topAndBottomPadding - lasAnnotationsPanel.getOffsetHeight();
@@ -1992,9 +2001,7 @@ public class SimplePropPropViewer implements EntryPoint {
                         leftControlsWidth = RootPanel.get("leftControls").getOffsetWidth();
                         newPlotImageWidth = windowWidth - leftPaddingWidth - leftControlsWidth;
                         plotImageWidth = plotImage.getWidth();
-                        if (newPlotImageWidth < plotImageWidth) {
-                            setPlotWidth(newPlotImageWidth);
-                        }
+                        setPlotWidth(newPlotImageWidth);
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.ResizeEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 
 import java.util.HashMap;
@@ -302,6 +303,7 @@ public class LASAnnotationsPanel extends Composite {
 
 			String text = response.getText();
 			setAnnotationsHTML(text);
+			eventBus.fireEventFromSource(new ResizeEvent(), LASAnnotationsPanel.this);
 
 		}
 
