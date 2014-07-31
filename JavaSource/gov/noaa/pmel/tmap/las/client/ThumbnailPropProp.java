@@ -405,7 +405,7 @@ public class ThumbnailPropProp implements EntryPoint {
                     }
                 }
                
-                Image plot = new Image(imageurl);
+                final  Image plot = new Image(imageurl);
                 currentRequest.setOperation("SPPV", "V7");
                 plotwidth = (Window.getClientWidth()-80)/4;
                 plotheight = (Window.getClientHeight()-80)/3;

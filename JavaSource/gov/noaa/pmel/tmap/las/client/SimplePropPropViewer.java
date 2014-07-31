@@ -853,13 +853,13 @@ public class SimplePropPropViewer implements EntryPoint {
             }
 
             // If varTwoId
-
+            String vcb = null;
             if ( varTwoId == null || (varTwoId != null && varTwoId.equals("") ) ) {
                 lasRequest.removeVariables();
                 // Find the first non-sub-set variable that is not already included
 
                 String vx = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-                String vcb = null;
+                
 
 
                 if ( vx == null || (vx != null && vx.equals(vy))) {
@@ -882,23 +882,23 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( vx != null ) {
                         lasRequest.addVariable(vds, vy, 0);
                     }
-                   
+
 
                     yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
 
                 }
-
-                if ( colorCheckBox.getValue() ) {
-                    vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
-                    lasRequest.setProperty("data", "count", "3");
-                    if ( vcb != null && plot ) { 
-                        lasRequest.addVariable(vds, vcb, 0);
-                    }
-                } else {
-                    lasRequest.setProperty("data", "count", "2");
-                }
             }
+            if ( colorCheckBox.getValue() ) {
+                vcb = colorVariables.getUserObject(colorVariables.getSelectedIndex()).getID();
+                lasRequest.setProperty("data", "count", "3");
+                if ( vcb != null && plot ) { 
+                    lasRequest.addVariable(vds, vcb, 0);
+                }
+            } else {
+                lasRequest.setProperty("data", "count", "2");
+            }
+
         } else {
             operationID = "prop_prop_plot";
         }
