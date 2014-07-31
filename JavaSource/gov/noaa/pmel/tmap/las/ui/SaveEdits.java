@@ -10,7 +10,6 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.Element;
-import org.jdom.JDOMException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -262,9 +260,9 @@ public class SaveEdits extends LASAction {
 			log.debug("DSG files updated");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to update DSG files with the WOCE flags", ex);
-			logerror(request, "expocode = " + expocode, "");
-			logerror(request, "dataName = " + dataName, "");
-			logerror(request, "woceFlag = " + woceFlag, "");
+			logerror(request, "expocode = " + expocode + 
+							"; dataName = " + dataName + 
+							"; woceFlag = " + woceFlag, "");
 			return mapping.findForward("error");
 		}
 
@@ -274,9 +272,9 @@ public class SaveEdits extends LASAction {
 			log.debug("WOCE event added to the database");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to record the WOCE event in the database", ex);
-			logerror(request, "expocode = " + expocode, "");
-			logerror(request, "dataName = " + dataName, "");
-			logerror(request, "woceFlag = " + woceFlag, "");
+			logerror(request, "expocode = " + expocode + 
+							"; dataName = " + dataName + 
+							"; woceFlag = " + woceFlag, "");
 			return mapping.findForward("error");
 		}
 
