@@ -2020,6 +2020,7 @@ public class SimplePropPropViewer implements EntryPoint {
         } else {
             annotationsButton.setTitle("Click to show the annotations of the plot.");
         }
+        resize(Window.getClientWidth(), Window.getClientHeight());
     }
 
     ChangeHandler constraintChange = new ChangeHandler() {
