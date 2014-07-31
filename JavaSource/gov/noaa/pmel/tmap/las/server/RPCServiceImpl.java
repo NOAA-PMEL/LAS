@@ -828,6 +828,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 String lhs = constraintSerializable.getLhs();
                 String op = constraintSerializable.getOp();
                 String rhs = constraintSerializable.getRhs();
+                String type = constraintSerializable.getType();
+                
+                if ( type.equals("variable")) {
+                    String sname = lasConfig.getVariableName(dsid, lhs);
+                    if ( sname != null && !sname.equals("") ) {
+                        lhs = sname;
+                    }
+                }
                 if ( lhs.equals(time_name) ) {
                     rhs = reformatFerretToISO(rhs);
                 }
