@@ -1795,11 +1795,15 @@ public class SimplePropPropViewer implements EntryPoint {
         int pwidth = Math.max(newPlotImageWidth, image_w_min);
         if (autoZoom) {
             imageScaleRatio = 1.;
-            if (pwidth < image_w) {
-                // If the panel is less than the image, shrink the image.
-                double h = ((Double.valueOf(image_h) / Double.valueOf(image_w)) * Double.valueOf(pwidth));
-                imageScaleRatio = h / Double.valueOf(image_h);
+
+            // If the panel is less than the image, shrink the image.
+            double h = ((Double.valueOf(image_h) / Double.valueOf(image_w)) * Double.valueOf(pwidth));
+            imageScaleRatio = h / Double.valueOf(image_h);
+            // Scale it every time. If it's going to grow set it back to 1.
+            if ( imageScaleRatio > 1.0 ) {
+                imageScaleRatio = 1.0;
             }
+
             if (plotImage != null) {
                 // set the plotImage to the grid before scaling so plotImage's
                 // imageElement will be valid

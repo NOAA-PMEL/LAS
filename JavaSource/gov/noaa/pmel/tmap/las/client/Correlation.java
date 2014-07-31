@@ -1912,20 +1912,22 @@ public class Correlation implements EntryPoint {
 		autoZoom = true;
 		int pwidth = Math.max(newPlotImageWidth, image_w_min);
 		if (autoZoom) {
-			imageScaleRatio = 1.;
-			if (pwidth < image_w) {
-				// If the panel is less than the image, shrink the image.
-				double h = ((Double.valueOf(image_h) / Double.valueOf(image_w)) * Double
-						.valueOf(pwidth));
-				imageScaleRatio = h / Double.valueOf(image_h);
-			}
-			if (plotImage != null) {
-				// set the plotImage to the grid before scaling so plotImage's
-				// imageElement will be valid
-				outputPanel.setWidget(shadowCanvasRow, 0, plotImage);
-				plotImage.setVisible(false);
-				drawToScreenScaled(imageScaleRatio);
-			}
+		    imageScaleRatio = 1.;
+
+		    // If the panel is less than the image, shrink the image.
+		    double h = ((Double.valueOf(image_h) / Double.valueOf(image_w)) * Double
+		            .valueOf(pwidth));
+		    imageScaleRatio = h / Double.valueOf(image_h);
+		    if ( imageScaleRatio > 1.0 ) {
+		        imageScaleRatio = 1.0;
+		    }
+		    if (plotImage != null) {
+		        // set the plotImage to the grid before scaling so plotImage's
+		        // imageElement will be valid
+		        outputPanel.setWidget(shadowCanvasRow, 0, plotImage);
+		        plotImage.setVisible(false);
+		        drawToScreenScaled(imageScaleRatio);
+		    }
 		} else {
 			setImageSize(fixedZoom);
 		}
