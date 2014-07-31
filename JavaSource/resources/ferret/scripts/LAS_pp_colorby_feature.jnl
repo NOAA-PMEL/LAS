@@ -249,7 +249,7 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
     LET plot_d = all_d[i=1:`ndo_it`];\
      ;\
      IF `do_it AND ($connect_dots"0|0|1|*>1")` THEN \
-     PLOT/NOAX/VS/OVER/LINE=6/NOLAB xpolydat, ypolydat ;\
+     PLOT/NOAX/VS/OVER/LINE=6/DASH=(0.1,0.04,0.1,0.04)/NOLAB xpolydat, ypolydat ;\
      ;\
     IF `do_it` THEN GO polymark ($poly_command) plot_x, plot_y, plot_d, ($shape($ishape)), ($poly_scale) ;\
      ;\

@@ -54,7 +54,7 @@ DEFINE SYMBOL ferret_view = ($viewsave)
 
 ! Build up the plot qualifiers
 IF ($ferret_use_graticules"0|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
+  SET MODE GRATICULE:(DASH=(0.1,0.04,0.1,0.04),COLOR=black)
 ENDIF
 
 ! This may be a polygon plot. Options for color, shape, size.
@@ -268,7 +268,7 @@ ELSE
           DEFINE SYMBOL yvar = ($data_y_var)* constraints_mask_var
 	  LET x_plot_var = ($xvar)
 	  IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
-	  LET y_plot_var = ($yvar)
+		  LET y_plot_var = ($yvar)
 	  DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
       ENDIF
 
@@ -280,7 +280,7 @@ ELSE
    ENDIF
 
 ! on lat/lon plots, draw a gray line on the cruise tracks.
-   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/NOLAB  x_plot_var, y_plot_var
+   IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/DASH=(0.1,0.04,0.1,0.04)/NOLAB  x_plot_var, y_plot_var
 
 ! ?? show locations where the color-by variable is missing...
    IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var
