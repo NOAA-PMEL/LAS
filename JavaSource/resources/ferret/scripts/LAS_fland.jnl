@@ -32,7 +32,8 @@ IF `fland_area LT 0.005` THEN
 
    DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
 
-   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0` THEN
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0 AND\
+   (($region_y_hi) LE 72 AND ($region_y_lo) GT -72) ` THEN
       USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
       
       DEFINE SYMBOL toponame = smith_sandwell_topo_v8_2
