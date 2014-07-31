@@ -5,7 +5,6 @@
 !
 ! By default an appropriate etopo dataset is used to plot gray continents.
 
-
 ! Set defaults for any 'basemap_~' symbols that are not yet defined
 SET DATA/SAVE
 
@@ -14,7 +13,7 @@ DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 
 ! Make it higher resolution to match what I did to Jons_fland
 IF `($basemap_area) LT 0.25` THEN
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
-  IF `($basemap_area) LT 0.001` THEN
+  IF `(($basemap_area) LT 0.001) AND (($region_y_hi) LE 72 AND ($region_y_lo) GT -72) ` THEN
      IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0` THEN \
         DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
   ENDIF
@@ -92,3 +91,4 @@ CANCEL DATA ($basemap_url)
 
 SET DATA/RESTORE
 !-------------------------- end of LAS_XY_overlay_basemap-------------------
+
