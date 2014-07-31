@@ -44,8 +44,15 @@ IF `fland_area LT 0.005` THEN
       DEF SYM yhi_hack `MIN(($yhi_hack)+1,  90)`
       DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
    ELSE
-      USE etopo05
-      DEFINE SYMBOL toponame = etopo05
+      IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc") EQ 0` THEN 
+        CANCEL DATA ($toponame)
+        USE "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc"
+	DEFINE SYMBOL toponame = `topo,RETURN=dset`
+        SET VAR/name=rose TOPO
+      ELSE
+         USE etopo05
+         DEFINE SYMBOL toponame = etopo05
+      ENDIF
    ENDIF
 
    SHADE/NOLAB/NOKEY/LEV=(0,10000,10000)/PAL=gray/OVERLAY rose($map_reg)
