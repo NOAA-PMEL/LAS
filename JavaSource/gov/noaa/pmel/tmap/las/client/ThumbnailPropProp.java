@@ -405,7 +405,7 @@ public class ThumbnailPropProp implements EntryPoint {
                     }
                 }
                
-                final  Image plot = new Image(imageurl);
+                Image plot = new Image(imageurl);
                 currentRequest.setOperation("SPPV", "V7");
                 plotwidth = (Window.getClientWidth()-80)/4;
                 plotheight = (Window.getClientHeight()-80)/3;
@@ -428,6 +428,17 @@ public class ThumbnailPropProp implements EntryPoint {
                        LASRequest r = makePlot(currentPlot);
                        String nexturl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + stream;
                        Image nextplot = new Image(nexturl);
+                       r.setOperation("SPPV", "V7");
+                       final String nurl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + "&catid="+dsid;
+                       nextplot.addClickHandler(new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            Window.open(nurl, "blank_", Constants.WINDOW_FEATURES);
+                            
+                        }
+                           
+                       });
                        nextplot.setSize(plotwidth+"px", plotheight+"px");
                        nextplot.setTitle(currentTitle);
                        plots.setWidget(row(currentPlot), column(currentPlot), nextplot);
