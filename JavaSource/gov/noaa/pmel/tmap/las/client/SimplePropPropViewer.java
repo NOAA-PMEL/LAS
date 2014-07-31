@@ -1975,7 +1975,6 @@ public class SimplePropPropViewer implements EntryPoint {
             if ( outputPanel.getRowCount() > 2 ) {
                 plotImage = (IESafeImage) outputPanel.getWidget(2, 0);
             }
-            Window.alert("resize: "+windowWidth+"x"+windowHeight);
 
             if (plotImage != null) {
                 // Check width first
