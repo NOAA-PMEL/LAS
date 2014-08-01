@@ -5,21 +5,36 @@
 !
 ! By default an appropriate etopo dataset is used to plot gray continents.
 
-
 ! Set defaults for any 'basemap_~' symbols that are not yet defined
 SET DATA/SAVE
 
 DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 180)`
 
 ! Make it higher resolution to match what I did to Jons_fland
+! Note smith-sandwell is only between -72 and 72.
+
 IF `($basemap_area) LT 0.25` THEN
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
-  IF `($basemap_area) LT 0.001` THEN
-     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0` THEN \
+  IF `($basemap_area) LT 0.05` THEN
+     IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc") EQ 0` THEN 
+        DEFINE SYMBOL basemap_url = "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc"
+        DEFINE SYMBOL topovar = TOPO
+     ELSE  
+        IF `($region_y_hi) LE 72 AND ($region_y_lo) GT -72 AND\
+          (TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0)` THEN \
         DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+     ENDIF
   ENDIF
 ELSE 
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
+ENDIF
+
+! Try for etopo1
+IF `($basemap_area) LT 0.001` THEN
+   IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2") EQ 0` THEN 
+      DEFINE SYMBOL basemap_url = "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2"
+      DEFINE SYMBOL topovar = TOPO
+   ENDIF
 ENDIF
 
 DEFINE SYMBOL basemap_fill_type = FILL
@@ -37,6 +52,8 @@ DEFINE SYMBOL basemap_region_z = ($basemap_region_z"k=1")
 DEFINE SYMBOL basemap_region_t = ($basemap_region_t"l=1")
 
 SET DATA ($basemap_url)
+IF ($topovar"0|*>1") THEN set var/name=rose '($topovar)'
+
 DEFINE SYMBOL basemap_data_num = `($basemap_var),return=dsetnum`
 
 ! Plot the data
@@ -53,8 +70,16 @@ LET topo_dy = `ybox[GY=($basemap_var),J=1]`
 
 IF `(($region_x_range) LT topo_dx) OR  (($region_y_range) LT topo_dx)` THEN
    DEFINE SYMBOL topo_regrid = 1
-   DEFINE AXIS/UNITS=degrees_east/MODULO/($region_x)/NPOINTS=5 x_super_fine
-   DEFINE AXIS/UNITS=degrees_north/($region_y)/NPOINTS=5 y_super_fine
+   IF `($region_x_range) EQ 0` THEN  
+      DEFINE AXIS/UNITS=degrees_east/MODULO/x=`($region_x_lo)-topo_dx`:`($region_x_lo)+topo_dx`/NPOINTS=5 x_super_fine
+   ELSE
+      DEFINE AXIS/UNITS=degrees_east/MODULO/($region_x)/NPOINTS=5 x_super_fine
+   ENDIF
+   IF `($region_y_range) EQ 0` THEN  
+      DEFINE AXIS/UNITS=degrees_north/MODULO/y=`($region_y_lo)-topo_dx`:`($region_y_lo)+topo_dx`/NPOINTS=5 y_super_fine
+   ELSE
+      DEFINE AXIS/UNITS=degrees_north/($region_y)/NPOINTS=5 y_super_fine
+   ENDIF
    DEFINE GRID/X=x_super_fine/y=y_super_fine g_super_fine
 
    LET basevar = ($basemap_var)[d=($basemap_data_num),GXY=g_super_fine,($basemap_region_z),($basemap_region_t)]
@@ -84,3 +109,4 @@ CANCEL DATA ($basemap_url)
 
 SET DATA/RESTORE
 !-------------------------- end of LAS_XY_overlay_basemap-------------------
+
