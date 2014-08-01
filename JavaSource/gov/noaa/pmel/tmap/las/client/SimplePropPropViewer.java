@@ -1524,9 +1524,13 @@ public class SimplePropPropViewer implements EntryPoint {
                 
                 if (vtosety != null) {
                     xVariables.setVariable(vtosety);
+                } else {
+                    xVariables.setVariable(xFilteredDatasetVariables.get(defaulty));
                 }
                 if (vtosetx != null ) {
                     yVariables.setVariable(vtosetx);
+                } else {
+                    yVariables.setVariable(xFilteredDatasetVariables.get(defaultx));
                 }
                 
                 String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
