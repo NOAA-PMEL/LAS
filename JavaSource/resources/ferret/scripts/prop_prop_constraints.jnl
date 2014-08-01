@@ -59,7 +59,13 @@ LET ntxtconstr = 0
 REPEAT/RANGE=0:100/NAME=ic (\
   DEF SYM ic = `ic`;\
   IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
-  IF `($constraint_($ic)_lhs"0|($feature_variable%A%)>0|*>1") EQ 0` THEN EXIT/LOOP;\
+  DEF SYM cvar = ($constraint_($ic)_lhs);\
+  IF `($cvar"0|($feature_variable%A%)>0|*>1") EQ 0` THEN EXIT/CYCLE;\
+  LET ignore = 0;\
+  IF ($ignore_vars"0|*>1") THEN LET ignore = \
+   `(IS_ELEMENT_OF_STR_N(ignore_constraints, "($cvar)") GT 0) OR \
+   (IS_ELEMENT_OF_STR_N(ignore_constraints, "($cvar)_") GT 0)`;\
+  IF `ignore GE 0` THEN EXIT/CYCLE;\
   IF `($constraint_($ic)_type"0|text>1|*>0") EQ 1` THEN LET ntxtconstr = `ntxtconstr+1`;\
   )
 

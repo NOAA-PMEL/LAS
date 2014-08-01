@@ -353,4 +353,8 @@ socat_data_ref>1|orig_data_ref>1|addl_docs>1|socat_data_doi>1|*>0") THEN
    IF ($data_name_in"0|*>1") THEN DEFINE SYMBOL data_name_in = expocode
 ENDIF
 
+! Hack: Will ignore constraints in PP plots for metadata variables
+DEFINE SYMBOL ignore_vars = 1
+LET ignore_constraints = {"dataset_name","vessel_name","investigators","organization"}
+
 ! End of file ------------SOCAT_format_title_units.jnl--------------------------
