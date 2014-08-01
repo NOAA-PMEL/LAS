@@ -847,7 +847,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                     }
                 } else {
                     Constraint c = new Constraint(lhs, op, rhs);
-                    url = url + "&" + c.getAsString();
+                    if ( c.getOp().equals("is") || c.getOp().equals("like") ) {
+                        url = url + "&" + c.getAsERDDAPString();
+                    } else {
+                        url = url +"&" + c.getAsString();
+                    }
                 }
               
             }
