@@ -10,13 +10,12 @@ DEFINE SYMBOL var_name = $1
 ! Did they send in request to use standard pre-defined levels?
 
 LET use_std_levels = 1
+
 IF `($piecewise_decimation"0|*>1") EQ 0` THEN LET use_std_levels = 0
+IF `($numobs"0") GT 100000` THEN  LET use_std_levels = 1
+IF ($ferret_fill_levels"0|*>1") THEN LET use_std_levels = 0
 
 LET levels_string = UPCASE("($ferret_fill_levels%0%)")
-IF `STRINDEX(levels_string, "STAN") GT 0` THEN 
-   LET use_std_levels = 1
-   CANCEL SYMBOL ferret_fill_levels
-ENDIF
 
 ! Note etopo is positive numbers indicating depth.
 IF ($var_name"0|etopo2>1|*>0") THEN
@@ -90,22 +89,38 @@ ENDIF
 ! This based on the full-range socat2 thru 2011
 
 IF ($var_name"0|fCO2_recommended>1|*>0") THEN
+   IF `STRINDEX(levels_string, "STAN") GT 0` THEN 
+      LET use_std_levels = 1
+      CANCEL SYMBOL ferret_fill_levels
+   ENDIF
    IF `use_std_levels AND (($ferret_fill_levels"0|*>1") EQ 0)` THEN \
      DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 ! Set the rest of the fCO2, pCO2, and xCO2 the same 
 IF ($var_name"0|fCO2_water_equi_uatm>1|fCO2_water_sst_100humidity_uatm>1|*>0") THEN
+   IF `STRINDEX(levels_string, "STAN") GT 0` THEN 
+      LET use_std_levels = 1
+      CANCEL SYMBOL ferret_fill_levels
+   ENDIF
    IF `use_std_levels AND (($ferret_fill_levels"0|*>1") EQ 0)` THEN \
       DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 IF ($var_name"0|pCO2_water_equi_temp>1|pCO2_water_sst_100humidity_uatm>1|*>0") THEN
+   IF `STRINDEX(levels_string, "STAN") GT 0` THEN 
+      LET use_std_levels = 1
+      CANCEL SYMBOL ferret_fill_levels
+   ENDIF
    IF `use_std_levels AND (($ferret_fill_levels"0|*>1") EQ 0)` THEN \
       DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
 
 IF ($var_name"0|xCO2_water_equi_temp_dry_ppm>1|xCO2_water_sst_dry_ppm>1|*>0") THEN
+   IF `STRINDEX(levels_string, "STAN") GT 0` THEN 
+      LET use_std_levels = 1
+      CANCEL SYMBOL ferret_fill_levels
+   ENDIF
    IF `use_std_levels AND (($ferret_fill_levels"0|*>1") EQ 0)` THEN \
       DEFINE SYMBOL ferret_fill_levels = (-inf)(160,260,20)(260,450,10)(440,560,20)(inf)
 ENDIF
@@ -218,3 +233,4 @@ IF ($var_name"|($feature_variable)>1|*>0") THEN
 ENDIF
 
 ! End of file ------------ SOCAT_custom_levs_keys.jnl--------------------------
+
