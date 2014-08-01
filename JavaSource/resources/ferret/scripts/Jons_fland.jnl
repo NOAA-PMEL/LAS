@@ -55,7 +55,7 @@ IF `use_landmask EQ 1` THEN
 
    DEFINE SYMBOL xlo_hack ($xaxis_min%0%)
    DEFINE SYMBOL xhi_hack ($xaxis_max%360%)
-   DEFINE SYMBOL map_reg = [x=($xlo_hack):($xhi_hack)]
+   DEFINE SYMBOL map_reg = [x=($xlo_hack):($xhi_hack),y=($yaxis_min):($yaxis_max)]
    LET landvar = landmask($map_reg)
 
    IF ($topo_regrid"0|*>1") THEN 
