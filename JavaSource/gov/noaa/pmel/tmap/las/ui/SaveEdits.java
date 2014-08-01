@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.socat.dashboard.nc.Constants;
 import gov.noaa.pmel.socat.dashboard.nc.DsgNcFileHandler;
 import gov.noaa.pmel.socat.dashboard.server.DatabaseRequestHandler;
 import gov.noaa.pmel.socat.dashboard.shared.DataLocation;
@@ -186,14 +187,8 @@ public class SaveEdits extends LASAction {
 						Double latitude = Double.parseDouble(value);
 						datumLoc.setLatitude(latitude);
 					}
-					else if ( name.startsWith("WOCE_") ) {
+					else if ( name.equals("WOCE_CO2_WATER") ) {
 						// WOCE flag for the data variable
-						String woceDataName = name.substring(5);
-						if ( dataName == null )
-							dataName = woceDataName;
-						else if ( ! dataName.equals(woceDataName) )
-							throw new IllegalArgumentException("Mismatch of data names from WOCE name; " +
-									"previous: '" + dataName + "'; current: '" + woceDataName + "'");
 						if ( value.length() != 1 )
 							throw new IllegalArgumentException("Invalid WOCE flag value '" + value + "'");
 						Character givenFlag = value.charAt(0);
@@ -205,7 +200,7 @@ public class SaveEdits extends LASAction {
 					}
 					else {
 						// Assume it is the data variable name.
-						// Note that WOCE_geoposition will not have this column
+						// Note that WOCE from just lat/lon/date plots will not have this column
 						if ( dataName == null )
 							dataName = name;
 						else if ( ! dataName.equals(name) )
@@ -233,13 +228,19 @@ public class SaveEdits extends LASAction {
 			return mapping.findForward("error");
 		}
 		if ( woceFlag == null ) {
-			logerror(request, "No WOCE_... given in the WOCE flags", "");
+			logerror(request, "No WOCE_CO2_WATER given in the WOCE flags", "");
 			return mapping.findForward("error");
 		}
 		if ( dataName == null ) {
-			// Should never happen if woceFlag is not null 
-			logerror(request, "Unexpected failure to get the data name for the WOCE flags", "");
-			return mapping.findForward("error");
+			dataName = Constants.geoposition_VARNAME;
+		}
+		else {
+			String varName = Constants.VARIABLE_NAMES.get(dataName);
+			if ( varName == null ) {
+				logerror(request, "Unknown data variable '" + dataName + "'", "");
+				return mapping.findForward("error");
+			}
+			dataName = varName;
 		}
 
 		// Create the (incomplete) WOCE event
@@ -248,13 +249,12 @@ public class SaveEdits extends LASAction {
 		woceEvent.setUsername(username);
 		woceEvent.setComment(comment);
 		woceEvent.setExpocode(expocode);
-		woceEvent.setColumnName(dataName);  // Note: all-uppercase
+		woceEvent.setColumnName(dataName);
 		woceEvent.setFlag(woceFlag);
 		woceEvent.setFlagDate(new Date());
 		woceEvent.setLocations(locations);
 
-		// Update the DSG files with the WOCE flags, filling in the missing 
-		// information and fixing the data variable name in the process
+		// Update the DSG files with the WOCE flags, filling in the missing information
 		try {
 			dsgHandler.updateWoceFlags(woceEvent, tempname, log);
 			log.debug("DSG files updated");
