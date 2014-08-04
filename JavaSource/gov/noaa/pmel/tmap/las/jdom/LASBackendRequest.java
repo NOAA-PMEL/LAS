@@ -560,6 +560,7 @@ public class LASBackendRequest extends LASDocument {
                     }
                     if ( value.contains("'") ) {
                         value = "\""+value+"\"";
+                        symbols.put(name+"_quoted", "1");
                     }
                     symbols.put(name, value);
                 }
@@ -579,11 +580,13 @@ public class LASBackendRequest extends LASDocument {
                         String value = mvs.parts.get(pname);
                         if ( value.contains("'") ) {
                             value = "\""+value+"\"";
+                            symbols.put(name+"_quoted", "1");
                         }
                         symbols.put(name, value);
                     }
                     if ( mvs.values[i].contains("'") ) {
                         mvs.values[i] = "\""+mvs.values[i]+"\"";
+                        symbols.put("constraint_"+index+"_"+mvs.valuesName+"_quoted", "1");
                     }
                     symbols.put("constraint_"+index+"_"+mvs.valuesName, mvs.values[i]);
                     symbols.put("constraint_"+index+"_type", "text");
@@ -598,6 +601,7 @@ public class LASBackendRequest extends LASDocument {
                     String value = mvs.parts.get(pname);
                     if ( value.contains("'") ) {
                         value = "\""+value+"\"";
+                        symbols.put(name+"_quoted", "1");
                     }
                     symbols.put(name, value);
                 }
