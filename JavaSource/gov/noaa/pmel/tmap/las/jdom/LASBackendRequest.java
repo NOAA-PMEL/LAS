@@ -558,6 +558,9 @@ public class LASBackendRequest extends LASDocument {
                     if ( value.contains("_ns_") ) {
                         value = value.replace("_ns_", ",");
                     }
+                    if ( value.contains("'") ) {
+                        value = "\""+value+"\"";
+                    }
                     symbols.put(name, value);
                 }
                 index++;
@@ -574,7 +577,13 @@ public class LASBackendRequest extends LASDocument {
                         String pname = (String) partsIt.next();
                         String name = "constraint_"+index+"_"+pname;
                         String value = mvs.parts.get(pname);
+                        if ( value.contains("'") ) {
+                            value = "\""+value+"\"";
+                        }
                         symbols.put(name, value);
+                    }
+                    if ( mvs.values[i].contains("'") ) {
+                        mvs.values[i] = "\""+mvs.values[i]+"\"";
                     }
                     symbols.put("constraint_"+index+"_"+mvs.valuesName, mvs.values[i]);
                     symbols.put("constraint_"+index+"_type", "text");
@@ -587,6 +596,9 @@ public class LASBackendRequest extends LASDocument {
                     String pname = (String) partsIt.next();
                     String name = "constraint_"+index+"_"+pname;
                     String value = mvs.parts.get(pname);
+                    if ( value.contains("'") ) {
+                        value = "\""+value+"\"";
+                    }
                     symbols.put(name, value);
                 }
                 symbols.put("constraint_"+index+"_type", "text");
