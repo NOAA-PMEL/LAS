@@ -67,13 +67,15 @@ ELIF ($lhs"0|ident_ID>1|*>0") THEN
    IF ($math_sym_convert"0|no_convert>1") THEN DEFINE SYMBOL mask_title_($nmask_labels) = Data from ID ($c_s) ($rhs)
 
 ELSE 
-DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`
-GO remove_underscores ($lhs)
-DEFINE SYMBOL lhs = ($Var_Lab) 
-IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
-DEFINE SYMBOL math_op_sym = ($op)
-IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
-DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+   DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`
+   GO remove_underscores ($lhs)
+   DEFINE SYMBOL lhs = ($Var_Lab) 
+   IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
+   DEFINE SYMBOL math_op_sym = ($op)
+   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
+   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+ENDIF
+
 
 ! Show time constraint as a formatted time
 IF `($lhs"|time>1|TIME>1|*>0")` THEN
@@ -117,9 +119,9 @@ IF `($rhs"|NaN>1|*>0")+($op"|NE>1|*>0") EQ 2` THEN
 ENDIF
 
 IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
-   DEFINE SYMBOL lhs_last = ($lhs)
-   DEFINE SYMBOL op_last = ($op)
-   DEFINE SYMBOL rhs_last = ($rhs) 
-ENDIF
+DEFINE SYMBOL lhs_last = ($lhs)
+DEFINE SYMBOL op_last = ($op)
+DEFINE SYMBOL rhs_last = ($rhs) 
+
 
 !-----------------End of make_c_lab ---------------------------------
