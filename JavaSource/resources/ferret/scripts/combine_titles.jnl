@@ -63,13 +63,13 @@ ENDIF
 IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN 
    IF `STRCMP(rhsvar_last, rhsvar) NE 0` THEN
       DEFINE SYMBOL vlast = `($v)-1`
-      LET rhscomma($v) = STRCAT(rhsvar_last($vlast),",")
+      LET rhscomma($v) = STRCAT(rhsvar_last($vlast),", ")
       LET rhs($v) = STRCAT(rhscomma($v),rhsvar($v))
 
       DEFINE SYMBOL prev_status = `rhsvar_all($vlast),return=status`
       IF `($prev_status"0|AVAILABLE>1|*>0")` THEN
          let rhs($v)_new = STRCAT(rhscomma($v),rhsvar($v))
-         LET rhscomma($v)_new = STRCAT(rhsvar_all($v),",")
+         LET rhscomma($v)_new = STRCAT(rhsvar_all($v),", ")
 	 LET rhs($v) = STRCAT(rhscomma($v)_new,rhs($v)_new)
       ENDIF
 
