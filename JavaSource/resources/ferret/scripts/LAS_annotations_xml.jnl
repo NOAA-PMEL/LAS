@@ -60,7 +60,14 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
 	 IF `($note_($mnote)_lab"0|*>1") EQ 0` THEN EXIT/CYCLE; \
          DEFINE SYMBOL out = <annotation type="note">; \
          GO write_to_xml; \
+	 sh var note_($mnote)_lab; \
+	 DEFINE SYMBOL note_status = `note_($mnote)_lab,return=status`; \
+	 DEFINE SYMBOL note_ready = `($note_status"0|AVAILABLE>1|*>0")`; \
+	 IF ($note_ready) THEN ; \
+         DEFINE SYMBOL out = `LIST_VALUE_XML("value", note_($mnote)_lab, 1, "($result_annotations_filename)" )`; \
+	 ELSE; \
          DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote)_lab)", 1, "($result_annotations_filename)" )`; \
+	 ENDIF; \
          DEFINE SYMBOL out = </annotation>; \
          GO write_to_xml; \
        )

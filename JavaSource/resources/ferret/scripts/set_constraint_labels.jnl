@@ -19,36 +19,42 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL lhs = ($constraint_($v)_lhs); \
   DEFINE SYMBOL op = ($constraint_($v)_op); \
   DEFINE SYMBOL rhs = ($constraint_($v)_rhs); \
+  DEFINE SYMBOL rhsquoted = ($constraint_($v)_rhs_quoted"0|0|*>1");\
   IF ($rhs"NaN>1|*>0") THEN DEFINE SYMBOL rhs = valid; \
+  IF `($lhs"99|*>0") EQ 99` THEN EXIT/loop; \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/loop; \
   GO make_c_lab)
 
-! A set of cruises may have been selected on the map. Dont label them.
-! That info is documented elsewhere
+! A set of cruises may have been selected on the map.  If so label them.
+! If a subset was chosen, we will replace the annotation below.
 
 IF `($nmask_labels"0") GT 0` THEN
    REPEAT/RANGE=1:($nmask_labels)/NAME=mlab (\
    DEFINE SYMBOL mlab = `mlab`;\
-   IF `STRINDEX("($mask_title_($mlab))", "expocode") GT 0` THEN EXIT/CYCLE;\
    DEFINE SYMBOL note_num `($note_num"0") + 1`; \
    IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($mlab)); \
-   IF `STRINDEX("($note_($note_num)_lab)", "expocode") GT 0` THEN DEFINE SYMBOL cruises_labeled = 1; \
+   IF ($mask_title_($mlab)"0|*>1") THEN LET note_($note_num)_lab = mask_title_($mlab); \
    )
 ENDIF
 
 ! Label the cruises that came in with ferret_cruise_list.
-! If there was also a constraint on expocode, then that 
-! takes precedence; list only that.
 
-IF `($ferret_cruise_list"0|*>1") AND (($cruises_labeled"0|*>1") EQ 0)` THEN
-   DEFINE SYMBOL note_num `($note_num"0") + 1`
+IF `($ferret_cruise_list"0|*>1")` THEN
+
+   IF ($cruises_labeled"0|*>1") THEN 
+      DEFINE SYMBOL note_num = ($cruises_labeled)
+   ELSE
+      DEFINE SYMBOL note_num `($note_num"0") + 1`
+   ENDIF
 
    LET slen = STRLEN("($ferret_cruise_list)")
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
+      LET note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
    ELSE 
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
+      LET note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
    ENDIF
 
 ENDIF

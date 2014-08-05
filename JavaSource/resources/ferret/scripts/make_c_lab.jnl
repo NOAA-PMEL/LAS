@@ -18,10 +18,12 @@ ENDIF
 DEFINE SYMBOL translate_math = 1
 IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
 
-IF `STRINDEX("($rhs)", "'") GT 0` THEN
-   LET slen = `STRLEN("($rhs)")`
-   LET s1 = `STRINDEX("($rhs)", "'")`
-   DEFINE SYMBOL rhs = `SUBSTRING("($rhs)", s1+1, slen-2)`
+IF ($rhsquoted"0|0|*>1") THEN 
+   LET rhsvar = ($rhs)
+   LET rhsvar($v) = ($rhs)
+ELSE
+   LET rhsvar = "($rhs)"
+   LET rhsvar($v) = "($rhs)"
 ENDIF
 
 IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
@@ -30,7 +32,7 @@ IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
 LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 IF ($lhs"0|month>1|*>0") THEN 
-   IF `STRINDEX("($rhs)", ",") EQ 0` THEN 
+   IF `STRINDEX("($rhs), ",") EQ 0` THEN 
      DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
      DEFINE SYMBOL imonth = `MAX(1, INT(($rhs)) )`
      DEFINE SYMBOL mask_title_($nmask_labels) = Months `month_labels[i=($imonth)]`
@@ -67,15 +69,17 @@ ELIF ($lhs"0|ident_ID>1|*>0") THEN
    IF ($math_sym_convert"0|no_convert>1") THEN DEFINE SYMBOL mask_title_($nmask_labels) = Data from ID ($c_s) ($rhs)
 
 ELSE 
-   DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`
-   GO remove_underscores ($lhs)
-   DEFINE SYMBOL lhs = ($Var_Lab) 
-   IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
-   DEFINE SYMBOL math_op_sym = ($op)
-   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
-   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
-ENDIF
 
+DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`
+GO remove_underscores ($lhs)
+DEFINE SYMBOL lhs = ($Var_Lab) 
+IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
+DEFINE SYMBOL math_op_sym = ($op)
+IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
+LET mask_title_A = "Where ($lhs) ($math_op_sym) "
+LET mask_title_($nmask_labels) = STRCAT(mask_title_a,rhsvar)
+LOAD mask_title_($nmask_labels) 
+DEFINE SYMBOL mask_title_($nmask_labels) = "`mask_title_($nmask_labels)`"
 
 ! Show time constraint as a formatted time
 IF `($lhs"|time>1|TIME>1|*>0")` THEN
@@ -119,9 +123,18 @@ IF `($rhs"|NaN>1|*>0")+($op"|NE>1|*>0") EQ 2` THEN
 ENDIF
 
 IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
-DEFINE SYMBOL lhs_last = ($lhs)
-DEFINE SYMBOL op_last = ($op)
-DEFINE SYMBOL rhs_last = ($rhs) 
-
+   DEFINE SYMBOL lhs_last = ($lhs)
+   DEFINE SYMBOL op_last = ($op)
+   DEFINE SYMBOL rhs_last = ($rhs) 
+   
+   IF ($rhsquoted"0|0|*>1") THEN 
+      LET rhsvar_last = ($rhs)
+      IF `($v) EQ 0` THEN LET rhsvar_last($v) = ($rhs)
+   ELSE
+      LET rhsvar_last = "($rhs)"
+      IF `($v) EQ 0` THEN LET rhsvar_last($v) = "($rhs)"
+   ENDIF
+ENDIF
 
 !-----------------End of make_c_lab ---------------------------------
+
