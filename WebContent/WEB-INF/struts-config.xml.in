@@ -93,7 +93,7 @@
           </action>
           <action path="/saveQC" type="gov.noaa.pmel.tmap.las.ui.SaveQC">
 		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
-		  <forward name="error" path="/productserver/templates/qc.vm" redirect="false" />
+		  <forward name="qc" path="/productserver/templates/qc.vm" redirect="false" />
           </action>
           <action path="/ProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
 		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
