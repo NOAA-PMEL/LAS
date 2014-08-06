@@ -32,7 +32,7 @@ public class SaveQC extends LASAction {
 	private static final String DATABASE_CONFIG = "DatabaseBackendConfig.xml";
 	private static final String DATABASE_NAME = "SOCATFlags";
 
-	private double socatQCVersion;
+	private String socatQCVersion;
 	private DsgNcFileHandler dsgHandler;
 	private DatabaseRequestHandler databaseHandler;
 
@@ -82,7 +82,7 @@ public class SaveQC extends LASAction {
 				selectUsername, selectPassword, updateUsername, updatePassword);
 		log.debug("database request handler configuration successful");
 
-		socatQCVersion = Double.parseDouble(dbParams.getAttributeValue("socatQCVersion"));
+		socatQCVersion = dbParams.getAttributeValue("socatQCVersion");
 		log.debug("socatQCVersion=" + socatQCVersion);
 
 		String dsgFileDir = dbParams.getAttributeValue("dsgFileDir");
