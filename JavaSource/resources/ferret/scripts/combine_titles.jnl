@@ -63,7 +63,7 @@ ENDIF
 ! (investigator names already have commas.  Use the word or? Cannot easily use ;)
 
 IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN 
-   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last),($rhs)
+   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
 
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
@@ -73,7 +73,7 @@ ENDIF
 
 
 IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN 
-   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last),($rhs)
+   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
 
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
