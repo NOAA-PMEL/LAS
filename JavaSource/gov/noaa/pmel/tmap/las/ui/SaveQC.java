@@ -209,7 +209,7 @@ public class SaveQC extends LASAction {
 			return mapping.findForward("error");
 		}
 
-		return null;
+		return mapping.findForward("qc");
 	}
 
 }
