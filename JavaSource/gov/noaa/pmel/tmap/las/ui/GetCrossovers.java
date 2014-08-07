@@ -56,7 +56,7 @@ public class GetCrossovers extends LASAction {
     public static final double CUTOFF = 80.d;
     public static final double SPEED = 30.d;
     public static final double MIN_FCO2_DIFF = 5.0d;
-    public static final double MIN_TEMP_DIFF = 0.3;
+    public static final double MIN_TEMP_DIFF = 0.3d;
     
 	/* (non-Javadoc)
 	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
