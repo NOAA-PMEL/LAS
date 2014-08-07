@@ -54,12 +54,14 @@ ENDIF
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
    go write_to_xml
+
    IF `($note_num"0") GT 0` THEN
       REPEAT/RANGE=1:($note_num)/NAME=m (\
          DEFINE SYMBOL mnote = `m`; \
 	 IF `($note_($mnote)_lab"0|*>1") EQ 0` THEN EXIT/CYCLE; \
          DEFINE SYMBOL out = <annotation type="note">; \
          GO write_to_xml; \
+	 IF ($note_($mnote)_lab_quoted"0|*>1") THEN GO set_quoted_annotation ($mnote);\
 	 sh var note_($mnote)_lab; \
 	 DEFINE SYMBOL note_status = `note_($mnote)_lab,return=status`; \
 	 DEFINE SYMBOL note_ready = `($note_status"0|AVAILABLE>1|*>0")`; \
@@ -94,3 +96,7 @@ ENDIF
 ! closing tag
 DEFINE SYMBOL out = </annotations>
 GO write_to_xml
+
+
+!-----------------End of LAS_annotations_xml ---------------------------------
+
