@@ -72,9 +72,20 @@ IF ($var_name"0|fCO2_source>1|*>0") THEN
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
 ENDIF
 
+! Redefine socat_version as a float. Set its levels.
+
 IF ($var_name"0|socat_version>1|*>0") THEN
+   DEFINE SYMBOL dtype = `socat_version,RETURN=dtype`
+   IF ($dtype"|CHAR>1|*>0") THEN
+      SET VAR/NAME=socat_version_in socat_version
+      LET socat_version = STRFLOAT(socat_version_in)
+      LET DATA_VAR_EXPAND = EXPND_BY_LEN(socat_version, ($rowvar),`($rowvar)[m=@sum]`)
+      DEFINE SYMBOL data_var = data_var_expand
+      LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)  
+      CANCEL SYMBOL is_string
+   ENDIF
    IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = ten_bright_levels
-   DEFINE SYMBOL ferret_fill_levels = (1.3)(1.4)(2,4,1)
+   DEFINE SYMBOL ferret_fill_levels = (1.3)(1.4)(2,3,1)
    IF `($ferret_version) GE 6.92` THEN DEFINE SYMBOL keycentered = 1
    IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
    IF `($ferret_key_annotate"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_key_annotate = 0
