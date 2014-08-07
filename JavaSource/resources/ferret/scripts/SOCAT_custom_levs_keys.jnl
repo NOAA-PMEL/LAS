@@ -203,6 +203,18 @@ IF ($var_name"0|tmonth>1|*>0") THEN
 ENDIF
 
 IF `STRINDEX("($var_name)", "WOCE") GT 0` THEN
+
+
+   DEFINE SYMBOL dtype = `($var_name),RETURN=dtype`
+   IF ($dtype"|CHAR>1|*>0") THEN
+      SET VAR/NAME=($var_name)_in ($var_name)
+      LET ($var_name) = STRFLOAT(($var_name)_in)
+      LET DATA_VAR_EXPAND = EXPND_BY_LEN(($var_name), ($rowvar),`($rowvar)[m=@sum]`)
+      DEFINE SYMBOL data_var = data_var_expand
+      LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)  
+      CANCEL SYMBOL is_string
+   ENDIF
+
    IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette =  woce
    DEFINE SYMBOL ferret_fill_levels = (2,4,1)
    IF `($ferret_plot_key"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = 1
