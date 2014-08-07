@@ -190,6 +190,11 @@ ENDIF
 ! Is it a varible on the E axis of a DSG file?
 IF ($its_trajectory_map"0|*>1") THEN
 DEFINE SYMBOL vshape = `($data_var),RETURN=shape`
+IF ($vshape"0|POINT>1|*>0") THEN 
+   DEFINE SYMBOL eshape = `($data_var),return=eaxis`
+   IF ($eshape"0|NORMAL>0|*>1") THEN DEFINE SYMBOL vshape = E
+ENDIF
+
 IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)` THEN
 
 ! Is there a rowsize variable?
@@ -207,6 +212,8 @@ IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)
       LET/TITLE="($ferret_title_0)" data_var_expand = EXPND_BY_LEN(($data_var), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
    DEFINE SYMBOL data_var = data_var_expand
+   
+   DEFINE SYMBOL numobs = `($data_var),return = isize`
 ENDIF
 ENDIF
 
