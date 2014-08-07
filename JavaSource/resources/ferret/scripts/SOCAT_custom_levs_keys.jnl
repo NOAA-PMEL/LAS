@@ -12,7 +12,7 @@ DEFINE SYMBOL var_name = $1
 LET use_std_levels = 1
 
 IF `($piecewise_decimation"0|*>1") EQ 0` THEN LET use_std_levels = 0
-IF `($numobs"0") GT 100000` THEN  LET use_std_levels = 1
+IF `($numobs"0|bad>0|*") GT 100000` THEN  LET use_std_levels = 1
 IF ($ferret_fill_levels"0|*>1") THEN LET use_std_levels = 0
 
 LET levels_string = UPCASE("($ferret_fill_levels%0%)")

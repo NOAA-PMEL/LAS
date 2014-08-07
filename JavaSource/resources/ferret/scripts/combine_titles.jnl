@@ -58,7 +58,9 @@ IF `STRINDEX("($op_last)", "L") GT 0 AND STRINDEX("($op)", "G") GT 0` THEN
    ENDIF
 ENDIF
 
-! Now look for text constraints,
+! Now look for text constraints.
+! When combining names, we may want something else not a comma between them. 
+! (investigator names already have commas.  Use the word or? Cannot easily use ;)
 
 IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN 
    IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last),($rhs)
@@ -67,7 +69,6 @@ IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
    DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
    IF ($($lhsq)_quoted"0") THEN DEFINE SYMBOL mask_title_($nmask_labels)_quoted = ($lhsq)
-!   sh sym lhsq, *quoted*; pause
 ENDIF
 
 
@@ -78,6 +79,5 @@ IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
    DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
 ENDIF
-
 
 ! ----- End of combine_titles.jnl ------------------------------------------------
