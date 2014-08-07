@@ -1,0 +1,37 @@
+! set_quoted_annotation.jnl
+! If there is a single-quote inside an annotation, pull the 
+! string apart and replace the part of the string that is
+!  varname_ic_is_quoted with the string sent in as the symbol
+!  constraint_ic_rhs
+
+DEFINE SYMBOl notenum = $1
+
+! The symbol note_($notenum)_lab_quoted contains the variable name
+
+LET i1 = `STRINDEX("($note_($notenum)_lab)", "($note_($notenum)_lab_quoted)")`
+LET i2 = `STRINDEX("($note_($notenum)_lab)", "is_quoted")`
+
+LET namelen = STRLEN( "($note_($notenum)_lab_quoted)")
+
+! constraint number
+DEFINE SYMBOL cnum = `SUBSTRING("($note_($notenum)_lab)",i1+namelen+1,i2-namelen-i1-2)`
+
+LET part1 = SUBSTRING("($note_($notenum)_lab)",1,i1-1)
+
+LET notelen = `STRLEN("($note_($notenum)_lab)")`
+
+LET part2 = "`SUBSTRING("($note_($notenum)_lab)",i2+9,notelen-i2-10+3)`"
+LET quoted_string = ($constraint_($cnum)_rhs)
+
+LET note_($notenum)_A = STRCAT(part1, quoted_string)
+LET note_($notenum)_lab = STRCAT(note_($notenum)_A, part2)
+
+list note_($notenum)_lab
+
+! There may be more quoted strings in the same note. Do it again until
+! there are no instances of is_quoted...
+pause
+
+
+! ----- End of set_quoted_annotation.jnl ------------------------------------------------
+
