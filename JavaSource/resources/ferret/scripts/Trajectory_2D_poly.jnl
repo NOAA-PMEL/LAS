@@ -261,6 +261,12 @@ let pre_plot = ($clock_secs)
    ENDIF
 ENDIF
 
+! Hack: histogram levels
+
+ IF `STRINDEX("($ferret_fill_levels)", "H") GT 0 OR STRINDEX("($ferret_fill_levels)", "h") GT 0` THEN \
+($plot_command)($qualifiers)/missing=black/nokey  x_var_data, y_var_data, var_data 
+
+
 SAY _________________ END plot: clock seconds:                                   ($clock_secs)
 SAY _________________ total time for line plot, seconds                          ----- `($clock_secs) - pre_plot`
 
