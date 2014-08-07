@@ -49,7 +49,11 @@ IF ($las_ferret_header_label"0|*>1") THEN
    GO write_to_xml
 ENDIF
 
-! Other notes that may have been set up
+! Other notes that may have been set up.
+! The symbol note_($mnote)_lab_quoted indicates that
+! string(s) containing an apostrophe or other reserved
+! character have been replaced by an innocuous string
+! and the actual value needs to be inserted befor writing.
 
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
@@ -61,7 +65,10 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
 	 IF `($note_($mnote)_lab"0|*>1") EQ 0` THEN EXIT/CYCLE; \
          DEFINE SYMBOL out = <annotation type="note">; \
          GO write_to_xml; \
-	 IF ($note_($mnote)_lab_quoted"0|*>1") THEN GO set_quoted_annotation ($mnote);\
+	 CANCEL SYMBOL qn; \
+	 IF ($note_($mnote)_lab_quoted"0|*>1") THEN\
+	    REPEAT/RANGE=1:5/NAME=q (GO set_quoted_annotation ($mnote); IF `still_quoted EQ 0` THEN EXIT/LOOP); \
+	 ; \
 	 sh var note_($mnote)_lab; \
 	 DEFINE SYMBOL note_status = `note_($mnote)_lab,return=status`; \
 	 DEFINE SYMBOL note_ready = `($note_status"0|AVAILABLE>1|*>0")`; \
@@ -74,6 +81,7 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
          GO write_to_xml; \
        )
     ENDIF
+
     IF ($calendar_lab"0|*>1") THEN
       DEFINE SYMBOL out = <annotation type="note">
       GO write_to_xml
