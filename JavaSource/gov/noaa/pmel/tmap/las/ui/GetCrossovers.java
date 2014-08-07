@@ -55,6 +55,8 @@ public class GetCrossovers extends LASAction {
     public static final double EARTH_AUTHALIC_RADIUS_KM = 6371.007;
     public static final double CUTOFF = 80.d;
     public static final double SPEED = 30.d;
+    public static final double MIN_FCO2_DIFF = 5.0d;
+    public static final double MIN_TEMP_DIFF = 0.3;
     
 	/* (non-Javadoc)
 	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -209,7 +211,7 @@ public class GetCrossovers extends LASAction {
 	                                    // We found some.  Compute the cross overs.
 	                                    JsonObject selectedCruise = null;
 	                                    // get the data for the selected cruise.
-	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude&"+traj_id_name+"=\""+tid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
 	                                    InputStream stream = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
 	                                    if ( stream != null ) {
 	                                        JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(stream));
@@ -220,7 +222,7 @@ public class GetCrossovers extends LASAction {
 	                                    if ( selectedCruise != null ) {
 	                                        for (Iterator cIt = candiateCruises.iterator(); cIt.hasNext();) {
 	                                            String cid = (String) cIt.next();
-	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
 	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
 	                                            if ( st != null ) {
 	                                                JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(st));
@@ -344,6 +346,18 @@ public class GetCrossovers extends LASAction {
             long time = dt.getMillis();
             double lat = row.get(2).getAsDouble();
             double lon = row.get(3).getAsDouble();
+            double temp;
+            try {
+                temp = row.get(4).getAsDouble();
+            } catch (Exception e) {
+                temp = Double.MAX_VALUE - 10000.d;
+            }
+            double fCO2;
+            try {
+                fCO2 = row.get(5).getAsDouble();
+            } catch (Exception e) {
+                fCO2 = Double.MAX_VALUE - 10000.d;
+            }
             for ( int j = 0; j < crossingRows.size(); j++ ) {
                 JsonArray crossingRow = (JsonArray) crossingRows.get(j);
                 String crossingID = crossingRow.get(0).getAsString();
@@ -361,6 +375,18 @@ public class GetCrossovers extends LASAction {
                 long crossingTime = cdt.getMillis();
                 double crossingLat = crossingRow.get(2).getAsDouble();
                 double crossingLon = crossingRow.get(3).getAsDouble();
+                double crossingTemp;
+                try {
+                    crossingTemp = crossingRow.get(4).getAsDouble();
+                } catch (Exception e) {
+                    crossingTemp = Double.MAX_VALUE - 10000.d;
+                }
+                double crossingfCO2;
+                try {
+                    crossingfCO2 = crossingRow.get(5).getAsDouble();
+                } catch (Exception e) {
+                    crossingfCO2 = Double.MAX_VALUE - 10000.d;
+                }
                 
                 if ( crossingTime > time + timeDelta  ) {
                     /* 
@@ -389,10 +415,13 @@ public class GetCrossovers extends LASAction {
                 if ( minDistance > locTimeDist ) {
                     minDistance = locTimeDist;
                     if ( locTimeDist <= CUTOFF ) {
+                        double temp_diff = Math.abs(crossingTemp - temp );
+                        double fCO2diff = Math.abs(crossingfCO2 - fCO2);
+                        if ( temp_diff < MIN_TEMP_DIFF && fCO2diff  < MIN_FCO2_DIFF ) {
                        
-                        crossover = new Crossover(crossingID, locTimeDist, crossingLat, crossingLon, crossingDate, cruiseMinDate, cruiseMaxDate);
+                            crossover = new Crossover(crossingID, locTimeDist, crossingLat, crossingLon, crossingDate, cruiseMinDate, cruiseMaxDate);
                         
-                       
+                        }
                     }
                 }
                 
