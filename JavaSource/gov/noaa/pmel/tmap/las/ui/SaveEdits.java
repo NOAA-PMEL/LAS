@@ -285,7 +285,8 @@ public class SaveEdits extends LASAction {
 		log.info("Assigned WOCE event (also updated " + tempname + "): \n" + 
 				woceEvent.toString());
 
-		return null;
+		request.setAttribute("expocode", expocode);
+		return mapping.findForward("edits");
 	}
 
 }
