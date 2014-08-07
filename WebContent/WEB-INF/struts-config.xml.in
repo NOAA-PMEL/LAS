@@ -90,6 +90,7 @@
           <action path="/getCrossovers" type="gov.noaa.pmel.tmap.las.ui.GetCrossovers"/>
           <action path="/saveEdits" type="gov.noaa.pmel.tmap.las.ui.SaveEdits">
                   <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
+		  <forward name="edits" path="/productserver/templates/edits.vm" redirect="false" />
           </action>
           <action path="/saveQC" type="gov.noaa.pmel.tmap.las.ui.SaveQC">
 		  <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
