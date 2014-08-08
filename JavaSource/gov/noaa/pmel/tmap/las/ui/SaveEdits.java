@@ -249,7 +249,7 @@ public class SaveEdits extends LASAction {
 		woceEvent.setUsername(username);
 		woceEvent.setComment(comment);
 		woceEvent.setExpocode(expocode);
-		woceEvent.setColumnName(dataName);
+		woceEvent.setDataVarName(dataName);
 		woceEvent.setFlag(woceFlag);
 		woceEvent.setFlagDate(new Date());
 		woceEvent.setLocations(locations);
