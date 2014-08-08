@@ -307,6 +307,9 @@ public class TabledapTool extends TemplateTool {
                     }
                 } else if ( tType.equals("text") ) {
                     String rhsString = constraint.getChildText("rhs");
+                    if ( rhsString != null && rhsString.equals("") ) {
+                        rhsString = " ";
+                    }
                     String lhsString = constraint.getChildText("lhs");
                     String opString = constraint.getChildText("op");  //some sort of text format
                     Constraint c = new Constraint(lhsString, opString, rhsString);          
