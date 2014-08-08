@@ -45,10 +45,10 @@ IF `($ferret_cruise_list"0|*>1")` THEN
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
-      LET note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)` 
+      LET note_($note_num)_lab = "Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`"
    ELSE 
       DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
-      LET note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list) 
+      LET note_($note_num)_lab = "Where cruise expocode = ($ferret_cruise_list)"
    ENDIF
 
 ENDIF
