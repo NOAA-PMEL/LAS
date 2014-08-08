@@ -33,7 +33,7 @@ IF `($nmask_labels"0") GT 0` THEN
    DEFINE SYMBOL mlab = `mlab`;\
    DEFINE SYMBOL note_num `($note_num"0") + 1`; \
    IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($mlab)); \
-   IF ($mask_title_($mlab)"0|*>1") THEN LET note_($note_num)_lab = mask_title_($mlab); \ 
+   IF ($mask_title_($mlab)"0|*>1") THEN LET note_($note_num)_lab = "($mask_title_($mlab))"; \ 
    )
 ENDIF
 
