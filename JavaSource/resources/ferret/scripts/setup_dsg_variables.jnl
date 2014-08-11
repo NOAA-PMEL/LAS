@@ -12,6 +12,7 @@ IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 IF `($data_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_var_in = ($data_var)
 IF `($data_x_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_x_var_in = ($data_x_var)
 IF `($data_y_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_y_var_in = ($data_y_var)
+IF `($data_t_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_t_var_in = ($data_t_var)
 
 DEFINE SYMBOL nfeatures = `($rowvar),RETURN=msize`
 
@@ -34,6 +35,7 @@ DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
 LET lon_with_gaps = ($data_x_var)
 LET lat_with_gaps = ($data_y_var)
+LET time_with_gaps = ($data_t_var)
 LET var_with_gaps = ($data_var)
 
 ! Function separate puts gaps between cruises and also removes jumps in longitude
@@ -62,6 +64,7 @@ ELSE
 ENDIF
 
 LET lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
+LET time_with_gaps = SEPARATE(($data_t_var)[i=1:`npts`], ($rowvar), 0)
 
 LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)   
 IF ($is_string) THEN LET var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
@@ -71,6 +74,7 @@ LET npts = `lat_with_gaps,RETURN=isize`
 DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
 DEFINE SYMBOL data_y_var = lat_with_gaps
+DEFINE SYMBOL data_t_var = time_with_gaps
 
 !ENDIF ! nfeatures GT 1
 

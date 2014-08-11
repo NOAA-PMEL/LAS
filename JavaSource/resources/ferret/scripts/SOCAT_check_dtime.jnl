@@ -2,16 +2,14 @@
 
 ! Put an extra gap between points where delta-time is over specified # days
 LET day_tol = 2
-
-LET time_with_gaps = SEPARATE(($data_t_var)[i=1:`npts`], ($rowvar), 0)
-LET twoday = 2*24*60*60  ! 2 days of seconds
+LET twoday = day_tol*24*60*60  ! 2 days of seconds
 
 LET two_day_gaps = if time_with_gaps[i=@ddf] GT `twoday` then 1
 LET add_time_gaps = `two_day_gaps[i=@ngd] GT 0` 
 
 IF `add_time_gaps EQ 0` THEN EXIT/SCRIPT
 
-! Now put an extra gap between points where delta-time is over specified # days
+! Now put an extra gap between points where delta-time is more than specified # days
 
 DEFINE AXIS/X=1:`npts`:1 ax_with_gaps
 LET ii_with_gaps = i[gx=ax_with_gaps]
@@ -27,8 +25,8 @@ LET timegaps = ESEQUENCE(XCAT(timelens,`npts-timelens[i=@sum]`) )
 
 ! The variables now get an extra gap where there is a long delta-time.
 
-LET/units="`x_var_data,return=units`" x_var_data = SEPARATE(lon_with_gaps, timegaps, 0)
-LET/units="`y_var_data,return=units`" y_var_data = SEPARATE(lat_with_gaps, timegaps, 0)
+LET x_var_data = SEPARATE(lon_with_gaps, timegaps, 0)
+LET y_var_data = SEPARATE(lat_with_gaps, timegaps, 0)
 
 DEFINE SYMBOL vardef = `var_data,return=title`
 
