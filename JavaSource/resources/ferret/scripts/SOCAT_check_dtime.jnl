@@ -27,8 +27,8 @@ LET timegaps = ESEQUENCE(XCAT(timelens,`npts-timelens[i=@sum]`) )
 
 ! The variables now get an extra gap where there is a long delta-time.
 
-LET x_var_data = SEPARATE(lon_with_gaps, timegaps, 0)
-LET y_var_data = SEPARATE(lat_with_gaps, timegaps, 0)
+LET/units="`x_var_data,return=units`" x_var_data = SEPARATE(lon_with_gaps, timegaps, 0)
+LET/units="`y_var_data,return=units`" y_var_data = SEPARATE(lat_with_gaps, timegaps, 0)
 
 DEFINE SYMBOL vardef = `var_data,return=title`
 
