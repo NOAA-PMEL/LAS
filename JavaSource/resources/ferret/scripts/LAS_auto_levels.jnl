@@ -122,7 +122,11 @@ IF ($ferret_fill_levels"0|*>1") THEN
    IF `nc GT 0` THEN 
       LET slen = STRLEN ("($up_fill_levels)") 
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
-      CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
+      IF `STRINDEX("($up_fill_levels)", "V") GT 0` THEN
+         CANCEL SYMBOL num_fine_levels
+      ELSE
+         CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
+      ENDIF 
    ENDIF
    LET other = `STRINDEX("($ferret_fill_levels)", "D")` + \
       `STRINDEX("($ferret_fill_levels)", ",")`+ \
