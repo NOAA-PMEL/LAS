@@ -2,7 +2,7 @@
 ! $Header$
 ! insitu_waterfall_xz.jnl
 !
-! Creates a YZ Waterfall plot 
+! Creates a XZ Waterfall plot 
 !
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
@@ -15,8 +15,9 @@ DEFINE SYMBOL  data_initialization_script = feature_initialize_data_insitu
 
 SET MODE verify:always  ! allows for debugging
 
-DEFINE SYMBOL  ribbon = 1
-DEFINE SYMBOL  its_insitu = 1
+DEFINE SYMBOL ribbon = 1   ! straight lines colored by the color var
+!DEFINE SYMBOL ribbon = 0   ! wiggly waterfall plots, still colored if there is a color palette.
+DEFINE SYMBOL its_insitu = 1
 
 GO LAS_initialize_region 0
 
@@ -44,12 +45,18 @@ GO LAS_url_label 0
 
 GO LAS_initialize_feature_id
 
+! Reset variables defined in the above
+
+define symbol data_var = ($data_0_var)
+define symbol data_x_var = lon
+define symbol data_y_var = lat
+
 DEFINE SYMBOL variable_lab = ($variable_lab) at depth (meters)
 
 ! Apply any constraints
 
-LET xvar = ($ferret_plot_var)
-LET nx_var = `($ferret_plot_var),RETURN=isize`
+LET xvar = ($data_var)
+LET nx_var = `($data_var),RETURN=isize`
 
 LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
 LET subset_mask = 1
@@ -77,13 +84,8 @@ DEFINE SYMBOL  nbad_data = `($data_var)[i=@NBD]`
 ! 
 ! In this case we can set up a time axis, and call polymark_datekey 
 
-
-IF ($rowvar"0|*>1") THEN 
-   GO setup_dsg_variables
-ELSE
-   LET nout_lonlat = `var_data_masked[i=@ngd]`
-   DEFINE SYMBOL  nout_lonlat = `nout_lonlat` 
-ENDIF
+LET nout_lonlat = `var_data_masked[i=@ngd]`
+DEFINE SYMBOL  nout_lonlat = `nout_lonlat` 
 
 ! When the data crosses the branch cut, replicate the lon,lat,var variables 
 ! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
@@ -122,6 +124,26 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   ENDIF
 ENDIF
 
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN
+
+   LET tmin = ($data_t_var)[i=@MIN]
+   LET tmax = ($data_t_var)[i=@MAX]
+
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL  tunits = `tunits`
+   ENDIF
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis
+
+   LET ttvar = t[gt=time_axis]
+   DEFINE SYMBOL  datekey_time_arg = ttvar
+
+   DEFINE SYMBOL  margin = 1
+   DEFINE SYMBOL  ferret_fill_levels = 30
+
+ENDIF
+
 IF ($ferret_by_id"0|*>1") THEN
    DEFINE SYMBOL  ferret_palette = more_by_levels
    DEFINE SYMBOL  ferret_fill_levels = `($rowvar),RETURN=lsize`
@@ -152,15 +174,13 @@ ELSE
    DEFINE SYMBOL  qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-IF ($ferret_fill_levels"0|*>1") THEN
-   DEFINE SYMBOL  qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
-ENDIF
+DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels"v")
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL  plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
    IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL  plot_command = ($plot_command)/THICK
 ENDIF
-
+pause
 LET prof_id = _m[ge=($rowvar)]
 
 LET rowsum = `($rowvar)[m=@sum]`
@@ -191,32 +211,36 @@ LET/TITLE="Depth"/UNITS="m"  zplot = EXPNDI_BY(($data_z_var), newrow, ($nk))
 
 LET/TITLE="Depth"/UNITS="m"  issurf = EXPNDI_BY(XSEQUENCE(newrow), XSEQUENCE(newrow), ($nk))  ! Surface locations
 
-
-PPL %range `zplot[i=@min]`,  `zplot[i=@max]`, 10
+LET ntic = 10
+PPL %range ($region_z_lo),  ($region_z_hi), `ntic`
+LET dlo = ($ppl$range_low)
 LET dhi = ($ppl$range_high)
 
-PPL %range `latplot[i=@min]`,  `latplot[i=@max]`, 10
+PPL %range ($region_y_lo),  ($region_y_hi), `ntic`
 LET ylo = ($ppl$range_low)
 LET yhi = ($ppl$range_high)
 
-PPL %range `lonplot[i=@min]`,  `lonplot[i=@max]`, 10
+PPL %range ($region_x_lo),  ($region_x_hi), `ntic`
 LET xlo = ($ppl$range_low)
 LET xhi = ($ppl$range_high)
 
-IF ($ribbon"0|*>1") THEN
-   PLOT/VS/RIBBON/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET lonplot, zplot, varplot
+! First plot sets up plot symbols. The reset_labels and color-key labeled by dates
+! expect the color plot to be an overlay.
+
+IF ($ribbon"0|0|1|*>1") THEN
+   PLOT/VS/RIBBON/PALETTE=white/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`xlo`:`xhi` lonplot, zplot, varplot
+   PLOT/VS/RIBBON/OVER/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET lonplot, zplot, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
-      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-   PPL ribbon
+   PPL RIBBON/OVER
+   sh sym qualifiers
 ELSE
 
-
-! To make wiggly waterfall plots  (should choose x or y)
+! To make wiggly waterfall plots
 
    define axis/x=-180:360:180/units=degrees xfull
    define axis/y=90s:90n:90/units=degrees yfull
    define axis/z=0:10000:5000/depth zfull
-   
+
 ! valmid - a "nice" value roughly mid-range of the "surface" values
    DEFINE SYMBOL   nvals `($data_var)[i=@ngd]`
    IF `($nvals) EQ 0` THEN
@@ -233,23 +257,22 @@ ELSE
    ENDIF
    DEFINE SYMBOL  valrange `($valmax) - ($valmin)`   ! full range
    
-! decide on a nice range to use for the length key
+! decide on a range to use for the length key
    ppl %RANGE,($valmin),($valmax),10
    DEFINE SYMBOL  scale_min ($ppl$range_low)
    DEFINE SYMBOL  scale_max ($ppl$range_high)
    
-   
    IF `($valrange) EQ 0` THEN
-     DEFINE SYMBOL  wscale `0.1 * (yhi - ylo)`
+     DEFINE SYMBOL  wscale `0.1 * (xhi - xlo)`
    ELSE
-     DEFINE SYMBOL  wscale `0.1 * (yhi - ylo)/($valrange)`
+     DEFINE SYMBOL  wscale `0.1 * (xhi - xlo)/($valrange)`
    ENDIF
    
 ! draw a blank,labelled rectangle - allow room for waterfalls at edges
    DEFINE SYMBOL wleft  `($wscale)*(($valmid) - ($valmin))`
    DEFINE SYMBOL wright `($wscale)*(($valmax) - ($valmid))`
    
-   FILL/VLIM=0:`dhi`/HLIM=`ylo`:`yhi`/NOKEY/NOLAB/LEV=(-100,-99,1) 0*x[gx=xfull]*z[gz=zfull]
+   FILL/VLIM=0:`dhi`/HLIM=`xlo`:`xhi`/NOKEY/NOLAB/LEV=(-100,-99,1) 0*x[gx=xfull]*z[gz=zfull]
    PPL YLAB @ACDepth (meters)
    
 ! X or Y coordinates of profiles and depths defined above, lonplot, latplot, zplot. 
@@ -260,17 +283,17 @@ ELSE
       LABEL/NOUSER `(ppl$xlen)/2`,`(ppl$ylen)/2`,0,0,.25 @ACNo Valid Data
    ELSE
    ! ... vertical profile markers
-      PLOT/VS/LINE/color=black/THICK/OVER/NOLAB/i=1:($nk) latplot, zplot
+      PLOT/VS/LINE/color=black/OVER/NOLAB/i=1:($nk) lonplot, zplot
    ! ... profile data
       IF `($nvals)/($nprofiles) GT 50` THEN
-!          PLOT/VS/LINE/COLOR=red/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot
-          RIBBON/VS/LINE/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
+!          PLOT/VS/LINE/COLOR=red/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot
+          RIBBON/VS/LINE/palette=($ferret_palette"red")/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
       ELSE
-!          PLOT/VS/LINE/COLOR=red/SYM=1/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot
-          RIBBON/VS/LINE/SYM=1/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
+!          PLOT/VS/LINE/COLOR=red/SYM=1/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot
+          RIBBON/VS/LINE/SYM=1/palette=($ferret_palette"red")/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
       ENDIF
    ! ... scale indicator
-      DEFINE SYMBOL  xmidsc (`(yhi + ylo)/2`)
+      DEFINE SYMBOL  xmidsc (`(xhi + xlo)/2`)
       DEFINE SYMBOL  xlosc `($xmidsc) - ($wscale)*(($valmid) - ($scale_min))`
       DEFINE SYMBOL  xhisc `($xmidsc) + ($wscale)*(($scale_max) - ($valmid))`
       DEFINE SYMBOL  zmidsc `dhi/2`
@@ -281,7 +304,6 @@ ELSE
    ENDIF
 
 ENDIF  ! NOT ribbon
-
 
 ! Add any constraint labels as annotation notes.
 
