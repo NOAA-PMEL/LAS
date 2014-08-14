@@ -139,6 +139,12 @@ IF `(($num)+1) eq ($data_count)` THEN
    IF `($data_($num)_var"0|($feature_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_feature = 1
 ENDIF
 
+IF ($rowvar"0|*>1") THEN 
+   DEFINE SYMBOL rdir = `($rowvar),RETURN=shape`
+   DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
+   LET longest = ($rowvar)[($rind)=@max]+2
+ENDIF
+
 ! Other variables on the E axis to be colored the same way.
 IF `color_by_index EQ 1` THEN let color_by_feature = 1
 
