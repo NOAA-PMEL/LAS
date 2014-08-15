@@ -1,8 +1,8 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.socat.dashboard.handlers.DatabaseRequestHandler;
+import gov.noaa.pmel.socat.dashboard.handlers.DsgNcFileHandler;
 import gov.noaa.pmel.socat.dashboard.nc.Constants;
-import gov.noaa.pmel.socat.dashboard.nc.DsgNcFileHandler;
-import gov.noaa.pmel.socat.dashboard.server.DatabaseRequestHandler;
 import gov.noaa.pmel.socat.dashboard.shared.DataLocation;
 import gov.noaa.pmel.socat.dashboard.shared.SocatWoceEvent;
 import gov.noaa.pmel.tmap.exception.LASException;
