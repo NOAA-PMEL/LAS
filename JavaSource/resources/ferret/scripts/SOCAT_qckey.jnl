@@ -39,7 +39,7 @@ IF `($win_aspect"1") LT 0.8` THEN
 
    LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,($qclettersize),D
 
-   LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,($qcwordsize),Experimental
+   LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,($qcwordsize),E
 
    LABEL/NOUSER `keydel*5+keystart`,`key_hi`,0,0,($qclettersize),F
 
