@@ -1,5 +1,5 @@
 ! SOCAT_qckey
-! Label the key with A,B,C,D,E,F,U,N,S,X
+! Label the key with A,B,C,D,F,N,U,S,X
 
 ! --------
 LET n_key_levs = 10
@@ -34,17 +34,17 @@ LABEL/NOUSER `keydel*2+keystart`,`key_hi`,0,0,.09,C
 
 LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,.09,D
 
-LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,.09,E
+LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,.09,Experimental
 
 LABEL/NOUSER `keydel*5+keystart`,`key_hi`,0,0,.09,F
 
-LABEL/NOUSER `keydel*6+keystart`,`key_hi`,0,0,.09,U
+LABEL/NOUSER `keydel*6+keystart`,`key_hi`,0,0,.09,New
 
-LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,.09,N
+LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,.09,Updated
 
-LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,.09,S
+LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,.09,Suspended
 
-LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,.09,X
+LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,.09,Excluded
 
 ! ----- End of SOCAT_qckey.jnl ------------------------------------------------
 
