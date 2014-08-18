@@ -83,7 +83,8 @@ IF ($var_name"0|socat_version>1|*>0") THEN
       LET socat_version = STRFLOAT(socat_version_in)
       LET DATA_VAR_EXPAND = EXPND_BY_LEN(socat_version, ($rowvar),`($rowvar)[m=@sum]`)
       DEFINE SYMBOL data_var = data_var_expand
-      LET var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)  
+      LET var_with_gaps = SEPARATE(DATA_VAR_EXPAND[i=1:`npts`], ($rowvar), 0)  
+      DEFINE SYMBOL data_var = var_with_gaps
       CANCEL SYMBOL is_string
    ENDIF
    IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = ten_bright_levels
