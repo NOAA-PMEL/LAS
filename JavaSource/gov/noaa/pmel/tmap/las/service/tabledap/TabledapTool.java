@@ -478,8 +478,8 @@ public class TabledapTool extends TemplateTool {
             
             // This changes the data set to the decimated data set if it exists.
             // We have decided to try all ribbon plots with the decimated data set...
-            // so we will remove the !hasConstraints && !smallArea 
-            if ( operationID.equals("Trajectory_2D_poly") && !decid.equals("") && !full ) {
+            // so we will remove the !hasConstraints 
+            if ( !smallarea && operationID.equals("Trajectory_2D_poly") && !decid.equals("") && !full ) {
                 id = decid;
             }
             
