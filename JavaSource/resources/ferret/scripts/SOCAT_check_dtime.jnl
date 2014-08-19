@@ -28,10 +28,9 @@ LET timegaps = ESEQUENCE(XCAT(timelens,`npts-timelens[i=@sum]`) )
 LET/units="`lon_with_gaps,return=units`" x_var_data = SEPARATE(lon_with_gaps, timegaps, 0)
 LET/units="`lat_with_gaps,return=units`" y_var_data = SEPARATE(lat_with_gaps, timegaps, 0)
 
-DEFINE SYMBOL vardef = `var_data,return=title`
-
 IF ($is_string) THEN 
    LET/units="`var_with_gaps,return=units`" var_data = SEPARATE_STR(var_with_gaps, timegaps, 0)
+   DEFINE SYMBOL vardef = `var_data,return=title`
    IF ($vardef"0|COLOR_VAR>1|*>0") THEN LET/units="`var_with_gaps,return=units`" var_data  = SEPARATE(color_var, timegaps, 0)
 ELSE
    LET/units="`var_with_gaps,return=units`" var_data  = SEPARATE(var_with_gaps, timegaps, 0)
