@@ -72,7 +72,7 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
   IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
   LET var_data = ($data_var)
 
-   DEFINE SYMBOL var_data = ($data_var)
+   DEFINE SYMBOL var_data = ($data_var)[i=1,m=1]
    DEFINE SYMBOL vtype = 0
    LET gettype= ($var_data)
    DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
@@ -210,13 +210,16 @@ DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 
 IF ($decimation_fraction"0|*>1") THEN 
-   IF `approx_total LT 70000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+   DEFINE SYMBOL  drawthick = 1
 ELSE
-   IF `nout_lonlat LT 40000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+   IF `nout_lonlat LT 400000` THEN DEFINE SYMBOL drawthick = 1
+   IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 1
 ENDIF
 
-!IF `nout_lonlat LT 40000 and featuresize LT 100` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
-IF `featuresize LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+! Always thick?
+
+DEFINE SYMBOL drawthick = 1
+IF ($drawthick"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
 
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
