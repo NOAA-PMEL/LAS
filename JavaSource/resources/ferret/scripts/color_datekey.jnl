@@ -89,7 +89,7 @@ IF `dates_same GT 0` THEN
    
    LET ttime = `($TLAB_tstart)+4*($TLAB_tstep)`
    IF `ttime LE ttime_last` THEN 
-      LET ttime =  = `(1. - 1.e-5)* ($TLAB_tend) - 1`
+      LET ttime = `(1. - 1.e-5)* ($TLAB_tend) - 1`
    ENDIF 
    LET dayfrac = `TAX_DAYFRAC(ttime, tpts)`
    IF `PLMlabel GT 0` THEN
