@@ -43,7 +43,7 @@ IF `STRCMP("($day_3_fourth)", "($day_2_fourth)") EQ 0` THEN LET dates_same = 1
 
 LET ttime = `($TLAB_tstart)+4*($TLAB_tstep)`
 IF `ttime LE ttime_last` THEN 
-   LET ttime =  = `(1. - 1.e-5)* ($TLAB_tend) - 1`
+   LET ttime = `(1. - 1.e-5)* ($TLAB_tend) - 1`
 ENDIF 
 DEFINE SYMBOL day_4_fourth = `TAX_DATESTRING(ttime, tpts, "day")`
 IF `STRCMP("($day_4_fourth)", "($day_3_fourth)") EQ 0` THEN LET dates_same = 1
