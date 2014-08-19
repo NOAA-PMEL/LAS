@@ -32,6 +32,7 @@ public class Constants {
     public static final String PROFILE_ESGF = "LAS-ESGF";
     public static final double CONTROLS_WIDTH = 280.;
     public static final String ALLBORDER = "allBorderGray";
+    public static final int MAX_CONSTRAINTS = 300;
     
     public static String PICK = "Choose variable from the group above,";
     public static String APPEAR = "then a value from the list that appears here.";
