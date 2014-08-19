@@ -211,6 +211,11 @@ public class ConstraintWidgetGroup extends Composite {
                 String value = event.getValue();
                 String key = event.getKey();
                 String keyValue = event.getKeyValue();
+                
+                if ( displayPanel.getWidgetCount() >= Constants.MAX_CONSTRAINTS ) {
+                    Window.alert("Only "+Constants.MAX_CONSTRAINTS+" constraints allowed. Try using the text search widget.");
+                    return;
+                }
 
                 TextConstraintAnchor anchor = new TextConstraintAnchor("text", null, null, variable, value, key, keyValue, "eq");
 
