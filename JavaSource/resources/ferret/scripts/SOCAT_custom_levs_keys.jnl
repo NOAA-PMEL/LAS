@@ -210,7 +210,7 @@ IF `STRINDEX("($var_name)", "WOCE") GT 0` THEN
    IF ($dtype"|CHAR>1|*>0") THEN
       SET VAR/NAME=($var_name)_in ($var_name)
       LET ($var_name) = STRFLOAT(($var_name)_in)
-      LET var_with_gaps = SEPARATE(($var_name)[i=1:`npts`], ($rowvar), 0)
+      LET var_with_gaps = SEPARATE(($var_name), ($rowvar), 0)
       DEFINE SYMBOL data_var = var_with_gaps
       CANCEL SYMBOL is_string
    ENDIF
