@@ -71,7 +71,7 @@ DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY/NOLAB
 
-IF ($ferret_thumb"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
+!IF ($ferret_thumb"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
 
 DEFINE SYMBOL dokey = 0
 
