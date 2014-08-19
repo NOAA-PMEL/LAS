@@ -22,6 +22,9 @@ public class ConstraintTextDisplay extends FlowPanel {
                 String value = anchor.getKeyValue();
                 ConstraintSerializable keyConstraint = cons.get(key);
                 if ( keyConstraint == null ) {
+                    if ( value.contains("*") || value.contains("[") || value.contains("]") ) {
+                        op = "is";
+                    }
                     keyConstraint = new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, op, value, key+"_"+value);
                     cons.put(key, keyConstraint);
                 } else {

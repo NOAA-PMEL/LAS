@@ -9,14 +9,14 @@
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 import gov.noaa.pmel.tmap.addxml.AxisBean;
+import gov.noaa.pmel.tmap.addxml.CatalogRefHandler;
 import gov.noaa.pmel.tmap.addxml.CategoryBean;
 import gov.noaa.pmel.tmap.addxml.DatasetBean;
 import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
-import gov.noaa.pmel.tmap.addxml.CatalogRefHandler;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
-import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.jdom.filter.AttributeFilter;
@@ -28,24 +28,19 @@ import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
-import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-
 import gov.noaa.pmel.tmap.las.product.server.Cache;
-import gov.noaa.pmel.tmap.las.test.LASTest;
 import gov.noaa.pmel.tmap.las.test.LASTestOptions;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
-import gov.noaa.pmel.tmap.las.util.Arange;
 import gov.noaa.pmel.tmap.las.util.Axis;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.DataConstraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
-import gov.noaa.pmel.tmap.las.util.EnsembleMember;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Institution;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
@@ -61,13 +56,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -77,11 +67,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.Vector;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -97,11 +84,9 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Parent;
-import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -110,9 +95,6 @@ import org.xml.sax.SAXException;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dods.DODSNetcdfFile;
 
 /**
  * This class is the JDOM instantiation of the "las.xml" file and any entities it references (data stubs and operationsV7.xml).
@@ -1190,12 +1172,14 @@ public class LASConfig extends LASDocument {
         ArrayList<Option> options = new ArrayList<Option>();
         Element optiondef = getElementByXPath("/lasdata/lasui/options/optiondef[@name='"+optionID+"']");
         List definedOptions = optiondef.getChildren("option");
-        // Collect the options that are defined inside this optiondef.
+        // Collect the options that are defined inside this optiondef, if any.
         Option opB = null;
-        for (Iterator doIt = definedOptions.iterator(); doIt.hasNext();) {
-            Element opt = (Element) doIt.next();
-            opB = new Option((Element)opt.clone());
-            options.add(opB);
+        if ( definedOptions != null ) {
+            for (Iterator doIt = definedOptions.iterator(); doIt.hasNext();) {
+                Element opt = (Element) doIt.next();
+                opB = new Option((Element)opt.clone());
+                options.add(opB);
+            }
         }
         // These options are defined by inheritence from other optiondef elements.
         String inherit = optiondef.getAttributeValue("inherit");
@@ -5556,7 +5540,9 @@ public class LASConfig extends LASDocument {
                     vars[i].setGrid(wire_grid);
                     vars[i].setShortname(getVariableName(dsid, vars[i].getID()));
                 }
+                
             }
+            
             return cat;
         } catch (Exception e) {
             throw new LASException(e.getMessage());
@@ -5729,7 +5715,7 @@ public class LASConfig extends LASDocument {
                     String key = keyE.getTextNormalize();
                     constraint.setKey(key);
                     constraintGroup.add(constraint);
-                } else if (groupType != null && groupType.equals("subset")){
+                } else if (groupType != null && groupType.equals("subset") || groupType.equals("regex")){
                     List constraints = cg.getChildren("constraint");
                     for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
                         ERDDAPConstraint constraint = new ERDDAPConstraint();
