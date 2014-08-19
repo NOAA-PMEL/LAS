@@ -69,7 +69,10 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
-DEFINE SYMBOL qualifiers ($qualifiers)/NOKEY/NOLAB
+DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY/NOLAB
+
+IF ($ferret_thumb"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
+
 DEFINE SYMBOL dokey = 0
 
 ! add any constraint labels in the lower left.
@@ -128,7 +131,7 @@ IF `($all_missing"0") EQ 0` THEN
 !   DEFINE SYMBOL yaxis_max = `ax_hi`
 !ENDIF
 
-DEFINE SYMBOL qualifiers = /OVER/NOLAB
+DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
 IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/siz=.12
