@@ -201,7 +201,7 @@ public class SaveQC extends LASAction {
 
 		// Update the QC flag in the DSG files
 		try {
-			dsgHandler.updateQCFlag(qcEvent, log);
+			dsgHandler.updateQCFlag(qcEvent);
 			log.debug("QC event " + qcEvent.toString() + " added to the DSG files");
 		} catch (Exception ex) {
 			logerror(request, "Unable to record the QC flag " + qcEvent.getFlag().toString() + 
