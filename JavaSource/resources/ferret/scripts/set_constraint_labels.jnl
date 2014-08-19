@@ -32,8 +32,8 @@ IF `($nmask_labels"0") GT 0` THEN
    REPEAT/RANGE=1:($nmask_labels)/NAME=mlab (\
    DEFINE SYMBOL mlab = `mlab`;\
    DEFINE SYMBOL note_num `($note_num"0") + 1`; \
-   IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($mlab)); \
-   IF ($mask_title_($mlab)"0|*>1") THEN LET note_($note_num)_lab = "($mask_title_($mlab))"; \ 
+   IF ($mask_title_($mlab)"0|*>1") THEN DEFINE SYMBOL note_($note_num"0")_lab =  ($mask_title_($mlab)); \
+   IF ($mask_title_($mlab)"0|*>1") THEN LET note_($note_num"0")_lab = "($mask_title_($mlab))"; \ 
    )
 ENDIF
 
@@ -44,11 +44,11 @@ IF `($ferret_cruise_list"0|*>1")` THEN
    LET slen = STRLEN("($ferret_cruise_list)")
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN
-      DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
-      LET note_($note_num)_lab = "Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`"
+      DEFINE SYMBOL note_($note_num"0")_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
+      LET note_($note_num"0")_lab = "Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`"
    ELSE 
-      DEFINE SYMBOL note_($note_num)_lab = Where cruise expocode = ($ferret_cruise_list)
-      LET note_($note_num)_lab = "Where cruise expocode = ($ferret_cruise_list)"
+      DEFINE SYMBOL note_($note_num"0")_lab = Where cruise expocode = ($ferret_cruise_list)
+      LET note_($note_num"0")_lab = "Where cruise expocode = ($ferret_cruise_list)"
    ENDIF
 
 ENDIF
