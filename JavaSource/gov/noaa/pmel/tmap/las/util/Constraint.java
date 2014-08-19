@@ -81,13 +81,13 @@ public class Constraint {
     }
     public String getAsERDDAPString() {
         // Even stuff that looks like a number has to be enclosed in quotes for ERDDAP variables that come is a list of distinct values.
-        if ( op.equals("is") || op.equals("like") ) {
+        if ( op.equals("is") || op.equals("like") || rhs.contains("*") || rhs.contains("[") || rhs.contains("]") ) {
             lhs = lhs.replaceAll("_ns_", "|");
             
             String[] parts = rhs.split("_ns_");
             StringBuilder r = new StringBuilder();
             for (int i = 0; i < parts.length; i++) {
-                r.append(Pattern.quote(parts[i]));
+                r.append(parts[i]);
                 if ( i < parts.length - 1 ) {
                     r.append("|");
                 }
