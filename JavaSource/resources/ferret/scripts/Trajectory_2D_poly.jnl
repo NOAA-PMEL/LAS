@@ -225,6 +225,10 @@ IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
 ENDIF
 
+! When there are just a few points (missing or valid), draw a colored symbol as well as the ribbon line.
+IF `npts LE 30` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=17
+
+
 ! Points will mark location of missing data if needed
 ! Use color=1 for black...
 LET missing_flag = -9999999
