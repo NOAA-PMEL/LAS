@@ -59,6 +59,7 @@ public class ConstraintWidgetGroup extends Composite {
     ERDDAPVariableConstraintPanel variableConstraints;
     ERDDAPValidDataConstraintPanel validConstraints;
     
+    
     // Keep track of the dsid for this panel.
     String dsid;
     
@@ -314,6 +315,12 @@ public class ConstraintWidgetGroup extends Composite {
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals("valid") ) {
                 constraintPanel.add(validConstraints, erddapConstraintGroup.getName(), 22);
+                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                panel++;
+            } else if ( erddapConstraintGroup.getType().equals("regex") ) {
+                RegexSubsetConstraintPanel regexSubsetConstraintPanel = new RegexSubsetConstraintPanel();
+                regexSubsetConstraintPanel.init(erddapConstraintGroup);
+                constraintPanel.add(regexSubsetConstraintPanel, erddapConstraintGroup.getName(), 22);
                 constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
                 panel++;
             }
