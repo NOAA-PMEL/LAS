@@ -16,9 +16,9 @@ LET lon_range = `($region_X_hi) - ($region_X_lo)`
 LET lat_range = `($region_Y_hi) - ($region_Y_lo)`
 LET fland_area = `ABS(lon_range * lat_range) / (360 * 180)`
 
-! If a tiny region then use smith_sandwell topo from PMEL server
+! If a tiny region then use the etopo2 landmask from PMEL server
 ! (see the Jons_fland.jnl under the SOCAT customization for use of
-! etopo1. Need to decide how to make it availabe - on the Ferret thredds
+! etopo1. Need to decide how to make it available - on the Ferret thredds
 ! server as below?)
 
 IF `fland_area LT 0.005` THEN
@@ -32,30 +32,19 @@ IF `fland_area LT 0.005` THEN
 
    DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
 
-   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0 AND\
-   (($region_y_hi) LE 72 AND ($region_y_lo) GT -72) ` THEN
-      USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
-      
-      DEFINE SYMBOL toponame = smith_sandwell_topo_v8_2
+   DEFINE SYMBOL land_levels = (0,10000,10000)
 
-      DEF SYM xlo_hack = `($xlo_hack)-1`
-      DEF SYM xhi_hack = `($xhi_hack)+1`
-      DEF SYM ylo_hack `MAX(($ylo_hack)-1, -90)`
-      DEF SYM yhi_hack `MIN(($yhi_hack)+1,  90)`
-      DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc") EQ 0` THEN 
+     USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
+     DEFINE SYMBOL toponame = `landmask,RETURN=dset`
+     SET VAR/name=rose landmask
+     DEFINE SYMBOL land_levels = (1,2,1)
    ELSE
-      IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc") EQ 0` THEN 
-        CANCEL DATA ($toponame)
-        USE "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo2_v2c.nc"
-	DEFINE SYMBOL toponame = `topo,RETURN=dset`
-        SET VAR/name=rose TOPO
-      ELSE
-         USE etopo05
-         DEFINE SYMBOL toponame = etopo05
-      ENDIF
+      USE etopo05
+      DEFINE SYMBOL toponame = etopo05
    ENDIF
 
-   SHADE/NOLAB/NOKEY/LEV=(0,10000,10000)/PAL=gray/OVERLAY rose($map_reg)
+   SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=gray/OVERLAY rose($map_reg)
    CAN DATA ($toponame)
    SET DATA/RESTORE
    DEFINE SYMBOL fland_done = 1
@@ -70,4 +59,3 @@ IF `($fland_done"0|*>1") EQ 0` THEN \
 GO fland ($fland_resolution) ($fland_palette)
 
 ! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
-
