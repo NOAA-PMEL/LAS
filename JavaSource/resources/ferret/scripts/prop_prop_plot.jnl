@@ -69,7 +69,7 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY/NOLAB
+DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
 IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
 
@@ -303,6 +303,7 @@ ELSE
       PPL POLYGON/OVER
    ENDIF
 ENDIF  ! color-by-trajectory or not...
+
 
 ! This allows for auto-levels on prop-prop plots.
 IF ($color_by"0|*>1") THEN
