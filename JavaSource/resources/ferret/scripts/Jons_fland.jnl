@@ -43,15 +43,15 @@ IF `use_landmask EQ 1` THEN
 
 
 ! Try for etopo1
-   IF `($basemap_area) LT 0.001` THEN
-      IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2") EQ 0` THEN 
-         CANCEL DATA landmask02
-         USE "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2"
-	 SET AXIS/MODULO `topo,RETURN=xaxis`
-         LET landmask = IF TOPO GE 0 THEN 1
-         DEFINE SYMBOL landdat etopo1_bed_g2
-      ENDIF
-   ENDIF
+!   IF `($basemap_area) LT 0.001` THEN
+!      IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2") EQ 0` THEN 
+!         CANCEL DATA landmask02
+!         USE "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2"
+!	 SET AXIS/MODULO `topo,RETURN=xaxis`
+!         LET landmask = IF TOPO GE 0 THEN 1
+!         DEFINE SYMBOL landdat etopo1_bed_g2
+!      ENDIF
+!   ENDIF
 
    DEFINE SYMBOL xlo_hack ($xaxis_min%0%)
    DEFINE SYMBOL xhi_hack ($xaxis_max%360%)
