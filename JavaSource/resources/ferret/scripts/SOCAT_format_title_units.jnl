@@ -50,7 +50,8 @@ IF `STRCMP(uptitle, "FCO2_REC") EQ 0` THEN
    IF `($data_($num)_units"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_units = uatm
 ENDIF
 
-IF `($data_($num)_($vcode)"0|region_id>1|*>0") AND (($its_trajectory_map"0|1|*>0) EQ 0)` THEN
+IF `($num) LT (($data_count) -1) AND ($data_($num)_($vcode)"0|region_id>1|*>0") AND \
+ (($its_trajectory_map"0|1|*>0) EQ 0)` THEN
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
    DEFINE SYMBOL r_id = 1=NPac,2=TPac,4=South,5=Ind,6=NAtl,7=Cst,8=TAtl,10=Arc
    DEFINE SYMBOL note_($note_num)_lab = Region IDs: ($r_id)
