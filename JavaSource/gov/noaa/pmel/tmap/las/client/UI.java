@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent.Handler;
+import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.ESGFDatasetAddedEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.LASRequestEvent;
@@ -566,13 +567,19 @@ public class UI extends BaseUI {
                     setConstraintsFromHistory(tokenMap); 
                 }
                 popHistory(false, initialHistory);
+                
                 /*
                  * If this is from an initialHistory URL with constraints, first set up the panel, then set them from the token map.
                  */
                
 
             }
+            
+            setConstraintsFromProperties();
+            
         }
+        
+       
 
     };
 
@@ -590,10 +597,25 @@ public class UI extends BaseUI {
             xAxesWidget.getRefMap().setRegions(config.getRegions());
             ops = config.getOperations();
             setupForNewGrid(grid);
-
+            setConstraintsFromProperties();
+            
         }
     };
-
+    private void setConstraintsFromProperties() {
+        // Call if the initial load has this property or if variable in the new data set has this property.
+        Map<String, String> constraints = xVariable.getProperties().get("constraints");
+        if ( constraints != null ) {
+            for (Iterator keyIt = constraints.keySet().iterator(); keyIt.hasNext();) {
+                String key = (String) keyIt.next();
+                String value = constraints.get(key);
+                String key_trim = key;
+                if ( key.contains("_cidx") ) {
+                    key_trim = key.substring(0, key.indexOf("_cidx"));
+                }
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(key_trim, value, key_trim, value, "is"), UI.this);
+            }
+        }
+    }
     AsyncCallback<ConfigSerializable> getGridForChangeVariableCallback = new AsyncCallback<ConfigSerializable>() {
 
         @Override
