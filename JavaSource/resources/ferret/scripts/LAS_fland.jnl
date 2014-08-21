@@ -1,27 +1,25 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $RCSfile: LAS_fland.jnl,v $
-! $Revision: 1.1 $
+! LAS_fland.jnl
+! $Revision: 1.1 
 ! 
-! $Author: ansley $
-! $Date: 2006/07/06 17:54:11 $
+! Author: ansley
+! Date: 2006/07/06 17:54:11 
 !
 ! LAS_fland.jnl automatically adjusts the resolution
 !
-! $1 = ignore the user specified resolution
-! $2 = palette
+! $1 = palette
 
-DEFINE SYMBOL fland_palette ($2"gray")
+DEFINE SYMBOL fland_palette ($1"gray")
 
-LET lon_range = `($region_X_hi) - ($region_X_lo)`
-LET lat_range = `($region_Y_hi) - ($region_Y_lo)`
+LET lon_range = ($region_x_range)
+LET lat_range = ($region_y_range)
 LET fland_area = `ABS(lon_range * lat_range) / (360 * 180)`
 
-! If a tiny region then use the etopo2 landmask from PMEL server
-! (see the Jons_fland.jnl under the SOCAT customization for use of
-! etopo1. Need to decide how to make it available - on the Ferret thredds
-! server as below?)
+! If a tiny region then use the etopo2 or etopo1 from PMEL server
 
-IF `fland_area LT 0.005` THEN
+CANCEL SYMBOL topo_url
+
+IF `fland_area LT 0.05` THEN
   
    SET DATA/SAVE
 
@@ -34,22 +32,28 @@ IF `fland_area LT 0.005` THEN
 
    DEFINE SYMBOL land_levels = (0,10000,10000)
 
-   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc") EQ 0` THEN 
-     USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
-     DEFINE SYMBOL toponame = `landmask,RETURN=dset`
-     SET VAR/name=rose landmask
-     DEFINE SYMBOL land_levels = (1,2,1)
-   ELSE
-      USE etopo05
-      DEFINE SYMBOL toponame = etopo05
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc") EQ 0` THEN \
+     DEFINE SYMBOL topo_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc"
+
+   IF `fland_area LT 0.001` THEN
+     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN \
+        DEFINE SYMBOL topo_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc"
    ENDIF
 
-   SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=gray/OVERLAY rose($map_reg)
+   IF `($topo_url"0|*>1") EQ 0` THEN 
+      DEFINE SYMBOL topo_url = etopo5
+   ENDIF
+
+   USE ($topo_url)
+   SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=($fland_palette)/OVERLAY rose($map_reg)
+   DEFINE SYMBOL toponame = `rose,return=dset`
+   say OVERLAY LandResolution IS ($topo_url)  Region area is `fland_area`
+
    CAN DATA ($toponame)
    SET DATA/RESTORE
    DEFINE SYMBOL fland_done = 1
 
-ELIF `fland_area LT 0.04` THEN
+ELIF `fland_area LT 0.25` THEN
   DEFINE SYMBOL fland_resolution 05
 ELSE
   DEFINE SYMBOL fland_resolution 20
@@ -58,4 +62,4 @@ ENDIF
 IF `($fland_done"0|*>1") EQ 0` THEN \
 GO fland ($fland_resolution) ($fland_palette)
 
-! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
+! End of LAS_fland.jnl --------------------------------------------------

@@ -180,7 +180,6 @@ IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL  plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
    IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL  plot_command = ($plot_command)/THICK
 ENDIF
-pause
 LET prof_id = _m[ge=($rowvar)]
 
 LET rowsum = `($rowvar)[m=@sum]`
