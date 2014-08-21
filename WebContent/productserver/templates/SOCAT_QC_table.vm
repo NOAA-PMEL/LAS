@@ -62,7 +62,7 @@ function submitQC (cruise_ID, region_name)
   Req.setProperty('qc','cruise_ID',cruise_ID);
   Req.setProperty('qc','region_name',region_name);
   var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
-  var features = 'alwaysRaised=1,width=400px,height=500px,menubar=no,location=no,status=no,resizeable=no';
+  var features = 'alwaysRaised=1,width=600px,height=1000px,menubar=no,location=no,status=no,resizeable=yes,scrollbars=yes';
   window.open(URL,"inputQC", features);
 }
 ##end
@@ -318,8 +318,8 @@ fieldset p .note {
 <table width="1020">
 	<tr>
 		<td>
-			<a href="javascript:toggleConstraints()" id="constraints_toggle">Show</a>
-			<a href="javascript:toggleConstraints()" style="display:none" id="constraints_toggle_hide">Hide</a>
+			<a href="javascript:toggleConstraints()" id="constraints_toggle">Show all versions</a>
+			<a href="javascript:toggleConstraints()" style="display:none" id="constraints_toggle_hide">Hide previous versions</a>
 		</td>
 	</tr>
 </table>
@@ -364,7 +364,7 @@ fieldset p .note {
           ## Advance the row.  We do this at the top since we are currently before the first row (see beforeFirst() above).
           #set($next=$las_webrowset.next())
           ## Use the alternator to change the color of every other row.
-       	  #if ($las_webrowset.getString(6)=="2.0")
+       	  #if ($las_webrowset.getString(6)=="3.0")
           	<tr class="twoplus">
           #else
           	<tr class="onepointfiveminus">
