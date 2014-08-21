@@ -163,12 +163,12 @@ GO LAS_XY_overlay_basemap
 
 PPL SHASET PROTECT
 
-! Note argument 1 is ignored by Jons_fland.jnl. It determines the resoultion itself.
-!  GO Jons_fland 20 black
-!  GO Jons_fland 20 navy
-!  GO Jons_fland 20 brown_dark
+! Note LAS_fland.jnl determines the resoultion from the region symbols.
+!  GO LAS_fland black
+!  GO LAS_fland navy
+!  GO LAS_fland brown_dark
 
-GO Jons_fland 20 green_pine
+GO LAS_fland green_pine
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
 

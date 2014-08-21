@@ -10,33 +10,23 @@ SET DATA/SAVE
 
 DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 180)`
 
-! Make it higher resolution to match what I did to Jons_fland
-! Note smith-sandwell is only between -72 and 72.
 
 IF `($basemap_area) LT 0.25` THEN
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
-  IF `($basemap_area) LT 0.05` THEN
-!     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc") EQ 0` THEN 
-!        DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
-!        DEFINE SYMBOL topovar = LANDMASK
-!	DEFINE SYMBOL basemap_levels = (1,2,1)
-!     ELSE  
-        IF `($region_y_hi) LE 72 AND ($region_y_lo) GT -72 AND\
-          (TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0)` THEN \
-        DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
-!     ENDIF
+
+  IF `($basemap_area) LT 0.02` THEN
+     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc") EQ 0` THEN \
+        DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc"
+  ENDIF  
+
+  IF `($basemap_area) LT 0.001` THEN
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN \
+      DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc"
   ENDIF
+
 ELSE 
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
 ENDIF
-
-! Try for etopo1
-!IF `($basemap_area) LT 0.001` THEN
-!   IF `TEST_OPENDAP("http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2") EQ 0` THEN 
-!      DEFINE SYMBOL basemap_url = "http://geoport.whoi.edu/thredds/dodsC/bathy/etopo1_bed_g2"
-!      DEFINE SYMBOL topovar = TOPO
-!   ENDIF
-!ENDIF
 
 DEFINE SYMBOL basemap_fill_type = FILL
 
@@ -44,8 +34,6 @@ DEFINE SYMBOL basemap_var = ($basemap_var"rose")
 DEFINE SYMBOL basemap_palette = ($basemap_palette"gray")
 DEFINE SYMBOL basemap_fill_type = ($basemap_fill_type"shade|fill|*>shade")
 !DEFINE SYMBOL basemap_levels = ($basemap_levels"(0,10000,10000)")
-! JC_NOTE: Ferret 6 (minor version # = ?) cannot parse the previous line -- Bugzilla #1398
-IF  ($basemap_levels"1|*>0") THEN DEFINE SYMBOL basemap_levels = (0,100000,100000)
 
 ! TODO:  Is the region setting for Z and T sufficient?
 
@@ -53,7 +41,6 @@ DEFINE SYMBOL basemap_region_z = ($basemap_region_z"k=1")
 DEFINE SYMBOL basemap_region_t = ($basemap_region_t"l=1")
 
 SET DATA ($basemap_url)
-IF ($topovar"0|*>1") THEN set var/name=rose '($topovar)'
 
 DEFINE SYMBOL basemap_data_num = `($basemap_var),return=dsetnum`
 
@@ -95,6 +82,7 @@ IF ($basemap_fill_type"FILL|FILL>1|fill>1|*>0") THEN
    ($basemap_axisformatting)
    PPL SHADE
 !!!!!   FILL/OVER/NOLABELS/NOKEY/PALETTE=($basemap_palette)/LEVELS=($basemap_levels) basevar
+
 ELSE
   ($basemap_fill_type)/NOLABELS/NOKEY/PALETTE=($basemap_palette)/LEVELS=($basemap_levels)/SET basevar
    ($basemap_xformat)
@@ -105,6 +93,7 @@ ELSE
 ENDIF
 
 ! Clean up
+   say BASEMAP LandResolution IS ($basemap_url)  Region area is ($basemap_area)
 
 CANCEL DATA ($basemap_url)
 
