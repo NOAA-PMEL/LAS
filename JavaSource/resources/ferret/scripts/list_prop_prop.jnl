@@ -211,7 +211,7 @@ ENDIF  ! longitude, latitude
 
 ! Define variables with titles
 
-IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_0|*>1") THEN
+IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
 
    LET gettype = ($ferret_plot_var_0)
    DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
@@ -225,7 +225,7 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_0|*
    DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var_in)
 ENDIF
 
-IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_0|*>1") THEN
+IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
 
    LET gettype = ($ferret_plot_var_1)
    DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
@@ -241,7 +241,7 @@ ENDIF
 
 ! color-by variable on the prop-prop plot:
 
-IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_0|*>1") THEN 
+IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN 
    
    LET ii = i[g=($timevar)]
    LET iindices = IF constraints_mask THEN ii
