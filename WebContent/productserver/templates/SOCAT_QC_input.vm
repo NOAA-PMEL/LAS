@@ -78,7 +78,12 @@
 					comment += "No high-quality cross-overs found at the time of this QC.  ";
 				}
 
-				comment += document.getElementById("addlcomment").value.trim();
+				var userComment = document.getElementById("addlcomment").value.trim();
+				userComment = userComment.replace(/\'/g,"").replace(/\"/g,'');
+				userComment = userComment.replace(/</g," less than ").replace(/>/g," greater than ");
+				userComment = userComment.replace(/%/g," percent").replace(/&/g," and ");
+				comment += userComment;
+
 				document.getElementById("comment").value = comment.trim();
 			}
 
