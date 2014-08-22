@@ -50,7 +50,7 @@ public class RegexSubsetConstraintPanel extends Composite {
             public void onClick(ClickEvent event) {
                 String ex = regex.getText();
                 if ( !ex.contains("*") || !ex.contains("]") || !ex.contains("[") ) {
-                    ex = ".*"+ex+".*";
+                    ex = "(?i).*"+ex+".*";
                 }
                 VariableSerializable cv = variablesListBox.getVariable(variablesListBox.getSelectedIndex());
                 eventBus.fireEventFromSource(new AddSelectionConstraintEvent(cv.getShortname(), ex, cv.getShortname(), ex, "like"), RegexSubsetConstraintPanel.this);
