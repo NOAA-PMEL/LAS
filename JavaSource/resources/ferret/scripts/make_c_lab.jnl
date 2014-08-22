@@ -23,10 +23,11 @@ ENDIF
 DEFINE SYMBOL translate_math = 1
 IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
 
-IF `STRINDEX("($rhs)", "'") GT 0` THEN
-   LET slen = `STRLEN("($rhs)")`
-   LET s1 = `STRINDEX("($rhs)", "'")`
-   DEFINE SYMBOL rhs = `SUBSTRING("($rhs)", s1+1, slen-2)`
+LET strvar = "($rhs)"
+IF `STRINDEX(strvar, "'") GT 0` THEN
+   LET slen = `STRLEN(strvar)`
+   LET s1 = `STRINDEX(strvar, "'")`
+   DEFINE SYMBOL rhs = `SUBSTRING(strvar, s1+1, slen-2)`
 ENDIF
 
 IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
@@ -35,18 +36,18 @@ IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
 LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
 IF ($lhs"0|month>1|*>0") THEN 
-   IF `STRINDEX("($rhs)", ",") EQ 0` THEN 
+   IF `STRINDEX(strvar, ",") EQ 0` THEN 
      DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
      DEFINE SYMBOL imonth = `MAX(1, INT(($rhs)) )`
      DEFINE SYMBOL mask_title_($nmask_labels) = Months `month_labels[i=($imonth)]`
    ELSE
-     LET rhslen = `STRLEN("($rhs)")`
-     LET commaloc = `STRINDEX("($rhs)", ",") `
-     DEFINE SYMBOL m1 = `SUBSTRING("($rhs)", 1, commaloc-1)`
+     LET rhslen = `STRLEN(strvar)`
+     LET commaloc = `STRINDEX(strvar, ",") `
+     DEFINE SYMBOL m1 = `SUBSTRING(strvar, 1, commaloc-1)`
      DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
      DEFINE SYMBOL imonth = `MAX(1, INT(($m1)) )`
      DEFINE SYMBOL mask_title_($nmask_labels) = Months `month_labels[i=($imonth)]`
-     DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs)", commaloc+1, rhslen-commaloc+1)`
+     DEFINE SYMBOL rhs2 = `SUBSTRING(strvar, commaloc+1, rhslen-commaloc+1)`
 
      DEFINE SYMBOL mask_label_long = 0
      REPEAT/RANGE=1:`rhslen` (\
