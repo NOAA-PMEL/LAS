@@ -189,13 +189,24 @@ public class SaveQC extends LASAction {
 		qcEvent.setFlag(flag.charAt(0));
 		qcEvent.setFlagDate(new Date());
 
-		// Add the QC event to the database; the flag may be updated if in conflict
+		// Add the QC event to the database
 		try {
 			databaseHandler.addQCEvent(qcEvent);
 			log.debug("QC event " + qcEvent.toString() + " added to the database");
 		} catch (Exception ex) {
-			logerror(request, "Unable to record the QC event " + qcEvent.toString() + 
-					" in the database", ex);
+			logerror(request, "Unable to record the QC event " + 
+					qcEvent.toString() + " in the database", ex);
+			return mapping.findForward("error");
+		}
+
+		// Update the QC event flag to assign to the DSG files
+		try {
+			qcEvent.setFlag(databaseHandler.getQCFlag(expocode));
+			log.debug("QC flag '" + qcEvent.getFlag().toString() + 
+					"' returned by the database handler");
+		} catch (Exception ex) {
+			logerror(request, "Unable to obtain from the database " +
+					"the QC flag to assign to the DSG files", ex);
 			return mapping.findForward("error");
 		}
 
@@ -204,8 +215,8 @@ public class SaveQC extends LASAction {
 			dsgHandler.updateQCFlag(qcEvent);
 			log.debug("QC event " + qcEvent.toString() + " added to the DSG files");
 		} catch (Exception ex) {
-			logerror(request, "Unable to record the QC flag " + qcEvent.getFlag().toString() + 
-					" in the DSG files", ex);
+			logerror(request, "Unable to record the QC flag " + 
+					qcEvent.getFlag().toString() + " in the DSG files", ex);
 			return mapping.findForward("error");
 		}
 
