@@ -523,6 +523,8 @@ public class TabledapTool extends TemplateTool {
             } else {
                 // We have to build our own netCDF file from the two queries.  In this case we will pull two DSG files make our own DSG ragged array file.
 
+                boolean empty1 = false;
+                boolean empty2 = false;
                 File temp_file1 = new File(netcdfFilename+".1.temp");
                 File temp_file2 = new File(netcdfFilename+".2.temp");
                 String q1 = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
@@ -532,7 +534,7 @@ public class TabledapTool extends TemplateTool {
                 dt = new DateTime();
                 log.debug("TableDapTool query="+dsUrl1);
                 log.info("{TableDapTool starting file pull for file 1 at "+fmt.print(dt));
-                int number = 0;
+
                 try {
 
                     lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
@@ -544,7 +546,7 @@ public class TabledapTool extends TemplateTool {
                     }
                     if ( message.toLowerCase().contains("query produced no matching") ) {
                         // one empty search
-                        number++;
+                        empty1 = true;
                     } else {
                         causeOfError = "Data source error: " + message;
                         throw new Exception(message);
@@ -567,22 +569,27 @@ public class TabledapTool extends TemplateTool {
                     }
                     if ( message.toLowerCase().contains("query produced no matching" ) ) {
                         // two empty searches
-                        number++;
+                        empty2 = true;
                     } else {
                         causeOfError = "Data source error: " + message;
                         throw new Exception(message);
                     }
                 }
-                if ( number == 2 ) {
+                if ( empty1 && empty2 ) {
                     // two empty searches, write the empty file
                     writeEmpty(netcdfFilename);
+                } else if ( empty1 && !empty2 ) {
+                    temp_file2.renameTo(new File(netcdfFilename));
+                } else if ( !empty1 && empty2 ) {
+                    temp_file1.renameTo(new File(netcdfFilename));
+                } else {
+                    dt = new DateTime();
+                    log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
+                    //was the request canceled?
+                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                        return lasBackendResponse;
+                    merge(netcdfFilename, temp_file1, temp_file2);
                 }
-                dt = new DateTime();
-                log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
-                //was the request canceled?
-                if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                    return lasBackendResponse;
-                merge(netcdfFilename, temp_file1, temp_file2);
 
             }
 
