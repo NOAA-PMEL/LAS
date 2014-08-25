@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.addxml;
 
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
-import gov.noaa.pmel.tmap.las.util.ERDDAPUtil;
+import gov.noaa.pmel.tmap.las.erddap.util.ERDDAPUtil;
 
 import java.io.File;
 import java.io.FileWriter;
