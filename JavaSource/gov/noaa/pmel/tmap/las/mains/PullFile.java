@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 
 public class PullFile {
 

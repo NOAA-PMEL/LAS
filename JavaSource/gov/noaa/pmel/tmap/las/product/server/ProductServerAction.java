@@ -15,9 +15,9 @@ import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
+import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.service.ProductLocalService;
 import gov.noaa.pmel.tmap.las.service.ProductWebService;
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Institution;
 
 import java.io.BufferedReader;

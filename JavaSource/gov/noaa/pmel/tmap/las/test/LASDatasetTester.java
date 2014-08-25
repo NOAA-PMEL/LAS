@@ -6,7 +6,7 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Variable;

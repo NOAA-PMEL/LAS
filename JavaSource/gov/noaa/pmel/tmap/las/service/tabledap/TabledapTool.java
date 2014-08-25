@@ -7,9 +7,9 @@ import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASTabledapBackendConfig;
+import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 import gov.noaa.pmel.tmap.las.service.database.IntermediateNetcdfFile;
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 
 import java.io.File;
