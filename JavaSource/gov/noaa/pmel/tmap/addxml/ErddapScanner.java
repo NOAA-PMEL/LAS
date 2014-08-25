@@ -18,10 +18,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import opendap.dap.Attribute;
+import opendap.dap.AttributeTable;
+import opendap.dap.DAP2Exception;
+import opendap.dap.DAS;
+import opendap.dap.NoSuchAttributeException;
+import opendap.dap.parsers.ParseException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
-import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import org.joda.time.Chronology;
@@ -33,18 +39,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonStreamParser;
-
-import opendap.dap.Attribute;
-import opendap.dap.AttributeTable;
-import opendap.dap.DAP2Exception;
-import opendap.dap.DAS;
-import opendap.dap.NoSuchAttributeException;
-import opendap.dap.parsers.ParseException;
 
 public class ErddapScanner {
 
@@ -211,6 +207,7 @@ public class ErddapScanner {
                 gb.setElement(gridid);
                 
                 String trajID = trajIdVar.keySet().iterator().next();
+                                
                 
                 UniqueVector axes = new UniqueVector();
                 if ( !timeVar.keySet().isEmpty() ) {
@@ -257,7 +254,7 @@ public class ErddapScanner {
                         arb.setStep("1");
                         // Fudge
                         days = days + 1;
-                        arb.setSize(String.valueOf(days));
+                        arb.setSize(String.valueOf(Long.valueOf(days)));
                         ab.setArange(arb);    
                     } else {
                         arb.setStart("UNKNOW_START");
@@ -302,7 +299,7 @@ public class ErddapScanner {
 
                         arb.setStart(start);
                         arb.setStep("1.0");
-                        arb.setSize(String.valueOf(size));
+                        arb.setSize(String.valueOf((long) (size+1)));
                         ab.setArange(arb);
                         if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
                             db.setProperty("tabledap_access", "lon_domain", "0:360");
@@ -353,7 +350,7 @@ public class ErddapScanner {
 
                         arb.setStart(start);
                         arb.setStep("1.0");
-                        arb.setSize(String.valueOf(size));
+                        arb.setSize(String.valueOf((long) size+1));
                         ab.setArange(arb);                    
                     } else {
                         arb.setStart("UNKNOW_START");
