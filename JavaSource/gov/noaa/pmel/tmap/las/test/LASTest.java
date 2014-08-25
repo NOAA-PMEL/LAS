@@ -4,7 +4,7 @@ package gov.noaa.pmel.tmap.las.test;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 
@@ -157,7 +157,8 @@ public class LASTest{
         LASDocument doc = new LASDocument();
         // Get the first 10 and keep the size
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        lasProxy.executeGetMethodAndStreamResult(lto.getLAS()+"getDatasets.do?format=xml&start="+start+"&end="+end, stream);
+        String requestURL = lto.getLAS()+"getDatasets.do?format=xml&start="+start+"&end="+end;
+        lasProxy.executeGetMethodAndStreamResult(requestURL, stream);
         JDOMUtils.XML2JDOM(stream.toString(), doc);
         
         List<Element> dE = doc.getRootElement().getChildren("dataset");
