@@ -47,8 +47,8 @@ import javax.sql.rowset.WebRowSet;
 import oracle.jdbc.rowset.OracleWebRowSet;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -67,7 +67,7 @@ import com.sun.rowset.WebRowSetImpl;
  *
  */
 public final class ProductServerAction extends LASAction {
-    private static Logger log = LogManager.getLogger(ProductServerAction.class.getName());
+    private static Logger log = LoggerFactory.getLogger(ProductServerAction.class.getName());
     private static LASProxy lasProxy= new LASProxy();
 
     public ActionForward execute(ActionMapping mapping,
@@ -174,30 +174,11 @@ public final class ProductServerAction extends LASAction {
         	}
         }
         
-        String log_level = request.getParameter("log_level");
-        Logger ancestor = Logger.getLogger("gov.noaa.pmel.tmap");
-        if ( log_level != null ) {
-        
-            if ( log_level.equalsIgnoreCase("debug") ) {
-                ancestor.setLevel(Level.DEBUG);
-            } else if ( log_level.equalsIgnoreCase("info") ) {
-                ancestor.setLevel(Level.INFO);
-            } else if ( log_level.equalsIgnoreCase("warn") ) {
-                ancestor.setLevel(Level.WARN);
-            } else if ( log_level.equalsIgnoreCase("error") ) {
-                ancestor.setLevel(Level.ERROR);
-            } else if ( log_level.equalsIgnoreCase("fatal") ) {
-                ancestor.setLevel(Level.FATAL);
-            } else {
-                ancestor.setLevel(Level.INFO);
-            }
 
-        }
         if ( (requestXML == null || requestXML.equals("")) ) {
             try {
                 request.setAttribute("title", lasConfig.getTitle());
                 request.setAttribute("services", serverConfig.getServiceNamesAndURLs());
-                request.setAttribute("log_level", log.getEffectiveLevel().toString());
             }
             catch (Exception e) {
                 logerror(request, "Error creating info page..", e);
@@ -275,10 +256,6 @@ public final class ProductServerAction extends LASAction {
         	lasRequest.setProperty("las", "debug", "false");
         }
 
-        // Report logging level only for "debug" and "trace" levels.
-        log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for "+log.getName());
-        //debug
-        
         log.debug("Creating ProductRequest object.");
         // Create a new ProductRequest object
         ProductRequest productRequest;

@@ -11,7 +11,7 @@ package gov.noaa.pmel.tmap.iosp;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import ucar.nc2.NetcdfFile;
 import ucar.unidata.io.RandomAccessFile;

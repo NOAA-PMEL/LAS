@@ -18,8 +18,8 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
 
 /**
@@ -31,7 +31,7 @@ import org.jdom.JDOMException;
  *
  */
 public class DapperBackendService extends BackendService {
-    private static Logger log = LogManager.getLogger(DapperBackendService.class.getName());
+    private static Logger log = LoggerFactory.getLogger(DapperBackendService.class.getName());
 
     /**
      * This processes the backendRequestXML and returns the requested data.
@@ -50,10 +50,6 @@ public class DapperBackendService extends BackendService {
         LASDapperBackendRequest dapperBackendRequest = new LASDapperBackendRequest();      
         JDOMUtils.XML2JDOM(dapperBackendRequestXML, dapperBackendRequest);        
         
-        //report logging level only for "debug" and "trace" levels
-        String debug = dapperBackendRequest.getProperty("las", "debug");      
-        setLogLevel(debug);
-        log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for " + log.getName());
         
         //get the lasBackendResponse
         DapperTool tool = new DapperTool();

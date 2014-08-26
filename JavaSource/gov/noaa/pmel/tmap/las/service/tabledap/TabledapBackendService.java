@@ -3,8 +3,8 @@ package gov.noaa.pmel.tmap.las.service.tabledap;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
 
 import gov.noaa.pmel.tmap.exception.LASException;
@@ -16,19 +16,12 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 
 
 public class TabledapBackendService extends BackendService {
-    final Logger log = LogManager.getLogger(TabledapBackendService.class.getName());
+    final Logger log = LoggerFactory.getLogger(TabledapBackendService.class.getName());
     public String getProduct(String backendRequestXML, String outputFileName) throws Exception {
         try {
             LASBackendRequest lasBackendRequest = new LASBackendRequest();      
             JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
             LASBackendResponse lasBackendResponse = new LASBackendResponse();
-
-            String debug = lasBackendRequest.getProperty("las", "debug");
-
-            setLogLevel(debug);
-
-            // Report logging level only for "debug" and "trace" levels.
-            log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
 
             if ( lasBackendRequest.isCancelRequest()) {
                 lasBackendResponse.setError("error", "Database backend request canceled.");

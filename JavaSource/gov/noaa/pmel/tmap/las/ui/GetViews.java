@@ -23,8 +23,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -47,7 +47,7 @@ public class GetViews extends ConfigService {
     /*
      * Generated Methods
      */
-    private static Logger log = LogManager.getLogger(GetViews.class.getName());
+    private static Logger log = LoggerFactory.getLogger(GetViews.class.getName());
 
     /** 
      * Method execute

@@ -76,8 +76,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.jdom.Attribute;
 import org.jdom.Content;
 import org.jdom.Document;
@@ -102,7 +102,7 @@ import thredds.catalog.InvDataset;
  *
  */
 public class LASConfig extends LASDocument {
-    private static Logger log = LogManager.getLogger(LASConfig.class.getName());
+    private static Logger log = LoggerFactory.getLogger(LASConfig.class.getName());
     private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
     private static LASProxy lasProxy = new LASProxy();
     private static String time_formats[] = {

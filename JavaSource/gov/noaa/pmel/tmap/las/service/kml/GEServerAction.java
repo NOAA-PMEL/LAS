@@ -1,55 +1,31 @@
 package gov.noaa.pmel.tmap.las.service.kml;
 
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import java.util.ArrayList;
 
-import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletContext;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.net.*;
-import java.io.*;
-import java.util.Date;
-
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
-import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
-import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
-import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
-import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
-import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
-import gov.noaa.pmel.tmap.las.service.ProductWebService;
-import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.log4j.Logger;
 import org.jdom.JDOMException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *@author Jing Yang Li
  *
  */
 public final class GEServerAction extends Action {
-    private static Logger log = Logger.getLogger(GEServerAction.class);
+    private static Logger log = LoggerFactory.getLogger(GEServerAction.class);
 
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,
@@ -201,13 +177,20 @@ public final class GEServerAction extends Action {
             //the KML for non-vector plot contains a screen overlay of colorbar
             //the KML for vector plot doesn't contain a screen overlay of colorbar
             String op = lasUIRequest.getOperationXPath();
-            if(op.contains("Plot_GE_Overlay")){
+            if(op.contains("Plot_GE_Overlay") && !op.contains("Traj")){
                 lasUIRequest.changeOperation("Plot_GE_kml");
                 //build the request for plot overlay
                 requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
                 //build the request for placemarks
                 lasUIRequest.changeOperation("Grid_GE_kml");
                 placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+            } else if(op.contains("Plot_GE_Overlay") && op.contains("Traj")){
+                lasUIRequest.changeOperation("Plot_GE_Traj_kml");
+                //build the request for plot overlay
+                requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+                //build the request for placemarks
+//                lasUIRequest.changeOperation("Grid_GE_kml");
+//                placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
             }else if(op.contains("Vector_GE_Overlay")){
                 lasUIRequest.changeOperation("Vector_GE_kml");
                 //build the request for plot overlay

@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -36,7 +36,7 @@ import org.apache.struts.action.ActionMapping;
  *
  */
 public class LASAction extends Action {
-	private static Logger log = LogManager.getLogger(LASAction.class.getName());
+	private static Logger log = LoggerFactory.getLogger(LASAction.class.getName());
 	   public static void logerror(HttpServletRequest request) {
 	        LASBackendResponse error = (LASBackendResponse) request.getSession().getAttribute("las_response");
 	        log.error(error.getResult("las_message"));

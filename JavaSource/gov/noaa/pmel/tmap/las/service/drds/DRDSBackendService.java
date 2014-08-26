@@ -12,8 +12,8 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
 
 /**
@@ -21,17 +21,10 @@ import org.jdom.JDOMException;
  *
  */
 public class DRDSBackendService extends BackendService {
-    private static Logger log = LogManager.getLogger(DRDSBackendService.class.getName());
+    private static Logger log = LoggerFactory.getLogger(DRDSBackendService.class.getName());
     public String getProduct(String backendRequestXML, String cacheFileName) throws Exception, LASException, IOException, JDOMException {       
         LASBackendRequest lasBackendRequest = new LASBackendRequest();      
         JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
-        
-        String debug = lasBackendRequest.getProperty("las", "debug");
-        
-        setLogLevel(debug);
-        
-        // Report logging level only for "debug" and "trace" levels.
-        log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
         
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
         if ( lasBackendRequest.isCancelRequest()) {           

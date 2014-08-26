@@ -54,8 +54,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.jdom.JDOMException;
@@ -83,7 +83,7 @@ import ucar.nc2.*;
  */
 public class KMLTool extends TemplateTool  {
 
-    final Logger log = LogManager.getLogger(KMLTool.class.getName());
+    final Logger log = LoggerFactory.getLogger(KMLTool.class.getName());
     LASKMLBackendConfig kmlBackendConfig;
 
     /**

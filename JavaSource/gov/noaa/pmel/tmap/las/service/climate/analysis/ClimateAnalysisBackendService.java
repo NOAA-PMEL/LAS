@@ -3,8 +3,8 @@ package gov.noaa.pmel.tmap.las.service.climate.analysis;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
@@ -17,19 +17,12 @@ import gov.noaa.pmel.tmap.las.service.database.DatabaseBackendService;
 import gov.noaa.pmel.tmap.las.service.ferret.FerretTool;
 
 public class ClimateAnalysisBackendService extends BackendService {
-    final Logger log = LogManager.getLogger(ClimateAnalysisBackendService.class.getName());
+    final Logger log = LoggerFactory.getLogger(ClimateAnalysisBackendService.class.getName());
     public String getProduct(String backendRequestXML, String outputFileName) throws Exception {
     	 LASBackendRequest lasBackendRequest = new LASBackendRequest();      
          JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
          LASBackendResponse lasBackendResponse = new LASBackendResponse();
-         
-         String debug = lasBackendRequest.getProperty("las", "debug");
-         
-         setLogLevel(debug);
-         
-         // Report logging level only for "debug" and "trace" levels.
-         log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
-         
+   
          if ( lasBackendRequest.isCancelRequest()) {
              lasBackendResponse.setError("Climate Analysis backend request canceled.");
              log.debug("Climate Analysis backend request canceled: "+lasBackendRequest.toCompactString());

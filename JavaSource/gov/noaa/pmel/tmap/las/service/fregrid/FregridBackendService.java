@@ -5,24 +5,17 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.service.BackendService;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class FregridBackendService extends BackendService {
     // This object could be persisted between requests if this
     // were packaged in a servlet.
-    private static Logger log = LogManager.getLogger(FregridBackendService.class.getName());
+    private static Logger log = LoggerFactory.getLogger(FregridBackendService.class.getName());
     public String getProduct(String backendRequestXML, String cacheFileName) throws Exception {       
         LASBackendRequest lasBackendRequest = new LASBackendRequest();      
         JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
-        
-        String debug = lasBackendRequest.getProperty("las", "debug");
-        
-        setLogLevel(debug);
-        
-        // Report logging level only for "debug" levels.
-        log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
-        
+
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
         if ( lasBackendRequest.isCancelRequest()) {           
             lasBackendResponse.setError("Fregrid backend request canceled.");

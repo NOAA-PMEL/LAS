@@ -58,6 +58,9 @@ public class LASDocument extends Document {
                 String type = elements[2];
                 String id = elements[3];
                 id = id.substring(id.indexOf("@ID='")+5, id.length()-2);
+                if ( type == null || id == null) {
+                    System.out.println("typeis null");
+                }
                 return getByID(type, getRootElement(), id);
             } else if (elements.length == 6 ) {
                 String type = elements[2];
@@ -67,6 +70,10 @@ public class LASDocument extends Document {
                 type = elements[4];
                 id = elements[5];
                 id = id.substring(id.indexOf("@ID='")+5, id.length()-2);
+                if ( type == null || parent == null || id == null) {
+                    System.out.println("you are null");
+                }
+                
                 return getByID(type, parent, id);
             } else {
                 // Do the old style xpath search...

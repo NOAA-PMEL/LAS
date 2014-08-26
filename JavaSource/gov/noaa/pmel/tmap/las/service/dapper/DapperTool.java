@@ -31,8 +31,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.velocity.VelocityContext;
 import org.jdom.JDOMException;
 import org.joda.time.DateTime;
@@ -81,7 +81,7 @@ public class DapperTool extends TemplateTool {
 
     //LASDapperBackendConfig dapperBackendConfig;
     
-    final Logger log = LogManager.getLogger(DapperTool.class.getName());
+    final Logger log = LoggerFactory.getLogger(DapperTool.class.getName());
     
     /**
      * This default constructor uses the TemplateTool base class to initialize all

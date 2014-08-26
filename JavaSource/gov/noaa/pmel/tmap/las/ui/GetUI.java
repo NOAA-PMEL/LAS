@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.httpclient.HttpException;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -72,7 +72,7 @@ public class GetUI extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = LogManager.getLogger(GetUI.class.getName());
+    private static Logger log = LoggerFactory.getLogger(GetUI.class.getName());
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
         ServletContext context = (ServletContext) servlet.getServletContext();
