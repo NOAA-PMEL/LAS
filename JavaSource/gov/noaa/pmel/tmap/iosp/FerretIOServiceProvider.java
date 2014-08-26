@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.tools.ant.types.selectors.TypeSelector.FileType;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -66,7 +67,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  */
 public class FerretIOServiceProvider implements IOServiceProvider {
-	static private Logger log = Logger.getLogger(FerretIOServiceProvider.class
+	static private Logger log = LoggerFactory.getLogger(FerretIOServiceProvider.class
 			.getName());
 	RandomAccessFile raf;
 	static private final long maxHeader = 512;
@@ -869,7 +870,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		// "_expr_{levitus_climatology}{let airt_regrid=airt[d=1,t=\"15-Jan\":\"15-Dec\"@ave];let temp_regrid=temp[d=2,gxy=airt_regrid[d=1]]}";
 		String inner = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/levitus_climatology_cdf/coads_climatology_cdf.jnl";
 		String ninner = "";
-		log.setLevel(Level.DEBUG);
+		
 		try {
 			ninner = URLEncoder.encode(inner, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
