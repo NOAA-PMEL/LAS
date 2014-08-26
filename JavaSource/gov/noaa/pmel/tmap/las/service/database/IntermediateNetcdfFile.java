@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.jdom.Document;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -39,7 +39,7 @@ import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.units.DateUnit;
 import ucar.nc2.units.SimpleUnit;
 public class IntermediateNetcdfFile {
-    final Logger log = LogManager.getLogger(IntermediateNetcdfFile.class.getName());
+    final Logger log = LoggerFactory.getLogger(IntermediateNetcdfFile.class.getName());
     protected String[] varNames;
     protected String zname="";
     protected String tname="";

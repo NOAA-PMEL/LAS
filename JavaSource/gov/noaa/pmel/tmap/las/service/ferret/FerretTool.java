@@ -27,8 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -37,7 +37,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.jdom.JDOMException;
 
 public class FerretTool extends TemplateTool{
-    final Logger log = LogManager.getLogger(FerretTool.class.getName());
+    final Logger log = LoggerFactory.getLogger(FerretTool.class.getName());
     LASFerretBackendConfig lasFerretBackendConfig;
     
     public FerretTool(String service, String configFile) throws LASException, IOException {

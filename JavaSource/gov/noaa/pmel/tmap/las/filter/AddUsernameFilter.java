@@ -12,15 +12,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Assigns the "user_name" attribute to a session, which comes from the name
  * in the user Principal of an authenticated user.
  */
 public class AddUsernameFilter implements Filter {
-	private static Logger log = LogManager.getLogger(AddUsernameFilter.class.getName());
+	private static Logger log = LoggerFactory.getLogger(AddUsernameFilter.class.getName());
 	private static final String ATTRIBUTE_NAME = "user_name";
 
 	@Override

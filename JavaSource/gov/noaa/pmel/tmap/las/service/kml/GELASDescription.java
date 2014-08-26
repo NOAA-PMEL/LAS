@@ -12,7 +12,8 @@ import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import java.util.HashMap;
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * The description for a regular grid point
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class GELASDescription{
 
-    private static Logger log = Logger.getLogger(GELASDescription.class);
+    private static Logger log = LoggerFactory.getLogger(GELASDescription.class);
 
     String point_lat;
     String point_lon;

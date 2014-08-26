@@ -23,8 +23,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -56,7 +56,7 @@ public class GetGrid extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = LogManager.getLogger(GetGrid.class.getName());
+    private static Logger log = LoggerFactory.getLogger(GetGrid.class.getName());
     public ActionForward execute(ActionMapping mapping, ActionForm form,
             HttpServletRequest request, HttpServletResponse response) {
         

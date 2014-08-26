@@ -14,8 +14,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.jdom.Element;
 import org.xml.sax.SAXException;
 
@@ -28,7 +28,7 @@ import thredds.catalog.ServiceType;
 
 public class ESGDriver {
 
-	private static final Logger log = LogManager.getLogger(ESGDriver.class);
+	private static final Logger log = LoggerFactory.getLogger(ESGDriver.class);
 	public static void main(String[] args) {
 		String src = "http://tds.prototype.ucar.edu/thredds/esgcet/catalog.xml";
 		String base = src.substring(0, src.lastIndexOf("/")+1);

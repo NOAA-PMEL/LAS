@@ -29,7 +29,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 /*
  * For generating a collection of place marks for LAS data

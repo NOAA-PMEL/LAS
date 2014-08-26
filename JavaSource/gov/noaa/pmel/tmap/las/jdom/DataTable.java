@@ -64,6 +64,7 @@ public class DataTable {
             }
             if (headersStart) {
                 if ( dataStart ) {
+                    if ( line.contains("---- M") ) line = reader.readLine(); // Skip some debug output for now...
                     String[] values = line.trim().split(",");
                     for (int i = 0; i < getHeaders().size(); i++ ) {
                         String header = getHeaders().get(i);

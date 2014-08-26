@@ -8,13 +8,13 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 import java.util.Date;
 import java.util.logging.*;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class FerretBackendService extends BackendService {
 	// This object could be persisted between requests if this
 	// were packaged in a servlet.
-	private static Logger log = LogManager.getLogger(FerretBackendService.class
+	private static Logger log = LoggerFactory.getLogger(FerretBackendService.class
 			.getName());
 
 	private final java.util.logging.Logger logger = java.util.logging.Logger
@@ -26,14 +26,7 @@ public class FerretBackendService extends BackendService {
         JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
         log.info(new Date().toString()+ ":"+"START: "+lasBackendRequest.getServiceAction());
         log.debug(new Date().toString()+ ":"+"Starting request: "+lasBackendRequest.toCompactString());
-        String debug = lasBackendRequest.getProperty("las", "debug");
-        
-        setLogLevel(debug);
-        logger.setLevel(Level.OFF);
-        
-        // Report logging level only for "debug" levels.
-        log.debug(new Date().toString()+ ":"+"Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
-        
+  
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
         
 		String logMessage = new Date().toString()+

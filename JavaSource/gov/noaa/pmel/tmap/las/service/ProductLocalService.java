@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
@@ -41,7 +41,7 @@ import org.jdom.Namespace;
  *
  */
 public class ProductLocalService extends ProductService {
-    final Logger log = LogManager.getLogger(ProductLocalService.class.getName());
+    final Logger log = LoggerFactory.getLogger(ProductLocalService.class.getName());
     
     /**
      * @param lasBackendRequest

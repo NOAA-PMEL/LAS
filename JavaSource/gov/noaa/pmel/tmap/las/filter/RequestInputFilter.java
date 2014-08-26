@@ -23,11 +23,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class RequestInputFilter implements Filter {
-    private static Logger log = LogManager.getLogger(RequestInputFilter.class.getName());
+    private static Logger log = LoggerFactory.getLogger(RequestInputFilter.class.getName());
     /*
      * For the record these values could have been passed in via parameters in the web.xml...
      * 

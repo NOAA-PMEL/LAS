@@ -22,7 +22,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
 import thredds.servlet.DatasetSource;
 import ucar.nc2.NetcdfFile;

@@ -21,8 +21,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -40,7 +40,7 @@ import org.json.XML;
  * @struts.action validate="true"
  */
 public class GetOptions extends ConfigService {
-	private static Logger log = LogManager.getLogger(GetOptions.class.getName());
+	private static Logger log = LoggerFactory.getLogger(GetOptions.class.getName());
 	/*
 	 * Generated Methods
 	 */

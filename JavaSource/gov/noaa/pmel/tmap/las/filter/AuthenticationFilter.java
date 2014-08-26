@@ -18,12 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 
 public class AuthenticationFilter implements Filter {
-	private static Logger log = LogManager.getLogger(AuthenticationFilter.class.getName());
+	private static Logger log = LoggerFactory.getLogger(AuthenticationFilter.class.getName());
 	private String databaseUrl;
 	private String selectUser;
 	private String selectPass;

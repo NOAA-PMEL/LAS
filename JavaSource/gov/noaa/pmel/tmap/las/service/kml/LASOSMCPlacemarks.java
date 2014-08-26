@@ -29,7 +29,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * For generating a collection of place marks for OSMC data
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class LASOSMCPlacemarks implements LASPlacemarks{
 
-    private static Logger log = Logger.getLogger(LASOSMCPlacemarks.class);
+    private static Logger log = LoggerFactory.getLogger(LASOSMCPlacemarks.class);
 
     String gridFileName;
     HashMap<String, String> initLASReq;

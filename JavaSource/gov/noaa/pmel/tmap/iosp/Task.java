@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 /**
  * This is where the rubber meets the road and the external process defined by
  * the Tool class actually gets run.

@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.service.shape;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
@@ -9,18 +9,11 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.service.BackendService;
 
 public class ShapeFileService extends BackendService {
-	 private static Logger log = LogManager.getLogger(ShapeFileService.class.getName());
+	 private static Logger log = LoggerFactory.getLogger(ShapeFileService.class.getName());
 	 public String getProduct(String backendRequestXML, String cacheFileName) throws Exception {       
 	        LASBackendRequest lasBackendRequest = new LASBackendRequest();      
 	        JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
-	        
-	        String debug = lasBackendRequest.getProperty("las", "debug");
-	        
-	        setLogLevel(debug);
-	        
-	        // Report logging level only for "debug" levels.
-	        log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
-	        
+	                
 	        LASBackendResponse lasBackendResponse = new LASBackendResponse();    
 	        if ( lasBackendRequest.isCancelRequest()) {           
 	            lasBackendResponse.setError("ShapeFile backend request canceled.");

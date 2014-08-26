@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.view.XMLToolboxManager;
@@ -32,7 +32,7 @@ public class TemplateTool extends Tool {
     public VelocityEngine ve = new VelocityEngine();
     Map toolboxContext;
     private File configFile;
-    final Logger log = LogManager.getLogger(TemplateTool.class.getName());
+    final Logger log = LoggerFactory.getLogger(TemplateTool.class.getName());
     
     public TemplateTool() {    
     }

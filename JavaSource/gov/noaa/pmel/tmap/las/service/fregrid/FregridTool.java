@@ -24,15 +24,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * @author rhs
  *
  */
 public class FregridTool extends TemplateTool {
-	final Logger log = LogManager.getLogger(FregridTool.class.getName());
+	final Logger log = LoggerFactory.getLogger(FregridTool.class.getName());
 	LASFregridBackendConfig lasFregridBackendConfig;
 	/**
 	 * @throws IOException 
