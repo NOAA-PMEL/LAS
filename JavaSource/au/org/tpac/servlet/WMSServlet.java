@@ -28,7 +28,9 @@ import au.org.tpac.wms.lib.WMSCapabilities_111;
 
 import au.org.tpac.wms.request.WMSRequest;
 import au.org.tpac.wms.exception.WMSException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.media.jai.codec.FileCacheSeekableStream;
 
 
@@ -36,7 +38,7 @@ import com.sun.media.jai.codec.FileCacheSeekableStream;
  * @author Pauline Mak (pauline@insight4.com); modified by Jing Y. Li
  */
 public class WMSServlet extends HttpServlet{
-    private static Logger log = Logger.getLogger(WMSServlet.class);
+    private static Logger log = LoggerFactory.getLogger(WMSServlet.class);
     private String lasXMLFile;
     //private String legendConfigFile;
 

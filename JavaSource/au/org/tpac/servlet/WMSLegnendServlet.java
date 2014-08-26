@@ -5,7 +5,8 @@
 */
 package au.org.tpac.servlet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +35,7 @@ import com.sun.media.jai.codec.FileCacheSeekableStream;
  */
 public class WMSLegnendServlet extends WMSServlet
 {
-    private static Logger log = Logger.getLogger(WMSLegnendServlet.class);
+    private static Logger log = LoggerFactory.getLogger(WMSLegnendServlet.class);
     private int top;
     private int width;  //how far to go in from the right edge of the image
     private int height;

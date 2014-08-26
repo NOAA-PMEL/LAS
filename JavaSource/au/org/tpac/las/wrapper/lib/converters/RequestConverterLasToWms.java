@@ -33,7 +33,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class converts WMSRequest to a LAS ProductServer request.
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class RequestConverterLasToWms
 {
-    private static Logger log = Logger.getLogger(RequestConverterLasToWms.class);
+    private static Logger log = LoggerFactory.getLogger(RequestConverterLasToWms.class);
 
     /**
      * A WMSRequest object that's about to be converted
