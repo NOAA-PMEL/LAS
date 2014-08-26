@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import thredds.servlet.DatasetSource;
 import ucar.nc2.NetcdfFile;
@@ -44,7 +45,7 @@ public class FerretDataSource implements DatasetSource {
     /* (non-Javadoc)
      * @see thredds.servlet.DatasetSource#getNetcdfFile(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    static private Logger log = Logger.getLogger(FerretDataSource.class.getName());
+    static private Logger log = LoggerFactory.getLogger(FerretDataSource.class.getName());
     public NetcdfFile getNetcdfFile(HttpServletRequest req, HttpServletResponse res) throws IOException {
         StringBuffer jnl = new StringBuffer("DEFINE ALIAS letdeq1 let/d=1\nDEFINE ALIAS ATTRCMD SET ATT/LIKE=\n");
         

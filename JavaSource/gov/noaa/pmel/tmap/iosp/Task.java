@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * This is where the rubber meets the road and the external process defined by
  * the Tool class actually gets run.
@@ -25,7 +26,7 @@ import org.slf4j.Logger;
  */
 public class Task {
     
-    static private Logger log = Logger.getLogger(Task.class.getName());
+    static private Logger log = LoggerFactory.getLogger(Task.class.getName());
 
     /** Sets up an external process. */
     public Task(String[] cmd, String[] env, File workDir, long timeLimit, String[] errors) {
