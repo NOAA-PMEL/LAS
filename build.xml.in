@@ -249,17 +249,8 @@
 	<target name="addxml-compile" depends="addxml-init">
 		<copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml"
 			tofile="${addxml-build}/log4j.xml" />
-		<unjar src="WebContent/WEB-INF/lib/JSAP_1.03a.jar"
-			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/joda-time-2.1.jar"
-			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/netcdfAll-4.3.jar"
-			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
-			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/commons-cli-1.2.jar" dest="${addxml-build}" />
 		<javac
-			srcdir="${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
+			srcdir="${addxml-src}/gov/noaa/pmel/tmap/las/proxy:${addxml-src}/gov/noaa/pmel/tmap/las/erddap/util:${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
 			<classpath>
 				<fileset id="addxml-libs"
