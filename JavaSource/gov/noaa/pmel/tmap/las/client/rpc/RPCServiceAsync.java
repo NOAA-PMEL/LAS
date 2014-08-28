@@ -5,6 +5,7 @@ import java.util.Map;
 
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
@@ -42,7 +43,7 @@ public interface RPCServiceAsync {
 	 * These are services that must attach to an ERDDAP server
 	 */
 	public void getERDDAPOuterSequenceVariables(String dsid, String varid, AsyncCallback<Map<String, String>> outerSequencVariableCallback);
-	public void getERDDAPOuterSequenceValues(String dsid, String varid, String key, List<ConstraintSerializable> constraints, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
+	public void getERDDAPOuterSequenceValues(String dsid, String varid, String key, ERDDAPConstraint constraint, List<ConstraintSerializable> constraints, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
 	public void getERDDAPConstraintGroups(String dsid, AsyncCallback<List<ERDDAPConstraintGroup>> constraints);
 	public void getERDDAPJSON(String dsid, String varid, String trajectory_id, String variables, AsyncCallback<String> json);
 	/*

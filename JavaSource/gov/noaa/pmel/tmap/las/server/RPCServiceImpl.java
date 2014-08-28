@@ -10,6 +10,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.ESGFDatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.FacetSerializable;
@@ -792,6 +793,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         // we are going to completely forego this check...
     }
     /**
+     * @param dsid the data set id to use for find the values
+     * @param varid the variable id to use for find the values
+     * @param key_variable if the values are one variable and the key are another (like cruise_name matches one to one with cruise_id)
+     * @param constraint the original ERDDAPConstraint object that trigger this request. Use to add labels. Could be empty or null
+     * @param constraints the values might need to be constrained to some sub set like in the case where the menu is used to build the id list for the thumbnails. could be empty 
      * Get the values of an ERDDAP "subset" variable to use as a way to select which DSG items are selected from the ERRDDAP server.
      * A query looks something like this:
      * 
@@ -799,7 +805,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
      * 
      */
     @Override
-    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, List<ConstraintSerializable> constriants) throws RPCException {
+    public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, ERDDAPConstraint constraint, List<ConstraintSerializable> constriants) throws RPCException {
         Map<String, String> outerSequenceValues = new TreeMap<String, String>();
         InputStream jsonStream;
         try {
@@ -855,7 +861,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 }
               
             }
-            
+            Map<String, String> labels = constraint.getLabels();
             // Decide what to do about x now that we have the info.
             if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
                 double dxlo = Double.valueOf(xlo);
@@ -897,11 +903,18 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 for (int i = 0; i < v.length(); i++) {
                     JSONArray s = v.getJSONArray(i);
                     String t = s.getString(0);
-                    if ( shortname.equals(key_variable) ) {
+                    if ( shortname.equals(key_variable) && labels == null) {
                         outerSequenceValues.put(t,t);
                     } else {
-                        String u = s.getString(1);
-                        outerSequenceValues.put(t, u);
+                        // The config specifies the names...
+                        if ( labels != null ) {
+                            String u = labels.get(t);
+                            outerSequenceValues.put(t,u);
+                        } else {
+                            // A second variable specifies the names
+                            String u = s.getString(1);
+                            outerSequenceValues.put(t, u);
+                        }
                     }
                 }
             
