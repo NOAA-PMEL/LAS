@@ -217,6 +217,14 @@ public class TabledapTool extends TemplateTool {
             String decid = getTabledapProperty(lasBackendRequest, "decimated_id");
             
             Map<String, String> ferret_prop = lasBackendRequest.getPropertyGroup("ferret");
+            Map<String, String> download = lasBackendRequest.getPropertyGroup("download");
+            boolean downloadall = false;
+            if ( download != null ) {
+                String dall = download.get("all");
+                if ( dall != null ) {
+                    downloadall = true;
+                }
+            }
             String full_option = ferret_prop.get("full_data");
             boolean full = false;
             if ( full_option != null && full_option.equalsIgnoreCase("yes") ) {
@@ -241,6 +249,9 @@ public class TabledapTool extends TemplateTool {
                 String all = thumbnail_properties.get("variable_names").trim();
                 query.append(all);
             } else if (operationID != null && operationID.equals("Trajectgory_correlation")) {
+                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                query.append(all);
+            } else if ( downloadall ) {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
             }  else {

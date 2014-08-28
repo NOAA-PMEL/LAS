@@ -161,11 +161,15 @@ $las_response.toString()
        #set($con_var_name = $las_config.getVariableTitle($con.getVariableXPath()))
        UIString += "<br>Constraint: [$con_var_name $con.getHTMLOp() $con.getValue()]"
     #end
+    
     UIString +="<br></td></tr><br>";
     
     //data format menu
     UIString +="<tr><td valign=top><b>Select Format</b></td><td><div id='format'></div></td></tr>";
     UIString += "</table>";
+
+    // Check for full data set.
+    UIString += "<br><INPUT ID='all' TYPE='checkbox' name='all_data' value='true'>Include all variables in the download.<br>";
 
     //ok and reset button
     UIString += "<br><INPUT TYPE='button' name='download_submit' Value='OK' onClick='submit()'> ";
@@ -263,6 +267,10 @@ $las_response.toString()
 
   //open a new window with the request as URL
   function sendLASRequest(lasReq){
+    if ( document.getElementById('all').checked ) {
+      lasReq.setProperty("download", "all_data", "true");
+      alert("Checked");
+    }
     var prefix =  baseURL + '/ProductServer.do?xml=';
     var url = prefix+escape(lasReq.getXMLText());
     //document.location = url;
