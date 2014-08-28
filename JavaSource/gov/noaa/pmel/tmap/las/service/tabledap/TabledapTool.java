@@ -220,7 +220,7 @@ public class TabledapTool extends TemplateTool {
             Map<String, String> download = lasBackendRequest.getPropertyGroup("download");
             boolean downloadall = false;
             if ( download != null ) {
-                String dall = download.get("all");
+                String dall = download.get("all_data");
                 if ( dall != null ) {
                     downloadall = true;
                 }
