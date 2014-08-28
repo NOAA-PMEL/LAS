@@ -79,9 +79,13 @@
 				}
 
 				var userComment = document.getElementById("addlcomment").value.trim();
-				userComment = userComment.replace(/\'/g,"").replace(/\"/g,'');
-				userComment = userComment.replace(/</g," less than ").replace(/>/g," greater than ");
-				userComment = userComment.replace(/%/g," percent").replace(/&/g," and ");
+				// listing each of these problems individually - maybe one day we can fix some or all
+				userComment = userComment.replace(/\'/g,"")
+				userComment = userComment.replace(/\"/g,"");
+				userComment = userComment.replace(/</g," less than ")
+				userComment = userComment.replace(/>/g," more than ");
+				userComment = userComment.replace(/%/g," percent")
+				userComment = userComment.replace(/&/g," and ");
 				comment += userComment;
 
 				document.getElementById("comment").value = comment.trim();
@@ -193,18 +197,6 @@
 			}
 
 			/**
-			 * Modify the readonly attribute of the final comment TextArea 
-			 */
-			function setFinalEditable() {
-				if ( document.getElementById("editfinal").selected ) {
-					document.getElementById("comment").readonly = false;
-				}
-				else {
-					document.getElementById("comment").readonly = true;
-				}
-			}
-
-			/**
 			 * Submit the QC flag.  Checks the selected comments are sufficient 
 			 * for the selected flag then makes the LAS request.
 			 */
@@ -229,7 +221,9 @@
 				Req.setProperty("qc","comment",comment);
 				Req.setProperty("qc","reviewer",reviewer);
 
-				document.location="ProductServer.do?xml=" + escape(Req.getXMLText());
+				var reqXmlText = Req.getXMLText();
+				reqXmlText = escape(reqXmlText);
+				document.location="ProductServer.do?xml=" + reqXmlText;
 			}
 
 			/**
@@ -238,16 +232,15 @@
 			 */
 			function setup() {
 				var cmtids = [ "fco2two", "fco2five", "fco2ten", "fco2bad", "fco2nocomment", 
-				                     "soptrue", "sopfalse", "sopnocomment", 
-				                     "metacomplete", "metalacking", "metanocomment",
-				                     "datagood", "databad", "datanocomment",
-				                     "crossfound", "crossexpo", "crossnone", "crossnocomment",
-				                     "addlcomment" ];
+				               "soptrue", "sopfalse", "sopnocomment", 
+				               "metacomplete", "metalacking", "metanocomment",
+				               "datagood", "databad", "datanocomment",
+				               "crossfound", "crossexpo", "crossnone", "crossnocomment" ];
 				var numids = cmtids.length;
 				for (var k = 0; k < numids; k++) {
 					document.getElementById(cmtids[k]).addEventListener("change", assignComment);
 				}
-				document.getElementById("editfinal").addEventListener("change", setFinalEditable);
+				document.getElementById("addlcomment").addEventListener("input", assignComment);
 				document.getElementById("cancelqc").addEventListener("click", window.close);
 				document.getElementById("submitqc").addEventListener("click", submitQC);
 			}
@@ -402,13 +395,7 @@
 				<textarea id="addlcomment" cols="80" rows="5"></textarea>
 			</div>
 
-			<h4 class="toplabel">
-				<span style="float: right;">
-					<input class="checkbox" type="checkbox" name="editfinal" id="editfinal"/>
-					<label for="editfinal">Edit</label>
-				</span>
-				<span>Complete QC comment:</span>
-			</h4>
+			<h4 class="toplabel">Complete QC comment:</h4>
 			<div class="value">
 				<textarea id="comment" cols="80" rows="10" readonly="true"></textarea>
 			</div>
