@@ -5731,6 +5731,19 @@ public class LASConfig extends LASDocument {
                             var.setShortname(shortname);
                             variables.add(var);
                             constraint.setVariables(variables);
+                            
+                            Element labels = c.getChild("labels");
+                            Map<String, String> valueLabels = new HashMap<String, String>();
+                            if ( labels != null ) {
+                                List<Element> list = labels.getChildren("label");
+                                for (Iterator lsitIt = list.iterator(); lsitIt.hasNext();) {
+                                    Element label = (Element) lsitIt.next();
+                                    String value = label.getAttributeValue("value");
+                                    String labelText = label.getTextTrim();
+                                    valueLabels.put(value, labelText);
+                                }
+                                constraint.setLabels(valueLabels);
+                            }
                         }
                         constraintGroup.add(constraint);
                         Element keyE = c.getChild("key");

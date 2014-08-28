@@ -117,7 +117,7 @@ public class SubsetConstraintPanel extends Composite {
         this.constraintGroup = constraintGroup;
         radioButtonGroup.clear();
         for (Iterator conIt = constraintGroup.getConstraints().iterator(); conIt.hasNext();) {
-            ERDDAPConstraint constraint = (ERDDAPConstraint) conIt.next();
+            final ERDDAPConstraint constraint = (ERDDAPConstraint) conIt.next();
             dsid = constraintGroup.getDsid();
             final String key = constraint.getKey();
             // There should be only 1.
@@ -140,7 +140,7 @@ public class SubsetConstraintPanel extends Composite {
                         valuesList.addItem(Constants.LOADING);
                         currentVariable = button.getText();
                                                                                          // For this part, we do not constrain on anything...
-                        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, new ArrayList<ConstraintSerializable>(), outerSequenceValuesCallback);
+                        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, constraint, new ArrayList<ConstraintSerializable>(), outerSequenceValuesCallback);
                     }
 
                 });

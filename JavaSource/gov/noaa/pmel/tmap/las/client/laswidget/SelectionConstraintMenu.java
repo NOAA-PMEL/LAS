@@ -181,7 +181,7 @@ public class SelectionConstraintMenu extends Composite {
         valuesList.clear();
         valuesList.addItem(Constants.LOADING);
         currentVariable = shortname;
-        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, constraints, outerSequenceValuesCallback);
+        Util.getRPCService().getERDDAPOuterSequenceValues(dsid, id, key, constraint, constraints, outerSequenceValuesCallback);
         
     }
 

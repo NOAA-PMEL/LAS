@@ -11,6 +11,7 @@ public class ERDDAPConstraint implements IsSerializable {
     String widget;
     String dsid;
   
+    Map<String, String> labels;
     List<VariableSerializable> variables;
     String key;
     public String getWidget() {
@@ -18,6 +19,12 @@ public class ERDDAPConstraint implements IsSerializable {
     }
     public void setWidget(String widget) {
         this.widget = widget;
+    }
+    public Map<String, String> getLabels() {
+        return labels;
+    }
+    public void setLabels(Map<String, String> labels) {
+        this.labels = labels;
     }
     public List<VariableSerializable> getVariables() {
         return variables;
