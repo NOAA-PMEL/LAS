@@ -269,7 +269,6 @@ $las_response.toString()
   function sendLASRequest(lasReq){
     if ( document.getElementById('all').checked ) {
       lasReq.setProperty("download", "all_data", "true");
-      alert("Checked");
     }
     var prefix =  baseURL + '/ProductServer.do?xml=';
     var url = prefix+escape(lasReq.getXMLText());
