@@ -49,22 +49,29 @@ public class GetCrossovers extends LASAction {
 
     private static Logger log = LoggerFactory.getLogger(GetCrossovers.class.getName());
     DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
-    
+
     DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
 
     DateTimeFormatter iso_fmt = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-    
+
     public static final double EARTH_AUTHALIC_RADIUS_KM = 6371.007;
     public static final double CUTOFF = 80.d;
     public static final double SPEED = 30.d;
     public static final double MIN_FCO2_DIFF = 5.0d;
     public static final double MIN_TEMP_DIFF = 0.3d;
-    
-	/* (non-Javadoc)
-	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
+
+    // Max allowable difference in time in milliseconds
+    long timeDelta = (long) Math.ceil(24.0 * 60.0 * 60.0 * 1000.0 * CUTOFF / SPEED);
+
+    // Max allowable difference in latitude in degrees
+    double latDelta = (CUTOFF / EARTH_AUTHALIC_RADIUS_KM) * 
+            (180.0 / Math.PI);
+
+    /* (non-Javadoc)
+     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			        throws Exception {	
 	    
@@ -175,10 +182,31 @@ public class GetCrossovers extends LASAction {
 	                                    timeminmax = getMinMax(timebounds);
 	                                    stream.close();
 
-	                                    // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
+	                                    // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box, but you have to fudge the time and lat because they only have to be "close"
+	                                    
+	                                    String tmin = timeminmax.get(0).getAsString();
+	                                    String tmax = timeminmax.get(1).getAsString();
+	                                    
+	                                    DateTime tmindt = iso_fmt.parseDateTime(tmin);
+	                                    DateTime tmaxdt = iso_fmt.parseDateTime(tmax);
+	                                    
+	                                    tmindt = tmindt.minus(timeDelta);
+	                                    tmaxdt = tmaxdt.plus(timeDelta);
+	                                    
+	                                    tmin = iso_fmt.print(tmindt.getMillis());
+	                                    tmax = iso_fmt.print(tmaxdt.getMillis());
+	                                    
+	                                    double latitudeMin = latminmax.get(0).getAsDouble();
+	                                    double latitudeMax = latminmax.get(1).getAsDouble();
+	                                    
+	                                    latitudeMin = latitudeMin - latDelta;
+	                                    if ( latitudeMin < -90.d ) latitudeMin = -90.d;
+	                                    latitudeMax = latitudeMax + latDelta;
+	                                    if ( latitudeMax > 90.d ) latitudeMax = 90.d;
+	                                    
 
-	                                    String crossoversurl = dataurl + ".json?"+URLEncoder.encode(traj_id_name+"&"+traj_id_name+"!=\""+tid+"\"&distinct()&time>="+timeminmax.get(0).getAsString()+"&time<="+timeminmax.get(1).getAsString()+
-	                                            "&latitude>="+latminmax.get(0).getAsString()+"&latitude<="+latminmax.get(1).getAsString()+
+	                                    String crossoversurl = dataurl + ".json?"+URLEncoder.encode(traj_id_name+"&"+traj_id_name+"!=\""+tid+"\"&distinct()&time>="+tmin+"&time<="+tmax+
+	                                            "&latitude>="+latitudeMin+"&latitude<="+latitudeMax+
 	                                            "&longitude>="+lonminmax.get(0).getAsString()+"&longitude<="+lonminmax.get(1).getAsString(), "UTF-8");
 	                                    stream = null;
 	                                    stream = lasProxy.executeGetMethodAndReturnStream(crossoversurl, response);
@@ -197,7 +225,7 @@ public class GetCrossovers extends LASAction {
 	                                        }
 	                                        stream.close();
 	                                    } else {
-	                                        bsw.write("none");
+	                                        bsw.write("check failed");
 	                                        bsw.flush();
 	                                        bsw.close();
 	                                        return null;
@@ -213,7 +241,6 @@ public class GetCrossovers extends LASAction {
 	                                    // We found some.  Compute the cross overs.
 	                                    JsonObject selectedCruise = null;
 	                                    // get the data for the selected cruise.
-//	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
 	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&orderBy(\"time\")", "UTF-8");
                                                                         
 	                                    InputStream stream = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
@@ -226,7 +253,6 @@ public class GetCrossovers extends LASAction {
 	                                    if ( selectedCruise != null ) {
 	                                        for (Iterator cIt = candiateCruises.iterator(); cIt.hasNext();) {
 	                                            String cid = (String) cIt.next();
-//	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
                                                 String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&orderBy(\"time\")", "UTF-8");
 
 	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
@@ -327,12 +353,7 @@ public class GetCrossovers extends LASAction {
 	    }
 	}
 	public Crossover checkCrossover(JsonObject selectedCruise,  JsonObject potentialCross) {
-	       // Max allowable difference in time in milliseconds
-        long timeDelta = (long) Math.ceil(24.0 * 60.0 * 60.0 * 1000.0 * CUTOFF / SPEED);
 
-        // Max allowable difference in latitude in degrees
-        double latDelta = (CUTOFF / EARTH_AUTHALIC_RADIUS_KM) * 
-                          (180.0 / Math.PI);
         
         double minDistance = Double.MAX_VALUE;
         
