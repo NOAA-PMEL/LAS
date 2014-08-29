@@ -36,6 +36,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -45,6 +47,7 @@ import com.google.gson.JsonStreamParser;
 
 public class GetCrossovers extends LASAction {
 
+    private static Logger log = LoggerFactory.getLogger(GetCrossovers.class.getName());
     DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
     
     DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
@@ -210,7 +213,9 @@ public class GetCrossovers extends LASAction {
 	                                    // We found some.  Compute the cross overs.
 	                                    JsonObject selectedCruise = null;
 	                                    // get the data for the selected cruise.
-	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+//	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&orderBy(\"time\")", "UTF-8");
+                                                                        
 	                                    InputStream stream = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
 	                                    if ( stream != null ) {
 	                                        JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(stream));
@@ -221,7 +226,9 @@ public class GetCrossovers extends LASAction {
 	                                    if ( selectedCruise != null ) {
 	                                        for (Iterator cIt = candiateCruises.iterator(); cIt.hasNext();) {
 	                                            String cid = (String) cIt.next();
-	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+//	                                            String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&distinct()&orderBy(\"time\")", "UTF-8");
+                                                String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&orderBy(\"time\")", "UTF-8");
+
 	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
 	                                            if ( st != null ) {
 	                                                JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(st));
@@ -410,14 +417,15 @@ public class GetCrossovers extends LASAction {
                      */
                     continue;
                 }
+                
                 double locTimeDist = distanceTo(lat, lon, time, crossingLat, crossingLon, crossingTime, SPEED, EARTH_AUTHALIC_RADIUS_KM );
                 if ( minDistance > locTimeDist ) {
-                    minDistance = locTimeDist;
+                    
                     if ( locTimeDist <= CUTOFF ) {
                         double temp_diff = Math.abs(crossingTemp - temp );
                         double fCO2diff = Math.abs(crossingfCO2 - fCO2);
                         if ( temp_diff < MIN_TEMP_DIFF && fCO2diff  < MIN_FCO2_DIFF ) {
-                       
+                            minDistance = locTimeDist;
                             crossover = new Crossover(crossingID, locTimeDist, crossingLat, crossingLon, crossingDate, cruiseMinDate, cruiseMaxDate);
                         
                         }
