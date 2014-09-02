@@ -221,8 +221,9 @@ ELSE
 ENDIF
 
 ! If there's not a lot of data on the map and the region is pretty small, 
-
 !IF `featuresize LT 20 AND (($basemap_area"0") LT 0.2)` THEN DEFINE SYMBOL drawthick = 3
+
+! Try this first, few cruises --> thick
 IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
 
 IF `($drawthick"0|1|2|3|*>0") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=($drawthick)
