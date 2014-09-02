@@ -190,8 +190,8 @@ public class GetCrossovers extends LASAction {
 	                                    DateTime tmindt = iso_fmt.parseDateTime(tmin);
 	                                    DateTime tmaxdt = iso_fmt.parseDateTime(tmax);
 	                                    
-	                                    tmindt = tmindt.minus(timeDelta);
-	                                    tmaxdt = tmaxdt.plus(timeDelta);
+	                                    tmindt = tmindt.minus(timeDelta*2);
+	                                    tmaxdt = tmaxdt.plus(timeDelta*2);
 	                                    
 	                                    tmin = iso_fmt.print(tmindt.getMillis());
 	                                    tmax = iso_fmt.print(tmaxdt.getMillis());
@@ -199,9 +199,9 @@ public class GetCrossovers extends LASAction {
 	                                    double latitudeMin = latminmax.get(0).getAsDouble();
 	                                    double latitudeMax = latminmax.get(1).getAsDouble();
 	                                    
-	                                    latitudeMin = latitudeMin - latDelta;
+	                                    latitudeMin = latitudeMin - latDelta*2;
 	                                    if ( latitudeMin < -90.d ) latitudeMin = -90.d;
-	                                    latitudeMax = latitudeMax + latDelta;
+	                                    latitudeMax = latitudeMax + latDelta*2;
 	                                    if ( latitudeMax > 90.d ) latitudeMax = 90.d;
 	                                    
 
@@ -218,10 +218,13 @@ public class GetCrossovers extends LASAction {
 	                                        JsonObject crossovers = (JsonObject) jp.next(); 
 	                                        JsonArray rows = (JsonArray) ((JsonObject) (crossovers.get("table"))).get("rows");
 
-
+	                                        String filter = tid.substring(0, 4);
 	                                        // Add the list of potential crosses to the table.
 	                                        for (int i = 0; i < rows.size(); i++) {
-	                                            candiateCruises.add(rows.get(i).getAsString());
+	                                            String candidate_id = rows.get(i).getAsString();
+	                                            if ( !candidate_id.startsWith(filter)) {
+	                                                candiateCruises.add(candidate_id);
+	                                            }
 	                                        }
 	                                        stream.close();
 	                                    } else {
