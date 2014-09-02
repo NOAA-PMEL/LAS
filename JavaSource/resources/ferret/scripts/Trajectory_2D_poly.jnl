@@ -209,17 +209,23 @@ GO feature_labels
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 
+! Always thick?
+DEFINE SYMBOL drawthick = 1
+DEFINE SYMBOL drawthick = 2
+
 IF ($decimation_fraction"0|*>1") THEN 
-   DEFINE SYMBOL  drawthick = 1
+   DEFINE SYMBOL  drawthick = 2
 ELSE
-   IF `nout_lonlat LT 400000` THEN DEFINE SYMBOL drawthick = 1
-   IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 1
+!   IF `nout_lonlat LT 400000` THEN DEFINE SYMBOL drawthick = 2
+   IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
 ENDIF
 
-! Always thick?
+! If there's not a lot of data on the map and the region is pretty small, 
 
-DEFINE SYMBOL drawthick = 1
-IF ($drawthick"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+!IF `featuresize LT 20 AND (($basemap_area"0") LT 0.2)` THEN DEFINE SYMBOL drawthick = 3
+IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
+
+IF `($drawthick"0|1|2|3|*>0") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=($drawthick)
 
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
