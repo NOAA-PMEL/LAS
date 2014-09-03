@@ -121,6 +121,7 @@ CANCEL SYMBOL put_label
 ! For the line connecting points in each feature, color it grey.
 PPL COLOR,6,60,60,60 ! grey
 
+
 let pq = p*q
 let pqmask = pq-pq
 let p_var = p + pqmask
@@ -128,42 +129,20 @@ let q_var = q + pqmask
 
 ! Define axes for both variables using the range in the data
 
-LET amin = p_var[i=@MIN]
-LET amax = p_var[i=@MAX]
-
-DEFINE SYMBOL is_time = ($ferret_prop_var"0|time>1|TIME>1|*>0") 
-IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
-
-GO LAS_is_range amin amax
-CANCEL SYMBOL is_time
-
-DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis 
-DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis1 
-
-LET dep_var = x[gx=haxis]
-LET dep_var1 = x[gx=haxis1]
-
-LET amin = q_var[i=@MIN]
-LET amax = q_var[i=@MAX]
-DEFINE SYMBOL is_time = ($ferret_plot_var"0|time>1|TIME>1|*>0")
-IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
-GO LAS_is_range amin amax
-CANCEL SYMBOL is_time
-
-DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
-DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1
-
-LET indep_var = y[gy=vaxis]
-LET indep_var1 = y[gy=vaxis1]
-! Formatted horizontal axes
-! See if the independent axis is longitude, latitude, or time
-! If so redefine those axes
+!----------
+! Possibly redefine longitude to lon360 depending on the longitude range.
+! Do this first, as the constraints are based on lon in 0-360. Then the
+! constrained variable will be correct. (This fixes ticket 1623).
 
 IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN 
 
    DEFINE SYMBOL is_lon = 1
 
+   DEFINE SYMBOL lon_units = `longitude,RETURN=units`
+
 ! Get min and max longitudes and create a LON axis.
+! All this lon360 stuff is to deal with cases where longitude data is on 
+! both sides of the dateline.
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
@@ -177,27 +156,34 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       let ax_hi = amax
    ENDIF
 
+! make sure del_ax is defined
+   GO LAS_is_range ax_lo ax_hi ! get del_ax
+
    LET varnames = ..varnames
    IF `IS_ELEMENT_OF_STR(varnames, "lon360") GT 0` THEN
-      LET xvar_360 = lon360
+      LET/UNITS="($lon_units)" xvar_360 = lon360
    ELSE
-      LET xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
+      LET/UNITS="($lon_units)" xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
    ENDIF
    
    LET amin360 = xvar_360[i=@MIN]
    LET amax360 = xvar_360[i=@MAX]
 
-   IF `(amax360 - amin360) LT (amax - amin) ` THEN 
+    DEFINE SYMBOL isbad =  `(amax - amin) `  ! a constraint on longitude may make amin,amax bad.
+    LET adiff = amax - amin
+    IF ($isbad"0|bad>1|*>0") THEN LET adiff = 9000
+
+   IF `(amax360 - amin360) LT adiff` THEN 
 
       LET ax_lo360 = `xvar_360[i=@MIN]`
       LET ax_hi360 = `xvar_360[i=@MAX]`
       IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
          LET xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
-	 set var/name=longitude_in longitude 
-	 LET/UNITS="`longitude_in,RETURN=units`"/d=1 longitude = IF longitude_in LT 0 THEN longitude_in+360 ELSE longitude_in
+	 SET VAR/NAME=longitude_in longitude
+	 LET/UNITS="($lon_units)"/d=1 longitude = IF longitude_in LT 0 THEN longitude_in+360 ELSE longitude_in
 	 CANCEL SYMBOL pvar_reset
-	 LET xvar_360 = longitude
+	 LET/UNITS="($lon_units)" xvar_360 = longitude
          LET ax_lo = p_var[i=@MIN]
          LET ax_hi = p_var[i=@MAX] 
          LET ax_lo = `ax_lo360`
@@ -218,7 +204,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    ELSE  ! case with 360 degree range
       IF `((ax_hi-ax_lo) GT 350) AND (ax_lo LT (-178))` THEN
-         LET xvar = xvar_360
+         LET/UNITS="($lon_units)" xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
          LET ax_lo = 0
          LET ax_hi = 360
@@ -227,12 +213,12 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    ENDIF  !`(ax_hi-ax_lo) LT 359`
 
    IF `amax GT 180` THEN 
-         LET xvar = xvar_360
+         LET/UNITS="($lon_units)" xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
    ENDIF
 
    IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
-         LET xvar = xvar_360
+         LET/UNITS="($lon_units)" xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
    ENDIF
 
@@ -246,8 +232,9 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       let ax_hi = `amax`
    ENDIF
 
-   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis
+   DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="($lon_units%degrees_east%)" haxis
    IF ($dm_labels"0|*>1") THEN DEFINE SYMBOL special_label_x = ppl xfor (($dm_labels))
+   DEFINE SYMBOL have_haxis = 1
 
    DEFINE SYMBOL region_x_range = `ax_hi - ax_lo` ! reset this so LAS_fland.jnl chooses the right resolution
 
@@ -255,6 +242,40 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    CANCEL SYMBOL data_1_units
    CANCEL SYMBOL ferret_title_0  ! dont need a horizontal axis label
 ENDIF
+!---------- Redefining longitude
+
+LET amin = p_var[i=@MIN]
+LET amax = p_var[i=@MAX]
+
+DEFINE SYMBOL is_time = ($ferret_prop_var"0|time>1|TIME>1|*>0") 
+IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
+
+GO LAS_is_range amin amax
+CANCEL SYMBOL is_time
+
+IF `($have_haxis"0|*>1") EQ 0` THEN \
+DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis 
+DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis1 
+
+LET dep_var = x[gx=haxis]
+LET dep_var1 = x[gx=haxis1]
+
+LET amin = q_var[i=@MIN]
+LET amax = q_var[i=@MAX]
+DEFINE SYMBOL is_time = ($ferret_plot_var"0|time>1|TIME>1|*>0")
+IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
+GO LAS_is_range amin amax
+CANCEL SYMBOL is_time
+
+DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
+DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1
+
+LET indep_var = y[gy=vaxis]
+LET indep_var1 = y[gy=vaxis1]
+
+! Formatted horizontal axes
+! See if the independent axis is longitude, latitude, or time
+! If so redefine those axes
 
 IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN 
 
@@ -543,12 +564,13 @@ IF ($put_label"0|*>1") THEN
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
       ENDIF
-      define symbol bad_pp_var = 1
+      DEFINE SYMBOL bad_pp_var = 1
    ENDIF
 
    IF `($bad_pp_var"0") EQ 0` THEN 
       LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @ASConstraints result in no valid data
    ENDIF
+
    DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
    EXIT/SCRIPT
 ENDIF
