@@ -228,6 +228,29 @@ IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
 
 IF `($drawthick"0|1|2|3|*>0") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=($drawthick)
 
+! Is this a mooring where all the location data is at a single location?  If so make a colored symbol
+
+LET lonattnames = ($data_x_var_in).attnames
+LET latattnames = ($data_y_var_in).attnames
+IF `IS_ELEMENT_OF_STR(lonattnames, "actual_range") GT 0 AND \
+ IS_ELEMENT_OF_STR(lonattnames, "actual_range") GT 0` THEN
+
+   LET lvar = ($data_x_var_in).actual_range
+   LET lonmin `lvar[i=@min],PREC=9`
+   LET lonmax `lvar[i=@max],PREC=9`
+
+   LET lvar = ($data_y_var_in).actual_range
+   LET latmax `lvar[i=@max],PREC=9`
+   LET latmin `lvar[i=@min],PREC=9`
+
+   IF `lonmax-lonmin LT 0.1 AND latmax-latmin LT 0.1` THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=21/SIZ=0.1
+      DEFINE SYMBOL is_mooring = 1
+   ENDIF
+ENDIF
+
+
+
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
 ENDIF
@@ -264,13 +287,17 @@ ELSE
    ENDIF
 
 SAY _________________ Start plot: clock seconds:                                 ($clock_secs)
-let pre_plot = ($clock_secs)
+LET pre_plot = ($clock_secs)
    ! Draw the ribbon plot
    IF ($single_color"0|*>1") THEN
     ($plot_command)($qualifiers) x_var_data, y_var_data
    ELSE
 ! or /missing=blank or leave off for gray...
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+      IF ($is_mooring"0|*>1") THEN
+         ($plot_command)($qualifiers)/missing=blank/SET x_var_data, y_var_data, var_data 
+      ELSE
+         ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+      ENDIF
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
       PPL RIBBON/OVER
    ENDIF
