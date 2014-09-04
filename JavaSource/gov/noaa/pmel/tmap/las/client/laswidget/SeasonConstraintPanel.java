@@ -47,7 +47,7 @@ public class SeasonConstraintPanel extends Composite {
     ToggleButton dec = new ToggleButton("Dec");
 
     VariableSerializable var;
-    HTML hint = new HTML("Select <i>any</i> sequence of consecuative months, e.g. DJF.");
+    HTML hint = new HTML("Select <i>any</i> sequence of consecutive months, e.g. DJF.");
 
     List<String> months = new ArrayList<String>();
 
