@@ -262,7 +262,7 @@
   <!-- for SOCAT QC -->
   <login-config>
     <auth-method>FORM</auth-method>
-    <realm-name>SOCAT Reviewer</realm-name>
+    <realm-name>socatreviewer</realm-name>
       <form-login-config>
         <form-login-page>/socatlogin.html</form-login-page>
         <form-error-page>/socatloginerror.html</form-error-page>
