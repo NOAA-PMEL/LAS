@@ -68,7 +68,7 @@ public class ConstraintWidgetGroup extends Composite {
 
     public ConstraintWidgetGroup() {
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", STACK_HEIGHT+"px");
-        mainPanel.add(topLabel);
+       
        
         scrollPanel.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
         scrollPanel.add(displayPanel);
@@ -78,6 +78,7 @@ public class ConstraintWidgetGroup extends Composite {
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
         // The stack panel
+        mainPanel.add(topLabel);
         interiorPanel.add(constraintPanel);
         mainPanel.add(interiorPanel);
         
