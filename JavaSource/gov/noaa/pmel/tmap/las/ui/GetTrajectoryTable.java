@@ -126,7 +126,7 @@ public class GetTrajectoryTable extends LASAction {
 	                String table = tabledap.get("table_variables");
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
-                    String did = tabledap.get("decimated_id");
+                    //String did = tabledap.get("decimated_id");
                     String cruise_id = tabledap.get("trajectory_id");
                     StringBuilder xquery2 = new StringBuilder();
                     StringBuilder xquery1 = new StringBuilder();
@@ -144,9 +144,9 @@ public class GetTrajectoryTable extends LASAction {
                             String fulldataurl = dataurl + id;
 
 	                        // If available use the decimated URL for the other requests.
-	                        if ( did != null && !did.equals("") ) {
-	                            id = did;
-	                        }
+//	                        if ( did != null && !did.equals("") ) {
+//	                            id = did;
+//	                        }
 	                        dataurl = dataurl + id;
 	                        
 	                        if ( id != null && !id.equals("") ) {
