@@ -189,6 +189,10 @@
 		</copy>
 		<copy file="JavaSource/resources/ferret/FerretBackendConfig.xml"
 			tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml" />
+		<!-- remove any symbolic links because the delete task follows symbolic links -->
+		<exec executable="find">
+			<arg line="${deploy.home} -type l -delete" />
+		</exec>
 		<delete dir="${deploy.home}" />
 		<copy file="${app.name}.war" tofile="${dist.war}" />
 	</target>
