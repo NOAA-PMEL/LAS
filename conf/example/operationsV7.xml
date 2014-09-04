@@ -860,7 +860,7 @@
     </grid_types>
   </operation>
   <!--  Trajctory Table	 -->
-  <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable" target="_self">
+  <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable">
     <response ID="PlotResp" type="HTML" index="1">
       <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
       <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
