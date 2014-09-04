@@ -859,7 +859,7 @@
       <grid_type name="trajectory"/>
     </grid_types>
   </operation>
-  <!--  Trajctory Table	 -->
+  <!--  Trajctory Table	 USE target="_self" to have the table replace the main interface.  -->
   <operation name="Trajectory Table" ID="TrajectoryTable" service_action="" default="true" category="trajectory_table" output_template="TrajectoryTable">
     <response ID="PlotResp" type="HTML" index="1">
       <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
