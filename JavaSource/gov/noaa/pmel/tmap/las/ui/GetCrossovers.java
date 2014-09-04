@@ -228,7 +228,7 @@ public class GetCrossovers extends LASAction {
 	                                        }
 	                                        stream.close();
 	                                    } else {
-	                                        bsw.write("check failed");
+	                                        bsw.write("none");
 	                                        bsw.flush();
 	                                        bsw.close();
 	                                        return null;
