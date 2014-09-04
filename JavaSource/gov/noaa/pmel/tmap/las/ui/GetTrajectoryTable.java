@@ -166,7 +166,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                    if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
 	                                        double dxlo = Double.valueOf(xlo);
 	                                        double dxhi = Double.valueOf(xhi);
-	                                        // Do the full globle and two query dance...
+	                                        // Do the full globe and two query dance...
 
 	                                        if ( Math.abs(dxhi - dxlo ) < 355. ) {
 
