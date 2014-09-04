@@ -53,8 +53,6 @@ $las_response.toString()
 <body  onload="initializeLASRequest()">
 
 
-<h3>Test output: $data is the netCDF URL</h3>
-
 
 ## Write the preamble
 
