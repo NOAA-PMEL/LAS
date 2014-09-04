@@ -69,15 +69,18 @@ public class ConstraintWidgetGroup extends Composite {
     public ConstraintWidgetGroup() {
         constraintPanel.setSize(Constants.CONTROLS_WIDTH+"px", STACK_HEIGHT+"px");
         mainPanel.add(topLabel);
-        interiorPanel.add(constraintPanel);
-        mainPanel.add(interiorPanel);
+       
         scrollPanel.setSize(Constants.CONTROLS_WIDTH-10+"px", "100px");
         scrollPanel.add(displayPanel);
         scrollPanel.addStyleName(Constants.ALLBORDER);
         displayPanel.setSize(Constants.CONTROLS_WIDTH-25+"px", "125px");
+        // The active constraints display
         mainPanel.add(constraintLabel);
         mainPanel.add(scrollPanel);
-
+        // The stack panel
+        interiorPanel.add(constraintPanel);
+        mainPanel.add(interiorPanel);
+        
         variableConstraints = new ERDDAPVariableConstraintPanel();
         validConstraints = new ERDDAPValidDataConstraintPanel();
         
