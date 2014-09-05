@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -20,7 +19,7 @@ import thredds.catalog.InvDataset;
 import thredds.catalog.ServiceType;
 
 public class ReadESG {
-	private static final Logger log = LoggerFactory.getLogger(ReadESG.class);
+	private static final Logger log = Logger.getLogger(ReadESG.class);
 	public void read(String src) {
 //		addXML ax = new addXML();
 		InvCatalogFactory factory = new InvCatalogFactory("default", false);
