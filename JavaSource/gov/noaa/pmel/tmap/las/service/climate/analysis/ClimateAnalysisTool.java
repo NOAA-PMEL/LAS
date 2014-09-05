@@ -11,8 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.iosp.Task;
@@ -27,7 +27,7 @@ import gov.noaa.pmel.tmap.las.service.ferret.FerretTool;
 
 public class ClimateAnalysisTool extends TemplateTool {
 	LASClimateAnalysisBackendConfig lasClimateAnalysisBackendConfig;
-    final Logger log = LoggerFactory.getLogger(ClimateAnalysisTool.class.getName());
+    final Logger log = Logger.getLogger(ClimateAnalysisTool.class.getName());
 	public ClimateAnalysisTool() throws LASException, IOException {
 		super("climate/analysis", "ClimateAnalysisBackendConfig.xml");
 		lasClimateAnalysisBackendConfig = new LASClimateAnalysisBackendConfig();

@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -111,7 +111,7 @@ public class TabledapTool extends TemplateTool {
     String zname;
     List<String> all = new ArrayList<String>();
     List<DataRow> datarows = new ArrayList<DataRow>();
-    final Logger log = LoggerFactory.getLogger(TabledapTool.class.getName());
+    final Logger log = Logger.getLogger(TabledapTool.class.getName());
     
     /**
      * This default constructor uses the TemplateTool base class to initialize all

@@ -19,8 +19,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -28,7 +28,7 @@ import org.jdom.Element;
 
 public class SaveQC extends LASAction {
 
-	private static Logger log = LoggerFactory.getLogger(SaveQC.class.getName());
+	private static Logger log = Logger.getLogger(SaveQC.class.getName());
 	private static final String DATABASE_CONFIG = "DatabaseBackendConfig.xml";
 	private static final String DATABASE_NAME = "SOCATFlags";
 

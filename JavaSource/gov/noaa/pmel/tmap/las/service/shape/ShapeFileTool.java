@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.NetcdfDataset;
@@ -32,7 +32,7 @@ import gov.noaa.pmel.tmap.las.service.TemplateTool;
 import gov.noaa.pmel.tmap.las.service.ferret.FerretTool;
 
 public class ShapeFileTool extends TemplateTool {
-	final Logger log = LoggerFactory.getLogger(TemplateTool.class.getName());
+	final Logger log = Logger.getLogger(TemplateTool.class.getName());
 	LASShapeFileBackendConfig lasShapeFileBackendConfig;
 	public ShapeFileTool() throws LASException, IOException {
 

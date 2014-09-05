@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.service.shape;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
@@ -9,7 +9,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.service.BackendService;
 
 public class ShapeFileService extends BackendService {
-	 private static Logger log = LoggerFactory.getLogger(ShapeFileService.class.getName());
+	 private static Logger log = Logger.getLogger(ShapeFileService.class.getName());
 	 public String getProduct(String backendRequestXML, String cacheFileName) throws Exception {       
 	        LASBackendRequest lasBackendRequest = new LASBackendRequest();      
 	        JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);

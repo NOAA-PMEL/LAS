@@ -47,8 +47,8 @@ import javax.sql.rowset.WebRowSet;
 import oracle.jdbc.rowset.OracleWebRowSet;
 
 import org.apache.log4j.Level;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -67,7 +67,7 @@ import com.sun.rowset.WebRowSetImpl;
  *
  */
 public final class ProductServerAction extends LASAction {
-    private static Logger log = LoggerFactory.getLogger(ProductServerAction.class.getName());
+    private static Logger log = Logger.getLogger(ProductServerAction.class.getName());
     private static LASProxy lasProxy= new LASProxy();
 
     public ActionForward execute(ActionMapping mapping,

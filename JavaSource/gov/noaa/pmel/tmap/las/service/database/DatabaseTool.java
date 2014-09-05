@@ -26,8 +26,8 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.velocity.VelocityContext;
 import org.jdom.JDOMException;
 
@@ -39,7 +39,7 @@ public class DatabaseTool extends TemplateTool {
     
     LASDatabaseBackendConfig databaseBackendConfig;
     
-    final Logger log = LoggerFactory.getLogger(DatabaseTool.class.getName());
+    final Logger log = Logger.getLogger(DatabaseTool.class.getName());
     int ti = 0;
     public DatabaseTool() throws LASException, IOException {
        

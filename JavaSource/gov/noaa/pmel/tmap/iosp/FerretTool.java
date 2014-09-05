@@ -15,15 +15,15 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 /**
  * This is the Tool class (based on the Anagram Tool class) that runs Ferret so it can do work for the IOSP.
  * @author rhs
  *
  */
 public class FerretTool extends Tool{
-    static private Logger log = LoggerFactory.getLogger(FerretTool.class.getName());
+    static private Logger log = Logger.getLogger(FerretTool.class.getName());
     //final Logger log = Logger.getLogger(FerretTool.class.getName());
     FerretConfig ferretConfig;
     String scriptDir;

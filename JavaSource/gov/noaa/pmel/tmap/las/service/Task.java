@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 public class Task {
     
-    private static Logger log = LoggerFactory.getLogger(Task.class.getName());
+    private static Logger log = Logger.getLogger(Task.class.getName());
     
     /** An array of strings that indicate there is an error in command output */
     protected String[] ERROR_INDICATOR;

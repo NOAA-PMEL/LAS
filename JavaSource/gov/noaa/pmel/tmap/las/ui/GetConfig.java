@@ -23,8 +23,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -57,7 +57,7 @@ public class GetConfig extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	private static Logger log = LoggerFactory.getLogger(GetConfig.class.getName());
+	private static Logger log = Logger.getLogger(GetConfig.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) {
 		

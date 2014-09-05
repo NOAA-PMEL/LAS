@@ -17,8 +17,8 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.view.XMLToolboxManager;
 import org.jdom.Element;
@@ -37,7 +37,7 @@ public class ProductService {
     public VelocityEngine ve = new VelocityEngine();
     Map toolboxContext;
     
-    final Logger log = LoggerFactory.getLogger(ProductService.class.getName());
+    final Logger log = Logger.getLogger(ProductService.class.getName());
     
     public ProductService (LASBackendRequest lasBackendRequest, String serverURL, String methodName, String outputFileName) throws LASException, IOException {
         this.lasBackendRequest = lasBackendRequest;

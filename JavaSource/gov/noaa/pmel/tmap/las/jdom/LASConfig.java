@@ -76,8 +76,8 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.jdom.Attribute;
 import org.jdom.Content;
 import org.jdom.Document;
@@ -102,7 +102,7 @@ import thredds.catalog.InvDataset;
  *
  */
 public class LASConfig extends LASDocument {
-    private static Logger log = LoggerFactory.getLogger(LASConfig.class.getName());
+    private static Logger log = Logger.getLogger(LASConfig.class.getName());
     private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
     private static LASProxy lasProxy = new LASProxy();
     private static String time_formats[] = {
@@ -817,7 +817,7 @@ public class LASConfig extends LASDocument {
     } */
     /**
      * See if this config contains a grid with this ID
-     * @param id the id to check
+     * @param data.getId() the id to check
      * @return true if found; false if not
      */
     private boolean containsGrid(String grid_id) {
@@ -840,7 +840,7 @@ public class LASConfig extends LASDocument {
     /**
      * Does this config contain this data set and variable?
      * @param dsid the data set
-     * @param id the variable
+     * @param data.getId() the variable
      * @return
      * @throws JDOMException
      */

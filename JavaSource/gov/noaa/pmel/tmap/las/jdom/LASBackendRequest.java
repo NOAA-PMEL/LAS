@@ -26,8 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -51,7 +51,7 @@ public class LASBackendRequest extends LASDocument {
 	 */
     private static final long serialVersionUID = 8177345236093847495L;
 
-    private static Logger log = LoggerFactory.getLogger(LASBackendRequest.class.getName());
+    private static Logger log = Logger.getLogger(LASBackendRequest.class.getName());
     /**
      * A convenience method that will report if the &lt;cancel&gt; element is present
      * in the request.  If so the service is supposed to stop processing any request it

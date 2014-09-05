@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.jdom.JDOMException;
@@ -32,7 +32,7 @@ import org.jdom.JDOMException;
  *
  */
 public class JavaBackendService {
-    private static Logger log = LoggerFactory.getLogger(JavaBackendService.class.getName());
+    private static Logger log = Logger.getLogger(JavaBackendService.class.getName());
     
     public String fiveMinutes(String backendRequestXML, String cacheFileName) throws JDOMException, IOException, Exception {
         LASBackendRequest lasBackendRequest = new LASBackendRequest();    

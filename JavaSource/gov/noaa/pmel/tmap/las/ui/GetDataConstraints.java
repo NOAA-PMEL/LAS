@@ -23,8 +23,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -47,7 +47,7 @@ public class GetDataConstraints extends ConfigService {
 	/*
 	 * Generated Methods
 	 */
-	private static Logger log = LoggerFactory.getLogger(GetDataConstraints.class.getName());
+	private static Logger log = Logger.getLogger(GetDataConstraints.class.getName());
 
 	/** 
 	 * Method execute
