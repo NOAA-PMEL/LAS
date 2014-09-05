@@ -18,8 +18,8 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 import java.io.File;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.jdom.JDOMException;
 
 /**
@@ -31,7 +31,7 @@ import org.jdom.JDOMException;
  *
  */
 public class DapperBackendService extends BackendService {
-    private static Logger log = LoggerFactory.getLogger(DapperBackendService.class.getName());
+    private static Logger log = Logger.getLogger(DapperBackendService.class.getName());
 
     /**
      * This processes the backendRequestXML and returns the requested data.

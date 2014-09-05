@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.slf4j.Logger;
+
 import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionServlet;
 import org.apache.struts.action.PlugIn;
 import org.apache.struts.config.ModuleConfig;
@@ -84,7 +84,7 @@ public class LASConfigPlugIn implements PlugIn {
 	 */
 	public final static String LAS_FTDS_UP_KEY = "ftds_up";
 
-	private static Logger log = LoggerFactory.getLogger(LASConfigPlugIn.class.getName());
+	private static Logger log = Logger.getLogger(LASConfigPlugIn.class.getName());
 
 	private ServletContext context;
 

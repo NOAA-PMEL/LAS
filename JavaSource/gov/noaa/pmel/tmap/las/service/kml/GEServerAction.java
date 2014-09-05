@@ -18,14 +18,14 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 /**
  *@author Jing Yang Li
  *
  */
 public final class GEServerAction extends Action {
-    private static Logger log = LoggerFactory.getLogger(GEServerAction.class);
+    private static Logger log = Logger.getLogger(GEServerAction.class);
 
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,

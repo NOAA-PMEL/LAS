@@ -36,8 +36,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -47,7 +47,7 @@ import com.google.gson.JsonStreamParser;
 
 public class GetCrossovers extends LASAction {
 
-    private static Logger log = LoggerFactory.getLogger(GetCrossovers.class.getName());
+    private static Logger log = Logger.getLogger(GetCrossovers.class.getName());
     DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
 
     DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);

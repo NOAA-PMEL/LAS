@@ -15,12 +15,12 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 public class LASProxy {
 	public int streamBufferSize = 8196;
-	private static Logger log = LoggerFactory.getLogger(LASProxy.class.getName());
+	private static Logger log = Logger.getLogger(LASProxy.class.getName());
 	public void executeGetMethodAndSaveResult(String url, File outfile, HttpServletResponse response) throws IOException, HttpException {
 		HttpClient client = new HttpClient();
 		HttpClientParams params = client.getParams();

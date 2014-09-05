@@ -14,8 +14,8 @@ import gov.noaa.pmel.tmap.las.util.Variable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -26,7 +26,7 @@ import org.json.XML;
 
 public class GetVariable extends ConfigService {
 
-	private static Logger log = LoggerFactory.getLogger(GetVariables.class.getName());
+	private static Logger log = Logger.getLogger(GetVariables.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
 
 		String query = request.getQueryString();

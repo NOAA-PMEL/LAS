@@ -12,8 +12,8 @@ import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import java.util.HashMap;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 /*
  * A point that represents an insitu observation
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LASInsituPoint{
 
-    private static Logger log = LoggerFactory.getLogger(LASInsituPoint.class);
+    private static Logger log = Logger.getLogger(LASInsituPoint.class);
 
     private String lat;
     private String lon;

@@ -23,8 +23,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.jdom.JDOMException;
 import org.joda.time.DateTime;
@@ -72,7 +72,7 @@ public class DRDSTool extends TemplateTool {
 
      LASDRDSBackendConfig drdsBackendConfig;
     
-    final Logger log = LoggerFactory.getLogger(DRDSTool.class.getName());
+    final Logger log = Logger.getLogger(DRDSTool.class.getName());
     
     /**
      * The default constructor which uses the TemplateTool base class to initialize all

@@ -8,13 +8,13 @@ import gov.noaa.pmel.tmap.las.service.BackendService;
 import java.util.Date;
 import java.util.logging.*;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 public class FerretBackendService extends BackendService {
 	// This object could be persisted between requests if this
 	// were packaged in a servlet.
-	private static Logger log = LoggerFactory.getLogger(FerretBackendService.class
+	private static Logger log = Logger.getLogger(FerretBackendService.class
 			.getName());
 
 	private final java.util.logging.Logger logger = java.util.logging.Logger

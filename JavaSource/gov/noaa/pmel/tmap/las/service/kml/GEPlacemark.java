@@ -12,8 +12,8 @@ import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import java.util.HashMap;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 /*
  * A single Google Earth placemark
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GEPlacemark{
 
-    private static Logger log = LoggerFactory.getLogger(GEPlacemark.class);
+    private static Logger log = Logger.getLogger(GEPlacemark.class);
 
     String kmlString;
     String point_lat;

@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 
 /*
  * For generating a collection of place marks for LAS data
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LASRegularPlacemarks implements LASPlacemarks{
 
-    private static Logger log = LoggerFactory.getLogger(LASRegularPlacemarks.class);
+    private static Logger log = Logger.getLogger(LASRegularPlacemarks.class);
 
     String gridFileName;
     HashMap<String, String> initLASReq;

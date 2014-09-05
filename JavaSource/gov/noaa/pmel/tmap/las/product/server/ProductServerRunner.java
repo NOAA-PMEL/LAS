@@ -33,8 +33,8 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.Element;
@@ -69,7 +69,7 @@ public class ProductServerRunner  extends Thread  {
     protected long start;
     protected long current_start;
 
-    private static Logger log = LoggerFactory.getLogger(ProductServerRunner.class.getName());
+    private static Logger log = Logger.getLogger(ProductServerRunner.class.getName());
     public ProductServerRunner (ProductRequest productRequest, LASConfig lasConfig, ServerConfig serverConfig, HttpServletRequest request, ActionMapping mapping, Cache cache) {
         this.productRequest = productRequest;
         this.lasConfig = lasConfig;

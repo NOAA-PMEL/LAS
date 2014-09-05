@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.log4j.Logger;
 import org.apache.tools.ant.types.selectors.TypeSelector.FileType;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -67,7 +67,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  */
 public class FerretIOServiceProvider implements IOServiceProvider {
-	static private Logger log = LoggerFactory.getLogger(FerretIOServiceProvider.class
+	static private Logger log = Logger.getLogger(FerretIOServiceProvider.class
 			.getName());
 	RandomAccessFile raf;
 	static private final long maxHeader = 512;

@@ -19,8 +19,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -28,7 +28,7 @@ import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
 
 public class CacheManager extends Action {
-	private static Logger log = LoggerFactory.getLogger(CacheManager.class.getName());
+	private static Logger log = Logger.getLogger(CacheManager.class.getName());
 	/* (non-Javadoc)
 	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
 	 */
