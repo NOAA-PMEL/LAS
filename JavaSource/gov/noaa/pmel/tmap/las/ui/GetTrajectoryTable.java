@@ -45,6 +45,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImpl;
 
+import com.cohort.util.String2;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -126,8 +127,9 @@ public class GetTrajectoryTable extends LASAction {
 	                String table = tabledap.get("table_variables");
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
-                    //String did = tabledap.get("decimated_id");
+                    String did = tabledap.get("decimated_id");
                     String cruise_id = tabledap.get("trajectory_id");
+                    String lon_domain = tabledap.get("lon_domain");
                     StringBuilder xquery2 = new StringBuilder();
                     StringBuilder xquery1 = new StringBuilder();
                     StringBuilder dsgQuery = new StringBuilder();
@@ -142,11 +144,47 @@ public class GetTrajectoryTable extends LASAction {
 	                        
 	                        // Use the full data for the downloads.
                             String fulldataurl = dataurl + id;
+                            
+                            boolean smallarea = false;
 
-	                        // If available use the decimated URL for the other requests.
-//	                        if ( did != null && !did.equals("") ) {
-//	                            id = did;
-//	                        }
+                            if ( lon_domain.contains("180") ) {
+                                if (xlo.length() > 0 && xhi.length() > 0 ) {
+
+                                    double xhiDbl = String2.parseDouble(xhi);
+                                    double xloDbl = String2.parseDouble(xlo);
+                                    // Check the span before normalizing and if it's big, just forget about the lon constraint all together.
+                                    if ( Math.abs(xhiDbl - xloDbl ) < 358. ) {
+                                       
+                                        // This little exercise will normalize the x values to -180, 180.
+                                        LatLonPoint p = new LatLonPointImpl(0, xhiDbl);
+                                        xhiDbl = p.getLongitude();
+                                        p = new LatLonPointImpl(0, xloDbl);
+                                        xloDbl = p.getLongitude();
+
+                                        double xspan = Math.abs(xhiDbl - xloDbl);
+                                        double yloDbl = -90.d;
+                                        double yhiDbl = 90.d;
+                                        if (ylo.length() > 0) {
+                                            yloDbl = Double.valueOf(ylo);
+                                        }
+                                        if (yhi.length() > 0) {
+                                            yhiDbl = Double.valueOf(yhi);
+                                        }
+                                        double yspan = Math.abs(yhiDbl - yloDbl);
+
+                                        double fraction = ((xspan+yspan)/(360.d + 180.d));
+
+                                        if ( fraction < .1d ) {
+                                            smallarea = true;
+                                        }
+                                    }
+                                }
+                            }
+                            
+	                        // If available use the decimated URL for the other requests if the area is NOT small.
+	                        if ( did != null && !did.equals("") && !smallarea ) {
+	                            id = did;
+	                        }
 	                        dataurl = dataurl + id;
 	                        
 	                        if ( id != null && !id.equals("") ) {
