@@ -221,6 +221,19 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET nok = `compress_mask[i=@ngd]`
    LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0), compress_mask[i=1:`nok`])
 
+! expand metadata variables onto the X axis
+   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+   DEFINE SYMBOL zshape = `($ferret_plot_var_0),RETURN=shape`
+   IF `($zshape"0|E>1|*>0)` THEN
+      ! Expand all strings into obs axis
+      IF ($is_string"0|*>1") THEN 
+         LET ($ferret_plot_var_0)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_0), ($rowvar), `($rowvar)[m=@sum]`)
+      ELSE
+         LET ($ferret_plot_var_0)_xpnd = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar), `($rowvar)[m=@sum]`)
+      ENDIF
+      LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0)_xpnd, compress_mask[i=1:`nok`])
+   ENDIF
+
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var_in)
 ENDIF
@@ -235,6 +248,20 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET nok = `compress_mask[i=@ngd]`
    LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
 
+   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+   
+! expand metadata variables onto the X axis
+   DEFINE SYMBOL zshape = `($ferret_plot_var_1),RETURN=shape`
+   IF `($zshape"0|E>1|*>0)` THEN
+      ! Expand all strings into obs axis
+      IF ($is_string"0|*>1") THEN 
+         LET ($ferret_plot_var_1)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_1), ($rowvar), `($rowvar)[m=@sum]`)
+      ELSE
+         LET ($ferret_plot_var_1)_xpnd = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar), `($rowvar)[m=@sum]`)
+      ENDIF
+      LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1)_xpnd, compress_mask[i=1:`nok`])
+   ENDIF
+
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
 ENDIF
@@ -248,6 +275,20 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET compress_mask = COMPRESSI(iindices)
    LET nok = `compress_mask[i=@ngd]`
    LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
+   
+! expand metadata variables onto the X axis
+   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+   DEFINE SYMBOL zshape = `($ferret_plot_var_2),RETURN=shape`
+   IF `($zshape"0|E>1|*>0)` THEN
+      ! Expand all strings into obs axis
+      IF ($is_string"0|*>1") THEN 
+         LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)
+      ELSE
+         LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)
+      ENDIF
+      LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (($ferret_plot_var_2)_xpnd, compress_mask[i=1:`nok`])
+   ENDIF
+
    LET nlist = `nlist + 1`
    DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)
 ENDIF
