@@ -407,10 +407,10 @@ public class GetTrajectoryTable extends LASAction {
                                                     row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
                                                     dsgQuery.setLength(0);
                                                     csvQuery.setLength(0);
-                                                    
+                                                    InputStream stream = null;
 	                                                // Call out to ERDDAP for the lat/lon/time box.
 	                                                try {
-	                                                    InputStream stream = null;
+	                                                   
 	                                                    JsonStreamParser jp = null;
 
 	                                                    String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
@@ -426,6 +426,8 @@ public class GetTrajectoryTable extends LASAction {
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
 	                                                    // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
 	                                                } catch ( Exception e ) {
+	                                                    if (stream != null ) 
+	                                                       stream.close();
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
 	                                                }
@@ -458,6 +460,7 @@ public class GetTrajectoryTable extends LASAction {
 
 	                                        bsw.write("</table>\n</body>\n</html>");
 
+	                                        input.close();
 
 	                                        bsw.flush();
 	                                        bsw.close();
