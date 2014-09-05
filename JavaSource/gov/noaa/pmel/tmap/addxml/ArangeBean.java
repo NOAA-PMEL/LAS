@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
+
 
 /**
  * <p>Title: addXML</p>
@@ -22,7 +22,7 @@ public class ArangeBean extends LasBean {
   private String size;
   private String end;
   
-  private static Logger log = LoggerFactory.getLogger(ArangeBean.class.getName());
+  private static Logger log = Logger.getLogger(ArangeBean.class.getName());
 
   public ArangeBean() {
   }

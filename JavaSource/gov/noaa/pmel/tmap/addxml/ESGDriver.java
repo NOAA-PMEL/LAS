@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -14,12 +13,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.xml.sax.SAXException;
 
-import thredds.catalog.DatasetFilter;
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
@@ -28,7 +25,7 @@ import thredds.catalog.ServiceType;
 
 public class ESGDriver {
 
-	private static final Logger log = LoggerFactory.getLogger(ESGDriver.class);
+	private static final Logger log = Logger.getLogger(ESGDriver.class);
 	public static void main(String[] args) {
 		String src = "http://tds.prototype.ucar.edu/thredds/esgcet/catalog.xml";
 		String base = src.substring(0, src.lastIndexOf("/")+1);

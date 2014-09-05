@@ -2,8 +2,7 @@ package gov.noaa.pmel.tmap.addxml;
 
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.log4j.Logger;
 import org.jdom.*;
 
 /**
@@ -21,7 +20,7 @@ import org.jdom.*;
  */
 public class AxisBean extends LasBean {
 	
-    private static Logger log = LoggerFactory.getLogger(AxisBean.class.getName());
+    private static Logger log = Logger.getLogger(AxisBean.class.getName());
 
 	private String type;
 	private String units;
