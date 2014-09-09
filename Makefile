@@ -56,6 +56,7 @@ clean-more:
 	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu
 	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.ClimateAnalysis
 	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget
+	rm -fr build
 
 .PHONY: clean 
 clean: clean-ant clean-noant
