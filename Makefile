@@ -37,5 +37,29 @@ clean-noant:
 	rm -rf build.xml
 	rm -rf test/LASTest/las_test_config.xml
 
+.PHONY: clean-more
+clean-more:
+	rm -f  bin/addXML.sh
+	rm -f  bin/addDiscrete.sh
+	rm -f  bin/lasTest.sh
+	rm -fr conf/server
+	rm -fr WebContent/JavaScript/gwt-unitCache
+	rm -fr WebContent/JavaScript/components/WEB-INF
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.InteractiveDownloadData
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.PPT
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.InteractiveDownloadDataJUnit
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.DateWidgetTest
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.Correlation
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.SPPV
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.ColumnEditor
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.UI
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.ClimateAnalysis
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget
+
 .PHONY: clean 
 clean: clean-ant clean-noant
+
+.PHONY: ultra-clean
+ultra-clean: clean-ant clean-noant clean-more
+
