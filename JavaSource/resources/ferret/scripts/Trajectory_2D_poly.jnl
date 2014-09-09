@@ -156,9 +156,12 @@ SAY _________________ Before land underlay clock seconds:                       
 
 ! Create the blank plot with bathymetries,
 ! coastlines, EEZ's, etc.
+! Make the gray ocean lighter.  To make it lighter still,
+! start the colors with -40000.
 
 DEFINE SYMBOL basemap_palette = grayscale
-DEFINE SYMBOL basemap_levels = (-inf)(-10000,-1000,1000)(-1000,0,100)
+
+DEFINE SYMBOL basemap_levels = (-inf)(-20000,-1000,500)(-1000,0,100)
 GO LAS_XY_overlay_basemap
 
 PPL SHASET PROTECT
