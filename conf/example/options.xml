@@ -391,6 +391,7 @@ Choices are:
       <help>Set the color levels of the plot. Levels are described using Ferret syntax. The
 	  number of levels is approximate, and may be changed as the algorithm rounds off the values. Examples:
 &lt;li>&lt;b>60V&lt;/b> Draw 60 levels based on the variance of the data with open-ended extrema
+&lt;li>&lt;b>30H&lt;/b> Draw 30 levels based on a histogram
 &lt;li>&lt;b>25&lt;/b> Draw 25 levels spanning the range of the data
 &lt;li>&lt;b>30C&lt;/b> Draw 30 levels centered at 0 
 &lt;li>&lt;b>(0,100,10)&lt;/b>  Bands of color starting at 0, ending at 100, with an interval of 10
