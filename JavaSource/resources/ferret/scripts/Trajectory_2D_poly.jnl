@@ -152,7 +152,9 @@ GO LAS_set_plot_qualifiers
 ! Open the window
 GO LAS_open_window
 
-SAY _________________ Before land underlay clock seconds:                         ($clock_secs)
+SAY _________________ Before land underlay clock seconds:                        ($clock_secs)
+
+LET pre_plot = ($clock_secs)
 
 ! Create the blank plot with bathymetries,
 ! coastlines, EEZ's, etc.
@@ -184,6 +186,7 @@ PPL SHASET PROTECT
 GO LAS_fland green_pine
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
+SAY _________________ total time for land underlay, seconds                                 ----- `($clock_secs) - pre_plot`
 
 ! Turn on annotate_key, which persists until turned off
 ! (unless key_annoatate property tells us otherwise).
@@ -299,7 +302,7 @@ ELSE
       DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
    ENDIF
 
-SAY _________________ Start plot: clock seconds:                                 ($clock_secs)
+SAY _________________ Start line plot: clock seconds:                            ($clock_secs)
 LET pre_plot = ($clock_secs)
    ! Draw the ribbon plot
    IF ($single_color"0|*>1") THEN
@@ -321,8 +324,8 @@ ENDIF
  IF `STRINDEX("($ferret_fill_levels)", "H") GT 0 OR STRINDEX("($ferret_fill_levels)", "h") GT 0` THEN \
 ($plot_command)($qualifiers)/missing=black/nokey  x_var_data, y_var_data, var_data 
 
-SAY _________________ END plot: clock seconds:                                   ($clock_secs)
-SAY _________________ total time for line plot, seconds                          ----- `($clock_secs) - pre_plot`
+SAY _________________ END line plot: clock seconds:                              ($clock_secs)
+SAY _________________ total time for line plot, seconds                                     ----- `($clock_secs) - pre_plot`
 
 IF ($ferret_plot_var"0|*>1") THEN
    LET data_range = minmax(var_data)
@@ -414,7 +417,7 @@ GO LAS_results box
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SAY _________________ exiting Trajectory_2D_poly.jnl product script: 
 
-SAY _________________ Product script total execution time, seconds:              ----- `($clock_secs) - ($start_clock_seconds)`
+SAY _________________ Product script total execution time, seconds:                         ----- `($clock_secs) - ($start_clock_seconds)`
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

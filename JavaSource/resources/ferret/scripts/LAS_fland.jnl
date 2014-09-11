@@ -47,7 +47,6 @@ IF `fland_area LT 0.05` THEN
    USE ($topo_url)
    SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=($fland_palette)/OVERLAY rose($map_reg)
    DEFINE SYMBOL toponame = `rose,return=dset`
-   say OVERLAY LandResolution IS ($topo_url)  Region area is `fland_area`
 
    CAN DATA ($toponame)
    SET DATA/RESTORE
