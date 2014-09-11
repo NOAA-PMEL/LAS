@@ -2,7 +2,7 @@
 ! Label the key with A,B,C,D,F,N,U,S,X
 
 ! --------
-LET n_key_levs = 10
+LET n_key_levs = 11
 
 IF ($horizontal_key"0|*>1") THEN
 
@@ -45,13 +45,17 @@ IF `($win_aspect"1") LT 0.8` THEN
 
    LABEL/NOUSER `keydel*6+keystart`,`key_hi`,0,0,($qcwordsize),New
 
-   LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,($qcwordsize),Updated
+   LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,($qcwordsize),Conflicting
 
-   LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,($qcwordsize),Suspended
+   LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,($qcwordsize),Updated
 
-   LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,($qcwordsize),Excluded
+   LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,($qcwordsize),Suspended
+
+   LABEL/NOUSER `keydel*10+keystart`,`key_hi`,0,0,($qcwordsize),Excluded
 
 ELSE
+
+LET key_hi = `key_hi - 1.2*($qclettersize)`
    LABEL/NOUSER `keydel*0+keystart`,`key_hi`,0,0,($qclettersize),A
 
    LABEL/NOUSER `keydel*1+keystart`,`key_hi`,0,0,($qclettersize),B
@@ -66,13 +70,14 @@ ELSE
 
    LABEL/NOUSER `keydel*6+keystart`,`key_hi`,0,0,($qclettersize),N
 
-   LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,($qclettersize),U
+   LABEL/NOUSER `keydel*7+keystart`,`key_hi`,0,0,($qclettersize),Q
 
-   LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,($qclettersize),S
+   LABEL/NOUSER `keydel*8+keystart`,`key_hi`,0,0,($qclettersize),U
 
-   LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,($qclettersize),X
+   LABEL/NOUSER `keydel*9+keystart`,`key_hi`,0,0,($qclettersize),S
+
+   LABEL/NOUSER `keydel*10+keystart`,`key_hi`,0,0,($qclettersize),X
 ENDIF
-
 
 ! ----- End of SOCAT_qckey.jnl ------------------------------------------------
 
