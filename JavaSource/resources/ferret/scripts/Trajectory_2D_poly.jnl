@@ -159,9 +159,19 @@ SAY _________________ Before land underlay clock seconds:                       
 ! Make the gray ocean lighter.  To make it lighter still,
 ! start the colors with -40000.
 
+! In trajectory_ui.xml is an option "Bathymetry style".  Choose a white
+! background or the default grayscale bathymetry.
+
 DEFINE SYMBOL basemap_palette = grayscale
 
 DEFINE SYMBOL basemap_levels = (-inf)(-20000,-1000,500)(-1000,0,100)
+
+IF ($ferret_bathymetry_style"0|white>1|*>0") THEN DEFINE SYMBOL basemap_palette = white
+IF ($ferret_bathymetry_style"0|blue>1|*>0") THEN 
+   DEFINE SYMBOL basemap_palette = osmc_bluescale
+   DEFINE SYMBOL basemap_levels = (-20000)(-10000,0,10000)
+ENDIF
+
 GO LAS_XY_overlay_basemap
 
 PPL SHASET PROTECT
