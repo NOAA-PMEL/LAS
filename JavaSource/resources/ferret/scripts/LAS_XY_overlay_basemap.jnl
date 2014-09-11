@@ -14,7 +14,7 @@ DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 
 IF `($basemap_area) LT 0.2` THEN
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
 
-  IF `($basemap_area) LT 0.08` \
+  IF `($basemap_area) LT 0.08` THEN \
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
 
   IF `($basemap_area) LT 0.02` THEN
