@@ -44,7 +44,7 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
   IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
-  LET reset_lon = `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_rhs"0") GT 180 AND ($its_listing"0")` ;\
+  LET reset_lon = `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_rhs"0|NaN>0|*") GT 180 AND ($its_listing"0")` ;\
   IF `reset_lon` THEN DEFINE SYMBOL constraint_($ic)_rhs = `($constraint_($ic)_rhs)-360` ;\
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_lon_min = ($constraint_($ic)_rhs) ;\
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_lon_max = ($constraint_($ic)_rhs) ;\
