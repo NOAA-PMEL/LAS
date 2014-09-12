@@ -94,17 +94,16 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
    ENDIF
    
    IF ($data_0_var"|tmonth>1|*>0") THEN 
-      LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-      SET VAR/NAME = var_data_0  var_data
-      LET var_data =  element_index_str_n(var_data_0, month_labels) 
-      SET ATT/LIKE=var_data_0 var_data
-      DEFINE SYMBOL ferret_plot_var var_data
+      SET VAR/NAME=var_data_in var_data
+      GO SOCAT_custom_vars ($data_0_var) var_data_in
+      DEFINE SYMBOL data_var = color_var
+      DEFINE SYMBOL ferret_plot_var = color_var
+      LET var_data = color_var
    ENDIF
 
 ENDIF
 
 IF ($ferret_is_socat) THEN GO SOCAT_check_dtime
-
 
 ! Special color-by-time key
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN 

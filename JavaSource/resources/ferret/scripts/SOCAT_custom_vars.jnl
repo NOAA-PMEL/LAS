@@ -66,5 +66,10 @@ IF ($var_name"0|region_ID>1|*>0") THEN
 
 ENDIF
 
+IF ($var_name"0|tmonth>1|*>0") THEN
+   LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+   LET color_var =  ELEMENT_INDEX_STR_N( ($color_var), month_labels) 
+ENDIF
+
 ! End of file ------------ SOCAT_custom_vars.jnl--------------------------
 
