@@ -136,7 +136,7 @@ IF ($data_units"0|*>1") THEN
 ENDIF
 
 DEFINE SYMBOL ferret_plot_title ($data_title) ($data_units)
-IF `($ferret_is_socat"0|0|1|*>0") AND (($data_count) EQ 1)` THEN \
+IF `($ferret_is_socat"0") AND (($data_count) EQ 1)` THEN \
   DEFINE SYMBOL ferret_plot_title = @CR($data_title_fmt) ($data_units_fmt)
 
 ! SET DATA and check for errors

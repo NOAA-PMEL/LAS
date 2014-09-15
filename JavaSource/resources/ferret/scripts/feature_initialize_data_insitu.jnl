@@ -11,7 +11,7 @@ DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
 ! For socat dataset, reset title and units strings, putting in subscripts, Greek letters
 IF `STRINDEX("($data_($num)_dataset_id)", "SOCAT") GT 0` THEN DEFINE SYMBOL ferret_is_socat = 1
-IF ($ferret_is_socat"0|*>1") THEN GO SOCAT_format_title_units
+IF ($ferret_is_socat"0") THEN GO SOCAT_format_title_units
 
 ! The variable at the x and y locations
 
