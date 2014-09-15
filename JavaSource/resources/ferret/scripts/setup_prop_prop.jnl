@@ -260,7 +260,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
 ENDIF
 
-IF ($ferret_is_socat"0|*>1") THEN GO SOCAT_setup_variables
+IF ($ferret_is_socat"0") THEN GO SOCAT_setup_variables
 
 ! Define the label with title and units to be used in the annotations.
 can sym variable_lab

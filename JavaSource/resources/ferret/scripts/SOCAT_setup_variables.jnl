@@ -4,7 +4,7 @@
 ! Set up varibles for prop-prop plots
 
 
-IF `($ferret_is_socat"0|*>1") EQ 0` THEN EXIT/SCRIPT 
+IF `($ferret_is_socat"0") EQ 0` THEN EXIT/SCRIPT 
 
 
 DEFINE SYMBOL vtype = 0
