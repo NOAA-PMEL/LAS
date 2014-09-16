@@ -51,16 +51,17 @@ IF ($lhs"0|month>1|*>0") THEN
 
      DEFINE SYMBOL mask_label_long = 0
      REPEAT/RANGE=1:`rhslen` (\
-     LET rhslen = `STRLEN("($rhs2)")` ;\
-     LET commaloc = `STRINDEX("($rhs2)", ",") ` ;\
+     LET strvar2 = "($rhs2)" ;\
+     LET rhslen = `STRLEN(strvar2)` ;\
+     LET commaloc = `STRINDEX(strvar2, ",") ` ;\
      IF `commaloc EQ 0` THEN DEFINE SYMBOL m1 = ($rhs2);\
-     IF `commaloc NE 0` THEN DEFINE SYMBOL m1 = `SUBSTRING("($rhs2)", 1, commaloc-1)` ;\
+     IF `commaloc NE 0` THEN DEFINE SYMBOL m1 = `SUBSTRING(strvar2, 1, commaloc-1)` ;\
      DEFINE SYMBOL imonth = `MAX(1, INT(($m1)) )`;\
      DEFINE SYMBOL mask_title_($nmask_labels) = ($mask_title_($nmask_labels)), `month_labels[i=($imonth)]` ;\
      IF `commaloc EQ 0` THEN EXIT/LOOP ;\
      IF `STRLEN("($mask_title_($nmask_labels))") GT 100 AND ($mask_label_long) EQ 0` THEN DEFINE SYMBOL mask_title_($nmask_labels) = ($mask_title_($nmask_labels))<NL>;\
      IF `STRLEN("($mask_title_($nmask_labels))") GT 100` THEN DEFINE SYMBOL mask_label_long = 1;\
-     DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs2)", commaloc+1, rhslen-commaloc+1)` ;\
+     DEFINE SYMBOL rhs2 = `SUBSTRING(strvar2, commaloc+1, rhslen-commaloc+1)` ;\
      )
      IF ($mask_label_long"0|*>1") THEN DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`  ! add space for extra line
      

@@ -66,12 +66,15 @@ ENDIF
 
 IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN 
    LET len1 = `STRLEN("($lhs)") + STRLEN("($math_op_sym)") + 1`
-   LET len2 = `STRLEN("($rhs_last%0%)")`
+   LET strvar = "($rhs_last%0%)"
+   LET len2 = `STRLEN(strvar)`
 
    IF `(len1+len2) GT 2020` THEN 
       DEFINE SYMBOL nmask_labels = `($nmask_labels) + 1` 
    ELSE
-      IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN 
+      LET strvar = "($rhs)"
+      LET strvar_last = "($rhs_last)"
+      IF `STRCMP(strvar_last, strvar) NE 0` THEN 
          DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
       ENDIF
    ENDIF
@@ -84,7 +87,10 @@ ENDIF
 
 
 IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN 
-   IF `STRCMP("($rhs_last)", "$rhs)") NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
+
+   LET strvar = "($rhs)"
+   LET strvar_last = "($rhs_last)"
+   IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
 
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
