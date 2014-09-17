@@ -2599,8 +2599,6 @@ public class OutputPanel extends Composite implements HasName {
                 sp.ensureDebugId("ScrollPanel");
                 HTML result = new HTML(doc);
                 p.add(result);
-                HTML again = new HTML("<b>Push the Update Plots button when you're ready to make your next request.");
-                p.add(again);
                 sp.add(p);
                 sp.setSize("30em", "20em");
                 grid.setWidget(plotRow, 0, sp);
