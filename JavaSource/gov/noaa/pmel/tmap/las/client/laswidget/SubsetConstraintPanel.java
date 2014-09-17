@@ -70,7 +70,7 @@ public class SubsetConstraintPanel extends Composite {
                     for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
                         String key_value = (String) rIt.next();
                         String value = (String) currentValues.get(key_value);
-                        if ( value.toLowerCase().startsWith(f.toLowerCase()) ) {
+                        if ( value.toLowerCase().contains(f.toLowerCase()) ) {
                             valuesList.addItem(value, key_value);
                         }
                     }
