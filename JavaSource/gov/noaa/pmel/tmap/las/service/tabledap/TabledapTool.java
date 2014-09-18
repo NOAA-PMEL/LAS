@@ -243,30 +243,7 @@ public class TabledapTool extends TemplateTool {
             StringBuilder query = new StringBuilder();
             
          
-            // Some things might need something besides x,y,z and t in the file so...
-            String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
-            if ( extra_metadata != null && !extra_metadata.equals("") ) {
-                if ( extra_metadata.contains(",") ) {
-                    String[] extras = extra_metadata.split(",");
-                    for (int i = 0; i < extras.length; i++) {
-                        String e = extras[i].trim();
-                        if ( query.indexOf(e) < 0 ) {
-                            if ( query.length() > 0 && !query.toString().endsWith(",") ) {
-                                query.append(",");
-                            }
-                            query.append(e);
-                        }
-                    }
-
-                } else {
-                    if ( query.indexOf(extra_metadata) < 0 ) {
-                        if ( query.length() > 0 && !query.toString().endsWith(",") ) {
-                            query.append(",");
-                        }
-                        query.append(extra_metadata);
-                    }
-                }
-            }
+            
            
             // If the operation is the prop-prop plot, we need all the variables.
             if ( operationID != null && operationID.equals("Trajectgory_thumbnails") ) {
@@ -280,6 +257,31 @@ public class TabledapTool extends TemplateTool {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
             }  else {
+                // Only add the extras if the variable list does not come from configuraiton.
+                // Some things might need something besides x,y,z and t in the file so...
+                String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
+                if ( extra_metadata != null && !extra_metadata.equals("") ) {
+                    if ( extra_metadata.contains(",") ) {
+                        String[] extras = extra_metadata.split(",");
+                        for (int i = 0; i < extras.length; i++) {
+                            String e = extras[i].trim();
+                            if ( query.indexOf(e) < 0 ) {
+                                if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                    query.append(",");
+                                }
+                                query.append(e);
+                            }
+                        }
+
+                    } else {
+                        if ( query.indexOf(extra_metadata) < 0 ) {
+                            if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                query.append(",");
+                            }
+                            query.append(extra_metadata);
+                        }
+                    }
+                }
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
                 ArrayList<String> vars = lasBackendRequest.getVariables();
 
