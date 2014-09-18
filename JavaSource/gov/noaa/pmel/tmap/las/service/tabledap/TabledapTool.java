@@ -242,23 +242,33 @@ public class TabledapTool extends TemplateTool {
             //create the query.   First: variables
             StringBuilder query = new StringBuilder();
             
-            // If the operation is the prop-prop plot, we need all the variables.
-            
+         
+            // Some things might need something besides x,y,z and t in the file so...
             String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
             if ( extra_metadata != null && !extra_metadata.equals("") ) {
-                String[] extras = extra_metadata.split(",");
-                for (int i = 0; i < extras.length; i++) {
-                    String e = extras[i].trim();
-                    if ( query.indexOf(e) < 0 ) {
+                if ( extra_metadata.contains(",") ) {
+                    String[] extras = extra_metadata.split(",");
+                    for (int i = 0; i < extras.length; i++) {
+                        String e = extras[i].trim();
+                        if ( query.indexOf(e) < 0 ) {
+                            if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                query.append(",");
+                            }
+                            query.append(e);
+                        }
+                    }
+
+                } else {
+                    if ( query.indexOf(extra_metadata) < 0 ) {
                         if ( query.length() > 0 && !query.toString().endsWith(",") ) {
                             query.append(",");
                         }
-                        query.append(e);
+                        query.append(extra_metadata);
                     }
                 }
-                
             }
            
+            // If the operation is the prop-prop plot, we need all the variables.
             if ( operationID != null && operationID.equals("Trajectgory_thumbnails") ) {
                 Map<String, String> thumbnail_properties = lasBackendRequest.getPropertyGroup("thumbnails");
                 String all = thumbnail_properties.get("variable_names").trim();
