@@ -31,6 +31,22 @@ IF ($var_name"0|qc_flag>1|*>0") THEN
    LET color_var =  m1+m2+m3+m4+m5+m6+m7+m8+m9+m10+m11
    DEFINE SYMBOL ($color_var) = color_var
    CANCEL SYMBOL data_units
+
+   let q1  = IF STRCMP(qc_flag,"A") EQ 0 THEN  0 ELSE 0
+   let q2  = IF STRCMP(qc_flag,"B") EQ 0 THEN  1 ELSE 0 
+   let q3  = IF STRCMP(qc_flag,"C") EQ 0 THEN  2 ELSE 0 
+   let q4  = IF STRCMP(qc_flag,"D") EQ 0 THEN  3 ELSE 0
+   let q5  = IF STRCMP(qc_flag,"F") EQ 0 THEN  4 ELSE 0
+   let q6  = IF STRCMP(qc_flag,"E") EQ 0 THEN  5 ELSE 0 
+   let q7  = IF STRCMP(qc_flag,"N") EQ 0 THEN  6 ELSE 0 
+   let q8  = IF STRCMP(qc_flag,"Q") EQ 0 THEN  7 ELSE 0 
+   let q9  = IF STRCMP(qc_flag,"U") EQ 0 THEN  8 ELSE 0 
+   let q10 = IF STRCMP(qc_flag,"S") EQ 0 THEN  9 ELSE 0 
+   let q11 = IF STRCMP(qc_flag,"X") EQ 0 THEN 10 ELSE 0 
+   LET mark_end = q1+q2+q3+q4+q5+q6+q7+q8+q9+q10+q11
+   DEFINE SYMBOL mark_end = mark_end
+   DEFINE SYMBOL mark_end_m = 1
+
 ENDIF
 
 IF ($var_name"0|region_ID>1|*>0") THEN
@@ -64,11 +80,32 @@ IF ($var_name"0|region_ID>1|*>0") THEN
 
    CANCEL SYMBOL data_units
 
+   let q1 = IF STRCMP(region_id,"A") EQ 0 THEN 1 ELSE 0
+   let q2 = IF STRCMP(region_id,"C") EQ 0 THEN 2 ELSE 0
+   let q3 = IF STRCMP(region_id,"I") EQ 0 THEN 3 ELSE 0
+   let q4 = IF STRCMP(region_id,"N") EQ 0 THEN 4 ELSE 0
+   let q5 = IF STRCMP(region_id,"O") EQ 0 THEN 5 ELSE 0
+   let q6 = IF STRCMP(region_id,"T") EQ 0 THEN 6 ELSE 0
+   let q7 = IF STRCMP(region_id,"Z") EQ 0 THEN 7 ELSE 0
+   let q8 = IF STRCMP(region_id,"R") EQ 0 THEN 8 ELSE 0
+   LET mark_end = q1+q2+q3+q4+q5+q6+q7+q8
+   DEFINE SYMBOL mark_end = mark_end
+
 ENDIF
 
 IF ($var_name"0|tmonth>1|*>0") THEN
    LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
    LET color_var =  ELEMENT_INDEX_STR_N( ($color_var), month_labels) 
+   
+   LET mark_end = ELEMENT_INDEX_STR_N(tmonth, month_labels) 
+   DEFINE SYMBOL mark_end = mark_end
+   
+ENDIF
+
+IF ($var_name"0|socat_version>1|*>0") THEN
+   LET mark_end = socat_version
+   DEFINE SYMBOL mark_end = mark_end
+   
 ENDIF
 
 ! End of file ------------ SOCAT_custom_vars.jnl--------------------------

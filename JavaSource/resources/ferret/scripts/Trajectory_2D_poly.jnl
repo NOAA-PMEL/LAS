@@ -100,6 +100,12 @@ IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
       DEFINE SYMBOL ferret_plot_var = color_var
       LET var_data = color_var
    ENDIF
+   
+   IF ($data_0_var"|socat_version>1|*>0") THEN 
+      SET VAR/NAME=var_data_in var_data
+      GO SOCAT_custom_vars ($data_0_var) var_data_in
+      SET VAR/NAME=var_data var_data_in
+   ENDIF
 
 ENDIF
 
@@ -313,12 +319,43 @@ LET pre_plot = ($clock_secs)
    ELSE
 ! or /missing=blank or leave off for gray...
       IF ($is_mooring"0|*>1") THEN
-         ($plot_command)($qualifiers)/missing=blank/SET x_var_data, y_var_data, var_data 
+         ($plot_command)($qualifiers)/missing=pink/SET x_var_data, y_var_data, var_data 
       ELSE
          ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       ENDIF
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
       PPL RIBBON/OVER
+   ENDIF
+ENDIF
+
+! Draw the last of each mooring expocode as a symbol, so moorings will show up.
+ IF ($ferret_is_socat"0") THEN
+   LET end_of_traj = xsequence(rowsize[m=@iin])
+   LET/units=degrees_east lonend = SAMPLEI (longitude, end_of_traj)
+   LET/units=degrees_north latend = SAMPLEI (latitude, end_of_traj)
+   
+   LET varnames = ..varnames
+   IF `IS_ELEMENT_OF_STR(varnames, "vessel_name") GT 0` THEN
+      LET mooring_mask = STRINDEX(vessel_name, "Mooring") gt 0
+
+      LET/units=degrees_east lonend = XSEQUENCE(mooring_mask)* SAMPLEI (longitude, end_of_traj)
+      LET/units=degrees_north latend = XSEQUENCE(mooring_mask)* SAMPLEI (latitude, end_of_traj)
+   ENDIF
+
+   LET varend = SAMPLEI (($mark_end), end_of_traj) 
+   IF ($mark_end_m"0") THEN LET varend = ($mark_end)
+
+   LET have_moor = 1
+   IF `IS_ELEMENT_OF_STR(varnames, "vessel_name") GT 0` THEN LET have_moor =  `mooring_mask[M=@sum] GT 0`
+
+   IF `have_moor` THEN
+      DEFINE SYMBOL qual_over = /NOLAB/NOKEY/LEVELS/THICK=2
+      IF ($ferret_palette"0|*>1") THEN DEFINE SYMBOL qual_over = \
+       ($qual_over)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+      IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL qual_over = ($qual_over)/LEVEL=($lev_opnlevs)
+      PLOT/VS/OVER/RIBBON/SYM=17/siz=0.02($qual_over)/missing=black  lonend, latend, varend
+      
+SAY _________________ Draw end point of `mooring_mask[M=@sum]` moorings
    ENDIF
 ENDIF
 
@@ -384,7 +421,7 @@ IF `($ferret_annotations%0|*>1%)` THEN
       ENDIF)
 ELSE
 
-   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+   IF `$nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
    DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
 
    DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
