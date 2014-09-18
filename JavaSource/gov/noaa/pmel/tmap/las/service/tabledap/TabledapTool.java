@@ -306,8 +306,14 @@ public class TabledapTool extends TemplateTool {
                 }
 
                 if ( !variables.equals("") ) {
+                    if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                        query.append(",");
+                    }
                     query.append(String2.replaceAll(variables, " ", ""));
                 } else {
+                    if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                        query.append(",");
+                    }
                     query.append(dummy);
                 }
             }
