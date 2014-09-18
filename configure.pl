@@ -470,8 +470,6 @@ my @Scripts = qw(build.xml
                  bin/lasTest.sh
                  conf/example/sample_las.xml
                  conf/example/sample_ui.xml
-                 conf/example/sample_insitu_las.xml
-                 conf/example/sample_insitu_ui.xml
                  conf/example/productserver.xml
                  JavaSource/resources/ferret/FerretBackendConfig.xml.base
                  JavaSource/resources/ferret/FerretBackendConfig.xml.pybase
@@ -674,9 +672,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     my @sample_in = ();
     my @sample_out = ();
 
-    my @insitu_in = ();
-    my @insitu_out = ();
-
     $sample_in[0] = "conf/example/sample_las.xml";
     $sample_out[0] = $serverConf."/las.xml";
     $sample_in[1] = "conf/example/productserver.xml";
@@ -695,35 +690,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[7] = $serverConf."/options.xml";
     $sample_in[8] = "conf/example/trajectory_ui.xml";
     $sample_out[8] = $serverConf."/trajectory_ui.xml";
-
-    $insitu_in[0] = "conf/example/insitu_demo_1.xml";
-
-    $insitu_in[0] = "conf/example/insitu_demo_1.xml";
-    $insitu_out[0] = $serverConf."/insitu_demo_1.xml";
-    $insitu_in[1] = "conf/example/insitu_demo_2.xml";
-    $insitu_out[1] = $serverConf."/insitu_demo_2.xml";
-    $insitu_in[2] = "conf/example/insitu_demo_ui.xml";
-    $insitu_out[2] = $serverConf."/insitu_demo_ui.xml";
-    $insitu_in[3] = "conf/example/insitu_ui.xml";
-    $insitu_out[3] = $serverConf."/insitu_ui.xml";
-    $insitu_in[4] = "conf/example/insitu_options.xml";
-    $insitu_out[4] = $serverConf."/insitu_options.xml";
-
-    # Overwrite gridded only las.xml and ui.xml for insitu demo.
-    $insitu_in[5] = "conf/example/sample_insitu_las.xml";
-    $insitu_out[5] = $serverConf."/las.xml";
-    $insitu_in[6] = "conf/example/sample_insitu_ui.xml";
-    $insitu_out[6] = $serverConf."/ui.xml";
-    $insitu_in[7] = "conf/example/nwioos_hake98.xml";
-    $insitu_out[7] = $serverConf."/nwioos_hake98.xml";
-    $insitu_in[8] = "conf/example/pfeg.xml";
-    $insitu_out[8] = $serverConf."/pfeg.xml";
-
-
-    my $insitu = 0;
-       if (getYesOrNo("Are the sample in-situ datasets loaded into your mySQL database")) {
-          $insitu=1;
-       }
 
 
     for ( my $i = 0; $i <= $#sample_in; $i++ ) {
@@ -748,25 +714,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
    
     if (!copy("conf/example/levitus_monthly.html","WebContent/docs/levitus_monthly.html")){
        print "Couldn't copy levitus_monthly.html.\n";
-    }
-    if ($insitu) {
-       for ( my $i = 0; $i <= $#insitu_in; $i++ ) {
-          if ( -f $insitu_out[$i] && 
-                 !$insitu_out[$i] =~ "/las.xml" &&
-                 !$insitu_out[$i] =~ "/ui.xml" ) {
-              print "You already have this XML configuration file for your\n";
-              print "product server in $insitu_out[$i].\n";
-              if (! getYesOrNo("Overwrite this file", 1)){
-                 print "I will not generate a sample configuration\n";
-             }
-          }
-          if (-f $insitu_out[$i] && !unlink $insitu_out[$i]){
-              print "Couldn't delete $insitu_out[$i]\n"; return;
-          }
-          if (!copy($insitu_in[$i], $insitu_out[$i])){
-              print "Couldn't copy $insitu_in[$i] to $insitu_out[$i]\n";
-          }
-       }
     }
  }
 
