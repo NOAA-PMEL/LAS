@@ -243,6 +243,21 @@ public class TabledapTool extends TemplateTool {
             StringBuilder query = new StringBuilder();
             
             // If the operation is the prop-prop plot, we need all the variables.
+            
+            String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
+            if ( extra_metadata != null && !extra_metadata.equals("") ) {
+                String[] extras = extra_metadata.split(",");
+                for (int i = 0; i < extras.length; i++) {
+                    String e = extras[i].trim();
+                    if ( query.indexOf(e) < 0 ) {
+                        if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                            query.append(",");
+                        }
+                        query.append(e);
+                    }
+                }
+                
+            }
            
             if ( operationID != null && operationID.equals("Trajectgory_thumbnails") ) {
                 Map<String, String> thumbnail_properties = lasBackendRequest.getPropertyGroup("thumbnails");
