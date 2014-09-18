@@ -123,6 +123,8 @@ ENDIF
 
 IF `($data_x_var"0|*>1") EQ 0` THEN GO feature_lon_lat_time_depth
 
+DEFINE SYMBOL mark_end = ($data_var)
+
 ! If the plot is colored by profile ID then fake that variable, and exit
 
 LET color_by_feature = 0
@@ -146,6 +148,7 @@ IF ($rowvar"0|*>1") THEN
 ENDIF
 
 ! Other variables on the E axis to be colored the same way.
+
 IF `color_by_index EQ 1` THEN let color_by_feature = 1
 
 IF `color_by_feature EQ 1` THEN
@@ -160,6 +163,8 @@ IF `color_by_feature EQ 1` THEN
 ! Create the profile variables and symbols
 
    GO LAS_initialize_feature_id
+  
+   DEFINE SYMBOL mark_end = ($data_var)
 
    IF ($its_prop_prop_plot"0|*>1") THEN
    
@@ -214,8 +219,14 @@ IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)
 
    IF ($is_string"0|0|*>1") THEN 
       LET/TITLE="($ferret_title_0)" data_var_expand = EXPND_BY_LEN_STR(($data_var), ($rowvar),`($rowvar)[m=@sum]`)
+      LET mark_end = xsequence(_m[gm=($data_var)])
+      DEFINE SYMBOL mark_end = mark_end
+      DEFINE SYMBOL mark_end_m = 1
    ELSE
       LET/TITLE="($ferret_title_0)" data_var_expand = EXPND_BY_LEN(($data_var), ($rowvar),`($rowvar)[m=@sum]`)
+      LET mark_end = ($data_var)
+      DEFINE SYMBOL mark_end = mark_end
+      DEFINE SYMBOL mark_end_m = 1
    ENDIF
    DEFINE SYMBOL data_var = data_var_expand
    
