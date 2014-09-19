@@ -75,7 +75,11 @@ IF `STRINDEX("($op_last)", "IS") GT 0 AND STRINDEX("($op)", "IS") GT 0` THEN
       LET strvar = "($rhs)"
       LET strvar_last = "($rhs_last)"
       IF `STRCMP(strvar_last, strvar) NE 0` THEN 
-         DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
+         IF ($lhs"0|investigators>1|*>0") THEN 
+            IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last) : ($rhs)
+         ELSE
+            IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
+         ENDIF
       ENDIF
    ENDIF
 
@@ -90,8 +94,8 @@ IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN
 
    LET strvar = "($rhs)"
    LET strvar_last = "($rhs_last)"
-   IF ($lhs"investigators>1|*>0" THEN 
-      IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last): ($rhs)
+   IF ($lhs"0|investigators>1|*>0") THEN 
+      IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last) : ($rhs)
    ELSE
       IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
    ENDIF
@@ -102,3 +106,5 @@ IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN
 ENDIF
 
 ! ----- End of combine_titles.jnl ------------------------------------------------
+sh sym lhs
+pause
