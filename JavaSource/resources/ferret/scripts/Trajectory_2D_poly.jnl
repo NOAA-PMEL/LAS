@@ -191,8 +191,10 @@ PPL SHASET PROTECT
 !  GO LAS_fland black
 !  GO LAS_fland navy
 !  GO LAS_fland brown_dark
+!  GO LAS_fland green_pine
 
-GO LAS_fland green_pine
+GO LAS_fland brown_soft
+
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
 SAY _________________ total time for land underlay, seconds                                 ----- `($clock_secs) - pre_plot`
@@ -253,7 +255,7 @@ IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
 
 IF `($drawthick"0|1|2|3|*>0") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=($drawthick)
 
-! Is this a mooring where all the location data is at a single location?  If so make a colored symbol
+! Is this a single mooring where all the location data is at a single location?  If so make a colored symbol
 
 LET lonattnames = ($data_x_var_in).attnames
 LET latattnames = ($data_y_var_in).attnames
@@ -273,8 +275,6 @@ IF `IS_ELEMENT_OF_STR(lonattnames, "actual_range") GT 0 AND \
       DEFINE SYMBOL is_mooring = 1
    ENDIF
 ENDIF
-
-
 
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
@@ -319,18 +319,21 @@ LET pre_plot = ($clock_secs)
    ELSE
 ! or /missing=blank or leave off for gray...
       IF ($is_mooring"0|*>1") THEN
-         ($plot_command)($qualifiers)/missing=pink/SET x_var_data, y_var_data, var_data 
+         ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       ELSE
          ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
       ENDIF
+
       IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
       PPL RIBBON/OVER
    ENDIF
 ENDIF
 
 ! Draw the last of each mooring expocode as a symbol, so moorings will show up.
+! The -1 makes it the second-from-last point which seems to be missing less often.
+
  IF ($ferret_is_socat"0") THEN
-   LET end_of_traj = xsequence(rowsize[m=@iin])
+   LET end_of_traj = xsequence(rowsize[m=@iin]-1)
    LET/units=degrees_east lonend = SAMPLEI (longitude, end_of_traj)
    LET/units=degrees_north latend = SAMPLEI (latitude, end_of_traj)
    
@@ -343,24 +346,30 @@ ENDIF
    ENDIF
 
    LET varend = SAMPLEI (($mark_end), end_of_traj) 
+   LET varend = SAMPLEI (($mark_end), end_of_traj) 
    IF ($mark_end_m"0") THEN LET varend = ($mark_end)
 
    LET have_moor = 1
    IF `IS_ELEMENT_OF_STR(varnames, "vessel_name") GT 0` THEN LET have_moor =  `mooring_mask[M=@sum] GT 0`
-
+   LET moosize = 0.04
+   LET moothick = 2
+   LET msize = `mooring_mask,RETURN=msize`
+   IF `mooring_mask[M=@sum] EQ msize` THEN 
+      LET moosize = 0.08
+      LET moothick = 3
+   ENDIF
    IF `have_moor` THEN
-      DEFINE SYMBOL qual_over = /NOLAB/NOKEY/LEVELS/THICK=2
+      DEFINE SYMBOL qual_over = /NOLAB/NOKEY/LEVELS/THICK=`moothick`
       IF ($ferret_palette"0|*>1") THEN DEFINE SYMBOL qual_over = \
        ($qual_over)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
       IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL qual_over = ($qual_over)/LEVEL=($lev_opnlevs)
-      PLOT/VS/OVER/RIBBON/SYM=17/siz=0.02($qual_over)/missing=black  lonend, latend, varend
+      PLOT/VS/OVER/RIBBON/SYM=17/siz=`moosize`($qual_over)/missing=black  lonend, latend, varend
       
 SAY _________________ Draw end point of `mooring_mask[M=@sum]` moorings
    ENDIF
 ENDIF
 
 ! Hack: histogram levels
-
  IF `STRINDEX("($ferret_fill_levels)", "H") GT 0 OR STRINDEX("($ferret_fill_levels)", "h") GT 0` THEN \
 ($plot_command)($qualifiers)/missing=black/nokey  x_var_data, y_var_data, var_data 
 
