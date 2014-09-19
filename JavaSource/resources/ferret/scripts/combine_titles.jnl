@@ -90,7 +90,11 @@ IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN
 
    LET strvar = "($rhs)"
    LET strvar_last = "($rhs_last)"
-   IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
+   IF ($lhs"investigators>1|*>0" THEN 
+      IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last): ($rhs)
+   ELSE
+      IF `STRCMP(strvar_last, strvar) NE 0` THEN DEFINE SYMBOL rhs = ($rhs_last), ($rhs)
+   ENDIF
 
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
