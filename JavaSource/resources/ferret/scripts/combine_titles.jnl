@@ -106,5 +106,3 @@ IF `STRINDEX("($op_last)", "EQ") GT 0 AND STRINDEX("($op)", "EQ") GT 0` THEN
 ENDIF
 
 ! ----- End of combine_titles.jnl ------------------------------------------------
-sh sym lhs
-pause
