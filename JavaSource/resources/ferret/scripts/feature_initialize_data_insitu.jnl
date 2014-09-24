@@ -113,7 +113,7 @@ IF `($its_listing"0|*>1") AND ($num) EQ 0` THEN
    DEFINE SYMBOL data_var ($data_($num)_var)
 ENDIF
 
-IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)")` THEN 
+IF ($feature_variable"0|*>1") THEN
    IF `($have_feature_nums"0|*>1) EQ 0` THEN GO feature_initialize_vars
 ENDIF
 
