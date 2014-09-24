@@ -16,4 +16,22 @@ IF `IS_ELEMENT_OF_STR(var_attnames, "sample_dimension")` THEN
    DEFINE SYMBOL rowvar = ($vname)
 ENDIF 
 
+! The cf_role attribute might be on a coordinate variable. 
+! If so, set up index as the feature id.
+
+IF `($feature_variable"0|*>1")` THEN
+   IF `STRINDEX("($feature_variable)", "(") GT 0` THEN 
+      DEF SYM dname = `dimnames[i=($q)]`
+      LET feature_variable = FLOATSTR(_M[GE=($dname)], "(F5.0)")
+      DEFINE SYMBOL feature_variable = feature_variable
+
+! Is this one of the variables in the plot (color-by?) If so, redefine the symbol
+
+      REPEAT/range=0:`($data_count)-1`/name=ic (\
+        DEFINE SYMBOL ic = `ic`;\
+        IF ($data_($ic)_var"0|($dname)>1|*>0") THEN \
+         DEFINE SYMBOL data_($ic)_var = feature_variable)
+   ENDIF
+ENDIF
+
 !---------------- end of DSG_find_roles.jnl -------------------------
