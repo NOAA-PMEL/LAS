@@ -193,7 +193,8 @@ PPL SHASET PROTECT
 !  GO LAS_fland brown_dark
 !  GO LAS_fland green_pine
 
-GO LAS_fland brown_soft
+IF ($ferret_is_socat) THEN DEFINE SYMBOL ferret_land_palette = brown_soft
+GO LAS_fland ($ferret_land_palette"green_pine")
 
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
