@@ -293,7 +293,7 @@ IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_($num)_yt = ($region_yt)
 IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
 IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
 
-! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
+! If time is in units of day, make time symbols w/o the trailing 00:00:00
 
 IF ($region_0_t_lo"0|*>1") THEN
    DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
