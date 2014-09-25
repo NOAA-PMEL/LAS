@@ -261,50 +261,38 @@ ENDIF
 ! When there are just a few points (missing or valid), draw a colored symbol as well as the ribbon line.
 IF `npts LE 30` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=17
 
-
 ! Points will mark location of missing data if needed
 ! Use color=1 for black...
 LET missing_flag = -9999999
 LET/UNITS=degrees_east  x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
 LET/UNITS=degrees_north y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
 
-! Set up for polygon overlay plot
+! Set the palette
+! If there is no variable, only locations, and if a palette is not 
+! defined by ferret_palette, use black.
 
-DEFINE SYMBOL do_icons = 0
-IF ($data_var"0|metadata_ID>1|($feature_variable)>1|*>0") THEN
-   IF (ntrajs LE ($traj_max_labels)) THEN
-      GO Trajectory_map_icons
-      DEFINE SYMBOL do_icons = 1
-   ENDIF
-
+IF ($ferret_plot_var"0|*>1") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
 ELSE
-
-   ! Set the palette
-   ! If there is no variable, only locations, and if a palette is not 
-   ! defined by ferret_palette, use black.
-
-   IF ($ferret_plot_var"0|*>1") THEN
-      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
-   ELSE
-      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
-   ENDIF
+   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
+ENDIF
 
 SAY _________________ Start line plot: clock seconds:                            ($clock_secs)
 LET pre_plot = ($clock_secs)
-   ! Draw the ribbon plot
-   IF ($single_color"0|*>1") THEN
-    ($plot_command)($qualifiers) x_var_data, y_var_data
-   ELSE
-! or /missing=blank or leave off for gray...
-      IF ($is_mooring"0|*>1") THEN
-         ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
-      ELSE
-         ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
-      ENDIF
 
-      IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-      PPL RIBBON/OVER
+! Draw the ribbon plot
+IF ($single_color"0|*>1") THEN
+    ($plot_command)($qualifiers) x_var_data, y_var_data
+ELSE
+! or /missing=blank or leave off for gray...
+   IF ($is_mooring"0|*>1") THEN
+      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+   ELSE
+      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
    ENDIF
+
+   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL RIBBON/OVER
 ENDIF
 
 ! Draw extra points, e.g. moorings as dots
