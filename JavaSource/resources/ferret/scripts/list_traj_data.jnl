@@ -71,7 +71,12 @@ ENDIF
 
 SET LIST/prec=6
 SET LIST/FILE="($result_ferret_listing_filename)"
-LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F16.0) SIZE
+
+IF ($dataset_title_att"0|*>1") THEN 
+   LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("($dataset_title_att)"/"Total Number of Records", F16.0) SIZE
+ELSE
+   LIST/NOHEAD/NOROW/FILE/APPEND/FORMAT=(Total Number of Records", F16.0) SIZE
+ENDIF
 
 DEFINE SYMBOL list_quals = APPEND
 
