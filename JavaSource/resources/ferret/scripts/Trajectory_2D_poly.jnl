@@ -60,7 +60,7 @@ IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@N
 
 IF `STRINDEX("($ferret_view"0")", "x") EQ 0` THEN
 
-  MESSAGE/ERROR **ERROR Expecting a view in xy, xyt, or xyzt
+  MESSAGE/ERROR **ERROR Expecting a view in xy or xyt
   EXIT/PROGRAM
 ENDIF
 
