@@ -12,8 +12,7 @@ LET vnames = ..varnames
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
 
-! Initialize : These may be reset for e.g. SOCAT dataset where we reformat lablels
-! and use Greek letters or subscripting.
+! Initialize
 
 LET data_0_title = "($data_0_title)"
 LET data_0_units = " (($data_0_units))"
@@ -260,7 +259,10 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
 ENDIF
 
-IF ($ferret_is_socat"0") THEN GO SOCAT_setup_variables
+IF ($custom_dataset"0|*>1") THEN 
+    IF `($ferret_is_($custom_dataset)"0|*>1") AND ($custom_setup_vars"0|*>1")` THEN \
+     GO ($custom_setup_vars)
+ENDIF
 
 ! Define the label with title and units to be used in the annotations.
 can sym variable_lab
@@ -396,3 +398,4 @@ IF ($apply_region) THEN
 ENDIF
 
 ! End of  ------------- setup_prop_prop.jnl--------------------------
+
