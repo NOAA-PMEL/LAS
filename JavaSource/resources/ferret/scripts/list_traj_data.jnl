@@ -15,17 +15,33 @@
 DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
-LET nlist = 0
-REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
-  GO LAS_initialize_region ($var_num); \
-  GO LAS_initialize_data ($var_num);\
-  DEFINE SYMBOL varlist = , ($data_($num)_var);\
-  LET nlist = `nlist+1`;\
-  )
-sh sym frmt
+GO LAS_initialize_region 0
+GO LAS_initialize_data 0
 
-! Do we want the date string or the date coordinate?  List both.
-IF `($ferret_timelab_res"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_timelab_res = day
+GO LAS_setup_dsg
+LET skip_names = {"($feature_variable)", "($rowvar)",  "longitude", "latitude", \
+"time", "tmonth", "day_of_year", "sample_number", "lon360"}
+
+IF ($custom_skip_listnames"0|*>1") THEN LET skip_names = {"($feature_variable)", "($rowvar)", ($custom_skip_listnames)}
+
+DEFINE SYMBOL vars_out = ($feature_variable), datetime, latitude,  longitude
+LET nlist = 4
+
+LET nvars = ..nvars
+LET varnames = ..varnames
+repeat/range=1:`nvars`/name=ivar (\
+  DEFINE SYMBOL ivar = `ivar`; \
+  DEFINE SYMBOL vname = `varnames[i=($ivar)]`; \
+  IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN GO reshape_list_var ($vname); \   
+  IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN DEFINE SYMBOL vars_out = ($vars_out), ($vname); \
+  IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN LET nlist = `nlist+1`;\
+)
+
+! expand the feature ids to the obs axis.
+GO reshape_list_var ($feature_variable)
+
+! Do we want the date string or the date coordinate?  List dates.
+IF `($ferret_timelab_res"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_timelab_res = minute
 
 DEFINE SYMBOL t_units_string = `TIME.units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
@@ -39,10 +55,6 @@ GO LAS_is_range amin amax
 DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`TIME.time_origin`"/units=($tunits) haxis
 
 LET/TITLE="Time String" datetime = TAX_DATESTRING (time, t[gt=haxis], "($ferret_timelab_res%($tunits)%)")
-DEFINE SYMBOL tlist = datetime, time,
-
-DEFINE SYMBOL vars_out = ($tlist) latitude, longitude ($varlist)
-LET nlist = `nlist+4`
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 LET use_size = 1000000*($ferret_memory)/4.
