@@ -57,6 +57,12 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
+! Get the dataset title
+LET global_attnames = ..attnames
+IF `IS_ELEMENT_OF_STR(global_attnames, "title") GT 0` THEN
+  DEFINE SYMBOL dataset_title_att = `..title`
+ENDIF
+
 GO custom_dataset_definitions
 
 ! Did the request return the no-data flag?
