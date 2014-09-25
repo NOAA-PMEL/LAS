@@ -17,15 +17,16 @@ let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.04`
 let y2 = `y1+0.2`
 
+IF ($custom_dataset"0|*>1") THEN 
+   IF ($custom_color_key"0|*>1") THEN 
+      GO ($custom_color_key)
+      IF ($color_key_done"0|0|*>1") THEN EXIT/SCRIPT
+   ENDIF
+ENDIF
+
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
    ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
   GO color_datekey ttvar
-ELIF ($ferret_plot_key"0|qc_flag>1|*>0") THEN
-   ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
-  GO SOCAT_qckey ttvar
-ELIF ($ferret_plot_key"0|region_id>1|*>0") THEN
-   ppl shakey ,0,0.0000001,100,,,`x1`,`x2`,`y1`,`y2`
-  GO SOCAT_regions_key ttvar
 ELSE
    ppl shakey ,0,`-1*key_label_size`,,,,`x1`,`x2`,`y1`,`y2`
 ENDIF
