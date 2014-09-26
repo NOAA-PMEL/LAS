@@ -23,13 +23,31 @@ REPEAT/I=1:`nvars` (DEFINE SYMBOL ivar = `all_varnames`;\
  IF `($data_x_var"0|*>1")+($data_y_var"0|*>1")+($data_t_var"0|*>1")+($data_z_var"0|*>1") EQ 4` THEN EXIT/LOOP;\
  )
 
+! Are longitude and latitude on the E axis of the dsg file? (profile data)
+
+DEFINE SYMBOL vshape = `($data_x_var),RETURN=shape`
+IF `($vshape"0|E>1|*>0)` THEN
+   DEFINE SYMBOL ($data_x_var)_name = ($data_x_var)
+   SET VAR/NAME=($data_x_var)_M ($data_x_var)
+   LET/units=`($data_x_var)_M,return=units`/TITLE=`($data_x_var)_M,RETURN=title` \
+    ($($data_x_var)_name) = EXPND_BY_LEN(($data_x_var)_M, ($rowvar),`($rowvar)[m=@sum]`)
+ENDIF
+
+DEFINE SYMBOL vshape = `($data_y_var),RETURN=shape`
+IF `($vshape"0|E>1|*>0)` THEN
+   DEFINE SYMBOL ($data_y_var)_name = ($data_y_var)
+   SET VAR/NAME=($data_y_var)_M ($data_y_var)
+   LET/UNITS=`($data_y_var)_M,RETURN=units`/TITLE=`($data_y_var)_M,RETURN=title` \
+    ($($data_y_var)_name) = EXPND_BY_LEN(($data_y_var)_M, ($rowvar),`($rowvar)[m=@sum]`)
+ENDIF
+
 IF `($data_x_var%0|*>1%) + ($data_x_var%0|*>1%) LT 2` THEN
    MESSAGE/ERROR **ERROR Dataset must contain a Lon variable and a Lat variable
    EXIT/PROGRAM
 ENDIF
 
 
-IF ($its_trajectory_map"0|*>1") THEN
+IF `($its_trajectory_map"0|*>1") OR ($its_profile_map"0|*>1")` THEN
    IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
 
    DEFINE SYMBOL vshape = `($data_x_var),RETURN=shape`
@@ -58,9 +76,10 @@ IF ($its_trajectory_map"0|*>1") THEN
       LET/TITLE="($ferret_title_0)" data_y_var_expand = EXPND_BY_LEN(($data_y_var), ($rowvar),`($rowvar)[m=@sum]`)
       DEFINE SYMBOL data_y_var = data_y_var_expand
 
-   ENDIF  ! IF ($data_z_var
+   ENDIF  ! IF ($data_z_var)
    ENDIF
 
 ENDIF
 
 !---------------- end of feature_lon_lat_time_depth.jnl -------------------------
+
