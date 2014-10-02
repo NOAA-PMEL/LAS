@@ -34,8 +34,8 @@ PLOT/OVER/NOLAB/VS/SYM=dot/COLOR=black x_var_data,latitude
 SET AXIS/STRIDE=($cruise_thinning) `longitude,RETURN=xaxis`
 DEFINE SYMBOL relabel_subsampling = 1
 
-LET data_1_var_z =  EXPNDI_BY_Z(x_var_data, cruise_mask,`ncruises`,`longest`)
-LET data_var_z =  EXPNDI_BY_Z(y_var_data, cruise_mask,`ncruises`,`longest`)
+LET data_1_var_c =  EXPNDI_BY_Z(x_var_data, cruise_mask,`ncruises`,`longest`)
+LET data_var_c =  EXPNDI_BY_Z(y_var_data, cruise_mask,`ncruises`,`longest`)
 
 DEFINE SYMBOL ferret_icons_palette = ten_by_levels
 DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_icons_palette)
@@ -47,8 +47,8 @@ IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/L
 
 DEFINE SYMBOL poly_command poly($qualifiers)
 
-LET pmask = data_1_var_z
-LET qmask = data_var_z
+LET pmask = data_1_var_c
+LET qmask = data_var_c
 
 ! Use different color for each cruise 1-10, 11-21, ...
 ! Use different symbols for each set of 10

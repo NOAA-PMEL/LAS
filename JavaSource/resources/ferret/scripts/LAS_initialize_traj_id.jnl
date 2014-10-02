@@ -27,8 +27,8 @@ LET traj_numbers = x[gx=xtraj_axis]
 ! rind direction of rowsize, defined in Trajectory_initialize_cruise
 LET longest = trajvar[($rind)=@max]+2
 
-LET data_var_z =  EXPNDI_BY_Z_COUNTS(longitude, xsequence(trajvar),`longest`)
-LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(trajvar),`longest`)
+LET data_var_c =  EXPNDI_BY_Z_COUNTS(longitude, xsequence(trajvar),`longest`)
+LET id_by_c =  EXPNDI_ID_BY_Z_COUNTS(xsequence(trajvar),`longest`)
 
 ! If  a subset of cruise ids is given then only plot those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.
@@ -43,7 +43,7 @@ LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(xsequence(trajvar),`longest`)
       LET subm_ids = IF ELEMENT_INDEX(traj_numbers,subset_ids) THEN 1
       IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = subm_ids + 0*x[x=1:`ntrajs`]  ! put it on a non-abstract axis. 
 
-! apply mask as data_var_z* subset_mask
+! apply mask as data_var_c* subset_mask
 
       LET n_subset = `subset_mask[I=@NGD]`
       DEFINE SYMBOL cruises_shown = `n_subset`

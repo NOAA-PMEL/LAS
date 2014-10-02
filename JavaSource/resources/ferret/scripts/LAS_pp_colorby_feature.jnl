@@ -84,8 +84,8 @@ LET dvar =  idvar
 LET pvar = constraints_mask* (xvar)
 LET qvar = constraints_mask* (yvar)
 
-LET data_1_var_z =  EXPNDI_BY_Z(pvar, obs_mask, `nfeatures`, `longest`)
-LET data_var_z =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
+LET data_1_var_c =  EXPNDI_BY_Z(pvar, obs_mask, `nfeatures`, `longest`)
+LET data_var_c =  EXPNDI_BY_Z(qvar, obs_mask, `nfeatures`, `longest`)
 
 ! Decimation for longitude/latitude plots
 ! Dont decimate for prop-prop plots when we have a subset mask!
@@ -148,8 +148,8 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
    ! This value of longest is now wrong, but it's too big so should be harmless.
    
 
-   LET data_1_var_z =  EXPNDI_BY_Z(pvar, decimated_mask, `nfeatures`, `longest`)
-   LET data_var_z =  EXPNDI_BY_Z(qvar, decimated_mask, `nfeatures`, `longest`)
+   LET data_1_var_c =  EXPNDI_BY_Z(pvar, decimated_mask, `nfeatures`, `longest`)
+   LET data_var_c =  EXPNDI_BY_Z(qvar, decimated_mask, `nfeatures`, `longest`)
    LET data_var_d =  EXPNDI_BY_Z(dvar, decimated_mask, `nfeatures`, `longest`)
 
    LET dmask =  subset_mask * data_var_d
@@ -160,11 +160,11 @@ IF `($ferret_plot_var_0"0|longitude>1|*>0") AND ($ferret_plot_var_1"0|latitude>1
 ENDIF  ! Decimation for longitude/latitude plots
 
 ! Set up to plot the data and the linear fit
-LET pmask =  subset_mask * data_1_var_z
-LET qmask =  subset_mask * data_var_z
+LET pmask =  subset_mask * data_1_var_c
+LET qmask =  subset_mask * data_var_c
 
-LET p = XSEQUENCE( subset_mask * data_1_var_z)
-LET q = XSEQUENCE( subset_mask * data_var_z)
+LET p = XSEQUENCE( subset_mask * data_1_var_c)
+LET q = XSEQUENCE( subset_mask * data_var_c)
 
 ! Set up to make polygon plot. If there are not too many features
 ! color the data according to feature.
@@ -193,8 +193,8 @@ DEFINE SYMBOL line_color = blue
 
 IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
 
-   LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
-   LET q = XSEQUENCE( subset_mask * data_var_z)
+   LET p = XSEQUENCE( subset_mask * data_1_var_c)  ! for regression line
+   LET q = XSEQUENCE( subset_mask * data_var_c)
 
    ! Use different color for each feature 1-10, 11-21, ...
    ! Use different symbols for each set of 10

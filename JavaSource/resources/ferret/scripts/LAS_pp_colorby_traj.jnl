@@ -26,15 +26,15 @@ LET pvar = constraints_mask* ($ferret_plot_var_0)
 LET qvar = constraints_mask* ($ferret_plot_var_1)
 LET dvar = constraints_mask* ID_DATA
 
-LET data_1_var_z =  EXPNDI_BY_Z(pvar, traj_mask,`ntrajs`,`longest`)
-LET data_var_z =  EXPNDI_BY_Z(qvar, traj_mask,`ntrajs`,`longest`)
+LET data_1_var_c =  EXPNDI_BY_Z(pvar, traj_mask,`ntrajs`,`longest`)
+LET data_var_c =  EXPNDI_BY_Z(qvar, traj_mask,`ntrajs`,`longest`)
 
 ! Set up to plot the data and the linear fit
-LET pmask =  subset_mask * data_1_var_z
-LET qmask =  subset_mask * data_var_z
+LET pmask =  subset_mask * data_1_var_c
+LET qmask =  subset_mask * data_var_c
 
-LET p = XSEQUENCE( subset_mask * data_1_var_z)
-LET q = XSEQUENCE( subset_mask * data_var_z)
+LET p = XSEQUENCE( subset_mask * data_1_var_c)
+LET q = XSEQUENCE( subset_mask * data_var_c)
 
 ! Set up to make polygon plot. If there are not too many trajs
 ! color the data according to traj.
@@ -76,8 +76,8 @@ IF `($traj_max) EQ 1` THEN
 
 ELIF `($traj_max) LE ($traj_max_labels)` THEN
 
-   LET p = XSEQUENCE( subset_mask * data_1_var_z)  ! for regression line
-   LET q = XSEQUENCE( subset_mask * data_var_z)
+   LET p = XSEQUENCE( subset_mask * data_1_var_c)  ! for regression line
+   LET q = XSEQUENCE( subset_mask * data_var_c)
 
 
    ! Use different color for each traj 1-10, 11-21, ...
