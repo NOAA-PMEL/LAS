@@ -140,7 +140,7 @@ IF `color_by_traj EQ 1` THEN
    GO LAS_initialize_traj_id
 
    DEFINE SYMBOL ferret_poly_levels = `($rowvar),RETURN=lsize`
-   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
+   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_c)))
    IF ($its_listing"0|*>1") THEN
       LET/TITLE="($data_($num)_var)" var_data = ($data_($num)_var)
       DEFINE SYMBOL data_($num)_var = ($data_($num)_var)

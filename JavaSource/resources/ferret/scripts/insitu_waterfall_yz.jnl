@@ -141,7 +141,7 @@ ENDIF
 IF ($ferret_by_id"0|*>1") THEN
    DEFINE SYMBOL  ferret_palette = more_by_levels
    DEFINE SYMBOL  ferret_fill_levels = `($rowvar),RETURN=lsize`
-   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
+   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_c)))
    LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL  var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL  ferret_plot_title Colored by Profile Number
