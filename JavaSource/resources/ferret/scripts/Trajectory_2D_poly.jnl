@@ -129,8 +129,15 @@ ENDIF
 ! Set color levels
 GO LAS_initialize_var_levels
 
+! Color key for the variable values.
+! If there is no plot variable defined (only plotting locations),
+! do not plot the key.
+
+DEFINE SYMBOL ferret_plot_key = ($ferret_plot_var"0|*>1")
+
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers
+IF `STRINDEX("($qualifiers)", "KEY") EQ 0 AND ($ferret_plot_key"0")` THEN DEFINE SYMBOL qualifers = ($qualifiers)/KEY
 
 ! Open the window
 GO LAS_open_window
@@ -191,21 +198,6 @@ ENDIF
 !CANCEL SYMBOL qualifiers 
 DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
-! Color key for the variable values.
-! If there is no plot variable defined (only plotting locations),
-! do not plot the key.
-
-IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0
-
-IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
-   IF ($keycentered"0|*>1") THEN 
-      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
-   ELSE
-      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
-   ENDIF
-ELSE
-   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
 
 ! Get info for deciding on line thickness
 GO feature_labels
@@ -214,24 +206,25 @@ GO feature_labels
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 
-! Always thick?
-DEFINE SYMBOL drawthick = 1
-DEFINE SYMBOL drawthick = 2
+IF `($drawthick"0|*>1") EQ 0` THEN 
+   DEFINE SYMBOL drawthick = 1
+   DEFINE SYMBOL drawthick = 2
 
-IF ($decimation_fraction"0|*>1") THEN 
-   DEFINE SYMBOL  drawthick = 2
-ELSE
-!   IF `nout_lonlat LT 400000` THEN DEFINE SYMBOL drawthick = 2
+   IF ($decimation_fraction"0|*>1") THEN 
+      DEFINE SYMBOL  drawthick = 2
+   ELSE
+      IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
+   ENDIF
+
+!    If there's not a lot of data on the map and the region is pretty small, 
+!   IF `featuresize LT 20 AND (($basemap_area"0") LT 0.2)` THEN DEFINE SYMBOL drawthick = 3
+
+! Try this first, few cruises --> thick
    IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
 ENDIF
 
-! If there's not a lot of data on the map and the region is pretty small, 
-!IF `featuresize LT 20 AND (($basemap_area"0") LT 0.2)` THEN DEFINE SYMBOL drawthick = 3
-
-! Try this first, few cruises --> thick
-IF `featuresize LT 20` THEN DEFINE SYMBOL drawthick = 3
-
 IF `($drawthick"0|1|2|3|*>0") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=($drawthick)
+
 
 ! Is this a single mooring where all the location data is at a single location?  If so make a colored symbol
 
