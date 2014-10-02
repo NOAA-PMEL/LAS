@@ -25,7 +25,7 @@ REPEAT/RANGE=0:101:1/NAME=v ( \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/loop; \
   GO make_c_lab)
 
-! A set of cruises may have been selected on the map. If so label them.
+! A set of features may have been selected on the map. If so label them.
 ! If a subset was chosen, we will replace the annotation below.
 
 IF `($nmask_labels"0") GT 0` THEN
@@ -37,18 +37,20 @@ IF `($nmask_labels"0") GT 0` THEN
    )
 ENDIF
 
-! Label the cruises that came in with ferret_cruise_list.
+! Label the features that came in with ferret_cruise_list.
 
 IF `($ferret_cruise_list"0|*>1")` THEN 
 
    LET slen = STRLEN("($ferret_cruise_list)")
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN
-      DEFINE SYMBOL note_($note_num"0")_lab = Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
-      LET note_($note_num"0")_lab = "Where cruise expocode = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`"
+      DEFINE SYMBOL note_num `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num"0")_lab = Where ($feature_variable) = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`
+      LET note_($note_num"0")_lab = "Where ($feature_variable) = `SUBSTRING("($ferret_cruise_list)", 1, slen-1)`"
    ELSE 
-      DEFINE SYMBOL note_($note_num"0")_lab = Where cruise expocode = ($ferret_cruise_list)
-      LET note_($note_num"0")_lab = "Where cruise expocode = ($ferret_cruise_list)"
+      DEFINE SYMBOL note_num `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num"0")_lab = Where ($feature_variable) = ($ferret_cruise_list)
+      LET note_($note_num"0")_lab = "Where ($feature_variable) = ($ferret_cruise_list)"
    ENDIF
 
 ENDIF
