@@ -863,10 +863,27 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             }
             Map<String, String> labels = constraint.getLabels();
             // Decide what to do about x now that we have the info.
+            
+            // If the data set is 0 to 360 and the UI sends -180 to 180, re-normalize
+            Map<String, String> dt = dataset.getPropertiesAsMap().get("tabledap_access");  
+            boolean is360 = false;
+            if ( dt != null ) {
+                String range = dt.get("lon_domain");
+                is360 = range.contains("180");
+            }
+            
             if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
                 double dxlo = Double.valueOf(xlo);
                 double dxhi = Double.valueOf(xhi);
                 // Do the full globle and two query dance...
+                if ( is360 ) {
+                    if ( dxlo < 0 ) {
+                        dxlo = dxlo + 360.;
+                    }
+                    if ( dxhi < 0 ) {
+                        dxhi = dxhi + 360.;
+                    }
+                }
 
                 if ( Math.abs(dxhi - dxlo ) < 355. ) {
 
@@ -909,7 +926,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                         // The config specifies the names...
                         if ( labels != null ) {
                             String u = labels.get(t);
-                            outerSequenceValues.put(t,u);
+                            if ( u != null ) {
+                                outerSequenceValues.put(t,u);
+                            } else {
+                                // No label found for this one
+                                outerSequenceValues.put(t,t);
+                            }
                         } else {
                             // A second variable specifies the names
                             String u = s.getString(1);
