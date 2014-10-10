@@ -869,7 +869,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             boolean is360 = false;
             if ( dt != null ) {
                 String range = dt.get("lon_domain");
-                is360 = range.contains("180");
+                is360 = !range.contains("180");
             }
             
             if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
@@ -887,11 +887,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
                 if ( Math.abs(dxhi - dxlo ) < 355. ) {
 
-                    LatLonPoint p = new LatLonPointImpl(0, dxhi);
-                    dxhi = p.getLongitude();
-                    p = new LatLonPointImpl(0, dxlo);
-                    dxlo = p.getLongitude();
-
+                    if ( !is360 ) {
+                        LatLonPoint p = new LatLonPointImpl(0, dxhi);
+                        dxhi = p.getLongitude();
+                        p = new LatLonPointImpl(0, dxlo);
+                        dxlo = p.getLongitude();
+                    }
                     if ( dxhi < dxlo ) {
                         if ( dxhi < 0 && dxlo >= 0 ) {
                             dxhi = dxhi + 360.0d;
