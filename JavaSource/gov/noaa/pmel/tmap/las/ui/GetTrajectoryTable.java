@@ -358,6 +358,8 @@ public class GetTrajectoryTable extends LASAction {
 	                                        
 	                                        
 	                                        columnHeaders.append("<th>qc flags</th>\n");
+	                                        columnHeaders.append("<th>thumbnails</th>\n");
+
 	                                        columnHeaders.append("</tr>\n");
 	                                        bsw.write(columnHeaders.toString());
 
@@ -371,6 +373,8 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < units.length; i++) {
 	                                            unitStrings.append("<th>"+units[i]+"</th>\n");
 	                                        }
+	                                        unitStrings.append("<th></th>\n");
+	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
@@ -449,6 +453,16 @@ public class GetTrajectoryTable extends LASAction {
 	                                                String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
 	                                                
                                                     row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
+                                                    row.append("\n</td>");
+                                                    
+                                                    // ADD a THUMBNAIL table link...
+                                                    LASUIRequest thumb = (LASUIRequest) lasUIRequest.clone();
+                                                    thumb.removeLinks();
+                                                    thumb.setOperation("PropPropThumbTable");
+                                                    thumb.addTextConstraint(cruise_id, "eq", parts[0]);
+                                                    String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
+                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                    row.append("<a target=\"_blank\" href=\""+thumburl+"\">Thumbnails</a>");
                                                     row.append("\n</td>");
 	                                                
 	                                                row.append("</tr>");
