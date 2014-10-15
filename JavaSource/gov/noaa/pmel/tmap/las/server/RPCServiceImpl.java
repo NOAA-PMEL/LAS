@@ -45,6 +45,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -854,9 +856,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 } else {
                     Constraint c = new Constraint(lhs, op, rhs);
                     if ( c.getOp().equals("is") || c.getOp().equals("like") ) {
-                        url = url + "&" + c.getAsERDDAPString();
+                        xquery1.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name()));
+                        xquery2.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name()));
                     } else {
-                        url = url +"&" + c.getAsString();
+                        xquery1.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name()));
+                        xquery2.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name()));
+
                     }
                 }
               
