@@ -952,7 +952,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 jsonStream = new URL(q2url).openStream();
                 String jsonText2 = IOUtils.toString(jsonStream);
                 JSONObject json2 = new JSONObject(jsonText2);
-                JSONArray v2 = json.getJSONObject("table").getJSONArray("rows");
+                JSONArray v2 = json2.getJSONObject("table").getJSONArray("rows");
                 for (int i = 0; i < v2.length(); i++) {
                     JSONArray s = v2.getJSONArray(i);
                     String t = s.getString(0);
