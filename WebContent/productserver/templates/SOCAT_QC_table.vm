@@ -351,9 +351,6 @@ fieldset p .note {
 				<th title="Time and Day when SOCAT QC flag assigned to cruise">Flag Timestamp</th>
 				<th title="Name of reviewer who submitted this flag">Reviewer</th>
 				<th title="Version in which flag was added to the cruise">Version<br />Flagged</th>
-#if ($readonly == false)
-                 <th>Upload/Download<br>Documents</th>
-#end
 				<th title="Comments added by reviewer regarding this flag">Comments</th>
 
 
