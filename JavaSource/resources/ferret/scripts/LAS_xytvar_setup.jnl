@@ -195,7 +195,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       LET amax = `ax_hi`
       GO LAS_is_range ax_lo ax_hi ! get del_ax
       LET ax_lo = `amin`
-      let ax_hi = `amax`
+      LET ax_hi = `amax`
 
       IF `(ax_hi-ax_lo) GE 359` THEN 
          LET ax_lo = ($region_x_lo)
@@ -218,8 +218,14 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    ENDIF
 
    IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
+
+      IF `ax_lo-amin LT 1` THEN LET ax_lo = `ax_lo - 1 `
+      IF `amax-ax_hi LT 1` THEN LET ax_hi = `ax_hi + 1`
+      
+         IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
          LET/UNITS="($lon_units)" xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
+	 ENDIF
    ENDIF
 
 ! If there was a longitude mask apply that to the plot region
@@ -635,3 +641,4 @@ LET p = ($xvar)
 LET q = ($yvar)
 
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------
+
