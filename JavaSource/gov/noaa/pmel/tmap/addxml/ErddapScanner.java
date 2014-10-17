@@ -8,16 +8,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
@@ -42,7 +44,6 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonStreamParser;
-import com.google.gwt.dev.util.collect.HashSet;
 
 public class ErddapScanner {
 
@@ -63,6 +64,7 @@ public class ErddapScanner {
 
     protected static String url = "http://osmc.noaa.gov/erddap/tabledap/";
     protected static String id = "OSMCV4_DUO_SURFACE_TRAJECTORY";
+    protected static List<String> axesToSkip = new ArrayList<String>();
 
     protected static ErddapScannerOptions opts = new ErddapScannerOptions();
     protected static CommandLine cl;
@@ -85,13 +87,19 @@ public class ErddapScanner {
             if ( !url.endsWith("/") ) {
                 url = url+"/";
             }
+            String skipaxes = cl.getOptionValue("axes");
+            
+            if ( skipaxes != null ) {
+                // This is regex magic to split on empty strings, that follow the start of the string.
+                axesToSkip = Arrays.asList(skipaxes.split("(?!^)"));
+            }
             input = new URL(url+id+".das").openStream();
             das.parse(input);
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
             Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
             Attribute cdm_profile_variables_attribute = global.getAttribute(PROFILE);
             Attribute cdm_data_type = global.getAttribute("cdm_data_type");
-            String grid_type = cdm_data_type.getValueAt(0);
+            String grid_type = cdm_data_type.getValueAt(0).toLowerCase();
             Attribute subset_names = null;
             Attribute title_attribute = global.getAttribute("title");
             String title = "No title global attribute";
@@ -219,12 +227,13 @@ public class ErddapScanner {
                 Element axesE = new Element("axes");
                 // Build the LAS configuration.
                 DatasetBean db = new DatasetBean();
+               
                 db.setElement(id);
                 db.setName(title);            
 
                 db.setUrl(url);
                 // Build the grid...
-
+                db.setProperty("ferret", "data_format", "csv");
                 String gridid = "grid-"+id;
                 gb.setElement(gridid);
 
@@ -248,36 +257,41 @@ public class ErddapScanner {
                     ArangeBean arb = new ArangeBean();
                     InputStream stream = null;
                     JsonStreamParser jp = null;
+                    if ( !axesToSkip.contains("t") ) {
+                        String timeurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&time!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
+                        stream = null;
 
-                    String timeurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&time!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
-                    stream = null;
+                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null);
+                        if ( stream != null ) {
+                            jp = new JsonStreamParser(new InputStreamReader(stream));
+                            JsonObject bounds = (JsonObject) jp.next();
+                            String[] timeminmax = ERDDAPUtil.getMinMax(bounds, name);
+                            stream.close();
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null);
-                    if ( stream != null ) {
-                        jp = new JsonStreamParser(new InputStreamReader(stream));
-                        JsonObject bounds = (JsonObject) jp.next();
-                        String[] lonminmax = ERDDAPUtil.getMinMax(bounds, name);
-                        stream.close();
+                            String start = timeminmax[0];
+                            String end = timeminmax[1];
 
-                        String start = lonminmax[0];
-                        String end = lonminmax[1];
+                            // This should be time strings in ISO Format
 
-                        // This should be time strings in ISO Format
+                            Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+                            DateTimeFormatter iso = ISODateTimeFormat.dateTimeParser().withChronology(chrono).withZone(DateTimeZone.UTC);
 
-                        Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-                        DateTimeFormatter iso = ISODateTimeFormat.dateTimeParser().withChronology(chrono).withZone(DateTimeZone.UTC);
+                            DateTime dtstart = iso.parseDateTime(start);
+                            DateTime dtend = iso.parseDateTime(end);
 
-                        DateTime dtstart = iso.parseDateTime(start);
-                        DateTime dtend = iso.parseDateTime(end);
-
-                        int days = Days.daysBetween(dtstart.withTimeAtStartOfDay() , dtend.withTimeAtStartOfDay() ).getDays();
-                        DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); 
-                        arb.setStart(hoursfmt.print(dtstart.withTimeAtStartOfDay()));
-                        arb.setStep("1");
-                        // Fudge
-                        days = days + 1;
-                        arb.setSize(String.valueOf(Long.valueOf(days)));
-                        ab.setArange(arb);    
+                            int days = Days.daysBetween(dtstart.withTimeAtStartOfDay() , dtend.withTimeAtStartOfDay() ).getDays();
+                            DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); 
+                            arb.setStart(hoursfmt.print(dtstart.withTimeAtStartOfDay()));
+                            arb.setStep("1");
+                            // Fudge
+                            days = days + 1;
+                            arb.setSize(String.valueOf(Long.valueOf(days)));
+                            ab.setArange(arb);
+                        } else {
+                            arb.setStart("UNKNOW_START");
+                            arb.setStep("UNKNOW_STEP");
+                            arb.setSize("UNKNOW_SIZE");
+                        }
                     } else {
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
@@ -299,41 +313,50 @@ public class ErddapScanner {
                         String units = ua.getValueAt(0);
                         ab.setUnits(units);
                     }
-                    // Do a query to get the longitude range from the dataset.
-                    InputStream stream = null;
-                    JsonStreamParser jp = null;
+                    ArangeBean arb = new ArangeBean();     
+                    if ( !axesToSkip.contains("x") ) {
+                        // Do a query to get the longitude range from the dataset.
+                        InputStream stream = null;
+                        JsonStreamParser jp = null;
 
-                    String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
-                    stream = null;
+                        String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
+                        stream = null;
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
-                    ArangeBean arb = new ArangeBean();      
-                    if ( stream != null ) {
-                        jp = new JsonStreamParser(new InputStreamReader(stream));
-                        JsonObject bounds = (JsonObject) jp.next();
-                        String[] lonminmax = ERDDAPUtil.getMinMax(bounds, name);
-                        stream.close();
+                        stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
 
-                        String start = lonminmax[0];
-                        String end = lonminmax[1];
-                        double size = Double.valueOf(end) - Double.valueOf(start);
+                        if ( stream != null ) {
+                            jp = new JsonStreamParser(new InputStreamReader(stream));
+                            JsonObject bounds = (JsonObject) jp.next();
+                            String[] lonminmax = ERDDAPUtil.getMinMax(bounds, name);
+                            stream.close();
+
+                            String start = lonminmax[0];
+                            String end = lonminmax[1];
+                            double size = Double.valueOf(end) - Double.valueOf(start);
 
 
-                        arb.setStart(start);
-                        arb.setStep("1.0");
-                        arb.setSize(String.valueOf((long) (size+1)));
-                        ab.setArange(arb);
-                        if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
-                            db.setProperty("tabledap_access", "lon_domain", "0:360");
+                            arb.setStart(start);
+                            arb.setStep("1.0");
+                            arb.setSize(String.valueOf((long) (size+1)));
+                            ab.setArange(arb);
+                            if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
+                                db.setProperty("tabledap_access", "lon_domain", "0:360");
+                            } else {
+                                db.setProperty("tabledap_access", "lon_domain", "-180:180");
+                            }
                         } else {
-                            db.setProperty("tabledap_access", "lon_domain", "-180:180");
+                            arb.setStart("UNKNOW_START");
+                            arb.setStep("UNKNOW_STEP");
+                            arb.setSize("UNKNOW_SIZE");
+                            ab.setArange(arb);
+                            db.setProperty("tabledap_access", "lon_domain", "UNKNOWN:UNKNOWN");
                         }
                     } else {
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
                         ab.setArange(arb);
-                        db.setProperty("tabledap_access", "lon_domaine", "UNKNOWN:UNKNOWN");
+                        db.setProperty("tabledap_access", "lon_domain", "UNKNOWN:UNKNOWN");
                     }
 
                     axes.add(ab);
@@ -351,29 +374,37 @@ public class ErddapScanner {
                         String units = ua.getValueAt(0);
                         ab.setUnits(units);
                     }
-                    InputStream stream = null;
-                    JsonStreamParser jp = null;
+                    ArangeBean arb = new ArangeBean();      
+                    if ( !axesToSkip.contains("y") ) {
+                        InputStream stream = null;
+                        JsonStreamParser jp = null;
 
-                    String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
-                    stream = null;
+                        String laturl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
+                        stream = null;
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
-                    ArangeBean arb = new ArangeBean();          
+                        stream = lasProxy.executeGetMethodAndReturnStream(laturl, null);
 
-                    if ( stream != null ) {
-                        jp = new JsonStreamParser(new InputStreamReader(stream));
-                        JsonObject bounds = (JsonObject) jp.next();
-                        String[] lonminmax = ERDDAPUtil.getMinMax(bounds, name);
-                        stream.close();
 
-                        String start = lonminmax[0];
-                        String end = lonminmax[1];
-                        double size = Double.valueOf(end) - Double.valueOf(start);
+                        if ( stream != null ) {
+                            jp = new JsonStreamParser(new InputStreamReader(stream));
+                            JsonObject bounds = (JsonObject) jp.next();
+                            String[] latminmax = ERDDAPUtil.getMinMax(bounds, name);
+                            stream.close();
 
-                        arb.setStart(start);
-                        arb.setStep("1.0");
-                        arb.setSize(String.valueOf((long) size+1));
-                        ab.setArange(arb);                    
+                            String start = latminmax[0];
+                            String end = latminmax[1];
+                            double size = Double.valueOf(end) - Double.valueOf(start);
+
+                            arb.setStart(start);
+                            arb.setStep("1.0");
+                            arb.setSize(String.valueOf((long) size+1));
+                            ab.setArange(arb);                    
+                        } else {
+                            arb.setStart("UNKNOW_START");
+                            arb.setStep("UNKNOW_STEP");
+                            arb.setSize("UNKNOW_SIZE");
+                            ab.setArange(arb);
+                        }
                     } else {
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
@@ -383,10 +414,11 @@ public class ErddapScanner {
                     axes.add(ab);
                 }
                 /*
-                 * Right now we cannot do anything but surface trajectories so we're going to ignore the depth variable.
-
+                 * For profiles, grab the depth and make 10 equal levels.
+                 */
                 if ( !zVar.keySet().isEmpty() ) {
                     String name = zVar.keySet().iterator().next();
+                    db.setProperty("tabledap_access", "altitude", name);
                     AttributeTable var = zVar.get(name);
                     AxisBean ab = new AxisBean();
                     ab.setElement(name+"-"+id);
@@ -396,27 +428,47 @@ public class ErddapScanner {
                         String units = ua.getValueAt(0);
                         ab.setUnits(units);
                     }
-                    Attribute ar = var.getAttribute("actual_range");
-                    if ( ar != null ) {
-                        String start = ar.getValueAt(0);
-                        String end = ar.getValueAt(1);
-                        double size = Double.valueOf(end) - Double.valueOf(end);
-                        ArangeBean arb = new ArangeBean();
+                    ArangeBean arb = new ArangeBean();         
+                    if ( !axesToSkip.contains("z") ) {
+                    InputStream stream = null;
+                    JsonStreamParser jp = null;
+
+                    String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
+                    stream = null;
+
+                    stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
+                    
+
+                    if ( stream != null ) {
+                        jp = new JsonStreamParser(new InputStreamReader(stream));
+                        JsonObject bounds = (JsonObject) jp.next();
+                        String[] zminmax = ERDDAPUtil.getMinMax(bounds, name);
+                        stream.close();
+
+                        String start = zminmax[0];
+                        String end = zminmax[1];
+                        double size = Double.valueOf(end) - Double.valueOf(start);
+                        double step = size/10.;
                         arb.setStart(start);
-                        arb.setStep("1.0");
-                        arb.setSize(String.valueOf(size));
-                    ab.setArange(arb);  
+                        DecimalFormat df = new DecimalFormat("#.##");
+                        arb.setStep(df.format(step));
+                        arb.setSize("10");
+                        ab.setArange(arb);                    
                     } else {
-                        ArangeBean arb = new ArangeBean();
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
                         ab.setArange(arb);
                     }
-                    axes.add(ab);            System.err.println(e.getMessage());
-
+                    } else {
+                        arb.setStart("UNKNOW_START");
+                        arb.setStep("UNKNOW_STEP");
+                        arb.setSize("UNKNOW_SIZE");
+                        ab.setArange(arb);
+                    }
+                    axes.add(ab);            
                 }
-                 */
+               
                 gb.setAxes(axes);
 
                 Element cons = new Element("constraints");
@@ -479,7 +531,75 @@ public class ErddapScanner {
                     if ( subIt.hasNext() ) allv.append(",");
                 }
                 db.setProperty("tabledap_access", "all_variables", allv.toString());
+                /*
+                * There is a page that will show thumbnails of property-property plots.
+                * 
+                * It takes 3 pieces of metadata. First is the list of variables that will show up in the banner for a particular ID.
+                * 
+                     <thumbnails> 
+                *
+                * THESE are ERDDAP variable names.
+                          <metadata>expocode,vessel_name,investigators,qc_flag</metadata>
+                * 
+                * Next is the list of plot paris:
+                * 
+                *          <variable_pairs>
+                               <!-- NO WHITESPACE AROUND THE COMMA -->
+                               <!-- x-axis followed by y-axis variable. -->
+                               <!-- LAS IDs -->
+                               
+                               longitude-socatV3_c6c1_d431_8194,latitude-socatV3_c6c1_d431_8194
+                               time-socatV3_c6c1_d431_8194,day_of_year-socatV3_c6c1_d431_8194
+                               time-socatV3_c6c1_d431_8194,temp-socatV3_c6c1_d431_8194
+                               time-socatV3_c6c1_d431_8194,Temperature_equi-socatV3_c6c1_d431_8194
 
+                           </variable_paris>
+                           
+                * Finally, is just a flat list of every variable needed to make all the plots so there can be one data pull from ERDDAP.           
+
+                           <!-- The names of the variables needed to make all of the thumbnail plots so the netcdf file can be as minimal as possible. 
+                                Do not list latitude,longitude,depth,time,expocode
+                                as these are handled by LAS internally
+                           -->
+                           <variable_names>day_of_year,temp,Temperature_equi</variable_names>
+                           
+                *
+                * The default set that we will construct will be lat vs lon and time vs all other varaibles.
+                */
+                
+                db.setProperty("thumbnails", "metadata", idVar.keySet().iterator().next());
+                
+                String lonn = lonVar.keySet().iterator().next();
+                
+                
+                String latn = latVar.keySet().iterator().next();
+                
+                StringBuilder pairs = new StringBuilder();
+                StringBuilder vnames = new StringBuilder();
+                pairs.append("\n");
+                pairs.append(lonn+"-"+id+","+latn+"-"+id+"\n");
+                String timen = timeVar.keySet().iterator().next();
+                String zn = null;
+                if ( !zVar.keySet().isEmpty() ) {
+                    zn = zVar.keySet().iterator().next();
+                }
+                for (Iterator subIt = data.keySet().iterator(); subIt.hasNext();) {
+                    String key = (String) subIt.next();
+                    vnames.append(key);
+                    if ( subIt.hasNext() ) {
+                        vnames.append(",");
+                    }
+                    if ( TRAJECTORY.contains(grid_type) ) {
+                        pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
+                    } else if ( PROFILE.contains(grid_type) && zn != null ) {
+                        pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
+
+                    }
+                }
+                pairs.append("\n");
+                db.setProperty("thumbnails", "variable_pairs", pairs.toString());
+                db.setProperty("thumbnails", "variable_names", vnames.toString());
+                
                 // Add lat, lon and time to the data variable for output to the dataset
 
                 String vn = lonVar.keySet().iterator().next();
@@ -493,6 +613,9 @@ public class ErddapScanner {
                 vn = timeVar.keySet().iterator().next();
                 if ( !data.containsKey(vn) ) {
                     data.put(vn, timeVar.get(vn));
+                }
+                if ( zn != null && !data.containsKey(zn) ) {
+                    data.put(zn, zVar.get(zn));
                 }
                 for (Iterator dataIt = data.keySet().iterator(); dataIt.hasNext();) {
                     String name = (String) dataIt.next();
