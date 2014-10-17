@@ -248,8 +248,7 @@ ELSE
 ! Dont use the palette coming in. Its for variable 0
      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
-     IF ($keycentered"0|*>1") THEN \
-	  DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
+     IF ($ferret_key_centerlab"0|0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT,CENT
 
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=rainbow
      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
