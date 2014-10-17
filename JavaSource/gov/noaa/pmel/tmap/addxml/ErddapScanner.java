@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
@@ -41,13 +42,14 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonStreamParser;
+import com.google.gwt.dev.util.collect.HashSet;
 
 public class ErddapScanner {
 
     public static DAS das = new DAS();
     public static InputStream input;
     public static List<String> subsetNames = new ArrayList<String>();
-    public static Map<String, AttributeTable> trajIdVar = new HashMap<String, AttributeTable>();
+    public static Map<String, AttributeTable> idVar = new HashMap<String, AttributeTable>();
     public static Map<String, AttributeTable> timeVar = new HashMap<String, AttributeTable>();
     public static Map<String, AttributeTable> latVar = new HashMap<String, AttributeTable>();
     public static Map<String, AttributeTable> lonVar = new HashMap<String, AttributeTable>();
@@ -66,6 +68,9 @@ public class ErddapScanner {
     protected static CommandLine cl;
 
     protected static LASProxy lasProxy = new LASProxy();
+    
+    private static String TRAJECTORY = "cdm_trajectory_variables";
+    private static String PROFILE = "cdm_profile_variables";
 
     /**
      * @param args
@@ -83,7 +88,11 @@ public class ErddapScanner {
             input = new URL(url+id+".das").openStream();
             das.parse(input);
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
-            Attribute cdm_trajectory_variables_attribute = global.getAttribute("cdm_trajectory_variables");
+            Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
+            Attribute cdm_profile_variables_attribute = global.getAttribute(PROFILE);
+            Attribute cdm_data_type = global.getAttribute("cdm_data_type");
+            String grid_type = cdm_data_type.getValueAt(0);
+            Attribute subset_names = null;
             Attribute title_attribute = global.getAttribute("title");
             String title = "No title global attribute";
             if ( title_attribute != null ) {
@@ -91,22 +100,29 @@ public class ErddapScanner {
                 title = titleIt.next();
             }
             AttributeTable variableAttributes = das.getAttributeTable("s");
-            if ( cdm_trajectory_variables_attribute != null && variableAttributes != null ) {
+            if ( (cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null) && variableAttributes != null ) {
+                if ( cdm_trajectory_variables_attribute != null ) {
+                    subset_names = cdm_trajectory_variables_attribute;
 
-                Iterator<String> trajectory_variables_attribute_values = cdm_trajectory_variables_attribute.getValuesIterator();
-                if ( trajectory_variables_attribute_values.hasNext() ) {
+                } else if ( cdm_profile_variables_attribute != null ) {
+                    subset_names = cdm_profile_variables_attribute;
+                }
+                Iterator<String> subset_variables_attribute_values = subset_names.getValuesIterator();
+                if ( subset_variables_attribute_values.hasNext() ) {
                     // Work with the first value...  Attributes like ranges can have multiple values...
-                    String trajectory_variables_value = trajectory_variables_attribute_values.next();
-                    String[] trajectory_variables = trajectory_variables_value.split(",");
-                    for (int i = 0; i < trajectory_variables.length; i++) {
-                        String tv = trajectory_variables[i].trim();
+                    String subset_variable_value = subset_variables_attribute_values.next();
+                    String[] subset_variables = subset_variable_value.split(",");
+                    for (int i = 0; i < subset_variables.length; i++) {
+                        String tv = subset_variables[i].trim();
                         if ( !tv.equals("") ) {
                             subsetNames.add(tv);
                         }
                     }
                 } else {
-                    System.err.println("No CDM trajectory variables found in the cdm_trajectory_variables global attribute.");
+                    System.err.println("No CDM trajectory or profile variables found in the cdm_trajectory_variables or cdm_profile_variables global attribute.");
                 }
+                // Collect the subset names...
+
                 // Classify all of the variables...
 
                 Enumeration names = variableAttributes.getNames();
@@ -117,40 +133,46 @@ public class ErddapScanner {
                     String name = (String) names.nextElement();
                     AttributeTable var = variableAttributes.getAttribute(name).getContainer();
                     if ( subsetNames.contains(name) ) {
-                        if ( var.hasAttribute("cf_role") && var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") ) {
-                            trajIdVar.put(name, var);
+                        if ( var.hasAttribute("cf_role") && (var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || var.getAttribute("cf_role").getValueAt(0).equals("profile_id")) ) {
+                            idVar.put(name, var);
                         } else {
+                            if ( !subsets.containsKey(name) ) {
+                                subsets.put(name, var);
+                            }
+                        }
+                    } else if ( var.hasAttribute("cf_role") && (var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || var.getAttribute("cf_role").getValueAt(0).equals("profile_id")) ) {
+                        idVar.put(name, var);
+                        if ( !subsets.containsKey(name) ) {
                             subsets.put(name, var);
                         }
-                    } else if ( var.hasAttribute("cf_role") && var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") ) {
-                        trajIdVar.put(name, var);                      
-                        subsets.put(name, var);
+                    }
+                    // Look at the attributes and classify any variable as either time, lat, lon, z or a data variable.
+                    if ( var.hasAttribute("_CoordinateAxisType") ) {
+                        String type = var.getAttribute("_CoordinateAxisType").getValueAt(0);
+                        if ( type.toLowerCase().equals("time") ) {
+                            timeVar.put(name, var);
+                        } else if ( type.toLowerCase().equals("lon") ) {
+                            lonVar.put(name, var);
+                        } else if ( type.toLowerCase().equals("lat") ) {
+                            latVar.put(name, var);
+                        } else if ( type.toLowerCase().equals("height") ) {
+                            zVar.put(name, var);
+                        }
                     } else {
-                        // Look at the attributes and classify any variable that falls in here as either time, lat, lon, z or a data variable.
-                        if ( var.hasAttribute("_CoordinateAxisType") ) {
-                            String type = var.getAttribute("_CoordinateAxisType").getValueAt(0);
-                            if ( type.toLowerCase().equals("time") ) {
-                                timeVar.put(name, var);
-                            } else if ( type.toLowerCase().equals("lon") ) {
-                                lonVar.put(name, var);
-                            } else if ( type.toLowerCase().equals("lat") ) {
-                                latVar.put(name, var);
-                            } else if ( type.toLowerCase().equals("height") ) {
-                                zVar.put(name, var);
-                            }
-                        } else {
-                            if ( name.toLowerCase().contains("tmonth") ) {
-                                monthOfYear.put(name, var);
-                            }
+                        if ( name.toLowerCase().contains("tmonth") ) {
+                            monthOfYear.put(name, var);
+                        }
+                        if ( !data.containsKey(name) && !subsets.containsKey(name) && !idVar.containsKey(name) ) {
                             data.put(name, var);
                         }
+                    }
 
-                    } 
+
                 }
                 // DEBUG what we've got so far:
-                if ( !trajIdVar.keySet().isEmpty() ) {
-                    String name = trajIdVar.keySet().iterator().next();
-                    System.out.println("Trajectory ID variable:");
+                if ( !idVar.keySet().isEmpty() ) {
+                    String name = idVar.keySet().iterator().next();
+                    System.out.println(grid_type+" ID variable:");
                     System.out.println("\t "+name);
                 }
                 System.out.println("Subset variables:");
@@ -205,10 +227,10 @@ public class ErddapScanner {
 
                 String gridid = "grid-"+id;
                 gb.setElement(gridid);
-                
-                String trajID = trajIdVar.keySet().iterator().next();
-                                
-                
+
+                String trajID = idVar.keySet().iterator().next();
+
+
                 UniqueVector axes = new UniqueVector();
                 if ( !timeVar.keySet().isEmpty() ) {
                     String name = timeVar.keySet().iterator().next();
@@ -239,15 +261,15 @@ public class ErddapScanner {
 
                         String start = lonminmax[0];
                         String end = lonminmax[1];
-                        
+
                         // This should be time strings in ISO Format
-                        
+
                         Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
                         DateTimeFormatter iso = ISODateTimeFormat.dateTimeParser().withChronology(chrono).withZone(DateTimeZone.UTC);
-                        
+
                         DateTime dtstart = iso.parseDateTime(start);
                         DateTime dtend = iso.parseDateTime(end);
-                        
+
                         int days = Days.daysBetween(dtstart.withTimeAtStartOfDay() , dtend.withTimeAtStartOfDay() ).getDays();
                         DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); 
                         arb.setStart(hoursfmt.print(dtstart.withTimeAtStartOfDay()));
@@ -280,7 +302,7 @@ public class ErddapScanner {
                     // Do a query to get the longitude range from the dataset.
                     InputStream stream = null;
                     JsonStreamParser jp = null;
-                    
+
                     String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                     stream = null;
 
@@ -295,7 +317,7 @@ public class ErddapScanner {
                         String start = lonminmax[0];
                         String end = lonminmax[1];
                         double size = Double.valueOf(end) - Double.valueOf(start);
-                            
+
 
                         arb.setStart(start);
                         arb.setStep("1.0");
@@ -331,7 +353,7 @@ public class ErddapScanner {
                     }
                     InputStream stream = null;
                     JsonStreamParser jp = null;
-                   
+
                     String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                     stream = null;
 
@@ -402,12 +424,12 @@ public class ErddapScanner {
 
                 Element idcg = new Element("constraint_group");
 
-                String idname = trajIdVar.keySet().iterator().next();
-                AttributeTable idvar = trajIdVar.get(idname);
+                String idname = idVar.keySet().iterator().next();
+                AttributeTable idvar = idVar.get(idname);
                 VariableBean idvb = addSubset(idname, idvar);
                 idvb.addAttribute("color_by", "true");
-                idvb.addAttribute("trajectory_id", "true");
-                idvb.addAttribute("grid_type", "trajectory");
+                idvb.addAttribute(grid_type.toLowerCase()+"_id", "true");
+                idvb.addAttribute("grid_type", grid_type.toLowerCase());
                 variables.add(idvb);
 
                 idcg.setAttribute("name", "Individual Cruise(s)");
@@ -433,7 +455,7 @@ public class ErddapScanner {
                     String name = (String) subsetIt.next();
                     AttributeTable var = subsets.get(name);
                     VariableBean vb = addSubset(name, var);
-                    vb.addAttribute("grid_type", "trajectory");
+                    vb.addAttribute("grid_type", grid_type.toLowerCase());
                     variables.add(vb);
                     Element c = new Element("constraint");
                     c.setAttribute("type", "subset");
@@ -457,46 +479,55 @@ public class ErddapScanner {
                     if ( subIt.hasNext() ) allv.append(",");
                 }
                 db.setProperty("tabledap_access", "all_variables", allv.toString());
-                
+
                 // Add lat, lon and time to the data variable for output to the dataset
-                
+
                 String vn = lonVar.keySet().iterator().next();
-                data.put(vn, lonVar.get(vn));
+                if ( !data.containsKey(vn) ) {
+                    data.put(vn, lonVar.get(vn));
+                }
                 vn = latVar.keySet().iterator().next();
-                data.put(vn, latVar.get(vn));
+                if ( !data.containsKey(vn ) ) {
+                    data.put(vn, latVar.get(vn));
+                }
                 vn = timeVar.keySet().iterator().next();
-                data.put(vn, timeVar.get(vn));
-                
+                if ( !data.containsKey(vn) ) {
+                    data.put(vn, timeVar.get(vn));
+                }
                 for (Iterator dataIt = data.keySet().iterator(); dataIt.hasNext();) {
                     String name = (String) dataIt.next();
-                    if ( i == 0 ) db.setProperty("tabledap_access", "dummy", name);
-                    i++;
-                    AttributeTable var = data.get(name);
-                    VariableBean vb = new VariableBean();
-                    vb.setElement(name+"-"+id);
+                    // May already be done because it's a sub set variable??
+                    
+                    if ( !subsets.containsKey(name) ) {
+                        if ( i == 0 ) db.setProperty("tabledap_access", "dummy", name);
+                        i++;
+                        AttributeTable var = data.get(name);
+                        VariableBean vb = new VariableBean();
+                        vb.setElement(name+"-"+id);
 
-                    vb.setUrl("#"+name);
-                    Attribute ua = var.getAttribute("units");
-                    if ( ua != null ) {
-                        String units = ua.getValueAt(0);
-                        vb.setUnits(units);
-                    } else {
-                        vb.setUnits("none");
+                        vb.setUrl("#"+name);
+                        Attribute ua = var.getAttribute("units");
+                        if ( ua != null ) {
+                            String units = ua.getValueAt(0);
+                            vb.setUnits(units);
+                        } else {
+                            vb.setUnits("none");
+                        }
+                        Attribute ln = var.getAttribute("long_name");
+                        if ( ln != null ) {
+                            String longname = ln.getValueAt(0);
+                            vb.setName(longname);
+                        } else {
+                            vb.setName(name);
+                        }
+                        vb.setUrl("#"+name);
+                        vb.setGrid(gb);
+                        vb.addAttribute("grid_type", grid_type.toLowerCase());
+                        variables.add(vb);   
                     }
-                    Attribute ln = var.getAttribute("long_name");
-                    if ( ln != null ) {
-                        String longname = ln.getValueAt(0);
-                        vb.setName(longname);
-                    } else {
-                        vb.setName(name);
-                    }
-                    vb.setUrl("#"+name);
-                    vb.setGrid(gb);
-                    vb.addAttribute("grid_type", "trajectory");
-                    variables.add(vb);            
 
                 }
-                
+
                 db.setProperty("tabledap_access", "table_variables", trajID);
 
                 db.addAllVariables(variables);
@@ -506,13 +537,14 @@ public class ErddapScanner {
 
                 // Add all the tabledap_access properties
 
-                db.setProperty("tabledap_access", "trajectory_id", trajIdVar.keySet().iterator().next());
-                db.setProperty("tabledap_access", "server", "TableDAP Trajectory");
+                //TODO "Profile"
+                db.setProperty("tabledap_access", grid_type.toLowerCase()+"_id", idVar.keySet().iterator().next());
+                db.setProperty("tabledap_access", "server", "TableDAP "+grid_type.toLowerCase());
                 db.setProperty("tabledap_access", "title", title);
 
                 db.setProperty("tabledap_access", "id", id);
 
-                db.setProperty("ui", "default", "file:ui.xml#Trajectories");
+                db.setProperty("ui", "default", "file:ui.xml#"+grid_type.toLowerCase());
 
                 if ( !monthOfYear.keySet().isEmpty() ) {
                     String name = monthOfYear.keySet().iterator().next();
@@ -560,8 +592,8 @@ public class ErddapScanner {
                 outputXML(outputFile, gridsE, true);
                 outputXML(outputFile, axesE, true);
             }
-            if ( cdm_trajectory_variables_attribute == null ) {
-                System.err.println("No cdm_trajectory_variables global attribute found in this data set.");
+            if ( subset_names == null ) {
+                System.err.println("No cdm_trajectory_variables or profile_variables global attribute found in this data set.");
             }
             if ( variableAttributes == null ) {
                 System.err.println("No variables found.");
@@ -577,7 +609,7 @@ public class ErddapScanner {
         } catch (DAP2Exception e) {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (org.apache.commons.cli.ParseException e) {
-            System.err.println("Error opening: "+url+id+" "+e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
