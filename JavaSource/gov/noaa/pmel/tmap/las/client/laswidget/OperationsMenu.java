@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -45,7 +46,7 @@ public class OperationsMenu extends Composite {
         animationButton.setTitle("Interactive interface for making a sequence of plots over time.");
         compareButton.addStyleDependentName("SMALLER");
         correlationButton.addStyleDependentName("SMALLER");
-        correlationButton.setTitle("Beta interface to make a scatter plot of a property vs. another property.");
+        correlationButton.setTitle("Interface to make a scatter plot of a property vs. another property.");
         googleEarthButton.addStyleDependentName("SMALLER");
         googleEarthButton.setTitle("View a plot of data draped over the globe using Google Earth.");
         showValuesButton.addStyleDependentName("SMALLER");
@@ -76,6 +77,85 @@ public class OperationsMenu extends Composite {
 		initWidget(buttonBar);
 		buttonBar.setSize("100%", "100%");
 	}
+	public void setNames(Map<String, String> titles, Map<String, String> help) {
+	    for (Iterator titleIt = titles.keySet().iterator(); titleIt.hasNext();) {
+            String buttonName = (String) titleIt.next();
+            String buttonTitle = titles.get(buttonName);
+            String helpString = help.get(buttonName);
+            setButton(buttonName, buttonTitle, helpString);
+        }
+	}
+	private void setButton(String buttonName, String buttonTitle, String helpString) {
+	    // "compare" button not used.
+	    if ( buttonName != null ) {
+	        if ( buttonName.toLowerCase().contains("animate") ) {
+	            if ( buttonTitle != null ) {
+	                animationButton.setTitle(buttonTitle);
+	            }
+	            if ( helpString != null ) {
+	                animationButton.setText(helpString);
+	            }
+	        } else if ( buttonName.toLowerCase().contains("correlation") ) {
+	            if ( buttonTitle != null ) {
+	                correlationButton.setTitle(buttonTitle);
+	            }
+	            if ( helpString != null ) {
+	                correlationButton.setText(helpString);
+	            }
+	        } else if ( buttonName.toLowerCase().contains("earth") ) {
+	            if ( buttonTitle != null ) {
+	                googleEarthButton.setTitle(buttonTitle);
+	            }
+	            if ( helpString != null ) {
+	                googleEarthButton.setText(helpString);
+	            }
+	        } else if ( buttonName.toLowerCase().contains("values") ) {
+	            if ( buttonTitle != null ) {
+	                showValuesButton.setTitle(buttonTitle);
+	            }
+	            if ( helpString != null ) {
+	                showValuesButton.setText(helpString);
+	            }
+	        } else if ( buttonName.toLowerCase().contains("desktop") ) {
+	            if ( buttonTitle != null ) {
+                    exportToDesktopButton.setTitle(buttonTitle);
+                }
+                if ( helpString != null ) {
+                    exportToDesktopButton.setText(helpString);
+                }
+	        } else if ( buttonName.toLowerCase().contains("save") ) {
+	            if ( buttonTitle != null ) {
+                    saveAsButton.setTitle(buttonTitle);
+                }
+                if ( helpString != null ) {
+                    saveAsButton.setText(helpString);
+                }
+	        } else if ( buttonName.toLowerCase().contains("analysis") ) {
+	            if ( buttonTitle != null ) {
+                    climateAnalysis.setTitle(buttonTitle);
+                }
+                if ( helpString != null ) {
+                    climateAnalysis.setText(helpString);
+                }
+	        } else if ( buttonName.toLowerCase().contains("table") ) {
+	            if ( buttonTitle != null ) {
+                    trajectoryTable.setTitle(buttonTitle);
+                }
+                if ( helpString != null ) {
+                    trajectoryTable.setText(helpString);
+                }
+	        } else if ( buttonName.toLowerCase().contains("thumbnail") ) {
+	            if ( buttonTitle != null ) {
+                    thumbnailTable.setTitle(buttonTitle);
+                }
+                if ( helpString != null ) {
+                    thumbnailTable.setText(helpString);
+                }
+	        }
+	    }
+
+	}
+	
     private void turnOffButtons() {
 		animationButton.setEnabled(false);
 		animationButton.setOperation(null);
@@ -160,7 +240,8 @@ public class OperationsMenu extends Composite {
 				} else if ( category.contains("table") && !category.contains("trajectory") ) {
 					if ( op_view.equals(view) ) {
 						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-							if ( op.getName().toLowerCase().contains("values") ) {
+						    String name = op.getName().toLowerCase();
+							if ( name.contains("values") ) {
 								showValuesButton.setOperation(op);
 								showValuesButton.setEnabled(true);
 							}
