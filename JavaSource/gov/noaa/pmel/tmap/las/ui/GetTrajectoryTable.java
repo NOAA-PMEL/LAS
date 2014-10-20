@@ -116,6 +116,17 @@ public class GetTrajectoryTable extends LASAction {
 	        List<LASBackendRequest> reqs = productRequest.getRequestXML();
 	        LASBackendRequest backRequest = reqs.get(0);
 	        
+	        Dataset ds = lasConfig.getDataset(dsid);
+	        Map<String, String> fp = ds.getPropertiesAsMap().get("ferret");
+	        String is = null;
+            if ( fp != null ) {
+                is = fp.get("is_socat");
+            }
+            boolean socat = false;
+            if ( is != null && !is.equals("") ) {
+                socat = true;
+            }
+	        
 	        // lasRequest below try to be backRequest
 	        
 	        List<Category> c = lasConfig.getCategories(dsid);
@@ -370,10 +381,10 @@ public class GetTrajectoryTable extends LASAction {
 	                                        columnHeaders.append("<th>start</th>\n");
 	                                        columnHeaders.append("<th>end</th>\n");
 
-	                                        columnHeaders.append("<th>crossovers</th>\n");
-	                                        
-	                                        
-	                                        columnHeaders.append("<th>qc flags</th>\n");
+	                                        if ( socat ) {
+	                                            columnHeaders.append("<th>crossovers</th>\n");
+	                                            columnHeaders.append("<th>qc flags</th>\n");
+	                                        }
 	                                        columnHeaders.append("<th>thumbnails</th>\n");
 
 	                                        columnHeaders.append("</tr>\n");
@@ -392,8 +403,10 @@ public class GetTrajectoryTable extends LASAction {
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
-	                                        unitStrings.append("<th></th>\n");
-	                                        unitStrings.append("<th></th>\n");
+	                                        if ( socat ) {
+	                                            unitStrings.append("<th></th>\n");
+	                                            unitStrings.append("<th></th>\n");
+	                                        }
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("</tr>\n");
 	                                        bsw.write(unitStrings.toString());
@@ -452,25 +465,26 @@ public class GetTrajectoryTable extends LASAction {
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
 	                                                }
 
+	                                                if ( socat ) {
+	                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+	                                                    // Add the link to load a list of potential crosses to the table.
+	                                                    row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
+	                                                    row.append("\n</td>");
 
-	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-	                                                // Add the link to load a list of potential crosses to the table.
-	                                                row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
-	                                                row.append("\n</td>");
-	                                                
-	                                                // Add the QC link
-	                                                LASUIRequest qcRequest = new LASUIRequest();
-	                                                qcRequest.addVariable(dsid, vars[0].getID());
-	                                                qcRequest.setOperation("SOCAT_QC_table");
-	                                                qcRequest.setProperty("qc", cruise_id, parts[0]);
-	                                                qcRequest.setProperty("las", "output_type", "xml");
-	                                                row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-                                                    // Add the link to load a list of potential crosses to the table.
-	                                                String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
-	                                                
-                                                    row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
-                                                    row.append("\n</td>");
-                                                    
+	                                                    // Add the QC link
+	                                                    LASUIRequest qcRequest = new LASUIRequest();
+	                                                    qcRequest.addVariable(dsid, vars[0].getID());
+	                                                    qcRequest.setOperation("SOCAT_QC_table");
+	                                                    qcRequest.setProperty("qc", cruise_id, parts[0]);
+	                                                    qcRequest.setProperty("las", "output_type", "xml");
+	                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+	                                                    // Add the link to load a list of potential crosses to the table.
+	                                                    String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
+
+
+	                                                    row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
+	                                                    row.append("\n</td>");
+	                                                }
                                                     // ADD a THUMBNAIL table link...
                                                     LASUIRequest thumb = (LASUIRequest) lasUIRequest.clone();
                                                     thumb.removeLinks();
