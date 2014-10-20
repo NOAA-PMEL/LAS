@@ -376,7 +376,9 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < titles.length; i++) {
 	                                            columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                        }
-	                                        columnHeaders.append("<th>documentation</th>\n");
+	                                        if ( socat ) {
+	                                            columnHeaders.append("<th>documentation</th>\n");
+	                                        }
 	                                        columnHeaders.append("<th>download</th>\n");
 	                                        columnHeaders.append("<th>start</th>\n");
 	                                        columnHeaders.append("<th>end</th>\n");
@@ -400,7 +402,9 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < units.length; i++) {
 	                                            unitStrings.append("<th>"+units[i]+"</th>\n");
 	                                        }
-	                                        unitStrings.append("<th></th>\n");
+	                                        if ( socat ) {
+	                                            unitStrings.append("<th></th>\n");
+	                                        }
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
 	                                        if ( socat ) {
@@ -436,7 +440,9 @@ public class GetTrajectoryTable extends LASAction {
 	                                                }
 	                                                dsgQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
 	                                                csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
-	                                                row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
+	                                                if ( socat ) {
+	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
+	                                                }
                                                     row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
                                                     dsgQuery.setLength(0);
                                                     csvQuery.setLength(0);
