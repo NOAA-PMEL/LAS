@@ -100,6 +100,12 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class UI extends BaseUI {
     
+    Map<String, String> trajectoryTitles = new HashMap<String, String>();
+    Map<String, String> profileTitles = new HashMap<String, String>();
+    
+    Map<String, String> trajectoryHelp = new HashMap<String, String>();
+    Map<String, String> profileHelp = new HashMap<String, String>();
+    
     public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
 
         @Override
@@ -651,6 +657,15 @@ public class UI extends BaseUI {
                 xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
                 xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
                 tOperationsMenu.setMenus(ops, xView);
+                if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+                    tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
+                } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
+                    tOperationsMenu.setNames(profileTitles, profileHelp);
+                } else {
+                    // Grids do not show buttons that have titles that change.
+                    // tOperationsMenu.setNames(gridTitles, gridHelp);
+
+                }
                 for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                     OutputPanel p = (OutputPanel) panelIt.next();
                     p.setOperation(xOperationID, xView);
@@ -1037,6 +1052,13 @@ public class UI extends BaseUI {
      * @wbp.parser.entryPoint
      */
     public void onModuleLoad() {
+        
+        profileTitles.put("table", "Table of Profiles");
+        profileHelp.put("table", "See a table of the profiles defined by the current constraints.");
+        
+        trajectoryTitles.put("table", "Table of Trajectories");
+        trajectoryHelp.put("table", "See a table of current profiles and find crossovers if appliciable.");
+        
         initialHistory = getAnchor();
         super.initialize();
         logger.setLevel(Level.OFF);
@@ -1454,6 +1476,15 @@ public class UI extends BaseUI {
 
         xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
+        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
+            tOperationsMenu.setNames(profileTitles, profileHelp);
+        } else {
+            // Grids do not show buttons that have titles that change.
+            // tOperationsMenu.setNames(gridTitles, gridHelp);
+
+        }
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), xOptionsButton.getState());
         GridSerializable ds_grid = xVariable.getGrid();
         double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -2099,6 +2130,15 @@ public class UI extends BaseUI {
         // Get set the new operations that apply to the remaining views.
         xOperationsWidget.setOperationsForAnalysis(xVariable.getGrid(), intervals, xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
+        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
+            tOperationsMenu.setNames(profileTitles, profileHelp);
+        } else {
+            // Grids do not show buttons that have titles that change.
+            // tOperationsMenu.setNames(gridTitles, gridHelp);
+
+        }
         setOperationsClickHandler(xVizGalOperationsClickHandler);
 
         // Set the default operation.
@@ -2242,6 +2282,15 @@ public class UI extends BaseUI {
         xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
         xView = xOperationsWidget.getCurrentView();
         tOperationsMenu.setMenus(ops, xView);
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
+        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
+            tOperationsMenu.setNames(profileTitles, profileHelp);
+        } else {
+            // Grids do not show buttons that have titles that change.
+            // tOperationsMenu.setNames(gridTitles, gridHelp);
+
+        }
         if (xPanels == null || xPanels.size() == 0) {
             UI.super.setupOutputPanels(1, Constants.IMAGE);
         }
@@ -2509,6 +2558,15 @@ public class UI extends BaseUI {
         xOperationID = ops[0].getID();
         xOperationsWidget.setOperations(xVariable.getGrid(), ops[0].getID(), xView, ops);
         tOperationsMenu.setMenus(ops, xView);
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
+        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
+            tOperationsMenu.setNames(profileTitles, profileHelp);
+        } else {
+            // Grids do not show buttons that have titles that change.
+            // tOperationsMenu.setNames(gridTitles, gridHelp);
+
+        }
         tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
         tOperationsMenu.setCorrelationButtonEnabled(true);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
