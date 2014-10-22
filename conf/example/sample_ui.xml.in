@@ -11,6 +11,9 @@
 <!-- UI Configuration for Trajectory Plots -->
 <!ENTITY trajectory_ui SYSTEM "trajectory_ui.xml">
 
+<!-- UI Configuration for Profile Plots -->
+<!ENTITY profile_ui SYSTEM "profile_ui.xml">
+
 ]>
 <lasui title="@TITLE@">
    <ui url="http://@SERVLET_ROOT_URL@/@APPNAME@/servlets/"/>
@@ -19,6 +22,7 @@
     &insitu_options;
     &insitu_demo_ui;
     &trajectory_ui;
+    &profile_ui;
 
     <images>
         <image name="Image_StdWorld" url="gifs/java_0_world.gif" 
