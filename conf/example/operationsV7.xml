@@ -1,6 +1,76 @@
 <?xml version="1.0"?>
 <operations>
-
+  <!-- Profile specific operations. -->
+  <operation name="Profile Plot" ID="Profile_interactive_plot" output_template="zoom" default="true" category="visualization">
+    <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+    </operation>
+    <operation chained="true" name="Profile Map" ID="Profile_2D_poly" output_template="output" service_action="Profile_2D_poly">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+        <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+        <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+        <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+        <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+        <result type="js_total" ID="js_total" file_suffix=".js"/>
+        <result type="map_data" ID="map_data" file_suffix=".txt"/>
+        <result type="image" ID="ref_map" file_suffix=".png"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+        <result type="cancel" ID="cancel"/>
+        <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      </response>
+      <service>ferret</service>
+    </operation>
+    <optiondef IDREF="Trajectory_Options"/>
+    <region>
+      <intervals name="xyt" type="Maps" title="Latitude-Longitude"/>
+    </region>
+  </operation>
+  <operation ID="Profile_Plot_2D_zoom" default="true" name="Color plot" output_template="zoom" service_action="Plot_2D" order="0101" category="visualization" isZoomable="true">
+      <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+    </operation>
+    <operation chained="true" ID="Profile_Plot_2D" service_action="Plot_2D_Profile" order="0101" category="visualization">
+    <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+    </args>
+    <service>ferret</service>
+    <response ID="PlotResp">
+      <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+      <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" 
+				/> -->
+      <result type="image" ID="ref_map" file_suffix=".png"/>
+      <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+      <result type="debug" ID="debug" file_suffix=".txt"/>
+      <result type="cancel" ID="cancel" file_suffix=".txt"/>
+    </response>
+    </operation>
+     <region>
+      <intervals name="xz" type="Depth Profiles" title="Longitude-Depth"/>
+      <intervals name="yz" type="Depth Profiles" title="Latitude-Depth"/>
+      <intervals name="zt" type="Hovmoller Plots" title="Latitude-Depth"/>
+    </region>
+    <grid_types>
+      <grid_type name="profile"/>
+    </grid_types>
+    <optiondef IDREF="Options_2D_image_contour_7"/>
+  </operation>
+  <!-- End of Profile specific operations -->
     <operation name="Table of QC" ID="SOCAT_QC_table" output_template="SOCAT_QC_table" service_action="SOCAT_QC_table">
       <response ID="DBExtractResponse">
         <result type="debug" ID="db_debug"/>
@@ -256,6 +326,8 @@
       <intervals name="xyt"/>
     </region>
   </operation>
+
+  
   
   <!-- Private operation only invoked by correlation viewer when it knows 
 		the plot can be made from the existing netCDF file. -->
