@@ -100,12 +100,6 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class UI extends BaseUI {
     
-    Map<String, String> trajectoryTitles = new HashMap<String, String>();
-    Map<String, String> profileTitles = new HashMap<String, String>();
-    
-    Map<String, String> trajectoryHelp = new HashMap<String, String>();
-    Map<String, String> profileHelp = new HashMap<String, String>();
-    
     public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
 
         @Override
@@ -657,15 +651,6 @@ public class UI extends BaseUI {
                 xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
                 xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
                 tOperationsMenu.setMenus(ops, xView);
-                if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-                    tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
-                } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
-                    tOperationsMenu.setNames(profileTitles, profileHelp);
-                } else {
-                    // Grids do not show buttons that have titles that change.
-                    // tOperationsMenu.setNames(gridTitles, gridHelp);
-
-                }
                 for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                     OutputPanel p = (OutputPanel) panelIt.next();
                     p.setOperation(xOperationID, xView);
@@ -733,7 +718,7 @@ public class UI extends BaseUI {
             ops = config.getOperations();
 
             xVariable.setGrid(grid);
-            if (xVariable.isVector() || xVariable.isDescrete() ) {
+            if (xVariable.isVector() || xVariable.isDiscrete() ) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -856,7 +841,7 @@ public class UI extends BaseUI {
                 if ( lb.getName().contains("Panel-0") ) {
                     VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
                     xNewVariable = v;
-                    if (v.isVector() || v.isDescrete()) {
+                    if (v.isVector() || v.isDiscrete()) {
                         lb.setAddButtonEnabled(false);
                     } else {
                         lb.setAddButtonEnabled(true);
@@ -931,7 +916,7 @@ public class UI extends BaseUI {
         logger.info("changeDataset() called");
         logger.warning("Changing xVariable:" + xVariable + " to xNewVariable:" + xNewVariable);
         logger.setLevel(Level.OFF);
-        if (xNewVariable.isVector() || xNewVariable.isDescrete()) {
+        if (xNewVariable.isVector() || xNewVariable.isDiscrete()) {
             autoContourTextBox.setText("");
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
@@ -963,19 +948,18 @@ public class UI extends BaseUI {
                 xTrajectoryConstraint.setVisible(false);
 //                getComparePanel().getOutputControlPanel().setVisible(true);
                 xAnalysisWidget.setVisible(true);
-            } else if (xNewVariable.isDescrete()) {
+            } else if (xNewVariable.isDiscrete()) {
                 if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-                    xOperationID = "Trajectory Plot";
-                    if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
-                        xTrajectoryConstraint.setActive(true);
-                        xTrajectoryConstraint.setVisible(true);
-                        xAnalysisWidget.setVisible(false);
-                    }
-                } else {
-                    xOperationID = "Insitu_extract_location_value_plot";
-                    xTrajectoryConstraint.setActive(false);
-                    xLeftPanel.setVisible(false);
+                    xOperationID = "Trajectory_interactive_plot";
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("profile") ) {
+                    xOperationID = "Profile_interactive_plot";
                 }
+                if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
+                    xTrajectoryConstraint.setActive(true);
+                    xTrajectoryConstraint.setVisible(true);
+                    xAnalysisWidget.setVisible(false);
+                }
+           
             } else {
                 xOperationID = "Insitu_extract_location_value_plot";
                 xTrajectoryConstraint.setActive(false);
@@ -1017,10 +1001,9 @@ public class UI extends BaseUI {
         String av;
         if (xAnalysisWidget.isActive()) {
             av = xAnalysisWidget.getAnalysisAxis();
-        } else {
-            av = xView;
+            setTool(av);
         }
-        setTool(av);
+        
         // We are finally ready to transfer the current map selection on to the
         // panels, in the dimension where it applies.
         // TODO: Avoid synchronizing the visible NavAxesGroup xAxesWidget in UI
@@ -1052,13 +1035,6 @@ public class UI extends BaseUI {
      * @wbp.parser.entryPoint
      */
     public void onModuleLoad() {
-        
-        profileTitles.put("table", "Table of Profiles");
-        profileHelp.put("table", "See a table of the profiles defined by the current constraints.");
-        
-        trajectoryTitles.put("table", "Table of Trajectories");
-        trajectoryHelp.put("table", "See a table of current profiles and find crossovers if appliciable.");
-        
         initialHistory = getAnchor();
         super.initialize();
         logger.setLevel(Level.OFF);
@@ -1396,7 +1372,7 @@ public class UI extends BaseUI {
              xTrajectoryConstraint.setSelectedPanelIndex(panelIndex);
              xTrajectoryConstraint.setConstraints(cons);
          } else {
-             if ( !xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+             if ( !xVariable.getAttributes().get("grid_type").equals("trajectory") && !xVariable.getAttributes().get("grid_type").equals("profile")) {
                  xTrajectoryConstraint.setActive(false);
                  xTrajectoryConstraint.setVisible(false);
                  //             getComparePanel().getOutputControlPanel().setVisible(true);
@@ -1427,7 +1403,11 @@ public class UI extends BaseUI {
         if (xAnalysisWidget.isActive()) {
             setTool(xAnalysisWidget.getAnalysisAxis());
         } else {
-            xAxesWidget.getRefMap().setTool(xView);
+            if ( xVariable.isDiscrete() ) {
+                xAxesWidget.getRefMap().setTool("xy");
+            } else {
+                xAxesWidget.getRefMap().setTool(xView);
+            }
         }
         // s, n, w, e
         xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")), Double.valueOf(tokenMap.get("yhi")), Double.valueOf(tokenMap.get("xlo")), Double.valueOf(tokenMap.get("xhi")));
@@ -1476,15 +1456,6 @@ public class UI extends BaseUI {
 
         xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
-        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
-            tOperationsMenu.setNames(profileTitles, profileHelp);
-        } else {
-            // Grids do not show buttons that have titles that change.
-            // tOperationsMenu.setNames(gridTitles, gridHelp);
-
-        }
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), xOptionsButton.getState());
         GridSerializable ds_grid = xVariable.getGrid();
         double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -1502,13 +1473,17 @@ public class UI extends BaseUI {
                 delta = Math.abs(Double.valueOf(step));
             }
         }
-        xAxesWidget.getRefMap().setTool(xView);
+        if ( xVariable.isDiscrete() ) {
+            xAxesWidget.getRefMap().setTool("xy");
+        } else {
+            xAxesWidget.getRefMap().setTool(xView);
+        }
         xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
         getComparePanel().getAxesWidgets().getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") || xVariable.getAttributes().get("grid_type").equals("profile") ) {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
@@ -1629,7 +1604,7 @@ public class UI extends BaseUI {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonVisible(false);
         }
 
-        if (xVariable.isVector() || xVariable.isDescrete()) {
+        if (xVariable.isVector() || xVariable.isDiscrete()) {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(false);
         } else {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(true);
@@ -1980,11 +1955,11 @@ public class UI extends BaseUI {
                 OutputPanel panel = (OutputPanel) panelIt.next();
                 if (!panel.isComparePanel()) {
                     vector = vector || panel.getVariable().isVector();
-                    scattered = scattered || panel.getVariable().isDescrete();
+                    scattered = scattered || panel.getVariable().isDiscrete();
                 }
             }
 
-            if ((!xVariable.isVector() && vector) || (!xVariable.isDescrete() && scattered) || xVariable.isVector() && !vector || (xVariable.isDescrete() && !scattered)) {
+            if ((!xVariable.isVector() && vector) || (!xVariable.isDiscrete() && scattered) || xVariable.isVector() && !vector || (xVariable.isDiscrete() && !scattered)) {
                 if (!xView.equals("xy")) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(false);
@@ -2034,7 +2009,7 @@ public class UI extends BaseUI {
                 }
             }
         } else {
-            if (xVariable.isVector() || xVariable.isDescrete()) {
+            if (xVariable.isVector() || xVariable.isDiscrete()) {
                 if (!xView.equals("xy")) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(false);
@@ -2130,15 +2105,6 @@ public class UI extends BaseUI {
         // Get set the new operations that apply to the remaining views.
         xOperationsWidget.setOperationsForAnalysis(xVariable.getGrid(), intervals, xOperationID, xView, ops);
         tOperationsMenu.setMenus(ops, xView);
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
-        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
-            tOperationsMenu.setNames(profileTitles, profileHelp);
-        } else {
-            // Grids do not show buttons that have titles that change.
-            // tOperationsMenu.setNames(gridTitles, gridHelp);
-
-        }
         setOperationsClickHandler(xVizGalOperationsClickHandler);
 
         // Set the default operation.
@@ -2271,7 +2237,7 @@ public class UI extends BaseUI {
         setUpdateRequired(true);
         xVariable.setGrid(grid);
         xAnalysisWidget.setAnalysisAxes(grid);
-        if ( xVariable.isDescrete() ) {
+        if ( xVariable.isDiscrete() ) {
             xAnalysisWidget.setVisible(false);
         } else {
             xAnalysisWidget.setVisible(true);
@@ -2282,15 +2248,6 @@ public class UI extends BaseUI {
         xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
         xView = xOperationsWidget.getCurrentView();
         tOperationsMenu.setMenus(ops, xView);
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
-        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
-            tOperationsMenu.setNames(profileTitles, profileHelp);
-        } else {
-            // Grids do not show buttons that have titles that change.
-            // tOperationsMenu.setNames(gridTitles, gridHelp);
-
-        }
         if (xPanels == null || xPanels.size() == 0) {
             UI.super.setupOutputPanels(1, Constants.IMAGE);
         }
@@ -2366,7 +2323,7 @@ public class UI extends BaseUI {
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), operationChangeOptions);
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
-        if (xVariable.isVector() || xVariable.isDescrete()) {
+        if (xVariable.isVector() || xVariable.isDiscrete()) {
             if (!xView.equals("xy")) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(false);
@@ -2385,7 +2342,7 @@ public class UI extends BaseUI {
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
         } else {
-            if (xVariable.isVector() || xVariable.isDescrete()) {
+            if (xVariable.isVector() || xVariable.isDiscrete()) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -2406,7 +2363,11 @@ public class UI extends BaseUI {
             setAnalysisAxes(v);
             setTool(v);
         } else {
-            xAxesWidget.getRefMap().setTool(xView);
+            if ( xVariable.isDiscrete() ) {
+                xAxesWidget.getRefMap().setTool("xy");
+            } else {
+                xAxesWidget.getRefMap().setTool(xView);
+            }
         }
         tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
     }
@@ -2503,7 +2464,11 @@ public class UI extends BaseUI {
             xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(xYlo), Double.valueOf(xYhi), Double.valueOf(xXlo), Double.valueOf(xXhi));
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.setMapTool(xView);
+                if ( panel.getVariable().isDiscrete() ) {
+                    panel.setMapTool("xy");
+                } else {
+                    panel.setMapTool(xView);
+                }
                 panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
             }
         } else {
@@ -2513,7 +2478,11 @@ public class UI extends BaseUI {
             double tmp_yhi = xAxesWidget.getRefMap().getYhi();
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.setMapTool(xView);
+                if ( panel.getVariable().isDiscrete() ) {
+                    panel.setMapTool("xy");
+                } else {
+                    panel.setMapTool(xView);
+                }
                 panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
             }
         }
@@ -2558,22 +2527,17 @@ public class UI extends BaseUI {
         xOperationID = ops[0].getID();
         xOperationsWidget.setOperations(xVariable.getGrid(), ops[0].getID(), xView, ops);
         tOperationsMenu.setMenus(ops, xView);
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-            tOperationsMenu.setNames(trajectoryTitles, trajectoryHelp);
-        } else if ( xVariable.getAttributes().get("grid_type").equals("profile") ) {
-            tOperationsMenu.setNames(profileTitles, profileHelp);
-        } else {
-            // Grids do not show buttons that have titles that change.
-            // tOperationsMenu.setNames(gridTitles, gridHelp);
-
-        }
         tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
         tOperationsMenu.setCorrelationButtonEnabled(true);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
         xAxesWidget.showViewAxes(xView, xOrtho, null);
         xOperationID = xOperationsWidget.setZero(xView);
-        xAxesWidget.getRefMap().setTool(xView);
+        if ( xVariable.isDiscrete() ) {
+            xAxesWidget.getRefMap().setTool("xy");
+        } else {
+            xAxesWidget.getRefMap().setTool(xView);
+        }
         GridSerializable grid = xVariable.getGrid();
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();

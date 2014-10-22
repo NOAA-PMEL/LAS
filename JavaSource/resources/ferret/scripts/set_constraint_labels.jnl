@@ -41,6 +41,12 @@ ENDIF
 
 IF `($ferret_cruise_list"0|*>1")` THEN 
 
+   IF ($feature_variable"0|*>1") THEN 
+      DEFINE SYMBOL feature_title = `($feature_variable),RETURN=title`
+   ELSE
+      DEFINE SYMBOL feature_title = ($feature_type"trajectory")
+   ENDIF
+
    LET slen = STRLEN("($ferret_cruise_list)")
    DEFINE SYMBOL lastletter = `SUBSTRING("($ferret_cruise_list)", slen, 1)`
    IF `STRCMP("($lastletter)", ",") EQ 0` THEN

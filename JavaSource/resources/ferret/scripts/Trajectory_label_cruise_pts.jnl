@@ -32,7 +32,7 @@ LET var_flag_z = IF var_fill_z EQ `fillval` THEN 1
 LET nbad_in_cruise =  var_flag_z[K=@NGD]
 LET ngood_in_cruise = var_fill_z[K=@NGD] - var_flag_z[K=@NGD]
 
-LET trajectory_mask = 1
+LET trajectory_mask = {1}
 IF ($text_mask_trajectory"0|*>1") THEN 
    LET trajectory_mask = XSEQUENCE(($text_mask_trajectory))
 ELSE

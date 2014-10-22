@@ -36,6 +36,7 @@ IF `($data_count"0") GE 3` THEN
 ENDIF
 
 GO LAS_initialize_region 0
+
 GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
@@ -116,6 +117,7 @@ ENDIF
 IF `($data_count"0") GE 2` THEN 
 
 GO LAS_initialize_region 1
+DEFINE SYMBOL data_1_url = ($data_0_url)
 GO LAS_initialize_data 1
 
 IF ($error_status"0|*>1") THEN
@@ -205,6 +207,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ! same as for var 0 (for now anyway)
 
    GO LAS_initialize_region 2
+   DEFINE SYMBOL data_2_url = ($data_0_url)
    GO LAS_initialize_data 2
    
    IF ($error_status"0|*>1") THEN
@@ -288,6 +291,36 @@ IF  ($color_by"0") THEN
    ENDIF
 ENDIF
 
+! Special color-by-time key
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
+
+! In this case we set up a time axis, and label the color key with dates
+! If the units are seconds since, we don't need that much resolution for this. Make it hours.
+
+   LET tmin = ($data_var)[i=@MIN]
+   LET tmax = ($data_var)[i=@MAX]
+
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN 
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL tunits = `tunits`
+   ENDIF
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   IF ($tunits"0|seconds>1|*>0") THEN \
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE SYMBOL datekey = 1
+
+   DEFINE SYMBOL ferret_key_annotate = 0
+
+   LET ttvar = t[gt=time_axis]
+   DEFINE SYMBOL datekey_time_arg = ttvar
+
+   DEFINE SYMBOL ferret_plot_levels = 30
+   DEFINE SYMBOL ferret_fill_levels = 30
+
+ENDIF
+
+
 DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar
 
@@ -297,8 +330,8 @@ DEFINE SYMBOL yvar = yvar
 
 LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
 
-IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = 1
-LET text_mask = 1
+IF `($subset_mask"0|*>1") EQ 0` THEN LET subset_mask = {1}
+LET text_mask = {1}
 LET ntext_masks = 0
 
 IF ($constraint_0_lhs"0|*>1) THEN
@@ -319,36 +352,6 @@ ENDIF  ! color-by 3rd var
 
 DEFINE SYMBOL xvar = constraints_mask*xvar
 DEFINE SYMBOL yvar = constraints_mask*yvar
-
-! Special color-by-time key
-IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
-
-! In this case we set up a time axis, and label the color key with dates
-! If the units are seconds since, we don't need that much resolution for this. Make it hours.
-
-   LET masked_time = constraints_mask* ($data_var)
-   LET tmin = masked_time[i=@MIN]
-   LET tmax = masked_time[i=@MAX]
-
-   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
-   IF `since_loc GT 1` THEN 
-      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
-      DEFINE SYMBOL tunits = `tunits`
-   ENDIF
-   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
-   IF ($tunits"0|seconds>1|*>0") THEN \
-   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
-   DEFINE SYMBOL datekey = 1
-
-   DEFINE SYMBOL ferret_key_annotate = 0
-
-   LET ttvar = t[gt=time_axis]
-   DEFINE SYMBOL datekey_time_arg = ttvar
-
-   DEFINE SYMBOL ferret_plot_levels = 30
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_plot_levels)
-
-ENDIF
 
 
 ! Set up annotations for the space-time region if this is a correletion plot

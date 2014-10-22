@@ -43,13 +43,7 @@ GO LAS_url_label 0
 
 ! Create the profile variables and symbols
 
-GO LAS_initialize_feature_id
-
-! Reset variables defined in the above
-
-define symbol data_var = ($data_0_var)
-define symbol data_x_var = lon
-define symbol data_y_var = lat
+IF `color_by_feature EQ 1` THEN GO LAS_initialize_feature_id
 
 DEFINE SYMBOL variable_lab = ($variable_lab) at depth (meters)
 
@@ -231,7 +225,6 @@ IF ($ribbon"0|0|1|*>1") THEN
    PLOT/VS/RIBBON/OVER/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET lonplot, zplot, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
    PPL RIBBON/OVER
-   sh sym qualifiers
 ELSE
 
 ! To make wiggly waterfall plots

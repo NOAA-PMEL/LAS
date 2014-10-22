@@ -171,7 +171,9 @@ public class OperationsWidget extends Composite {
                         // op.getID().equals("Plot_2D_XY")) {
                         if ( attrs != null && attrs.get("default") != null && Boolean.valueOf(attrs.get("default")) ) {
 
-                            if ( (view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) || op.getID().contains("Trajectory_interactive_plot") ) {
+                            if ( (view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) 
+                                    || op.getID().contains("Trajectory_interactive_plot") 
+                                    || op.getID().contains("Profile_interactive_plot") ) { // TODO, this is a hack for specific operations...
                                 if ( !hasXYMap ) {
                                     xyMapTable.clear();
                                     hasXYMap = true;
@@ -244,7 +246,9 @@ public class OperationsWidget extends Composite {
                                 }
                             } else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z")) ||
                                     (view.equals("yz") && intervals.contains("y") && intervals.contains("z")) ||
-                                    (view.equals("ze") && intervals.contains("z") && intervals.contains("e"))) {
+                                    (view.equals("ze") && intervals.contains("z") && intervals.contains("e")) ||
+                                    (op.getID().contains("Profile_Plot_2D_zoom") && (view.equals("xz") || view.contains("yz")))
+                                    ) {
                                 if ( !hasSectionPlots ) {
                                     sectionPlotsTable.clear();
                                     hasSectionPlots = true;
@@ -302,7 +306,8 @@ public class OperationsWidget extends Composite {
                                 sectionPlotsRow++;
                             } else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t")) ||
                                     (view.equals("yt") && intervals.contains("y") && intervals.contains("t")) ||
-                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t")) 
+                                    (view.equals("zt") && intervals.contains("z") && intervals.contains("t") ||
+                                    (op.getID().contains("Profile_Plot_2D_zoom") && (view.equals("xt") || view.equals("yt") || view.equals("zt") ) ))
                                    ) {
                                 if ( !hasHofmullerPlots ) {
                                     hofmullerPlotsTable.clear();
@@ -442,6 +447,7 @@ public class OperationsWidget extends Composite {
         // No operation was found using the view requested.
         // Find the first operation available by progressing through the most common views.
         id = findZero("xy");
+        id = findZero("xyt");
         if ( id != null ) {
             return id;
         }

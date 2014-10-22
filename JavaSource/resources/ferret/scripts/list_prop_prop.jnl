@@ -59,7 +59,7 @@ IF ($time_done"0|*>1") THEN DEFINE SYMBOL timevar = time_
 ! Apply any constraints
 
 LET var_mask = 1+0*($timevar)
-LET text_mask = 1
+LET text_mask = {1}
 LET ntext_masks = 0
 
 IF ($constraint_0_lhs"0|*>1) THEN

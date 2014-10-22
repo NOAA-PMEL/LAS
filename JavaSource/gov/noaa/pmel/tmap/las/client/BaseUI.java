@@ -150,7 +150,7 @@ public class BaseUI {
     protected void pickerCloseActions() {
         xAxesWidget.restorePanels();
         xOperationsWidget.setOpen(true);
-        if ( xVariable.isDescrete() ) {
+        if ( xVariable.isDiscrete() ) {
             xAnalysisWidget.setVisible(false);
         } else {
             xAnalysisWidget.setVisible(true);
