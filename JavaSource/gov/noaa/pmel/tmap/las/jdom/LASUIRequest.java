@@ -236,12 +236,6 @@ public class LASUIRequest extends LASDocument {
         link.setAttribute("match", operation_xpath);
         getRootElement().addContent(link);
     }
-    public void removeLinks() {
-        getRootElement().removeChildren("link");
-    }
-    public void removeVariables() {
-        getRootElement().getChild("args").removeChildren("link");
-    }
     
     /**
      * Sets the options for this request.

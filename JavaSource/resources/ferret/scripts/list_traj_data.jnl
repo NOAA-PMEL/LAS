@@ -27,14 +27,19 @@ IF ($custom_skip_listnames"0|*>1") THEN LET skip_names = {"($feature_variable)",
 DEFINE SYMBOL vars_out = ($feature_variable), datetime, latitude,  longitude
 LET nlist = 4
 
+! make the list of variables to write. If lon/lat variables have been
+! expanded onto the X axis they may have been redefined and the file
+! variables included in skip_list_var.
+
 LET nvars = ..nvars
 LET varnames = ..varnames
 repeat/range=1:`nvars`/name=ivar (\
   DEFINE SYMBOL ivar = `ivar`; \
   DEFINE SYMBOL vname = `varnames[i=($ivar)]`; \
+  IF `STRINDEX("($skip_list_var%99%)", "($vname)") GT 0` THEN EXIT/CYCLE; \
   IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN GO reshape_list_var ($vname); \   
   IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN DEFINE SYMBOL vars_out = ($vars_out), ($vname); \
-  IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN LET nlist = `nlist+1`;\
+  IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN LET nlist = `nlist+1`; \
 )
 
 ! expand the feature ids to the obs axis.
@@ -61,7 +66,7 @@ LET use_size = 1000000*($ferret_memory)/4.
 LET max_size = ($MAX_LIST_SIZE"`use_size`")
 
 ! Size of the data variable 
-LET size = `longitude,RETURN=isize`
+LET size = `obsXvar,RETURN=isize`
 
 IF `size* nlist GT max_size` THEN
    IF `($ferret_memory"25.6") LT 300` THEN SET MEM/SIZ=300

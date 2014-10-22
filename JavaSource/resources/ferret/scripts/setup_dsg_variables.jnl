@@ -38,6 +38,8 @@ LET lat_with_gaps = ($data_y_var)
 LET time_with_gaps = ($data_t_var)
 LET var_with_gaps = ($data_var)
 
+IF ($data_z_var"0|*>1") THEN LET vert_with_gaps = ($data_z_var)
+
 ! Function separate puts gaps between cruises and also removes jumps in longitude
 ! where it crosses the dateline. Set ngood and nbad before adding these gaps.
 ! Prop-prop plots compute ngood elsewhere, taking into account constraints.
@@ -58,23 +60,30 @@ ENDIF
 DEFINE SYMBOL n_gaps = `($nfeatures) - 1`
 
 IF ($data_x_is_lon"0|*>1") THEN
-   LET/units="`($data_x_var),return=units`" lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
+   LET/units="`($data_x_var),return=units` "/title="`($data_x_var),return=title`" lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 1)
 ELSE
-   LET/units="`($data_x_var),return=units`" lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 0)
+   LET/units="`($data_x_var),return=units` "/title="`($data_x_var),return=title`" lon_with_gaps = SEPARATE(($data_x_var)[i=1:`npts`], ($rowvar), 0)
 ENDIF
 
-LET/units="`($data_y_var),return=units`" lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
-LET/units="`($data_t_var),return=units`" time_with_gaps = SEPARATE(($data_t_var)[i=1:`npts`], ($rowvar), 0)
+LET/units="`($data_y_var),return=units` "/title="`($data_y_var),return=title`" lat_with_gaps = SEPARATE(($data_y_var)[i=1:`npts`], ($rowvar), 0)   
+
+LET/units="`($data_t_var),return=units` "/title="`($data_t_var),return=title`" time_with_gaps = SEPARATE(($data_t_var)[i=1:`npts`], ($rowvar), 0)
+
+IF ($data_z_var"0|*>1") THEN \
+ LET/units="`($data_z_var),return=units` "/title="`($data_z_var),return=title`" vert_with_gaps = SEPARATE(($data_z_var)[i=1:`npts`], ($rowvar), 0)
+
 
 LET/units="`($data_var),return=units`" var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)   
-IF ($is_string) THEN LET/units="`($data_var),return=units`" var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
+IF ($is_string) THEN LET/units="`($data_var),return=units` "/title="`($data_var),return=title`" var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
 DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
 DEFINE SYMBOL data_y_var = lat_with_gaps
-!DEFINE SYMBOL data_t_var = time_with_gaps
+DEFINE SYMBOL data_t_var = time_with_gaps  ! this was commented out. Why?
+
+IF ($data_z_var"0|*>1") THEN DEFINE SYMBOL data_z_var = vert_with_gaps
 
 !ENDIF ! nfeatures GT 1
 

@@ -23,21 +23,9 @@ DEFINE SYMBOL gifplot_name = ($result_plot_image_filename)
 IF ($result_colorbar_filename%0|*>1%) THEN \
 DEFINE SYMBOL gifplot_name = ($result_plot_image_filename)_($session_pid)
 
-sh sym reset_gifname"0"
-sh sym ferret_version
-
 IF `(($reset_gifname"0|*>1") EQ 0) AND ($FERRET_VERSION"0") GE 6.721` THEN 
    IF `STRINDEX("($gifplot_name)", "gif") GT 0` THEN
       SET GIFFILE "($gifplot_name)"
-      DEFINE SYMBOL reset_gifname = 1
-   ENDIF
-ENDIF
-
-! Do this again looking for .png
-
-IF `(($reset_gifname"0|*>1") EQ 0) AND ($FERRET_VERSION"0") GE 6.721` THEN 
-   IF `STRINDEX("($gifplot_name)", "png") GT 0` THEN
-      SET GIFFILE "($gifplot_name).gif"
       DEFINE SYMBOL reset_gifname = 1
    ENDIF
 ENDIF

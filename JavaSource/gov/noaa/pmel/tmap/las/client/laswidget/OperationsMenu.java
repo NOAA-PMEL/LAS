@@ -4,7 +4,6 @@ import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
@@ -30,7 +29,7 @@ public class OperationsMenu extends Composite {
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
 	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
-	OperationPushButton trajectoryTable = new OperationPushButton("Table of Cruises");
+	OperationPushButton dsgTable = new OperationPushButton("Table");
 	OperationPushButton thumbnailTable = new OperationPushButton("Thumbnails");
 	
 	boolean hasComparison = false;
@@ -46,7 +45,7 @@ public class OperationsMenu extends Composite {
         animationButton.setTitle("Interactive interface for making a sequence of plots over time.");
         compareButton.addStyleDependentName("SMALLER");
         correlationButton.addStyleDependentName("SMALLER");
-        correlationButton.setTitle("Interface to make a scatter plot of a property vs. another property.");
+        correlationButton.setTitle("Beta interface to make a scatter plot of a property vs. another property.");
         googleEarthButton.addStyleDependentName("SMALLER");
         googleEarthButton.setTitle("View a plot of data draped over the globe using Google Earth.");
         showValuesButton.addStyleDependentName("SMALLER");
@@ -58,8 +57,8 @@ public class OperationsMenu extends Composite {
         saveAsButton.setTitle("Save data in various text and binary formats.");
         climateAnalysis.addStyleDependentName("SMALLER");
         climateAnalysis.setTitle("Perform time average spectrum and other advanced analysis.");
-        trajectoryTable.addStyleDependentName("SMALLER");
-        trajectoryTable.setTitle("See a table of current cruises and find crossovers.");
+        dsgTable.addStyleDependentName("SMALLER");
+        dsgTable.setTitle("See a table of current observations by ID.");
         thumbnailTable.addStyleDependentName("SMALLER");
         thumbnailTable.setTitle("See a table of select property-property plots.");
 		buttonBar.add(animationButton);
@@ -69,93 +68,14 @@ public class OperationsMenu extends Composite {
 		buttonBar.add(exportToDesktopButton);
 		buttonBar.add(saveAsButton);
 		buttonBar.add(climateAnalysis);
-		buttonBar.add(trajectoryTable);
+		buttonBar.add(dsgTable);
 		buttonBar.add(thumbnailTable);
 		climateAnalysis.setVisible(false);
-		trajectoryTable.setVisible(false);
+		dsgTable.setVisible(false);
 		thumbnailTable.setVisible(false);
 		initWidget(buttonBar);
 		buttonBar.setSize("100%", "100%");
 	}
-	public void setNames(Map<String, String> titles, Map<String, String> help) {
-	    for (Iterator titleIt = titles.keySet().iterator(); titleIt.hasNext();) {
-            String buttonName = (String) titleIt.next();
-            String buttonTitle = titles.get(buttonName);
-            String helpString = help.get(buttonName);
-            setButton(buttonName, buttonTitle, helpString);
-        }
-	}
-	private void setButton(String buttonName, String buttonTitle, String helpString) {
-	    // "compare" button not used.
-	    if ( buttonName != null ) {
-	        if ( buttonName.toLowerCase().contains("animate") ) {
-	            if ( buttonTitle != null ) {
-	                animationButton.setTitle(buttonTitle);
-	            }
-	            if ( helpString != null ) {
-	                animationButton.setText(helpString);
-	            }
-	        } else if ( buttonName.toLowerCase().contains("correlation") ) {
-	            if ( buttonTitle != null ) {
-	                correlationButton.setTitle(buttonTitle);
-	            }
-	            if ( helpString != null ) {
-	                correlationButton.setText(helpString);
-	            }
-	        } else if ( buttonName.toLowerCase().contains("earth") ) {
-	            if ( buttonTitle != null ) {
-	                googleEarthButton.setTitle(buttonTitle);
-	            }
-	            if ( helpString != null ) {
-	                googleEarthButton.setText(helpString);
-	            }
-	        } else if ( buttonName.toLowerCase().contains("values") ) {
-	            if ( buttonTitle != null ) {
-	                showValuesButton.setTitle(buttonTitle);
-	            }
-	            if ( helpString != null ) {
-	                showValuesButton.setText(helpString);
-	            }
-	        } else if ( buttonName.toLowerCase().contains("desktop") ) {
-	            if ( buttonTitle != null ) {
-                    exportToDesktopButton.setTitle(buttonTitle);
-                }
-                if ( helpString != null ) {
-                    exportToDesktopButton.setText(helpString);
-                }
-	        } else if ( buttonName.toLowerCase().contains("save") ) {
-	            if ( buttonTitle != null ) {
-                    saveAsButton.setTitle(buttonTitle);
-                }
-                if ( helpString != null ) {
-                    saveAsButton.setText(helpString);
-                }
-	        } else if ( buttonName.toLowerCase().contains("analysis") ) {
-	            if ( buttonTitle != null ) {
-                    climateAnalysis.setTitle(buttonTitle);
-                }
-                if ( helpString != null ) {
-                    climateAnalysis.setText(helpString);
-                }
-	        } else if ( buttonName.toLowerCase().contains("table") ) {
-	            if ( buttonTitle != null ) {
-                    trajectoryTable.setTitle(buttonTitle);
-                }
-                if ( helpString != null ) {
-                    trajectoryTable.setText(helpString);
-                }
-	        } else if ( buttonName.toLowerCase().contains("thumbnail") ) {
-	            if ( buttonTitle != null ) {
-                    thumbnailTable.setTitle(buttonTitle);
-                }
-                if ( helpString != null ) {
-                    thumbnailTable.setText(helpString);
-                }
-	        }
-	    }
-
-	}
-	
     private void turnOffButtons() {
 		animationButton.setEnabled(false);
 		animationButton.setOperation(null);
@@ -173,8 +93,8 @@ public class OperationsMenu extends Composite {
 		correlationButton.setOperation(null);
 	    climateAnalysis.setEnabled(false);
 	    climateAnalysis.setOperation(null);
-	    trajectoryTable.setEnabled(false);
-	    trajectoryTable.setOperation(null);
+	    dsgTable.setEnabled(false);
+	    dsgTable.setOperation(null);
 	    thumbnailTable.setEnabled(false);
         thumbnailTable.setOperation(null);
     }
@@ -240,8 +160,7 @@ public class OperationsMenu extends Composite {
 				} else if ( category.contains("table") && !category.contains("trajectory") ) {
 					if ( op_view.equals(view) ) {
 						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-						    String name = op.getName().toLowerCase();
-							if ( name.contains("values") ) {
+							if ( op.getName().toLowerCase().contains("values") ) {
 								showValuesButton.setOperation(op);
 								showValuesButton.setEnabled(true);
 							}
@@ -274,9 +193,9 @@ public class OperationsMenu extends Composite {
                     if ( op_view.equals(view) ) {
                         if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
                             if ( op.getName().toLowerCase().contains("trajectory table") ) {
-                                trajectoryTable.setOperation(op);
-                                trajectoryTable.setVisible(true);
-                                trajectoryTable.setEnabled(true);
+                                dsgTable.setOperation(op);
+                                dsgTable.setVisible(true);
+                                dsgTable.setEnabled(true);
                             }
                         }
                     }
@@ -304,7 +223,7 @@ public class OperationsMenu extends Composite {
         saveAsButton.addClickHandler(clickHandler);
         exportToDesktopButton.addClickHandler(clickHandler);
         climateAnalysis.addClickHandler(clickHandler);
-        trajectoryTable.addClickHandler(clickHandler);
+        dsgTable.addClickHandler(clickHandler);
         thumbnailTable.addClickHandler(clickHandler);
     }
     public void setGoogleEarthButtonEnabled(boolean enable) {
@@ -360,11 +279,11 @@ public class OperationsMenu extends Composite {
         } else {
             climateAnalysis.setVisible(false);
         }
-        if ( trajectoryTable != null && trajectoryTable.getOperation() != null && trajectoryTable.getOperation().getViews().contains(view) ) {
-            trajectoryTable.setEnabled(true);
-            trajectoryTable.setVisible(true);
+        if ( dsgTable != null && dsgTable.getOperation() != null && dsgTable.getOperation().getViews().contains(view) ) {
+            dsgTable.setEnabled(true);
+            dsgTable.setVisible(true);
         } else {
-            trajectoryTable.setVisible(false);
+            dsgTable.setVisible(false);
         }
         if ( thumbnailTable != null && thumbnailTable.getOperation() != null && thumbnailTable.getOperation().getViews().contains(view) ) {
             thumbnailTable.setEnabled(true);

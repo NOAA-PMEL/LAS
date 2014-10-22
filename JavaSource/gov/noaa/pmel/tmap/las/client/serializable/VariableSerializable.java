@@ -98,7 +98,7 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	public void setVector(boolean vector) {
 		this.vector = vector;
 	}
-	public boolean isDescrete() {
+	public boolean isDiscrete() {
 	    return getAttributes().get("grid_type").equals("trajectory") || 
 	            getAttributes().get("grid_type").equals("scattered") || 
 	            getAttributes().get("grid_type").equals("point") ||

@@ -1,8 +1,8 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! $Header$
-! insitu_waterfall_yz.jnl
+! insitu_waterfall_zt.jnl
 !
-! Creates a YZ Waterfall plot 
+! Creates a ZT Waterfall plot 
 !
 ! Set the gif filename, changing it from .gif to the name from this request
 GO LAS_reset_gifname
@@ -73,43 +73,8 @@ DEFINE SYMBOL  data_var = var_data_masked
 DEFINE SYMBOL  ngood_data = `($data_var)[i=@NGD]`
 DEFINE SYMBOL  nbad_data = `($data_var)[i=@NBD]`
 
-! If the variable is TIME then  symbols are
-!  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
-! 
-! In this case we can set up a time axis, and call polymark_datekey 
-
 LET nout_lonlat = `var_data_masked[i=@ngd]`
-DEFINE SYMBOL  nout_lonlat = `nout_lonlat`
-
-! When the data crosses the branch cut, replicate the lon,lat,var variables 
-! with lon+360 or lon-360 and replicate latitudes, mask, and color-by variable
-
-IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
-
-  LET/UNITS=degrees_east x_var_data = ($data_x_var)
-  IF `($nodata"0|*>1") EQ 0` THEN
-     STAT x_var_data
-  ELSE
-     DEFINE SYMBOL stat_min ($region_x_lo)
-  ENDIF
-
-  IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
-  IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
-  IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
-  LET var_data = ($data_var)
-  DEFINE SYMBOL  var_data = ($data_var)
-
-  IF `($STAT_MIN) LT ($REGION_X_LO)` THEN
-    DEFINE SYMBOL  do_wrap = 360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + ($do_wrap)
-  ENDIF
-
-  IF `($REGION_X_LO) LT ($STAT_MIN)` THEN
-    DEFINE SYMBOL  do_wrap = -360
-    LET/UNITS=degrees_east x_var_data_wrap = x_var_data + (($do_wrap))
-  ENDIF
-
-ENDIF
+DEFINE SYMBOL  nout_lonlat = `nout_lonlat` 
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 
@@ -167,7 +132,6 @@ IF ($ribbon"0|*>1") THEN
    DEFINE SYMBOL  plot_command = PLOT/VS/RIBBON/LINE($qualifiers)
    IF `nout_lonlat LT 50000` THEN DEFINE SYMBOL  plot_command = ($plot_command)/THICK
 ENDIF
-
 LET prof_id = _m[ge=($rowvar)]
 
 LET rowsum = `($rowvar)[m=@sum]`
@@ -194,6 +158,7 @@ DEFINE SYMBOL  nk = `nk`
 LET/TITLE="`($data_var),RETURN=title`" varplot = EXPNDI_BY(XSEQUENCE(($data_var)), XSEQUENCE(newrow), ($nk))
 LET/TITLE="Latitude"/UNITS="degrees_north" latplot = EXPNDI_BY(XSEQUENCE(($data_y_var)), XSEQUENCE(newrow), ($nk))
 LET/TITLE="Longitude"/UNITS="degrees_east"  lonplot = EXPNDI_BY(XSEQUENCE(($data_x_var)), XSEQUENCE(newrow), ($nk))
+LET/TITLE="Time"/UNITS="seconds"  timplot = EXPNDI_BY(XSEQUENCE(($data_t_var)), XSEQUENCE(newrow), ($nk))
 LET/TITLE="Depth"/UNITS="m"  zplot = EXPNDI_BY(($data_z_var), newrow, ($nk))
 
 LET/TITLE="Depth"/UNITS="m"  issurf = EXPNDI_BY(XSEQUENCE(newrow), XSEQUENCE(newrow), ($nk))  ! Surface locations
@@ -203,31 +168,72 @@ PPL %range ($region_z_lo),  ($region_z_hi), `ntic`
 LET dlo = ($ppl$range_low)
 LET dhi = ($ppl$range_high)
 
-PPL %range ($region_y_lo),  ($region_y_hi), `ntic`
-LET ylo = ($ppl$range_low)
-LET yhi = ($ppl$range_high)
+DEFINE VIEWPORT/XLIM=0:1/YLIM=0:1 vfull1
+DEFINE VIEWPORT/XLIM=0:1/YLIM=0:1 vfull2
 
-PPL %range ($region_x_lo),  ($region_x_hi), `ntic`
-LET xlo = ($ppl$range_low)
-LET xhi = ($ppl$range_high)
+DEFINE SYMBOL view1 = vfull1
+DEFINE SYMBOL view2 = vfull2
+
+! Get units and origin for time variable
+
+let tunits = "`($data_t_var),return=units`"
+let sstring = `strindex(tunits, "since")` - 2
+let time_units = substring(tunits, 1, `sstring`)
+let slen = strlen(tunits)
+let time_origin = substring(tunits, sstring+8, slen-sstring)
+
+IF ($original_time_var"0|*>1") THEN
+   LET attnames = ($original_time_var).attnames
+   IF `IS_ELEMENT_OF_STR_N (attnames, "time_origin") GT 0` THEN \
+    LET time_origin = "`($original_time_var).time_origin`"
+ENDIF
+
+LET amin = time[i=@min]
+LET amax = time[i=@max]
+
+GO LAS_is_range amin amax
+CANCEL SYMBOL is_time
+
+
+DEFINE AXIS/t=`ax_lo`:`ax_hi`/npoints=1000/units=`time_units`/t0="`time_origin`" haxis 
+LET xlo = ax_lo
+LET xhi = ax_hi
+
+DEFINE AXIS/z=0:`dhi`/depth/npoints=100 vaxis
+DEF sym vunits= `($data_z_var),return=units`AAA
+IF `STRCMP("($vunits)", "AAA")` THEN SET AXIS/UNITS=`($data_z_var),return=units` vaxis
+
+
+! Make a blank plot with the correct time axis on the horizal and depth
+! axis on the vertical.
+
+SET VIEW ($view1)
+
+LET blankvar = 100+t[gt=haxis] + z[gz=vaxis]
+SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) blankvar
+SET VIEW ($view2)
+
+!Now make the ribbon plot.
+
+LET zplotvar = -1*zplot
+DEFINE SYMBOL qualifiers = ($qualifiers)/noaxes
 
 ! First plot sets up plot symbols. The reset_labels and color-key labeled by dates
 ! expect the color plot to be an overlay.
 
 IF ($ribbon"0|0|1|*>1") THEN
-   PLOT/VS/RIBBON/PALETTE=white/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`ylo`:`yhi` latplot, zplot, varplot
-   PLOT/VS/RIBBON/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`ylo`:`yhi`($qualifiers)/SET latplot, zplot, varplot
+   PLOT/VS/RIBBON/PALETTE=white/NOKEY/NOLAB/VLIM=`(-1)*dhi`:0/HLIM=`xlo`:`xhi`($qualifiers) timplot, zplotvar, varplot
+   PLOT/VS/OVER/RIBBON/LINE/SYM=19/THICK/VLIM=`(-1)*dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET timplot, zplotvar, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
    PPL RIBBON/OVER
-
 ELSE
 
-! To make wiggly waterfall plots 
+! To make wiggly waterfall plots
 
    define axis/x=-180:360:180/units=degrees xfull
    define axis/y=90s:90n:90/units=degrees yfull
    define axis/z=0:10000:5000/depth zfull
-   
+
 ! valmid - a "nice" value roughly mid-range of the "surface" values
    DEFINE SYMBOL   nvals `($data_var)[i=@ngd]`
    IF `($nvals) EQ 0` THEN
@@ -250,16 +256,16 @@ ELSE
    DEFINE SYMBOL  scale_max ($ppl$range_high)
    
    IF `($valrange) EQ 0` THEN
-     DEFINE SYMBOL  wscale `0.1 * (yhi - ylo)`
+     DEFINE SYMBOL  wscale `0.1 * (xhi - xlo)`
    ELSE
-     DEFINE SYMBOL  wscale `0.1 * (yhi - ylo)/($valrange)`
+     DEFINE SYMBOL  wscale `0.1 * (xhi - xlo)/($valrange)`
    ENDIF
    
 ! draw a blank,labelled rectangle - allow room for waterfalls at edges
    DEFINE SYMBOL wleft  `($wscale)*(($valmid) - ($valmin))`
    DEFINE SYMBOL wright `($wscale)*(($valmax) - ($valmid))`
    
-   FILL/VLIM=0:`dhi`/HLIM=`ylo`:`yhi`/NOKEY/NOLAB/LEV=(-100,-99,1) 0*y[gy=yfull]*z[gz=zfull]
+   FILL/VLIM=0:`dhi`/HLIM=`xlo`:`xhi`/NOKEY/NOLAB/LEV=(-100,-99,1) 0*x[gx=xfull]*z[gz=zfull]
    PPL YLAB @ACDepth (meters)
    
 ! X or Y coordinates of profiles and depths defined above, lonplot, latplot, zplot. 
@@ -270,15 +276,17 @@ ELSE
       LABEL/NOUSER `(ppl$xlen)/2`,`(ppl$ylen)/2`,0,0,.25 @ACNo Valid Data
    ELSE
    ! ... vertical profile markers
-      PLOT/VS/LINE/color=black/OVER/NOLAB/i=1:($nk) latplot, zplot
+      PLOT/VS/LINE/color=black/OVER/NOLAB/i=1:($nk) lonplot, zplot
    ! ... profile data
       IF `($nvals)/($nprofiles) GT 50` THEN
-          PLOT/VS/LINE/COLOR=red/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot
+!          PLOT/VS/LINE/COLOR=red/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot
+          RIBBON/VS/LINE/palette=($ferret_palette"red")/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
       ELSE
-          PLOT/VS/LINE/COLOR=red/SYM=1/OVER/NOLAB/i=1:($nk) latplot + ($wscale)*(varplot - ($valmid)), zplot
+!          PLOT/VS/LINE/COLOR=red/SYM=1/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot
+          RIBBON/VS/LINE/SYM=1/palette=($ferret_palette"red")/OVER/NOLAB/i=1:($nk) lonplot + ($wscale)*(varplot - ($valmid)), zplot, zplot
       ENDIF
    ! ... scale indicator
-      DEFINE SYMBOL  xmidsc (`(yhi + ylo)/2`)
+      DEFINE SYMBOL  xmidsc (`(xhi + xlo)/2`)
       DEFINE SYMBOL  xlosc `($xmidsc) - ($wscale)*(($valmid) - ($scale_min))`
       DEFINE SYMBOL  xhisc `($xmidsc) + ($wscale)*(($scale_max) - ($valmid))`
       DEFINE SYMBOL  zmidsc `dhi/2`
@@ -289,7 +297,6 @@ ELSE
    ENDIF
 
 ENDIF  ! NOT ribbon
-
 
 ! Add any constraint labels as annotation notes.
 
@@ -337,4 +344,4 @@ IF `($do_icons"0|*>1") AND ($result_webrowset_filename"0|*>1")` THEN  GO feature
 
 GO LAS_results box
 
-! End of file ------------insitu_waterfall_yz.jnl--------------------------
+! End of file ------------insitu_waterfall_zt.jnl--------------------------

@@ -113,7 +113,7 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
    LET ttvar = t[gt=time_axis]
    DEFINE SYMBOL datekey_time_arg = ttvar
 
-   DEFINE SYMBOL ferret_plot_levels = 30
+   DEFINE SYMBOL ferret_plot_levels = 60
    IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_plot_levels)
 
 ENDIF
@@ -133,11 +133,11 @@ GO LAS_initialize_var_levels
 ! If there is no plot variable defined (only plotting locations),
 ! do not plot the key.
 
-IF `($ferret_plot_key"0|0|1>0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = ($ferret_plot_var"0|*>1")
+DEFINE SYMBOL ferret_plot_key = ($ferret_plot_var"0|*>1")
 
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers
-IF `STRINDEX("($qualifiers)", "KEY") EQ 0 AND ($ferret_plot_key"0|*>1")` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+IF `STRINDEX("($qualifiers)", "KEY") EQ 0 AND ($ferret_plot_key"0")` THEN DEFINE SYMBOL qualifers = ($qualifiers)/KEY
 
 ! Open the window
 GO LAS_open_window

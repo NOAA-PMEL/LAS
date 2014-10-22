@@ -1,0 +1,298 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_insitu_pie_xy.jnl
+!
+! Creates a 2D plot with a blank 'basemap' and an overlay of points
+! drawn in the pie style from ($ferret_plot_var) defined in LAS_initialize_data_insitu.
+!
+
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
+! Initialize the region and data.
+
+DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
+
+! DEFINE SYMBOL ferret_label = 0
+
+SET MODE verify:always  ! allows for debugging
+
+DEFINE SYMBOL its_insitu = 1
+DEFINE SYMBOL its_profile_map = 1
+GO LAS_initialize_region 0
+
+IF ($data_0_var"0|vid>1|*>0")  THEN
+   DEFINE SYMBOL ferret_by_id = 1
+   USE "($data_0_url)"
+   LET varnames = ..varnames
+
+   DEFINE SYMBOL data_0_var = `varnames[i=1]`
+   CANCEL DATA "($data_0_url)"
+ENDIF
+DEFINE SYMBOL data_name_in = ($data_0_var)
+
+GO LAS_initialize_data 0
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
+
+! For the annotations
+IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
+IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+
+IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
+
+  LET/UNITS=degrees_east x_var_data = ($data_x_var)
+  IF `($nodata"0|*>1") EQ 0` THEN
+     STAT x_var_data
+  ELSE
+     DEFINE SYMBOL stat_min ($region_x_lo)
+  ENDIF
+
+  IF ($data_y_var"0|*>1") THEN LET/UNITS=degrees_north y_var_data = ($data_y_var)
+  IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
+  IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
+  LET var_data = ($data_var)
+
+   DEFINE SYMBOL var_data = ($data_var)
+   DEFINE SYMBOL vtype = 0
+   LET gettype= ($var_data)
+   DEFINE SYMBOL vtype = `gettype[i=1,m=1],RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+
+   IF `($is_string) AND ($ferret_strfloat"0|*>1")` THEN 
+      SET VAR/NAME = var_data_0  var_data 
+      LET var_data = STRFLOAT(var_data_0)
+      SET ATT/LIKE=var_data_0 var_data
+      DEFINE SYMBOL ferret_plot_var var_data
+   ENDIF
+
+   IF ($data_0_var"|tmonth>1|*>0") THEN 
+      LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+      SET VAR/NAME = var_data_0  var_data
+      LET var_data =  element_index_str_n(var_data_0, month_labels) 
+      SET ATT/LIKE=var_data_0 var_data
+      DEFINE SYMBOL ferret_plot_var var_data
+   ENDIF
+
+ENDIF
+
+! Special color-by-time key
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
+
+! In this case we set up a time axis, and label the color key with dates
+! If the units are seconds since, we don't need that much resolution for this. Make it hours.
+
+   LET tmin = ($data_var)[i=@MIN]
+   LET tmax = ($data_var)[i=@MAX]
+
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN 
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL tunits = `tunits`
+   ENDIF
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   IF ($tunits"0|seconds>1|*>0") THEN \
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE SYMBOL datekey = 1
+
+   DEFINE SYMBOL ferret_key_annotate = 0
+
+   LET ttvar = t[gt=time_axis]
+   DEFINE SYMBOL datekey_time_arg = ttvar
+
+   DEFINE SYMBOL ferret_plot_levels = 60
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_plot_levels)
+
+ENDIF
+
+IF ($ferret_by_id"0|*>1") THEN
+   DEFINE SYMBOL ferret_plot_levels = `($rowvar),RETURN=lsize`
+   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_c)))
+   LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+   DEFINE SYMBOL var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+   DEFINE SYMBOL ferret_plot_title Colored by Trajectory Number
+ENDIF
+
+! Set color levels
+GO LAS_initialize_var_levels
+
+! Plot qualifiers (graticule lines etc)
+GO LAS_set_plot_qualifiers
+
+! Open the window
+GO LAS_open_window
+
+! Create the blank plot with bathymetries,
+! coastlines, EEZ's, etc.
+
+DEFINE SYMBOL basemap_palette = grayscale
+DEFINE SYMBOL basemap_levels = (-inf)(-10000,-1000,1000)(-1000,0,100)
+GO LAS_XY_overlay_basemap
+
+PPL SHASET PROTECT
+
+!  GO LAS_fland black
+!  GO LAS_fland navy
+!  GO LAS_fland brown_dark
+
+GO LAS_fland green_pine
+PPL SHASET PROTECT
+
+! Turn on annotate_key, which persists until turned off
+! (unless key_annoatate property tells us otherwise).
+
+IF ($ferret_key_annotate"1|0|1|*>1") THEN
+   KEYMARK 1
+ELSE
+   KEYMARK 0
+ENDIF
+
+! Define plot qualifiers for polygon overlay
+
+!CANCEL SYMBOL qualifiers 
+DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
+
+! Color key for the variable values.
+! If there is no plot variable defined (only plotting locations),
+! do not plot the key.
+
+IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0
+
+IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
+   IF ($keycentered"0|*>1") THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
+   ELSE
+      DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+   ENDIF
+ELSE
+   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+ENDIF
+
+! Ribbon plot
+DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
+!DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
+
+IF ($decimation_fraction"0|*>1") THEN 
+   IF `approx_total LT 70000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+ELSE
+   IF `nout_lonlat LT 40000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+ENDIF
+
+!IF `nout_lonlat LT 40000 and featuresize LT 100` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+IF `featuresize LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
+
+IF ($single_color"0|*>1") THEN
+   DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
+ENDIF
+
+! Points will mark location of missing data if needed
+! Use color=1 for black...
+LET missing_flag = -9999999
+LET/UNITS=degrees_east  x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
+LET/UNITS=degrees_north y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
+
+
+! Set the palette
+
+IF ($ferret_plot_var"0|*>1") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
+ELSE
+   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
+ENDIF
+
+! Draw the pie plot
+
+GO insitu_pie_xy
+
+IF ($ferret_plot_var"0|*>1") THEN
+   LET data_range = minmax(var_data)
+   DEFINE SYMBOL data_plotted_min = `data_range[i=1],prec=7`
+   DEFINE SYMBOL data_plotted_max = `data_range[i=2],prec=7`
+ENDIF
+
+! Set the shape to what is used above it will be the same on the key
+DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
+
+! Add labels; unless all labels have been turned off
+
+IF `($ferret_label"1|0|1|*>1") EQ 1` THEN
+   
+   ! Add the plot title on the bottom
+   ! Nudge things down a little for 'yt and 'zt views because the time axis
+   ! has years labeled beneath the months.
+   
+   IF `($ferret_annotations"0|*>1") EQ 0` THEN
+      IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+      ELSE
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+      ENDIF
+   ENDIF
+   
+   IF ($t_lab_lo"0|*>1") THEN
+      DEFINE SYMBOL n_left_labels `($n_left_labels"0") + 1`
+      DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo)
+      IF ($t_lab_hi"0|*>1") THEN DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo) to ($t_lab_hi)
+      DEFINE SYMBOL time_lab ($upper_left_($n_left_labels))
+   ENDIF
+
+ENDIF ! ferret_label
+
+! Add labels at the top for the dataset name etc if they exist  
+
+GO labels_above_plot
+
+! Add any constraint labels in the lower left, or as annotation notes.
+! (The constraints themselves are handled in the data request from ERDDAP.
+!  We do not need masking for constraints in map plots.)
+
+IF `($ferret_annotations%0|*>1%)` THEN
+
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+
+   REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
+      DEFINE SYMBOL mmask = `m`;\
+      IF ($mask_title_($mmask)"0|*>1) THEN ; \
+         DEFINE SYMBOL note_num = `($note_num"0") + 1`; \
+         DEFINE SYMBOL note_($note_num)_lab = ($mask_title_($mmask)); \
+      ENDIF)
+ELSE
+
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+
+   DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+
+   REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
+      DEFINE SYMBOL mmask = `m`;\
+      IF ($mask_title_($mmask)"0|*>1) THEN ; \
+        LABEL/NOUSER `($label_x)`, `($label_y)`, -1, 0, 0.12, ($mask_title_($mmask)) ; \
+        DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
+      ENDIF)
+ENDIF
+
+! Add cruise information on the top
+GO feature_labels  
+
+! if constraints are shown via constraint_0_lhs etc, define labels for those
+GO set_constraint_labels
+
+! restore key-annotation setting: keys not annotated
+KEYMARK 0
+
+! Save the results
+
+IF `($do_icons"0|*>1") AND ($result_webrowset_filename"0|*>1")` THEN  GO feature_key
+
+GO LAS_results box
+
+! End of file ------------LAS_insitu_pie_xy.jnl--------------------------
+

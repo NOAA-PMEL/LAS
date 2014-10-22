@@ -297,6 +297,7 @@ public class ConstraintWidgetGroup extends Composite {
     }
     public void init(List<ERDDAPConstraintGroup> constraintGroups) {
         panel = 0;
+        displayPanel.clear();
         if ( constraintPanel.getWidgetCount() > 0 ) constraintPanel.clear();
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();

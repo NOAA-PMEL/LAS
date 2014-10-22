@@ -111,6 +111,10 @@ public class TabledapTool extends TemplateTool {
     String zname;
     List<String> all = new ArrayList<String>();
     List<DataRow> datarows = new ArrayList<DataRow>();
+    boolean downloadall = false;
+    String decid;
+    String id;
+    boolean full = false;
     final Logger log = Logger.getLogger(TabledapTool.class.getName());
     
     /**
@@ -139,43 +143,216 @@ public class TabledapTool extends TemplateTool {
 
         log.debug("Entered TabledapTool.run method."); // debug
 
+       
         //If exception occurs in try/catch block, 'causeOfError' was the cause.
         String causeOfError = "Unexpected error: "; 
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
+        
+      //has the request been canceled (method 2)?    
+        String cancelFileName = lasBackendRequest.getResult("cancel");
+        File cancel = null;
+        if (cancelFileName != null && cancelFileName.length() > 0) {
+            causeOfError = "Unable to create cancelFileName=" + cancelFileName + ": ";
+            cancel = new File(cancelFileName);
+        }            
+        //then standard check can be done any time
+        if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+            return lasBackendResponse;
+        
         try {      
+        //First: has the request already been canceled (method 1)?
+        if (lasBackendRequest.isCancelRequest()) {           
+            lasBackendResponse.setError("Tabledap backend request canceled.");
+            causeOfError = "Tabledap lasBackendRequest failed to cancel request: ";
+            File cancel2 = new File(lasBackendRequest.getResult("cancel"));
+            cancel2.createNewFile();
+            log.debug("Tabledap backend request canceled: " + lasBackendRequest.toCompactString());
+            return lasBackendResponse;
+        }
+        //get the name for the .nc results file
+        causeOfError = "Unable to get backend request's resultsAsFile(netcdf): ";
+        String netcdfFilename = lasBackendRequest.getResultAsFile("netcdf");
+        log.debug("Got netcdf filename: " + netcdfFilename);
+        required(netcdfFilename, causeOfError);
 
-            //First: has the request already been canceled (method 1)?
-            if (lasBackendRequest.isCancelRequest()) {           
-                lasBackendResponse.setError("Tabledap backend request canceled.");
-                causeOfError = "Tabledap lasBackendRequest failed to cancel request: ";
-                File cancel = new File(lasBackendRequest.getResult("cancel"));
-                cancel.createNewFile();
-                log.debug("Tabledap backend request canceled: " + lasBackendRequest.toCompactString());
-                return lasBackendResponse;
+        //get url (almost always ending in "/tabledap/")
+        causeOfError = "Could not get url from backend request: "; 
+        String url = lasBackendRequest.getRootElement().getChild(
+                "dataObjects").getChild("data").getAttributeValue("url");
+        required(url, causeOfError);
+        
+        causeOfError = "Could not get id."; 
+        id = getTabledapProperty(lasBackendRequest, "id");
+        log.debug("Got id: " + id); 
+        required(id, causeOfError);
+        
+       decid = getTabledapProperty(lasBackendRequest, "decimated_id");
+        
+        Map<String, String> ferret_prop = lasBackendRequest.getPropertyGroup("ferret");
+        Map<String, String> download = lasBackendRequest.getPropertyGroup("download");
+        
+        if ( download != null ) {
+            String dall = download.get("all_data");
+            if ( dall != null ) {
+                downloadall = true;
+            }
+        }
+        String full_option = ferret_prop.get("full_data");
+        
+        if ( full_option != null && full_option.equalsIgnoreCase("yes") ) {
+            full = true;
+        }
+       
+        
+
+            
+            String query = null;
+            String query2 = null;
+            // If there is no need for the second query, just do the thing and carry on...
+            List<String> qs = makeERDDAPQuery(lasBackendRequest, ".ncCF");
+            if ( qs.size() > 0 ) {
+                query = qs.get(0);
+                if ( qs.size() == 2 ) {
+                    query2 = qs.get(1);
+                }
+            } else {
+                throw new Exception("Could not build queries");
+            }
+            DateTime dt = new DateTime();
+            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+            if ( query2 == null ) {
+                File temp_file = new File(netcdfFilename+".temp");
+
+
+                try {
+                    String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20").replaceAll("%3F", "?");;
+                    String dsUrl = url + q;  //don't include ".dods"; readOpendapSequence does that
+                   
+                    dt = new DateTime();
+                    log.debug("TableDapTool query="+dsUrl);
+                    log.info("{TableDapTool starting file pull for the only file at "+fmt.print(dt));
+                    lasProxy.executeGetMethodAndSaveResult(dsUrl, temp_file, null);
+                    dt = new DateTime();
+                    log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
+                    //was the request canceled?
+                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                        return lasBackendResponse;
+
+                    temp_file.renameTo(new File(netcdfFilename));
+                    dt = new DateTime();
+                    log.info("Tabledap tool renamed the netcdf file to "+netcdfFilename+" at "+fmt.print(dt));
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                        writeEmpty(netcdfFilename);
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
+                }
+            } else {
+                // We have to build our own netCDF file from the two queries.  In this case we will pull two DSG files make our own DSG ragged array file.
+                boolean empty1 = false;
+                boolean empty2 = false;
+                File temp_file1 = new File(netcdfFilename+".1.temp");
+                File temp_file2 = new File(netcdfFilename+".2.temp");
+                String q1 = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20").replaceAll("%3F", "?");
+                String dsUrl1 = url + q1;  //don't include ".dods"; readOpendapSequence does that
+                String q2 = URLEncoder.encode(query2.toString(), "UTF-8").replaceAll("\\+", "%20").replaceAll("%3F", "?");
+                String dsUrl2 = url + q2;  //don't include ".dods"; readOpendapSequence does that
+                dt = new DateTime();
+                log.debug("TableDapTool query="+dsUrl1);
+                log.info("{TableDapTool starting file pull for file 1 at "+fmt.print(dt));
+
+                try {
+
+                    lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                        // one empty search
+                        empty1 = true;
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
+                }
+                dt = new DateTime();
+                log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
+                //was the request canceled?
+                if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                    return lasBackendResponse;
+                log.debug("TableDapTool query="+dsUrl2);
+                log.info("{TableDapTool starting file pull for file 2 at "+fmt.print(dt));
+                try {
+                    lasProxy.executeGetMethodAndSaveResult(dsUrl2, temp_file2, null);
+                } catch (Exception e) {
+                    String message = e.getMessage();
+                    if ( e.getMessage().contains("com.cohort") ) {
+                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
+                        message = message.substring(0, message.indexOf(")"));
+                    }
+                    if ( message.toLowerCase().contains("query produced no matching" ) ) {
+                        // two empty searches
+                        empty2 = true;
+                    } else {
+                        causeOfError = "Data source error: " + message;
+                        throw new Exception(message);
+                    }
+                }
+                if ( empty1 && empty2 ) {
+                    // two empty searches, write the empty file
+                    writeEmpty(netcdfFilename);
+                } else if ( empty1 && !empty2 ) {
+                    temp_file2.renameTo(new File(netcdfFilename));
+                } else if ( !empty1 && empty2 ) {
+                    temp_file1.renameTo(new File(netcdfFilename));
+                } else {
+                    dt = new DateTime();
+                    log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
+                    //was the request canceled?
+                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                        return lasBackendResponse;
+                    merge(netcdfFilename, temp_file1, temp_file2);
+                    temp_file1.delete();
+                    temp_file2.delete();
+                }
+
             }
 
-            //has the request been canceled (method 2)?    
-            String cancelFileName = lasBackendRequest.getResult("cancel");
-            File cancel = null;
-            if (cancelFileName != null && cancelFileName.length() > 0) {
-                causeOfError = "Unable to create cancelFileName=" + cancelFileName + ": ";
-                cancel = new File(cancelFileName);
-            }            
-            //then standard check can be done any time
-            if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                return lasBackendResponse;
 
-            //get the name for the .nc results file
-            causeOfError = "Unable to get backend request's resultsAsFile(netcdf): ";
-            String netcdfFilename = lasBackendRequest.getResultAsFile("netcdf");
-            log.debug("Got netcdf filename: " + netcdfFilename);
-            required(netcdfFilename, causeOfError);
+           
 
-            //get url (almost always ending in "/tabledap/")
-            causeOfError = "Could not get url from backend request: "; 
-            String url = lasBackendRequest.getRootElement().getChild(
-                    "dataObjects").getChild("data").getAttributeValue("url");
-            required(url, causeOfError);
+
+            // The service just wrote the file to the requested location so
+            // copy the response element from the request to the response.
+            causeOfError = "Failed to set response element: ";
+            lasBackendResponse.addResponseFromRequest(lasBackendRequest);
+
+        } catch (Exception e) {
+            //System.out.println("TabledapTool is processing the exception.");
+            log.warn(MustBe.throwableToString(e));
+            lasBackendResponse.setError(causeOfError, e);
+        }
+
+        return lasBackendResponse;
+    }
+    public List<String> makeERDDAPQuery(LASBackendRequest lasBackendRequest, String type) throws Exception {
+        
+        List<String> qs = new ArrayList<String>();
+
+        String causeOfError;
+            
+
+           
 
             causeOfError = "Could not get trajectory id from backend request: "; 
             cruiseid = getTabledapProperty(lasBackendRequest, "trajectory_id");
@@ -208,27 +385,6 @@ public class TabledapTool extends TemplateTool {
                 for (int i = 0; i < mods.length; i++) {
                     modulo_vars.add(mods[i].trim());
                 }
-            }
-            causeOfError = "Could not get id."; 
-            String id = getTabledapProperty(lasBackendRequest, "id");
-            log.debug("Got id: " + id); 
-            required(id, causeOfError);
-            
-            String decid = getTabledapProperty(lasBackendRequest, "decimated_id");
-            
-            Map<String, String> ferret_prop = lasBackendRequest.getPropertyGroup("ferret");
-            Map<String, String> download = lasBackendRequest.getPropertyGroup("download");
-            boolean downloadall = false;
-            if ( download != null ) {
-                String dall = download.get("all_data");
-                if ( dall != null ) {
-                    downloadall = true;
-                }
-            }
-            String full_option = ferret_prop.get("full_data");
-            boolean full = false;
-            if ( full_option != null && full_option.equalsIgnoreCase("yes") ) {
-                full = true;
             }
            
             //get "debug" file name, may be null or ""
@@ -421,8 +577,7 @@ public class TabledapTool extends TemplateTool {
             
 
             //            Table data = new Table();
-            DateTime dt = new DateTime();
-            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+         
             StringBuilder query2 = null;
             boolean smallarea = false;
             
@@ -527,133 +682,20 @@ public class TabledapTool extends TemplateTool {
                 id = decid;
             }
             
+            query.insert(0, type+"?");
+            query.insert(0, id);
             
-            // If there is no need for the second query, just do the thing and carry on...
-          
-            if ( query2 == null ) {
-                File temp_file = new File(netcdfFilename+".temp");
-
-
-                try {
-                    String q = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
-                    String dsUrl = url + id + ".ncCF?"+q;  //don't include ".dods"; readOpendapSequence does that
-                   
-                    dt = new DateTime();
-                    log.debug("TableDapTool query="+dsUrl);
-                    log.info("{TableDapTool starting file pull for the only file at "+fmt.print(dt));
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl, temp_file, null);
-                    dt = new DateTime();
-                    log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
-                    //was the request canceled?
-                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                        return lasBackendResponse;
-
-                    temp_file.renameTo(new File(netcdfFilename));
-                    dt = new DateTime();
-                    log.info("Tabledap tool renamed the netcdf file to "+netcdfFilename+" at "+fmt.print(dt));
-                } catch (Exception e) {
-                    String message = e.getMessage();
-                    if ( e.getMessage().contains("com.cohort") ) {
-                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
-                        message = message.substring(0, message.indexOf(")"));
-                    }
-                    if ( message.toLowerCase().contains("query produced no matching") ) {
-                        writeEmpty(netcdfFilename);
-                    } else {
-                        causeOfError = "Data source error: " + message;
-                        throw new Exception(message);
-                    }
-                }
-            } else {
-                // We have to build our own netCDF file from the two queries.  In this case we will pull two DSG files make our own DSG ragged array file.
-
-                boolean empty1 = false;
-                boolean empty2 = false;
-                File temp_file1 = new File(netcdfFilename+".1.temp");
-                File temp_file2 = new File(netcdfFilename+".2.temp");
-                String q1 = URLEncoder.encode(query.toString(), "UTF-8").replaceAll("\\+", "%20");
-                String dsUrl1 = url + id + ".ncCF?"+q1;  //don't include ".dods"; readOpendapSequence does that
-                String q2 = URLEncoder.encode(query2.toString(), "UTF-8").replaceAll("\\+", "%20");
-                String dsUrl2 = url + id + ".ncCF?"+q2;  //don't include ".dods"; readOpendapSequence does that
-                dt = new DateTime();
-                log.debug("TableDapTool query="+dsUrl1);
-                log.info("{TableDapTool starting file pull for file 1 at "+fmt.print(dt));
-
-                try {
-
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
-                } catch (Exception e) {
-                    String message = e.getMessage();
-                    if ( e.getMessage().contains("com.cohort") ) {
-                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
-                        message = message.substring(0, message.indexOf(")"));
-                    }
-                    if ( message.toLowerCase().contains("query produced no matching") ) {
-                        // one empty search
-                        empty1 = true;
-                    } else {
-                        causeOfError = "Data source error: " + message;
-                        throw new Exception(message);
-                    }
-                }
-                dt = new DateTime();
-                log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
-                //was the request canceled?
-                if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                    return lasBackendResponse;
-                log.debug("TableDapTool query="+dsUrl2);
-                log.info("{TableDapTool starting file pull for file 2 at "+fmt.print(dt));
-                try {
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl2, temp_file2, null);
-                } catch (Exception e) {
-                    String message = e.getMessage();
-                    if ( e.getMessage().contains("com.cohort") ) {
-                        message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
-                        message = message.substring(0, message.indexOf(")"));
-                    }
-                    if ( message.toLowerCase().contains("query produced no matching" ) ) {
-                        // two empty searches
-                        empty2 = true;
-                    } else {
-                        causeOfError = "Data source error: " + message;
-                        throw new Exception(message);
-                    }
-                }
-                if ( empty1 && empty2 ) {
-                    // two empty searches, write the empty file
-                    writeEmpty(netcdfFilename);
-                } else if ( empty1 && !empty2 ) {
-                    temp_file2.renameTo(new File(netcdfFilename));
-                } else if ( !empty1 && empty2 ) {
-                    temp_file1.renameTo(new File(netcdfFilename));
-                } else {
-                    dt = new DateTime();
-                    log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
-                    //was the request canceled?
-                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-                        return lasBackendResponse;
-                    merge(netcdfFilename, temp_file1, temp_file2);
-                }
-
+            if ( query != null && query.length() > 0 ) {
+                qs.add(query.toString());
             }
-
-
-           
-
-
-            // The service just wrote the file to the requested location so
-            // copy the response element from the request to the response.
-            causeOfError = "Failed to set response element: ";
-            lasBackendResponse.addResponseFromRequest(lasBackendRequest);
-
-        } catch (Exception e) {
-            //System.out.println("TabledapTool is processing the exception.");
-            log.warn(MustBe.throwableToString(e));
-            lasBackendResponse.setError(causeOfError, e);
-        }
-
-        return lasBackendResponse;
+            if ( query2 != null && query.length() > 0 ) {
+                query2.insert(0, type+"?");
+                query2.insert(0, id);            
+                qs.add(query2.toString());
+            }
+            return qs;
     }
+
     /**
      * This doesn't really do anything, but it shows how to access trajectories via the Java netCDF library.  Looping through the whole thing is pretty slow.
      * @param netcdfFilename
@@ -699,9 +741,7 @@ public class TabledapTool extends TemplateTool {
         netcdfFile.write(time, data);
     }
     public void merge(String netcdfFilename, File temp_file1, File temp_file2) throws IOException, InvalidRangeException  {
-// DEBUG
-        time = "time";
-        // END OF DEBUG
+
         NetcdfFile trajset1 = (NetcdfFile) NetcdfDataset.open(temp_file1.getAbsolutePath());
         NetcdfFile trajset2 = (NetcdfFile) NetcdfDataset.open(temp_file2.getAbsolutePath());
         NetcdfFileWriter ncfile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, netcdfFilename);

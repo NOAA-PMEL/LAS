@@ -114,6 +114,14 @@ ENDIF
 
 SET VIEW ($view1)
 
+! Depth on the vertical axis?  We'll want to make it increasing downwards.
+
+LET attnames = ($ferret_plot_var).attnames
+IF `IS_ELEMENT_OF_STR_N(attnames, "positive")` THEN 
+   DEFINE SYMBOL posdirec = `($ferret_plot_var).positive`
+   DEFINE SYMBOL reverse_vert = ($posdirec"0|DOWN>1|down>1|*>0")
+ENDIF
+
 ! If this symbol is set during this script, then
 ! the script will make a blank plot and exit.
 CANCEL SYMBOL put_label
@@ -195,7 +203,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       LET amax = `ax_hi`
       GO LAS_is_range ax_lo ax_hi ! get del_ax
       LET ax_lo = `amin`
-      LET ax_hi = `amax`
+      let ax_hi = `amax`
 
       IF `(ax_hi-ax_lo) GE 359` THEN 
          LET ax_lo = ($region_x_lo)
@@ -218,14 +226,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    ENDIF
 
    IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
-
-      IF `ax_lo-amin LT 1` THEN LET ax_lo = `ax_lo - 1 `
-      IF `amax-ax_hi LT 1` THEN LET ax_hi = `ax_hi + 1`
-      
-         IF `(ax_lo GT amin) OR (ax_hi LT amax)` THEN
          LET/UNITS="($lon_units)" xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
-	 ENDIF
    ENDIF
 
 ! If there was a longitude mask apply that to the plot region
@@ -273,8 +275,8 @@ IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
-DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
-DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis1
+DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`q,RETURN=units`" vaxis 
+DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`q,RETURN=units`" vaxis1
 
 LET indep_var = y[gy=vaxis]
 LET indep_var1 = y[gy=vaxis1]
@@ -447,6 +449,23 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
 ENDIF
 ENDIF
 
+! Depth axis in vertical direction
+
+IF ($reverse_vert"0") THEN
+
+   LET amin = q_var[i=@MIN]
+   LET amax = q_var[i=@MAX]
+   GO LAS_is_range amin amax  ! get del_ax
+   LET ax_lo = `amin`
+   LET ax_hi = `amax`
+
+   DEFINE AXIS/z=`ax_lo`:`ax_hi`:`del_ax`/units="`($ferret_plot_var),RETURN=units`"/depth vaxis 
+   DEFINE AXIS/z=`ax_lo`:`ax_hi`:`del_ax`/units="`($ferret_plot_var),RETURN=units`"/depth vaxis1
+   LET indep_var = z[gz=vaxis]
+   LET indep_var1 = z[gz=vaxis1]
+
+ENDIF
+
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
 IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
 
@@ -524,6 +543,7 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
    SET VIEW full_view2
 ENDIF
 
+
 SHADE/NOKEY/PAL=white($pqual)/NOAX/title=" "/SET allmiss
    ($thumb_alab_size)
    ($ax_label_resize)
@@ -539,6 +559,7 @@ IF ($lab1"0|*>1") THEN
 ENDIF
 PPL SHADE
 
+
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
 
@@ -552,10 +573,11 @@ IF ($put_label"0|*>1") THEN
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
       IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> is all-missing
+         LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
+         LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
       ENDIF
-      LET ylab_bad = `ylab_bad-0.2`
       DEFINE SYMBOL bad_pp_var = 1
    ENDIF
 
@@ -567,14 +589,16 @@ IF ($put_label"0|*>1") THEN
    
       IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> is all-missing
+         LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
+         LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
       ENDIF
       DEFINE SYMBOL bad_pp_var = 1
    ENDIF
 
    IF `($bad_pp_var"0") EQ 0` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, 0.12, @ASConstraints result in no valid data
+      LABEL/NOUSER 0.2, `ylab_bad-($miss_lab_siz)`, -1, 0, 0.12, @ASConstraints result in no valid data
    ENDIF
 
    DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
@@ -641,4 +665,3 @@ LET p = ($xvar)
 LET q = ($yvar)
 
 ! End of file ------------LAS_xytvar_setup.jnl--------------------------
-

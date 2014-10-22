@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
+import gov.noaa.pmel.tmap.las.service.tabledap.TabledapTool;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
@@ -116,17 +117,6 @@ public class GetTrajectoryTable extends LASAction {
 	        List<LASBackendRequest> reqs = productRequest.getRequestXML();
 	        LASBackendRequest backRequest = reqs.get(0);
 	        
-	        Dataset ds = lasConfig.getDataset(dsid);
-	        Map<String, String> fp = ds.getPropertiesAsMap().get("ferret");
-	        String is = null;
-            if ( fp != null ) {
-                is = fp.get("is_socat");
-            }
-            boolean socat = false;
-            if ( is != null && !is.equals("") ) {
-                socat = true;
-            }
-	        
 	        // lasRequest below try to be backRequest
 	        
 	        List<Category> c = lasConfig.getCategories(dsid);
@@ -140,6 +130,19 @@ public class GetTrajectoryTable extends LASAction {
                     String id = tabledap.get("id");
                     String did = tabledap.get("decimated_id");
                     String cruise_id = tabledap.get("trajectory_id");
+                    String profile_id = tabledap.get("profile_id");
+                    
+                    String dsg_id = null;
+                    String type = null;
+                    
+                    
+                    if ( cruise_id != null && cruise_id.trim().length() > 0 ) {
+                        dsg_id = cruise_id;
+                        type = "trajectory";
+                    } else if ( profile_id != null && profile_id.trim().length() > 0 ) {
+                        dsg_id = profile_id;
+                        type = "profile";
+                    }
                     String lon_domain = tabledap.get("lon_domain");
                     StringBuilder xquery2 = new StringBuilder();
                     StringBuilder xquery1 = new StringBuilder();
@@ -211,34 +214,18 @@ public class GetTrajectoryTable extends LASAction {
 	                                Document doc = new Document();
 
 	                                String query = "";
-	                                
-	                                Map<String, String> dt = dataset.getPropertiesAsMap().get("tabledap_access");  
-	                                boolean is360 = false;
-	                                if ( dt != null ) {
-	                                    String range = dt.get("lon_domain");
-	                                    is360 = !range.contains("180");
-	                                }
-	                                
 	                                try {
 	                                    if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
 	                                        double dxlo = Double.valueOf(xlo);
 	                                        double dxhi = Double.valueOf(xhi);
 	                                        // Do the full globe and two query dance...
-	                                        if ( is360 ) {
-	                                            if ( dxlo < 0 ) {
-	                                                dxlo = dxlo + 360.;
-	                                            }
-	                                            if ( dxhi < 0 ) {
-	                                                dxhi = dxhi + 360.;
-	                                            }
-	                                        }
+
 	                                        if ( Math.abs(dxhi - dxlo ) < 355. ) {
-	                                            if ( !is360 ) {
-	                                                LatLonPoint p = new LatLonPointImpl(0, dxhi);
-	                                                dxhi = p.getLongitude();
-	                                                p = new LatLonPointImpl(0, dxlo);
-	                                                dxlo = p.getLongitude();
-	                                            }
+
+	                                            LatLonPoint p = new LatLonPointImpl(0, dxhi);
+	                                            dxhi = p.getLongitude();
+	                                            p = new LatLonPointImpl(0, dxlo);
+	                                            dxlo = p.getLongitude();
 
 	                                            if ( dxhi < dxlo ) {
 	                                                if ( dxhi < 0 && dxlo >= 0 ) {
@@ -376,19 +363,22 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < titles.length; i++) {
 	                                            columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                        }
-	                                        if ( socat ) {
-	                                            columnHeaders.append("<th>documentation</th>\n");
-	                                        }
+                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
+
+                                                columnHeaders.append("<th>documentation</th>\n");
+                                            }
 	                                        columnHeaders.append("<th>download</th>\n");
 	                                        columnHeaders.append("<th>start</th>\n");
 	                                        columnHeaders.append("<th>end</th>\n");
 
-	                                        if ( socat ) {
-	                                            columnHeaders.append("<th>crossovers</th>\n");
-	                                            columnHeaders.append("<th>qc flags</th>\n");
-	                                        }
-	                                        columnHeaders.append("<th>thumbnails</th>\n");
+                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
 
+                                                columnHeaders.append("<th>crossovers</th>\n");
+                                                columnHeaders.append("<th>qc flags</th>\n");
+                                                
+                                            }	                                        
+	                                        
+	                                       
 	                                        columnHeaders.append("</tr>\n");
 	                                        bsw.write(columnHeaders.toString());
 
@@ -402,16 +392,13 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < units.length; i++) {
 	                                            unitStrings.append("<th>"+units[i]+"</th>\n");
 	                                        }
-	                                        if ( socat ) {
-	                                            unitStrings.append("<th></th>\n");
-	                                        }
+	                                        unitStrings.append("<th></th>\n");
+                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
+
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
-	                                        if ( socat ) {
-	                                            unitStrings.append("<th></th>\n");
-	                                            unitStrings.append("<th></th>\n");
-	                                        }
 	                                        unitStrings.append("<th></th>\n");
+                                            }
 	                                        unitStrings.append("</tr>\n");
 	                                        bsw.write(unitStrings.toString());
 
@@ -443,7 +430,9 @@ public class GetTrajectoryTable extends LASAction {
 	                                                if ( socat ) {
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
 	                                                }
-                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
+	                                                
+                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf</a>"+" || "+"<a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
+                                                    
                                                     dsgQuery.setLength(0);
                                                     csvQuery.setLength(0);
                                                     InputStream stream = null;
@@ -471,35 +460,29 @@ public class GetTrajectoryTable extends LASAction {
 	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
 	                                                }
 
-	                                                if ( socat ) {
-	                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-	                                                    // Add the link to load a list of potential crosses to the table.
-	                                                    row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
-	                                                    row.append("\n</td>");
+                                                    if ( socat ) {
 
-	                                                    // Add the QC link
-	                                                    LASUIRequest qcRequest = new LASUIRequest();
-	                                                    qcRequest.addVariable(dsid, vars[0].getID());
-	                                                    qcRequest.setOperation("SOCAT_QC_table");
-	                                                    qcRequest.setProperty("qc", cruise_id, parts[0]);
-	                                                    qcRequest.setProperty("las", "output_type", "xml");
-	                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-	                                                    // Add the link to load a list of potential crosses to the table.
-	                                                    String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
-
-
-	                                                    row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
-	                                                    row.append("\n</td>");
-	                                                }
-                                                    // ADD a THUMBNAIL table link...
-                                                    LASUIRequest thumb = (LASUIRequest) lasUIRequest.clone();
-                                                    thumb.removeLinks();
-                                                    thumb.setOperation("PropPropThumbTable");
-                                                    thumb.addTextConstraint(cruise_id, "eq", parts[0]);
-                                                    String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
-                                                    row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-                                                    row.append("<a target=\"_blank\" href=\""+thumburl+"\">Thumbnails</a>");
-                                                    row.append("\n</td>");
+                                                        row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                        // Add the link to load a list of potential crosses to the table.
+                                                        row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
+                                                        row.append("\n</td>");
+                                                        
+                                                        // Add the QC link
+                                                        LASUIRequest qcRequest = new LASUIRequest();
+                                                        qcRequest.addVariable(dsid, vars[0].getID());
+                                                        qcRequest.setOperation("SOCAT_QC_table");
+                                                        qcRequest.setProperty("qc", cruise_id, parts[0]);
+                                                        qcRequest.setProperty("las", "output_type", "xml");
+                                                        row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                        // Add the link to load a list of potential crosses to the table.
+                                                        String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
+                                                        
+                                                        row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
+                                                        row.append("\n</td>");
+                                                        
+                                                    }	             
+                                                    
+	                  
 	                                                
 	                                                row.append("</tr>");
 	                                                bsw.write(row.toString());

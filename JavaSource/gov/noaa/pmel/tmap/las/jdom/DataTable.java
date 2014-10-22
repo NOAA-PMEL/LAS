@@ -37,6 +37,10 @@ public class DataTable {
             if ( line.contains("Column ") ) {
                 cols++;
                 columnStart = true;
+            } else if ( line.contains("Total ") ) {
+                // add the total to the preamble below
+            } else if ( line.trim().length() == 0 ) {
+                // Skip any line that is all white space...
             } else {
                 if ( columnStart ) {
                     columnEnd = true;

@@ -1839,7 +1839,7 @@ public class OutputPanel extends Composite implements HasName {
 
     public void setOrthoRanges(String xView, List<String> xOrtho) {
         boolean range = false;
-        if (panelVar != null && panelVar.getGrid() != null && panelVar.isDescrete()) {
+        if (panelVar != null && panelVar.getGrid() != null && panelVar.isDiscrete()) {
             range = true;
         }
         for (Iterator<String> oIt = xOrtho.iterator(); oIt.hasNext();) {

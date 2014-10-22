@@ -256,7 +256,7 @@ public class SimplePropPropViewer implements EntryPoint {
     String initialHistory;
     boolean hasInitialHistory = false;
     
-    String trajectory_id;
+    String dsg_id;
     DialogBox editDialog = new DialogBox(false);
     
     AbsolutePanel canvasDiv = new AbsolutePanel();
@@ -698,7 +698,7 @@ public class SimplePropPropViewer implements EntryPoint {
         if (v1 != null) {
             tableRequest.setProperty("data_1", "url", netcdf);
         }
-        if (v2 != null && !v2.equals(trajectory_id) && !v2.equals("longitude") && !v2.equals("latitude") && !v2.equals("longitude") ) {
+        if (v2 != null && !v2.equals(dsg_id) && !v2.equals("longitude") && !v2.equals("latitude") && !v2.equals("longitude") ) {
             tableRequest.addVariable(dsid, v2, 0);
             tableRequest.setProperty("data_2", "url", netcdf);
             tableRequest.setProperty("data", "count", "3");
@@ -791,7 +791,7 @@ public class SimplePropPropViewer implements EntryPoint {
             lasRequest.removeProperty("las", "output_type");
         }
         String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
-        if (netcdf != null && contained && grid_type.equals("trajectory")) {
+        if (netcdf != null && contained && (grid_type.equals("trajectory") || grid_type.equals("profile")) ) {
             if ( plot ) {
                 operationID = "Trajectory_correlation_plot"; // No data base access;
             } else {
@@ -822,7 +822,7 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
                 currentIconList = new ArrayList<String>();
             }
-        } else if ((!contained || netcdf == null) && grid_type.equals("trajectory")) {
+        } else if ((!contained || netcdf == null) && (grid_type.equals("trajectory") || grid_type.equals("profile"))) {
             // This should only occur when the app loads for the first time...
             if ( plot ) {
                 operationID = "Trajectory_correlation_extract_and_plot";
@@ -837,7 +837,7 @@ public class SimplePropPropViewer implements EntryPoint {
             String vy = varid;
             String vds = dsid;
             // Because there is no netCDF we know this is the first request.
-            if ( varid.equals(trajectory_id) ) {
+            if ( varid.equals(dsg_id) ) {
                 if ( defaulty != null ) {
                     vy = defaulty;
                 } else {
@@ -868,7 +868,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     for (int yi = 0; yi < xVariables.getItemCount(); yi++) {
                         VariableSerializable v = (VariableSerializable) xVariables.getUserObject(yi);               
                         // DEBUG don't use WOCE flag as second variable
-                        if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") && !v.getID().equals(trajectory_id) ) {
+                        if ( vx == null && !v.getID().equals(vy) && v.getAttributes().get("subset_variable") == null && !v.getName().contains("WOCE") && !v.getID().equals(dsg_id) ) {
                             vx = v.getID();
                             vds = v.getDSID();
                         }
@@ -1482,7 +1482,12 @@ public class SimplePropPropViewer implements EntryPoint {
                     VariableSerializable vs = variables[i];
                     String tid = vs.getAttributes().get("trajectory_id");
                     if ( tid != null && tid.equals("true") ) {
-                        trajectory_id = vs.getID();
+                        dsg_id = vs.getID();
+                    } else {
+                        tid = vs.getAttributes().get("profile_id");
+                    }
+                    if ( tid != null && tid.equals("true") ) {
+                        dsg_id = vs.getID();
                     }
                     if ( !vs.getAttributes().get("grid_type").equals("vector") ) {
                         xAllDatasetVariables.put(vs.getID(), vs);
@@ -1494,16 +1499,17 @@ public class SimplePropPropViewer implements EntryPoint {
                     if ( allvariables.contains(vs.getShortname().trim()) ||
                             vs.getShortname().trim().equals("longitude") ||
                             vs.getShortname().trim().equals("latitude")  ||
+                            vs.getShortname().trim().equals("depth") ||
                             vs.getShortname().trim().equals("time") || 
-                            vs.getID().equals(trajectory_id) ) {
+                            vs.getID().equals(dsg_id) ) {
                         included.add(vs);
                     }
                 }
                 yVariables.setVariables(included);
                 xVariables.setVariables(included);
                 colorVariables.setVariables(included);
-                if ( trajectory_id != null && !trajectory_id.equals("") ) {
-                    colorVariables.setVariable(xAllDatasetVariables.get(trajectory_id));
+                if ( dsg_id != null && !dsg_id.equals("") ) {
+                    colorVariables.setVariable(xAllDatasetVariables.get(dsg_id));
                 } else {
                     colorCheckBox.setValue(false);
                 }
@@ -1538,7 +1544,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
                 if (grid_type.equals("regular")) {
                     operationID = "prop_prop_plot";
-                } else if (grid_type.equals("trajectory")) {
+                } else if (grid_type.equals("trajectory") || grid_type.equals("profile") ) { // Try it with an OR for now. May require a new operation. //TODO decide if needs a new operation
                     operationID = "Trajectory_correlation_plot";
                 }
 

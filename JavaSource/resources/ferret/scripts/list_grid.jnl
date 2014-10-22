@@ -91,7 +91,7 @@ ENDIF  ! native_curvi_xy
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
 
 ! Default mask if no other mask is defined 
-LET mask = 1
+LET mask = {1}
 
 IF ($data_0_intervals"0|xy>1|*>0") THEN
 
@@ -150,7 +150,7 @@ IF ($data_0_intervals"0|xyzt>1|*>0") THEN
   ELIF ($region_t"0|*>1") THEN 
      LET mask = IF xyztvar[T=@NGD] GT 0 THEN 1
   ELSE
-     LET mask = 1
+     LET mask = {1}
   ENDIF
 ENDIF
 

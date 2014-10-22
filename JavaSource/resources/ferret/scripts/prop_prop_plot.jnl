@@ -98,8 +98,24 @@ LET q = ($yvar)
 
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
-IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
-IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+
+IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN 
+   IF ($data_0_units"0|*>1") THEN 
+      DEFINE SYMBOL tunits = ($data_0_units)
+   ELSE
+      DEFINE SYMBOL t_units = `($data_0_var),return=units`AA 
+      IF `STRLEN("$tunits)") GT 2` THEN DEFINE SYMBOL tunits = ($data_0_units"`($data_0_var),return=units`")
+   ENDIF
+ENDIF
+
+IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN 
+   IF ($data_1_units"0|*>1") THEN 
+      DEFINE SYMBOL tunits = ($data_1_units)
+   ELSE
+      DEFINE SYMBOL t_units = `($data_1_var),return=units`AA 
+      IF `STRLEN("$tunits)") GT 2` THEN DEFINE SYMBOL tunits = ($data_1_units"`($data_1_var),return=units`")
+   ENDIF
+ENDIF
 
 ! Polygon plot
 GO LAS_xytvar_setup
@@ -248,7 +264,8 @@ ELSE
 ! Dont use the palette coming in. Its for variable 0
      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
-     IF ($ferret_key_centerlab"0|0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT,CENT
+     IF ($keycentered"0|*>1") THEN \
+	  DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=centerlevels
 
 !      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=rainbow
      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
@@ -302,7 +319,6 @@ ELSE
       PPL POLYGON/OVER
    ENDIF
 ENDIF  ! color-by-trajectory or not...
-
 
 ! This allows for auto-levels on prop-prop plots.
 IF ($color_by"0|*>1") THEN
