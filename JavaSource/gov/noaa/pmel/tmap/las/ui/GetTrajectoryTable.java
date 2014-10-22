@@ -441,7 +441,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                                dsgQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
 	                                                csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
 	                                                if ( socat ) {
-	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
+	                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
 	                                                }
                                                     row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf,</a><a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
                                                     dsgQuery.setLength(0);
