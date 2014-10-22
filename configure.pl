@@ -690,7 +690,8 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[7] = $serverConf."/options.xml";
     $sample_in[8] = "conf/example/trajectory_ui.xml";
     $sample_out[8] = $serverConf."/trajectory_ui.xml";
-
+    $sample_in[9] = "conf/example/profile_ui.xml";
+    $sample_out[9] = $serverConf."/profile_ui.xml";
 
     for ( my $i = 0; $i <= $#sample_in; $i++ ) {
        if ( -f $sample_out[$i] ) {
