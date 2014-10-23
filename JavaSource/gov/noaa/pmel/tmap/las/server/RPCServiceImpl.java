@@ -45,6 +45,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -854,26 +856,45 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 } else {
                     Constraint c = new Constraint(lhs, op, rhs);
                     if ( c.getOp().equals("is") || c.getOp().equals("like") ) {
-                        url = url + "&" + c.getAsERDDAPString();
+                        xquery1.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name())); 
+                        xquery2.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name())); 
                     } else {
-                        url = url +"&" + c.getAsString();
+                        xquery1.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name())); 
+                        xquery2.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name())); 
                     }
                 }
               
             }
             Map<String, String> labels = constraint.getLabels();
             // Decide what to do about x now that we have the info.
+   	 	            // If the data set is 0 to 360 and the UI sends -180 to 180, re-normalize 
+            Map<String, String> dt = dataset.getPropertiesAsMap().get("tabledap_access");   
+            boolean is360 = false; 
+            if ( dt != null ) { 
+                String range = dt.get("lon_domain"); 
+                is360 = !range.contains("180"); 
+            } 
             if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
                 double dxlo = Double.valueOf(xlo);
                 double dxhi = Double.valueOf(xhi);
                 // Do the full globle and two query dance...
+                if ( is360 ) { 
+                    if ( dxlo < 0 ) { 
+                        dxlo = dxlo + 360.; 
+                    } 
+                    if ( dxhi < 0 ) { 
+                        dxhi = dxhi + 360.; 
+                    } 
+                } 
 
                 if ( Math.abs(dxhi - dxlo ) < 355. ) {
 
-                    LatLonPoint p = new LatLonPointImpl(0, dxhi);
-                    dxhi = p.getLongitude();
-                    p = new LatLonPointImpl(0, dxlo);
-                    dxlo = p.getLongitude();
+                    if ( !is360) {
+                        LatLonPoint p = new LatLonPointImpl(0, dxhi);
+                        dxhi = p.getLongitude();
+                        p = new LatLonPointImpl(0, dxlo);
+                        dxlo = p.getLongitude();
+                    }
 
                     if ( dxhi < dxlo ) {
                         if ( dxhi < 0 && dxlo >= 0 ) {
@@ -909,7 +930,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                         // The config specifies the names...
                         if ( labels != null ) {
                             String u = labels.get(t);
-                            outerSequenceValues.put(t,u);
+                            if ( u != null ) { 
+                                outerSequenceValues.put(t,u); 
+                            } else { 
+                                // No label found for this one 
+                                outerSequenceValues.put(t,t); 
+                            } 
                         } else {
                             // A second variable specifies the names
                             String u = s.getString(1);
@@ -924,7 +950,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 jsonStream = new URL(q2url).openStream();
                 String jsonText2 = IOUtils.toString(jsonStream);
                 JSONObject json2 = new JSONObject(jsonText2);
-                JSONArray v2 = json.getJSONObject("table").getJSONArray("rows");
+                JSONArray v2 = json2.getJSONObject("table").getJSONArray("rows");
                 for (int i = 0; i < v2.length(); i++) {
                     JSONArray s = v2.getJSONArray(i);
                     String t = s.getString(0);
