@@ -98,4 +98,10 @@ Choices are:
       <map href="#DefaultLivemap"/>
       <map href="#Trajectory_ColorOptions"/>
     </default>
+    <default name="trajectory">
+      <map href="#Trajectory_Operations"/>
+      <map href="#Trajectory_Views"/>
+      <map href="#DefaultLivemap"/>
+      <map href="#Trajectory_ColorOptions"/>
+    </default>
   </defaults>
