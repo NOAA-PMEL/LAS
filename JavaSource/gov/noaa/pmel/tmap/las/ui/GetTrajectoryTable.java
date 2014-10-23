@@ -123,6 +123,17 @@ public class GetTrajectoryTable extends LASAction {
 	        Dataset dataset = c.get(0).getDataset();
 	        Map<String, Map<String, String>> properties = dataset.getPropertiesAsMap();
 	        if ( properties != null ) {
+
+
+                    Map<String, String> fp = properties.get("ferret");
+	            String is = null;
+                    if ( fp != null ) {
+                       is = fp.get("is_socat");
+                    }
+                    boolean socat = false;
+                    if ( is != null && !is.equals("") ) {
+                        socat = true;
+                    }
 	            Map<String, String> tabledap = properties.get("tabledap_access");
 	            if ( tabledap != null ) {
 	                String table = tabledap.get("table_variables");
@@ -214,18 +225,36 @@ public class GetTrajectoryTable extends LASAction {
 	                                Document doc = new Document();
 
 	                                String query = "";
+
+ 	                                Map<String, String> dt = dataset.getPropertiesAsMap().get("tabledap_access");  
+ 	                                boolean is360 = false;
+ 	                                if ( dt != null ) {
+ 	                                    String range = dt.get("lon_domain");
+ 	                                    is360 = !range.contains("180");
+ 	                                }
+
 	                                try {
 	                                    if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
 	                                        double dxlo = Double.valueOf(xlo);
 	                                        double dxhi = Double.valueOf(xhi);
-	                                        // Do the full globe and two query dance...
+ 	                                        // Do the full globe  and two query dance...
+ 	                                        if ( is360 ) {
+ 	                                            if ( dxlo < 0 ) {
+ 	                                                dxlo = dxlo + 360.;
+ 	                                            }
+ 	                                            if ( dxhi < 0 ) {
+ 	                                                dxhi = dxhi + 360.;
+ 	                                            }
+ 	                                        }
 
 	                                        if ( Math.abs(dxhi - dxlo ) < 355. ) {
+ 	                                            if ( !is360 ) {
+ 	                                                LatLonPoint p = new LatLonPointImpl(0, dxhi);
+ 	                                                dxhi = p.getLongitude();
+ 	                                                p = new LatLonPointImpl(0, dxlo);
+ 	                                                dxlo = p.getLongitude();
+ 	                                            }
 
-	                                            LatLonPoint p = new LatLonPointImpl(0, dxhi);
-	                                            dxhi = p.getLongitude();
-	                                            p = new LatLonPointImpl(0, dxlo);
-	                                            dxlo = p.getLongitude();
 
 	                                            if ( dxhi < dxlo ) {
 	                                                if ( dxhi < 0 && dxlo >= 0 ) {
@@ -363,7 +392,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                        for (int i = 0; i < titles.length; i++) {
 	                                            columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
 	                                        }
-                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
+                                            if ( socat ) {
 
                                                 columnHeaders.append("<th>documentation</th>\n");
                                             }
@@ -371,7 +400,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                        columnHeaders.append("<th>start</th>\n");
 	                                        columnHeaders.append("<th>end</th>\n");
 
-                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
+                                            if ( socat ) {
 
                                                 columnHeaders.append("<th>crossovers</th>\n");
                                                 columnHeaders.append("<th>qc flags</th>\n");
@@ -393,7 +422,7 @@ public class GetTrajectoryTable extends LASAction {
 	                                            unitStrings.append("<th>"+units[i]+"</th>\n");
 	                                        }
 	                                        unitStrings.append("<th></th>\n");
-                                            if ( type.equals("trajectory") && document_base.trim().length() > 0 ) {
+                                            if ( socat ) {
 
 	                                        unitStrings.append("<th></th>\n");
 	                                        unitStrings.append("<th></th>\n");
