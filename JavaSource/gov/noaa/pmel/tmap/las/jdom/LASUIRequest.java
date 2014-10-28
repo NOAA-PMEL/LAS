@@ -44,6 +44,16 @@ public class LASUIRequest extends LASDocument {
         link.setAttribute("match", "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
         args.addContent(link);
     }
+    public void addVariableOldXPath(String dsid, String varid) {
+        Element args = getRootElement().getChild("args");
+        if ( args == null ) {
+            args = new Element("args");
+            getRootElement().addContent(args);
+        }
+        Element link = new Element("link");
+        link.setAttribute("match", "/lasdata/datasets/"+dsid+"/variables/"+varid);
+        args.addContent(link);
+    }
     
     /**
      * Get a list of all the Variables in the request as XPaths.

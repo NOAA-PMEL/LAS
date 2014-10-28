@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.exception.LASException;
-import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.erddap.util.ERDDAPUtil;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -10,9 +9,7 @@ import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
-import gov.noaa.pmel.tmap.las.service.tabledap.TabledapTool;
 import gov.noaa.pmel.tmap.las.util.Category;
-import gov.noaa.pmel.tmap.las.util.Constraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Variable;
@@ -37,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.gwttime.time.chrono.GregorianChronology;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -140,7 +136,7 @@ public class GetTrajectoryTable extends LASAction {
 	        if ( properties != null ) {
 
 
-                    Map<String, String> fp = properties.get("ferret");
+                Map<String, String> fp = properties.get("ferret");
 	            String is = null;
                     if ( fp != null ) {
                        is = fp.get("is_socat");
@@ -502,7 +498,7 @@ public class GetTrajectoryTable extends LASAction {
 
                                                     String ps = baseurl + "?catid="+dsid+"&amp;xml="+download.toEncodedURLString();
 
-                                                    row.append("<td target=\"_blank\" nowrap=\"nowrap\" colspan=\"1\"><a href='"+ps+"'>Save As...</a></td>\n");
+                                                    row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href='"+ps+"'>Save As...</a></td>\n");
 
 
                                                     //row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf</a>"+" || "+"<a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
