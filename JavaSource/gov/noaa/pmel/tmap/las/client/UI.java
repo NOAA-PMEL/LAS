@@ -131,7 +131,7 @@ public class UI extends BaseUI {
             CategorySerializable[] cats = (CategorySerializable[]) result;
             if (cats != null) {
                 if (cats.length > 1) {
-                    Window.alert("Multiple categories found.");
+                    Window.alert("Please choose a data set.");
                 } else if (cats.length == 1) {
                     CategorySerializable firstCategorySerializable = cats[0];
                     if (firstCategorySerializable != null && !firstCategorySerializable.isVariableChildren()) {
@@ -159,6 +159,9 @@ public class UI extends BaseUI {
                             }
                         }
                     }
+                } else {
+                	// No such data set was found.
+                	Util.getRPCService().getIDMap(null, initFromURL);
                 }
             }
         }
@@ -232,7 +235,7 @@ public class UI extends BaseUI {
                 xView = "xy";
                 xOperationID = "Plot_2D_XY_zoom";
                 xOptionID = "Options_2D_image_contour_xy_7";
-                Window.alert("Please choose a data set.");
+                Util.getRPCService().getIDMap(null, initFromURL);
             }
         }
     };
