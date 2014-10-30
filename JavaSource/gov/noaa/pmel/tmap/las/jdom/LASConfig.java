@@ -234,15 +234,17 @@ public class LASConfig extends LASDocument {
         return comboList;
     }
     public Map<String, String> getIDMap(String data_url) throws JDOMException, LASException {
-        List<Category> categories = getDatasetsAsCategories(false);
-        for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
-            Category category = (Category) catIt.next();
-            Map<String, String> ids = findDataURL(data_url, category);
-            if ( ids.size() > 0 ) {
-                return ids;
-            }
-        }
-        return new HashMap<String, String>();
+    	List<Category> categories = getDatasetsAsCategories(false);
+
+    	for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+    		Category category = (Category) catIt.next();
+    		Map<String, String> ids = findDataURL(data_url, category);
+    		if ( ids.size() > 0 ) {
+    			return ids;
+    		}
+    	}
+
+    	return new HashMap<String, String>();
     }
     public String getIDs(String data_url) throws JDOMException, LASException {
         Map<String, String> ids = getIDMap(data_url);
@@ -263,12 +265,20 @@ public class LASConfig extends LASDocument {
     			Variable variable = (Variable) varsIt.next();
     			String url = getFullDataObjectURL(variable.getDSID(), variable.getID());
     			if ( !url.equals("") ) {
-    				if ( url.startsWith(data_url) || url.endsWith(data_url) ) {
+    				if ( data_url != null && (url.startsWith(data_url) || url.endsWith(data_url) ) ) {
     				    Map<String, String> ids = new HashMap<String, String>();
     				    ids.put("catid", category.getID());
     				    ids.put("dsid", variable.getDSID());
     				    ids.put("varid", variable.getID());
     					return ids;
+    				} else {
+    					if ( variable.getAttributesAsMap().get("grid_type") != null && variable.getAttributesAsMap().get("grid_type").equals("regular") ) {
+    						Map<String, String> ids = new HashMap<String, String>();
+    						ids.put("catid", category.getID());
+    						ids.put("dsid", variable.getDSID());
+    						ids.put("varid", variable.getID());
+    						return ids;
+    					}
     				}
     			}
     		}
