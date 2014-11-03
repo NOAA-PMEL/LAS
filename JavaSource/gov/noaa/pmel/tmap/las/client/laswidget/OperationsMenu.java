@@ -29,7 +29,7 @@ public class OperationsMenu extends Composite {
 	OperationPushButton exportToDesktopButton = new OperationPushButton("Export to Desktop Application");
 	OperationPushButton saveAsButton = new OperationPushButton("Save As...");
 	OperationPushButton climateAnalysis = new OperationPushButton("Climate Analysis...");
-	OperationPushButton dsgTable = new OperationPushButton("Table");
+	OperationPushButton dsgTable = new OperationPushButton("Table of Platforms");
 	OperationPushButton thumbnailTable = new OperationPushButton("Thumbnails");
 	
 	boolean hasComparison = false;
