@@ -6,6 +6,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 
 import com.google.gwt.core.client.GWT;
@@ -46,6 +47,7 @@ public class AlertButton extends Composite {
         eventBus = cf.getEventBus();
         this.alertStyle = alertStyle;
         eventBus.addHandler(WidgetSelectionChangeEvent.TYPE, updateNeededEventHandler);
+        eventBus.addHandler(VariableSelectionChangeEvent.TYPE, variableChangedEventHandler);
         eventBus.addHandler(UpdateFinishedEvent.TYPE, updateFinishedHandler);
         eventBus.addHandler(MapChangeEvent.TYPE, mapChangeHandler);
         initWidget(panel);
@@ -59,6 +61,14 @@ public class AlertButton extends Composite {
             button.addStyleDependentName(alertStyle);            
         }
         
+    };
+    VariableSelectionChangeEvent.Handler variableChangedEventHandler = new VariableSelectionChangeEvent.Handler() {
+
+		@Override
+		public void onVariableChange(VariableSelectionChangeEvent event) {
+            button.addStyleDependentName(alertStyle);            			
+		}
+    	
     };
     private MapChangeEvent.Handler mapChangeHandler = new MapChangeEvent.Handler() {
 
