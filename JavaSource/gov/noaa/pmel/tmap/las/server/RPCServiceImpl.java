@@ -21,6 +21,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
+import gov.noaa.pmel.tmap.las.erddap.util.ERDDAPUtil;
 import gov.noaa.pmel.tmap.las.jdom.ESGFSearchDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -830,6 +831,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             String xhi = null;
             String xlo = null;
             // If they exist, add the other constraints...
+            List<Constraint> textConstraints = new ArrayList<Constraint>();
             for (Iterator iterator = constriants.iterator(); iterator.hasNext();) {
                 ConstraintSerializable constraintSerializable = (ConstraintSerializable) iterator.next();
                 
@@ -855,16 +857,15 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                     }
                 } else {
                     Constraint c = new Constraint(lhs, op, rhs);
-                    if ( c.getOp().equals("is") || c.getOp().equals("like") ) {
-                        xquery1.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name())); 
-                        xquery2.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name())); 
-                    } else {
-                        xquery1.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name())); 
-                        xquery2.append("&" + URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name())); 
-                    }
+                    textConstraints.add(c);
                 }
               
             }
+            
+            String cq = ERDDAPUtil.getConstraintQuery(textConstraints);
+            xquery1.append(cq);
+            xquery2.append(cq);
+
             Map<String, String> labels = constraint.getLabels();
             // Decide what to do about x now that we have the info.
    	 	            // If the data set is 0 to 360 and the UI sends -180 to 180, re-normalize 
@@ -874,45 +875,15 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 String range = dt.get("lon_domain"); 
                 is360 = !range.contains("180"); 
             } 
-            if ( xlo != null && xlo.length() > 0 && xhi != null && xhi.length() > 0 ) {
-                double dxlo = Double.valueOf(xlo);
-                double dxhi = Double.valueOf(xhi);
-                // Do the full globle and two query dance...
-                if ( is360 ) { 
-                    if ( dxlo < 0 ) { 
-                        dxlo = dxlo + 360.; 
-                    } 
-                    if ( dxhi < 0 ) { 
-                        dxhi = dxhi + 360.; 
-                    } 
-                } 
-
-                if ( Math.abs(dxhi - dxlo ) < 355. ) {
-
-                    if ( !is360) {
-                        LatLonPoint p = new LatLonPointImpl(0, dxhi);
-                        dxhi = p.getLongitude();
-                        p = new LatLonPointImpl(0, dxlo);
-                        dxlo = p.getLongitude();
-                    }
-
-                    if ( dxhi < dxlo ) {
-                        if ( dxhi < 0 && dxlo >= 0 ) {
-                            dxhi = dxhi + 360.0d;
-                            xquery1.append("&lon360>=" + dxlo);
-                            xquery1.append("&lon360<=" + dxhi);                            
-                            xquery2.append("&longitude>="+dxlo+"&longitude<"+180);
-                        } // else request overlaps, so leave it off
-                    } else {
-                        xquery1.append("&longitude>="+dxlo);
-                        xquery1.append("&longitude<="+dxhi);
-                    }
-
-                }
-            } else {
-                // 
-                if ( xlo != null && xlo.length() > 0 ) xquery1.append("&longitude>="+xlo);
-                if ( xhi != null && xhi.length() > 0 ) xquery1.append("&longitude<="+xhi);
+            List<String> lonQueries = ERDDAPUtil.getLongitudeQuery(is360, xlo, xhi);
+            String lonQ1 = lonQueries.get(0);
+            String lonQ2 = null;
+            if ( lonQueries.size() > 1 ) {
+            	lonQ2 = lonQueries.get(1);
+            }
+            xquery1.append(lonQ1);
+            if ( lonQ2 != null ) {
+            	xquery2.append(lonQ2);
             }
             // Always to the first query.
                 String q1url = url + xquery1.toString();
