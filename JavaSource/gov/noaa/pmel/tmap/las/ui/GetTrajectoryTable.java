@@ -129,10 +129,8 @@ public class GetTrajectoryTable extends LASAction {
 	        Dataset dataset = c.get(0).getDataset();
 	        Map<String, Map<String, String>> properties = dataset.getPropertiesAsMap();
 	        String baseurl = lasConfig.getBaseServerURL();
-	        if ( !baseurl.endsWith("/") ) {
-	            baseurl = baseurl + "/";
-	        }
-	        baseurl = baseurl + "ProductServer.do";
+	        String context = baseurl.substring(baseurl.lastIndexOf("/"), baseurl.length());
+	        baseurl = context + "/" + "ProductServer.do";
 	        if ( properties != null ) {
 
 
