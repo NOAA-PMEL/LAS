@@ -37,7 +37,7 @@ IF `($vshape"0|E>1|POINT>1|*>0)` THEN
    DEFINE SYMBOL ($data_x_var)_name = ($data_x_var)
    SET VAR/NAME=($data_x_var)_M ($data_x_var)
    LET ($($data_x_var)_name)_x = EXPND_BY_LEN(($data_x_var)_M, ($rowvar),`($rowvar)[m=@sum]`)
-   LET/units="`($data_x_var)_M,return=units`"/TITLE=`($data_x_var)_M,RETURN=title` \
+   LET/units="`($data_x_var)_M,return=units`"/TITLE="`($data_x_var)_M,RETURN=title`" \
     ($($data_x_var)_name) = ($($data_x_var)_name)_x[gx=obsXvar@ASN]
    DEFINE SYMBOL skip_list_var = ($skip_list_var) ($data_x_var)_M
 ENDIF
@@ -47,7 +47,7 @@ IF `($vshape"0|E>1|POINT>1|*>0)` THEN
    DEFINE SYMBOL ($data_y_var)_name = ($data_y_var)
    SET VAR/NAME=($data_y_var)_M ($data_y_var)
    LET ($($data_y_var)_name)_y = EXPND_BY_LEN(($data_y_var)_M, ($rowvar),`($rowvar)[m=@sum]`)
-   LET/units="`($data_y_var)_M,return=units`"/TITLE=`($data_y_var)_M,RETURN=title` \
+   LET/units="`($data_y_var)_M,return=units`"/TITLE="`($data_y_var)_M,RETURN=title`" \
     ($($data_y_var)_name) = ($($data_y_var)_name)_y[gx=obsXvar@ASN]
    DEFINE SYMBOL skip_list_var = ($skip_list_var) ($data_y_var)_M
 ENDIF
@@ -57,7 +57,7 @@ IF `($vshape"0|E>1|POINT>1|*>0)` THEN
    DEFINE SYMBOL ($data_t_var)_name = ($data_t_var)
    SET VAR/NAME=($data_t_var)_M ($data_t_var)
    LET ($($data_t_var)_name)_y = EXPND_BY_LEN(($data_t_var)_M, ($rowvar),`($rowvar)[m=@sum]`)
-   LET/units="`($data_t_var)_M,return=units`"/TITLE=`($data_t_var)_M,RETURN=title` \
+   LET/units="`($data_t_var)_M,return=units`"/TITLE="`($data_t_var)_M,RETURN=title`" \
     ($($data_t_var)_name) = ($($data_t_var)_name)_y[gx=obsXvar@ASN]
    DEFINE ATTRIBUTE ($($data_t_var)_name).time_origin = "`($data_t_var)_M.time_origin`"
    DEFINE SYMBOL skip_list_var = ($skip_list_var) ($data_t_var)_M
