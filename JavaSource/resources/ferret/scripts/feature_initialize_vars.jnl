@@ -23,11 +23,10 @@ IF `($ferret_memory"25.6") LT 200` THEN SET MEM/siz=200
 ! NOTE:  the SQL query (dsg request?) ends with:  'ORDER BY feature_ID'.
 
 DEFINE SYMBOL feature_max_labels = 200
-LET num_i = `($data_var),return = isize`
-DEFINE SYMBOL numobs = `MAX(($numobs"0"), num_i)`
+DEFINE SYMBOL numobs = `($data_var),return = isize`
 LET num_e = `($data_var),return = msize`
 
-DEFINE SYMBOL numobs = `MAX(($numobs"0"), num_e)`
+IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 
 ! Are the rowsize variables in the E direction?
 DEFINE SYMBOL rdir = `($rowvar),RETURN=shape` 
