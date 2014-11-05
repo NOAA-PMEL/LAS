@@ -8,6 +8,12 @@
 GO LAS_reset_gifname
 
 !! Make a 2d plot...
+IF ($ferret_view"0|xzt>1|*>0") THEN
+define ferret_view = xz
+ENDIF
+IF ($ferret_view"0|yzt>1|*>0") THEN
+define ferret_view = xz
+ENDIF
 IF ($ferret_view"0|xz>1|yz>1|zt>1|*>0") THEN
    GO insitu_waterfall_($ferret_view)
 ELSE
