@@ -247,14 +247,14 @@ public class OperationsWidget extends Composite {
                             } else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z")) ||
                                     (view.equals("yz") && intervals.contains("y") && intervals.contains("z")) ||
                                     (view.equals("ze") && intervals.contains("z") && intervals.contains("e")) ||
-                                    (op.getID().contains("Profile_Plot_2D_zoom") && (view.equals("xz") || view.contains("yz")))
+                                    (op.getID().contains("Profile_Plot_2D_zoom") && (view.equals("xzt") || view.contains("yzt")))
                                     ) {
                                 if ( !hasSectionPlots ) {
                                     sectionPlotsTable.clear();
                                     hasSectionPlots = true;
                                 }
                                 OperationRadioButton button = null;
-                                if ( view.equals("xz") ) {
+                                if ( view.contains("xz") ) {
                                     String l = grid.getZAxis().getLabel();
                                     String n = grid.getZAxis().getName();
                                     if ( l != null && !l.equals("") ) {
@@ -264,7 +264,7 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Longitude-z");
                                     }
-                                } else if ( view.equals("yz") ) {
+                                } else if ( view.contains("yz") ) {
                                     String l = grid.getZAxis().getLabel();
                                     String n = grid.getZAxis().getName();
                                     if ( l != null && !l.equals("") ) {
