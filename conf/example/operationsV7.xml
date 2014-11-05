@@ -61,8 +61,8 @@
     </response>
     </operation>
      <region>
-      <intervals name="xz" type="Depth Profiles" title="Longitude-Depth"/>
-      <intervals name="yz" type="Depth Profiles" title="Latitude-Depth"/>
+      <intervals name="xzt" type="Depth Profiles" title="Longitude-Depth"/>
+      <intervals name="yzt" type="Depth Profiles" title="Latitude-Depth"/>
       <intervals name="zt" type="Hovmoller Plots" title="Latitude-Depth"/>
     </region>
     <grid_types>
