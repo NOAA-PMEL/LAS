@@ -89,22 +89,21 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 
 
 
-! Adjust if there is just one time
-IF `tmin-tmax LT 1.e-3` THEN
-   LET addtime = 1
-   IF `STRINDEX(time_units, "sec") GT 0` THEN LET addtime = 24*60*60
-   IF `STRINDEX(time_units, "min") GT 0` THEN LET addtime = 24*60
-   IF `STRINDEX(time_units, "ho") GT 0` THEN LET addtime = 24
-   IF `STRINDEX(time_units, "da") GT 0` THEN LET addtime = 1
-   IF `tmin GT 0` THEN 
-      LET tmin = `tmin - addtime`
-      LET tmax = `tmax + addtime`
-   ELSE
-      LET tmin = `tmin + addtime`
-      LET tmax = `tmax - addtime`
-   ENDIF   
-ENDIF
-
+! Adjust if start and end times are too close together
+   LET oneday = 1
+   IF `STRINDEX(time_units, "sec") GT 0` THEN LET oneday = 24*60*60
+   IF `STRINDEX(time_units, "min") GT 0` THEN LET oneday = 24*60
+   IF `STRINDEX(time_units, "ho") GT 0` THEN LET oneday = 24
+   IF `STRINDEX(time_units, "da") GT 0` THEN LET oneday = 1
+   IF `tmin-tmax LT 1.e-3` THEN
+      IF `tmin GT 0` THEN 
+         LET tmin = `tmin - oneday`
+         LET tmax = `tmax + oneday`
+      ELSE
+         LET tmin = `tmin + oneday`
+         LET tmax = `tmax - oneday`
+      ENDIF   
+   ENDIF
 
    DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis
 
@@ -214,19 +213,20 @@ LET amax = time[i=@max]
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
-! Adjust if there is just one time
-IF `ax_lo-ax_hi LT 1.e-3` THEN
-   LET addtime = 1
-   IF `STRINDEX(time_units, "sec") GT 0` THEN LET addtime = 24*60*60
-   IF `STRINDEX(time_units, "min") GT 0` THEN LET addtime = 24*60
-   IF `STRINDEX(time_units, "ho") GT 0` THEN LET addtime = 24
-   IF `STRINDEX(time_units, "da") GT 0` THEN LET addtime = 1
+! Adjust if time too close together
+let oneday = 1
+IF `STRINDEX(time_units, "sec") GT 0` THEN LET oneday = 24*60*60
+IF `STRINDEX(time_units, "min") GT 0` THEN LET oneday = 24*60
+IF `STRINDEX(time_units, "ho") GT 0` THEN LET oneday = 24
+IF `STRINDEX(time_units, "da") GT 0` THEN LET oneday = 1 
+
+IF `ax_lo-ax_hi LT oneday/2` THEN
    IF `ax_lo GT 0` THEN 
-      LET ax_lo = `ax_lo - addtime`
-      LET ax_hi = `ax_hi + addtime`
+      LET ax_lo = `ax_lo - oneday`
+      LET ax_hi = `ax_hi + oneday`
    ELSE
-      LET ax_lo = `ax_lo + addtime`
-      LET ax_hi = `ax_hi - addtime`
+      LET ax_lo = `ax_lo + oneday`
+      LET ax_hi = `ax_hi - oneday`
    ENDIF   
 ENDIF
 DEFINE AXIS/t=`ax_lo`:`ax_hi`/npoints=1000/units=`time_units`/t0="`time_origin`" haxis 
@@ -235,7 +235,7 @@ LET xlo = ax_lo
 LET xhi = ax_hi
 
 DEFINE AXIS/z=0:`dhi`/depth/npoints=100 vaxis
-DEF sym vunits= `($data_z_var),return=units`AAA
+DEFINE SYMBOL vunits= `($data_z_var),return=units`AAA
 IF `STRCMP("($vunits)", "AAA")` THEN SET AXIS/UNITS=`($data_z_var),return=units` vaxis
 
 
