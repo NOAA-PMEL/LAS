@@ -86,6 +86,26 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
       LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
       DEFINE SYMBOL  tunits = `tunits`
    ENDIF
+
+
+
+! Adjust if there is just one time
+IF `tmin-tmax LT 1.e-3` THEN
+   LET addtime = 1
+   IF `STRINDEX(time_units, "sec") GT 0` THEN LET addtime = 24*60*60
+   IF `STRINDEX(time_units, "min") GT 0` THEN LET addtime = 24*60
+   IF `STRINDEX(time_units, "ho") GT 0` THEN LET addtime = 24
+   IF `STRINDEX(time_units, "da") GT 0` THEN LET addtime = 1
+   IF `tmin GT 0` THEN 
+      LET tmin = `tmin - addtime`
+      LET tmax = `tmax + addtime`
+   ELSE
+      LET tmin = `tmin + addtime`
+      LET tmax = `tmax - addtime`
+   ENDIF   
+ENDIF
+
+
    DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis
 
    LET ttvar = t[gt=time_axis]
@@ -194,8 +214,23 @@ LET amax = time[i=@max]
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
-
+! Adjust if there is just one time
+IF `ax_lo-ax_hi LT 1.e-3` THEN
+   LET addtime = 1
+   IF `STRINDEX(time_units, "sec") GT 0` THEN LET addtime = 24*60*60
+   IF `STRINDEX(time_units, "min") GT 0` THEN LET addtime = 24*60
+   IF `STRINDEX(time_units, "ho") GT 0` THEN LET addtime = 24
+   IF `STRINDEX(time_units, "da") GT 0` THEN LET addtime = 1
+   IF `ax_lo GT 0` THEN 
+      LET ax_lo = `ax_lo - addtime`
+      LET ax_hi = `ax_hi + addtime`
+   ELSE
+      LET ax_lo = `ax_lo + addtime`
+      LET ax_hi = `ax_hi - addtime`
+   ENDIF   
+ENDIF
 DEFINE AXIS/t=`ax_lo`:`ax_hi`/npoints=1000/units=`time_units`/t0="`time_origin`" haxis 
+
 LET xlo = ax_lo
 LET xhi = ax_hi
 
