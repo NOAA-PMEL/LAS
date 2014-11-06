@@ -133,11 +133,11 @@ GO LAS_initialize_var_levels
 ! If there is no plot variable defined (only plotting locations),
 ! do not plot the key.
 
-DEFINE SYMBOL ferret_plot_key = ($ferret_plot_var"0|*>1")
+IF `($ferret_plot_key"0|0|1>0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_key = ($ferret_plot_var"0|*>1")
 
 ! Plot qualifiers (graticule lines etc)
 GO LAS_set_plot_qualifiers
-IF `STRINDEX("($qualifiers)", "KEY") EQ 0 AND ($ferret_plot_key"0")` THEN DEFINE SYMBOL qualifers = ($qualifiers)/KEY
+IF `STRINDEX("($qualifiers)", "KEY") EQ 0 AND ($ferret_plot_key"0|*>1")` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY 
 
 ! Open the window
 GO LAS_open_window
