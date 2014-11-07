@@ -326,6 +326,7 @@ DEFINE SYMBOL yvar = yvar
 
 ! Apply any constraints
 
+ LET npts = `xvar,return=isize`
 ! Initialize mask variables
 
 LET var_mask = 1+0*x[gx=xvar,i=1:`nx_var`]
