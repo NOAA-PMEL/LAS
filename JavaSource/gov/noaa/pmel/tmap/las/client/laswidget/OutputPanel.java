@@ -1373,6 +1373,9 @@ public class OutputPanel extends Composite implements HasName {
         }
        
         if ( constraints != null ) {
+        	// If there were constraints in the previous request, they need to be removed.
+        	// We might have changed data sets.
+        	lasRequest.removeConstraints();
             lasRequest.addConstraints(constraints);
         }
         return lasRequest;
