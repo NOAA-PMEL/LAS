@@ -51,6 +51,7 @@ DEFINE SYMBOL ferret_view = aa
 GO LAS_open_window
 
 DEFINE SYMBOL ferret_view = ($viewsave)
+IF `STRLEN("($ferret_view)") EQ 1` THEN DEFINE SYMBOL ferret_view = xy
 
 ! Build up the plot qualifiers
 IF ($ferret_use_graticules"0|0|*>1) THEN
