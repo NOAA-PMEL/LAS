@@ -39,7 +39,10 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `has_var EQ 0` THEN EXIT/CYCLE;\
   IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_;\
   IF `($constraint_($ic)_type"0|variable>1|*>0") EQ 0` THEN EXIT/CYCLE;\
-  LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
+  LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1; \
+  LET nc = `($cvar),RETURN=isize`;\
+  IF `(nc NE npts) AND ($rowvar"0|*>1")` THEN DEFINE SYMBOL cvar = SEPARATE(($cvar), ($rowvar), 0); \
+  LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1; \
   IF ($apply_region) THEN LET var_mask_($ic) = IF ($cvar)[($region_full)] ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
   IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
