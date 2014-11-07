@@ -89,15 +89,15 @@ LET/QUIET PLMypolymark = PLMypolymark0[k=1:3]*PLMyscale
 def sym word = "($data_var_in)"
 IF `STRCMP(($word),"TAX")` THEN
   ! word is not TAX
-  poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")/set  x_var_data+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+  poly/coord_ax=Z/key/over/nolab($qualifiers)/set  x_var_data+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
   GO key_at_top
   PPL POLYGON/OVER
 
   IF `($region_x_lo) LT 0` THEN
-    poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")  x_var_data-360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+    poly/coord_ax=Z/key/over/nolab($qualifiers)  x_var_data-360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
   ENDIF
   IF `($region_x_hi) GT 360` THEN
-    poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")  x_var_data+360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+    poly/coord_ax=Z/key/over/nolab($qualifiers)  x_var_data+360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
   ENDIF
 ELSE
   ! word is TAX
@@ -117,16 +117,16 @@ ELSE
       ppl fillpol
     ENDIF
   ELSE
-    poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")/set  x_var_data+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+    poly/coord_ax=Z/key/over/nolab($qualifiers)/set  x_var_data+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
     ppl shakey ,,0.0001
     ppl fillpol
     IF `($region_x_lo) LT 0` THEN
-    poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")/set  x_var_data-360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+    poly/coord_ax=Z/key/over/nolab($qualifiers)/set  x_var_data-360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
       ppl shakey ,,0.0001
       ppl fillpol
     ENDIF
     IF `($region_x_hi) GT 360` THEN
-      poly/coord_ax=Z/key/over/nolab/lev=v/pal=($ferret_palette"rnb2")/set  x_var_data+360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
+      poly/coord_ax=Z/key/over/nolab($qualifiers)/set  x_var_data+360+PLMxpolymark*sym_size, y_var_data+PLMypolymark*sym_size, var_data
       ppl shakey ,,0.0001
       ppl fillpol
     ENDIF
