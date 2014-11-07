@@ -1372,9 +1372,6 @@ public class OutputPanel extends Composite implements HasName {
             lasRequest.setProperty("las", "output_type", "xml");
         }
         
-        // If there were constraints in the previous request, they need to be removed.
-    	// We might have changed data sets.
-    	lasRequest.removeConstraints();
         if ( constraints != null ) {
             lasRequest.addConstraints(constraints);
         }
