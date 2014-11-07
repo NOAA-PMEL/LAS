@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! LAS_insitu_pie_xy.jnl
+! Profile_2D_poly.jnl
 !
 ! Creates a 2D plot with a blank 'basemap' and an overlay of points
 ! drawn in the pie style from ($ferret_plot_var) defined in LAS_initialize_data_insitu.
@@ -179,19 +179,6 @@ ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-! Ribbon plot
-DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
-!DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
-
-IF ($decimation_fraction"0|*>1") THEN 
-   IF `approx_total LT 70000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
-ELSE
-   IF `nout_lonlat LT 40000` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
-ENDIF
-
-!IF `nout_lonlat LT 40000 and featuresize LT 100` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
-IF `featuresize LT 20` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/THICK
-
 IF ($single_color"0|*>1") THEN
    DEFINE SYMBOL plot_command = PLOT/VS/LINE/color=5
 ENDIF
@@ -201,15 +188,6 @@ ENDIF
 LET missing_flag = -9999999
 LET/UNITS=degrees_east  x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
 LET/UNITS=degrees_north y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
-
-
-! Set the palette
-
-IF ($ferret_plot_var"0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
-ELSE
-   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
-ENDIF
 
 ! Draw the pie plot
 
