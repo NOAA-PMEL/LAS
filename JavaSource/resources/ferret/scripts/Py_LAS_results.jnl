@@ -197,8 +197,11 @@ ENDIF
 
 ! This section assumes there is a variable "the_plot_var" which is
 ! defined by standard LAS scripts but not for all customized interfaces.
+! If things have really gone wrong and there is no ferret_plot_var, just 
+! use this dummy variable so as to be able to finish the script.
 
-   IF `($ferret_plot_var"0|*>1") EQ 1` THEN 
+   LET dummyvar = x[i=1:5] + y[i=1:5]
+   IF `($ferret_plot_var"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_plot_var = dummyvar
 
    IF `($ax_horiz"0|*>1") OR ($ax_vert"0|*>1")`  THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV", \
@@ -299,8 +302,6 @@ ENDIF
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF  ! ax_horiz ax_vert defined
-   ENDIF  ! ferret_plot_var defined
-
 
 ! If it was a color plot write the string needed to put into a /LEVELS qualifier,
 ! to duplicate the color levels from this plot.
