@@ -14,6 +14,9 @@
 <!-- UI Configuration for Profile Plots -->
 <!ENTITY profile_ui SYSTEM "profile_ui.xml">
 
+<!-- UI Configuration for Profile Plots -->
+<!ENTITY timeseries_ui SYSTEM "timeseries_ui.xml">
+
 ]>
 <lasui title="@TITLE@">
    <ui url="http://@SERVLET_ROOT_URL@/@APPNAME@/servlets/"/>
@@ -23,6 +26,7 @@
     &insitu_demo_ui;
     &trajectory_ui;
     &profile_ui;
+    &timeseries_ui;
 
     <images>
         <image name="Image_StdWorld" url="gifs/java_0_world.gif" 
