@@ -504,6 +504,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     dsgQuery.setLength(0);
                                                     csvQuery.setLength(0);
                                                     InputStream stream = null;
+                                                    InputStreamReader reader = null;
                                                     // Call out to ERDDAP for the lat/lon/time box.
                                                     try {
 
@@ -514,16 +515,17 @@ public class GetTrajectoryTable extends LASAction {
 
                                                         stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
 
-                                                        jp = new JsonStreamParser(new InputStreamReader(stream));
+                                                        reader = new InputStreamReader(stream);
+                                                        jp = new JsonStreamParser(reader);
                                                         JsonObject timebounds = (JsonObject) jp.next();
                                                         JsonArray timeminmax = getMinMax(timebounds);
-                                                        stream.close();
+                                                        reader.close();
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
                                                         // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
                                                     } catch ( Exception e ) {
-                                                        if (stream != null ) 
-                                                            stream.close();
+                                                        if (reader != null ) 
+                                                            reader.close();
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
                                                     }

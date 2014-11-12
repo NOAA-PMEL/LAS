@@ -106,7 +106,7 @@ public class LASProxy {
 	    GetMethod method = new GetMethod(request);
 
 	    method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
-
+	    method.setRequestHeader("Connection", "close");
 
 	    log.info("method: " + method.getURI());
 
@@ -138,6 +138,7 @@ public class LASProxy {
 		GetMethod method = new GetMethod(request);
 
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
+		method.setRequestHeader("Connection", "close");
 
 		try {
 
@@ -177,6 +178,7 @@ public class LASProxy {
 		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
 		client.setParams(params);
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
+		method.setRequestHeader("Connection", "close");
 
 		try {
 
