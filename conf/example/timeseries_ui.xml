@@ -12,14 +12,14 @@
     </menu>
   </menus>
   <maps>
-    <map type="options" name="Trajectory_ColorOptions">
-      <ifoptions op="Trajectory_interactive_plot" href="#Trajectory_Options"/>
+    <map type="options" name="Timeseries_ColorOptions">
+      <ifoptions op="Timeseries_interactive_plot" href="#Timeseries_Options"/>
     </map>
-    <map type="ops" name="Trajectory_Operations">
-      <ifmenu view="xy" href="#Trajectory_operations_XY"/>
+    <map type="ops" name="Timeseries_Operations">
+      <ifmenu view="xy" href="#Timeseries_operations_XY"/>
       <constraint type="variable"/>
     </map>
-    <map type="views" name="Trajectory_Views">
+    <map type="views" name="Timeseries_Views">
       <menu href="#Views_StdSurface_XY"/>
     </map>
   </maps>
@@ -91,6 +91,7 @@ Choices are:
 
     <optiondef name="Timeseries_Options" inherit="#Timeseries_palette,#size,#fill_levels,#deg_min_sec,#set_aspect,#use_graticules,#full_data,#bathymetry_style"/>
   </options>
+  <defaults>
     <default name="timeseries">
       <map href="#Timeseries_Operations"/>
       <map href="#Timeseries_Views"/>

@@ -953,7 +953,9 @@ public class UI extends BaseUI {
                     xOperationID = "Trajectory_interactive_plot";
                 } else if ( xNewVariable.getAttributes().get("grid_type").equals("profile") ) {
                     xOperationID = "Profile_interactive_plot";
-                }
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("timeseries") ) {
+                        xOperationID = "Timeseries_interactive_plot";
+                } 
                 if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
                     xTrajectoryConstraint.setActive(true);
                     xTrajectoryConstraint.setVisible(true);
@@ -1372,7 +1374,7 @@ public class UI extends BaseUI {
              xTrajectoryConstraint.setSelectedPanelIndex(panelIndex);
              xTrajectoryConstraint.setConstraints(cons);
          } else {
-             if ( !xVariable.getAttributes().get("grid_type").equals("trajectory") && !xVariable.getAttributes().get("grid_type").equals("profile")) {
+             if ( !xVariable.isDiscrete() ) {
                  xTrajectoryConstraint.setActive(false);
                  xTrajectoryConstraint.setVisible(false);
                  //             getComparePanel().getOutputControlPanel().setVisible(true);
@@ -1483,7 +1485,7 @@ public class UI extends BaseUI {
 
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
-        if ( xVariable.getAttributes().get("grid_type").equals("trajectory") || xVariable.getAttributes().get("grid_type").equals("profile") ) {
+        if ( xVariable.isDiscrete() ) {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
