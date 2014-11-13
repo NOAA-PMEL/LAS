@@ -355,14 +355,19 @@ public class TabledapTool extends TemplateTool {
            
 
             causeOfError = "Could not get trajectory id from backend request: "; 
-            cruiseid = getTabledapProperty(lasBackendRequest, "trajectory_id");
-            if ( cruiseid != null ) {
-                if ( cruiseid.equals("") ) {
-                    cruiseid = getTabledapProperty(lasBackendRequest, "profile_id");
-                }
-            } else {
-                cruiseid = getTabledapProperty(lasBackendRequest, "profile_id");
+            
+            String tid = getTabledapProperty(lasBackendRequest, "trajectory_id");
+            String pid = getTabledapProperty(lasBackendRequest, "profile_id");
+            String sid = getTabledapProperty(lasBackendRequest, "timeseries_id");
+            
+            if ( tid != null && !tid.equals("") ) {
+            	cruiseid = tid;
+            } else if ( pid != null && !pid.equals("") ) {
+            	cruiseid = pid;
+            } else if ( sid != null && !sid.equals("") ) {
+            	cruiseid = sid;
             }
+           
             required(cruiseid, causeOfError);
 
             String lon_domain = getTabledapProperty(lasBackendRequest, "lon_domain");
