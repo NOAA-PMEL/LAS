@@ -148,11 +148,26 @@ IF `($all_missing"0") EQ 0` THEN
 !   DEFINE SYMBOL yaxis_max = `ax_hi`
 !ENDIF
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
+DEFINE SYMBOL qualifiers = ($qualifiers)/OVER
 
 IF ($ribbon"0|*>1") THEN
-   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/siz=.12
-   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/siz=.08
+
+! ... let symbol size gradually increase as no. of obs gets small
+   DEFINE SYMBOL size_creep_factor `(($ngood_data)+300)/(($ngood_data)+100) - 1`  ! [0,1] range
+   LET sym_factr = 0.9 + 1.5*($size_creep_factor)
+
+   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/SIZE=`.12*sym_factr`
+   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`
+
+! Fewer and larger symbols, use thicker line
+   IF `.12*sym_factr GT 0.3` THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=3
+      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`/THICK=3
+   ELIF `.12*sym_factr GT 0.16` THEN 
+      DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=2
+      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`/THICK=2
+   ENDIF
+
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
       IF ($color_by_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($color_by_levels)
@@ -362,20 +377,26 @@ IF ($do_rsquare"1|0|*>1) THEN
 
    LET pminmax = MINMAX(pmasked)
    LOAD pminmax
+   DEFINE SYMBOL P1 = `pminmax[i=1]`
+   DEFINE SYMBOL P2 = `pminmax[i=2]`
    LET p1 = `pminmax[i=1]`
    LET p2 = `pminmax[i=2]`
 
    LET qminmax = MINMAX(qhatmasked)
    LOAD qminmax
+   DEFINE SYMBOL q1 = `qminmax[i=1]`
+   DEFINE SYMBOL q2 = `qminmax[i=2]`
    LET q1 = `qminmax[i=1]`
    LET q2 = `qminmax[i=2]`
+
+! Are any of these values bad?  If so just skip drawing the slope line.
+   IF `($p1"0|bad>0|*>1") + ($p2"0|bad>0|*>1") + ($q1"0|bad>0|*>1") + ($q2"0|bad>0|*>1") EQ 4` THEN 
 
    IF `slope LT 0` THEN 
      LET qtmp = `q2`
      LET q2 = `q1`
      LET q1 = `qtmp`
    ENDIF
-
    PLOT/VS/OVER/NOLAB/LINE/THICK=2/color=($line_color) {`p1`,`p2`}, {`q1`,`q2`}
 
 ! Label the rsquare and slope of the line. Put this above the plot, 
@@ -391,6 +412,8 @@ IF ($do_rsquare"1|0|*>1) THEN
          LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.1`,1, 0, 0.10, @P4@DRSlope = `slope,P=3`
       ENDIF
    ENDIF
+
+   ENDIF  ! p1,p2,q1,q2 are ok
 
 ENDIF
 
