@@ -173,7 +173,8 @@ public class OperationsWidget extends Composite {
 
                             if ( (view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) 
                                     || op.getID().contains("Trajectory_interactive_plot") 
-                                    || op.getID().contains("Profile_interactive_plot") ) { // TODO, this is a hack for specific operations...
+                                    || op.getID().contains("Profile_interactive_plot")
+                                    || op.getID().contains("Timeseries_interactive_plot")) { // TODO, this is a hack for specific operations...
                                 if ( !hasXYMap ) {
                                     xyMapTable.clear();
                                     hasXYMap = true;
