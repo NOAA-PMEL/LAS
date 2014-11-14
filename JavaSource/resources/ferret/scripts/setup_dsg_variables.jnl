@@ -16,7 +16,6 @@ IF `($data_t_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_t_var_in = ($data_t_va
 
 DEFINE SYMBOL nfeatures = `($rowvar),RETURN=msize`
 
-
 IF ($nfeatures"0|*>1") THEN 
    LET mmax = `($rowvar)[m=1:($nfeatures)@sum]` ! 1st m cruises
    LET npts = mmax
@@ -37,10 +36,10 @@ LET lon_with_gaps = ($data_x_var)
 LET lat_with_gaps = ($data_y_var)
 LET time_with_gaps = ($data_t_var)
 LET var_with_gaps = ($data_var)
-set att/like=($data_y_var) lat_with_gaps
-set att/like=($data_x_var) lon_with_gaps
-set att/like=($data_t_var) time_with_gaps
-set att/like=($data_var) var_with_gaps
+
+
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_gaps
 
 IF ($data_z_var"0|*>1") THEN LET vert_with_gaps = ($data_z_var)
 
