@@ -80,11 +80,8 @@ LET/units="`($data_var),return=units`" var_with_gaps = SEPARATE(($data_var)[i=1:
 IF ($is_string) THEN LET/units="`($data_var),return=units` "/title="`($data_var),return=title`" var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
 
 ! keep original attributes (e.g. time origin may be needed later)
-set att/like=($data_y_var) lat_with_gaps
-set att/like=($data_x_var) lon_with_gaps
-set att/like=($data_t_var) time_with_gaps
-set att/like=($data_var) var_with_gaps
-
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_gaps
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
