@@ -192,7 +192,9 @@ public class OperationsWidget extends Composite {
                             } else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z"))
                                     || (view.equals("t") && intervals.contains("t")) || (view.equals("e") && intervals.contains("e")) 
                                     // Special case where the TE is a bunch of line plots stacked on top of each other...
-                                    ||  (view.equals("te") && intervals.contains("e") && intervals.contains("t")) ) {
+                                    ||  (view.equals("te") && intervals.contains("e") && intervals.contains("t")) 
+                                    // Special case where we stack the plot for timeseries DSG data which has an xyt data view and t plot view
+                                    || op.getID().contains("Timeseries_station_plot")) {
                                 if ( !hasLinePlots ) {
                                     linePlotsTable.clear();
                                     hasLinePlots = true;
@@ -214,7 +216,8 @@ public class OperationsWidget extends Composite {
                                     } else {
                                         button = new OperationRadioButton(groupName, "Z");
                                     }
-                                } else if ( view.equals("t") ) {
+                                } else if ( view.equals("t") ||
+                                		    op.getID().contains("Timeseries_station_plot") ) {
                                     button = new OperationRadioButton(groupName, "Time");
                                 } else if ( view.equals("e") ) {
                                     String l = grid.getEAxis().getLabel();
