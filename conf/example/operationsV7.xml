@@ -47,7 +47,7 @@
       </response>
       <service>tabledap</service>
     </operation>
-    <operation chained="true" name="Profile Map" ID="Profile_2D_poly" output_template="output" service_action="Profile_2D_poly">
+    <operation chained="true" name="Profile Map" ID="Profile_2D_poly" output_template="output" service_action="Trajectory_interactive_plot">
       <args>
         <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
         <arg type="region" index="1" ID="in-situ-Region"/>
