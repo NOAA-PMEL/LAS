@@ -941,7 +941,11 @@ public class UI extends BaseUI {
                 xTrajectoryConstraint.setActive(false);
                 xTrajectoryConstraint.setVisible(false);
 //                getComparePanel().getOutputControlPanel().setVisible(true);
-                xAnalysisWidget.setVisible(true);
+                if ( xNewVariable.getGrid().getIntervals().length() < 3 ) {
+                	xAnalysisWidget.setVisible(false);
+                } else {
+                	xAnalysisWidget.setVisible(true);
+                }
             } else if (xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
                 xTrajectoryConstraint.setActive(false);
@@ -975,7 +979,11 @@ public class UI extends BaseUI {
 //            getComparePanel().getOutputControlPanel().setVisible(false);
         } else {
 //            getComparePanel().getOutputControlPanel().setVisible(true);
-            xAnalysisWidget.setVisible(true);
+        	if ( xNewVariable.getGrid().getIntervals().length() < 3 ) {
+        		xAnalysisWidget.setVisible(false);
+        	} else {
+        		xAnalysisWidget.setVisible(true);
+        	}
         }
         if (xView == null || xView.equals("")) {
             xView = "xy";
@@ -1378,7 +1386,11 @@ public class UI extends BaseUI {
                  xTrajectoryConstraint.setActive(false);
                  xTrajectoryConstraint.setVisible(false);
                  //             getComparePanel().getOutputControlPanel().setVisible(true);
-                 xAnalysisWidget.setVisible(true);
+                 if ( xVariable.getGrid().getIntervals().length() < 3 ) {
+                	 xAnalysisWidget.setVisible(false);
+                 } else {
+                	 xAnalysisWidget.setVisible(true);
+                 }
              }
          }
          
@@ -1490,6 +1502,11 @@ public class UI extends BaseUI {
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
             xTrajectoryConstraint.init(xVariable.getCATID(), xVariable.getDSID(), xVariable.getID());
+        } else if ( xVariable.getGrid().getIntervals().length() < 3 ) {
+        	xTrajectoryConstraint.setActive(false);
+            xTrajectoryConstraint.setVisible(false);
+//            getComparePanel().getOutputControlPanel().setVisible(true);
+            xAnalysisWidget.setVisible(false);
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);
@@ -2240,6 +2257,8 @@ public class UI extends BaseUI {
         xVariable.setGrid(grid);
         xAnalysisWidget.setAnalysisAxes(grid);
         if ( xVariable.isDiscrete() ) {
+        	xAnalysisWidget.setVisible(false);
+        } else if ( xVariable.getGrid().getIntervals().length() < 3) {
             xAnalysisWidget.setVisible(false);
         } else {
             xAnalysisWidget.setVisible(true);
@@ -2277,6 +2296,8 @@ public class UI extends BaseUI {
     private void setupMainPanel() {
         if ( xTrajectoryConstraint.isActive() ) {
             xAnalysisWidget.setVisible(false);
+        } else if ( xVariable.getGrid().getIntervals().length() < 3 ) {
+        	xAnalysisWidget.setVisible(false);
         } else {
             xAxesWidget.setVisible(true);
         }
@@ -2295,6 +2316,8 @@ public class UI extends BaseUI {
     private void setupMainPanelAndRefreshForceLASRequest(boolean resetOnlyNewPanels) {
         if ( xTrajectoryConstraint.isActive() ) {
             xAnalysisWidget.setVisible(false);
+        } else if ( xVariable.getGrid().getIntervals().length() < 3 ) {
+        	xAnalysisWidget.setVisible(false);
         } else {
             xAnalysisWidget.setVisible(true);
         }
