@@ -388,7 +388,7 @@ public class ProductRequest {
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
                                         		jnl.append(gridTo.getJnl().toString());
-                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"='"+gridTo.getVar()+"'[d=1]]");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -400,7 +400,7 @@ public class ProductRequest {
                                         	    StringBuffer jnl = new StringBuffer("use _qt_"+encoded+"_qt__cr_");
                                                 jnl.append(gridTo.getJnl().toString());
                                         		gridTo.setVar(gridTo.getVar());
-                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"='"+gridTo.getVar()+"'[d=1]]");
                                                 expression = URLEncoder.encode("_expr_{}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
@@ -449,7 +449,7 @@ public class ProductRequest {
                                     		var = data.getAttributeValue("var");
                                     		String revar = var+"_"+var_count+"_transformed";
                                     		data.setAttribute("var", revar);
-                                    		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"[d=1,"+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"[d=1,"+g+"='"+gridTo.getVar()+"'[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -460,7 +460,7 @@ public class ProductRequest {
                                     	} else {    
                                     		var = data.getAttributeValue("var");
                                     		jnl.append("use _qt_"+encoded+"_qt__cr_");
-                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d=1,"+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d=1,"+g+"='"+gridTo.getVar()+"'[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_transformed");
@@ -927,14 +927,14 @@ public class ProductRequest {
         } else {
             if ( eop !=  null && grid.length() > 0) {
                 
-                jnl.append("letdeq1 "+var+"_"+var_count+"_etrans="+var+"[d="+dset+","+"e="+elo+":"+ehi+"@"+eop+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_etrans");
+                jnl.append("letdeq1 "+var+"_"+var_count+"_etrans="+var+"[d="+dset+","+"e="+elo+":"+ehi+"@"+eop+"]_cr_ATTRCMD '"+var+"' "+var+"_"+var_count+"_etrans");
                 jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_"+var_count+"_etrans"+"[d="+dset+grid+"]_cr_ATTRCMD "+var+"_"+var_count+"_etrans"+" "+var+"_"+var_count+"_transformed");
 
             } else {
                 if ( eop != null ) {
                     grid = ",e="+elo+":"+ehi+"@"+eop;
                 }
-                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dset+grid+"]_cr_ATTRCMD '"+var+"' "+var+"_"+var_count+"_transformed");
             }
         }
 
