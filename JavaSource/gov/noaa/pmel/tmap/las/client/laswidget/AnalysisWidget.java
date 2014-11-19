@@ -159,7 +159,10 @@ public class AnalysisWidget extends Composite {
 
     public void setAnalysisAxes(GridSerializable grid) {
         analysisAxis.clear();
-        analysisAxis.addItem("Area", "xy");
+        // You have to have one more axis in order to average out XY. If you only have XY you get a scalar which we can't handle.
+        if ( !grid.getIntervals().equals("xy") ) {
+        	analysisAxis.addItem("Area", "xy");
+        }
         analysisAxis.addItem("Longitude", "x");
         analysisAxis.addItem("Latitude", "y");
         if ( grid.hasZ() ) {
