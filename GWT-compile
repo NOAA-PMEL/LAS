@@ -4,16 +4,17 @@ GWTDIR="/usr/local/gwt"
 MAPDIR="/usr/local/gwt-maps"
 CLASSPATH="${APPDIR}/WebContent/WEB-INF/lib/*:${APPDIR}/JavaSource:${APPDIR}/test:${APPDIR}/bin:${GWTDIR}/*:${MAPDIR}/*"
 CMPNTDIR="${APPDIR}/WebContent/JavaScript/components"
+JAVAOPS="-Xmx1024M -Xms1024M"
+GWTOPTIONS="-strict"
 
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.InteractiveDownloadData;
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.InteractiveDownloadDataJUnit;
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.HelpMenu;
-java -Xmx1024M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.UI;
-java -Xmx1024M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.ColumnEditor;
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.NativeMapWidget;
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.TestResults
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.Correlation
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.ClimateAnalysis
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.DateWidgetTest
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.SPPV
-java -Xmx256M -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" gov.noaa.pmel.tmap.las.PPT
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.InteractiveDownloadData;
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.HelpMenu;
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.UI;
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.ColumnEditor;
+#java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.NativeMapWidget;
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.TestResults
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.Correlation
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.ClimateAnalysis
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.DateWidgetTest
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.SPPV
+java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.PPT
