@@ -3,6 +3,7 @@
       <!-- Inherit the core Web Toolkit stuff.                        -->
       <inherits name='com.google.gwt.user.User'/>
       <inherits name="com.google.gwt.i18n.I18N"/>
+      <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
       <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
       <inherits name="com.google.gwt.user.Debug" />
       <inherits name="com.google.gwt.json.JSON" />

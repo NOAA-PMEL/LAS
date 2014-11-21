@@ -19,7 +19,7 @@
  	<inherits name='com.google.gwt.user.theme.standard.Standard' /> 
 	<!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
 	<!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/> -->
-	<inherits name="com.google.gwt.maps.GoogleMaps" />
+	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
 	<inherits name="com.google.gwt.xml.XML" />
