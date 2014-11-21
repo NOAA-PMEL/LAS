@@ -24,7 +24,8 @@
       <inherits name='org.gwttime.Time' />
   
       <!-- Other module inherits. -->
-      <inherits name="com.google.gwt.maps.GoogleMaps" />                   
+      <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+	  <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />                 
       <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
       <inherits name="com.google.gwt.xml.XML" />
        <!--  The nifty printing utility -->

@@ -18,7 +18,8 @@
     <inherits name='com.google.gwt.user.theme.standard.Standard' />
     <!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
     <!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/>     -->
-    <inherits name="com.google.gwt.maps.GoogleMaps" />
+    <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
     <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
     <inherits name="com.google.gwt.xml.XML" />
@@ -31,9 +32,5 @@
  
     <!-- Specify the app entry point class.                         -->
     <entry-point class='gov.noaa.pmel.tmap.las.client.ClimateAnalysis' />
-
-    <!-- Specify the application specific style sheet. -->
-    <stylesheet src="../css/OLMapWidget.css" />
-
   
 </module>
