@@ -7,7 +7,7 @@
 	<inherits name="com.google.gwt.json.JSON" />
 	<!-- This will allow logger messages to show in the client's browser: -->
 	<!-- <inherits name="com.google.gwt.logging.Logging"/> -->
-	
+	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 
 	<source path="client" />
 
@@ -17,7 +17,6 @@
  	<inherits name='com.google.gwt.user.theme.standard.Standard' /> 
 	<!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
 	<!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/> -->
-	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
 	<inherits name="com.google.gwt.xml.XML" />
@@ -39,16 +38,8 @@
 		<when-type-is class="gov.noaa.pmel.tmap.las.client.ClientFactory" />
 	</replace-with>
 
-	<!-- The nifty printing utility -->
-	<inherits name='br.com.freller.tool.PrintTest' />
-
 	<!-- Specify the app entry point class. -->
 	<entry-point class='gov.noaa.pmel.tmap.las.client.UI' />
 
-	<!-- Specify the application specific style sheet. -->
-	<stylesheet src="../css/OLMapWidget.css" />
-	<!-- Moved reference from the UI.vm file so it will take precedence over the GWT theme and show in debug mode. -->
-	<stylesheet src="../css/LAS.css" />
-
-
+    <source path="org/gwttime"/>
 </module>

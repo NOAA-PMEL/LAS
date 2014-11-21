@@ -27,7 +27,8 @@
 
 	<!-- JUnit allows testing to work -->
 	<inherits name="com.google.gwt.junit.JUnit" />
-
+    <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
+	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 	<!-- GWT MVP classes -->
 	<!-- <inherits name="com.google.gwt.place.Place" /> -->
 	<inherits name="com.google.gwt.activity.Activity" />
