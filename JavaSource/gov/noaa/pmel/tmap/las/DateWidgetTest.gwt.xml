@@ -21,8 +21,6 @@
       <!-- GWT Joda Time implementation. -->
       <inherits name='org.gwttime.Time' />      
 
-      <!-- Other module inherits                                      -->
-      <inherits name="com.google.gwt.maps.GoogleMaps" />
       <inherits name="com.google.gwt.xml.XML" />
       <inherits name="com.google.gwt.activity.Activity" />
       <!--

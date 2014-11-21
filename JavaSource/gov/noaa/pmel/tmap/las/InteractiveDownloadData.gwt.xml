@@ -13,8 +13,12 @@
 	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/> -->
 
 	<!-- Other module inherits -->
-
+    <!--  The OpenLayers module contains a script reference. At some point we
+	      should repackage it and remove the reference, but for now, surpress the 
+	      warning. -->
+    <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
+
 	<inherits name="com.google.gwt.xml.XML" />
 	<!-- GWT Joda Time implementation. -->
 	<inherits name='org.gwttime.Time' />
