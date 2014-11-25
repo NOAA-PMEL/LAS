@@ -48,10 +48,9 @@
      
     
     -->
-    <script type="text/javascript" language="javascript" src="JavaScript/components/DateWidget.js"></script>
-    <script type="text/javascript" language="javascript" src="JavaScript/components/LASRequest.js"></script>
-    <script type="text/javascript" language="javascript" src="JavaScript/components/xmldom.js"></script>
+ 
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script>
+    <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/util.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
@@ -63,6 +62,7 @@ Moved reference to the UI.gxt.xml file so it will take precedence over the GWT t
     <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
 -->
     <link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
+    <link rel="stylesheet" href="JavaScript/components/css/OLMapWidget.css" type="text/css"/>
   </head>
 
   <!--                                           -->
