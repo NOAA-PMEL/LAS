@@ -791,7 +791,7 @@ public class SimplePropPropViewer implements EntryPoint {
             lasRequest.removeProperty("las", "output_type");
         }
         String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
-        if (netcdf != null && contained && (grid_type.equals("trajectory") || grid_type.equals("profile")) ) {
+        if (netcdf != null && contained && yVariables.getUserObject(0).isDiscrete() ) {
             if ( plot ) {
                 operationID = "Trajectory_correlation_plot"; // No data base access;
             } else {
@@ -822,7 +822,7 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
                 currentIconList = new ArrayList<String>();
             }
-        } else if ((!contained || netcdf == null) && (grid_type.equals("trajectory") || grid_type.equals("profile"))) {
+        } else if ((!contained || netcdf == null) && ( yVariables.getUserObject(0).isDiscrete() )) {
             // This should only occur when the app loads for the first time...
             if ( plot ) {
                 operationID = "Trajectory_correlation_extract_and_plot";
