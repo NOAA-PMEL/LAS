@@ -176,12 +176,12 @@ public class ERDDAPUtil {
         for (Iterator cit = textConstraints.iterator(); cit.hasNext();) {
             Constraint c = (Constraint) cit.next();
             if ( c.getOp().equals("is") || c.getOp().equals("like") ) {
-                q.append("&" + c.getAsERDDAPString()); 
+                q.append("&" + URLEncoder.encode(c.getAsERDDAPString(), StandardCharsets.UTF_8.name())); 
             } else {
-                q.append("&" + c.getAsString()); 
+                q.append("&" +  URLEncoder.encode(c.getAsString(), StandardCharsets.UTF_8.name())); 
             }
         }
-       return URLEncoder.encode(q.toString(), StandardCharsets.UTF_8.name());
+       return q.toString();
     }
 
 }
