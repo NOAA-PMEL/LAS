@@ -961,6 +961,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("profile_id");
             }
+            if ( id_name == null || id_name.trim().length() == 0 ) {
+                id_name = props.get("tabledap_access").get("timeseries_id");
+            }
             url = url + id + ".json" + "?" + variables + "&" + id_name + "=\""+trajectory_id+"\"" + "&distinct()";
             jsonStream = new URL(url).openStream();
             String jsonText = IOUtils.toString(jsonStream);
