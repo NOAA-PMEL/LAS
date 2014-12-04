@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -315,16 +316,16 @@ public class GetTrajectoryTable extends LASAction {
 
 
                                     if ( ylo != null && !ylo.equals("") ) {
-                                        query = query + "&latitude>="+ylo;
+                                        query = query + URLEncoder.encode("&latitude>="+ylo, StandardCharsets.UTF_8.name());
                                     }
                                     if ( yhi != null && !yhi.equals("") ) {
-                                        query = query + "&latitude<="+yhi;
+                                        query = query + URLEncoder.encode("&latitude<="+yhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zlo != null && !zlo.equals("") ) {
-                                        query = query + "&depth>="+zlo;
+                                        query = query + URLEncoder.encode("&depth>="+zlo, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zhi != null && !zhi.equals("") ) {
-                                        query = query + "&depth<="+zhi;
+                                        query = query + URLEncoder.encode("&depth<="+zhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( tlo != null && !tlo.equals("") ) {
                                         DateTime dlo;
@@ -387,7 +388,7 @@ public class GetTrajectoryTable extends LASAction {
 
                                         fullquery = fullquery + "&distinct()";
                                         
-                                        // fullquery are numerical and don't need encoding, the constraints encodes themselves.
+                                        // Each of these pieces has been encoded as it was constructed
                                         fullquery = fullquery+encodedConstraints;
                                         url = url + fullquery;
                                         InputStream input = lasProxy.executeGetMethodAndReturnStream(url, response);
