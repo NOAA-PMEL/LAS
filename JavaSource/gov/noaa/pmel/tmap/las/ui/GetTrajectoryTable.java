@@ -316,16 +316,16 @@ public class GetTrajectoryTable extends LASAction {
 
 
                                     if ( ylo != null && !ylo.equals("") ) {
-                                        query = query + URLEncoder.encode("&latitude>="+ylo, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode("latitude>="+ylo, StandardCharsets.UTF_8.name());
                                     }
                                     if ( yhi != null && !yhi.equals("") ) {
-                                        query = query + URLEncoder.encode("&latitude<="+yhi, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode("latitude<="+yhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zlo != null && !zlo.equals("") ) {
-                                        query = query + URLEncoder.encode("&depth>="+zlo, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode("depth>="+zlo, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zhi != null && !zhi.equals("") ) {
-                                        query = query + URLEncoder.encode("&depth<="+zhi, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode("depth<="+zhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( tlo != null && !tlo.equals("") ) {
                                         DateTime dlo;
