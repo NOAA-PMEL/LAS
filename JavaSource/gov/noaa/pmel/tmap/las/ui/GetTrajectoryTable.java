@@ -152,6 +152,7 @@ public class GetTrajectoryTable extends LASAction {
                     String did = tabledap.get("decimated_id");
                     String cruise_id = tabledap.get("trajectory_id");
                     String profile_id = tabledap.get("profile_id");
+                    String timeseries_id = tabledap.get("timeseries_id");
                     String all_variables = tabledap.get("all_variables");
                     List<Variable> vars = dataset.getVariables();
                     Grid grid = null;
@@ -211,6 +212,9 @@ public class GetTrajectoryTable extends LASAction {
                         } else if ( profile_id != null && profile_id.trim().length() > 0 ) {
                             dsg_id = profile_id;
                             type = "profile";
+                        } else if ( timeseries_id != null && timeseries_id.trim().length() > 0 ) {
+                            dsg_id = timeseries_id;
+                            type = "timeseries";
                         }
                         String lon_domain = tabledap.get("lon_domain");
                         StringBuilder xquery2 = new StringBuilder();
@@ -382,8 +386,9 @@ public class GetTrajectoryTable extends LASAction {
 
 
                                         fullquery = fullquery + "&distinct()";
-                                        // The constraint encodes itself.
-                                        fullquery = URLEncoder.encode(fullquery, "UTF-8")+encodedConstraints;
+                                        
+                                        // fullquery are numerical and don't need encoding, the constraints encodes themselves.
+                                        fullquery = fullquery+encodedConstraints;
                                         url = url + fullquery;
                                         InputStream input = lasProxy.executeGetMethodAndReturnStream(url, response);
                                         OutputStream output = response.getOutputStream();
