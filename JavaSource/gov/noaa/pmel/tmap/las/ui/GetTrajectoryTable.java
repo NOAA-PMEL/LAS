@@ -340,7 +340,7 @@ public class GetTrajectoryTable extends LASAction {
                                             }
                                         }
                                         String dtlo = iso_fmt.print(dlo.getMillis());
-                                        query = query + "&time>=\""+dtlo+"\"";
+                                        query = query + "&"+URLEncoder.encode("time>=\""+dtlo+"\"", StandardCharsets.UTF_8.name());
                                     }
                                     if ( thi != null && !thi.equals("") ) {
                                         DateTime dhi;
@@ -355,7 +355,7 @@ public class GetTrajectoryTable extends LASAction {
                                             }
                                         }
                                         String dthi = iso_fmt.print(dhi.getMillis());
-                                        query = query + "&time<=\""+dthi+"\"";
+                                        query = query + "&"+URLEncoder.encode("time<=\""+dthi+"\"", StandardCharsets.UTF_8.name());
                                     }
 
 
