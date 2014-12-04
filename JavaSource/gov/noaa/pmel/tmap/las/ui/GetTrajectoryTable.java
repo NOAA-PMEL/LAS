@@ -155,6 +155,7 @@ public class GetTrajectoryTable extends LASAction {
                     String profile_id = tabledap.get("profile_id");
                     String timeseries_id = tabledap.get("timeseries_id");
                     String all_variables = tabledap.get("all_variables");
+                    String depth_name = tabledap.get("altitude");
                     List<Variable> vars = dataset.getVariables();
                     Grid grid = null;
                     if ( all_variables != null && all_variables.length() > 0 ) {
@@ -322,10 +323,10 @@ public class GetTrajectoryTable extends LASAction {
                                         query = query + "&"+URLEncoder.encode("latitude<="+yhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zlo != null && !zlo.equals("") ) {
-                                        query = query + "&"+URLEncoder.encode("depth>="+zlo, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode(depth_name+">="+zlo, StandardCharsets.UTF_8.name());
                                     }
                                     if ( zhi != null && !zhi.equals("") ) {
-                                        query = query + "&"+URLEncoder.encode("depth<="+zhi, StandardCharsets.UTF_8.name());
+                                        query = query + "&"+URLEncoder.encode(depth_name+"<="+zhi, StandardCharsets.UTF_8.name());
                                     }
                                     if ( tlo != null && !tlo.equals("") ) {
                                         DateTime dlo;
