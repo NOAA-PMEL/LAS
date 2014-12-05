@@ -9,7 +9,6 @@ DEFINE SYMBOL num ($1"0")
 
 DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
-
 ! The variable at the x and y locations
 
 IF ($data_($num)_var"0|1|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
@@ -84,6 +83,8 @@ IF `nglobal_atts GT 0` THEN
 
    ENDIF
 ENDIF
+
+DEFINE SYMBOL dsetnum = `($data_0_var),RETURN=dsetnum`
 
 ! Is it a Profile or Trajectory dataset?
 GO LAS_setup_dsg
