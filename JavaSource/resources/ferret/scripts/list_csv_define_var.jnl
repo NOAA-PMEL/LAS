@@ -32,7 +32,7 @@ ENDIF
 DEFINE SYMBOL ferret_plot_var_($var_num) =($ferret_plot_var)
 LET ferret_list_var_($var_num) = XSEQUENCE(($ferret_plot_var))
 DEFINE SYMBOL ferret_list_var_($var_num) = ferret_list_var_($var_num)
-DEFINE SYMBOL size_($var_num)= `($ferret_list_var_($var_num)),return=isize`)
+DEFINE SYMBOL size_($var_num)= `($ferret_list_var_($var_num)),return=isize`
 IF `($var_num) GT 0` THEN if `($size_($var_num)) NE ($size_0)` THEN MESSAGE/ERROR ERROR: Variables different sizes
 IF `($var_num) GT 0` THEN if `($size_($var_num)) NE ($size_0)` THEN exit/program 
 
