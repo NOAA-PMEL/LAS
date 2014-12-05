@@ -35,17 +35,14 @@ ENDIF
 ! If a variable is listed twice, handle that.
 
 ! Save the name of the feature variable.
-IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL feature_variable_in = ($feature_variable)
+IF `($feature_variable_in"0|*>1") EQ 0` THEN \
+  IF ($feature_variable"0|*>1") THEN DEFINE SYMBOL feature_variable_in = ($feature_variable)
 
-REPEAT/RANGE=0:100/name=ivar (\
- DEFINE SYMBOL ivar = `ivar`;\
- IF `($data_($ivar)_var"0|*>1") EQ 0` THEN EXIT/LOOP;\
- DEFINE SYMBOL vname = ($data_($ivar)_var);\
- IF `($($vname)_done"0|*>1") EQ 0` THEN SET VAR/NAME=($vname)_ ($vname);\
- DEFINE SYMBOL data_($ivar)_var_in = ($vname);\
- DEFINE SYMBOL data_($ivar)_var = ($vname)_;\
- DEFINE SYMBOL ($vname)_done = 1;\
- )
+ REPEAT/RANGE=0:100/name=ivar (\
+   GO var_rename;\
+   IF ($exit_rename"0|*>1") THEN exit/loop;\
+   )
+
 
 LET varnames = ..varnames
 LET nvars = ..nvars
