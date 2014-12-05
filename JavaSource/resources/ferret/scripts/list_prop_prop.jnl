@@ -168,6 +168,8 @@ GO set_constraint_labels
 LET size = `constraints_mask[i=@ngd]`
 
 
+LET nlist = 0
+
 ! Always list the trajectory id, e.g. cruise_expocode
 
 IF ($feature_variable_in"0|*>1") THEN DEFINE SYMBOL vars_out = ($feature_variable_in),
@@ -205,7 +207,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = SAMPLEI (latitude_, compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 2`
-   DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude
+   DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude,
 
 ENDIF  ! longitude, latitude
 
@@ -235,7 +237,8 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out), ($data_0_var_in)
+   IF `nlist LT 1` THEN LET nlist = 2
+   DEFINE SYMBOL vars_out = ($vars_out)  ($data_0_var_in),
 ENDIF
 
 IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
@@ -263,7 +266,7 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out) ($data_1_var_in),
 ENDIF
 
 ! color-by variable on the prop-prop plot:
@@ -285,12 +288,19 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
          LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)
       ELSE
          LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)
-      ENDIF
+      ENDIFs
       LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (($ferret_plot_var_2)_xpnd, compress_mask[i=1:`nok`])
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out) ($data_2_var_in)
+ENDIF
+
+! Make sure we havent ended the list with a comma.
+
+IF `STRLEN("($vars_out)") EQ STRRINDEX("($vars_out)", ",")` THEN
+   LET slen = `STRLEN("($vars_out)") - 1`
+   DEFINE SYMBOL vars_out = `SUBSTRING("($vars_out)", 1, slen)`
 ENDIF
 
 LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F10.0) `size`

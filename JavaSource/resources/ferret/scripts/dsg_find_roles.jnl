@@ -17,20 +17,24 @@ IF `IS_ELEMENT_OF_STR(var_attnames, "sample_dimension")` THEN
 ENDIF 
 
 ! The cf_role attribute might be on a coordinate variable. 
-! If so, set up index as the feature id.
+! If so, set up index as the feature id. LAS expects a 
+! the feature variable to be a string.
 
 IF `($feature_variable"0|*>1")` THEN
+
    IF `STRINDEX("($feature_variable)", "(") GT 0` THEN 
       DEF SYM dname = `dimnames[i=($q)]`
-      LET feature_variable = FLOATSTR(_M[GE=($dname)], "(F5.0)")
-      DEFINE SYMBOL feature_variable = feature_variable
+      LET feature_id = FLOATSTR(_M[GE=($dname)], "(F5.0)")
+      LET feature_id_var = FLOATSTR(_M[GE=($dname)], "(F5.0)")
+      DEFINE SYMBOL feature_variable = feature_id_var
+      DEFINE SYMBOL feature_variable_in = feature_id
 
 ! Is this one of the variables in the plot (color-by?) If so, redefine the symbol
 
       REPEAT/range=0:`($data_count)-1`/name=ic (\
         DEFINE SYMBOL ic = `ic`;\
         IF ($data_($ic)_var"0|($dname)>1|*>0") THEN \
-         DEFINE SYMBOL data_($ic)_var = feature_variable)
+         DEFINE SYMBOL data_($ic)_var = feature_id)
    ENDIF
 ENDIF
 
