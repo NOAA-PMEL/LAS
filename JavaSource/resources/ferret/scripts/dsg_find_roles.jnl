@@ -68,7 +68,7 @@ LET feature_name = ($feature_variable)
          LET xtim_for_name = XSEQUENCE(($data_time_var))
       ENDIF
 
-      LET/d=($dsetnum"1") feature_name = LON_LAT_TIME_LIST(xlon_for_name, \
+      LET/d=($dsetnum"1") feature_name = LON_LAT_TIME_STRING(xlon_for_name, \
           xlat_for_name, xtim_for_name, tt_for_name, "($feature_type%A%)")
       DEFINE SYMBOL feature_name_list = 1
           
