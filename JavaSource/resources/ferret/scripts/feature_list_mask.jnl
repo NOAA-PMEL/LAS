@@ -61,6 +61,15 @@ list varnames
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "($feature_variable)") NE 0` THEN 
    LET subm_ids = IF ELEMENT_INDEX_STR_N(($feature_variable), subset_ids) GT 0 THEN 1
+ELSE
+
+! maybe the feature_variable is a dimension so the scripts have defined the 
+! feature_variable instead of it being in the file.
+
+   IF `($feature_variable),RETURN=isready` THEN \
+   LET subm_ids = IF ELEMENT_INDEX_STR_N(($feature_variable), subset_ids) GT 0 THEN 1
+
+ENDIF
 
 ! apply mask as data_var_c* subset_mask
    LET subset_mask = XSEQUENCE(subm_ids) + 0*i[gx=xmask_axis]  ! put it on a non-abstract axis
