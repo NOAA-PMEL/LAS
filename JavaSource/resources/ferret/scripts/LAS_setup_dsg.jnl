@@ -1,16 +1,29 @@
 ! LAS_setup_dsg.jnl
 SAY _________________ START LAS_setup_dsg: clock seconds:                        ($clock_secs)
 
+LET global_attnames = ..attnames
+LET varnames = ..varnames
+LET nvars = ..nvars
+
+! Find longitude, latitude, and time variables
+IF `($data_lon_var"0|*>1") + ($data_lat_var"0|*>1")+ ($data_time_var"0|*>1") LT 3` THEN
+   GO feature_get_direction_vars
+   DEFINE SYMBOL data_lon_var = ($data_x_var)
+   DEFINE SYMBOL data_lat_var = ($data_y_var)
+   DEFINE SYMBOL data_time_var = ($data_t_var)
+   ! These will be redefined later.
+   CANCEL SYMBOL data_x_var, data_y_var, data_t_var, data_z_var
+ENDIF
+
 !
 ! Is it a Profile or Trajectory dataset?
 ! Find the featureType attribute, and find which  variables
 ! are marked with the cf_role and sample_dimension attributes
 
+
+
 IF `( ($feature_variable"0|*>1") GT 0) AND ( ($rowvar"0|*>1") GT 0)` THEN EXIT/SCRIPT
 
-LET global_attnames = ..attnames
-LET varnames = ..varnames
-LET nvars = ..nvars
 IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
     DEFINE SYMBOL feature_type = `..featureType`
     IF ($ferret_feature_label"0|*>1") THEN DEFINE SYMBOL feature_type = ($ferret_feature_label)

@@ -1,27 +1,9 @@
 ! feature_lon_lat_time_depth.jnl
+
 ! Use file attributes to find which variables correspond to
 ! longitude, latitude, time in a Trajectory file
-! The attributes will be:
-!
-! _CoordinateAxisType = "Lat"
-! _CoordinateAxisType = "Lon"
-! _CoordinateAxisType = "Time"
-! 
 
-LET all_varnames = ..varnames
-LET nvars = ..nvars
-
-REPEAT/I=1:`nvars` (DEFINE SYMBOL ivar = `all_varnames`;\
- LET all_attnames = ($ivar).attnames;\
- LET vartype = "nostring";\
- IF `IS_ELEMENT_OF_STR(all_attnames, "_CoordinateAxisType") GT 0` THEN LET vartype = "`($ivar)._CoordinateAxisType`";\
- IF `STRCMP(vartype,"Lon") EQ 0` THEN DEFINE SYMBOL data_x_var = ($ivar);\
- IF `STRCMP(vartype,"Lat") EQ 0` THEN DEFINE SYMBOL data_y_var = ($ivar);\
- IF `STRCMP(vartype,"Time") EQ 0` THEN DEFINE SYMBOL data_t_var = ($ivar);\
- IF `STRCMP(vartype,"Height") EQ 0` THEN DEFINE SYMBOL data_z_var = ($ivar);\
- IF `STRCMP(vartype,"Depth") EQ 0` THEN DEFINE SYMBOL data_z_var = ($ivar);\
- IF `($data_x_var"0|*>1")+($data_y_var"0|*>1")+($data_t_var"0|*>1")+($data_z_var"0|*>1") EQ 4` THEN EXIT/LOOP;\
- )
+GO feature_get_direction_vars
 
 IF ($data_x_var"0|*>1") THEN DEFINE SYMBOL original_longi_var = ($data_x_var)
 IF ($data_y_var"0|*>1") THEN DEFINE SYMBOL original_lati_var  = ($data_y_var)
@@ -61,6 +43,17 @@ IF `($vshape"0|E>1|POINT>1|*>0)` THEN
     ($($data_t_var)_name) = ($($data_t_var)_name)_y[gx=obsXvar@ASN]
    DEFINE ATTRIBUTE ($($data_t_var)_name).time_origin = "`($data_t_var)_M.time_origin`"
    DEFINE SYMBOL skip_list_var = ($skip_list_var) ($data_t_var)_M
+ENDIF
+
+! If the data was expanded above, we need to redefine these variables,
+! used in synthesizing feature names when there is no name in the datset
+
+IF `($feature_name_list"0|*>1") AND ($skip_list_var"0|*>1")` THEN
+
+   LET xlon_for_name = XSEQUENCE(IF ($data_x_var)_M GE 0 THEN ($data_x_var)_M ELSE ($data_x_var)_M+360 )
+   LET xlat_for_name = XSEQUENCE(($data_y_var)_M)
+   LET xtim_for_name = XSEQUENCE(($data_t_var)_M)
+	 
 ENDIF
 
 IF `($data_x_var%0|*>1%) + ($data_y_var%0|*>1%) LT 2` THEN
