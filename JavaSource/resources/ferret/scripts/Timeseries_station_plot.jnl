@@ -1,0 +1,128 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Timeseries_station_plot.jnl
+! 
+! Author: Ansley Manke
+! Date: Nov 2014
+!
+! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
+!
+
+SET MODE verify:always  ! allows for debugging
+
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
+! Initialize the region and data.
+
+DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
+
+DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
+
+! Define symbols associated with the region and data and perform any
+! initialization needed for this dataset.
+
+GO LAS_initialize_region 0
+IF ($data_0_var"0|vid>1|*>0")  THEN
+   DEFINE SYMBOL ferret_by_id = 1
+   USE "($data_0_url)"
+   LET varnames = ..varnames
+
+   DEFINE SYMBOL data_0_var = `varnames[i=1]`
+   CANCEL DATA "($data_0_url)"
+ENDIF
+DEFINE SYMBOL data_name_in = ($data_0_var)
+
+GO LAS_initialize_data 0
+
+! for this we do not need var_with_gaps
+DEFINE SYMBOL data_var = ($data_0_var)  
+
+DEFINE SYMBOL its_insitu = 1
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Here is variable 0 title
+DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+LET title_len = STRLEN("($ferret_title_0)")
+
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
+
+! For the annotations
+IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
+IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+
+
+let nstations = `($rowvar),return=msize`
+let maxrow = `($rowvar)[m=@max]`
+
+! Use Ferret properties to set up the plot qualifiers
+IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = thirty_by_levels
+
+IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0,`nstations+1`,1)
+GO LAS_set_plot_qualifiers
+
+! Open the window, apply size, scale options
+GO LAS_open_window
+
+
+! Draw the plot
+
+
+let t1 = time[i=@min]
+let t2 = time[i=@max]
+define axis/t=`t1,prec=15`:`t2,prec=15`/npoints=2000/units=seconds/t0="`time.time_origin`" taxis_all
+let tt_all = t[gt=taxis_all]
+
+
+let time2d = EXPNDI_BY_M_COUNTS (time, ($rowvar), maxrow)
+let var2d = EXPNDI_BY_M_COUNTS (($data_var), ($rowvar), maxrow)
+
+let id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)), maxrow)
+let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
+
+
+set win/asp=0.5
+ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
+
+plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all] 
+
+! Plot the lines, cycling amongh the defined colors.
+
+repeat/range=1:`nstations`/name=q (\
+define symbol q = `q`; \
+define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
+npoints=2000/units=seconds/t0="`time.time_origin`" taxis; \
+show axis taxis;\
+let tempx = var2d[m=($q)];\
+let colrx = id2d[m=($q)];\
+let tt = t[gt=taxis];\
+let vart = reshape(tempx, tt);\
+let colort = reshape(colrx, tt);\
+stat colort;\
+plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort)
+
+! Add labels at the top for the location of overlaid lines
+! and for URLs if they exist  
+
+GO labels_above_plot
+
+! Overall header at the very top
+GO LAS_ferret_las_version_header
+
+! Save the results
+! The script wants to get the time-axis end points.
+
+DEFINE SYMBOL data_0_var = tt_all
+
+DEFINE SYMBOL result_type = tline
+GO LAS_results ($result_type)
+
+
+! End of file ------------ Timeseries_station_plot.jnl--------------------------
+
