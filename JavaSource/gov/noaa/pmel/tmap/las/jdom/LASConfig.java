@@ -5351,6 +5351,9 @@ public class LASConfig extends LASDocument {
         } else {
             master_id = id;
         }
+        if ( master_id == null || master_id.length() == 0 ) {
+        	return null;
+        }
 
         if ( master_id.endsWith("aggregation") ) {
             // Hack off three
@@ -5364,9 +5367,11 @@ public class LASConfig extends LASDocument {
             master_id = master_id.substring(0, master_id.lastIndexOf("."));
             master_id = master_id.substring(0, master_id.lastIndexOf("."));
         }  else {
-            // Hack off the version 
-            master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            if ( master_id != null && master_id.contains(".")) {
+            	master_id = master_id.substring(0, master_id.lastIndexOf("."));
+            }
         }
+            
 
 
         String search = getGlobalPropertyValue("product_server", "esgf_search_url");

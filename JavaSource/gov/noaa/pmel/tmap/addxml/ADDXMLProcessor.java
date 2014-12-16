@@ -1772,6 +1772,20 @@ public class ADDXMLProcessor {
                         DateRange dateRange = threddsDataset.getTimeCoverage();
 
                         StringBuilder grid_name = new StringBuilder(threddsDataset.getID()+"-grid");
+                        
+                        String elementName = threddsDataset.getID()+"-x-axis";
+                        AxisBean xAxis = new AxisBean();
+                        xAxis.setElement(elementName);
+                        
+                        elementName = threddsDataset.getID()+"-y-axis";
+                        AxisBean yAxis = new AxisBean();
+                        yAxis.setElement(elementName);
+                        
+                        
+                        elementName = threddsDataset.getID()+"-z-axis";
+                        AxisBean zAxis = new AxisBean();
+                        zAxis.setElement(elementName);
+                        
                         if (coverage != null ) {
 
                             boolean readX = false;
@@ -1802,30 +1816,12 @@ public class ADDXMLProcessor {
                             }
                             boolean hasZ = false;
                             boolean readZ = false;
-                            String zvalues = null;
+                            
 
                             Range z = coverage.getUpDownRange();
                             if ( z != null ) {  
                                 hasZ = true;
-                                double zsize = z.getSize();
-                                double zresolution = z.getResolution();
-                                double zstart = z.getStart();
-                                try {
-                                    zvalues = threddsDataset.findProperty(ESGF_Z_VALUES);
-                                } catch (Exception e) {
-                                    try {
-                                        zvalues = threddsDataset.findProperty(ZVALUES);
-                                    } catch (Exception e1) {
-                                        zvalues = null;
-                                    }
-                                }
-                                if ( zvalues != null ) {
-                                    zvalues = zvalues.trim();
-                                }
-                                if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
-                                        zvalues == null ) {
-                                    readZ = true;
-                                }
+                                
                             }
 
                             // If we can't get it from the metadata, we'll just give up.
@@ -1833,12 +1829,11 @@ public class ADDXMLProcessor {
                             if ( readX || readY || readZ ) {
                                 return null;
                             }
-                            String elementName = threddsDataset.getID()+"-x-axis";
-                            AxisBean xAxis = new AxisBean();
+                            
 
                             // Get the X Axis information...
                             System.out.println("Loading X from metadata: "+elementName);
-                            xAxis.setElement(elementName);
+                            
                             grid_name.append("-x-axis");
                             xAxis.setType("x");
                             xAxis.setUnits(xunits);
@@ -1851,12 +1846,11 @@ public class ADDXMLProcessor {
 
                             axisBeans.add(xAxis);
                             
-                            elementName = threddsDataset.getID()+"-y-axis";
-                            AxisBean yAxis = new AxisBean();
+                            
 
                             System.out.println("Loading Y from metadata: "+elementName);
                             // Get the Y Axis information...
-                            yAxis.setElement(elementName);
+                            
                             grid_name.append("-y-axis");
                             yAxis.setType("y");
                             yAxis.setUnits(yunits);
@@ -1868,26 +1862,10 @@ public class ADDXMLProcessor {
                             yAxis.setArange(yr);
 
                             axisBeans.add(yAxis);
-                        
-                            elementName = threddsDataset.getID()+"-z-axis";
-                            AxisBean zAxis = new AxisBean();
+
                             if ( hasZ ) {
-                                if ( zvalues != null ) {
-                                    System.out.println("Loading Z from property metadata: "+elementName);
-                                    zAxis.setElement(elementName);
-                                    String zunits = z.getUnits();
-                                    zAxis.setType("z");
-                                    zAxis.setUnits(zunits);
-                                    String[] zvs = zvalues.split("\\s+");
-                                    DecimalFormat format = new DecimalFormat("###############.###############");
-                                    for (int zi = 0; zi < zvs.length; zi++ ) {
-                                        double zd = Double.valueOf(zvs[zi]).doubleValue();
-                                        zvs[zi] = format.format(zd);
-                                    }
-                                    zAxis.setV(zvs);
-                                } else {
                                     System.out.println("Loading Z without property metadata: "+elementName);
-                                    zAxis.setElement(elementName);
+                                    
                                     grid_name.append("-z-axis");
                                     double zsize = z.getSize();
                                     double zresolution = z.getResolution();
@@ -1904,224 +1882,278 @@ public class ADDXMLProcessor {
                                         zAxis.setArange(zr);
 
                                     } 
-                                }
+                                
                                 grid_name.append("-z-axis");
                                 axisBeans.add(zAxis);
                             }
-                            String start_time = threddsDataset.findProperty("start");
-                            String time_length = threddsDataset.findProperty("time_length");
-                            String time_delta = threddsDataset.findProperty("time_delta");
-                            String calendar = threddsDataset.findProperty("calendar");
-                            String tdelta = "1";
-                            String tunits = "month";
-                            String tclimo = "false";
-                            if ( time_freqs.size() == 1 ) {
-                                String units = time_freqs.iterator().next();
-                                if ( units.equalsIgnoreCase("3hr") ) {
-                                    tdelta = "3";
-                                    tunits = "hour";
-                                } else if ( units.equalsIgnoreCase("6hr") ) {
-                                    tdelta = "6";
-                                    tunits = "hour";
-                                } else if ( units.equalsIgnoreCase("day") ) {
-                                    tdelta = "1";
-                                    tunits = "day";
-                                } else if ( units.equalsIgnoreCase("mon") ) {
-                                    tdelta = "1";
-                                    tunits = "month";
-                                } else if ( units.equalsIgnoreCase("monclim") ) {
-                                    tdelta = "1";
-                                    tunits = "month";
-                                    tclimo = "true";
-                                } else if ( units.equalsIgnoreCase("monthly") ) {
-                                    tdelta = "1";
-                                    tunits = "month";
-                                } else if ( units.equalsIgnoreCase("monthly_mean") ) {
-                                    tdelta = "1";
-                                    tunits = "month";
-                                } else if ( units.equalsIgnoreCase("yr") ) {
-                                    tdelta = "1";
-                                    tunits = "year";
-                                }
-                            } else {
 
-                                if ( time_delta != null && time_delta.contains(" ") ) {
-                                    String[] time_parts = time_delta.split("\\s+");
-                                    tdelta = time_parts[0];
-                                    tunits = time_parts[1];
-                                }
 
-                            }
-                            String calendar_name = null;
-                            // Use this chronology and the UTC Time Zone
-                            Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
-                            if ( calendar != null ) {
-
-                                // If calendar attribute is set, use appropriate Chronology.
-                                if (calendar.equals("proleptic_gregorian") ) {
-                                    calendar_name = "proleptic_gregorian";
-                                    chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-                                } else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
-                                    chrono = NoLeapChronology.getInstanceUTC();
-                                    calendar_name = "noleap";
-                                } else if (calendar.equals("julian") ) {
-                                    calendar_name = "julian";
-                                    chrono = JulianChronology.getInstanceUTC();
-                                } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
-                                    chrono = AllLeapChronology.getInstanceUTC();
-                                    calendar_name = "all_leap";
-                                } else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
-                                    chrono = ThreeSixtyDayChronology.getInstanceUTC();
-                                    calendar_name = "360_day";
-                                }
-                            }
+                        } else {  // end of coverage != null
+                        	ArangeBean xr = new ArangeBean();
+                            xr.setSize("360");
+                            xr.setStep("1.");
+                            xr.setStart("0.0");
+                            xAxis.setArange(xr);
+                            xAxis.setType("x");
+                            axisBeans.add(xAxis);
                             
-                            String modulo = null;
+                            ArangeBean yr = new ArangeBean();
+                            yr.setSize("180");
+                            yr.setStep("1.");
+                            yr.setStart("-90.");
+                            yAxis.setArange(yr);
+                            yAxis.setType("y");
+                            axisBeans.add(yAxis);
+                        }
+                        
 
-                            // Get the date time from the metadata TimeCoverage if it exists...
-                            DateType sd = dateRange.getStart();
-                            DateTime metadata_sd = null;
-                            if ( sd != null ) {
-                                String date = sd.getText();
-                                if ( date.startsWith("0000") ) {
-                                    date = date.replace("0000", "0001");
-                                    modulo = "true";
-                                }
-                                DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
-                                metadata_sd = f.parseDateTime(date).withChronology(chrono);
+
+                        String zvalues = null;    
+                
+                        try {
+                            zvalues = threddsDataset.findProperty(ESGF_Z_VALUES);
+                        } catch (Exception e) {
+                            try {
+                                zvalues = threddsDataset.findProperty(ZVALUES);
+                            } catch (Exception e1) {
+                                zvalues = null;
+                            }
+                        }
+                        if ( zvalues != null ) {
+                            zvalues = zvalues.trim();
+                        }
+
+                        if ( zvalues != null ) {
+                            System.out.println("Loading Z from property metadata: "+elementName);
+                            zAxis.setElement(elementName);
+                            String zunits = zAxis.getUnits();
+                            if ( zunits == null ) {
+                            	zunits = "unknown";
+                            }
+                            zAxis.setType("z");
+                            zAxis.setUnits(zunits);
+                            String[] zvs = zvalues.split("\\s+");
+                            DecimalFormat format = new DecimalFormat("###############.###############");
+                            for (int zi = 0; zi < zvs.length; zi++ ) {
+                                double zd = Double.valueOf(zvs[zi]).doubleValue();
+                                zvs[zi] = format.format(zd);
+                            }
+                            zAxis.setV(zvs);
+                        
+                            axisBeans.addUnique(zAxis);
+                            
+                        }
+                        // Try to collect the time information
+                        
+                        String start_time = threddsDataset.findProperty("start");
+                        String time_length = threddsDataset.findProperty("time_length");
+                        String time_delta = threddsDataset.findProperty("time_delta");
+                        String calendar = threddsDataset.findProperty("calendar");
+                        String tdelta = "1";
+                        String tunits = "month";
+                        String tclimo = "false";
+                        if ( time_freqs.size() == 1 ) {
+                            String units = time_freqs.iterator().next();
+                            if ( units.equalsIgnoreCase("3hr") ) {
+                                tdelta = "3";
+                                tunits = "hour";
+                            } else if ( units.equalsIgnoreCase("6hr") ) {
+                                tdelta = "6";
+                                tunits = "hour";
+                            } else if ( units.equalsIgnoreCase("day") ) {
+                                tdelta = "1";
+                                tunits = "day";
+                            } else if ( units.equalsIgnoreCase("mon") ) {
+                                tdelta = "1";
+                                tunits = "month";
+                            } else if ( units.equalsIgnoreCase("monclim") ) {
+                                tdelta = "1";
+                                tunits = "month";
+                                tclimo = "true";
+                            } else if ( units.equalsIgnoreCase("monthly") ) {
+                                tdelta = "1";
+                                tunits = "month";
+                            } else if ( units.equalsIgnoreCase("monthly_mean") ) {
+                                tdelta = "1";
+                                tunits = "month";
+                            } else if ( units.equalsIgnoreCase("yr") ) {
+                                tdelta = "1";
+                                tunits = "year";
+                            }
+                        } else {
+
+                            if ( time_delta != null && time_delta.contains(" ") ) {
+                                String[] time_parts = time_delta.split("\\s+");
+                                tdelta = time_parts[0];
+                                tunits = time_parts[1];
                             }
 
-                            String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
-                                    "yyyy-MM-dd HH:mm:s.s",
-                                    "yyyy-MM-dd HH:m:ss.s",
-                                    "yyyy-MM-dd HH:m:s.s",
+                        }
+                        String calendar_name = null;
+                        // Use this chronology and the UTC Time Zone
+                        Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
+                        if ( calendar != null ) {
 
-
-                                    "yyyy-MM-dd HH:mm:ss.s",
-                                    "yyyy-MM-dd HH:mm:s.s",
-                                    "yyyy-MM-dd HH:m:ss.s",
-                                    "yyyy-MM-dd HH:m:s.s",
-                                    "yyyy-MM-dd H:mm:ss.s",
-                                    "yyyy-MM-dd H:mm:s.s",
-                                    "yyyy-MM-dd H:m:ss.s",
-                                    "yyyy-MM-dd H:m:s.s",
-
-                                    "yyyy-MM-dd HH:mm:ss.s",
-                                    "yyyy-MM-dd HH:mm:s.s",
-                                    "yyyy-MM-dd HH:m:ss.s",
-                                    "yyyy-MM-dd HH:m:s.s",
-                                    "yyyy-MM-dd H:mm:ss.s",
-                                    "yyyy-MM-dd H:mm:s.s",
-                                    "yyyy-MM-dd H:m:ss.s",
-                                    "yyyy-MM-dd H:m:s.s",
-
-                                    "yyyy-MM-d HH:mm:ss.s",
-                                    "yyyy-MM-d HH:mm:s.s",
-                                    "yyyy-MM-d HH:m:ss.s",
-                                    "yyyy-MM-d HH:m:s.s",
-                                    "yyyy-MM-d H:mm:ss.s",
-                                    "yyyy-MM-d H:mm:s.s",
-                                    "yyyy-MM-d H:m:ss.s",
-                                    "yyyy-MM-d H:m:s.s",                
-
-                                    "yyyy-MM-dd HH:mm:ss.s",
-                                    "yyyy-MM-dd HH:mm:s.s",
-                                    "yyyy-MM-dd HH:m:ss.s",
-                                    "yyyy-MM-dd HH:m:s.s",
-                                    "yyyy-MM-dd H:mm:ss.s",
-                                    "yyyy-MM-dd H:mm:s.s",
-                                    "yyyy-MM-dd H:m:ss.s",
-                                    "yyyy-MM-dd H:m:s.s",
-
-                                    "yyyy-MM-d HH:mm:ss.s",
-                                    "yyyy-MM-d HH:mm:s.s",
-                                    "yyyy-MM-d HH:m:ss.s",
-                                    "yyyy-MM-d HH:m:s.s",
-                                    "yyyy-MM-d H:mm:ss.s",
-                                    "yyyy-MM-d H:mm:s.s",
-                                    "yyyy-MM-d H:m:ss.s",
-                                    "yyyy-MM-d H:m:s.s", 
-
-                                    "yyyy-M-dd HH:mm:ss.s",
-                                    "yyyy-M-dd HH:mm:s.s",
-                                    "yyyy-M-dd HH:m:ss.s",
-                                    "yyyy-M-dd HH:m:s.s",
-                                    "yyyy-M-dd H:mm:ss.s",
-                                    "yyyy-M-dd H:mm:s.s",
-                                    "yyyy-M-dd H:m:ss.s",
-                                    "yyyy-M-dd H:m:s.s",
-
-                                    "yyyy-M-d HH:mm:ss.s",
-                                    "yyyy-M-d HH:mm:s.s",
-                                    "yyyy-M-d HH:m:ss.s",
-                                    "yyyy-M-d HH:m:s.s",
-                                    "yyyy-M-d H:mm:ss.s",
-                                    "yyyy-M-d H:mm:s.s",
-                                    "yyyy-M-d H:m:ss.s",
-                                    "yyyy-M-d H:m:s.s"              
-
-                            };
-                            DateTime s = null;
-                            for ( int i = 0; i < esg_formats.length; i++) {
-                                try {
-                                    DateTimeFormatter f = DateTimeFormat.forPattern(esg_formats[i]).withChronology(chrono);
-                                    s = f.parseDateTime(start_time).withChronology(chrono);
-                                    break;
-                                } catch (Exception e) {
-                                    // Try again...
-                                }
-                            }                           
-
-                            if ( metadata_sd != null ) {
-                                s = metadata_sd;
+                            // If calendar attribute is set, use appropriate Chronology.
+                            if (calendar.equals("proleptic_gregorian") ) {
+                                calendar_name = "proleptic_gregorian";
+                                chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+                            } else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+                                chrono = NoLeapChronology.getInstanceUTC();
+                                calendar_name = "noleap";
+                            } else if (calendar.equals("julian") ) {
+                                calendar_name = "julian";
+                                chrono = JulianChronology.getInstanceUTC();
+                            } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+                                chrono = AllLeapChronology.getInstanceUTC();
+                                calendar_name = "all_leap";
+                            } else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+                                chrono = ThreeSixtyDayChronology.getInstanceUTC();
+                                calendar_name = "360_day";
                             }
+                        }
+                        
+                        String modulo = null;
 
-                            System.out.println("Loading T from metadata: "+elementName);
-                            AxisBean tAxis = new AxisBean();
-                            if ( calendar_name != null ) {
-                                tAxis.setCalendar(calendar_name);
+                        // Get the date time from the metadata TimeCoverage if it exists...
+                        DateType sd = dateRange.getStart();
+                        DateTime metadata_sd = null;
+                        if ( sd != null ) {
+                            String date = sd.getText();
+                            if ( date.startsWith("0000") ) {
+                                date = date.replace("0000", "0001");
+                                modulo = "true";
                             }
-                            tAxis.setElement(threddsDataset.getID()+"-t-axis");
-                            grid_name.append("-t-axis");
-                            if ( modulo != null && modulo.equals("true") ) {
-                                tAxis.setModulo(true);
+                            DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
+                            metadata_sd = f.parseDateTime(date).withChronology(chrono);
+                        }
+
+                        String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
+                                "yyyy-MM-dd HH:mm:s.s",
+                                "yyyy-MM-dd HH:m:ss.s",
+                                "yyyy-MM-dd HH:m:s.s",
+
+
+                                "yyyy-MM-dd HH:mm:ss.s",
+                                "yyyy-MM-dd HH:mm:s.s",
+                                "yyyy-MM-dd HH:m:ss.s",
+                                "yyyy-MM-dd HH:m:s.s",
+                                "yyyy-MM-dd H:mm:ss.s",
+                                "yyyy-MM-dd H:mm:s.s",
+                                "yyyy-MM-dd H:m:ss.s",
+                                "yyyy-MM-dd H:m:s.s",
+
+                                "yyyy-MM-dd HH:mm:ss.s",
+                                "yyyy-MM-dd HH:mm:s.s",
+                                "yyyy-MM-dd HH:m:ss.s",
+                                "yyyy-MM-dd HH:m:s.s",
+                                "yyyy-MM-dd H:mm:ss.s",
+                                "yyyy-MM-dd H:mm:s.s",
+                                "yyyy-MM-dd H:m:ss.s",
+                                "yyyy-MM-dd H:m:s.s",
+
+                                "yyyy-MM-d HH:mm:ss.s",
+                                "yyyy-MM-d HH:mm:s.s",
+                                "yyyy-MM-d HH:m:ss.s",
+                                "yyyy-MM-d HH:m:s.s",
+                                "yyyy-MM-d H:mm:ss.s",
+                                "yyyy-MM-d H:mm:s.s",
+                                "yyyy-MM-d H:m:ss.s",
+                                "yyyy-MM-d H:m:s.s",                
+
+                                "yyyy-MM-dd HH:mm:ss.s",
+                                "yyyy-MM-dd HH:mm:s.s",
+                                "yyyy-MM-dd HH:m:ss.s",
+                                "yyyy-MM-dd HH:m:s.s",
+                                "yyyy-MM-dd H:mm:ss.s",
+                                "yyyy-MM-dd H:mm:s.s",
+                                "yyyy-MM-dd H:m:ss.s",
+                                "yyyy-MM-dd H:m:s.s",
+
+                                "yyyy-MM-d HH:mm:ss.s",
+                                "yyyy-MM-d HH:mm:s.s",
+                                "yyyy-MM-d HH:m:ss.s",
+                                "yyyy-MM-d HH:m:s.s",
+                                "yyyy-MM-d H:mm:ss.s",
+                                "yyyy-MM-d H:mm:s.s",
+                                "yyyy-MM-d H:m:ss.s",
+                                "yyyy-MM-d H:m:s.s", 
+
+                                "yyyy-M-dd HH:mm:ss.s",
+                                "yyyy-M-dd HH:mm:s.s",
+                                "yyyy-M-dd HH:m:ss.s",
+                                "yyyy-M-dd HH:m:s.s",
+                                "yyyy-M-dd H:mm:ss.s",
+                                "yyyy-M-dd H:mm:s.s",
+                                "yyyy-M-dd H:m:ss.s",
+                                "yyyy-M-dd H:m:s.s",
+
+                                "yyyy-M-d HH:mm:ss.s",
+                                "yyyy-M-d HH:mm:s.s",
+                                "yyyy-M-d HH:m:ss.s",
+                                "yyyy-M-d HH:m:s.s",
+                                "yyyy-M-d H:mm:ss.s",
+                                "yyyy-M-d H:mm:s.s",
+                                "yyyy-M-d H:m:ss.s",
+                                "yyyy-M-d H:m:s.s"              
+
+                        };
+                        DateTime s = null;
+                        for ( int i = 0; i < esg_formats.length; i++) {
+                            try {
+                                DateTimeFormatter f = DateTimeFormat.forPattern(esg_formats[i]).withChronology(chrono);
+                                s = f.parseDateTime(start_time).withChronology(chrono);
+                                break;
+                            } catch (Exception e) {
+                                // Try again...
                             }
-                            tAxis.setType("t");
-                            tAxis.setUnits(tunits);
-                            ArangeBean tr = new ArangeBean();
-                            DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-                            System.out.println("Using start time: "+fmt.print(s)+ " from input "+start_time);
-                            tr.setStart(fmt.print(s));
-                            tr.setStep(tdelta);
-                            tr.setSize(time_length);
-                            if ( tclimo.equals("true") ) {
-                                tAxis.setModulo(true);
-                            }
-                            tAxis.setArange(tr);
-                            axisBeans.add(tAxis);
+                        }                           
 
-                            // We have the axes for this variable.  See if we can find it in the list of existing axes.
-                            
-                            
-                            
-                            GridBean grid = getMatchingGrid(axisBeans, allGrids);
-                            
-                            if ( grid == null ) {
+                        if ( metadata_sd != null ) {
+                            s = metadata_sd;
+                        }
 
-                                grid = new GridBean();
-                                grid.setElement(grid_name.toString());
-                                grid.setAxes(axisBeans);
-                                allAxes.addAll(axisBeans);
-                                allGrids.add(grid);
-                                
-                            }
-                            
-                            
-                            las_var.setGrid(grid);
-                            dataset.addVariable(las_var);
+                        System.out.println("Loading T from metadata: "+elementName);
+                        AxisBean tAxis = new AxisBean();
+                        if ( calendar_name != null ) {
+                            tAxis.setCalendar(calendar_name);
+                        }
+                        tAxis.setElement(threddsDataset.getID()+"-t-axis");
+                        grid_name.append("-t-axis");
+                        if ( modulo != null && modulo.equals("true") ) {
+                            tAxis.setModulo(true);
+                        }
+                        tAxis.setType("t");
+                        tAxis.setUnits(tunits);
+                        ArangeBean tr = new ArangeBean();
+                        DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+                        System.out.println("Using start time: "+fmt.print(s)+ " from input "+start_time);
+                        tr.setStart(fmt.print(s));
+                        tr.setStep(tdelta);
+                        tr.setSize(time_length);
+                        if ( tclimo.equals("true") ) {
+                            tAxis.setModulo(true);
+                        }
+                        tAxis.setArange(tr);
+                        axisBeans.add(tAxis);
+                        
+                        
+                        // We have the axes for this variable.  See if we can find it in the list of existing axes.
+                        GridBean grid = getMatchingGrid(axisBeans, allGrids);
+                        
+                        if ( grid == null ) {
 
-
-                        } // coverage != null
+                            grid = new GridBean();
+                            grid.setElement(grid_name.toString());
+                            grid.setAxes(axisBeans);
+                            allAxes.addAll(axisBeans);
+                            allGrids.add(grid);
+                            
+                        }
+                        
+                        
+                        las_var.setGrid(grid);
+                        dataset.addVariable(las_var);
                     } // for variables;
                     DatasetBeans.add(dataset);
                 } else { // vars > 0
