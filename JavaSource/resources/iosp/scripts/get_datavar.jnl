@@ -68,7 +68,7 @@ DEFINE SYMBOL shape = `UPCASE("($4"NONE")")`
 ! IF there are no axes, a purely scalar variable, just write it and exit.
 
 IF ($shape"0|NONE>1|*>0") THEN
-   SAVE/FILE="$1"/OUTTYPE=float/CLOBBER '($varname)'
+   SAVE/FILE="$1"/OUTTYPE=float/CLOBBER ($varname)
    EXIT/SCRIPT
 ENDIF
 
@@ -151,44 +151,44 @@ ENDIF
 ! If the variable is type CHAR, just write it.
 
 LET is_numeric = 1
-LET attnames = (($varname)).attnames 
+LET attnames = ($varname).attnames 
 
 ! These attributes are available for a transformed variable.
 IF `IS_ELEMENT_OF_STR_N(attnames, "ferret_datatype") NE 0` THEN
-  DEFINE SYMBOL data_type = `'($varname)'.ferret_datatype`
+  DEFINE SYMBOL data_type = `($varname).ferret_datatype`
 ELIF `IS_ELEMENT_OF_STR_N(attnames, "infile_datatype") NE 0` THEN
-  DEFINE SYMBOL data_type = `'($varname)'.ferret_datatype`
+  DEFINE SYMBOL data_type = `($varname).ferret_datatype`
 ELSE
 ! If those attributes dont exist then it's not an FTDS dataset, and 
 ! we can get the data type from the file safely.
-   DEFINE SYMBOL data_type = `'($varname)'[($region_full)],return=dtype`
+   DEFINE SYMBOL data_type = `($varname)[($region_full)],return=dtype`
 ENDIF
 
 LET is_numeric = `(STRCMP("($data_type)", "CHAR") NE 0) AND (STRCMP("($data_type)", "STRING") NE 0)`
 
 IF `is_numeric` THEN
 
-   LET attlist = (($varname)).attnames
+   LET attlist = ($varname).attnames
    IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
 
       DEFINE SYMBOL base_name = ($varname)
-      LET loc_regrid = STRINDEX("(($varname))", "_1_regrid")
-      LET loc_transf = STRINDEX("(($varname))", "_1_transformed")
-      IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("(($varname))", 1, loc_regrid-1)`
-      IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("(($varname))", 1, loc_transf-1)`
+      LET loc_regrid = STRINDEX("($varname)", "_1_regrid")
+      LET loc_transf = STRINDEX("($varname)", "_1_transformed")
+      IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($varname)", 1, loc_regrid-1)`
+      IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($varname)", 1, loc_transf-1)`
       SET VAR/NAME=temporary_get_datavar ($base_name)
       LET/D=($2) ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
       DEFINE ALIAS ATTRCMD SET ATT/LIKE=
       ATTRCMD temporary_get_datavar ($base_name)
    ENDIF
 
-   SET VAR/OUTTYPE=float '($varname)'
+   SET VAR/OUTTYPE=float ($varname)
 
 ENDIF
 
 ! All the region information has been gathered. Now write the file.  
 
-SAVE/FILE="$1"/CLOBBER '($varname)'[($region_full)]
+SAVE/FILE="$1"/CLOBBER ($varname)[($region_full)]
 
 ! Done writing data variable. Clean up.
 SET DATA/RESTORE
