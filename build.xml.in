@@ -254,7 +254,7 @@
 		<copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml"
 			tofile="${addxml-build}/log4j.xml" />
 		<javac
-			srcdir="${addxml-src}/gov/noaa/pmel/tmap/las/proxy:${addxml-src}/gov/noaa/pmel/tmap/las/erddap/util:${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
+			srcdir="${addxml-src}"
 			destdir="${addxml-build}">
 			<classpath>
 				<fileset id="addxml-libs"
