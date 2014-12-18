@@ -164,6 +164,13 @@ ELSE
    DEFINE SYMBOL data_type = `($varname)[($region_full)],return=dtype`
 ENDIF
 
+! A variable that we are defining for F-TDS will have the
+! Ferret default values for missing data, not whatever was
+! in the attributes inherited from the dataset variable.
+
+IF `STRINDEX("($varname)", "_transformed") GT 0` THEN \
+   SET VAR/BAD=-1.e34 ($varname)
+
 LET is_numeric = `(STRCMP("($data_type)", "CHAR") NE 0) AND (STRCMP("($data_type)", "STRING") NE 0)`
 
 IF `is_numeric` THEN
@@ -172,9 +179,7 @@ IF `is_numeric` THEN
    IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
 
       DEFINE SYMBOL base_name = ($varname)
-      LET loc_regrid = STRINDEX("($varname)", "_1_regrid")
       LET loc_transf = STRINDEX("($varname)", "_1_transformed")
-      IF `loc_regrid GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($varname)", 1, loc_regrid-1)`
       IF `loc_transf GT 0` THEN DEFINE SYMBOL base_name = `SUBSTRING("($varname)", 1, loc_transf-1)`
       SET VAR/NAME=temporary_get_datavar ($base_name)
       LET/D=($2) ($base_name) = IF temporary_get_datavar GT -9.e33 THEN temporary_get_datavar
