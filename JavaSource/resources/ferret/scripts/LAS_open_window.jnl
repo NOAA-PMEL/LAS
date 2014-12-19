@@ -23,7 +23,10 @@ IF `($set_window_quals"0|*>1") EQ 0` THEN \
 CANCEL MODE LOGO
 
 IF `($ferret_view"|xy>1|xyt>1|*>0") AND ($its_prop_prop_plot"0|*>1") EQ 0` THEN
-  DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
+
+   DEFINE SYMBOL win_aspect = 1
+  IF `($region_x_range"0") NE 0` THEN DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
+
   IF `($win_aspect) LT 0.1` THEN DEFINE SYMBOL win_aspect = 0.1
   IF `($win_aspect) GT 10` THEN DEFINE SYMBOL win_aspect = 10
   IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
