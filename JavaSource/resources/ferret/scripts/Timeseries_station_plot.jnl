@@ -104,8 +104,8 @@ let colrx = id2d[m=($q)];\
 let tt = t[gt=taxis];\
 let vart = reshape(tempx, tt);\
 let colort = reshape(colrx, tt);\
-stat colort;\
 plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort)
+
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
