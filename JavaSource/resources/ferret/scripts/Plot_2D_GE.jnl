@@ -16,11 +16,6 @@
 ! a file variable, an error occurred the second time the init script was called.
 !
 
-set redirect/tee/journal
-! Set the gif filename, changing it from .gif to the name from this request
-! Why is there not a result filename sometimes?
-IF `($result_plot_image_filename"0|*>1") EQ 0` THEN\
- DEFINE SYMBOL result_plot_image_filename = ($result_debug_filename).gif
 GO LAS_reset_gifname
 
 IF ($ferret_view"|xt>1|*>0") THEN
