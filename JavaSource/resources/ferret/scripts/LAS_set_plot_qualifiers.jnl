@@ -44,6 +44,8 @@ IF ($ferret_use_graticules"1|none>0|*>1) THEN
      DEFINE SYMBOL graticuleColor = 1
   ENDIF
   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+! If graticules are turned on, turn the tic marks off. (?)
+!  PPL TICS,0,0,0,0
 ENDIF
 
 ! Set up for degrees-minutes-seconds labels on independent variable axis
@@ -54,6 +56,10 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 ! -------- Options for 2D single-variable plots
 
 IF ($twoDplot"0|*>1") THEN
+
+! Set annotation at ends of color key
+   IF `($FERRET_VERSION"0") GE 6.2` THEN KEYMARK 1  ! annotate plot keys with the min and max
+   IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with Ferret property
 
    ! Contour levels, color levels
 
