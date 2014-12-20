@@ -15,7 +15,7 @@
 ! draw in the viewports defined in set_full_margins.jnl
 
 ! May turn off axis labeling later
-PPL TICS .125,.25,.125,.25
+PPL TICS .6,.125,.6,.125
 PPL axlabp,-1,-1
 
 !! TESTING; do we want to only constrain the map for constraints, not for
@@ -116,16 +116,16 @@ SET VIEW ($view1)
 
 ! Depth on the vertical axis?  We'll want to make it increasing downwards.
 
-LET attnames = ($ferret_plot_var_noregion%($ferret_plot_var)%).attnames
+LET attnames = ($ferret_plot_var_nq_noregion%($ferret_plot_var)%).attnames
 
 IF `IS_ELEMENT_OF_STR_N(attnames, "positive")` THEN 
-   DEFINE SYMBOL posdirec = `($ferret_plot_var_noregion%($ferret_plot_var)%).positive`
+   DEFINE SYMBOL posdirec = `($ferret_plot_var_nq_noregion%($ferret_plot_var)%).positive`
    DEFINE SYMBOL reverse_vert = ($posdirec"0|DOWN>1|down>1|*>0")
 ENDIF
 
 ! Look for a standard_name of depth, or one of the sea_floor_depth_below names:
 IF `IS_ELEMENT_OF_STR_N(attnames, "standard_name")` THEN 
-   DEFINE SYMBOL posdirec = `($ferret_plot_var_noregion%($ferret_plot_var)%).standard_name`
+   DEFINE SYMBOL posdirec = `($ferret_plot_var_nq_noregion%($ferret_plot_var)%).standard_name`
    DEFINE SYMBOL reverse_vert = ($posdirec"0|DEPTH>1|depth>1|*>0")
    IF `STRINDEX("($posdirec)", "sea_floor_depth") GT 0` THEN  reverse_vert = 1
 ENDIF
