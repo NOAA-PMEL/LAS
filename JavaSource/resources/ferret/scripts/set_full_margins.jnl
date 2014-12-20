@@ -36,8 +36,8 @@ IF ($ferret_view%0|xt>1|*>0%) THEN
 ENDIF
 
 IF ($ferret_view%0|t>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.08:0.99  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.08:0.99  full_view2
 ENDIF
 
 ! Thumbnail plots need bigger axis labels. Make the margins bigger.
@@ -50,5 +50,6 @@ SET VIEW full_view
 keymark 1
 IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with Ferret property
 
-PPL TICS,,,,,1,1
+! make short tics, on the outside of the axes
+PPL TICS .6,.125,.6,.125
 PPL AXLSZE ($text_size),($text_size)
