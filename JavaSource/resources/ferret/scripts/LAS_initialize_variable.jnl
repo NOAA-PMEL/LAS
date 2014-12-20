@@ -123,6 +123,7 @@ IF ($analysis_def"0|*>1") THEN  ! analysis_def from curvi data or transform
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
+IF ($data_var_nq"0|*>1") THEN DEFINE SYMBOL ferret_plot_var_nq_noregion = ($data_var_nq)[d=($data_num)]
 DEFINE SYMBOL ferret_plot_var_($num)_noregion = ($data_var)[d=($data_num)]
 
 DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var) 
