@@ -71,9 +71,7 @@ GO LAS_set_plot_qualifiers
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-
-! Draw the plot
-
+! Set up variables
 
 let t1 = time[i=@min]
 let t2 = time[i=@max]
@@ -93,25 +91,103 @@ ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
 
 plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all] 
 
-! Plot the lines, cycling amongh the defined colors.
+! Plot the lines.  For up to 8 lines, make separate labeled line plots
+! otherwise make a cloud of colored lines, changing color with each line.
+! Should have a UI choice between the two styles.
 
-repeat/range=1:`nstations`/name=q (\
-define symbol q = `q`; \
-define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
-npoints=2000/units=seconds/t0="`time.time_origin`" taxis; \
-show axis taxis;\
-let tempx = var2d[m=($q)];\
-let colrx = id2d[m=($q)];\
-let tt = t[gt=taxis];\
-let vart = reshape(tempx, tt);\
-let colort = reshape(colrx, tt);\
-plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort)
+list nstations; pause
 
+IF `nstations LE 8` THEN
+   
+   let asp = 1
+   set win/asp=`asp`
+   
+! Add another color, light gray, to make a line through the middle of each plot
+   let ncolors = 7
+   set mode linec:`ncolors`
+   
+   ppl color,7,85,85,85    ! lt gray
+   
+   ! Make the time series axis along the bottom
+   
+! This viewport will be used to draw the time axis at the bottom 
+! and to label the z axes.
+   
+   def view/axes/xlim=0.1:0.9/ylim=0.002:0.98 tv
+   set view tv
+   
+! Define variables for consistent vertical axes for all the time series
+   plot/set temperature
+   
+   let plotmin = ($ppl$ymin1)
+   let plotmax = ($ppl$ymax1)
+   
+   ppl %range `plotmin`, `plotmax`,4
+   let plotinc = ($ppl$range_inc)
+   
+! Draw the time axis along the bottom of the page
+   go margins 0.1,0.6
+   plot/nolab/axes=0,1,0,0/vlim=`plotmin`:`plotmax` t[gt=taxis_all] 
+   
+! Define viewports for the time series plots
+   let y2 = 0.98
+   let del = 0.92/nstations
+   let y1 = `y2 - del` + 0.02
+   
+   repeat/range=1:`nstations`/NAME=q (def view/axes/xlim=0.1:0.9/ylim=`y1`:`y2` vp_`q`; \
+                             let y1 = `y1 - del`; let y2 = `y2 - del`)
+   
+! Set up to draw a gray horizontal line through the middle of each plot
+   let t_all = t[gt=taxis_all]
+   let tpts = {`t_all[L=@min]`, `t_all[L=@max]`}
+   let ymid = ( `plotmax` + `plotmin`)/2
+   let ypts = {`ymid`, `ymid`}
+   
+! Draw and label each timeseries. Define the time series from the
+! time data in each individual feature, regrid to the overall time series
+! so they will be positioned correctly.
+   
+   repeat/range=1:`nstations`/name=q (\
+   define symbol q = `q`; \
+   set view vp_($q);\
+   define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
+   npoints=2000/units=seconds/t0="`time.time_origin`" taxis; \
+   show axis taxis;\
+   let tempx = var2d[m=($q)];\
+   let tt = t[gt=taxis];\
+   let tempt = reshape(tempx, tt);\
+   plot/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` tempt[gt=taxis_all]; \
+   plot/over/vs/line/nolab/color=7 tpts,ypts;\
+   plot/over/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` tempt[gt=taxis_all]; \
+   label/nouser 0.1, `($ppl$ylen)*0.9`, -1,0,0.12 @AS`station[m=($q)]`)
+
+ELSE  ! more than 8 stations
+
+   repeat/range=1:`nstations`/name=q (\
+   define symbol q = `q`; \
+   define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
+   npoints=2000/units=seconds/t0="`time.time_origin`" taxis; \
+   show axis taxis;\
+   let tempx = var2d[m=($q)];\
+   let colrx = id2d[m=($q)];\
+   let tt = t[gt=taxis];\
+   let vart = reshape(tempx, tt);\
+   let colort = reshape(colrx, tt);\
+   plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort;\
+   ppl shaset reset; list/L=1 colort)
+   
+ENDIF
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
 
 GO labels_above_plot
+
+! Add timeseries information on the top
+GO feature_labels  
+
+! if constraints are shown via constraint_0_lhs etc, define labels for those
+GO set_constraint_labels
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
