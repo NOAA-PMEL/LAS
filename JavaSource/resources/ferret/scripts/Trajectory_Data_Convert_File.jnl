@@ -13,6 +13,9 @@
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
 
+! Set up to write info to the debug log so that FshowGO can be used
+GO LAS_initial_setup 0
+
 
 DEFINE SYMBOL frmt width=1024/norow
 

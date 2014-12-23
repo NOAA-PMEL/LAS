@@ -20,6 +20,8 @@
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
 
+GO LAS_initial_setup 0
+
 CANCEL SYMBOL frmt 
 DEFINE SYMBOL frmt ($frmt)/($ferret_format%format=cdf|txt>heading|cdf>format=cdf|asc>width=1024|%)
 
