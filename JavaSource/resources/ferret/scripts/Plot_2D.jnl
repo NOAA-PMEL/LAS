@@ -7,7 +7,8 @@
 ! Plot_2d.jnl decides which script to call to make a 2D plot. 
 !
 ! Set the gif filename, changing it from .gif to the name from this request
-GO LAS_reset_gifname
+! Set up to write info to the debug log so that FshowGO can be used
+GO LAS_initial_setup
 
 !! Make a 2d plot...
    go draw_plot_2D

@@ -16,7 +16,7 @@
 ! a file variable, an error occurred the second time the init script was called.
 !
 
-GO LAS_reset_gifname
+GO LAS_initial_setup
 
 IF ($ferret_view"|xt>1|*>0") THEN
 

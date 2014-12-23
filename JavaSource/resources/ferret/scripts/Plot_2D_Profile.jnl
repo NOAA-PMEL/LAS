@@ -5,7 +5,8 @@
 !
 !
 ! Set the gif filename, changing it from .gif to the name from this request
-GO LAS_reset_gifname
+! Set up to write info to the debug log so that FshowGO can be used
+GO LAS_initial_setup
 
 !! Make a 2d plot...
 IF ($ferret_view"0|xzt>1|*>0") THEN

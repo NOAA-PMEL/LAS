@@ -29,6 +29,8 @@
 ! - units            units of the time axis
 ! - frames           list of each individual time points
 
+GO LAS_initial_setup 0
+
 DEFINE SYMBOL its_autolev_animate = 1
 
 GO LAS_initialize_region 0

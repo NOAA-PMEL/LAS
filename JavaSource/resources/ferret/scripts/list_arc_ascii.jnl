@@ -12,6 +12,8 @@
 
 ! Usage: GO list_arc_ascii 
 
+GO LAS_initial_setup 0
+
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
 

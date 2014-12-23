@@ -5,7 +5,8 @@
 ! Set a couple of variables and call the script that does the work.
 
 ! Set the gif filename, changing it from .gif to the name from this request
-GO LAS_reset_gifname
+! Set up to write info to the debug log so that FshowGO can be used
+GO LAS_initial_setup
 
 !CANCEL SYMBOL data_0_var
 IF ($database_access_0_longitude"0|1|*>1) THEN 

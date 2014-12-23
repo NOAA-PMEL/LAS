@@ -21,7 +21,8 @@
 ! Set any Ferret modes
 !
 ! Set the gif filename, changing it from .gif to the name from this request
-GO LAS_reset_gifname
+! Set up to write info to the debug log so that FshowGO can be used
+GO LAS_initial_setup
 
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
