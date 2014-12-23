@@ -82,7 +82,7 @@ DEFINE SYMBOL text_mask = 0
 IF `ntxtconstr EQ 0` THEN EXIT/SCRIPT
 
 REPEAT/RANGE=0:100/NAME=ic (GO set_text_constraints;\
- IF `done EQ 1` THEN EXIT/LOOP)
+ IF `text_constraints_done EQ 1` THEN EXIT/LOOP)
 
 ! Text masks are zero and 1 so they can be added.
 ! Now make it a mask with missing and 1, to multiply with var_mask
