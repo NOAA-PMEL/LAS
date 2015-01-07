@@ -109,7 +109,6 @@ public class BaseUI {
         }
     };
 
-    private final Logger logger = Logger.getLogger(BaseUI.class.getName());
     private int xButtonLayoutIndex = 0;
     private int xOtherControlsIndex = 0;
 
@@ -434,7 +433,7 @@ public class BaseUI {
             eventBus.fireEventFromSource(new ControlVisibilityEvent(false), this);
         }
         // resize OutputPanel(s) according to the current Window size
-        logger.info("handlePanelShowHide() calling resize(...)");
+      
         resize(Window.getClientWidth(), Window.getClientHeight());
     }
 
@@ -442,7 +441,7 @@ public class BaseUI {
      * @wbp.parser.entryPoint
      */
     public void initialize() {
-        logger.setLevel(Level.OFF);
+
         xTileServer = Util.getTileServer();
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
@@ -590,7 +589,6 @@ public class BaseUI {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                logger.info("onResize(ResizeEvent event) calling resize(...)");
                 resize(event.getWidth(), event.getHeight());
             }
         });
@@ -599,7 +597,6 @@ public class BaseUI {
         eventBus.addHandler(StringValueChangeEvent.TYPE, new StringValueChangeEvent.Handler() {
             @Override
             public void onValueChange(StringValueChangeEvent event) {
-                logger.info("BaseUI's onValueChange called with StringValueChangeEvent event:" + event);
                 Object source = event.getSource();
                 if ((source != null) && (source instanceof HasName)) {
                     HasName namedSource = (HasName) source;
@@ -609,12 +606,6 @@ public class BaseUI {
                         if (substring.equalsIgnoreCase("Panel-")) {
                             String imageURL = event.getValue();
                             if (imageURL != null) {
-                                logger.info("imageURL:" + imageURL);
-                                // An OutputPanel has loaded a new
-                                // plotImage,
-                                // resize
-                                logger.info("An OutputPanel has loaded a new plotImage, resize.");
-                                logger.info("onValueChange(StringValueChangeEvent event) calling resize(...)");
                                 resize(Window.getClientWidth(), Window.getClientHeight());
                             }
                         }
@@ -917,7 +908,6 @@ public class BaseUI {
      * @param windowHeight
      */
     void resize(int windowWidth, int windowHeight) {
-        logger.info("resize(int " + windowWidth + ", int " + windowHeight + ") called");
         if (xPanelCount > 1) {
             resizeOutputPanels();
         } else {
@@ -957,8 +947,7 @@ public class BaseUI {
                             try {
                                 setTopLeftAlignment((FlexTable) widget);
                             } catch (Exception e) {
-                                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
-                                e.printStackTrace();
+                               // e.printStackTrace();
                             }
                         }
                     }
