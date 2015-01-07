@@ -52,6 +52,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -95,407 +96,20 @@ import com.google.gwt.user.client.ui.Widget;
  * @author rhs
  * 
  */
-public class UI extends BaseUI {
-    
-    public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Could not add data sets to start this LAS session.");
-
-        }
-
-        @Override
-        public void onSuccess(String[] result) {
-            eventBus.fireEvent(new ESGFDatasetAddedEvent());
-            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
-        }
-
-    };
-    public AsyncCallback initFromDatasetAndVariable = new AsyncCallback() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            // Set some default values...
-            xView = "xy";
-            xOperationID = "Plot_2D_XY_zoom";
-            xOptionID = "Options_2D_image_contour_xy_7";
-            Window.alert("Please choose a data set.");
-        } 
-
-        @Override
-        public void onSuccess(Object result) {
-            CategorySerializable[] cats = (CategorySerializable[]) result;
-            if (cats != null) {
-                if (cats.length > 1) {
-                    Window.alert("Please choose a data set.");
-                } else if (cats.length == 1) {
-                    CategorySerializable firstCategorySerializable = cats[0];
-                    if (firstCategorySerializable != null && !firstCategorySerializable.isVariableChildren()) {
-                        // Set some default values...
-                        xView = "xy";
-                        xOperationID = "Plot_2D_XY_zoom";
-                        xOptionID = "Options_2D_image_contour_xy_7";
-                        Window.alert("Please choose a data set.");
-                    } else if ((firstCategorySerializable != null) && (firstCategorySerializable.isVariableChildren())) {
-                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable();
-                        VariableSerializable[] vars = ds.getVariablesSerializable();
-                        variables = new Vector<VariableSerializable>();
-                        if (xVarID == null) {
-                            xVarID = vars[0].getID();
-                        }
-                        for (int i = 0; i < vars.length; i++) {
-                            variables.add(vars[i]);
-                            if (vars[i].getID().equals(xVarID)) {
-                                logger.setLevel(Level.ALL);
-                                logger.warning("initFromDatasetAndVariable.onSuccess changing xVariable:" + xVariable + " to vars[" + i + "]:" + vars[i]);
-                                xVariable = vars[i];
-                                logger.setLevel(Level.OFF);
-                                // View is null to get all operations
-                                Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridCallback);
-                            }
-                        }
-                    }
-                } else {
-                	// No such data set was found.
-                	Util.getRPCService().getIDMap(null, initFromURL);
-                }
-            }
-        }
-    };
-    public AsyncCallback<Map<String, String>> initFromURL = new AsyncCallback<Map<String, String>>() {
-
-        @Override
-        public void onFailure(Throwable error) {
-            // Set some default values...
-            xView = "xy";
-            xOperationID = "Plot_2D_XY_zoom";
-            xOptionID = "Options_2D_image_contour_xy_7";
-            Window.alert("Please choose a data set.");
-        }
-
-        @Override
-        public void onSuccess(Map<String, String> ids) {
-            xCATID = ids.get("catid");
-            xDSID = ids.get("dsid");
-            xVarID = ids.get("varid");
-            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
-        }
-
-    };
-
-    public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            // Ok with me. User will just have to select a data set.
-        }
-
-        @Override
-        public void onSuccess(Object result) {
-            HashMap<String, String> product_server = (HashMap<String, String>) result;
-            for (Iterator nameIt = product_server.keySet().iterator(); nameIt.hasNext();) {
-                String name = (String) nameIt.next();
-                String value = product_server.get(name);
-                if (name.equals(Constants.DEFAULT_CATID)) {
-                    xCATID = value;
-                } else if (name.equals(Constants.DEFAULT_DSID)) {
-                    xDSID = value;
-                } else if (name.equals(Constants.DEFAULT_VARID)) {
-                    xVarID = value;
-                } else if (name.equals(Constants.DEFAULT_OP)) {
-                    xOperationID = value;
-                } else if (name.equals(Constants.DEFAULT_OPTION)) {
-                    xOptionID = value;
-                } else if (name.equals(Constants.DEFAULT_VIEW)) {
-                    xView = value;
-                } else if (name.equals(Constants.DEFAULT_TIME)) {
-                    tInitialTime = value;
-                } else if (name.equals(Constants.DEFAULT_Z)) {
-                    tInitialZ = value;
-                }
-            }
-
-            if (xDSID != null || xCATID != null) {
-
-                // Supply some reasonable defaults and go...
-                if (xOperationID == null) {
-                    xOperationID = "Plot_2D_XY_zoom";
-                }
-                if (xView == null) {
-                    xView = "xy";
-                }
-                setUpdateRequired(true);
-                Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
-            } else {
-                // Set some default values...
-                xView = "xy";
-                xOperationID = "Plot_2D_XY_zoom";
-                xOptionID = "Options_2D_image_contour_xy_7";
-                Util.getRPCService().getIDMap(null, initFromURL);
-            }
-        }
-    };
-
-    /*
-     * Keep track of which axis is in the plot panels.
-     */
-    // String compareAxis;
-
-    /*
-     * Keep track of which axis is selected in the header.
-     */
-    // String fixedAxis;
-
-    public ChangeListener panelAxisMenuChange = new ChangeListener() {
-        @Override
-        public void onChange(Widget sender) {
-            refresh(false, true, false);
-        }
-    };
-
-    public ClickHandler tExternalOperationClickHandler = new ClickHandler() {
-
-        String spinImageURL = URLUtil.getImageURL() + "/mozilla_blu.gif";
-
-        @Override
-        public void onClick(ClickEvent event) {
-            OperationPushButton b = (OperationPushButton) event.getSource();
-            OperationSerializable operation = b.getOperation();
-            final String target = operation.getAttributes().get("target");
-            final String opid = operation.getID();
-            final OptionsWidget op = new OptionsWidget();
-            final DialogBox optionsDialog = new DialogBox(false);
-            optionsDialog.setText("Set options for " + operation.getName());
-            op.addOkClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    Map<String, String> options = op.getState();
-                    xPanels.get(0).setVizGalState(xVariable, getHistoryToken(), xPanels.get(0).getHistoryToken());
-                    LASRequest lasRequest = xPanels.get(0).getRequest();
-                    if (options != null) {
-                        for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
-                            String key = opIt.next();
-                            String value = options.get(key);
-                            if (!value.toLowerCase().equals("default") && !value.equals("")) {
-                                lasRequest.setProperty("ferret", key, value);
-                            }
-                        }
-                    }
-                    lasRequest.setProperty("las", "output_type", "html");
-                    lasRequest.setOperation(opid, "v7");
-                   
-                    // We used to use the xOperationID.getName() instead of
-                    // "_blank" as
-                    // the Window name but IE respects only a narrow list of
-                    // valid
-                    // Window name parameters. Weusijana, 07/06/2012.
-                    if (xAnalysisWidget.isActive()) {
-                        AnalysisSerializable analysis = xAnalysisWidget.getAnalysisSerializable();
-                        if (analysis.isActive("t")) {
-                            analysis.getAxes().get("t").setLo(xAxesWidget.getTAxis().getFerretDateLo());
-                            analysis.getAxes().get("t").setHi(xAxesWidget.getTAxis().getFerretDateHi());
-                        }
-                        if (analysis.isActive("z")) {
-                            analysis.getAxes().get("z").setLo(xAxesWidget.getZAxis().getLo());
-                            analysis.getAxes().get("z").setHi(xAxesWidget.getZAxis().getHi());
-                        }
-                        if (analysis.isActive("y")) {
-                            analysis.getAxes().get("y").setLo(String.valueOf(xAxesWidget.getRefMap().getYlo()));
-                            analysis.getAxes().get("y").setHi(String.valueOf(xAxesWidget.getRefMap().getYhi()));
-                        }
-                        if (analysis.isActive("x")) {
-                            analysis.getAxes().get("x").setLo(String.valueOf(xAxesWidget.getRefMap().getXlo()));
-                            analysis.getAxes().get("x").setHi(String.valueOf(xAxesWidget.getRefMap().getXhi()));
-                        }
-                        if ( analysis.isActive("e") ) {
-                            analysis.getAxes().get("e").setLo(xAxesWidget.getEAxis().getLo());
-                            analysis.getAxes().get("e").setHi(xAxesWidget.getEAxis().getHi());
-                        }
-                        analysis.setLabel(xVariable.getName());
-                        lasRequest.setAnalysis(analysis, 0);
-                    }
-                    // Allow the operation stop specify a target of "_self" so that the new product
-                    // replaces the current window. This forces a back operation which will refresh a potentially stale plot.
-                    // No other target is allowed.
-                    String t = target;
-                    if ( t == null ) {
-                        t = "_blank";
-                    } else if ( t != null && !t.equals("_self") ) {
-                        t = "_blank";
-                    }
-                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), t, Constants.WINDOW_FEATURES);
-                    optionsDialog.hide();
-                }
-            });
-            op.addCancelHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    optionsDialog.hide();
-                }
-            });
-            op.setOptions(operation.getOptionsID(), false);
-            Widget source = (Widget) event.getSource();
-            optionsDialog.add(op);
-            optionsDialog.setPopupPosition(source.getAbsoluteLeft(), source.getAbsoluteTop());
-            Image spinImage = new Image(spinImageURL);
-            spinImage.setAltText("Spinner");
-            if (op.isEmptyOps()) {
-                optionsDialog.setText("Loading...");
-                op.hideButtons();
-                op.add(spinImage);
-            }
-            optionsDialog.show();
-            if (op.isEmptyOps()) {
-                op.ok();
-            } else {
-                optionsDialog.setText("Set options for " + operation.getName());
-                op.showButtons();
-                op.remove(spinImage);
-            }
-        }
-    };
-    public ClickHandler xVizGalOperationsClickHandler = new ClickHandler() {
-
-        @Override
-        public void onClick(ClickEvent event) {
-            Widget sender = (Widget) event.getSource();
-            if (sender instanceof OperationRadioButton) {
-                setupMenusForOperationChange();
-                applyChange();
-            }
-        }
-    };
-
+public class UI extends BaseUI implements EntryPoint {
+	
     protected boolean loadingModule = true;
-
-    private FeatureModifiedEvent.Handler featureModifiedHandler = new FeatureModifiedEvent.Handler() {
-
-        @Override
-        public void onFeatureModified(FeatureModifiedEvent event) {
-            OLMapWidget m = (OLMapWidget) event.getSource();
-            if (xAxesWidget.getRefMap().equals(m)) {
-                // Event from this map, re-fire it as a map change.
-                eventBus.fireEventFromSource(new MapChangeEvent(event.getYlo(), event.getYhi(), event.getXlo(), event.getXhi()), xPanels.get(0));
-            }
-        }
-
-    };
-    private final Logger logger = Logger.getLogger(UI.class.getName());
     private Timer noLongerRequireUpdateTimer;
-
-    private LASRequestEvent.Handler outputPanelRequestsHandler = new LASRequestEvent.Handler() {
-        private final Logger logger = Logger.getLogger(LASRequestEvent.Handler.class.getName());
-        private OutputPanelRequestController oprController = new OutputPanelRequestController();
-
-        @Override
-        public void onRequest(LASRequestEvent event) {
-            logger.setLevel(Level.OFF);
-            logger.info("onRequest(LASRequestEvent event) called.");
-            Object source = event.getSource();
-            if (source == null) {
-                logger.warning("source == null");
-            } else {
-                String sourceString = source.toString();
-                if ((source instanceof OutputPanel) || (sourceString.contains(".OutputPanel$"))) {
-                    oprController.process(event);
-                } else {
-                    logger.warning("The source is NOT and instanceof OutputPanel. source:" + sourceString);
-                }
-            }
-        }
-    };
     private boolean required_update = false;
 
     // Keep track of the number of variable widgets that are active.
     int activeVariables = 0;
 
-    ChangeHandler analysisActiveChange = new ChangeHandler() {
-        @Override
-        public void onChange(ChangeEvent event) {
-            Object source = event.getSource();
-            if ((source != null) && (source instanceof AnalysisWidget)) {
-                AnalysisWidget analysis = (AnalysisWidget) source;
-                applyButton.addStyleDependentName("APPLY-NEEDED");
-                // String v = xAnalysisWidget.getAnalysisAxis();
-                if (analysis.isActive()) {
-                    tOperationsMenu.setCorrelationButtonEnabled(false);
-                    String v = analysis.getAnalysisAxis();
-                    setAnalysisAxes(v);
-                } else {
-                    turnOffAnalysis();
-                }
-            }
-        }
-    };
-
-    ChangeHandler analysisAxesChange = new ChangeHandler() {
-
-        @Override
-        public void onChange(ChangeEvent event) {
-            if (xAnalysisWidget.isActive()) {
-                eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
-                ListBox analysisAxis = (ListBox) event.getSource();
-                String v = analysisAxis.getValue(analysisAxis.getSelectedIndex());
-                setAnalysisAxes(v);
-            }
-        }
-    };
-
-    ChangeHandler analysisOpChange = new ChangeHandler() {
-
-        @Override
-        public void onChange(ChangeEvent event) {
-            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
-        }
-    };
-    CloseHandler<DisclosurePanel> annotationsClose = new CloseHandler<DisclosurePanel>() {
-
-        @Override
-        public void onClose(CloseEvent<DisclosurePanel> event) {
-
-            for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-                OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.setAnnotationsOpen(false);
-            }
-
-        }
-
-    };
-    OpenHandler<DisclosurePanel> annotationsOpen = new OpenHandler<DisclosurePanel>() {
-
-        @Override
-        public void onOpen(OpenEvent<DisclosurePanel> event) {
-
-            for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-                OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.setAnnotationsOpen(true);
-            }
-
-        }
-
-    };
-    ClickHandler autoContour = new ClickHandler() {
-
-        @Override
-        public void onClick(ClickEvent event) {
-            if (autoContourButton.isDown()) {
-                autoScale();
-            } else {
-                autoContourTextBox.setText("");
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
-            }
-        }
-    };
     /*
      * Button to set the contour levels automatically.
      */
     ToggleButton autoContourButton;
-
     TextBox autoContourTextBox;
-
     FlexCellFormatter buttonFormatter;
 
     boolean changeDataset = false;
@@ -506,168 +120,12 @@ public class UI extends BaseUI {
      * Set if the init will be the result of a comparison mode change.
      */
     boolean comparisonModeChange;
-    /*
-     * Keep if a history token is attached to an initial URL, keep it and apply
-     * it after the VizGal has initialized.
-     */
-
-    // Sometimes you need to keep the current map selection values.
-//    double currentxlo;
-//    double currentxhi;
-//    double currentylo;
-//    double currentyhi;
 
     /*
      * Button to make slide sorter compute differences
      */
     ToggleButton differenceButton;
 
-    ClickListener differencesClick = new ClickListener() {
-        @Override
-        public void onClick(Widget sender) {
-            refresh(false, true, false);
-        }
-    };
-
-    AsyncCallback<ConfigSerializable> getGridCallback = new AsyncCallback<ConfigSerializable>() {
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Could not fetch grid.  " + caught.getLocalizedMessage());
-
-        }
-
-        @Override
-        public void onSuccess(ConfigSerializable config) {
-
-            GridSerializable grid = config.getGrid();
-            RegionSerializable[] regions = config.getRegions();
-            List<ERDDAPConstraintGroup> constraintGroups = config.getConstraintGroups();
-            if ( constraintGroups != null && constraintGroups.size() > 0 ) {
-                xTrajectoryConstraint.init(constraintGroups);
-                xTrajectoryConstraint.setVisible(true);
-            }
-            xAxesWidget.getRefMap().setRegions(regions);
-            ops = config.getOperations();
-            xVariable.setGrid(grid);
-            xAnalysisWidget.setAnalysisAxes(grid);
-
-            // if (xPanels == null || xPanels.size() == 0) {
-            // UI.super.setupOutputPanels(1, Constants.IMAGE);
-            // }
-
-
-            setupForNewGrid(grid);
-            setupPanelsAndRefreshNOforceLASRequest(false);
-            if (initialHistory != null && !initialHistory.equals("")) {
-                logger.setLevel(Level.ALL);
-                logger.info("getGridCallback.onSuccess(ConfigSerializable config) calling popHistory(false, initialHistory)");
-                logger.setLevel(Level.OFF);
-                if (initialHistory != null ) {
-                    String[] settings = initialHistory.split("token");
-                    HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
-                    setConstraintsFromHistory(tokenMap); 
-                }
-                popHistory(false, initialHistory);
-                
-                /*
-                 * If this is from an initialHistory URL with constraints, first set up the panel, then set them from the token map.
-                 */
-               
-
-            }
-            
-            setConstraintsFromProperties();
-            
-        }
-        
-       
-
-    };
-
-    AsyncCallback<ConfigSerializable> getGridForChangeDatasetCallback = new AsyncCallback<ConfigSerializable>() {
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Could not get grid for new variable." + caught.toString());
-
-        }
-
-        @Override
-        public void onSuccess(ConfigSerializable config) {
-
-            GridSerializable grid = config.getGrid();
-            xAxesWidget.getRefMap().setRegions(config.getRegions());
-            ops = config.getOperations();
-            setupForNewGrid(grid);
-            setConstraintsFromProperties();
-            
-        }
-    };
-    private void setConstraintsFromProperties() {
-        // Call if the initial load has this property or if variable in the new data set has this property.
-        Map<String, String> constraints = xVariable.getProperties().get("constraints");
-        if ( constraints != null ) {
-            for (Iterator keyIt = constraints.keySet().iterator(); keyIt.hasNext();) {
-                String key = (String) keyIt.next();
-                String value = constraints.get(key);
-                String key_trim = key;
-                if ( key.contains("_cidx") ) {
-                    key_trim = key.substring(0, key.indexOf("_cidx"));
-                }
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(key_trim, value, key_trim, value, "is"), UI.this);
-            }
-        }
-    }
-    AsyncCallback<ConfigSerializable> getGridForChangeVariableCallback = new AsyncCallback<ConfigSerializable>() {
-
-        @Override
-        public void onFailure(Throwable e) {
-            Window.alert("Could not get grid for new variable." + e.toString());
-        }
-
-        @Override
-        public void onSuccess(ConfigSerializable config) {
-            GridSerializable grid = config.getGrid();
-            xAxesWidget.getRefMap().setRegions(config.getRegions());
-            if (grid.getID().equals(xVariable.getGrid().getID()) && xNewVariable.getAttributes().get("grid_type").equals(xVariable.getAttributes().get("grid_type"))) {
-                logger.setLevel(Level.ALL);
-                logger.warning("getGridForChangeVariableCallback.onSuccess changing xVariable:" + xVariable + " to xNewVariable:" + xNewVariable);
-                xVariable = xNewVariable;
-                logger.setLevel(Level.OFF);
-                xVariable.setGrid(grid);
-                // In the case of where multiple variables are being used in a
-                // panel, we need to change the 1st UserList?
-                xPanels.get(0).setVariable(xVariable, true);
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
-            } else if (grid.getID().equals(xVariable.getGrid().getID()) && !xNewVariable.getAttributes().get("grid_type").equals(xVariable.getAttributes().get("grid_type"))) {
-                // Requires new operations, will likely replace the current
-                // operation with a new one
-                xVariable = xNewVariable;
-                xVariable.setGrid(grid);
-                // In the case of where multiple variables are being used in a
-                // panel, we need to change the 1st UserList?
-                xPanels.get(0).setVariable(xVariable, true);
-                ops = config.getOperations();
-                xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
-                xOperationID = xOperationsWidget.getCurrentOperation().getID();
-                xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
-                xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
-                tOperationsMenu.setMenus(ops, xView);
-                for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-                    OutputPanel p = (OutputPanel) panelIt.next();
-                    p.setOperation(xOperationID, xView);
-                }
-                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
-            } else {
-                // Not enough is the same. Pretend like it's a brand new data
-                // set.
-                xVariable = xNewVariable;
-                ops = config.getOperations();
-                setupForNewGrid(grid);
-
-            }
-        }
-
-    };
 
     double globalMax = -999999999.;
 
@@ -675,20 +133,7 @@ public class UI extends BaseUI {
      * Global min and max for setting contour levels.
      */
     double globalMin = 999999999.;
-    ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
-        /**
-         * Reloads the browser window at the new URL.
-         * 
-         * @param historyValueChangeEvent
-         */
-        @Override
-        public void onValueChange(ValueChangeEvent<String> historyValueChangeEvent) {
-            // The only safe way to react to a History change under the current
-            // architecture is to reload the page
-            Window.Location.reload();
-        }
-
-    };
+ 
 
     Map<String, String> historyOptions;
 
@@ -705,110 +150,12 @@ public class UI extends BaseUI {
      */
     VariableSerializable initial_var;
     String initialHistory;
-    AsyncCallback<ConfigSerializable> initVizGal = new AsyncCallback<ConfigSerializable>() {
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Failed to initalizes VizGal." + caught.toString());
-        }
-
-        @Override
-        public void onSuccess(ConfigSerializable config) {
-
-            GridSerializable grid = config.getGrid();
-            xAnalysisWidget.setAnalysisAxes(grid);
-            ops = config.getOperations();
-
-            xVariable.setGrid(grid);
-            if (xVariable.isVector() || xVariable.isDiscrete() ) {
-                autoContourTextBox.setText("");
-                autoContourButton.setDown(false);
-                autoContourButton.setEnabled(false);
-                if (!xView.equals("xy")) {
-                    differenceButton.setDown(false);
-                    differenceButton.setEnabled(false);
-                } else {
-                    differenceButton.setDown(false);
-                    differenceButton.setEnabled(true);
-                }
-            }
-            setupPanelsAndRefreshNOforceLASRequest(false);
-        }
-    };
-    AsyncCallback initVizGalForHistory = new AsyncCallback() {
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Failed to initalizes VizGal." + caught.toString());
-        }
-
-        @Override
-        public void onSuccess(Object result) {
-            String[] settings = historyString.split("token");
-            GridSerializable grid = (GridSerializable) result;
-            xVariable.setGrid(grid);
-            xAxesWidget.init(grid);
-            xAnalysisWidget.setAnalysisAxes(grid);
-            applyTokens(settings);
-            // Automatically fire the update, don't force panels to update if
-            // they don't need to and don't push history stack since this is a
-            // history event.
-            eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, false));
-        }
-    };
+    
     // Keep track of the current operations
     OperationSerializable[] ops;
 
     Map<String, String> optionsMapComparePanel;
 
-    ClickHandler optionsOkHandler = new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent arg0) {
-            refresh(false, true, false);
-        }
-
-    };
-    ClickHandler panelApplyButtonClick = new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-            refresh(false, true, false);
-        }
-    };
-    AsyncCallback requestGridForHistory = new AsyncCallback() {
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Failed to initalizes VizGal." + caught.toString());
-        }
-
-        @Override
-        public void onSuccess(Object result) {
-            CategorySerializable[] cats = (CategorySerializable[]) result;
-            if (cats.length > 1) {
-                Window.alert("Error getting variables for this dataset.");
-            } else {
-                if (cats[0].isVariableChildren()) {
-                    // TODO not a vector.  :-)
-                    Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
-                    logger.setLevel(Level.ALL);
-                    VariableSerializable catsVariable = cats[0].getVariable(historyTokens.get("varid"));
-                    logger.warning("requestGridForHistory.onSuccess changing xVariable:" + xVariable + " to cats[0].getVariable(historyTokens.get(\"varid\")):" + catsVariable);
-                    xVariable = catsVariable;
-                    logger.setLevel(Level.OFF);
-                    xPanels.get(0).setVariables(vars, xVariable);
-                    initial_var = xVariable;
-                    Util.getRPCService().getGrid(historyTokens.get("xDSID"), historyTokens.get("varid"), initVizGalForHistory);
-                } else {
-                    Window.alert("No variables found in this category");
-                }
-            }
-        }
-    };
-    ClickHandler settingsButtonApplyHandler = new ClickHandler() {
-
-        @Override
-        public void onClick(ClickEvent arg0) {
-            applyChange();
-        }
-
-    };
 
     // Keep track of the time and Z set in the config properties.
     String tInitialTime = null;
@@ -819,229 +166,20 @@ public class UI extends BaseUI {
 
     OperationsMenu tOperationsMenu = new OperationsMenu();
 
-    WidgetSelectionChangeEvent.Handler updateNeededEventHandler = new WidgetSelectionChangeEvent.Handler() {
-
-        @Override
-        public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
-            
-            if (applyButton.getCheckBoxValue() || event.isAuto() || isUpdateRequired()) {
-                refresh(false, event.isPushHistory(), event.isForce());
-            }
-
-        }
-
-    };
-    VariableSelectionChangeEvent.Handler variableChangeHandler = new VariableSelectionChangeEvent.Handler() {
-
-        @Override
-        public void onVariableChange(VariableSelectionChangeEvent event) {
-            Object source = event.getSource();
-            if (source instanceof UserListBox) {
-                UserListBox lb = (UserListBox) source;
-                // Only since compare panel events.  Hmmm... better way to do this?
-                if ( lb.getName().contains("Panel-0") ) {
-                    VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
-                    xNewVariable = v;
-                    if (v.isVector() || v.isDiscrete()) {
-                        lb.setAddButtonEnabled(false);
-                    } else {
-                        lb.setAddButtonEnabled(true);
-                    }
-                    Util.getRPCService().getConfig(null, xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
-                }
-            }
-        }
-
-    };
     /*
      * The main panel for this UI, has custom vizGal Buttons and the BaseUI main
      * panel
      */
     HorizontalPanel vVizGalPanel = new HorizontalPanel();
-    SelectionHandler<TreeItem> xVisGalDatasetSelectionHandler = new SelectionHandler<TreeItem>() {
-        @Override
-        public void onSelection(SelectionEvent<TreeItem> event) {
-            DatasetWidget datasetWidget = xDatasetButton.getDatasetWidget();
-            boolean isFromMainDatasetWidget = event.getSource().equals(datasetWidget);
-            if (isFromMainDatasetWidget) {
-                TreeItem item = event.getSelectedItem();
-                Object v = item.getUserObject();
-                if (v instanceof VariableSerializable) {
-                    variables.clear();
-                    List<VariableSerializable> panelVars = new ArrayList<VariableSerializable>();
-                    xNewVariable = (VariableSerializable) v;
-                    changeDataset = true;
-                    // Build the variables list from the selected item.
-                    TreeItem parent = item.getParentItem();
-                    for (int i = 0; i < parent.getChildCount(); i++) {
-                        TreeItem child = parent.getChild(i);
-                        Object userObject = child.getUserObject();
-                        if ((userObject != null) && (userObject instanceof VariableSerializable)) {
-                            variables.add((VariableSerializable) userObject);
-                            panelVars.add((VariableSerializable) userObject);
-                        }
-                    }
-                    if (xPanels.size() > 0) {
-                        OutputPanel outputPanel = xPanels.get(0);
-                        outputPanel.getVariableControls().removeListBoxesExceptFirst();               
-                    }
-                    for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
-                        OutputPanel outputPanel = (OutputPanel) panelsIt.next();
-                        outputPanel.setVariables(panelVars, xNewVariable);
-                    }
-                    changeDataset();
-                    // Requested in #1538, which restores the behavior of the original picker which was disliked previously,
-                    // "because it closes and I can't tell if I clicked on anything".
-                    xDatasetButton.close();
-                    pickerCloseActions();
-                }
-            }
-        }
-    };
-
-    public void applyChange() {
-        if (changeDataset) {
-            // cs = xAxesWidget.getRefMap().getCurrentSelection();
-            // This involves a jump across the wire, so the finishApply gets
-            // called in the callback from the getGrid.
-            turnOffAnalysis();
-            changeDataset();
-        } else {
-            // No jump required, just finish up now.
-            finishApply();
-        }
-    }
-
-    public void changeDataset() {
-        logger.setLevel(Level.ALL);
-        logger.info("changeDataset() called");
-        logger.warning("Changing xVariable:" + xVariable + " to xNewVariable:" + xNewVariable);
-        logger.setLevel(Level.OFF);
-        if (xNewVariable.isVector() || xNewVariable.isDiscrete()) {
-            autoContourTextBox.setText("");
-            autoContourButton.setDown(false);
-            autoContourButton.setEnabled(false);
-            if (!xView.equals("xy")) {
-                differenceButton.setDown(false);
-                differenceButton.setEnabled(false);
-            } else {
-                differenceButton.setDown(false);
-                differenceButton.setEnabled(true);
-            }
-        } else {
-            autoContourButton.setEnabled(true);
-            differenceButton.setDown(false);
-            differenceButton.setEnabled(true);
-        }
-
-        // Since we are changing data sets, go to the default plot and view.
-
-        if (xOperationID == null || xOperationID.equals("") || xVariable.getAttributes().get("grid_type") != xNewVariable.getAttributes().get("grid_type") ) {
-            if (xNewVariable.getAttributes().get("grid_type").equals("regular")) {
-                xOperationID = "Plot_2D_XY_zoom";
-                xTrajectoryConstraint.setActive(false);
-                xTrajectoryConstraint.setVisible(false);
-//                getComparePanel().getOutputControlPanel().setVisible(true);
-                xAnalysisWidget.setVisible(true);
-            } else if (xNewVariable.isVector()) {
-                xOperationID = "Plot_vector";
-                xTrajectoryConstraint.setActive(false);
-                xTrajectoryConstraint.setVisible(false);
-//                getComparePanel().getOutputControlPanel().setVisible(true);
-                xAnalysisWidget.setVisible(true);
-            } else if (xNewVariable.isDiscrete()) {
-                if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
-                    xOperationID = "Trajectory_interactive_plot";
-                } else if ( xNewVariable.getAttributes().get("grid_type").equals("profile") ) {
-                    xOperationID = "Profile_interactive_plot";
-                } else if ( xNewVariable.getAttributes().get("grid_type").equals("timeseries") ) {
-                        xOperationID = "Timeseries_interactive_plot";
-                } 
-                if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
-                    xTrajectoryConstraint.setActive(true);
-                    xTrajectoryConstraint.setVisible(true);
-                    xAnalysisWidget.setVisible(false);
-                }
-           
-            } else {
-                xOperationID = "Insitu_extract_location_value_plot";
-                xTrajectoryConstraint.setActive(false);
-                xLeftPanel.setVisible(false);
-            }
-        }
-        // Regardless, if it's a trajectory we need to change the widget values.
-        if ( xNewVariable.isDiscrete() && xNewVariable.getProperties().get("tabledap_access") != null ) {
-            xTrajectoryConstraint.clearConstraints();
-            xTrajectoryConstraint.init(xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID());
-//            getComparePanel().getOutputControlPanel().setVisible(false);
-        } else {
-//            getComparePanel().getOutputControlPanel().setVisible(true);
-            xAnalysisWidget.setVisible(true);
-        }
-        if (xView == null || xView.equals("")) {
-            xView = "xy";
-        }
-        xVariable = xNewVariable;
-
-        // Get all the config info. View is null to get all operations.
-        Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
-
-    }
-
-    public void finishApply() {
-        logger.info("finishApply() called");
-        // Check to see if the operation changed. If so, change the tool.
-        String op_id = xOperationsWidget.getCurrentOperation().getID();
-        String op_view = xOperationsWidget.getCurrentView();
-        if (!op_id.equals(xOperationID) && !op_view.equals(xView)) {
-            xOperationID = op_id;
-            xView = op_view;
-        }
-        if (historyOptions != null && historyOptions.keySet().size() > 0) {
-            xOptionsButton.setOptions(xOptionID, historyOptions);
-        }
-        // The view may have changed if the operation changed before the apply.
-        String av;
-        if (xAnalysisWidget.isActive()) {
-            av = xAnalysisWidget.getAnalysisAxis();
-            setTool(av);
-        }
-        
-        // We are finally ready to transfer the current map selection on to the
-        // panels, in the dimension where it applies.
-        // TODO: Avoid synchronizing the visible NavAxesGroup xAxesWidget in UI
-        // and the invisible (never attached to the web page's DOM)
-        // AxesWidgetGroup panelAxesWidgets in the main/compare (upper left)
-        // OutputPanel, perhaps by sharing the same OLMapWidget refMap member
-        // object. Weusijana 2012-09-20
-        for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-            OutputPanel panel = (OutputPanel) panelIt.next();
-            if (panel.isComparePanel()) {
-                // Set both Lats and Longs because the current map selection in
-                // the non-attached axes group must match all four dimensions
-                double ytlo = xAxesWidget.getRefMap().getYlo();
-                panel.getAxesWidgets().getRefMap().setCurrentSelection(ytlo, xAxesWidget.getRefMap().getYhi(), xAxesWidget.getRefMap().getXlo(), xAxesWidget.getRefMap().getXhi());
-                //panel.setLatLon(xAxesWidget.getRefMap().getCurrentSelection());
-            } else if (xView.contains("x") && !xView.contains("y")) {
-                panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
-            } else if (!xView.contains("x") && xView.contains("y")) {
-                panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
-            }
-        }
-        // Not quite ready yet, because the initalHistory has not yet been applied.
-        if ( initialHistory == null ) {
-            refresh(false, true, false);
-        }
-    }
+    
 
     /**
      * @wbp.parser.entryPoint
      */
     public void onModuleLoad() {
+    	super.initialize();
         initialHistory = getAnchor();
-        super.initialize();
-        logger.setLevel(Level.OFF);
-
+        
         int col = 0;
 
         tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
@@ -1212,41 +350,34 @@ public class UI extends BaseUI {
             public void onVisibilityUpdate(ControlVisibilityEvent event) {
                 // Makes sure xPanelHeaderHidden changes are saved in the
                 // browser History ONLY when needed
-                logger.setLevel(Level.ALL);
-                logger.warning("controlVisibilityEventHandler.onVisibilityUpdate(ControlVisibilityEvent event) called");
+
                 String historyTokenString = getHistoryTokenString();
-                logger.warning("historyTokenString:" + historyTokenString);
                 if (historyTokenString != null) {
                     String[] settings = historyTokenString.split("token");
                     HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
                     String panelHeaderHiddenString = tokenMap.get("panelHeaderHidden");
                     boolean panelHeaderHidden = Boolean.parseBoolean(panelHeaderHiddenString);
-                    logger.info("panelHeaderHiddenString:" + panelHeaderHiddenString);
                     String currentAnchor = getAnchor();
                     settings = currentAnchor.split("token");
                     tokenMap = Util.getTokenMap(settings[0]);
                     String anchorPanelHeaderHiddenString = tokenMap.get("panelHeaderHidden");
                     boolean anchorPanelHeaderHidden = Boolean.parseBoolean(anchorPanelHeaderHiddenString);
-                    logger.info("anchorPanelHeaderHiddenString:" + anchorPanelHeaderHiddenString);
                     if (anchorPanelHeaderHidden == panelHeaderHidden) {
-                        logger.warning("panelHeaderHiddenString == anchorPanelHeaderHiddenString:" + anchorPanelHeaderHiddenString);
+                        // warning
                     } else {
                         if (loadingModule) {
+                        	
                             // Don't change the browser History when loading
                             // module/app for the first time
-                            logger.severe("panelHeaderHidden in browser History doesn't need updating since loadingModule == true");
+
                         } else {
                             // Browser History needs to be updated
-                            logger.warning("historyTokenString != hash:" + currentAnchor);
-                            logger.severe("panelHeaderHidden in browser History needs updating since loadingModule == false");
-                            logger.severe("Calling History.newItem(historyTokenString, false);");
+
                             History.newItem(historyTokenString, false);
                         }
                     }
-                    logger.severe("Setting loadingModule = false");
                     loadingModule = false;
                 }
-                logger.setLevel(Level.OFF);
             }
         };
 
@@ -1284,9 +415,7 @@ public class UI extends BaseUI {
             Level level = Level.INFO;
             if (!panelHeaderHidden)
                 level = Level.SEVERE;
-            logger.log(level, "panelHeaderHiddenString:" + panelHeaderHiddenString);
             if (panelHeaderHidden != xPanelHeaderHidden) {
-                logger.log(level, "Toggling xPanelHeaderHidden because panelHeaderHidden != xPanelHeaderHidden:" + xPanelHeaderHidden);
                 handlePanelShowHide();
             }
             if (profile != null && profile.equals(Constants.PROFILE_ESGF)) {
@@ -1333,6 +462,154 @@ public class UI extends BaseUI {
         }
         History.addValueChangeHandler(historyHandler);
     }
+
+    public void applyChange() {
+        if (changeDataset) {
+            // cs = xAxesWidget.getRefMap().getCurrentSelection();
+            // This involves a jump across the wire, so the finishApply gets
+            // called in the callback from the getGrid.
+            turnOffAnalysis();
+            changeDataset();
+        } else {
+            // No jump required, just finish up now.
+            finishApply();
+        }
+    }
+
+    public void changeDataset() {
+
+        if (xNewVariable.isVector() || xNewVariable.isDiscrete()) {
+            autoContourTextBox.setText("");
+            autoContourButton.setDown(false);
+            autoContourButton.setEnabled(false);
+            if (!xView.equals("xy")) {
+                differenceButton.setDown(false);
+                differenceButton.setEnabled(false);
+            } else {
+                differenceButton.setDown(false);
+                differenceButton.setEnabled(true);
+            }
+        } else {
+            autoContourButton.setEnabled(true);
+            differenceButton.setDown(false);
+            differenceButton.setEnabled(true);
+        }
+
+        // Since we are changing data sets, go to the default plot and view.
+
+        if (xOperationID == null || xOperationID.equals("") || xVariable.getAttributes().get("grid_type") != xNewVariable.getAttributes().get("grid_type") ) {
+            if (xNewVariable.getAttributes().get("grid_type").equals("regular")) {
+                xOperationID = "Plot_2D_XY_zoom";
+                xTrajectoryConstraint.setActive(false);
+                xTrajectoryConstraint.setVisible(false);
+//                getComparePanel().getOutputControlPanel().setVisible(true);
+                xAnalysisWidget.setVisible(true);
+            } else if (xNewVariable.isVector()) {
+                xOperationID = "Plot_vector";
+                xTrajectoryConstraint.setActive(false);
+                xTrajectoryConstraint.setVisible(false);
+//                getComparePanel().getOutputControlPanel().setVisible(true);
+                xAnalysisWidget.setVisible(true);
+            } else if (xNewVariable.isDiscrete()) {
+                if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
+                    xOperationID = "Trajectory_interactive_plot";
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("profile") ) {
+                    xOperationID = "Profile_interactive_plot";
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("timeseries") ) {
+                        xOperationID = "Timeseries_interactive_plot";
+                } 
+                if ( xNewVariable.getProperties().get("tabledap_access") != null ) {
+                    xTrajectoryConstraint.setActive(true);
+                    xTrajectoryConstraint.setVisible(true);
+                    xAnalysisWidget.setVisible(false);
+                }
+           
+            } else {
+                xOperationID = "Insitu_extract_location_value_plot";
+                xTrajectoryConstraint.setActive(false);
+                xLeftPanel.setVisible(false);
+            }
+        }
+        // Regardless, if it's a trajectory we need to change the widget values.
+        if ( xNewVariable.isDiscrete() && xNewVariable.getProperties().get("tabledap_access") != null ) {
+            xTrajectoryConstraint.clearConstraints();
+            xTrajectoryConstraint.init(xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID());
+//            getComparePanel().getOutputControlPanel().setVisible(false);
+        } else {
+//            getComparePanel().getOutputControlPanel().setVisible(true);
+            xAnalysisWidget.setVisible(true);
+        }
+        if (xView == null || xView.equals("")) {
+            xView = "xy";
+        }
+        xVariable = xNewVariable;
+
+        // Get all the config info. View is null to get all operations.
+        Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
+
+    }
+
+    public void finishApply() {
+        // Check to see if the operation changed. If so, change the tool.
+        String op_id = xOperationsWidget.getCurrentOperation().getID();
+        String op_view = xOperationsWidget.getCurrentView();
+        if (!op_id.equals(xOperationID) && !op_view.equals(xView)) {
+            xOperationID = op_id;
+            xView = op_view;
+        }
+        if (historyOptions != null && historyOptions.keySet().size() > 0) {
+            xOptionsButton.setOptions(xOptionID, historyOptions);
+        }
+        // The view may have changed if the operation changed before the apply.
+        String av;
+        if (xAnalysisWidget.isActive()) {
+            av = xAnalysisWidget.getAnalysisAxis();
+            setTool(av);
+        }
+        
+        // We are finally ready to transfer the current map selection on to the
+        // panels, in the dimension where it applies.
+        // TODO: Avoid synchronizing the visible NavAxesGroup xAxesWidget in UI
+        // and the invisible (never attached to the web page's DOM)
+        // AxesWidgetGroup panelAxesWidgets in the main/compare (upper left)
+        // OutputPanel, perhaps by sharing the same OLMapWidget refMap member
+        // object. Weusijana 2012-09-20
+        for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+            OutputPanel panel = (OutputPanel) panelIt.next();
+            if (panel.isComparePanel()) {
+                // Set both Lats and Longs because the current map selection in
+                // the non-attached axes group must match all four dimensions
+                double ytlo = xAxesWidget.getRefMap().getYlo();
+                panel.getAxesWidgets().getRefMap().setCurrentSelection(ytlo, xAxesWidget.getRefMap().getYhi(), xAxesWidget.getRefMap().getXlo(), xAxesWidget.getRefMap().getXhi());
+                //panel.setLatLon(xAxesWidget.getRefMap().getCurrentSelection());
+            } else if (xView.contains("x") && !xView.contains("y")) {
+                panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
+            } else if (!xView.contains("x") && xView.contains("y")) {
+                panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
+            }
+        }
+        // Not quite ready yet, because the initalHistory has not yet been applied.
+        if ( initialHistory == null ) {
+            refresh(false, true, false);
+        }
+    }
+    
+    private void setConstraintsFromProperties() {
+        // Call if the initial load has this property or if variable in the new data set has this property.
+        Map<String, String> constraints = xVariable.getProperties().get("constraints");
+        if ( constraints != null ) {
+            for (Iterator keyIt = constraints.keySet().iterator(); keyIt.hasNext();) {
+                String key = (String) keyIt.next();
+                String value = constraints.get(key);
+                String key_trim = key;
+                if ( key.contains("_cidx") ) {
+                    key_trim = key.substring(0, key.indexOf("_cidx"));
+                }
+                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(key_trim, value, key_trim, value, "is"), UI.this);
+            }
+        }
+    }
+
 
     private void setConstraintsFromHistory(HashMap<String, String> tokenMap) {
         
@@ -1885,9 +1162,7 @@ public class UI extends BaseUI {
     }
 
     private void pushHistory() {
-        logger.warning("pushHistory() called");
         String historyTokenString = getHistoryTokenString();
-        logger.severe("pushHistory() calling History.newItem with historyTokenString:\n" + historyTokenString);
         if (initialHistory == null) {
             // Try not to add the same history more than once in a row
             if ( !historyTokenString.equals(previousHistory) ) {
@@ -2046,10 +1321,7 @@ public class UI extends BaseUI {
         }
         tOperationsMenu.setGoogleEarthButtonEnabled(xView.equals("xy")); // Why the config does not handle this I don't know. The view should be able to deal with this. Had trajectory code here, but off always now.
         if (history) {
-            logger.setLevel(Level.ALL);
-            logger.info("refresh calling pushHistory()");
             pushHistory();
-            logger.setLevel(Level.OFF);
         }
         if (initialHistory != null) {
             initialHistory = null;
@@ -2521,7 +1793,6 @@ public class UI extends BaseUI {
     }
 
     private void turnOffAnalysis() {
-        logger.info("turnOffAnalysis() called");
         xAnalysisWidget.setActive(false);
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();
@@ -2730,9 +2001,6 @@ public class UI extends BaseUI {
      * @return true if updates are currently required, false if they are not
      */
     boolean isUpdateRequired() {
-        logger.setLevel(Level.ALL);
-        logger.info("isUpdateRequired() returning required_update:" + required_update);
-        logger.setLevel(Level.OFF);
         return required_update;
     }
 
@@ -2748,11 +2016,8 @@ public class UI extends BaseUI {
      *            the new boolean state to set
      */
     void setUpdateRequired(boolean shouldUpdateBeRequired) {
-        logger.setLevel(Level.ALL);
-        logger.info("setUpdateRequired called with shouldUpdateBeRequired:" + shouldUpdateBeRequired);
         if (shouldUpdateBeRequired) {
             if (noLongerRequireUpdateTimer != null) {
-                logger.warning("noLongerRequireUpdateTimer:" + noLongerRequireUpdateTimer);
                 // Then a noLongerRequireUpdateTimer is running and needs to be
                 // cancelled (so updates are not halted) and nulled
                 noLongerRequireUpdateTimer.cancel();
@@ -2760,10 +2025,8 @@ public class UI extends BaseUI {
                 // Now after this method sets required_update = true,
                 // noLongerRequireUpdateTimer will not be set to false before
                 // the History related actions are complete
-                logger.info("noLongerRequireUpdateTimer cancelled and nulled");
             }
             required_update = true;
-            logger.info("required_update set to:" + required_update);
         } else {
             if (noLongerRequireUpdateTimer == null) {
                 // There is no other noLongerRequireUpdateTimer, so it's safe to
@@ -2792,12 +2055,705 @@ public class UI extends BaseUI {
                 };
                 // Schedule the timer to run once later.
                 noLongerRequireUpdateTimer.schedule(1000);
-                logger.info("Made and scheduled noLongerRequireUpdateTimer:" + noLongerRequireUpdateTimer);
             } else {
-                logger.warning("noLongerRequireUpdateTimer:" + noLongerRequireUpdateTimer);
             }
         }
-        logger.setLevel(Level.OFF);
+    	
     }
+    public AsyncCallback<String[]> addESGFDatasetsCallback = new AsyncCallback<String[]>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Could not add data sets to start this LAS session.");
+
+        }
+
+        @Override
+        public void onSuccess(String[] result) {
+            eventBus.fireEvent(new ESGFDatasetAddedEvent());
+            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
+        }
+
+    };
+    public AsyncCallback initFromDatasetAndVariable = new AsyncCallback() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            // Set some default values...
+            xView = "xy";
+            xOperationID = "Plot_2D_XY_zoom";
+            xOptionID = "Options_2D_image_contour_xy_7";
+            Window.alert("Please choose a data set.");
+        } 
+
+        @Override
+        public void onSuccess(Object result) {
+            CategorySerializable[] cats = (CategorySerializable[]) result;
+            if (cats != null) {
+                if (cats.length > 1) {
+                    Window.alert("Please choose a data set.");
+                } else if (cats.length == 1) {
+                    CategorySerializable firstCategorySerializable = cats[0];
+                    if (firstCategorySerializable != null && !firstCategorySerializable.isVariableChildren()) {
+                        // Set some default values...
+                        xView = "xy";
+                        xOperationID = "Plot_2D_XY_zoom";
+                        xOptionID = "Options_2D_image_contour_xy_7";
+                        Window.alert("Please choose a data set.");
+                    } else if ((firstCategorySerializable != null) && (firstCategorySerializable.isVariableChildren())) {
+                        DatasetSerializable ds = firstCategorySerializable.getDatasetSerializable();
+                        VariableSerializable[] vars = ds.getVariablesSerializable();
+                        variables = new Vector<VariableSerializable>();
+                        if (xVarID == null) {
+                            xVarID = vars[0].getID();
+                        }
+                        for (int i = 0; i < vars.length; i++) {
+                            variables.add(vars[i]);
+                            if (vars[i].getID().equals(xVarID)) {
+
+                                xVariable = vars[i];
+                                // View is null to get all operations
+                                Util.getRPCService().getConfig(null, xVariable.getCATID(), xVariable.getDSID(), xVariable.getID(), getGridCallback);
+                            }
+                        }
+                    }
+                } else {
+                	// No such data set was found.
+                	Util.getRPCService().getIDMap(null, initFromURL);
+                }
+            }
+        }
+    };
+    public AsyncCallback<Map<String, String>> initFromURL = new AsyncCallback<Map<String, String>>() {
+
+        @Override
+        public void onFailure(Throwable error) {
+            // Set some default values...
+            xView = "xy";
+            xOperationID = "Plot_2D_XY_zoom";
+            xOptionID = "Options_2D_image_contour_xy_7";
+            Window.alert("Please choose a data set.");
+        }
+
+        @Override
+        public void onSuccess(Map<String, String> ids) {
+            xCATID = ids.get("catid");
+            xDSID = ids.get("dsid");
+            xVarID = ids.get("varid");
+            Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
+        }
+
+    };
+
+    public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+            // Ok with me. User will just have to select a data set.
+        }
+
+        @Override
+        public void onSuccess(Object result) {
+            HashMap<String, String> product_server = (HashMap<String, String>) result;
+            for (Iterator nameIt = product_server.keySet().iterator(); nameIt.hasNext();) {
+                String name = (String) nameIt.next();
+                String value = product_server.get(name);
+                if (name.equals(Constants.DEFAULT_CATID)) {
+                    xCATID = value;
+                } else if (name.equals(Constants.DEFAULT_DSID)) {
+                    xDSID = value;
+                } else if (name.equals(Constants.DEFAULT_VARID)) {
+                    xVarID = value;
+                } else if (name.equals(Constants.DEFAULT_OP)) {
+                    xOperationID = value;
+                } else if (name.equals(Constants.DEFAULT_OPTION)) {
+                    xOptionID = value;
+                } else if (name.equals(Constants.DEFAULT_VIEW)) {
+                    xView = value;
+                } else if (name.equals(Constants.DEFAULT_TIME)) {
+                    tInitialTime = value;
+                } else if (name.equals(Constants.DEFAULT_Z)) {
+                    tInitialZ = value;
+                }
+            }
+
+            if (xDSID != null || xCATID != null) {
+
+                // Supply some reasonable defaults and go...
+                if (xOperationID == null) {
+                    xOperationID = "Plot_2D_XY_zoom";
+                }
+                if (xView == null) {
+                    xView = "xy";
+                }
+                setUpdateRequired(true);
+                Util.getRPCService().getCategories(xCATID, xDSID, initFromDatasetAndVariable);
+            } else {
+                // Set some default values...
+                xView = "xy";
+                xOperationID = "Plot_2D_XY_zoom";
+                xOptionID = "Options_2D_image_contour_xy_7";
+                Util.getRPCService().getIDMap(null, initFromURL);
+            }
+        }
+    };
+
+    /*
+     * Keep track of which axis is in the plot panels.
+     */
+    // String compareAxis;
+
+    /*
+     * Keep track of which axis is selected in the header.
+     */
+    // String fixedAxis;
+
+    public ChangeListener panelAxisMenuChange = new ChangeListener() {
+        @Override
+        public void onChange(Widget sender) {
+            refresh(false, true, false);
+        }
+    };
+    
+
+    public ClickHandler tExternalOperationClickHandler = new ClickHandler() {
+
+        String spinImageURL = URLUtil.getImageURL() + "/mozilla_blu.gif";
+
+        @Override
+        public void onClick(ClickEvent event) {
+            OperationPushButton b = (OperationPushButton) event.getSource();
+            OperationSerializable operation = b.getOperation();
+            final String target = operation.getAttributes().get("target");
+            final String opid = operation.getID();
+            final OptionsWidget op = new OptionsWidget();
+            final DialogBox optionsDialog = new DialogBox(false);
+            optionsDialog.setText("Set options for " + operation.getName());
+            op.addOkClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    Map<String, String> options = op.getState();
+                    xPanels.get(0).setVizGalState(xVariable, getHistoryToken(), xPanels.get(0).getHistoryToken());
+                    LASRequest lasRequest = xPanels.get(0).getRequest();
+                    if (options != null) {
+                        for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
+                            String key = opIt.next();
+                            String value = options.get(key);
+                            if (!value.toLowerCase().equals("default") && !value.equals("")) {
+                                lasRequest.setProperty("ferret", key, value);
+                            }
+                        }
+                    }
+                    lasRequest.setProperty("las", "output_type", "html");
+                    lasRequest.setOperation(opid, "v7");
+                   
+                    // We used to use the xOperationID.getName() instead of
+                    // "_blank" as
+                    // the Window name but IE respects only a narrow list of
+                    // valid
+                    // Window name parameters. Weusijana, 07/06/2012.
+                    if (xAnalysisWidget.isActive()) {
+                        AnalysisSerializable analysis = xAnalysisWidget.getAnalysisSerializable();
+                        if (analysis.isActive("t")) {
+                            analysis.getAxes().get("t").setLo(xAxesWidget.getTAxis().getFerretDateLo());
+                            analysis.getAxes().get("t").setHi(xAxesWidget.getTAxis().getFerretDateHi());
+                        }
+                        if (analysis.isActive("z")) {
+                            analysis.getAxes().get("z").setLo(xAxesWidget.getZAxis().getLo());
+                            analysis.getAxes().get("z").setHi(xAxesWidget.getZAxis().getHi());
+                        }
+                        if (analysis.isActive("y")) {
+                            analysis.getAxes().get("y").setLo(String.valueOf(xAxesWidget.getRefMap().getYlo()));
+                            analysis.getAxes().get("y").setHi(String.valueOf(xAxesWidget.getRefMap().getYhi()));
+                        }
+                        if (analysis.isActive("x")) {
+                            analysis.getAxes().get("x").setLo(String.valueOf(xAxesWidget.getRefMap().getXlo()));
+                            analysis.getAxes().get("x").setHi(String.valueOf(xAxesWidget.getRefMap().getXhi()));
+                        }
+                        if ( analysis.isActive("e") ) {
+                            analysis.getAxes().get("e").setLo(xAxesWidget.getEAxis().getLo());
+                            analysis.getAxes().get("e").setHi(xAxesWidget.getEAxis().getHi());
+                        }
+                        analysis.setLabel(xVariable.getName());
+                        lasRequest.setAnalysis(analysis, 0);
+                    }
+                    // Allow the operation stop specify a target of "_self" so that the new product
+                    // replaces the current window. This forces a back operation which will refresh a potentially stale plot.
+                    // No other target is allowed.
+                    String t = target;
+                    if ( t == null ) {
+                        t = "_blank";
+                    } else if ( t != null && !t.equals("_self") ) {
+                        t = "_blank";
+                    }
+                    Window.open(Util.getProductServer() + "?catid=" + xVariable.getCATID() + "&xml=" + URL.encode(lasRequest.toString()), t, Constants.WINDOW_FEATURES);
+                    optionsDialog.hide();
+                }
+            });
+            op.addCancelHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    optionsDialog.hide();
+                }
+            });
+            op.setOptions(operation.getOptionsID(), false);
+            Widget source = (Widget) event.getSource();
+            optionsDialog.add(op);
+            optionsDialog.setPopupPosition(source.getAbsoluteLeft(), source.getAbsoluteTop());
+            Image spinImage = new Image(spinImageURL);
+            spinImage.setAltText("Spinner");
+            if (op.isEmptyOps()) {
+                optionsDialog.setText("Loading...");
+                op.hideButtons();
+                op.add(spinImage);
+            }
+            optionsDialog.show();
+            if (op.isEmptyOps()) {
+                op.ok();
+            } else {
+                optionsDialog.setText("Set options for " + operation.getName());
+                op.showButtons();
+                op.remove(spinImage);
+            }
+        }
+    };
+    public ClickHandler xVizGalOperationsClickHandler = new ClickHandler() {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            Widget sender = (Widget) event.getSource();
+            if (sender instanceof OperationRadioButton) {
+                setupMenusForOperationChange();
+                applyChange();
+            }
+        }
+    };
+
+    private FeatureModifiedEvent.Handler featureModifiedHandler = new FeatureModifiedEvent.Handler() {
+
+        @Override
+        public void onFeatureModified(FeatureModifiedEvent event) {
+            OLMapWidget m = (OLMapWidget) event.getSource();
+            if (xAxesWidget.getRefMap().equals(m)) {
+                // Event from this map, re-fire it as a map change.
+                eventBus.fireEventFromSource(new MapChangeEvent(event.getYlo(), event.getYhi(), event.getXlo(), event.getXhi()), xPanels.get(0));
+            }
+        }
+
+    };
+
+    private LASRequestEvent.Handler outputPanelRequestsHandler = new LASRequestEvent.Handler() {
+        private OutputPanelRequestController oprController = new OutputPanelRequestController();
+
+        @Override
+        public void onRequest(LASRequestEvent event) {
+            Object source = event.getSource();
+            if (source == null) {
+            	// Uh oh.
+            } else {
+                String sourceString = source.toString();
+                if ((source instanceof OutputPanel) || (sourceString.contains(".OutputPanel$"))) {
+                    oprController.process(event);
+                } else {
+                	// uh oh.
+                }
+            }
+        }
+    };
+
+    ChangeHandler analysisActiveChange = new ChangeHandler() {
+        @Override
+        public void onChange(ChangeEvent event) {
+            Object source = event.getSource();
+            if ((source != null) && (source instanceof AnalysisWidget)) {
+                AnalysisWidget analysis = (AnalysisWidget) source;
+                applyButton.addStyleDependentName("APPLY-NEEDED");
+                // String v = xAnalysisWidget.getAnalysisAxis();
+                if (analysis.isActive()) {
+                    tOperationsMenu.setCorrelationButtonEnabled(false);
+                    String v = analysis.getAnalysisAxis();
+                    setAnalysisAxes(v);
+                } else {
+                    turnOffAnalysis();
+                }
+            }
+        }
+    };
+
+    ChangeHandler analysisAxesChange = new ChangeHandler() {
+
+        @Override
+        public void onChange(ChangeEvent event) {
+            if (xAnalysisWidget.isActive()) {
+                eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
+                ListBox analysisAxis = (ListBox) event.getSource();
+                String v = analysisAxis.getValue(analysisAxis.getSelectedIndex());
+                setAnalysisAxes(v);
+            }
+        }
+    };
+
+    ChangeHandler analysisOpChange = new ChangeHandler() {
+
+        @Override
+        public void onChange(ChangeEvent event) {
+            eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), event.getSource());
+        }
+    };
+    CloseHandler<DisclosurePanel> annotationsClose = new CloseHandler<DisclosurePanel>() {
+
+        @Override
+        public void onClose(CloseEvent<DisclosurePanel> event) {
+
+            for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+                OutputPanel panel = (OutputPanel) panelIt.next();
+                panel.setAnnotationsOpen(false);
+            }
+
+        }
+
+    };
+    OpenHandler<DisclosurePanel> annotationsOpen = new OpenHandler<DisclosurePanel>() {
+
+        @Override
+        public void onOpen(OpenEvent<DisclosurePanel> event) {
+
+            for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+                OutputPanel panel = (OutputPanel) panelIt.next();
+                panel.setAnnotationsOpen(true);
+            }
+
+        }
+
+    };
+    ClickHandler autoContour = new ClickHandler() {
+
+        @Override
+        public void onClick(ClickEvent event) {
+            if (autoContourButton.isDown()) {
+                autoScale();
+            } else {
+                autoContourTextBox.setText("");
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+            }
+        }
+    };
+    ClickListener differencesClick = new ClickListener() {
+        @Override
+        public void onClick(Widget sender) {
+            refresh(false, true, false);
+        }
+    };
+
+    AsyncCallback<ConfigSerializable> getGridCallback = new AsyncCallback<ConfigSerializable>() {
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Could not fetch grid.  " + caught.getLocalizedMessage());
+
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+
+            GridSerializable grid = config.getGrid();
+            RegionSerializable[] regions = config.getRegions();
+            List<ERDDAPConstraintGroup> constraintGroups = config.getConstraintGroups();
+            if ( constraintGroups != null && constraintGroups.size() > 0 ) {
+                xTrajectoryConstraint.init(constraintGroups);
+                xTrajectoryConstraint.setVisible(true);
+            }
+            xAxesWidget.getRefMap().setRegions(regions);
+            ops = config.getOperations();
+            xVariable.setGrid(grid);
+            xAnalysisWidget.setAnalysisAxes(grid);
+
+            // if (xPanels == null || xPanels.size() == 0) {
+            // UI.super.setupOutputPanels(1, Constants.IMAGE);
+            // }
+
+
+            setupForNewGrid(grid);
+            setupPanelsAndRefreshNOforceLASRequest(false);
+            if (initialHistory != null && !initialHistory.equals("")) {
+
+                if (initialHistory != null ) {
+                    String[] settings = initialHistory.split("token");
+                    HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+                    setConstraintsFromHistory(tokenMap); 
+                }
+                popHistory(false, initialHistory);
+                
+                /*
+                 * If this is from an initialHistory URL with constraints, first set up the panel, then set them from the token map.
+                 */
+               
+
+            }
+            
+            setConstraintsFromProperties();
+            
+        }
+        
+       
+
+    };
+
+    AsyncCallback<ConfigSerializable> getGridForChangeDatasetCallback = new AsyncCallback<ConfigSerializable>() {
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Could not get grid for new variable." + caught.toString());
+
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+
+            GridSerializable grid = config.getGrid();
+            xAxesWidget.getRefMap().setRegions(config.getRegions());
+            ops = config.getOperations();
+            setupForNewGrid(grid);
+            setConstraintsFromProperties();
+            
+        }
+    };
+    
+
+
+    AsyncCallback<ConfigSerializable> getGridForChangeVariableCallback = new AsyncCallback<ConfigSerializable>() {
+
+        @Override
+        public void onFailure(Throwable e) {
+            Window.alert("Could not get grid for new variable." + e.toString());
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+            GridSerializable grid = config.getGrid();
+            xAxesWidget.getRefMap().setRegions(config.getRegions());
+            if (grid.getID().equals(xVariable.getGrid().getID()) && xNewVariable.getAttributes().get("grid_type").equals(xVariable.getAttributes().get("grid_type"))) {
+                xVariable = xNewVariable;
+                xVariable.setGrid(grid);
+                // In the case of where multiple variables are being used in a
+                // panel, we need to change the 1st UserList?
+                xPanels.get(0).setVariable(xVariable, true);
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+            } else if (grid.getID().equals(xVariable.getGrid().getID()) && !xNewVariable.getAttributes().get("grid_type").equals(xVariable.getAttributes().get("grid_type"))) {
+                // Requires new operations, will likely replace the current
+                // operation with a new one
+                xVariable = xNewVariable;
+                xVariable.setGrid(grid);
+                // In the case of where multiple variables are being used in a
+                // panel, we need to change the 1st UserList?
+                xPanels.get(0).setVariable(xVariable, true);
+                ops = config.getOperations();
+                xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
+                xOperationID = xOperationsWidget.getCurrentOperation().getID();
+                xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
+                xOptionsButton.setOptions(xOptionID, xOptionsButton.getState());
+                tOperationsMenu.setMenus(ops, xView);
+                for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+                    OutputPanel p = (OutputPanel) panelIt.next();
+                    p.setOperation(xOperationID, xView);
+                }
+                eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
+            } else {
+                // Not enough is the same. Pretend like it's a brand new data
+                // set.
+                xVariable = xNewVariable;
+                ops = config.getOperations();
+                setupForNewGrid(grid);
+
+            }
+        }
+
+    };
+    ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
+        /**
+         * Reloads the browser window at the new URL.
+         * 
+         * @param historyValueChangeEvent
+         */
+        @Override
+        public void onValueChange(ValueChangeEvent<String> historyValueChangeEvent) {
+            // The only safe way to react to a History change under the current
+            // architecture is to reload the page
+            Window.Location.reload();
+        }
+
+    };
+    AsyncCallback<ConfigSerializable> initVizGal = new AsyncCallback<ConfigSerializable>() {
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Failed to initalizes VizGal." + caught.toString());
+        }
+
+        @Override
+        public void onSuccess(ConfigSerializable config) {
+
+            GridSerializable grid = config.getGrid();
+            xAnalysisWidget.setAnalysisAxes(grid);
+            ops = config.getOperations();
+
+            xVariable.setGrid(grid);
+            if (xVariable.isVector() || xVariable.isDiscrete() ) {
+                autoContourTextBox.setText("");
+                autoContourButton.setDown(false);
+                autoContourButton.setEnabled(false);
+                if (!xView.equals("xy")) {
+                    differenceButton.setDown(false);
+                    differenceButton.setEnabled(false);
+                } else {
+                    differenceButton.setDown(false);
+                    differenceButton.setEnabled(true);
+                }
+            }
+            setupPanelsAndRefreshNOforceLASRequest(false);
+        }
+    };
+    AsyncCallback initVizGalForHistory = new AsyncCallback() {
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Failed to initalizes VizGal." + caught.toString());
+        }
+
+        @Override
+        public void onSuccess(Object result) {
+            String[] settings = historyString.split("token");
+            GridSerializable grid = (GridSerializable) result;
+            xVariable.setGrid(grid);
+            xAxesWidget.init(grid);
+            xAnalysisWidget.setAnalysisAxes(grid);
+            applyTokens(settings);
+            // Automatically fire the update, don't force panels to update if
+            // they don't need to and don't push history stack since this is a
+            // history event.
+            eventBus.fireEvent(new WidgetSelectionChangeEvent(false, false, false));
+        }
+    };
+
+    ClickHandler optionsOkHandler = new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent arg0) {
+            refresh(false, true, false);
+        }
+
+    };
+    ClickHandler panelApplyButtonClick = new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+            refresh(false, true, false);
+        }
+    };
+    AsyncCallback requestGridForHistory = new AsyncCallback() {
+        @Override
+        public void onFailure(Throwable caught) {
+            Window.alert("Failed to initalizes VizGal." + caught.toString());
+        }
+
+        @Override
+        public void onSuccess(Object result) {
+            CategorySerializable[] cats = (CategorySerializable[]) result;
+            if (cats.length > 1) {
+                Window.alert("Error getting variables for this dataset.");
+            } else {
+                if (cats[0].isVariableChildren()) {
+                    // TODO not a vector.  :-)
+                    Vector<VariableSerializable> vars = cats[0].getDatasetSerializable().getVariablesSerializableAsVector();
+                    VariableSerializable catsVariable = cats[0].getVariable(historyTokens.get("varid"));
+                    xVariable = catsVariable;
+                    xPanels.get(0).setVariables(vars, xVariable);
+                    initial_var = xVariable;
+                    Util.getRPCService().getGrid(historyTokens.get("xDSID"), historyTokens.get("varid"), initVizGalForHistory);
+                } else {
+                    Window.alert("No variables found in this category");
+                }
+            }
+        }
+    };
+    ClickHandler settingsButtonApplyHandler = new ClickHandler() {
+
+        @Override
+        public void onClick(ClickEvent arg0) {
+            applyChange();
+        }
+
+    };
+
+    WidgetSelectionChangeEvent.Handler updateNeededEventHandler = new WidgetSelectionChangeEvent.Handler() {
+
+        @Override
+        public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
+            
+            if (applyButton.getCheckBoxValue() || event.isAuto() || isUpdateRequired()) {
+                refresh(false, event.isPushHistory(), event.isForce());
+            }
+
+        }
+
+    };
+    VariableSelectionChangeEvent.Handler variableChangeHandler = new VariableSelectionChangeEvent.Handler() {
+
+        @Override
+        public void onVariableChange(VariableSelectionChangeEvent event) {
+            Object source = event.getSource();
+            if (source instanceof UserListBox) {
+                UserListBox lb = (UserListBox) source;
+                // Only since compare panel events.  Hmmm... better way to do this?
+                if ( lb.getName().contains("Panel-0") ) {
+                    VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
+                    xNewVariable = v;
+                    if (v.isVector() || v.isDiscrete()) {
+                        lb.setAddButtonEnabled(false);
+                    } else {
+                        lb.setAddButtonEnabled(true);
+                    }
+                    Util.getRPCService().getConfig(null, xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID(), getGridForChangeVariableCallback);
+                }
+            }
+        }
+
+    };
+    SelectionHandler<TreeItem> xVisGalDatasetSelectionHandler = new SelectionHandler<TreeItem>() {
+        @Override
+        public void onSelection(SelectionEvent<TreeItem> event) {
+            DatasetWidget datasetWidget = xDatasetButton.getDatasetWidget();
+            boolean isFromMainDatasetWidget = event.getSource().equals(datasetWidget);
+            if (isFromMainDatasetWidget) {
+                TreeItem item = event.getSelectedItem();
+                Object v = item.getUserObject();
+                if (v instanceof VariableSerializable) {
+                    variables.clear();
+                    List<VariableSerializable> panelVars = new ArrayList<VariableSerializable>();
+                    xNewVariable = (VariableSerializable) v;
+                    changeDataset = true;
+                    // Build the variables list from the selected item.
+                    TreeItem parent = item.getParentItem();
+                    for (int i = 0; i < parent.getChildCount(); i++) {
+                        TreeItem child = parent.getChild(i);
+                        Object userObject = child.getUserObject();
+                        if ((userObject != null) && (userObject instanceof VariableSerializable)) {
+                            variables.add((VariableSerializable) userObject);
+                            panelVars.add((VariableSerializable) userObject);
+                        }
+                    }
+                    if (xPanels.size() > 0) {
+                        OutputPanel outputPanel = xPanels.get(0);
+                        outputPanel.getVariableControls().removeListBoxesExceptFirst();               
+                    }
+                    for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
+                        OutputPanel outputPanel = (OutputPanel) panelsIt.next();
+                        outputPanel.setVariables(panelVars, xNewVariable);
+                    }
+                    changeDataset();
+                    // Requested in #1538, which restores the behavior of the original picker which was disliked previously,
+                    // "because it closes and I can't tell if I clicked on anything".
+                    xDatasetButton.close();
+                    pickerCloseActions();
+                }
+            }
+        }
+    };
 
 }

@@ -409,6 +409,7 @@ public class ThumbnailPropProp implements EntryPoint {
                
                 Image plot = new Image(imageurl);
                 currentRequest.setOperation("SPPV", "V7");
+                currentRequest.removeProperty("ferret", "thumb");
                 plotwidth = (Window.getClientWidth()-80)/4;
                 plotheight = (Window.getClientHeight()-80)/3;
                 final String url = Util.getProductServer() + "?xml=" + URL.encode(currentRequest.toString()) + "&catid="+dsid;
