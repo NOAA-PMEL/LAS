@@ -34,7 +34,8 @@ SET MODE LINECOLORS:($nlinecolors)
 PPL COLOR,7,70,70,70     ! gray
 PPL COLOR,8,100,100,100  ! white
 
-IF ($ferret_use_graticules"1|none>0|*>1) THEN
+! Either none or notic removes graticules from the plot 
+IF ($ferret_use_graticules"1|none>0|notic>0|*>1) THEN
   DEFINE SYMBOL graticuleColor = black
   IF ($ferret_use_graticules"1|default>1|gray>1|*>0) THEN
      DEFINE SYMBOL graticuleColor = 7

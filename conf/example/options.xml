@@ -167,7 +167,7 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
 
   <optiondef name="use_graticules">
     <option>
-      <help>Turn on and off graticule lines on the plot, and set their color</help>
+      <help>Turn on and off graticule lines on the plot, and set their color. None/No tics turns off both graticules and tic marks along the axes.</help>
       <title>Show graticule</title>
       <menu type="options" name="use_graticules">
         <item values="default">Default</item>
@@ -175,6 +175,7 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
         <item values="gray">Gray</item>
         <item values="white">White</item>
         <item values="none">None</item>
+        <item values="notic">None/No tics</item>
       </menu>
     </option>
   </optiondef>
