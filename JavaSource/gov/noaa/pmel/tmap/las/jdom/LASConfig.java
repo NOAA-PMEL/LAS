@@ -5426,7 +5426,7 @@ public class LASConfig extends LASDocument {
                                     for ( Iterator strIt = strs.iterator(); strIt.hasNext(); ) {
                                         Element str = (Element) strIt.next();
                                         String txt = str.getTextTrim();
-                                        if ( txt.contains("|Catalog") ) {
+                                        if ( txt.contains("|Catalog") || txt.contains("|THREDDS")) {
                                             catalog = txt.substring(0, txt.indexOf("#"));
                                             System.out.println(catalog);
                                         }
