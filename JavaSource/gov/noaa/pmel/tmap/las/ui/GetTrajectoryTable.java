@@ -451,14 +451,19 @@ public class GetTrajectoryTable extends LASAction {
                                             String[] units = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                                             StringBuilder unitStrings = new StringBuilder();
                                             unitStrings.append("<tr>\n");
-                                            unitStrings.append("<th></th>\n");
+                                           
 
                                             for (int i = 0; i < units.length; i++) {
                                                 unitStrings.append("<th>"+units[i]+"</th>\n");
                                             }
+                                            if ( socat ) {
+                                            	unitStrings.append("<th></th>\n");
+                                            }
+                                            unitStrings.append("<th></th>\n");
+                                            unitStrings.append("<th></th>\n");
                                             unitStrings.append("<th></th>\n");
                                             if ( socat ) {
-                                                unitStrings.append("<th></th>\n");
+                                               
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
