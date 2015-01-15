@@ -438,6 +438,7 @@ public class GetTrajectoryTable extends LASAction {
 
                                                 columnHeaders.append("<th>crossovers</th>\n");
                                                 columnHeaders.append("<th>qc flags</th>\n");
+                                                columnHeaders.append("<th>thumbnails</th>\n");
 
                                             }	                                        
 
@@ -457,6 +458,7 @@ public class GetTrajectoryTable extends LASAction {
                                             }
                                             unitStrings.append("<th></th>\n");
                                             if ( socat ) {
+                                                unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
@@ -539,23 +541,34 @@ public class GetTrajectoryTable extends LASAction {
 
                                                     if ( socat ) {
 
-                                                        row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-                                                        // Add the link to load a list of potential crosses to the table.
-                                                        row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
-                                                        row.append("\n</td>");
+                                                    	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                    	// Add the link to load a list of potential crosses to the table.
+                                                    	row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
+                                                    	row.append("\n</td>");
 
-                                                        // Add the QC link
-                                                        LASUIRequest qcRequest = new LASUIRequest();
-                                                        qcRequest.addVariable(dsid, varid);
-                                                        qcRequest.setOperation("SOCAT_QC_table");
-                                                        qcRequest.setProperty("qc", cruise_id, parts[0]);
-                                                        qcRequest.setProperty("las", "output_type", "xml");
-                                                        row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
-                                                        // Add the link to load a list of potential crosses to the table.
-                                                        String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
+                                                    	// Add the QC link
+                                                    	LASUIRequest qcRequest = new LASUIRequest();
+                                                    	qcRequest.addVariable(dsid, varid);
+                                                    	qcRequest.setOperation("SOCAT_QC_table");
+                                                    	qcRequest.setProperty("qc", cruise_id, parts[0]);
+                                                    	qcRequest.setProperty("las", "output_type", "xml");
+                                                    	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                    	// Add the link to load a list of potential crosses to the table.
+                                                    	String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
 
-                                                        row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
-                                                        row.append("\n</td>");
+                                                    	row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
+                                                    	row.append("\n</td>");
+
+                                                    	// ADD a THUMBNAIL table link...
+                                                    	LASUIRequest thumb = (LASUIRequest) lasUIRequest.clone();
+                                                    	thumb.removeLinks();
+                                                    	thumb.setOperation("PropPropThumbTable");
+                                                    	thumb.addTextConstraint(cruise_id, "eq", parts[0]);
+                                                    	String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
+                                                    	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
+                                                    	row.append("<a target=\"_blank\" href=\""+thumburl+"\">Thumbnails</a>");
+                                                    	row.append("\n</td>");
+
 
                                                     }	             
 
