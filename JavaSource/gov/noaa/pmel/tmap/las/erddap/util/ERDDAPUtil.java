@@ -15,7 +15,7 @@ import ucar.unidata.geoloc.LatLonPointImpl;
 import com.cohort.util.String2;
 
 public class ERDDAPUtil {
-    public static List<String> getLongitudeQuery(boolean is360, String xhi, String xlo) {
+    public static List<String> getLongitudeQuery(boolean is360, String xhi, String xlo) throws UnsupportedEncodingException {
         List<String> queries = new ArrayList<String>();
         StringBuilder xquery1 = new StringBuilder();
         StringBuilder xquery2 = new StringBuilder();
@@ -44,20 +44,21 @@ public class ERDDAPUtil {
                 if ( dxhi < dxlo ) {
                     if ( dxhi < 0 && dxlo >= 0 ) {
                         dxhi = dxhi + 360.0d;
-                        xquery1.append("&lon360>=" + 180);
-                        xquery1.append("&lon360<=" + dxhi);                            
-                        xquery2.append("&longitude>="+dxlo+"&longitude<"+180);
+                        xquery1.append("&"+URLEncoder.encode("lon360>=" + 180, StandardCharsets.UTF_8.name()));
+                        xquery1.append("&"+URLEncoder.encode("lon360<=" + dxhi, StandardCharsets.UTF_8.name()));                          
+                        xquery2.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
+                        xquery2.append("&"+URLEncoder.encode("longitude<"+180, StandardCharsets.UTF_8.name()));
                     } // else request overlaps, so leave it off
                 } else {
-                    xquery1.append("&longitude>="+dxlo);
-                    xquery1.append("&longitude<="+dxhi);
+                    xquery1.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
+                    xquery1.append("&"+URLEncoder.encode("longitude<="+dxhi, StandardCharsets.UTF_8.name()));
                 }
 
             }
         } else {
             // 
-            if ( xlo != null && xlo.length() > 0 ) xquery1.append("&longitude>="+xlo);
-            if ( xhi != null && xhi.length() > 0 ) xquery1.append("&longitude<="+xhi);
+            if ( xlo != null && xlo.length() > 0 ) xquery1.append("&"+URLEncoder.encode("longitude>="+xlo, StandardCharsets.UTF_8.name()));
+            if ( xhi != null && xhi.length() > 0 ) xquery1.append("&"+URLEncoder.encode("longitude<="+xhi, StandardCharsets.UTF_8.name()));
         }
         queries.add(xquery1.toString());
         if ( xquery2.length() > 0 ) {
