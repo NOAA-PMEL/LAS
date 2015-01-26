@@ -568,6 +568,10 @@ public class GetTrajectoryTable extends LASAction {
                                                     	LASUIRequest thumb = (LASUIRequest) lasUIRequest.clone();
                                                     	thumb.removeLinks();
                                                     	thumb.setOperation("PropPropThumbTable");
+                                                    	
+                                                    	// Remove other cruise ID constraints.
+                                                    	thumb.removeTextConstraintByLHS(cruise_id);
+                                                    	
                                                     	thumb.addTextConstraint(cruise_id, "eq", parts[0]);
                                                     	String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
                                                     	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
