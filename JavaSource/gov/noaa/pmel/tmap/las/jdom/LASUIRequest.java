@@ -579,6 +579,29 @@ public class LASUIRequest extends LASDocument {
 		constraint.addContent(rhsE);
 		args.addContent(constraint);
 	}
+	public void removeTextConstraintByLHS(String lhs) {
+		// E.G. Remove all the cruise id constraints
+		Element args = getRootElement().getChild("args");
+		List<Element> remove = new ArrayList<Element>();
+		if ( args != null ) {
+			List<Element> constraints = args.getChildren("constraint");
+			for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
+				Element constraint = (Element) cIt.next();
+				String type = constraint.getAttributeValue("type");
+				if ( type != null && type.equals("text") ) {
+					List<Element> vs = constraint.getChildren("v");
+					Element lhsE = vs.get(0);
+					if (lhsE.getTextNormalize().equals(lhs) ) {
+						remove.add(constraint);
+					}
+				}
+			}
+			for (Iterator removeIt = remove.iterator(); removeIt.hasNext();) {
+				Element element = (Element) removeIt.next();
+				args.removeContent(element);
+			}
+		}		
+	}
 	public String getKey() {
 		try {
 			LASUIRequest doc = (LASUIRequest) this.clone();
