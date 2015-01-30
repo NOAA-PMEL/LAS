@@ -1083,6 +1083,11 @@ public class UI extends BaseUI implements EntryPoint {
         token.append(";ylo=" + xAxesWidget.getRefMap().getYlo());
         token.append(";yhi=" + xAxesWidget.getRefMap().getYhi());
 
+        if ((xVariable.getGrid().hasF() && xView.contains("f")) || (xAnalysisWidget.isActive() && xAnalysisWidget.getAnalysisAxis().contains("f"))) {
+            token.append(";flo=" + xAxesWidget.getFAxis().getFerretDateLo());
+            token.append(";fhi=" + xAxesWidget.getFAxis().getFerretDateHi());
+        }
+        
         if ((xVariable.getGrid().hasE() && xView.contains("e")) || (xAnalysisWidget.isActive() && xAnalysisWidget.getAnalysisAxis().contains("e"))) {
             token.append(";elo=" + xAxesWidget.getEAxis().getLo());
             token.append(";ehi=" + xAxesWidget.getEAxis().getHi());
