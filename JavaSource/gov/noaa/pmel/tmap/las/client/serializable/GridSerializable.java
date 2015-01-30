@@ -11,6 +11,7 @@ public class GridSerializable implements IsSerializable {
 	AxisSerializable yAxis;
 	AxisSerializable zAxis;
 	TimeAxisSerializable tAxis;
+	TimeAxisSerializable fAxis;
 	EnsembleAxisSerializable eAxis;
 	public String getPoints() {
 		return points;
@@ -48,8 +49,15 @@ public class GridSerializable implements IsSerializable {
 	public TimeAxisSerializable getTAxis() {
 		return tAxis;
 	}
+	/**
+	 * 
+	 * @return the eAxis
+	 */
 	public EnsembleAxisSerializable getEAxis() {
 		return eAxis;
+	}
+	public TimeAxisSerializable getFAxis() {
+		return fAxis;
 	}
 	/**
 	 * @param axis the xAxis to set
@@ -79,6 +87,12 @@ public class GridSerializable implements IsSerializable {
 		eAxis = axis;
 	}
 	/**
+	 * @param axis to set as the fAxis
+	 */
+	public void setFAxis(TimeAxisSerializable axis) {
+		fAxis = axis;
+	}
+	/**
 	 * @return the id
 	 */
 	public String getID() {
@@ -102,6 +116,8 @@ public class GridSerializable implements IsSerializable {
 			return xAxis;
 		} else if ( type.equals("e") ) {
 			return eAxis;
+		} else if ( type.equals("f") ) {
+			return fAxis;
 		} else {
 			return null;
 		}
@@ -120,5 +136,8 @@ public class GridSerializable implements IsSerializable {
 	}
 	public boolean hasE() {
 		return getEAxis() != null;
+	}
+	public boolean hasF() {
+		return getFAxis() != null;
 	}
 }
