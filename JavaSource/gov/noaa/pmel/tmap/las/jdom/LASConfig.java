@@ -1062,7 +1062,7 @@ public class LASConfig extends LASDocument {
                             }
                             axis.setName("axis");
                             axis.setAttribute("ID", AID);
-                            if ( axis.getAttributeValue("type").equals("t") ) {
+                            if ( axis.getAttributeValue("type").equals("t")  || axis.getAttributeValue("type").equals("f") ) {
                                 addTimeAxisAttributes(axis);
                             }
                             List v = axis.getChildren("v");
@@ -1089,7 +1089,7 @@ public class LASConfig extends LASDocument {
                             }
                         }
                     } else {
-                        if ( axis.getAttributeValue("type").equals("t") ) {
+                        if ( axis.getAttributeValue("type").equals("t") || axis.getAttributeValue("type").equals("f") ) {
                             addTimeAxisAttributes(axis);
                         }
                         if ( !axesProcessed.contains(axis.getAttributeValue("ID")) ) {
