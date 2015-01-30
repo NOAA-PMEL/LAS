@@ -112,6 +112,16 @@ public class Grid extends Container implements Cloneable, GridInterface {
         }
         return false;
     }
+    public boolean hasF() {
+    	List axes = element.getChildren("axis");
+    	for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
+            Element axis = (Element) axIt.next();
+            if ( axis.getAttributeValue("type").equalsIgnoreCase("f") ) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.GridInterface#getAxis(java.lang.String)
@@ -150,6 +160,16 @@ public class Grid extends Container implements Cloneable, GridInterface {
              }
          }
          return null;
+    }
+    public TimeAxis getForecast() {
+    	List axes = element.getChildren("axis");
+        for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
+            Element axis = (Element) axIt.next();
+            if ( axis.getAttributeValue("type").equalsIgnoreCase("f") ) {
+                return new TimeAxis(axis);
+            }
+        }
+        return null;
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.GridInterface#setTime(gov.noaa.pmel.tmap.las.util.TimeAxis)
@@ -194,6 +214,8 @@ public class Grid extends Container implements Cloneable, GridInterface {
             return hasZ();
         } else if ( analysis_axis_type.equalsIgnoreCase("t") ) {
             return hasT();
+        } else if ( analysis_axis_type.equalsIgnoreCase("f") ) {
+        	return hasF();
         } else {
           return false;
         }
@@ -240,6 +262,10 @@ public class Grid extends Container implements Cloneable, GridInterface {
 		if ( hasE() ) {
 			EnsembleAxisSerializable a = getEnsemble().getEnsembleAxisSerializable();
 			g.setEAxis(a);
+		}
+		if ( hasF() ) {
+			TimeAxisSerializable a = getForecast().getTimeAxisSerializable();
+			g.setFAxis(a);
 		}
 		return g;
 	}
