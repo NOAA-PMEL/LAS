@@ -16,6 +16,7 @@ public class NavAxesGroup extends Composite {
 	private final Logger logger = Logger.getLogger(NavAxesGroup.class.getName());
 	OLMapWidget refMap;
 	DateTimeWidget dateTimeWidget;
+	DateTimeWidget forecastInitializationTime;
 	AxisWidget zAxisWidget;
 	AxisWidget eAxisWidget;
 	FlexTable axesLayout = new FlexTable();
@@ -25,6 +26,7 @@ public class NavAxesGroup extends Composite {
 	boolean hasZ;
 	boolean hasT;
 	boolean hasE;
+	boolean hasF;
 	boolean axesPanelIsOpen = true;
 	public NavAxesGroup(String title, String width, String tile_server) {
 		refMap = new OLMapWidget("128px", "256px", tile_server);
@@ -35,6 +37,8 @@ public class NavAxesGroup extends Composite {
 		eAxisWidget.setVisible(false);
 		dateTimeWidget = new DateTimeWidget();
 		dateTimeWidget.setVisible(false);
+		forecastInitializationTime = new DateTimeWidget();
+        forecastInitializationTime.setVisible(false);
 		message.setVisible(false);
 		axesLayout.setWidget(0, 0, message);
 		axesLayout.setWidget(1, 0, refMap);
@@ -53,6 +57,7 @@ public class NavAxesGroup extends Composite {
 		hasZ = grid.hasZ();
 		hasT = grid.hasT();
 		hasE = grid.hasE();
+		hasF = grid.hasF();
 		if ( grid.hasZ() ) {
 			zAxisWidget = new AxisWidget(grid.getZAxis());
 			zAxisWidget.setVisible(true);
@@ -74,10 +79,18 @@ public class NavAxesGroup extends Composite {
 		    eAxisWidget = new AxisWidget();
 		    eAxisWidget.setVisible(false);
 		}
+		if ( grid.hasF() ) {
+			forecastInitializationTime = new DateTimeWidget(grid.getFAxis(), false, "Forecast Initialization:", "Start Forecast Initialization:", "End Forecast Initialization:");
+			forecastInitializationTime.setVisible(true);
+		} else {
+			forecastInitializationTime = new DateTimeWidget();
+			forecastInitializationTime.setVisible(false);
+		}
 		axesLayout.setWidget(2, 0, zAxisWidget);
 		dateTimeWidget.ensureDebugId("dateTimeWidget");
 		axesLayout.setWidget(3, 0, dateTimeWidget);
-		axesLayout.setWidget(4, 0, eAxisWidget);
+		axesLayout.setWidget(4, 0, forecastInitializationTime);
+		axesLayout.setWidget(5, 0, eAxisWidget);
 		logger.warning("axesLayout:"+axesLayout.toString());
 		if ( grid.hasX() && grid.hasY() ) {
 			refMap.setDataExtent(Double.valueOf(grid.getYAxis().getLo()), 
@@ -94,6 +107,9 @@ public class NavAxesGroup extends Composite {
     }
     public AxisWidget getEAxis() {
         return eAxisWidget;
+    }
+    public DateTimeWidget getFAxis() {
+    	return forecastInitializationTime;
     }
     public OLMapWidget getRefMap() {
     	return refMap;
@@ -119,6 +135,9 @@ public class NavAxesGroup extends Composite {
 		}
 		if ( type.equals("e") ) {
 		    eAxisWidget.setRange(range);
+		}
+		if ( type.equals("f") ) {
+			forecastInitializationTime.setRange(range);
 		}
 	}
 	public void showMessage(boolean b) {
@@ -179,6 +198,9 @@ public class NavAxesGroup extends Composite {
 		}
 		if ( type.equals("e") ) {
 		    eAxisWidget.setVisible(visible);
+		}
+		if ( type.equals("f") ) {
+			forecastInitializationTime.setVisible(visible);
 		}
 	}
 	public void setLoByDouble(double tlo, String time_origin, String dateUnits, String calendar) {
