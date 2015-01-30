@@ -100,8 +100,6 @@ import com.google.gwt.xml.client.XMLParser;
 public class OutputPanel extends Composite implements HasName {
 
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
-
-    private static final Logger logger = Logger.getLogger(OutputPanel.class.getName());
     
     OutputFormatChooser formatChooser = new OutputFormatChooser();
     
@@ -436,7 +434,6 @@ public class OutputPanel extends Composite implements HasName {
                 }
             });
             grid.setWidget(plotRow, 0, canvasDiv);
-            logger.info("imageLoadHandler firing StringValueChangeEvent");
             eventBus.fireEventFromSource(new StringValueChangeEvent(plotImage.getUrl()), thisOutputPanel);
         }
 
@@ -567,8 +564,7 @@ public class OutputPanel extends Composite implements HasName {
      */
     public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type, String tile_server,
             boolean annotationsShowing) {
-        logger.setLevel(Level.OFF);
-        logger.info("OutputPanel constructor called with id:" + id);
+
         this.ID = id;
         this.comparePanel = comparePanel;
         this.singlePanel = single;
@@ -658,7 +654,6 @@ public class OutputPanel extends Composite implements HasName {
             
         }
         initWidget(grid);
-        logger.info("OutputPanel constructor exiting with id:" + id);
     }
     private ControlVisibilityEvent.Handler hideControlsHandler = new ControlVisibilityEvent.Handler() {
         
@@ -822,6 +817,14 @@ public class OutputPanel extends Composite implements HasName {
                     lasRequest.setRange("e", cpState.get("elo"), cpState.get("ehi"), 0);
                 }
             }
+        }
+        // TODO analysis on f with differences.
+        if ( vizGalVariable.getGrid().hasF() ) {
+        	if ( view.contains("f") ) {
+        		lasRequest.setRange("f", vgState.get("flo"), vgState.get("fhi"), 0);
+        	} else {
+        		// TODO
+        	}
         }
         if (vizGalVariable.isVector()) {
             // Add the second component and its region to match the first
@@ -1082,7 +1085,6 @@ public class OutputPanel extends Composite implements HasName {
             Widget plotWidget = grid.getWidget(plotRow, 0);
             spinSetPopupPositionCenter(plotWidget);
             spin.show();
-            logger.info("containerType:" + containerType);
             if (containerType.equals(Constants.IMAGE)) {
 
                 // RequestBuilder sendRequest = new RequestBuilder(
@@ -1091,17 +1093,14 @@ public class OutputPanel extends Composite implements HasName {
                     updating = true;
                     // sendRequest.sendRequest(null, lasRequestCallback);
                     LASRequestEvent lasRequestEvent = new LASRequestEvent(url, RequestBuilder.GET, "lasRequestCallback", getName());
-                    logger.info(getName() + " in computeDifference(...) is firing lasRequestEvent:" + lasRequestEvent + " with url:" + url);
                     eventBus.fireEventFromSource(lasRequestEvent, this);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
                     spin.hide();
                     HTML error = new HTML(e.toString());
                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
                     grid.setWidget(plotRow, 0, error);
                 }
             } else {
-                logger.info("Reusing for output url:" + url);
                 output.setUrl(url);
                 grid.setWidget(plotRow, 0, output);
             }
@@ -1138,6 +1137,11 @@ public class OutputPanel extends Composite implements HasName {
        
         if (wantE) {
             token.append(";elo=" + panelAxesWidgets.getEAxis().getLo() + ";ehi=" + panelAxesWidgets.getEAxis().getHi());
+        }
+        
+        boolean wantF = panelVar.getGrid().hasF() && !view.contains("f");
+        if ( wantF ) {
+        	token.append(";flo="+panelAxesWidgets.getFAxis().getFerretDateLo()+";fhi="+panelAxesWidgets.getFAxis().getFerretDateHi());
         }
         
         token.append(";catid="+panelVar.getCATID());
@@ -1227,6 +1231,8 @@ public class OutputPanel extends Composite implements HasName {
         String local_zhi = null;
         String local_tlo = null;
         String local_thi = null;
+        String local_flo = null;
+        String local_fhi = null;
         String local_elo = null;
         String local_ehi = null;
 
@@ -1276,6 +1282,16 @@ public class OutputPanel extends Composite implements HasName {
                 local_ehi = panelAxesWidgets.getEAxis().getHi();
             }
         }
+        
+        if ( view.contains("f") ) {
+        	local_flo = vgState.get("flo");
+        	local_fhi = vgState.get("fhi");
+        } else {
+        	if ( panelVar.getGrid().hasF() ) {
+        		local_flo = panelAxesWidgets.getFAxis().getFerretDateLo();
+        		local_fhi = panelAxesWidgets.getFAxis().getFerretDateHi();
+        	}
+        }
 
         if (analysis != null) {
 
@@ -1311,6 +1327,7 @@ public class OutputPanel extends Composite implements HasName {
                     }
                 }
             }
+            // TODO Analysis with forecasts
         } else {
             lasRequest.setRange("x", local_xlo, local_xhi, 0);
             lasRequest.setRange("y", local_ylo, local_yhi, 0);
@@ -1341,6 +1358,9 @@ public class OutputPanel extends Composite implements HasName {
                     
                 }
             }
+            if ( panelVar.getGrid().hasF() ) {
+            	lasRequest.setRange("f", local_flo, local_fhi, 0);
+            }
         }
 
         
@@ -1360,6 +1380,9 @@ public class OutputPanel extends Composite implements HasName {
             }
             if ( panelVar.getGrid().getEAxis() != null ) {
                 lasRequest.setRange("e", local_elo, local_ehi, 1);
+            }
+            if ( panelVar.getGrid().hasF() ) {
+            	lasRequest.setRange("f", local_flo, local_fhi, 1);
             }
         }
 
@@ -1659,7 +1682,6 @@ public class OutputPanel extends Composite implements HasName {
                     Logger.getLogger(this.getClass().getName()).info(getName() + " in refreshPlot(...) is firing lasRequestEvent:" + lasRequestEvent + " with url:" + url);
                     eventBus.fireEventFromSource(lasRequestEvent, this);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
                     spin.hide();
                     HTML error = new HTML(e.toString());
                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -1766,7 +1788,6 @@ public class OutputPanel extends Composite implements HasName {
 
         });
         image.setTitle("  Click to Enlarge.  Images will size with browser.");
-        logger.severe("CALLING grid.setWidget(plotRow, 0, image);");
         grid.setWidget(plotRow, 0, image);
     }
 
@@ -2028,30 +2049,14 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     public void setVizGalState(VariableSerializable variable, String historyToken, String comparePanelState) {
-        logger.info("setVizGalState(VariableSerializable variable, String historyToken, String comparePanelState) called in" + this.getName());
         this.vizGalVariable = variable;
-        logger.info("vizGalVariable:" + vizGalVariable);
         this.vizGalState = historyToken;
-        logger.info("vizGalState:" + vizGalState);
         this.comparePanelState = comparePanelState;
-        logger.info("comparePanelState:" + comparePanelState);
     }
     
     public void setWidth(int width) {
-        logger.info("setWidth(int width) called with width:" + width);
         this.setPanelWidth(width);
         int plotImageWidth = convertPXtoInt(getPlotWidth());
-        logger.info("New plotImageWidth:" + plotImageWidth);
-        //super.setWidth(width + "px");
-        if (plotImageWidth != width) {
-            logger.warning("Couldn't set the exact width of this plotImage to width:" + width);
-        }
-        if (plotImage != null) {
-            logger.info("plotImage == " + plotImage.toString());
-        } else {
-            logger.severe("plotImage == null");
-        }
-        logger.info("ID:" + this.getID());
     }
 
     /**
@@ -2059,7 +2064,6 @@ public class OutputPanel extends Composite implements HasName {
      */
     @Override
     public void setWidth(String width) {
-        logger.info("setWidth(String width) with width:" + width);
         int widthInt = convertPXtoInt(width);
         setWidth(widthInt);
     }
@@ -2098,7 +2102,6 @@ public class OutputPanel extends Composite implements HasName {
     private void drawToScreen(ImageData imageData) {
         // Don't bother to use null imageData
         if ((imageData != null) && (imageCanvasContext != null)) {
-            logger.info("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
             imageCanvasContext.putImageData(imageData, 0, 0);
         }
     }
@@ -2195,19 +2198,14 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     private ImageData scaleImage(Image image, double scaleToRatio) {
-        logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
         Canvas canvasTmp = Canvas.createIfSupported();
         Context2d context = canvasTmp.getContext2d();
 
         int imageHeight = image.getHeight();
-        if (imageHeight <= 0) {
-            logger.warning("imageHeight:" + imageHeight);
-        }
+
         double ch = (imageHeight * scaleToRatio);
         int imageWidth = image.getWidth();
-        if (imageWidth <= 0) {
-            logger.warning("imageWidth:" + imageWidth);
-        }
+        
         double cw = (imageWidth * scaleToRatio);
 
         canvasTmp.setCoordinateSpaceHeight((int) ch);
@@ -2222,16 +2220,12 @@ public class OutputPanel extends Composite implements HasName {
         double sy = 0;
         int imageElementWidth = imageElement.getWidth();
         if (imageElementWidth <= 0) {
-            logger.warning("imageElementWidth:" + imageElementWidth);
             imageElementWidth = imageWidth;
-            logger.info("imageElementWidth:" + imageElementWidth);
         }
         double sw = imageElementWidth;
         int imageElementHeight = imageElement.getHeight();
         if (imageElementHeight <= 0) {
-            logger.warning("imageElementHeight:" + imageElementHeight);
             imageElementHeight = imageHeight;
-            logger.info("imageElementHeight:" + imageElementHeight);
         }
         double sh = imageElementHeight;
 
@@ -2275,11 +2269,7 @@ public class OutputPanel extends Composite implements HasName {
         drawingCanvas.setCoordinateSpaceWidth(wt);
         
         canvasDiv.setSize(wt + "px", ht + "px");
-        
-        if (imageData != null)
-            logger.info("scaleImage exiting returning imageData:" + imageData);
-        else
-            logger.severe("scaleImage exiting returning imageData:null");
+
         return imageData;
     }
 
@@ -2363,7 +2353,6 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     String getPlotWidth() {
-        logger.fine("entering getPlotWidth()");
         int antipadding = 0;// 100;
         String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
         if (plotImage != null) {
@@ -2372,7 +2361,6 @@ public class OutputPanel extends Composite implements HasName {
             int wt = (int) ((plotImage.getWidth() - antipadding) * imageScaleRatio);
             w = wt + "px";
         }
-        logger.fine("exiting getPlotWidth(), retuning w:" + w);
         return w;
     }
 
@@ -2483,7 +2471,6 @@ public class OutputPanel extends Composite implements HasName {
     void setPanelHeight(int height) {
         autoZoom = true;
         pwidth = (int) ((image_w / image_h) * Double.valueOf(height));
-        logger.info("setPanelHeight(int " + height + ") Just set pwidth:" + pwidth);
         setPlotImageWidth();
     }
 
@@ -2491,7 +2478,6 @@ public class OutputPanel extends Composite implements HasName {
         autoZoom = true;
         int max = (int) image_w;
         pwidth = Math.min(width, max);
-        logger.info("setPanelWidth(int " + width + ") has just set pwidth:" + pwidth);
         setPlotImageWidth();
     }
 
@@ -2560,7 +2546,6 @@ public class OutputPanel extends Composite implements HasName {
         @Override
         public void onError(Request request, Throwable exception) {
             currentURL = currentURL + "&error=true";
-            logger.warning(getName() + ": entering lasRequestCallback.onError request:" + request + "\nexception:" + exception);
             spin.hide();
             updating = false;
             HTML error = new HTML(exception.toString());
@@ -2570,12 +2555,10 @@ public class OutputPanel extends Composite implements HasName {
             if (pending) {
                 pending = false;
             }
-            logger.warning("exiting lasRequestCallback.onError");
         }
 
         @Override
         public void onResponseReceived(Request request, Response response) {
-            logger.info(getName() + ": entering lasRequestCallback.onResponseReceived request:" + request + "\nresponse:" + response);
             eventBus.fireEventFromSource(new UpdateFinishedEvent(), OutputPanel.this);
             updating = false;
             String doc = response.getText();
@@ -2590,7 +2573,6 @@ public class OutputPanel extends Composite implements HasName {
                 }
             }
             if (!isObviouslyXML) {
-                logger.info("The doc is not obviously XML, treat it as HTML");
                 currentURL = currentURL + "&error=true";
                 evalScripts(new HTML(response.getText()).getElement());
                 VerticalPanel p = new VerticalPanel();
@@ -2604,7 +2586,6 @@ public class OutputPanel extends Composite implements HasName {
                 grid.setWidget(plotRow, 0, sp);
             } else {
                 formatChooser.hide();
-                logger.info("The doc is obviously XML");
                 doc = doc.replaceAll("\n", "").trim();
                 Document responseXML = XMLParser.parse(doc);
                 NodeList results = responseXML.getElementsByTagName("result");
@@ -2613,18 +2594,15 @@ public class OutputPanel extends Composite implements HasName {
                 boolean image_ready = false;
                 for (int n = 0; n < results.getLength(); n++) {
                     if (results.item(n) instanceof Element) {
-                        logger.info("working on result n:" + n);
                         Element result = (Element) results.item(n);
                         String typeAttribute = result.getAttribute("type");
                         if (typeAttribute == null)
                             typeAttribute = "null";
-                        logger.info("result.getAttribute(\"type\"):" + typeAttribute);
                         if (typeAttribute.equals("image")) {
                             // HTML image = new
                             // HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
                             image_ready = true;
                             imageurl = result.getAttribute("url");
-                            logger.info("imageurl = result.getAttribute(\"url\"):" + imageurl);
                         } else if ( typeAttribute.equals("pdf") ) {
                             formatChooser.setPdfUrl(result.getAttribute("url"));
                         } else if ( typeAttribute.equals("svg") ) {
@@ -2716,7 +2694,6 @@ public class OutputPanel extends Composite implements HasName {
                              */
 
                             if (result.getAttribute("ID").equals("las_message")) {
-                                logger.info("result.getAttribute(\"ID\").equals(\"las_message\"");
                                 Node text = result.getFirstChild();
                                 if (text instanceof Text) {
                                     Text t = (Text) text;
@@ -2743,21 +2720,12 @@ public class OutputPanel extends Composite implements HasName {
                                 // infinite requests that always return 304
                                 sendRequest.setHeader("If-Modified-Since", new Date().toString());
                                 sendRequest.setHeader("max-age", "0");
-                                logger.info("Pragma:" + sendRequest.getHeader("Pragma"));
-                                logger.info("cache-directive:" + sendRequest.getHeader("cache-directive"));
-                                logger.info("max-age:" + sendRequest.getHeader("max-age"));
-                                logger.info("If-Modified-Since:" + sendRequest.getHeader("If-Modified-Since"));
-                                // logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
-                                // + url);
-                                // sendRequest.sendRequest(null,
-                                // lasRequestCallback);
                                 LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
                                 Logger.getLogger(this.getClass().getName()).info(
                                         getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
                                 eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
                                 // } catch (RequestException e) {
                             } catch (Exception e) {
-                                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
                                 HTML error = new HTML(e.toString());
                                 error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
                                 grid.setWidget(plotRow, 0, error);
@@ -2832,7 +2800,6 @@ public class OutputPanel extends Composite implements HasName {
                 pending = false;
                 eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
             }
-            logger.info("exiting lasRequestCallback.onResponseReceived");
         }
     };
     public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
@@ -3016,9 +2983,7 @@ public class OutputPanel extends Composite implements HasName {
             try {
                 String thisOutputPanelName = getName();
                 if ((event != null) && (thisOutputPanelName != null) && (event.getCallerObjectName().equalsIgnoreCase(thisOutputPanelName))) {
-                    logger.info(thisOutputPanelName + " has accepted LASResponseEvent event:" + event);
                     boolean isResponseReceived = event.isResponseReceived();
-                    logger.info("event.isResponseReceived():" + isResponseReceived);
                     if (isResponseReceived) {
                         if (event.getCallbackObjectName().equals("lasRequestCallback")) {
                             lasRequestCallback.onResponseReceived(event.getRequest(), event.getResponse());
@@ -3030,7 +2995,6 @@ public class OutputPanel extends Composite implements HasName {
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
             }
         }
     };
@@ -3096,7 +3060,6 @@ public class OutputPanel extends Composite implements HasName {
                     eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
                     // } catch (RequestException e) {
                 } catch (Exception e) {
-                    logger.log(Level.WARNING, e.getLocalizedMessage(), e);
                     Window.alert("Unable to cancel request.");
                 }
             }
