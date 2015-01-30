@@ -148,8 +148,8 @@ public class OperationsWidget extends Composite {
         linePlots.add(new Label("Line Plots"));
         sectionPlots.clear();
         sectionPlots.add(new Label("Vertical Section Plots"));
-        hofmullerPlots.clear();
-        hofmullerPlots.add(new Label("Hovmöller Plots"));
+        hofmullerPlots.clear();      // The o-umlat breaks compiling in some locales without a compiler option.
+        hofmullerPlots.add(new Label("Hovmoller Plots"));
         xyMapRow = 0;
         linePlotsRow = 0;
         sectionPlotsRow = 0;
