@@ -62,10 +62,13 @@ public class DateTimeWidget extends Composite {
 	DateTime lo;
 	DateTime hi;
     
+	String LABEL = "Date/Time: ";
+	String LABEL_LO_RANGE = "Start date/time: ";
+	String LABEL_HI_RANGE = "End date/time: ";
 	
-	Label d_label = new Label("Date/Time: ");
-	Label d_label_lo_range = new Label("Start date/time: ");
-	Label d_label_hi_range = new Label("End date/time: ");
+	Label d_label = new Label(LABEL);
+	Label d_label_lo_range = new Label(LABEL_LO_RANGE);
+	Label d_label_hi_range = new Label(LABEL_HI_RANGE);
 	
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();
@@ -126,6 +129,14 @@ public class DateTimeWidget extends Composite {
 		initWidget(dateTimeWidget);
 	}
 	
+	public DateTimeWidget(TimeAxisSerializable tAxis, boolean range, String label, String range_lo_label, String range_hi_label) {
+		ClientFactory factory = GWT.create(ClientFactory.class);
+	    eventBus = factory.getEventBus();
+        init(tAxis, range, label, range_lo_label, range_hi_label);
+        setListeners();
+		initWidget(dateTimeWidget);
+	}
+	
 	/**
 	 * 
 	 */
@@ -170,6 +181,9 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	}
+	public void init(TimeAxisSerializable tAxis, boolean range) {
+		init(tAxis, range, null, null, null);
+	}
 	/**
 	 * Initialize using a TimeAxisSerializable object. Range set to false means there is only one widget (or set of
 	 * widgets in the case of time) visible and the user can only select one
@@ -183,7 +197,30 @@ public class DateTimeWidget extends Composite {
 	 * @param tAxis
 	 * @param range
 	 */
-	public void init(TimeAxisSerializable tAxis, boolean range) {
+	public void init(TimeAxisSerializable tAxis, boolean range, String label, String range_lo_label, String range_hi_label) {
+		
+		if ( label != null && range_lo_label != null && range_hi_label != null ) {
+			d_label.setText(label);
+			d_label.setTitle(label);
+			
+			d_label_lo_range.setText(range_lo_label);
+			d_label_lo_range.setTitle(range_lo_label);
+			
+			d_label_hi_range.setText(range_hi_label);
+			d_label_hi_range.setTitle(range_hi_label);
+			
+		} else {
+			
+			d_label.setText(LABEL);
+			d_label.setTitle(LABEL);
+			
+			d_label_lo_range.setText(LABEL_LO_RANGE);
+			d_label_lo_range.setTitle(LABEL_LO_RANGE);
+			
+			d_label_hi_range.setText(LABEL_HI_RANGE);
+			d_label_hi_range.setTitle(LABEL_HI_RANGE);
+			
+		}
 		dateTimeWidget.clear();
 		hasYear = false;
 		hasMonth = false;
@@ -1115,7 +1152,7 @@ public class DateTimeWidget extends Composite {
 
 	    int insec = 0;
 
-	    Period p = null;
+	    Period p = new Period(0, 0, 0, 0, 0, 0, 0, 0);
 
 	    double f = Math.floor(in);
 	    double frac = in - f;
@@ -1204,6 +1241,7 @@ public class DateTimeWidget extends Composite {
 		@Override
 		public void onChange(ChangeEvent arg0) {
 			checkRangeStartHour();
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false), DateTimeWidget.this);
 		}
 	};
 	public boolean isContainedBy(String ferretDateLo, String ferretDateHi) {
