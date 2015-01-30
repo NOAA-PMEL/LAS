@@ -77,6 +77,9 @@ public class Util {
 		if ( !view.contains("e") && grid.hasE() ) {
 		    ortho.add("e");
 		}
+		if ( !view.contains("f") && grid.hasF() ) {
+			ortho.add("f");
+		}
 		if ( !view.contains("t") && grid.hasT() ) {
 			ortho.add("t");
 		}
