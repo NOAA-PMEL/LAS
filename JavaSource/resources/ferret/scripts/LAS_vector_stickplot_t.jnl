@@ -106,8 +106,6 @@ ENDIF
 
 GO vector_labels_reset
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs IF they exist  

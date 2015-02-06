@@ -135,9 +135,6 @@ ENDIF
 
 GO LAS_draw_xy_vector_plot
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
-
 IF `($ferret_annotations"0|*>1") EQ 0` THEN \
 LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.13, ($ferret_plot_title)
 

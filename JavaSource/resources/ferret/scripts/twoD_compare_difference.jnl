@@ -197,9 +197,6 @@ ENDIF
 DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
 DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
-
 ! Put the labels for time/location in the upper left
 
 GO labels_above_plot

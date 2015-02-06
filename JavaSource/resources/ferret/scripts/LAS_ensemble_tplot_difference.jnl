@@ -192,8 +192,6 @@ CANCEL MODE nodata_lab  ! so there isne a NO VALID DATA label on the plot.
 LET/BAD=9999 all_bad = IF MISSING(($ferret_diff_var),0) THEN 9999 ELSE 9999 !+ 0*($ferret_diff_var)
 SHADE/NOLAB/NOAX all_bad
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  

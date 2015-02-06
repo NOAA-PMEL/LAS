@@ -139,8 +139,6 @@ IF `($ferret_annotations"0|*>1") EQ 0` THEN
    LABEL/NOUSER -0.7, `($ppl$ylen)/2`, 0, 90, 0.12 "Depth (`($ferret_vector_1),return=zunits`)"
 ENDIF
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs IF they exist  

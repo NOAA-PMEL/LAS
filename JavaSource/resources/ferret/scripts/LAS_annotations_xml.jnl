@@ -2,6 +2,9 @@
 ! write xml for annotations that are taken off the plot
 ! and given back to LAS for display
 
+! Make a label with the Ferret and LAS version
+GO LAS_ferret_las_version_header
+
 !CANCEL MODE VERIFY
 ! Remove duplicate labels
 !  If dataset name and URL are the same, list just once

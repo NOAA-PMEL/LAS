@@ -163,8 +163,6 @@ IF ($ferret_view"0|e>1|*>0") THEN
 ENDIF
 
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Put the labels defined for above the plot
 
