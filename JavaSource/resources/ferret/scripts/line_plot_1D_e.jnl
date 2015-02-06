@@ -284,8 +284,6 @@ ENDIF
 
 GO labels_above_plot
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Set up so zooming works on plots with trend lines.
 IF ($ferret_trend_line"0|1|2>1") THEN GO reset_after_trend

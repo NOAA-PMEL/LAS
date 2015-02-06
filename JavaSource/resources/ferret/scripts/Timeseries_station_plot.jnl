@@ -189,8 +189,6 @@ GO feature_labels
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Save the results
 ! The script wants to get the time-axis end points.

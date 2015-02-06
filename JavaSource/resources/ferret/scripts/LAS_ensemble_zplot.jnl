@@ -107,8 +107,6 @@ PLOT/NOY/AX=0,0,1,0/M=`mhi`/HLIM=100:200/TITLE=" " all_zero
 
 ! Put on the title. If the title was split ineo two lines, move it up a bit.
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs IF they exist  
@@ -151,8 +149,6 @@ CANCEL MODE nodata_lab  ! so there isne a NO VALID DATA label on the plot.
 LET/BAD=9999 all_bad = IF MISSING(($ferret_plot_var),0) THEN 9999 ELSE 9999 + 0*($ferret_plot_var)
 SHADE/NOLAB/NOAX all_bad
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  

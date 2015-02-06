@@ -166,9 +166,6 @@ IF `($data_count"0") EQ 1` THEN
 
 ENDIF
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
-
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
 

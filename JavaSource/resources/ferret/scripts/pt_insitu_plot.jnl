@@ -146,8 +146,6 @@ IF `($pstride"0") GT 0` THEN
    DEFINE SYMBOL note_($note_num)_lab = ($p_npts) points subsampled to every ($pstride) point
 ENDIF 
 
-! Overall header at the very top
-GO LAS_ferret_las_version_header
 
 ! Save the results
 
