@@ -117,9 +117,6 @@ ENDIF
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-
-DEFINE SYMBOL ferret_plot_title ($ferret_plot_title)
-
 ! Draw  the plot. 
 
 IF ($native_curvilinear_xy"0|*>1") THEN 
