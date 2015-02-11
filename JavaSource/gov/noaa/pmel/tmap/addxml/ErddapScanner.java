@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import gov.noaa.pmel.tmap.las.erddap.util.ERDDAPUtil;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 
 import java.io.File;
@@ -75,6 +74,7 @@ public class ErddapScanner {
     
     private static String TRAJECTORY = "cdm_trajectory_variables";
     private static String PROFILE = "cdm_profile_variables";
+    private static String TIMESERIES = "cdm_timeseries_variables";
 
     /**
      * @param args
@@ -100,6 +100,7 @@ public class ErddapScanner {
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
             Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
             Attribute cdm_profile_variables_attribute = global.getAttribute(PROFILE);
+            Attribute cdm_timeseries_variables_attribute = global.getAttribute(TIMESERIES);
             Attribute cdm_data_type = global.getAttribute("cdm_data_type");
             String grid_type = cdm_data_type.getValueAt(0).toLowerCase();
             Attribute subset_names = null;
@@ -110,12 +111,14 @@ public class ErddapScanner {
                 title = titleIt.next();
             }
             AttributeTable variableAttributes = das.getAttributeTable("s");
-            if ( (cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null) && variableAttributes != null ) {
+            if ( (cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null || cdm_timeseries_variables_attribute != null ) && variableAttributes != null ) {
                 if ( cdm_trajectory_variables_attribute != null ) {
                     subset_names = cdm_trajectory_variables_attribute;
 
                 } else if ( cdm_profile_variables_attribute != null ) {
                     subset_names = cdm_profile_variables_attribute;
+                } else if ( cdm_timeseries_variables_attribute != null ) {
+                    subset_names = cdm_timeseries_variables_attribute;
                 }
                 Iterator<String> subset_variables_attribute_values = subset_names.getValuesIterator();
                 if ( subset_variables_attribute_values.hasNext() ) {
@@ -129,7 +132,7 @@ public class ErddapScanner {
                         }
                     }
                 } else {
-                    System.err.println("No CDM trajectory or profile variables found in the cdm_trajectory_variables or cdm_profile_variables global attribute.");
+                    System.err.println("No CDM trajectory, profile or timeseries variables found in the cdm_trajectory_variables, cdm_profile_variables or cdm_timeseries_variables global attribute.");
                 }
                 // Collect the subset names...
 
@@ -143,14 +146,22 @@ public class ErddapScanner {
                     String name = (String) names.nextElement();
                     AttributeTable var = variableAttributes.getAttribute(name).getContainer();
                     if ( subsetNames.contains(name) ) {
-                        if ( var.hasAttribute("cf_role") && (var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || var.getAttribute("cf_role").getValueAt(0).equals("profile_id")) ) {
+                        if ( var.hasAttribute("cf_role") && (
+                        	 var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || 
+                        	 var.getAttribute("cf_role").getValueAt(0).equals("profile_id") ||
+                        	 var.getAttribute("cf_role").getValueAt(0).equals("timeseries_id")
+                        	 ) ) {
                             idVar.put(name, var);
                         } else {
                             if ( !subsets.containsKey(name) ) {
                                 subsets.put(name, var);
                             }
                         }
-                    } else if ( var.hasAttribute("cf_role") && (var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || var.getAttribute("cf_role").getValueAt(0).equals("profile_id")) ) {
+                    } else if ( var.hasAttribute("cf_role") && (
+                    		    var.getAttribute("cf_role").getValueAt(0).equals("trajectory_id") || 
+                    		    var.getAttribute("cf_role").getValueAt(0).equals("profile_id") || 
+                    		    var.getAttribute("cf_role").getValueAt(0).equals("timeseries_id")
+                    		    ) ) {
                         idVar.put(name, var);
                         if ( !subsets.containsKey(name) ) {
                             subsets.put(name, var);
@@ -335,11 +346,10 @@ public class ErddapScanner {
                             String start = lonminmax[0];
                             String end = lonminmax[1];
                             double size = Double.valueOf(end) - Double.valueOf(start);
-
-
                             arb.setStart(start);
                             arb.setStep("1.0");
-                            arb.setSize(String.valueOf((long) (size+1)));
+                            double c = Math.ceil(size);
+                            arb.setSize(String.valueOf((long) (c+1)));
                             ab.setArange(arb);
                             if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
                                 db.setProperty("tabledap_access", "lon_domain", "0:360");
@@ -396,10 +406,10 @@ public class ErddapScanner {
                             String start = latminmax[0];
                             String end = latminmax[1];
                             double size = Double.valueOf(end) - Double.valueOf(start);
-
+                            double c = Math.ceil(size);
                             arb.setStart(start);
                             arb.setStep("1.0");
-                            arb.setSize(String.valueOf((long) size+1));
+                            arb.setSize(String.valueOf((long) c+1));
                             ab.setArange(arb);                    
                         } else {
                             arb.setStart("UNKNOW_START");
@@ -435,10 +445,10 @@ public class ErddapScanner {
                     InputStream stream = null;
                     JsonStreamParser jp = null;
 
-                    String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
+                    String zurl = url+id + ".json?"+URLEncoder.encode(trajID+","+name+",time,latitude,longitude&"+name+"!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                     stream = null;
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
+                    stream = lasProxy.executeGetMethodAndReturnStream(zurl, null);
                     
 
                     if ( stream != null ) {
