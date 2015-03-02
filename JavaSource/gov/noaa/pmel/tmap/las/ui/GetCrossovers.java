@@ -399,7 +399,12 @@ public class GetCrossovers extends LASAction {
                 if ( j == 0 ) {
                     cruiseMinDate = crossingDate;
                     JsonArray maxRow = (JsonArray) crossingRows.get(crossingRows.size() -1);
-                    cruiseMaxDate = maxRow.get(1).getAsString();
+                    JsonElement maxDate = maxRow.get(1);
+                    if ( !maxDate.isJsonNull() ) {
+                    	cruiseMaxDate = maxRow.get(1).getAsString();
+                    } else {
+                    	return null;
+                    }
                 }
                 DateTime cdt = iso_fmt.parseDateTime(crossingDate);
                 long crossingTime = cdt.getMillis();
