@@ -54,7 +54,7 @@ public class ERDDAPUtil {
                     	dxlo = t;
                     	xquery1.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
                         xquery1.append("&"+URLEncoder.encode("longitude<="+dxhi, StandardCharsets.UTF_8.name()));
-                    }
+                    }  // else request overlaps, so leave it off
                 } else {
                     xquery1.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
                     xquery1.append("&"+URLEncoder.encode("longitude<="+dxhi, StandardCharsets.UTF_8.name()));
