@@ -48,7 +48,13 @@ public class ERDDAPUtil {
                         xquery1.append("&"+URLEncoder.encode("lon360<=" + dxhi, StandardCharsets.UTF_8.name()));                          
                         xquery2.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
                         xquery2.append("&"+URLEncoder.encode("longitude<"+180, StandardCharsets.UTF_8.name()));
-                    } // else request overlaps, so leave it off
+                    } else if ( dxhi < 0 && dxlo < 0 ) {
+                    	double t = dxhi;
+                    	dxhi = dxlo;
+                    	dxlo = t;
+                    	xquery1.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
+                        xquery1.append("&"+URLEncoder.encode("longitude<="+dxhi, StandardCharsets.UTF_8.name()));
+                    }
                 } else {
                     xquery1.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
                     xquery1.append("&"+URLEncoder.encode("longitude<="+dxhi, StandardCharsets.UTF_8.name()));
