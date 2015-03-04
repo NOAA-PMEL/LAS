@@ -915,7 +915,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                     }
                 }
             
-            if ( xquery2.length() > 0 ) {
+            if ( lonQ2 != null ) {
                 String q2url = url + xquery2.toString();
 
                 jsonStream = new URL(q2url).openStream();
