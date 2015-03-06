@@ -402,7 +402,7 @@ public class GetTrajectoryTable extends LASAction {
                                                 "<html xmlns=\"http://www.w3.org/1999/xhtml\">"+
                                                 "<head>"+
                                                 "  <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\" />"+
-                                                "  <title>Table of Cruises</title>"+
+                                                "  <title>Table of Platforms</title>"+
                                                 "  <script src=\"JavaScript/frameworks/jquery-1.11.1.min.js\" type=\"text/javascript\"></script>"+
                                                 "</head>"+
                                                 "<body style=\"color:black; background:white; font-family:Arial,Helvetica,sans-serif; font-size:85%; line-height:130%;\">"+
