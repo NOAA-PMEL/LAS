@@ -75,6 +75,10 @@ public class ErddapScanner {
     private static String TRAJECTORY = "cdm_trajectory_variables";
     private static String PROFILE = "cdm_profile_variables";
     private static String TIMESERIES = "cdm_timeseries_variables";
+    
+    static boolean isTrajectory = false;
+    static boolean isProfile = false;
+    static boolean isTimeseries = false;
 
     /**
      * @param args
@@ -114,11 +118,13 @@ public class ErddapScanner {
             if ( (cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null || cdm_timeseries_variables_attribute != null ) && variableAttributes != null ) {
                 if ( cdm_trajectory_variables_attribute != null ) {
                     subset_names = cdm_trajectory_variables_attribute;
-
+                    isTrajectory = true;
                 } else if ( cdm_profile_variables_attribute != null ) {
                     subset_names = cdm_profile_variables_attribute;
+                    isProfile = true;
                 } else if ( cdm_timeseries_variables_attribute != null ) {
                     subset_names = cdm_timeseries_variables_attribute;
+                    isTimeseries = true;
                 }
                 Iterator<String> subset_variables_attribute_values = subset_names.getValuesIterator();
                 if ( subset_variables_attribute_values.hasNext() ) {
@@ -496,7 +502,15 @@ public class ErddapScanner {
                 idvb.addAttribute("grid_type", grid_type.toLowerCase());
                 variables.add(idvb);
 
-                idcg.setAttribute("name", "Individual Cruise(s)");
+                if ( isTrajectory ) {
+                	idcg.setAttribute("name", "Individual Cruise(s)");
+                }
+                if ( isProfile ) {
+                	idcg.setAttribute("name", "Individual Profile(s)");
+                }
+                if ( isTimeseries ) {
+                	idcg.setAttribute("name", "Individual Station(s)");
+                }
                 idcg.setAttribute("type", "selection");
 
                 Element idc = new Element("constraint");
