@@ -609,6 +609,7 @@ public class ErddapScanner {
                 if ( !zVar.keySet().isEmpty() ) {
                     zn = zVar.keySet().iterator().next();
                 }
+                List<String> data_variable_ids = new ArrayList();
                 for (Iterator subIt = data.keySet().iterator(); subIt.hasNext();) {
                     String key = (String) subIt.next();
                     vnames.append(key);
@@ -620,10 +621,27 @@ public class ErddapScanner {
                     } else if ( PROFILE.contains(grid_type) && zn != null ) {
                         pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
 
+                    } else if ( TIMESERIES.contains(grid_type) ) {
+                    	pairs.append(key+"-"+id+","+timen+"-"+id+"\n");
                     }
+                    data_variable_ids.add(key+"-"+id);
                 }
+                // Pair up every data variable with every other.
+                // May filter these in the UI to only use variables paired with current selection.
+                StringBuilder data_pairs = new StringBuilder();
+                if ( data_variable_ids.size() > 2 ) {
+                	for (int index = 0; index < data_variable_ids.size(); index++ ) {
+                		for (int jindex = 1; jindex < data_variable_ids.size(); jindex++ ) {
+                			data_pairs.append(data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+"\n");
+                		}
+                	}
+                }
+                
                 pairs.append("\n");
-                db.setProperty("thumbnails", "variable_pairs", pairs.toString());
+                db.setProperty("thumbnails", "coordinate_pairs", pairs.toString());
+                if ( data_pairs.length() > 0 ) {
+                	db.setProperty("thumbnails", "variable_pairs", data_pairs.toString());
+                }
                 db.setProperty("thumbnails", "variable_names", vnames.toString());
                 
                 // Add lat, lon and time to the data variable for output to the dataset
