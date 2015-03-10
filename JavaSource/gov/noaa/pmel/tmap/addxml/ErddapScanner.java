@@ -528,6 +528,14 @@ public class ErddapScanner {
                 subsetcg.setAttribute("type", "subset");
                 subsetcg.setAttribute("name", "by Metadata");
 
+
+                String lonn = lonVar.keySet().iterator().next();    
+                String latn = latVar.keySet().iterator().next();
+                
+                // Before using them, remove latn and lonn
+                subsets.remove(latn);
+                subsets.remove(lonn);
+                
                 for (Iterator subsetIt = subsets.keySet().iterator(); subsetIt.hasNext();) {
 
                     String name = (String) subsetIt.next();
@@ -595,11 +603,6 @@ public class ErddapScanner {
                 
                 db.setProperty("thumbnails", "metadata", idVar.keySet().iterator().next());
                 
-                String lonn = lonVar.keySet().iterator().next();
-                
-                
-                String latn = latVar.keySet().iterator().next();
-                
                 StringBuilder pairs = new StringBuilder();
                 StringBuilder vnames = new StringBuilder();
                 pairs.append("\n");
@@ -624,8 +627,6 @@ public class ErddapScanner {
                         pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
                     } else if ( PROFILE.contains(grid_type) && zn != null ) {
                         pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
-                        pairs.append(key+"-"+id+","+latn+"-"+id+"\n");
-                        pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
                     } else if ( TIMESERIES.contains(grid_type) ) {
                     	pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
                     }
