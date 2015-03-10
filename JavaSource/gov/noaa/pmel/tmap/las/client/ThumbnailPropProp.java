@@ -500,9 +500,9 @@ public class ThumbnailPropProp implements EntryPoint {
                     		for (int j = 0; j < pseparate.length; j++) {
                     			apair.add(pseparate[j].trim());
                     		}
+                    		plot_pairs.add(apair);
                     	}
-                    }
-                    plot_pairs.add(apair);
+                    }                
                 }
             }
         }
