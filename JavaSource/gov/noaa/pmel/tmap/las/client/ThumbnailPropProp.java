@@ -82,7 +82,6 @@ public class ThumbnailPropProp implements EntryPoint {
     String dsid;
     Map<String, VariableSerializable> xAllDatasetVariables = new HashMap<String, VariableSerializable>();
     List<List<String>> plot_pairs;
-    List<List<String>> data_pairs;
     List<LASRequest> requests = new ArrayList<LASRequest>();
     ConstraintSerializable idConstraint;
     
@@ -477,7 +476,6 @@ public class ThumbnailPropProp implements EntryPoint {
                 }
             }
             plot_pairs = new ArrayList<List<String>>();
-            data_pairs = new ArrayList<List<String>>();
             if ( thumbnail_properties != null) {
                 String p = thumbnail_properties.get("coordinate_pairs");
                 String[] pair_strings = p.split("\\s+");
