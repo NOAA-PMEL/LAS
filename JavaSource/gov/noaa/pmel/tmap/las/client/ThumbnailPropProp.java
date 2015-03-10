@@ -82,6 +82,7 @@ public class ThumbnailPropProp implements EntryPoint {
     String dsid;
     Map<String, VariableSerializable> xAllDatasetVariables = new HashMap<String, VariableSerializable>();
     List<List<String>> plot_pairs;
+    List<List<String>> data_pairs;
     List<LASRequest> requests = new ArrayList<LASRequest>();
     ConstraintSerializable idConstraint;
     
@@ -112,6 +113,8 @@ public class ThumbnailPropProp implements EntryPoint {
     String yhi;
     String tlo;
     String thi;
+    
+    String varid;
     
     Map<String, String> thumbnail_properties;
     
@@ -154,7 +157,7 @@ public class ThumbnailPropProp implements EntryPoint {
         catid = Util.getParameterString("catid");
         String xml = Util.getParameterString("xml");
         dataurl = Util.getParameterString("dataurl");
-        String varid = null;
+        varid = null;
         if (xml != null && !xml.equals("")) {
             xml = Util.decode(xml);
             lasRequest = new LASRequest(xml);
@@ -474,14 +477,30 @@ public class ThumbnailPropProp implements EntryPoint {
                 }
             }
             plot_pairs = new ArrayList<List<String>>();
+            data_pairs = new ArrayList<List<String>>();
             if ( thumbnail_properties != null) {
-                String p = thumbnail_properties.get("variable_pairs");
+                String p = thumbnail_properties.get("coordinate_pairs");
                 String[] pair_strings = p.split("\\s+");
                 for (int i = 0; i < pair_strings.length; i++) {
                     String[] pseparate = pair_strings[i].split(",");
                     List<String> apair = new ArrayList<String>();
                     for (int j = 0; j < pseparate.length; j++) {
                         apair.add(pseparate[j].trim());
+                    }
+                    plot_pairs.add(apair);
+                }
+                String d = thumbnail_properties.get("variable_pairs");
+                String[] data_strings = d.split("\\s+");
+                for (int i = 0; i < pair_strings.length; i++) {
+                    String[] pseparate = data_strings[i].split(",");
+                    List<String> apair = new ArrayList<String>();
+                    // Add only those data pairs that match the current variable.
+                    if (pseparate.length > 1 ) {
+                    	if ( varid.equals(pseparate[0]) || varid.equals(pseparate[1]) ) {
+                    		for (int j = 0; j < pseparate.length; j++) {
+                    			apair.add(pseparate[j].trim());
+                    		}
+                    	}
                     }
                     plot_pairs.add(apair);
                 }
