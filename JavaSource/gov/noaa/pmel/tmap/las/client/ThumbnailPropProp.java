@@ -491,7 +491,7 @@ public class ThumbnailPropProp implements EntryPoint {
                 }
                 String d = thumbnail_properties.get("variable_pairs");
                 String[] data_strings = d.split("\\s+");
-                for (int i = 0; i < pair_strings.length; i++) {
+                for (int i = 0; i < data_strings.length; i++) {
                     String[] pseparate = data_strings[i].split(",");
                     List<String> apair = new ArrayList<String>();
                     // Add only those data pairs that match the current variable.
