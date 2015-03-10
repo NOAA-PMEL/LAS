@@ -622,7 +622,7 @@ public class ErddapScanner {
                         pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
 
                     } else if ( TIMESERIES.contains(grid_type) ) {
-                    	pairs.append(key+"-"+id+","+timen+"-"+id+"\n");
+                    	pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
                     }
                     data_variable_ids.add(key+"-"+id);
                 }
