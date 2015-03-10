@@ -605,6 +605,8 @@ public class ErddapScanner {
                 pairs.append("\n");
                 pairs.append(lonn+"-"+id+","+latn+"-"+id+"\n");
                 String timen = timeVar.keySet().iterator().next();
+                
+                
                 String zn = null;
                 if ( !zVar.keySet().isEmpty() ) {
                     zn = zVar.keySet().iterator().next();
@@ -618,16 +620,20 @@ public class ErddapScanner {
                     }
                     if ( TRAJECTORY.contains(grid_type) ) {
                         pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
+                        pairs.append(key+"-"+id+","+latn+"-"+id+"\n");
+                        pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
                     } else if ( PROFILE.contains(grid_type) && zn != null ) {
                         pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
-
+                        pairs.append(key+"-"+id+","+latn+"-"+id+"\n");
+                        pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
                     } else if ( TIMESERIES.contains(grid_type) ) {
                     	pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
                     }
                     data_variable_ids.add(key+"-"+id);
                 }
+                
                 // Pair up every data variable with every other.
-                // May filter these in the UI to only use variables paired with current selection.
+                // Filter these in the UI to only use variables paired with current selection.
                 StringBuilder data_pairs = new StringBuilder();
                
                 	for (int index = 0; index < data_variable_ids.size(); index++ ) {
