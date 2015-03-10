@@ -629,13 +629,15 @@ public class ErddapScanner {
                 // Pair up every data variable with every other.
                 // May filter these in the UI to only use variables paired with current selection.
                 StringBuilder data_pairs = new StringBuilder();
-                if ( data_variable_ids.size() > 2 ) {
+               
                 	for (int index = 0; index < data_variable_ids.size(); index++ ) {
-                		for (int jindex = 1; jindex < data_variable_ids.size(); jindex++ ) {
-                			data_pairs.append(data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+"\n");
+                		for (int jindex = index; jindex < data_variable_ids.size(); jindex++ ) {
+                			if ( index != jindex ) {
+                				data_pairs.append(data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+"\n");
+                			}
                 		}
                 	}
-                }
+                
                 
                 pairs.append("\n");
                 db.setProperty("thumbnails", "coordinate_pairs", pairs.toString());
