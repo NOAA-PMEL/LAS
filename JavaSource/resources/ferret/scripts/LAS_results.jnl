@@ -4,11 +4,11 @@
 ! $Author: ansley $
 ! $Date: 2006/07/13 18:08:18 $
 ! 3/30/2007 ACM When writing the map_scale.xml file, first list the urls separately;
-!               long URLs can make the Ferret command too long.
+!       long URLs can make the Ferret command too long.
 ! 2/11/2008 ACM Add DATA_MIN, DATA_MAX and DATA_EXISTS to the map scale file for 2D plots. 
 ! 5/2010    ACM Add axis direction symbols for 1D plots: axis_vert or axis_horiz give the 
-!               indep axis, use D for the dep axis.
-!              
+!       indep axis, use D for the dep axis.
+!      
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
 ! 4/2014    ACM Add time units, origin and calendar to map scale file
@@ -52,8 +52,8 @@ ELSE
       IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
    ELSE
       IF ($basemap_url"0|0|*>1") THEN
-         USE ($basemap_url)
-         LET the_plot_var = ($basemap_var)
+ USE ($basemap_url)
+ LET the_plot_var = ($basemap_var)
       ENDIF
    ENDIF
 ENDIF
@@ -101,11 +101,11 @@ ENDIF
 
    IF ($region_0_x_lo_orig"0|*>1") THEN
       IF `($region_0_x_lo_orig) - ($XAXIS_MIN) LT (-350)` THEN 
-         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
-         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
+ DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
+ DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
       ELIF `($region_0_x_lo_orig) - ($XAXIS_MIN) GT   350 ` THEN 
-         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
-         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
+ DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
+ DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
       ENDIF
    ENDIF
 
@@ -147,20 +147,20 @@ ENDIF
       LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
       LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
       IF ($haxis_taxname"0|*>1") THEN 
-         LET tt= t[GT=($haxis_taxname)]
+ LET tt= t[GT=($haxis_taxname)]
 	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
 	 DEFINE SYMBOL haxis_tunits = `tt,RETURN=tunits`
 	 DEFINE SYMBOL haxis_torigin = `tt,RETURN=t0`
 	 DEFINE SYMBOL haxis_tcalendar = `tt,RETURN=calendar`
-         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
-         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
+ LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+ LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
 	 SET DATA 1
-         LET tt= t[GT=($data_0_var),d=($dset0%1%)]
+ LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
 	 DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
@@ -168,9 +168,9 @@ ENDIF
 	 DEFINE SYMBOL haxis_tunits = `($data_0_var),RETURN=tunits`
 	 DEFINE SYMBOL haxis_torigin = `($data_0_var),RETURN=t0`
 	 DEFINE SYMBOL haxis_tcalendar = `($data_0_var),RETURN=calendar`
-         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
-         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
-         LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+ LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+ LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
+ LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
 
@@ -178,20 +178,20 @@ ENDIF
       LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
       LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
       IF ($vaxis_taxname"0|*>1") THEN 
-         LET tt= t[GT=($vaxis_taxname)]
+ LET tt= t[GT=($vaxis_taxname)]
 	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
 	 DEFINE SYMBOL vaxis_tunits = `tt,RETURN=tunits`
 	 DEFINE SYMBOL vaxis_torigin = `tt,RETURN=t0`
 	 DEFINE SYMBOL vaxis_tcalendar = `tt,RETURN=calendar`
-         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
-         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
+ LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+ LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
 	 SET DATA 1
-         LET tt= t[GT=($data_0_var),d=($dset0%1%)]
+ LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
 	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
@@ -199,9 +199,9 @@ ENDIF
 	 DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
 	 DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
 	 DEFINE SYMBOL vaxis_tcalendar = `($data_0_var),RETURN=calendar`
-         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
-         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
-         LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+ LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+ LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
+ LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
 
@@ -231,49 +231,49 @@ ENDIF
       IF `($native_curvilinear_xy"0") EQ 0` THEN 
 
       IF ($ax_horiz"0|*>1") THEN
-         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
-         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+ DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
+ IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
 	    IF `($($ax_horiz)stride"0") GT 1` THEN 
 	       CANCEL AXIS/STRIDE `($ax_horiz)_strided_var,RETURN=($ax_horiz)axis`
-               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_horiz)axis`
+       DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_horiz)axis`
 	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
-                  LET attlist = (($the_axis)).attnames
+  LET attlist = (($the_axis)).attnames
 	       ELSE
-                  LET attlist = ($the_axis).attnames
+  LET attlist = ($the_axis).attnames
 	       ENDIF
 	    ENDIF
-         ELSE
-            LET attlist = (($the_axis)).attnames
-         ENDIF
+ ELSE
+    LET attlist = (($the_axis)).attnames
+ ENDIF
 	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
 	   DEFINE SYMBOL the_axis = (($the_axis))
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
+ IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+ DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
       ELSE
-         DEFINE SYMBOL ax_horiz = D
+ DEFINE SYMBOL ax_horiz = D
       ENDIF
 
       IF ($ax_vert"0|*>1") THEN
-         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
-         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+ DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
+ IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
 	    IF `($($ax_vert)stride"0") GT 1` THEN 
 	       CANCEL AXIS/STRIDE `($ax_vert)_strided_var,RETURN=($ax_vert)axis`
-               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_vert)axis`
+       DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_vert)axis`
 	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
-                  LET attlist = (($the_axis)).attnames
+  LET attlist = (($the_axis)).attnames
 	       ELSE
-                  LET attlist = ($the_axis).attnames
+  LET attlist = ($the_axis).attnames
 	       ENDIF
-            ENDIF
-         ELSE
-            LET attlist = (($the_axis)).attnames
-         ENDIF
+    ENDIF
+ ELSE
+    LET attlist = (($the_axis)).attnames
+ ENDIF
 	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
 	   DEFINE SYMBOL the_axis = (($the_axis))
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+ IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+ DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
       ELSE
-         DEFINE SYMBOL ax_vert = D
+ DEFINE SYMBOL ax_vert = D
       ENDIF
       
       ENDIF  ! curvilinear
@@ -285,13 +285,13 @@ ENDIF
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
 
       IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
-         DEFINE SYMBOL DATA_EXISTS = 0
-         CANCEL SYMBOL DATA_MIN
-         CANCEL SYMBOL DATA_MAX
+ DEFINE SYMBOL DATA_EXISTS = 0
+ CANCEL SYMBOL DATA_MIN
+ CANCEL SYMBOL DATA_MAX
       ELSE
-         DEFINE SYMBOL DATA_EXISTS = 1
-         DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
-         DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
+ DEFINE SYMBOL DATA_EXISTS = 1
+ DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
+ DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
 	 IF ($data_max"0|bad>1|1.E+34>1|*>0") THEN 
 	    CANCEL SYMBOL data_min
 	    CANCEL SYMBOL data_max
@@ -305,7 +305,7 @@ ENDIF
       ENDIF
 
       IF ($its_prop_prop_plot"0|*>1") THEN
-          DEFINE SYMBOL ax_horiz = ($data_0_id)
+  DEFINE SYMBOL ax_horiz = ($data_0_id)
 	  DEFINE SYMBOL ax_vert = ($data_1_id)
 	  CANCEL SYMBOL DATA_MAX
 	  CANCEL SYMBOL DATA_MIN
@@ -326,12 +326,12 @@ ENDIF
    IF ($LEV_NUM"0|*>1") THEN
       LET syms_names = "LEVELS_STRING"
       IF ($LEV_OPNLEVS"0|*>1") THEN 
-         LET syms_vals = "($LEV_OPNLEVS)"
+ LET syms_vals = "($LEV_OPNLEVS)"
       ELIF `(($LEV_MIN"0|*>1") + ($LEV_MAX"0|*>1") + ($LEV_DEL"0|*>1")) EQ 3` THEN
-         IF `STRCMP("($LEV_DEL%1%)", "none") EQ 0` THEN DEFINE SYMBOL lev_del = 1
-         LET syms_vals = "(($LEV_MIN),($LEV_MAX),($LEV_DEL))"
+ IF `STRCMP("($LEV_DEL%1%)", "none") EQ 0` THEN DEFINE SYMBOL lev_del = 1
+ LET syms_vals = "(($LEV_MIN),($LEV_MAX),($LEV_DEL))"
       ELSE
-         LET syms_vals = "($LEV_TEXT%v%)"
+ LET syms_vals = "($LEV_TEXT%v%)"
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF

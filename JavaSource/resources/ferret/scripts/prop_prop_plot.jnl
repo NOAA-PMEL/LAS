@@ -73,7 +73,12 @@ DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
-IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
+
+IF `($ferret_thumb_qc2"0|*>1") AND ($data_count"0") LE 2` THEN 
+   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=blue
+ELSE
+  IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
+ENDIF
 
 DEFINE SYMBOL dokey = 0
 
@@ -150,25 +155,23 @@ IF `($all_missing"0") EQ 0` THEN
 !ENDIF
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/OVER
-
 IF ($ribbon"0|*>1") THEN
 
 ! ... let symbol size gradually increase as no. of obs gets small
    DEFINE SYMBOL size_creep_factor `(($ngood_data)+300)/(($ngood_data)+100) - 1`  ! [0,1] range
    LET sym_factr = 0.9 + 1.5*($size_creep_factor)
 
-   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/SYM=25/SIZE=`.12*sym_factr`
-   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`
+   DEFINE SYMBOL plot_command = PLOT/OVER/NOLAB/VS/sym=17/SIZE=`.12*sym_factr`
+   DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/sym=17/COLOR=6/SIZE=`.08*sym_factr`
 
 ! Fewer and larger symbols, use thicker line
    IF `.12*sym_factr GT 0.3` THEN 
       DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=3
-      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`/THICK=3
+      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/sym=17/COLOR=6/SIZE=`.08*sym_factr`/THICK=3
    ELIF `.12*sym_factr GT 0.16` THEN 
       DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=2
-      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/SYM=25/COLOR=6/SIZE=`.08*sym_factr`/THICK=2
+      DEFINE SYMBOL underlay_command = PLOT/OVER/NOLAB/VS/sym=17/COLOR=6/SIZE=`.08*sym_factr`/THICK=2
    ENDIF
-
    DEFINE SYMBOL plot_end_command = PLOT/OVER
    IF `($data_count"0") GT 2` THEN 
       IF ($color_by_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($color_by_levels)
@@ -336,7 +339,6 @@ ELSE
       PPL POLYGON/OVER
    ENDIF
 ENDIF  ! color-by-trajectory or not...
-
 ! This allows for auto-levels on prop-prop plots.
 IF ($color_by"0|*>1") THEN
    LET data_range = minmax(constraints_mask*zvar)

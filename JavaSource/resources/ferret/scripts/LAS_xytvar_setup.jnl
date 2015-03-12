@@ -77,8 +77,7 @@ IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xla
 IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
 IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
-
-IF ($ferret_thumb"0|*>1") THEN  
+IF `($ferret_thumb"0|*>1") AND (($ferret_thumb_qc2"0|*>1") EQ 0)` THEN  
    IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab longitude
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab longitude
    IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab latitude
@@ -162,6 +161,9 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
+   LET amin = `min(p_var[i=@MIN]-5, 180)` 
+   LET amax = `max(p_var[i=@MAX]+5, -180)`
+
 
 ! Initialize   
    LET ax_lo = ($region_x_lo)
@@ -184,6 +186,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    
    LET amin360 = xvar_360[i=@MIN]
    LET amax360 = xvar_360[i=@MAX]
+   LET amin = `min(xvar_360[i=@MIN]-5, 360)` 
+   LET amax = `max(xvar_360[i=@MAX]+5, 0)`
 
     DEFINE SYMBOL isbad =  `(amax - amin) `  ! a constraint on longitude may make amin,amax bad.
     LET adiff = amax - amin
@@ -193,6 +197,9 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
       LET ax_lo360 = `xvar_360[i=@MIN]`
       LET ax_hi360 = `xvar_360[i=@MAX]`
+      LET ax_lo360 = `min(xvar_360[i=@MIN]-5, 360)` 
+      LET ax_hi360 = `max(xvar_360[i=@MAX]+5, 0)`
+
       IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
          LET xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
@@ -307,6 +314,10 @@ IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
+
+   LET amin = `max(p_var[i=@MIN]-5, -90)`
+   LET amax = `min(p_var[i=@MAX]+5,  90)`
+
    GO LAS_is_range amin amax
 
    DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg haxis 
@@ -443,6 +454,10 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
 
    LET amin = q_var[i=@MIN]
    LET amax = q_var[i=@MAX]
+   
+   LET amin = `max(q_var[i=@MIN]-5, -90)`
+   LET amax = `min(q_var[i=@MAX]+5,  90)`
+
    GO LAS_is_range amin amax  ! get del_ax
    LET ax_lo = `amin`
    LET ax_hi = `amax`
@@ -557,7 +572,6 @@ IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
    SET VIEW full_view2
 ENDIF
 
-
 SHADE/NOKEY/PAL=white($pqual)/NOAX/title=" "/SET allmiss
    ($thumb_alab_size)
    ($ax_label_resize)
@@ -572,7 +586,6 @@ IF ($lab1"0|*>1") THEN
    GO unlabel 1
 ENDIF
 PPL SHADE
-
 
 ! If put_label was defined, something caused one or both variables to be all BAD.
 IF ($put_label"0|*>1") THEN 
@@ -668,6 +681,11 @@ IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1
    GO LAS_fland ($land_palette)
    SET DATA 1
    DEFINE SYMBOL lon_units = degrees_east
+   IF ($ferret_thumb_qc2"0|*>1") THEN 
+      DEFINE SYMBOL lab_top = Expocode `EXPOCODE`
+      LABEL/NOUSER  `($ppl$xorg)`,`($ppl$height)-0.24`, -1,0,0.13,  Map with Locations
+      LABEL/NOUSER
+   ENDIF
 ENDIF
 
 SET MODE/LAST nodata_lab

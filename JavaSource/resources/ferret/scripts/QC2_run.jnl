@@ -1,0 +1,76 @@
+! DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/B9AAA8A4998F6D533D07B9F881391620_netcdf.nc  ! 09AR20121217
+ DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/6CD835ADEEFDB894DDE5833EB3C48C8C_netcdf.nc  ! 33LG20130412 2 srcs
+! DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/9326DB26C84555B49567FB17FE5BBD1F_netcdf.nc  ! 58AA19950218
+! DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/637D9E831211ED6D4A96271EA4079DE4_netcdf.nc ! 77CN20130321
+! DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/9275269E7EA8F6245DB5BB0D48C16512_netcdf.nc ! 642B20130713
+! DEFINE SYMBOL data_0_url = /home/users/ansley/tomcat/webapps/las/output/09448E80F0F1F2AF719AA9767703D2E3_netcdf.nc ! 26NA20121229
+
+say/outfile=clock.out/clobber ($clock_secs)
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_01.png
+GO QC2_01
+
+cancel redirect
+set redirect/clobber/file=all.out
+say/outfile=clock.out/append 01 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_02.png
+GO QC2_02
+
+say/outfile=clock.out/append  02 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_03.png
+GO QC2_03
+
+say/outfile=clock.out/append  03 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_04.png
+GO QC2_04
+
+say/outfile=clock.out/append  04 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_05.png
+GO QC2_05
+
+say/outfile=clock.out/append  05 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_06.png
+GO QC2_06
+
+say/outfile=clock.out/append  06 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_07.png
+GO QC2_07
+
+say/outfile=clock.out/append  07 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_08.png
+GO QC2_08
+
+say/outfile=clock.out/append  08 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_09.png
+GO QC2_09
+
+say/outfile=clock.out/append  09 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_10.png
+GO QC2_10
+
+say/outfile=clock.out/append  10 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_11.png
+GO QC2_11
+
+say/outfile=clock.out/append  11 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_12.png
+GO QC2_12
+
+say/outfile=clock.out/append  12 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
+define symbol result_plot_image_filename = ($expocode_str)_QC2_out_13.png
+GO QC2_13
+
+say/outfile=clock.out/append  13 ($clock_secs)  `($clock_secs)-($prev)`
+def sym prev = ($clock_secs)
