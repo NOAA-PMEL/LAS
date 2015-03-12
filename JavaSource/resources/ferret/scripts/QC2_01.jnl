@@ -1,0 +1,55 @@
+go QC2_setup ($data_0_url)
+
+DEFINE SYMBOL result_annotations_filename = ($expocode_str)__annotations.xml
+DEFINE SYMBOL result_debug_filename = ($expocode_str)__debug.txt
+DEFINE SYMBOL result_map_scale_filename = ($expocode_str)__map_scale.xml
+
+let tt1 = TAX_DATESTRING(`tt[L=@min]`,tt,"second")
+let tt2 = TAX_DATESTRING(`tt[L=@max]`,tt,"second")
+
+
+DEFINE SYMBOL region_0_t_hi = `tt2`
+DEFINE SYMBOL region_0_t_lo = `tt1`
+DEFINE SYMBOL region_0_x_hi = `min(longitude[i=@max]+5, 180)`
+DEFINE SYMBOL region_0_x_lo = `max(longitude[i=@min]-5, -180)`
+DEFINE SYMBOL region_0_y_hi = `min(latitude[i=@max]+5, 90)`
+DEFINE SYMBOL region_0_y_lo = `max(latitude[i=@min]-5, -90)`
+
+DEFINE SYMBOL data_0_var = longitude
+DEFINE SYMBOL data_1_var = latitude
+
+DEFINE SYMBOL data_0_dataset_name = `..title`
+
+DEFINE SYMBOL data_0_units = `($data_0_var),return=units`
+DEFINE SYMBOL data_0_name = ($data_0_var)
+DEFINE SYMBOL data_0_title = ($data_0_var)
+DEFINE SYMBOL data_0_ID = ($data_0_var)
+
+DEFINE SYMBOL data_1_url = ($data_0_url)
+DEFINE SYMBOL data_1_dataset_name = ($data_0_dataset_name)
+DEFINE SYMBOL data_1_units = `($data_1_var),return=units`
+DEFINE SYMBOL data_1_name = ($data_1_var)
+DEFINE SYMBOL data_1_title = ($data_1_var)
+DEFINE SYMBOL data_1_ID = ($data_1_var)
+
+DEFINE SYMBOL data_count = 2
+DEFINE SYMBOL ferret_thumb_qc2 = 1
+
+DEFINE SYMBOL ferret_annotations = file
+DEFINE SYMBOL ferret_image_format = gif
+DEFINE SYMBOL ferret_is_socat = 1
+
+DEFINE SYMBOL ferret_service_action = Trajectory_correlation
+DEFINE SYMBOL ferret_size = .8333
+DEFINE SYMBOL ferret_view = xyt
+
+DEFINE SYMBOL operation_ID = Trajectory_correlation_plot
+DEFINE SYMBOL operation_name = Trajectory Correlation Plot
+DEFINE SYMBOL operation_service = ferret
+DEFINE SYMBOL operation_service_action = Trajectory_correlation
+
+DEFINE SYMBOL result_annotations_ID = annotations
+
+GO ($operation_service_action)
+
+

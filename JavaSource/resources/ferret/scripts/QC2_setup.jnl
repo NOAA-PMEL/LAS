@@ -1,0 +1,41 @@
+
+can view
+IF ($QC2_setup_done"0|*>1") THEN exit/script
+
+can mode logo
+
+ppl txlsze,0.08
+ppl axlsze,0.08,0.08
+
+use "$1%one_cruise%"
+define symbol expocode_str = `expocode`
+
+! reset the green pan to a darker green...
+ppl color,3,0,70,0      ! dark green
+
+
+def axis/t/t0=1-jan-1969/units=seconds tax = time
+let tt = t[gt=tax]; 
+let tt1 = `tt[l=@min]`
+let ttn = `tt[l=@max]`
+LET monthsecs = 30*24*60*60
+IF `ttn-tt1 GT monthsecs` THEN DEFINE SYMBOL taxis_setting = PPL txtype,MON,DMY
+
+define view/x=0:1/y=0:1 full2
+define view/x=0:1/y=0:1 full1
+
+cancel mode nodata_label
+
+cancel symbol linestyle
+!
+!define symbol linestyle = /SYMBOL=1
+define symbol linestyle = /SYMBOL=dot
+define symbol linestyle = /SYMBOL=17
+define symbol linestyle = /SYMBOL=25
+define symbol linestyle = /SYMBOL=1
+define symbol linestyle = /SYMBOL=81
+
+say/append/outfile=clock.out file Size `latitude,return=isize`
+say/append/outfile=clock.out Line Style ($linestyle)
+
+define symbol QC2_setup_done = 1
