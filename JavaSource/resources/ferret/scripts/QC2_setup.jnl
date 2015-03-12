@@ -29,11 +29,11 @@ cancel mode nodata_label
 cancel symbol linestyle
 !
 !define symbol linestyle = /SYMBOL=1
-define symbol linestyle = /SYMBOL=dot
+!define symbol linestyle = /SYMBOL=dot
+!define symbol linestyle = /SYMBOL=25
+!define symbol linestyle = /SYMBOL=1
+!define symbol linestyle = /SYMBOL=81
 define symbol linestyle = /SYMBOL=17
-define symbol linestyle = /SYMBOL=25
-define symbol linestyle = /SYMBOL=1
-define symbol linestyle = /SYMBOL=81
 
 say/append/outfile=clock.out file Size `latitude,return=isize`
 say/append/outfile=clock.out Line Style ($linestyle)
