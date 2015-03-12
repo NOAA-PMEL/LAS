@@ -1,5 +1,5 @@
 go QC2_setup ($data_0_url)
-
+DEFINE SYMBOL result_plot_image_filename = ($expocode_str)_($result_plot_image_filename)
 DEFINE SYMBOL result_annotations_filename = ($expocode_str)__annotations.xml
 DEFINE SYMBOL result_debug_filename = ($expocode_str)__debug.txt
 DEFINE SYMBOL result_map_scale_filename = ($expocode_str)__map_scale.xml

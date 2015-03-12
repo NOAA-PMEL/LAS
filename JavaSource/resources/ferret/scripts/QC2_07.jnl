@@ -39,7 +39,7 @@ define view/x=0:1/y=0:1 full3
 
 set view full3
 ppl color,2,0,0,100
-plot($linestyle)/line/key=title/color/noax/set/vlim=1000:2000/L=1:5 woa, sal_t
+plot($linestyle)/line/key=title/color/noax/set/vlim=1000:2000/L=1:5/set woa, sal_t
   ppl ylab " "
   ppl xlab " "
   ($taxis_setting)

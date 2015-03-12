@@ -44,7 +44,7 @@ plot/axes=0,1,0,1/color=green/line($linestyle)/title=" "/set day
   go unlabel ($labnum_datitl)
 ppl plot
 
-! Make the color key - draw a plot withlines off the page, but 
+! Make the color key - draw a plot with blank data, but 
 ! with the Ferret key made by Ferret PLOT/KEY=TITLE
 ! Redefine color 2 to blue (and afterwards back to red)
 
@@ -52,7 +52,7 @@ define view/x=0:1/y=0:1 full3
 
 set view full3
 ppl color,2,0,0,100
-plot($linestyle)/line/key=title/color/noax/set/vlim=1000:2000/L=1:5 yr, day
+plot($linestyle)/line/key=title/color/noax/set/vlim=10000:20000/L=1:5/set yr, day
   ppl ylab " "
   ppl xlab " "
   ($taxis_setting)
