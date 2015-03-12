@@ -41,7 +41,7 @@ define view/x=0:1/y=0:1 full3
 
 set view full3
 ppl color,2,0,0,100
-plot/key=title/color/noax/set/vlim=1000:2000/L=1:5 lat, lon
+plot/key=title/color/noax/set/vlim=1000:2000/L=1:5/set lat, lon
   ppl ylab " "
   ppl xlab " "
   ($taxis_setting)
