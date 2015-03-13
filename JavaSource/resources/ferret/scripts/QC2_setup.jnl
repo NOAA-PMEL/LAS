@@ -35,7 +35,4 @@ cancel symbol linestyle
 !define symbol linestyle = /THICK
 define symbol linestyle = /SYMBOL=17
 
-say/append/outfile=clock.out file Size `latitude,return=isize`
-say/append/outfile=clock.out Line Style ($linestyle)
-
 define symbol QC2_setup_done = 1

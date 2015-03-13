@@ -3,7 +3,8 @@
 ! DEFINE SYMBOL data_0_url = ./data/9326DB26C84555B49567FB17FE5BBD1F_netcdf.nc  ! 58AA19950218
 ! DEFINE SYMBOL data_0_url = ./data/637D9E831211ED6D4A96271EA4079DE4_netcdf.nc ! 77CN20130321
 ! DEFINE SYMBOL data_0_url = ./data/9275269E7EA8F6245DB5BB0D48C16512_netcdf.nc ! 642B20130713
- DEFINE SYMBOL data_0_url = ./data/09448E80F0F1F2AF719AA9767703D2E3_netcdf.nc ! 26NA20121229
+! DEFINE SYMBOL data_0_url = ./data/09448E80F0F1F2AF719AA9767703D2E3_netcdf.nc ! 26NA20121229
+def sym data_0_url = /home/users/ansley/tomcat/webapps/las/output/6F1ECFFCBEF9F6DB3B8CC293CF3DAE83_netcdf.nc
 
 say/outfile=clock.out/clobber ($clock_secs)
 def sym prev = ($clock_secs)
@@ -74,5 +75,9 @@ GO QC2_13
 
 say/outfile=clock.out/append  13 ($clock_secs)  `($clock_secs)-($prev)`
 def sym prev = ($clock_secs)
+
+
+say/append/outfile=clock.out Number obs `latitude,return=isize`
+say/append/outfile=clock.out Line Style ($linestyle)
 
 sp mv clock.out clock.`expocode`
