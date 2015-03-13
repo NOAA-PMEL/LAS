@@ -20,11 +20,12 @@ public class ConstraintTextDisplay extends FlowPanel {
                 String key = anchor.getKey();
                 String op = anchor.getOp();
                 String value = anchor.getKeyValue();
+                String label = anchor.getValue();
                 ConstraintSerializable keyConstraint = cons.get(key);
                 if ( keyConstraint == null ) {
                     // Text constraints are always "is", that way they get quoted even if the values look like numbers.
                     op = "is";
-                    keyConstraint = new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, op, value, key+"_"+value);
+                    keyConstraint = new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, op, value, key+"_"+value, label);
                     cons.put(key, keyConstraint);
                 } else {
                     String v = keyConstraint.getRhs();
@@ -39,7 +40,8 @@ public class ConstraintTextDisplay extends FlowPanel {
                 // The value and key value are the same except in the case of time where the value is a calendar string and the key value is double.
                 String rhs = anchor.getKeyValue();
                 String type = anchor.getType();
-                ConstraintSerializable con = new ConstraintSerializable(type, dsid, varid, varid, op, rhs, dsid+"_"+varid);
+                String label = anchor.getValue();
+                ConstraintSerializable con = new ConstraintSerializable(type, dsid, varid, varid, op, rhs, dsid+"_"+varid, label);
                 constraints.add(con);
             }
         }

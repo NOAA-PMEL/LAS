@@ -154,7 +154,8 @@ public class SelectionConstraintMenu extends Composite {
         String key_value = valuesList.getValue(index);
         String value = valuesList.getItemText(index);
         String variable = getShortName(currentVariable);
-        return new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, "eq", value, key+"_"+value);
+        String label = valuesList.getItemText(index);
+        return new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, "eq", value, key+"_"+value, label);
     }
     public void setAdjust(boolean adjust) {
         this.adjust = adjust;

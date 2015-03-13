@@ -506,7 +506,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     download.setRange("x", gridxlo, gridxhi);
                                                     download.setRange("y", gridylo, gridyhi);
                                                     download.setRange("t", gridtlo_ferret, gridthi_ferret);
-                                                    download.addTextConstraint(dsg_id, "is", parts[0]);
+                                                    download.addTextConstraint(dsg_id, "is", parts[0], null);
 
                                                     String ps = baseurl + "?catid="+dsid+"&amp;xml="+download.toEncodedURLString();
 
@@ -572,7 +572,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     	// Remove other cruise ID constraints.
                                                     	thumb.removeTextConstraintByLHS(cruise_id);
                                                     	
-                                                    	thumb.addTextConstraint(cruise_id, "eq", parts[0]);
+                                                    	thumb.addTextConstraint(cruise_id, "eq", parts[0], null);
                                                     	String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
                                                     	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
                                                     	row.append("<a target=\"_blank\" href=\""+thumburl+"\">Thumbnails</a>");
