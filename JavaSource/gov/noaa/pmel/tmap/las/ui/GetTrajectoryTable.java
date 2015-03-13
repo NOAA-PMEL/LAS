@@ -150,7 +150,9 @@ public class GetTrajectoryTable extends LASAction {
 	                String table = tabledap.get("table_variables");
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
-                    String did = tabledap.get("decimated_id");
+                    // String did = tabledap.get("decimated_id");
+                    // Ignore the decimated data set for this operation.
+                    String did = null;
                     String cruise_id = tabledap.get("trajectory_id");
                     String profile_id = tabledap.get("profile_id");
                     String timeseries_id = tabledap.get("timeseries_id");
@@ -369,7 +371,7 @@ public class GetTrajectoryTable extends LASAction {
                                     // If there is only 1 x query, we're done...
                                     int xlimit = 1;
                                     List<String> previouslySent = new ArrayList<String>();
-                                    if ( xquery2.length() > 0 ) {
+                                    if ( lonQ2 != null ) {
                                         // If there are two, we have to do two queries, save the results from the first to eliminate dups
 
                                         xlimit = 2;
