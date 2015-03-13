@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
  *
  */
 public class Constraint {
+	String label;
     String lhs;
     String rhs;
     String op;
@@ -42,6 +43,12 @@ public class Constraint {
     }
     public void setRhs(String rhs) {
         this.rhs = rhs;
+    }
+    public void setLabel(String label) {
+    	this.label = label;
+    }
+    public String getLabel() {
+    	return this.label;
     }
     public String getOpAsSymbol() {
         String opString = "";
@@ -99,4 +106,5 @@ public class Constraint {
         }
         return lhs+getOpAsSymbol()+"\""+rhs+"\"";
     }
+    
 }

@@ -304,7 +304,7 @@ public class GetCrossovers extends LASAction {
 	                                                    region.put("intervals", intervals);
 	                                                    lasRequest.setRegion(region);
 
-	                                                    lasRequest.addTextConstraint(traj_id_name, "is", tid + "_ns_" + cid);
+	                                                    lasRequest.addTextConstraint(traj_id_name, "is", tid + "_ns_" + cid, null);
 	                                                    
 	                                                    lasRequest.setProperty("ferret", "view", "xyt");
 	                                                    //               DEFINE SYMBOL ferret_crossover_lat = 41.5

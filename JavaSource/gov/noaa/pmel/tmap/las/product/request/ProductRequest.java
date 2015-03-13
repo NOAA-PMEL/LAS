@@ -640,6 +640,13 @@ public class ProductRequest {
                             vE = (Element)v.get(2);
                             rhs.setText(vE.getText());
                             c.addContent(rhs);
+                            
+                            Element label = arg.getChild("label");
+                            if ( label != null ) {
+                            	Element labelE = new Element("label");
+                            	labelE.setText(label.getTextTrim());
+                            	c.addContent(labelE);
+                            }
 
                             backendRequestE.addContent(c);
 

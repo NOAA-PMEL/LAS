@@ -353,7 +353,7 @@ public class LASRequest {
      * @param op
      * @param rhs
      */
-    public void addConstraint(String lhs, String op, String rhs, String cid) {
+    public void addConstraint(String lhs, String op, String rhs, String cid, String label) {
         Element constraint = document.createElement("constraint");
         constraint.setAttribute("type", "text");
         if ( cid != null ) {
@@ -371,6 +371,12 @@ public class LASRequest {
         constraint.appendChild(v1);
         constraint.appendChild(v2);
         constraint.appendChild(v3);
+        if ( label != null ) {
+        	Element labelE = document.createElement("label");
+        	Text labelText = document.createTextNode(label);
+        	labelE.appendChild(labelText);
+        	constraint.appendChild(labelE);
+        }
         Element args = getArgsElement();
         args.appendChild(constraint);
     }
@@ -684,7 +690,7 @@ public class LASRequest {
     }
     public void addConstraint(ConstraintSerializable constraint) {
         if ( constraint.getType().equals("text") ) {
-            this.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null);
+            this.addConstraint(constraint.getLhs(), constraint.getOp(), constraint.getRhs(), null, constraint.getLabel());
         } else {
             this.addVariableConstraint(constraint.getDsid(), constraint.getVarid(), constraint.getOp(), constraint.getRhs(), constraint.getId());
         }

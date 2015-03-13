@@ -560,7 +560,7 @@ public class LASUIRequest extends LASDocument {
 	/**
 	 * Add a constraint
 	 */
-	public void addTextConstraint(String lhs, String ope, String rhs) {
+	public void addTextConstraint(String lhs, String ope, String rhs, String label) {
 		Element args = getRootElement().getChild("args");
 		if ( args == null ) {
 			args = new Element("args");
@@ -577,6 +577,11 @@ public class LASUIRequest extends LASDocument {
 		constraint.addContent(lhsE);
 		constraint.addContent(opeE);
 		constraint.addContent(rhsE);
+		if ( label != null ) {
+			Element labelE = new Element("label");
+			labelE.setText(label);
+			constraint.addContent(label);
+		}
 		args.addContent(constraint);
 	}
 	public void removeTextConstraintByLHS(String lhs) {
