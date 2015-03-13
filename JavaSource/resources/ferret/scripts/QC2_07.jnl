@@ -35,8 +35,6 @@ ppl plot
 ! with the Ferret key made by Ferret PLOT/KEY=TITLE
 ! Redefine color 2 to blue (and afterwards back to red)
 
-define view/x=0:1/y=0:1 full3
-
 set view full3
 ppl color,2,0,0,100
 plot($linestyle)/line/key=title/color/noax/set/vlim=1000:2000/L=1:5/set woa, sal_t
