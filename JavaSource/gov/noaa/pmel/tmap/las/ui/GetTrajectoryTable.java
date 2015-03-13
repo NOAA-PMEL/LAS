@@ -153,6 +153,8 @@ public class GetTrajectoryTable extends LASAction {
                     // String did = tabledap.get("decimated_id");
                     // Ignore the decimated data set for this operation.
                     String did = null;
+                    // Use the full data set..
+//                    String did = null;
                     String cruise_id = tabledap.get("trajectory_id");
                     String profile_id = tabledap.get("profile_id");
                     String timeseries_id = tabledap.get("timeseries_id");
@@ -277,7 +279,7 @@ public class GetTrajectoryTable extends LASAction {
                                 id = did;
                             }
                             dataurl = dataurl + id;
-
+                            String lonQ2 = null;
                             if ( id != null && !id.equals("") ) {
 
                                 String url = dataurl + ".csv";
@@ -303,8 +305,8 @@ public class GetTrajectoryTable extends LASAction {
 
                                         List<String> lonQueries = ERDDAPUtil.getLongitudeQuery(is360, xlo, xhi);
                                         String lonQ1 = lonQueries.get(0);
-                                        String lonQ2 = null;
-                                        if ( lonQueries.size() > 0 ) {
+                                        
+                                        if ( lonQueries.size() > 1 ) {
                                             lonQ2 = lonQueries.get(1);
                                         }
                                         xquery1.append(lonQ1);
@@ -371,7 +373,7 @@ public class GetTrajectoryTable extends LASAction {
                                     // If there is only 1 x query, we're done...
                                     int xlimit = 1;
                                     List<String> previouslySent = new ArrayList<String>();
-                                    if ( lonQ2 != null ) {
+                                    if ( xquery2.length() > 0 && lonQ2 != null ) {
                                         // If there are two, we have to do two queries, save the results from the first to eliminate dups
 
                                         xlimit = 2;
