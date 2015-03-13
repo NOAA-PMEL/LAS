@@ -101,6 +101,24 @@ LET q = ($yvar)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 
+! For thumbnail plots, and if it's a lon-lat map, things are much simpler.
+! Just draw the map plot and save the result.
+
+IF `($ferret_thumb"0|0|*>1") AND \
+ ($ferret_plot_var"0|latitude>1|*>0") AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
+
+   DEFINE SYMBOL lonlatcolor = RED
+   GO prop_prop_map_thumb
+ 
+! notation with number of cruises, trajectories, or profiles and obs.
+   GO feature_labels
+
+! Save the results
+   GO LAS_results box
+
+   EXIT/SCRIPT
+ENDIF
+
 IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN 
    IF ($data_0_units"0|*>1") THEN 
       DEFINE SYMBOL tunits = ($data_0_units)
