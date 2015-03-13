@@ -77,12 +77,6 @@ IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xla
 IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
 IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
 IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
-IF `($ferret_thumb"0|*>1") AND (($ferret_thumb_qc2"0|*>1") EQ 0)` THEN  
-   IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab longitude
-   IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab longitude
-   IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab latitude
-   IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab latitude
-ENDIF
 
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
@@ -681,11 +675,6 @@ IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1
    GO LAS_fland ($land_palette)
    SET DATA 1
    DEFINE SYMBOL lon_units = degrees_east
-   IF ($ferret_thumb_qc2"0|*>1") THEN 
-      DEFINE SYMBOL lab_top = Expocode `EXPOCODE`
-      LABEL/NOUSER  `($ppl$xorg)`,`($ppl$height)-0.24`, -1,0,0.13,  Map with Locations
-      LABEL/NOUSER
-   ENDIF
 ENDIF
 
 SET MODE/LAST nodata_lab
