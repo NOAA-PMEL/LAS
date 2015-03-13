@@ -73,12 +73,7 @@ DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
-
-IF `($ferret_thumb_qc2"0|*>1") AND ($data_count"0") LE 2` THEN 
-   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=blue
-ELSE
-  IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
-ENDIF
+IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
 
 DEFINE SYMBOL dokey = 0
 
