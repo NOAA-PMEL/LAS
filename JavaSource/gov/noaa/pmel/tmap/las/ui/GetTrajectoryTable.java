@@ -153,8 +153,6 @@ public class GetTrajectoryTable extends LASAction {
                     // String did = tabledap.get("decimated_id");
                     // Ignore the decimated data set for this operation.
                     String did = null;
-                    // Use the full data set..
-//                    String did = null;
                     String cruise_id = tabledap.get("trajectory_id");
                     String profile_id = tabledap.get("profile_id");
                     String timeseries_id = tabledap.get("timeseries_id");
