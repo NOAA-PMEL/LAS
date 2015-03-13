@@ -19,7 +19,12 @@ LET fland_area = `ABS(lon_range * lat_range) / (360 * 180)`
 
 CANCEL SYMBOL topo_url
 
-IF `fland_area LT 0.05` THEN
+! For thumbnail plots, which we want to run extra-fast, draw a coarser
+! map for all but the tiniest regions.
+
+LET fland_cutoff = 0.05
+IF `($ferret_thumb_qc2"0|*>1") AND (fland_area LT 0.05)` THEN LET fland_cutoff = 0.008
+IF `fland_area LT fland_cutoff` THEN
   
    SET DATA/SAVE
 

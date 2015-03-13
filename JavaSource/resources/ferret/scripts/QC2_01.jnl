@@ -1,55 +1,88 @@
 go QC2_setup ($data_0_url)
-DEFINE SYMBOL result_plot_image_filename = ($expocode_str)_($result_plot_image_filename)
-DEFINE SYMBOL result_annotations_filename = ($expocode_str)__annotations.xml
-DEFINE SYMBOL result_debug_filename = ($expocode_str)__debug.txt
-DEFINE SYMBOL result_map_scale_filename = ($expocode_str)__map_scale.xml
 
-let tt1 = TAX_DATESTRING(`tt[L=@min]`,tt,"second")
-let tt2 = TAX_DATESTRING(`tt[L=@max]`,tt,"second")
+DEFINE SYMBOL ferret_thumb_qc2 = 1  ! Dont use finest-resolution map underlay.
 
 
-DEFINE SYMBOL region_0_t_hi = `tt2`
-DEFINE SYMBOL region_0_t_lo = `tt1`
-DEFINE SYMBOL region_0_x_hi = `min(longitude[i=@max]+5, 180)`
-DEFINE SYMBOL region_0_x_lo = `max(longitude[i=@min]-5, -180)`
-DEFINE SYMBOL region_0_y_hi = `min(latitude[i=@max]+5, 90)`
-DEFINE SYMBOL region_0_y_lo = `max(latitude[i=@min]-5, -90)`
-
-DEFINE SYMBOL data_0_var = longitude
-DEFINE SYMBOL data_1_var = latitude
-
-DEFINE SYMBOL data_0_dataset_name = `..title`
-
-DEFINE SYMBOL data_0_units = `($data_0_var),return=units`
-DEFINE SYMBOL data_0_name = ($data_0_var)
-DEFINE SYMBOL data_0_title = ($data_0_var)
-DEFINE SYMBOL data_0_ID = ($data_0_var)
-
-DEFINE SYMBOL data_1_url = ($data_0_url)
-DEFINE SYMBOL data_1_dataset_name = ($data_0_dataset_name)
-DEFINE SYMBOL data_1_units = `($data_1_var),return=units`
-DEFINE SYMBOL data_1_name = ($data_1_var)
-DEFINE SYMBOL data_1_title = ($data_1_var)
-DEFINE SYMBOL data_1_ID = ($data_1_var)
-
-DEFINE SYMBOL data_count = 2
-DEFINE SYMBOL ferret_thumb_qc2 = 1
-
-DEFINE SYMBOL ferret_annotations = file
-DEFINE SYMBOL ferret_image_format = gif
-DEFINE SYMBOL ferret_is_socat = 1
-
-DEFINE SYMBOL ferret_service_action = Trajectory_correlation
-DEFINE SYMBOL ferret_size = .8333
-DEFINE SYMBOL ferret_view = xyt
-
-DEFINE SYMBOL operation_ID = Trajectory_correlation_plot
-DEFINE SYMBOL operation_name = Trajectory Correlation Plot
-DEFINE SYMBOL operation_service = ferret
-DEFINE SYMBOL operation_service_action = Trajectory_correlation
-
-DEFINE SYMBOL result_annotations_ID = annotations
-
-GO ($operation_service_action)
+SET VIEW full
+GO margins 1,0.7,0.7,0.7
 
 
+LET/UNITS="`longitude,RETURN=units`"/TITLE="`longitude,RETURN=title`" lon = longitude
+LET/UNITS="`latitude,RETURN=units`"/TITLE="`latitude,RETURN=title`" lat = latitude
+
+LET amin = `min(lon[i=@MIN]-5, 180)`
+LET amax = `max(lon[i=@MAX]+5, -180)`
+GO LAS_is_range amin amax 
+
+LET xax_lo = ($ppl$range_low)
+LET xax_hi = ($ppl$range_high)
+LET xax_del = ($ppl$range_inc)
+
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR(varnames, "lon360") GT 0` THEN
+   
+   LET amin = `min(lon[i=@MIN]-5, 360)`
+   LET amax = `max(lon[i=@MAX]+5, 0)`
+   
+   GO LAS_is_range amin amax 
+
+   LET ax_lo360 = ($ppl$range_low)
+   LET ax_hi360 = ($ppl$range_high)
+   LET xax360_del = ($ppl$range_inc)
+
+   IF `(ax_hi360 - ax_lo360) LT (xax_hi-xax_lo)` THEN
+      LET/UNITS="`longitude,RETURN=units`"/TITLE="`longitude,RETURN=title`" lon = lon360
+      LET xax_lo = ax_lo360
+      LET xax_hi = ax_hi360
+      LET xax_del = xax360_del
+   ENDIF
+
+ENDIF
+
+IF `ABS(xax_hi - xax_lo) LT 1` THEN DEFINE SYMBOL dm_labels = dm
+IF `ABS(xax_hi - xax_lo) LT 0.06` THEN DEFINE SYMBOL dm_labels = dms
+DEFINE AXIS/x=`xax_lo`:`xax_hi`:`del_ax`/units="($lon_units%degrees_east%)" haxis
+
+LET amin = `max(lat[i=@MIN]-5, -90)`
+LET amax = `min(lat[i=@MAX]+5,  90)`
+GO LAS_is_range amin amax
+
+
+LET yax_lo = ($ppl$range_low)
+LET yax_hi = ($ppl$range_high)
+LET del_ax = ($ppl$range_inc)
+
+DEFINE SYMBOL connect_dots = 1
+DEFINE AXIS/y=`yax_lo`:`yax_hi`:`del_ax`/units=deg vaxis
+
+LET dep_var = x[gx=haxis]
+LET indep_var = y[gy=vaxis]
+LET bvar = dep_var + indep_var
+LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
+
+SHADE/NOKEY/PAL=white/title=" "/SET allmiss
+   ppl xlab
+   ppl ylab
+PPL SHADE
+
+DEFINE SYMBOL region_x_lo = `xax_lo`
+DEFINE SYMBOL region_x_hi = `xax_hi`
+DEFINE SYMBOL region_x_range = `xax_hi - xax_lo`
+DEFINE SYMBOL region_y_lo = `yax_lo`
+DEFINE SYMBOL region_y_hi = `yax_hi`
+DEFINE SYMBOL region_y_range = `yax_hi - yax_lo`
+DEFINE SYMBOL land_palette = gray_light
+
+define symbol landtime = ($clock_secs) 
+GO LAS_fland ($land_palette)
+say/outfile=clock.out/append 01 time for LAS_fland `($clock_secs) -($landtime)`
+
+PLOT/VS/OVER/NOLAB/NOKEY/SYM=17/SIZE=0.12/COLOR=blue lon, lat
+
+! Label at the top with the Expocode and count
+LET nobs = `lat[i=@ngd]`
+DEFINE SYMBOL lab_top = Expocode `EXPOCODE`<NL>Count: `nobs` locations
+LABEL/NOUSER  `($ppl$xlen)/2`,`($ppl$ylen)+0.6*($ppl$yorg)`, 0,0,0.13,  ($lab_top)
+
+DEFINE SYMBOL result_plot_image_filename = `expocode`_($result_plot_image_filename)
+FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
