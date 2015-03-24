@@ -15,7 +15,7 @@ import ucar.unidata.geoloc.LatLonPointImpl;
 import com.cohort.util.String2;
 
 public class ERDDAPUtil {
-    public static List<String> getLongitudeQuery(boolean is360, String xhi, String xlo) throws UnsupportedEncodingException {
+    public static List<String> getLongitudeQuery(boolean is360, String xlo, String xhi) throws UnsupportedEncodingException {
         List<String> queries = new ArrayList<String>();
         StringBuilder xquery1 = new StringBuilder();
         StringBuilder xquery2 = new StringBuilder();
@@ -32,7 +32,7 @@ public class ERDDAPUtil {
                 } 
             } 
 
-            if ( Math.abs(dxhi - dxlo ) < 355. ) {
+            if ( Math.abs(dxhi - dxlo ) < 358. ) {
 
                 if ( !is360) {
                     LatLonPoint p = new LatLonPointImpl(0, dxhi);
@@ -44,7 +44,7 @@ public class ERDDAPUtil {
                 if ( dxhi < dxlo ) {
                     if ( dxhi < 0 && dxlo >= 0 ) {
                         dxhi = dxhi + 360.0d;
-                        xquery1.append("&"+URLEncoder.encode("lon360>=" + 180, StandardCharsets.UTF_8.name()));
+                        xquery1.append("&"+URLEncoder.encode("lon360>=" + dxlo, StandardCharsets.UTF_8.name()));
                         xquery1.append("&"+URLEncoder.encode("lon360<=" + dxhi, StandardCharsets.UTF_8.name()));                          
                         xquery2.append("&"+URLEncoder.encode("longitude>="+dxlo, StandardCharsets.UTF_8.name()));
                         xquery2.append("&"+URLEncoder.encode("longitude<"+180, StandardCharsets.UTF_8.name()));
