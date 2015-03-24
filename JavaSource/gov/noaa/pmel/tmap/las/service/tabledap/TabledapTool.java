@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.util.Constraint;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.jdom.Element;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -636,7 +636,15 @@ public class TabledapTool extends TemplateTool {
                                 query.append("&lon360<=" + xhiDbl);
                                 query2.append("&"+lonname+">="+xloDbl+"&"+lonname+"<180");
 
-                            } // the else block is that you overlapped so leave off the longitude constraint all teogether
+                            } else if ( xhiDbl < 0 && xloDbl < 0 ) {
+                            	double t = xhiDbl;
+                            	xhiDbl = xloDbl;
+                            	xloDbl = t;
+                            	query.append("&"+URLEncoder.encode("&"+lonname+">="+xloDbl, StandardCharsets.UTF_8.name()));
+                                query.append("&"+URLEncoder.encode("&"+lonname+"<="+xhiDbl, StandardCharsets.UTF_8.name()));
+                            } 
+                            
+                            // the else block is that you overlapped so leave off the longitude constraint all together
 
                         } else {
                             // This else block is the case where it a query that does not cross the date line.
