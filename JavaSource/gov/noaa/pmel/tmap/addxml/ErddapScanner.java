@@ -503,7 +503,7 @@ public class ErddapScanner {
                 variables.add(idvb);
 
                 if ( isTrajectory ) {
-                	idcg.setAttribute("name", "Individual Cruise(s)");
+                	idcg.setAttribute("name", "Individual Trajectory(ies)");
                 }
                 if ( isProfile ) {
                 	idcg.setAttribute("name", "Individual Profile(s)");
