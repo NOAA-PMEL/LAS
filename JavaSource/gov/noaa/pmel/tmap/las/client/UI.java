@@ -34,6 +34,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -672,7 +673,7 @@ public class UI extends BaseUI implements EntryPoint {
      */
     public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {
         xView = tokenMap.get("view");
-        xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
         xOperationID = tokenMap.get("operation_id");
         xOperationsWidget.setOperation(xOperationID, xView);
         for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -761,13 +762,15 @@ public class UI extends BaseUI implements EntryPoint {
         xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
         getComparePanel().getAxesWidgets().getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 
-        xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
 
         if ( xVariable.isDiscrete() ) {
             xTrajectoryConstraint.setActive(true);
             xTrajectoryConstraint.setVisible(true);
             xAnalysisWidget.setVisible(false);
+            List<ConstraintAnchor> cl = xTrajectoryConstraint.getAnchors();
             xTrajectoryConstraint.init(xVariable.getCATID(), xVariable.getDSID(), xVariable.getID());
+            xTrajectoryConstraint.setConstraints(cl);
         } else {
             xTrajectoryConstraint.setActive(false);
             xTrajectoryConstraint.setVisible(false);
@@ -788,8 +791,8 @@ public class UI extends BaseUI implements EntryPoint {
 
             for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
-                panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
-                panel.setOrthoRanges(xView, xOrtho);
+                panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
+                panel.setOrthoRanges(xView);
             }
             return true;
         }
@@ -819,8 +822,8 @@ public class UI extends BaseUI implements EntryPoint {
         // Now set view axis from history tokens.
         for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panelIt.next();
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
-            panel.setOrthoRanges(xView, xOrtho);
+            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
+            panel.setOrthoRanges(xView);
         }
 
         if (tokenMap.containsKey("globalMin")) {
@@ -1389,12 +1392,12 @@ public class UI extends BaseUI implements EntryPoint {
 
         // Set the default operation.
         xOperationID = xOperationsWidget.setZero(xView);
-        xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
 
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();
             panel.setOperation(xOperationID, xView);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
+            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
         }
         xAxesWidget.showViewAxes(xView, xOrtho, getAnalysisAxis());
 
@@ -1537,10 +1540,11 @@ public class UI extends BaseUI implements EntryPoint {
             // In the case of where multiple variables are being used in a
             // panel, we need to change the 1st UserList?
             panel.setVariable(xVariable, true);
-            panel.setupForCurrentVar(false, ops);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
-            panel.setOrthoRanges(xView, xOrtho);
             panel.setOperation(xOperationID, xView);
+            panel.setupForCurrentVar(false, ops);
+            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
+            panel.setOrthoRanges(xView);
+           
         }
         turnOffAnalysis();
         changeDataset = false;
@@ -1601,7 +1605,7 @@ public class UI extends BaseUI implements EntryPoint {
         xOperationID = oo.getID();
         Map<String, String> operationChangeOptions = xOptionsButton.getState();
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), operationChangeOptions);
-        xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
 
         if (xVariable.isVector() || xVariable.isDiscrete()) {
             if (!xView.equals("xy")) {
@@ -1635,8 +1639,8 @@ public class UI extends BaseUI implements EntryPoint {
             OutputPanel panel = (OutputPanel) panelsIt.next();
 
             panel.setOperation(xOperationID, xView);
-            panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis(), xPanelCount);
-            panel.setOrthoRanges(xView, xOrtho);
+            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
+            panel.setOrthoRanges(xView);
         }
         if (xAnalysisWidget.isActive()) {
             String v = xAnalysisWidget.getAnalysisAxis();
@@ -1809,7 +1813,7 @@ public class UI extends BaseUI implements EntryPoint {
         tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
         tOperationsMenu.setCorrelationButtonEnabled(true);
         setOperationsClickHandler(xVizGalOperationsClickHandler);
-        xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
         xAxesWidget.showViewAxes(xView, xOrtho, null);
         xOperationID = xOperationsWidget.setZero(xView);
         if ( xVariable.isDiscrete() ) {
@@ -1827,8 +1831,8 @@ public class UI extends BaseUI implements EntryPoint {
             if (grid.hasT()) {
                 panel.setRange("t", false);
             }
-            panel.showOrthoAxes(xView, xOrtho, null, xPanelCount);
-            panel.setOrthoRanges(xView, xOrtho);
+            panel.showOrthoAxes(xView, null, xPanelCount);
+            panel.setOrthoRanges(xView);
         }
         xAxesWidget.setMessage("");
         xAxesWidget.showMessage(false);
