@@ -145,7 +145,7 @@ public class AxesWidgetGroup extends Composite {
         }
     }
 
-    private void setAxisVisible(String type, boolean visible) {
+    public void setAxisVisible(String type, boolean visible) {
         if ( type.contains("x") ) {
             mapPanel.setVisible(visible);
         }

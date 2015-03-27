@@ -494,7 +494,7 @@ public class OutputPanel extends Composite implements HasName {
     String optionID;
 
     // Keep track of the axes that are currently orthogonal to the plot.
-    List<String> ortho;
+    List<String> ortho = new ArrayList<String>();
     Frame output = new Frame();
 
     boolean outx = false;
@@ -1263,7 +1263,7 @@ public class OutputPanel extends Composite implements HasName {
             }
         }
 
-        if (view.contains("t")) {
+        if (view.contains("t") && !ortho.contains("t")) {
             local_tlo = vgState.get("tlo");
             local_thi = vgState.get("thi");
         } else {
@@ -1858,12 +1858,12 @@ public class OutputPanel extends Composite implements HasName {
         view = v;
     }
 
-    public void setOrthoRanges(String xView, List<String> xOrtho) {
+    public void setOrthoRanges(String xView) {
         boolean range = false;
         if (panelVar != null && panelVar.getGrid() != null && panelVar.isDiscrete()) {
             range = true;
         }
-        for (Iterator<String> oIt = xOrtho.iterator(); oIt.hasNext();) {
+        for (Iterator<String> oIt = ortho.iterator(); oIt.hasNext();) {
             String type = oIt.next();
             panelAxesWidgets.setRange(type, range);
         }
@@ -1949,7 +1949,12 @@ public class OutputPanel extends Composite implements HasName {
         datasetLabel.setText(panelVar.getDSName() + ": " + panelVar.getName());
         GridSerializable ds_grid = panelVar.getGrid();
         ngrid = ds_grid;
-        ortho = Util.setOrthoAxes(view, ds_grid);
+        ortho = Util.setOrthoAxes(view, panelVar, comparePanel);
+        String aAxis = null;
+        if ( analysis != null ) {
+        	aAxis = analysis.getAnalysisAxes();
+        }
+        
         double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
         double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
 
@@ -2006,6 +2011,9 @@ public class OutputPanel extends Composite implements HasName {
 
         randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
 
+        // The panel axes are weird for in-situ data so that have to be set up here at the end.
+        panelAxesWidgets.showOrthoAxes(view, ortho, aAxis, isComparePanel());
+        setOrthoRanges(view);
         // setPlotImageWidth now sets the plotImage to the grid before any
         // scaling so plotImage's imageElement will be valid
         // setPlotImageWidth();
@@ -2078,7 +2086,7 @@ public class OutputPanel extends Composite implements HasName {
         panelAxesWidgets.setOpen(true);
     }
 
-    public void showOrthoAxes(String view, List<String> ortho, String analysis, int panelCount) {
+    public void showOrthoAxes(String view, String analysis, int panelCount) {
         panelAxesWidgets.showOrthoAxes(view, ortho, analysis, isComparePanel());
     }
 
@@ -2502,7 +2510,7 @@ public class OutputPanel extends Composite implements HasName {
         operationID = ops[0].getID();
 
         view = "xy";
-        ortho = Util.setOrthoAxes(view, panelVar.getGrid());
+        ortho = Util.setOrthoAxes(view, panelVar, comparePanel);
         panelAxesWidgets.getRefMap().setTool(view);
         GridSerializable grid = panelVar.getGrid();
         this.setOperation(operationID, view);
@@ -2527,7 +2535,7 @@ public class OutputPanel extends Composite implements HasName {
                 aAxis = ab.toString();
             }
         }
-        this.showOrthoAxes(view, ortho, aAxis, 1);
+        this.showOrthoAxes(view, aAxis, 1);
         panelAxesWidgets.getRefMap().resizeMap();
     }
     
@@ -2816,7 +2824,7 @@ public class OutputPanel extends Composite implements HasName {
             ngrid = config.getGrid();
             nvar.setGrid(ngrid);
             ops = config.getOperations();
-            ortho = Util.setOrthoAxes(view, ngrid);
+            ortho = Util.setOrthoAxes(view, nvar, comparePanel);
             // This is only for the history state...
 
             if (ngrid == null) {

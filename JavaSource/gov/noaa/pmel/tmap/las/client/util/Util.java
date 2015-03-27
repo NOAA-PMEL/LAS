@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +73,8 @@ public class Util {
         xml = xml.replace("op=\"<\"", "op=\"lt\"");
         return xml;
     }
-	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
+	public static List<String> setOrthoAxes(String view, VariableSerializable panelVar, boolean navPanel) {
+		GridSerializable grid = panelVar.getGrid();
 		List<String> ortho = new ArrayList<String>();
 		if ( !view.contains("e") && grid.hasE() ) {
 		    ortho.add("e");
@@ -80,7 +82,7 @@ public class Util {
 		if ( !view.contains("f") && grid.hasF() ) {
 			ortho.add("f");
 		}
-		if ( !view.contains("t") && grid.hasT() ) {
+		if ( !view.contains("t") && grid.hasT() || (panelVar.isDiscrete() && !navPanel) ) {
 			ortho.add("t");
 		}
 		if ( !view.contains("z") && grid.hasZ() ) {
