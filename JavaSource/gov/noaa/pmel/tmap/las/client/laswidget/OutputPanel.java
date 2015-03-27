@@ -1815,16 +1815,20 @@ public class OutputPanel extends Composite implements HasName {
         if (isComparePanel()) {
             panelAxesWidgets.getRefMap().setTool(view);
         } else {
-            if (view.contains("x") && !view.contains("y")) {
-                panelAxesWidgets.getRefMap().setTool("px");
-                panelAxesWidgets.setTitle("Select a latitude for this panel by clicking on the map.");
-            } else if (!view.contains("x") && view.contains("y")) {
-                panelAxesWidgets.getRefMap().setTool("px");
-                panelAxesWidgets.setTitle("Select a longitude for this panel by clicking on the map.");
-            } else {
-                panelAxesWidgets.getRefMap().setTool("pt");
-                panelAxesWidgets.setTitle("Select a latitude/longitude point for this panel by clicking on the map.");
-            }
+        	if ( panelVar.isDiscrete() ) {
+        		panelAxesWidgets.getRefMap().setTool("xy");
+        	} else {
+        		if (view.contains("x") && !view.contains("y")) {
+        			panelAxesWidgets.getRefMap().setTool("px");
+        			panelAxesWidgets.setTitle("Select a latitude for this panel by clicking on the map.");
+        		} else if (!view.contains("x") && view.contains("y")) {
+        			panelAxesWidgets.getRefMap().setTool("px");
+        			panelAxesWidgets.setTitle("Select a longitude for this panel by clicking on the map.");
+        		} else {
+        			panelAxesWidgets.getRefMap().setTool("pt");
+        			panelAxesWidgets.setTitle("Select a latitude/longitude point for this panel by clicking on the map.");
+        		}
+        	}
         }
     }
 
@@ -1840,15 +1844,7 @@ public class OutputPanel extends Composite implements HasName {
     public void setOperation(String id, String v) {
         operationID = id;
         view = v;
-        // In any panel a map selection will always be a point orthogonal to the
-        // view.
-        if (v.contains("y") && !v.contains("x")) {
-            panelAxesWidgets.getRefMap().setTool("py");
-        } else if (!v.contains("y") && v.contains("x")) {
-            panelAxesWidgets.getRefMap().setTool("px");
-        } else {
-            panelAxesWidgets.getRefMap().setTool("pt");
-        }
+        setMapTool(v);
     }
 
     public void setOperationOnly(String id, String v) {
@@ -2435,7 +2431,8 @@ public class OutputPanel extends Composite implements HasName {
         if (panelMapTool.equals(""))
             panelMapTool = "pt";
         // xAxesWidget.getRefMap().setTool(mapTool);
-        panelAxesWidgets.getRefMap().setTool(mapTool);
+        setMapTool(mapTool);
+        // panelAxesWidgets.getRefMap().setTool(mapTool);
         // for ( Iterator panIt = xPanels.iterator(); panIt.hasNext(); ) {
         // OutputPanel panel = (OutputPanel) panIt.next();
         // panel.setMapTool(panelMapTool);
@@ -2511,7 +2508,7 @@ public class OutputPanel extends Composite implements HasName {
 
         view = "xy";
         ortho = Util.setOrthoAxes(view, panelVar, comparePanel);
-        panelAxesWidgets.getRefMap().setTool(view);
+        setMapTool(view);
         GridSerializable grid = panelVar.getGrid();
         this.setOperation(operationID, view);
         if (grid.hasZ()) {
