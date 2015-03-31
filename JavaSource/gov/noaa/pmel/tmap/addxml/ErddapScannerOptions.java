@@ -11,7 +11,6 @@ public class ErddapScannerOptions extends Options {
         addOption(url);
         
         Option id = new Option("i", "id", true, "The ERDDAP ID of the trajectory data set (see the \"/tabledap\" page on the server.");
-        id.setRequired(true);
         addOption(id);
         
         Option axes = new Option("a", "axes", true, "By default, program will attempt to download the range of an axis. Use this option list which axes (xyzt) to skip.");
