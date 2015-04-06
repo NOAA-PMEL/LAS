@@ -7,7 +7,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.CancelButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintLayout;
@@ -67,6 +66,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -88,7 +88,7 @@ import com.google.gwt.xml.client.Text;
 import com.google.gwt.xml.client.XMLParser;
 
 /**
- * @author weusijana
+ * @author rhs
  * 
  */
 public class Correlation implements EntryPoint {
@@ -109,8 +109,7 @@ public class Correlation implements EntryPoint {
 	HorizontalPanel buttonPanel = new HorizontalPanel();
 	HorizontalPanel topRow = new HorizontalPanel();
 	HorizontalPanel output = new HorizontalPanel();
-	HelpPanel help = new HelpPanel();
-	HelpPanel spaceTimeHelp = new HelpPanel();
+
 	PopupPanel spin;
 	HTML spinImage;
 	HorizontalPanel coloredBy = new HorizontalPanel();
@@ -235,6 +234,8 @@ public class Correlation implements EntryPoint {
 	
 	boolean outx;
 	boolean outy;
+	
+	Button help = new Button("Help");
 
 	@Override
 	public void onModuleLoad() {
@@ -243,6 +244,16 @@ public class Correlation implements EntryPoint {
 		ClientFactory cf = GWT.create(ClientFactory.class);
 		eventBus = cf.getEventBus();
 
+		help.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				Window.open("../css/correlation_help.html", "_blank", "scrollbars=1");
+				
+			}
+			
+		});
 
 		// Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
 		eventBus.addHandler(StringValueChangeEvent.TYPE,
@@ -334,7 +345,7 @@ public class Correlation implements EntryPoint {
 		print.setEnabled(false);
 		buttonPanel.add(update);
 		buttonPanel.add(print);
-//		topRow.add(help);
+		topRow.add(help);
 //		topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
 //		controlPanel.setWidget(0, 0, topRow);
 //		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
@@ -385,9 +396,7 @@ public class Correlation implements EntryPoint {
 //		controlPanel.setWidget(2, 1, coloredBy);
 //		controlPanel.setWidget(2, 2, colorVariables);
 		topPanel.add(controlPanel);
-		help.setPopupWidth("550px");
-		help.setPopupHeight("550px");
-		help.setHelpURL("../css/correlation_help.html");
+
 		colorVariables.setEnabled(false);
 		colorVariables.addChangeHandler(new ChangeHandler() {
 
@@ -495,10 +504,10 @@ public class Correlation implements EntryPoint {
         coloredBy.add(colorCheckBox);
         variablePanel.setWidget(3, 0, coloredBy);
         variablePanel.setWidget(3, 1, colorVariables);
-        spaceTimeHelp.setHelpURL("../css/maphelp.html");
-        spaceTimeHelp.setPopupLeft(326);
-        spaceTimeHelp.setPopupTop(spaceTimeHelp.getAbsoluteTop()+15);
-		spaceTimeTopRow.add(spaceTimeHelp);
+//        spaceTimeHelp.setHelpURL("../css/maphelp.html");
+//        spaceTimeHelp.setPopupLeft(326);
+//        spaceTimeHelp.setPopupTop(spaceTimeHelp.getAbsoluteTop()+15);
+//		spaceTimeTopRow.add(spaceTimeHelp);
 		spaceTimeTopRow
 				.add(new HTML(
 						"<b>&nbsp;&nbsp;Latitude, Longitude and Time Constraints:</b>&nbsp;"));
