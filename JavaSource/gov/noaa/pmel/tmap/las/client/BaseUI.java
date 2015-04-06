@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.activity.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
@@ -48,6 +49,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasName;
@@ -57,7 +59,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -72,6 +76,13 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class BaseUI {
+	
+
+	   RootPanel rootPanel;
+	   HelpMenuBar hmb = new HelpMenuBar();
+
+	 
+	       
     private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 
     static final String ANNOTATIONS_CONTROL_DOWN_TOOLTIP = "Click to hide the annotations of the plots.";
@@ -149,7 +160,7 @@ public class BaseUI {
     protected void pickerCloseActions() {
         xAxesWidget.restorePanels();
         xOperationsWidget.setOpen(true);
-        if ( xVariable.isDiscrete() ) {
+        if ( xVariable != null && xVariable.isDiscrete() ) {
             xAnalysisWidget.setVisible(false);
         } else {
             xAnalysisWidget.setVisible(true);
@@ -441,7 +452,13 @@ public class BaseUI {
      * @wbp.parser.entryPoint
      */
     public void initialize() {
-
+    	
+    	// Add the help menu...
+    	 
+        rootPanel = RootPanel.get("headerBottomRight");
+        hmb.setWidth("55px");
+        rootPanel.add(hmb);
+       
         xTileServer = Util.getTileServer();
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query

@@ -2,8 +2,6 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBarImpl;
-import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
-import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBarImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelectorImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
@@ -33,7 +31,7 @@ public class ClientFactoryImpl implements ClientFactory {
 	// private static final PlaceController placeController = new
 	// PlaceController(eventBus);
 	private static final InteractiveDownloadDataView interactiveDownloadDataView = new InteractiveDownloadDataViewImpl();
-	private static final HelpMenuBar helpMenuBar = new HelpMenuBarImpl();
+	
     private static final RPCManager rpcManager = new RPCManager();
 	@Override
 	public EventBus getEventBus() {
@@ -48,11 +46,6 @@ public class ClientFactoryImpl implements ClientFactory {
 	@Override
 	public InteractiveDownloadDataView getInteractiveDownloadDataView() {
 		return interactiveDownloadDataView;
-	}
-
-	@Override
-	public HelpMenuBar getHelpMenuBar() {
-		return helpMenuBar;
 	}
 
 	@Override
