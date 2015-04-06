@@ -200,7 +200,7 @@ public class ThumbnailPropProp implements EntryPoint {
                     // First time, so fire the plot
                     fire = true;
                 }
-                idConstraint = new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, op, value, key+"_"+value, null);
+                idConstraint = new ConstraintSerializable(Constants.TEXT_CONSTRAINT, null, null, key, op, value, key+"_"+value, key);
                 if ( fire ) {
                     firePlots();
                 }
