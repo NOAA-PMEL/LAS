@@ -463,7 +463,7 @@ public class UI extends BaseUI implements EntryPoint {
         }
         History.addValueChangeHandler(historyHandler);
     }
-
+  
     public void applyChange() {
         if (changeDataset) {
             // cs = xAxesWidget.getRefMap().getCurrentSelection();
@@ -498,7 +498,7 @@ public class UI extends BaseUI implements EntryPoint {
 
         // Since we are changing data sets, go to the default plot and view.
 
-        if (xOperationID == null || xOperationID.equals("") || xVariable.getAttributes().get("grid_type") != xNewVariable.getAttributes().get("grid_type") ) {
+        if (xOperationID == null || xOperationID.equals("") || xVariable == null || (xVariable.getAttributes().get("grid_type") != xNewVariable.getAttributes().get("grid_type")) ) {
             if (xNewVariable.getAttributes().get("grid_type").equals("regular")) {
                 xOperationID = "Plot_2D_XY_zoom";
                 xTrajectoryConstraint.setActive(false);
@@ -2128,7 +2128,7 @@ public class UI extends BaseUI implements EntryPoint {
                     }
                 } else {
                 	// No such data set was found.
-                	Util.getRPCService().getIDMap(null, initFromURL);
+                	Window.alert("Please choose a data set.");
                 }
             }
         }

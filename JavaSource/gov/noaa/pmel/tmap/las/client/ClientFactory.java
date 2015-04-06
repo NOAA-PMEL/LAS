@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBar;
-import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.ToggleButton;
@@ -24,8 +23,6 @@ import com.google.gwt.place.shared.PlaceController;
 public interface ClientFactory {
 
 	EventBus getEventBus();
-
-	HelpMenuBar getHelpMenuBar();
 	
 	RPCManager getRPCManager();
 
