@@ -7,8 +7,6 @@
 	<inherits name="com.google.gwt.json.JSON" />
 	<!-- This will allow logger messages to show in the client's browser: -->
 	<!-- <inherits name="com.google.gwt.logging.Logging"/> -->
-	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
-
 	<source path="client" />
 
 	<!-- Inherit the default GWT style sheet. You can change -->
@@ -42,4 +40,5 @@
 	<entry-point class='gov.noaa.pmel.tmap.las.client.UI' />
 
     <source path="org/gwttime"/>
+    
 </module>
