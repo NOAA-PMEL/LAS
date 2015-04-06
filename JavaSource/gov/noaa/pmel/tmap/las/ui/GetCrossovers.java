@@ -109,7 +109,10 @@ public class GetCrossovers extends LASAction {
 	                String table = tabledap.get("table_variables");
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
-                    String did = tabledap.get("decimated_id");
+                    // String did = tabledap.get("decimated_id");
+
+                    // Ignore the decimated data set for this operation.
+                    String did = null;
                     
                     String traj_id_name = tabledap.get("trajectory_id");
                    
