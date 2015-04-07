@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 /*
  * Part of the simple help system for showing a bit of help text from a URL.
+ *
  */
 
 public class HelpPanel extends Composite {
