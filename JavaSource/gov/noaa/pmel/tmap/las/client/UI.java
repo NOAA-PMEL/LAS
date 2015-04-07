@@ -1639,7 +1639,8 @@ public class UI extends BaseUI implements EntryPoint {
             OutputPanel panel = (OutputPanel) panelsIt.next();
 
             panel.setOperation(xOperationID, xView);
-            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
+            panel.setOrtho();
+            panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);        
             panel.setOrthoRanges(xView);
         }
         if (xAnalysisWidget.isActive()) {

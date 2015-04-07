@@ -1774,6 +1774,9 @@ public class OutputPanel extends Composite implements HasName {
         this.ID = id;
     }
 
+    public void setOrtho() {
+    	ortho = Util.setOrthoAxes(view, panelVar, false);
+    }
     public void setImage(String image_url, String link_url) {
         final String url = link_url;
         Image image = new Image(image_url);
