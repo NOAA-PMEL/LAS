@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.activity.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
@@ -111,6 +112,9 @@ public class Correlation implements EntryPoint {
 	HorizontalPanel topRow = new HorizontalPanel();
 	HorizontalPanel output = new HorizontalPanel();
 	HelpPanel help = new HelpPanel();
+
+	RootPanel rootPanel;
+	HelpMenuBar hmb = new HelpMenuBar();
 	HelpPanel spaceTimeHelp = new HelpPanel();
 	PopupPanel spin;
 	HTML spinImage;
@@ -244,7 +248,10 @@ public class Correlation implements EntryPoint {
 		ClientFactory cf = GWT.create(ClientFactory.class);
 		eventBus = cf.getEventBus();
 
-
+		// Add the simple help menu
+		rootPanel = RootPanel.get("headerBottomRight");
+		hmb.setWidth("55px");
+		rootPanel.add(hmb);
 		// Listen for StringValueChangeEvents from LASAnnotationsPanel(s)
 		eventBus.addHandler(StringValueChangeEvent.TYPE,
 				new StringValueChangeEvent.Handler() {
