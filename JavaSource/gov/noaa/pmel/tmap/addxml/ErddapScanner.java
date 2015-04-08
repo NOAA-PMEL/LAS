@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
@@ -29,6 +30,7 @@ import opendap.dap.parsers.ParseException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import org.joda.time.Chronology;
@@ -52,6 +54,8 @@ public class ErddapScanner {
     protected static String url = "http://osmc.noaa.gov/erddap/tabledap/";
     protected static String id = "OSMCV4_DUO_SURFACE_TRAJECTORY";
     protected static String search = "index.json?page=1&itemsPerPage=1000";
+    protected static boolean verbose = false;
+    protected static String title = null;
 
     protected static ErddapScannerOptions opts = new ErddapScannerOptions();
     protected static CommandLine cl;
@@ -69,6 +73,8 @@ public class ErddapScanner {
             cl = parser.parse(opts, args);
             url = cl.getOptionValue("url");
             id = cl.getOptionValue("id");
+            verbose = cl.hasOption("verbose");
+            title = cl.getOptionValue("title");
             if ( !url.endsWith("/") ) {
                 url = url+"/";
             }
@@ -81,7 +87,7 @@ public class ErddapScanner {
             ErddapProcessor processor = new ErddapProcessor(axesToSkip);
             if ( id != null ) {
             	// Process the given data set.
-            	processor.process(url, id, -1);
+            	processor.process(url, id, false, verbose);
             } else {
             	String s = url+search;
             	InputStream stream = lasProxy.executeGetMethodAndReturnStream(s, null);
@@ -89,18 +95,55 @@ public class ErddapScanner {
             	JsonStreamParser jp = new JsonStreamParser(reader);
             	JsonObject tabledap_list = (JsonObject) jp.next();
             	JsonArray rows = (JsonArray) ((JsonObject) (tabledap_list.get("table"))).get("rows");
+            	File categoriesFile = new File("las_categories.xml");
+            	CategoryBean topCat = new CategoryBean();
+            	topCat.setID("erddap_cats");
+            	if ( title == null ) title = "Data from ERDDAP";
+            	topCat.setName(title);
             	// The first one is a listing of all data sets, not the first tabledap data set.
-            	for (int i = 1; i < rows.size(); i++) {
+            	Vector cats = new Vector();
+            	// int limit = rows.size();
+            	int limit = 10; //DEBUG
+            	for (int i = 1; i < limit; i++) {
 					JsonArray row = (JsonArray) rows.get(i);
 					String fullurl = row.get(2).getAsString();
+					String title = row.get(6).getAsString();
+					
 					String u = fullurl.substring(0, fullurl.lastIndexOf("/"));
 					String uid = fullurl.substring(fullurl.lastIndexOf("/")+1);
-					processor.process(u, uid, i);
+					
+					
+                    
+					boolean write = processor.process(u, uid, true, verbose);
+					// Only include the XML if it looks like it's fully specified.
+					if ( write ) {
+						CategoryBean cat = new CategoryBean();
+						cat.setName(title);
+						cat.setID("cat_"+uid);
+						
+						FilterBean filter = new FilterBean();
+	                    filter.setAction("apply-dataset");
+	                    filter.setContainstag(uid);
+	                    cat.addFilter(filter);
+	                    cats.add(cat);
+	                    
+	                    topCat.setCategories(cats);
+	                    // For now write it every time we can stop it and still use it.
+	                    Element lc = new Element("las_categories");
+	                    lc.addContent(topCat.toXml());
+	                    processor.outputXML(categoriesFile, lc, false);
+	                    
+					}
+					
 				}
+            	
             }
             
         } catch (Exception e) {
-        	
+        	String header = "An error occurred with the command line processing\n";
+        	String footer = "";
+        	HelpFormatter formatter = new HelpFormatter();
+        	formatter.printHelp("addDiscrete", header, opts, footer, true);
         }
     }
 }

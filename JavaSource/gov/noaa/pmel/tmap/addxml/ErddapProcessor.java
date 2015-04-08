@@ -84,7 +84,7 @@ public class ErddapProcessor {
     /**
      * @param args
      */
-    public void process(String url, String id, int fileindex) {
+    public boolean process(String url, String id, boolean do_not_write_UNKNOWN, boolean verbose) {
     	    DAS das = new DAS();
     	    this.url = url;
     	    this.id = id;
@@ -100,10 +100,15 @@ public class ErddapProcessor {
 
     	    variables = new ArrayList<VariableBean>();
     	    gb = new GridBean();
+    	    boolean write = true;
+    	    
         try {
             if ( !url.endsWith("/") ) {
             	url = url + "/";
             }
+            if ( verbose ) {
+    	    	System.out.println("Processing: " + url + id);
+    	    }
             input = new URL(url+id+".das").openStream();
             das.parse(input);
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
@@ -368,6 +373,10 @@ public class ErddapProcessor {
                                 db.setProperty("tabledap_access", "lon_domain", "-180:180");
                             }
                         } else {
+                        	if ( do_not_write_UNKNOWN ) {
+                        		write = false;
+                        		return write;
+                        	}
                             arb.setStart("UNKNOW_START");
                             arb.setStep("UNKNOW_STEP");
                             arb.setSize("UNKNOW_SIZE");
@@ -375,6 +384,10 @@ public class ErddapProcessor {
                             db.setProperty("tabledap_access", "lon_domain", "UNKNOWN:UNKNOWN");
                         }
                     } else {
+                    	if ( do_not_write_UNKNOWN ) {
+                    		write = false;
+                    		return write;
+                    	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
@@ -423,12 +436,20 @@ public class ErddapProcessor {
                             arb.setSize(String.valueOf((long) c+1));
                             ab.setArange(arb);                    
                         } else {
+                        	if ( do_not_write_UNKNOWN ) {
+                        		write = false;
+                        		return write;
+                        	}
                             arb.setStart("UNKNOW_START");
                             arb.setStep("UNKNOW_STEP");
                             arb.setSize("UNKNOW_SIZE");
                             ab.setArange(arb);
                         }
                     } else {
+                    	if ( do_not_write_UNKNOWN ) {
+                    		write = false;
+                    		return write;
+                    	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
@@ -478,12 +499,20 @@ public class ErddapProcessor {
                         arb.setSize("10");
                         ab.setArange(arb);                    
                     } else {
+                    	if ( do_not_write_UNKNOWN ) {
+                    		write = false;
+                    		return write;
+                    	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
                         ab.setArange(arb);
                     }
                     } else {
+                    	if ( do_not_write_UNKNOWN ) {
+                    		write = false;
+                    		return write;
+                    	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
                         arb.setSize("UNKNOW_SIZE");
@@ -712,15 +741,8 @@ public class ErddapProcessor {
                 db.setProperty("tabledap_access", "table_variables", trajID);
 
                 db.addAllVariables(variables);
-                String oname = "las_from_scanerddap";
-                if ( fileindex >= 0 ) {
-                	oname = oname + "_" + fileindex + ".xml";
-                } else {
-                	oname = oname + ".xml";
-                }
-                File outputFile = new File(oname);
-
-
+                
+                File outputFile = new File("las_from_erddap.xml");
 
                 // Add all the tabledap_access properties
 
@@ -775,16 +797,22 @@ public class ErddapProcessor {
                     AxisBean ab = (AxisBean) axesIt.next();
                     axesE.addContent(ab.toXml());
                 }
-                outputXML(outputFile, datasetsE, false);
-                outputXML(outputFile, gridsE, true);
-                outputXML(outputFile, axesE, true);
+                if ( write ) {
+                	outputXML(outputFile, datasetsE, true);
+                	outputXML(outputFile, gridsE, true);
+                	outputXML(outputFile, axesE, true);
+                }
+                return write;
             }
             if ( subset_names == null ) {
                 System.err.println("No cdm_trajectory_variables or profile_variables global attribute found in this data set.");
+                write = false;
             }
             if ( variableAttributes == null ) {
                 System.err.println("No variables found.");
+                write = false;
             }
+            
         } catch (NoSuchAttributeException e) {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (MalformedURLException e) {
@@ -795,7 +823,8 @@ public class ErddapProcessor {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } catch (DAP2Exception e) {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        } 
+        }
+		return write; 
     }
     public String[] getMinMax(JsonObject bounds, String name) {
         JsonArray rows = (JsonArray) ((JsonObject) (bounds.get("table"))).get("rows");
