@@ -364,7 +364,7 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
         //lasUIRequest.setProperty("constraint","type","SHIPS (GENERIC)");
 
         //add constraint
-        lasUIRequest.addTextConstraint("p.platform_code", "=", myID );
+        lasUIRequest.addTextConstraint("p.platform_code", "=", myID, "Platform Code");
 
         String serverURL = baseURL.replaceFirst("output","ProductServer");
         try{
