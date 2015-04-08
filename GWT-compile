@@ -8,7 +8,6 @@ JAVAOPS="-Xmx1024M -Xms1024M"
 GWTOPTIONS="-strict"
 
 java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.InteractiveDownloadData;
-java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.HelpMenu;
 java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.UI;
 java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.ColumnEditor;
 #java ${JAVAOPS} -cp "${CLASSPATH}" com.google.gwt.dev.Compiler -war "${CMPNTDIR}" "$@" ${GWTOPTIONS} gov.noaa.pmel.tmap.las.NativeMapWidget;
