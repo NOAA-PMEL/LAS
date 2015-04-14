@@ -91,17 +91,23 @@ public class LASProxy {
 		return executeGetMethodAndReturnResult(url, null);
 	}
 	   /**
-     * Makes HTTP GET request and writes result to response output stream.
-     * @param request fully qualified request URL.
-     * @param response the response
-     * @throws IOException
-     * @throws HttpException
-     */
-	public InputStream executeGetMethodAndReturnStream(String request, HttpServletResponse response) throws IOException, HttpException {
+  * Makes HTTP GET request and writes result to response output stream.
+  * @param request fully qualified request URL.
+  * @param response the response
+  * @throws IOException
+  * @throws HttpException
+  */
+	public InputStream executeGetMethodAndReturnStream(String request, HttpServletResponse response, int timeout) throws IOException, HttpException {
 
 	    HttpClient client = new HttpClient();
 	    HttpClientParams params = client.getParams();
 	    params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+
+	    if ( timeout > 0 ) {
+	       params.setSoTimeout(timeout*1000);
+	        params.setConnectionManagerTimeout(timeout*1000);
+	    }
+	    
 	    client.setParams(params);
 	    GetMethod method = new GetMethod(request);
 
@@ -123,6 +129,19 @@ public class LASProxy {
 	    return method.getResponseBodyAsStream();
 
 	}
+	   /**
+     * Makes HTTP GET request and writes result to response output stream.
+     * @param request fully qualified request URL.
+     * @param response the response
+     * @throws IOException
+     * @throws HttpException
+     */
+	public InputStream executeGetMethodAndReturnStream(String request, HttpServletResponse response) throws IOException, HttpException {
+
+		return executeGetMethodAndReturnStream(request, response, -1);
+	   
+	}
+	
 	/**
 	 * Makes HTTP GET request and writes result to response output stream.
 	 * @param request fully qualified request URL.
