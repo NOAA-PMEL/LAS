@@ -106,10 +106,12 @@ public class ErddapProcessor {
             if ( !url.endsWith("/") ) {
             	url = url + "/";
             }
+            DateTime date = new DateTime();
             if ( verbose ) {
-    	    	System.out.println("Processing: " + url + id);
+    	    	System.out.println("Processing: " + url + id + " at "+date.toString() );
     	    }
-            input = new URL(url+id+".das").openStream();
+            
+            input = lasProxy.executeGetMethodAndReturnStream(url+id+".das", null, 40);
             das.parse(input);
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
             Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
@@ -290,7 +292,7 @@ public class ErddapProcessor {
                         String timeurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&time!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null);
+                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null, 20);
                         if ( stream != null ) {
                             jp = new JsonStreamParser(new InputStreamReader(stream));
                             JsonObject bounds = (JsonObject) jp.next();
@@ -351,7 +353,7 @@ public class ErddapProcessor {
                         String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null);
+                        stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null, 20);
 
                         if ( stream != null ) {
                             jp = new JsonStreamParser(new InputStreamReader(stream));
@@ -418,7 +420,7 @@ public class ErddapProcessor {
                         String laturl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(laturl, null);
+                        stream = lasProxy.executeGetMethodAndReturnStream(laturl, null, 20);
 
 
                         if ( stream != null ) {
@@ -480,7 +482,7 @@ public class ErddapProcessor {
                     String zurl = url+id + ".json?"+URLEncoder.encode(trajID+","+name+",time,latitude,longitude&"+name+"!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                     stream = null;
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(zurl, null);
+                    stream = lasProxy.executeGetMethodAndReturnStream(zurl, null, 20);
                     
 
                     if ( stream != null ) {
@@ -813,17 +815,9 @@ public class ErddapProcessor {
                 write = false;
             }
             
-        } catch (NoSuchAttributeException e) {
+        } catch (Exception e) {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        } catch (MalformedURLException e) {
-            System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        } catch (ParseException e) {
-            System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        } catch (IOException e) {
-            System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        } catch (DAP2Exception e) {
-            System.err.println("Error opening: "+url+id+" "+e.getMessage());
-        }
+        } 
 		return write; 
     }
     public String[] getMinMax(JsonObject bounds, String name) {
