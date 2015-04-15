@@ -2000,7 +2000,7 @@ public class LASConfig extends LASDocument {
     public ArrayList<Dataset> getDatasets() throws JDOMException, LASException {
     	return getDatasets(false);
     }
-    public ArrayList<Dataset> getDatasets(boolean full, int start, int end) throws JDOMException, LASException {
+    public ArrayList<Dataset> getDatasets(boolean full, int start, int end, String url) throws JDOMException, LASException {
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
         Element datasetsE = getDatasetsAsElement();
         
@@ -2017,42 +2017,48 @@ public class LASConfig extends LASDocument {
         }
         
         for (int index = start; index < end; index++) {
-            
-            Element dataset = (Element) datasetElements.get(index);
-            Element ds_novars = (Element)dataset.clone();
 
-            if ( full ) {
-                ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
-                ds_novars.getChild("variables").removeChildren("variable");
-                for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-                    Variable variable = (Variable) varIt.next();
-                    ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
-                }
-            } else {
-                /*
-                 * For, the JavaScript UI, we want to strip out the children.
-                 * we'll remove every things that's not properties.  However, we will
-                 * keep the contributor and documentation elements.
-                 */
-                List children = ds_novars.getChildren();
-                ArrayList<String> remove = new ArrayList<String>();
-                for (Iterator childIt = children.iterator(); childIt.hasNext();) {
-                    Element child = (Element) childIt.next();
-                    if (!child.getName().equals("properties") &&
-                            !child.getName().equals("documentation") &&
-                            !child.getName().equals("contributor") ) {
-                        remove.add(child.getName());
-                    }
-                }
-                for (int i=0; i < remove.size(); i++) {
-                    ds_novars.removeChild(remove.get(i));
-                }
-            }
-            Dataset ds = new Dataset(ds_novars);
-            ds.setAttribute("catid", ds.getID());
-            datasets.add(ds);
+        	Element dataset = (Element) datasetElements.get(index);
+        	Element ds_novars = (Element)dataset.clone();
+
+        	if ( full ) {
+        		ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
+        		ds_novars.getChild("variables").removeChildren("variable");
+        		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+        			Variable variable = (Variable) varIt.next();
+        			ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
+        		}
+        	} else {
+        		/*
+        		 * For, the JavaScript UI, we want to strip out the children.
+        		 * we'll remove every things that's not properties.  However, we will
+        		 * keep the contributor and documentation elements.
+        		 */
+        		List children = ds_novars.getChildren();
+        		ArrayList<String> remove = new ArrayList<String>();
+        		for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+        			Element child = (Element) childIt.next();
+        			if (!child.getName().equals("properties") &&
+        					!child.getName().equals("documentation") &&
+        					!child.getName().equals("contributor") ) {
+        				remove.add(child.getName());
+        			}
+        		}
+        		for (int i=0; i < remove.size(); i++) {
+        			ds_novars.removeChild(remove.get(i));
+        		}
+        	}
+
+        	Dataset ds = new Dataset(ds_novars);
+        	ds.setAttribute("catid", ds.getID());
+        	if ( url == null || full && url != null && getDataAccessURL(ds.getID(), ds.getVariables().get(0).getID(), false).contains(url) ) {
+        		datasets.add(ds);
+        	} 
         }
         return datasets;
+    }
+    public ArrayList<Dataset> getDatasets(boolean full, int start, int end) throws JDOMException, LASException {
+    	return getDatasets(full, start, end, null);
     }
     /**
      * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.

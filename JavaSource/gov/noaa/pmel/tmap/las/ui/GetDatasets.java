@@ -68,6 +68,8 @@ public class GetDatasets extends ConfigService {
 		} else {
 			log.info("START: "+request.getRequestURL());
 		}
+		String data_url = request.getParameter("data_url");
+		
         String format = request.getParameter("format");
         if ( format == null ) {
             format = "json";
@@ -101,7 +103,7 @@ public class GetDatasets extends ConfigService {
                 
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
 		try {
-			datasets = lasConfig.getDatasets(true, start, end);
+			datasets = lasConfig.getDatasets(true, start, end, data_url);
 			
 			
 			
