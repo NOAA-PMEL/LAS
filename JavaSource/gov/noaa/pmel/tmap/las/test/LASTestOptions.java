@@ -15,6 +15,7 @@ public class LASTestOptions{
     private boolean verbose;  
     private boolean testFTDS;
     private String productTime;
+    private String url;
     
     private String dregex;
     private String vregex;
@@ -88,6 +89,12 @@ public class LASTestOptions{
     
     public String getLAS() {
     	return this.las;
+    }
+    public void setUrl(String url) {
+    	this.url = url;
+    }
+    public String getUrl() {
+    	return this.url;
     }
  
 // Keep this junk around temporarily to make sure we have all the options covered.  Yikes!

@@ -20,6 +20,7 @@ public class LASCLIOptions extends Options {
 		addOption("e", "exit", false, "Exit on first error.");
 		addOption("V", "verbose", false, "Verbose output.");
 		addOption("h", "help", false, "Print help message.");
+		addOption("u", "url", true, "Test only data URL's that contain thi string.");
 		
 		addOption("dregex", "dregex", true, "Test only data sets whose id matches this regular expression.");
 		addOption("vregex", "vregex", true, "Test only variables whose id matches this regular expression.");

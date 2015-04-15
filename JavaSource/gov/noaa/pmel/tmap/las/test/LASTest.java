@@ -158,6 +158,10 @@ public class LASTest{
         // Get the first 10 and keep the size
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         String requestURL = lto.getLAS()+"getDatasets.do?format=xml&start="+start+"&end="+end;
+        String urlRegEx = lto.getUrl();
+        if ( urlRegEx != null ) {
+        	requestURL = requestURL + "&data_url="+urlRegEx;
+        }
         lasProxy.executeGetMethodAndStreamResult(requestURL, stream);
         JDOMUtils.XML2JDOM(stream.toString(), doc);
         
@@ -276,6 +280,10 @@ public class LASTest{
         
         if ( cl.hasOption("dregex") ) {
             lto.setDregex(cl.getOptionValue("dregex"));
+        }
+        
+        if ( cl.hasOption("u") ) {
+        	lto.setUrl(cl.getOptionValue("url"));
         }
 
         //if no options being set; test opendap, ftds, and products 
