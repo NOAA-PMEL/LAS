@@ -184,10 +184,10 @@ public class LASResponseTester{
 			//if(isAvailable){
 			if( userds == null || userds=="" || dsURL.contains(userds) ){
 				if ( !web_output ) {
-					System.out.println("---- Dataset Name: "+ dataset.getName());
+					System.out.println("---- Dataset Name: "+ dataset.getName() + " with ID="+dataset.getID());
 					System.out.println("     -- Dataset  URL: "+ dsURL);   
 				}
-				if(dsURL.contains("http")){
+				if(dsURL.contains("http") && !dsURL.contains("tabledap") ){
 					isAvailable = isAvailable(dsURL); //remote dataset
 				}else{
 					isAvailable = true; //local dataset
@@ -492,11 +492,27 @@ public class LASResponseTester{
 			options = makeOptions(viewtype);
 			lr.setOptions("ferret", options);
 			lr.setProperty("ferret","palette","default");
+		} else if ( viewtype.length() == 3 && variable.isDiscrete() ) {
+			String gt = variable.getGridType();
+			// TODO other discrete types.
+			if ( gt != null ) {
+				options = makeOptions(viewtype);
+				lr.setOptions("ferret", options);
+				if ( gt.equals("timeseries") ) {
+					lr.setOperation("Timeseries_interactive_plot");
+				} else if (gt.equals("profile") ) {
+					lr.setOperation("Profile_interactive_plot");
+				} else if ( gt.equals("trajectory") ) {
+					lr.setOperation("Trajectory_interactive_plot");
+				}
+				
+			}
+			
 		}
 
 		HashMap<String, HashMap<String,String[]>> region = new HashMap<String, HashMap<String,String[]>>();
 
-		region = makeRegion(viewtype, variable.getGrid());
+		region = makeRegion(viewtype, variable);
 		if(region != null){lr.setRegion(region);}
 
 		return lr;
@@ -559,8 +575,9 @@ public class LASResponseTester{
 	 * @param dsID dataset ID
 	 * @param varID variable ID
 	 */
-	public HashMap<String, HashMap<String,String[]>> makeRegion(String viewtype, Grid grid){
+	public HashMap<String, HashMap<String,String[]>> makeRegion(String viewtype, Variable variable){
 
+		Grid grid = variable.getGrid();
 		String xLo = "";
 		String xHi = "";
 		String yLo = "";
@@ -652,7 +669,7 @@ public class LASResponseTester{
 
 		//make a z interval or point
 		if(hasZ){
-			if(viewtype.contains("z")){
+			if(viewtype.contains("z") || variable.isDiscrete() ){
 				//make a z interval
 				String[] z = new String[2];
 				z[0] =  zLo;
