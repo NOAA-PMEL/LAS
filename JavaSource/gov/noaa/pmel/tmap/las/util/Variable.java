@@ -134,7 +134,29 @@ public class Variable extends Container implements VariableInterface {
 		DSName = name;
 		element.setAttribute("dsname", name);
 	}
-	
+	public String getGridType() {
+		for (Iterator attrIt = getAttributes().iterator(); attrIt.hasNext();) {
+			NameValuePair attr = (NameValuePair) attrIt.next();
+			if ( attr.getName().equals("grid_type") ) {
+				return attr.getValue();
+			}
+		}
+		return null;
+	}
+	public boolean isDiscrete() {
+		boolean discrete = false;
+		for (Iterator attrIt = getAttributes().iterator(); attrIt.hasNext();) {
+			NameValuePair attr = (NameValuePair) attrIt.next();
+			if ( attr.getName().equals("grid_type") && ( attr.getValue().equals("trajectory") || 
+		            attr.getValue().equals("scattered") || 
+		            attr.getValue().equals("point") ||
+		            attr.getValue().equals("timeseries") ||
+		            attr.getValue().equals("profile" ) ) ) {
+				discrete = true;
+			}
+		}
+		return discrete;
+	}
 	public boolean isVector() {
 		boolean vector = false;
 		for (Iterator attrIt = getAttributes().iterator(); attrIt.hasNext();) {
