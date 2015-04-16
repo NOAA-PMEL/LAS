@@ -142,8 +142,8 @@ public class LASTest{
                     // Do the rest.
 
                     while ( end < count) {
-                        start = start + 500;
-                        end = end + 500;
+                        start = start + 10;
+                        end = end + 10;
                         ds = getDatasetRange(start, end);
                         ltr.testResponse(web_output, ds);
                     }
