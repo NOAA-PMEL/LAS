@@ -137,7 +137,7 @@ public class AxesWidgetGroup extends Composite {
             dateTimeWidget.setVisible(false);
         }
         if ( grid.hasF() ) {
-        	forecastVerificationTime.init(grid.getFAxis(), false, "Verification Time: ", "Start Forecast Verification Time: ", "End Forecast Verification Time: ");
+        	forecastVerificationTime.init(grid.getFAxis(), false, "Forecast Verification Time: ", "Start Forecast Verification Time: ", "End Forecast Verification Time: ");
         } else {
         	forecastVerificationTime.setVisible(false);
         }
