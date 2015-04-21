@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
@@ -66,7 +67,7 @@ public class DateTimeWidget extends Composite {
 	String LABEL_LO_RANGE = "Start date/time: ";
 	String LABEL_HI_RANGE = "End date/time: ";
 	
-	Label d_label = new Label(LABEL);
+	HTML d_label = new HTML(LABEL);
 	Label d_label_lo_range = new Label(LABEL_LO_RANGE);
 	Label d_label_hi_range = new Label(LABEL_HI_RANGE);
 	
@@ -200,14 +201,10 @@ public class DateTimeWidget extends Composite {
 	public void init(TimeAxisSerializable tAxis, boolean range, String label, String range_lo_label, String range_hi_label) {
 		
 		if ( label != null && range_lo_label != null && range_hi_label != null ) {
-			d_label.setText(label);
-			d_label.setTitle(label);
-			
-			d_label_lo_range.setText(range_lo_label);
-			d_label_lo_range.setTitle(range_lo_label);
-			
-			d_label_hi_range.setText(range_hi_label);
-			d_label_hi_range.setTitle(range_hi_label);
+
+			d_label.setHTML(label);
+			d_label_lo_range = new Label(range_lo_label);
+			d_label_hi_range = new Label(range_hi_label);
 			
 		} else {
 			

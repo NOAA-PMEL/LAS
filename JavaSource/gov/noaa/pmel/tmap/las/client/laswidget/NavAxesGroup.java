@@ -66,7 +66,11 @@ public class NavAxesGroup extends Composite {
 			zAxisWidget.setVisible(false);
 		}
 		if ( grid.hasT() ) {
-			dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false);
+			if ( grid.hasF() ) {
+				dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false, "Lead Time: ", "Lead Time Start: ", "Lead Time End: ");
+			} else {
+				dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false);
+			}
 			dateTimeWidget.setVisible(true);
 		} else {
 			dateTimeWidget = new DateTimeWidget();
@@ -80,7 +84,7 @@ public class NavAxesGroup extends Composite {
 		    eAxisWidget.setVisible(false);
 		}
 		if ( grid.hasF() ) {
-			forecastInitializationTime = new DateTimeWidget(grid.getFAxis(), false, "Forecast Initialization:", "Start Forecast Initialization:", "End Forecast Initialization:");
+			forecastInitializationTime = new DateTimeWidget(grid.getFAxis(), false, "Verification Time: ", "Start Forecast Verification Time: ", "End Forecast Verification Time: ");
 			forecastInitializationTime.setVisible(true);
 		} else {
 			forecastInitializationTime = new DateTimeWidget();
