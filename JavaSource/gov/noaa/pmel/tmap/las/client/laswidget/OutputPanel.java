@@ -1981,8 +1981,15 @@ public class OutputPanel extends Composite implements HasName {
             compareAxis = "z";
             fixedAxis = "none";
         }
+        if ( ds_grid.getFAxis() != null ) {
+        	panelAxesWidgets.getFAxis().init(ds_grid.getFAxis(), false, "Forecast Verification Time: ", "Start Forecast Verification Time: ", "End Forecast Verification Time: ");
+        }
         if (ds_grid.getTAxis() != null) {
-            panelAxesWidgets.getTAxis().init(ds_grid.getTAxis(), false);
+        	if ( ds_grid.hasF() ) {
+        		panelAxesWidgets.getTAxis().init(ds_grid.getTAxis(), false, "Lead Time: ", "Lead Time Start: ", "Lead Time End: ");
+        	} else {
+        		panelAxesWidgets.getTAxis().init(ds_grid.getTAxis(), false);
+        	}
 
         }
         if (ds_grid.getZAxis() != null) {
