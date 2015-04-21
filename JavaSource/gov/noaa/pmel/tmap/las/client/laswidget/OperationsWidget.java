@@ -35,26 +35,28 @@ import com.google.gwt.user.client.ui.Widget;
 public class OperationsWidget extends Composite {
     boolean isOpen;
     FlexTable layout = new FlexTable();
-    FlowPanel xyMap = new FlowPanel();// new DisclosurePanel("Maps");
+    FlowPanel xyMap = new FlowPanel();
     FlexTable xyMapTable = new FlexTable();
-    FlowPanel linePlots = new FlowPanel();// new DisclosurePanel("Line Plots");
+    FlowPanel linePlots = new FlowPanel();
     FlexTable linePlotsTable = new FlexTable();
-    FlowPanel sectionPlots = new FlowPanel();// new
-                                             // DisclosurePanel("Vertical Section Plots");
+    FlowPanel sectionPlots = new FlowPanel();
     FlexTable sectionPlotsTable = new FlexTable();
-    FlowPanel hofmullerPlots = new FlowPanel();// new
-                                               // DisclosurePanel("Hofmuller Plots");
+    FlowPanel hofmullerPlots = new FlowPanel();
     FlexTable hofmullerPlotsTable = new FlexTable();
+    FlowPanel forecastPlots = new FlowPanel();
+    FlexTable forecastPlotsTable = new FlexTable();
 
     int xyMapRow = 0;
     int linePlotsRow = 0;
     int sectionPlotsRow = 0;
     int hofmullerPlotsRow = 0;
+    int forecastPlotsRow = 0;
 
     boolean hasXYMap = false;
     boolean hasLinePlots = false;
     boolean hasSectionPlots = false;
     boolean hasHofmullerPlots = false;
+    boolean hasForecastPlots = false;
     OperationSerializable[] ops;
     OperationSerializable currentOperation;
     String currentView;
@@ -140,6 +142,7 @@ public class OperationsWidget extends Composite {
         hasLinePlots = false;
         hasSectionPlots = false;
         hasXYMap = false;
+        hasForecastPlots = false;
         layout.clear();
         buttons.clear();
         xyMap.clear();
@@ -150,10 +153,13 @@ public class OperationsWidget extends Composite {
         sectionPlots.add(new Label("Vertical Section Plots"));
         hofmullerPlots.clear();      // The o-umlat breaks compiling in some locales without a compiler option.
         hofmullerPlots.add(new Label("Hovmoller Plots"));
+        forecastPlots.clear();
+        forecastPlots.add(new Label("Forecast Plots"));
         xyMapRow = 0;
         linePlotsRow = 0;
         sectionPlotsRow = 0;
         hofmullerPlotsRow = 0;
+        forecastPlotsRow = 0;
         for ( int i = 0; i < ops.length; i++ ) {
             OperationSerializable op = ops[i];
             String category = op.getAttributes().get("category");
@@ -189,6 +195,21 @@ public class OperationsWidget extends Composite {
                                 currentView = "xy";
                                 xyMapTable.setWidget(xyMapRow, 0, button);
                                 xyMapRow++;
+                            } else if ( view.equals("tf") ) {
+                            	if ( !hasForecastPlots ) {
+                            		forecastPlotsTable.clear();
+                            		hasForecastPlots = true;
+                            	}
+                            	OperationRadioButton button = new OperationRadioButton(groupName, "Verification vs Initialization");
+                            	if ( button != null ) {
+                                    button.setView(view);
+                                    button.setOperation(op);
+                                    button.addClickListener(buttonListener);
+                                    buttons.add(button);
+                                    forecastPlotsTable.setWidget(forecastPlotsRow, 0, button);
+                                    forecastPlotsRow++;
+                                }
+                            	
                             } else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z"))
                                     || (view.equals("t") && intervals.contains("t")) || (view.equals("e") && intervals.contains("e")) 
                                     // Special case where the TE is a bunch of line plots stacked on top of each other...
@@ -369,7 +390,13 @@ public class OperationsWidget extends Composite {
         if ( hasHofmullerPlots ) {
             hofmullerPlots.add(hofmullerPlotsTable);
             layout.setWidget(row, 0, hofmullerPlots);
+            row++;
 //            hofmullerPlots.setVisible(true);// .setOpen(true);
+        }
+        if ( hasForecastPlots ) {
+        	forecastPlots.add(forecastPlotsTable);
+        	layout.setWidget(row, 0, forecastPlots);
+        	row++;
         }
         for ( Iterator clickIt = clicks.iterator(); clickIt.hasNext(); ) {
             ClickHandler click = (ClickHandler) clickIt.next();
@@ -436,6 +463,7 @@ public class OperationsWidget extends Composite {
         linePlots.setVisible(open);// .setOpen(open);
         sectionPlots.setVisible(open);// .setOpen(open);
         hofmullerPlots.setVisible(open);// .setOpen(open);
+        forecastPlots.setVisible(open);
     }
 
     public boolean isOpen() {
