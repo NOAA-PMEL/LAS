@@ -34,7 +34,7 @@ public class AxesWidgetGroup extends Composite {
 
     OLMapWidget refMap;
     DateTimeWidget dateTimeWidget;
-    DateTimeWidget forecastInitializationTime;
+    DateTimeWidget forecastVerificationTime;
     AxisWidget zWidget;
     EnsembleAxisWidget eWidget;
     HorizontalPanel layout;
@@ -76,8 +76,8 @@ public class AxesWidgetGroup extends Composite {
         eWidget.setVisible(false);
         dateTimeWidget = new DateTimeWidget();
         dateTimeWidget.setVisible(false);
-        forecastInitializationTime = new DateTimeWidget();
-        forecastInitializationTime.setVisible(false);
+        forecastVerificationTime = new DateTimeWidget();
+        forecastVerificationTime.setVisible(false);
         panel = new FlowPanel();//new DisclosurePanel(title);
         mapPanel.add(refMap);
         mapPanel.setOpen(true);
@@ -85,7 +85,7 @@ public class AxesWidgetGroup extends Composite {
             row.setWidget(0, 0, mapPanel);
             row.setWidget(0, 1, zWidget);
             row.setWidget(0, 2, dateTimeWidget);
-            row.setWidget(0, 3, forecastInitializationTime);
+            row.setWidget(0, 3, forecastVerificationTime);
             row.setWidget(0, 4, eWidget);
             row.getFlexCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
             row.getFlexCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
@@ -99,7 +99,7 @@ public class AxesWidgetGroup extends Composite {
             panel.setVisible(true);//.setOpen(true);
             menuWidgets.setWidget(0, 0, zWidget);
             menuWidgets.setWidget(1, 0, dateTimeWidget);
-            menuWidgets.setWidget(2, 0, forecastInitializationTime);
+            menuWidgets.setWidget(2, 0, forecastVerificationTime);
             menuWidgets.setWidget(3, 0, eWidget);
             menuWidgets.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
             menuWidgets.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
@@ -126,16 +126,20 @@ public class AxesWidgetGroup extends Composite {
             zWidget.setVisible(false);
         }
         if ( grid.hasT() ) {
-            dateTimeWidget.init(grid.getTAxis(), false);
+        	if ( grid.hasF() ) {
+        		dateTimeWidget.init(grid.getTAxis(), false, "Lead Time", "Lead Time Start", "Lead Time End");
+        	} else {
+        		dateTimeWidget.init(grid.getTAxis(), false);
+        	}
             // dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false);
         } else {
             // dateTimeWidget = new DateTimeWidget();
             dateTimeWidget.setVisible(false);
         }
         if ( grid.hasF() ) {
-        	forecastInitializationTime.init(grid.getFAxis(), false, "Forecast Initialization:", "Start Forecast Initialization:", "End Forecast Initialization:");
+        	forecastVerificationTime.init(grid.getFAxis(), false, "Verification Time:", "Start Forecast Verification Time:", "End Forecast Verification Time:");
         } else {
-        	forecastInitializationTime.setVisible(false);
+        	forecastVerificationTime.setVisible(false);
         }
         if ( grid.hasX() && grid.hasY() ) {
             refMap.setDataExtent(Double.valueOf(grid.getYAxis().getLo()),
@@ -162,7 +166,7 @@ public class AxesWidgetGroup extends Composite {
             eWidget.setVisible(visible);
         }
         if ( type.equals("f") && hasF ) {
-        	forecastInitializationTime.setVisible(visible);
+        	forecastVerificationTime.setVisible(visible);
         }
     }
 
@@ -178,7 +182,7 @@ public class AxesWidgetGroup extends Composite {
             dateTimeWidget.setRange(range);
         }
         if ( type.equals("f") ) {
-        	forecastInitializationTime.setRange(range);
+        	forecastVerificationTime.setRange(range);
         }
     }
 
@@ -191,7 +195,7 @@ public class AxesWidgetGroup extends Composite {
     }
     
     public DateTimeWidget getFAxis() {
-    	return forecastInitializationTime;
+    	return forecastVerificationTime;
     }
 
     public AxisWidget getZAxis() {
