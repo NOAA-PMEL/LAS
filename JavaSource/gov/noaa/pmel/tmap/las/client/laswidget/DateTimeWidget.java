@@ -67,9 +67,9 @@ public class DateTimeWidget extends Composite {
 	String LABEL_LO_RANGE = "Start date/time: ";
 	String LABEL_HI_RANGE = "End date/time: ";
 	
-	HTML d_label = new HTML(LABEL);
-	Label d_label_lo_range = new Label(LABEL_LO_RANGE);
-	Label d_label_hi_range = new Label(LABEL_HI_RANGE);
+	Label d_label = new Label();
+	Label d_label_lo_range = new Label();
+	Label d_label_hi_range = new Label();
 	
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();
@@ -202,9 +202,15 @@ public class DateTimeWidget extends Composite {
 		
 		if ( label != null && range_lo_label != null && range_hi_label != null ) {
 
-			d_label.setHTML(label);
-			d_label_lo_range = new Label(range_lo_label);
-			d_label_hi_range = new Label(range_hi_label);
+			d_label.setText(label);
+			d_label.setTitle(label);
+			
+			d_label_lo_range.setText(range_lo_label);
+			d_label_lo_range.setTitle(range_lo_label);
+			
+			d_label_hi_range.setText(range_hi_label);
+			d_label_hi_range.setTitle(range_hi_label);
+
 			
 		} else {
 			
