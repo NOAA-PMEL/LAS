@@ -127,7 +127,7 @@ public class AxesWidgetGroup extends Composite {
         }
         if ( grid.hasT() ) {
         	if ( grid.hasF() ) {
-        		dateTimeWidget.init(grid.getTAxis(), false, "Lead Time", "Lead Time Start", "Lead Time End");
+        		dateTimeWidget.init(grid.getTAxis(), false, "Lead Time: ", "Lead Time Start: ", "Lead Time End: ");
         	} else {
         		dateTimeWidget.init(grid.getTAxis(), false);
         	}
@@ -137,7 +137,7 @@ public class AxesWidgetGroup extends Composite {
             dateTimeWidget.setVisible(false);
         }
         if ( grid.hasF() ) {
-        	forecastVerificationTime.init(grid.getFAxis(), false, "Verification Time:", "Start Forecast Verification Time:", "End Forecast Verification Time:");
+        	forecastVerificationTime.init(grid.getFAxis(), false, "Verification Time: ", "Start Forecast Verification Time: ", "End Forecast Verification Time: ");
         } else {
         	forecastVerificationTime.setVisible(false);
         }
