@@ -109,8 +109,19 @@ public class LASResponseTester{
 
 				    if(!allVar){
 				        if ( variables != null && variables.size() > 0 ) {
-				            Variable firstVar = variables.get(0);
-				            varLASRequest(ds, firstVar, web_output, testResults);
+				        	Variable firstVar = null;
+				        	// We cannot test subset variables for DSG data.
+				        	for ( int i = 0; i < variables.size(); i++ ) {
+				        		
+				        		firstVar = variables.get(i);
+				        		// find the first non-subset variable
+				        		if ( firstVar.getAttributesAsMap().get("subset_variable") == null ) {
+				        			break;
+				        		}
+				        	}
+				        	if ( firstVar != null ) {
+				        		varLASRequest(ds, firstVar, web_output, testResults);
+				        	}
 				        }
 				    }else{
 				        for(Iterator varIt = variables.iterator(); varIt.hasNext();){
