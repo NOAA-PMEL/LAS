@@ -312,14 +312,22 @@ public class ErddapProcessor {
                             arb.setSize(String.valueOf(Long.valueOf(days)));
                             ab.setArange(arb);
                         } else {
-                            arb.setStart("UNKNOW_START");
-                            arb.setStep("UNKNOW_STEP");
-                            arb.setSize("UNKNOW_SIZE");
+                        	if ( do_not_write_UNKNOWN ) {
+                        		write = false;
+                        		return write;
+                        	}
+                            arb.setStart("UNKNOWN_START");
+                            arb.setStep("UNKNOWN_STEP");
+                            arb.setSize("UNKNOWN_SIZE");
                         }
                     } else {
-                        arb.setStart("UNKNOW_START");
-                        arb.setStep("UNKNOW_STEP");
-                        arb.setSize("UNKNOW_SIZE");
+                    	if ( do_not_write_UNKNOWN ) {
+                    		write = false;
+                    		return write;
+                    	}
+                        arb.setStart("UNKNOWN_START");
+                        arb.setStep("UNKNOWN_STEP");
+                        arb.setSize("UNKNOWN_SIZE");
                     }
                     ab.setArange(arb);
                     axes.add(ab);
@@ -383,9 +391,9 @@ public class ErddapProcessor {
                     		write = false;
                     		return write;
                     	}
-                        arb.setStart("UNKNOW_START");
-                        arb.setStep("UNKNOW_STEP");
-                        arb.setSize("UNKNOW_SIZE");
+                        arb.setStart("UNKNOWN_START");
+                        arb.setStep("UNKNOWN_STEP");
+                        arb.setSize("UNKNOWN_SIZE");
                         ab.setArange(arb);
                         db.setProperty("tabledap_access", "lon_domain", "UNKNOWN:UNKNOWN");
                     }
