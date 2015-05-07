@@ -114,8 +114,13 @@ public class LASResponseTester{
 				        	for ( int i = 0; i < variables.size(); i++ ) {
 				        		
 				        		firstVar = variables.get(i);
-				        		// find the first non-subset variable
-				        		if ( firstVar.getAttributesAsMap().get("subset_variable") == null ) {
+				        		// find the first non-subset variable, and not time, lat or lon since these require
+				        		// special treatment to extract from the server properly
+				        		if ( firstVar.getAttributesAsMap().get("subset_variable") == null &&
+				        			 !firstVar.getName().toLowerCase().contains("time") && 
+				        			 !firstVar.getName().toLowerCase().contains("lat") &&
+				        			 !firstVar.getName().toLowerCase().contains("lon") && 
+				        			 !firstVar.getName().toLowerCase().contains("depth")) {
 				        			break;
 				        		}
 				        	}
