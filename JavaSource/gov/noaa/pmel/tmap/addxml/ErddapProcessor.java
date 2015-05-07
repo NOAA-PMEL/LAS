@@ -4,15 +4,11 @@ import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,14 +17,9 @@ import java.util.Map;
 
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
-import opendap.dap.DAP2Exception;
 import opendap.dap.DAS;
 import opendap.dap.NoSuchAttributeException;
-import opendap.dap.parsers.ParseException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 import org.joda.time.Chronology;
@@ -47,6 +38,8 @@ import com.google.gson.JsonStreamParser;
 
 
 public class ErddapProcessor {
+	
+	private static int timeout = 400;  // units of seconds
 
     public DAS das = new DAS();
     public InputStream input;
@@ -111,7 +104,7 @@ public class ErddapProcessor {
     	    	System.out.println("Processing: " + url + id + " at "+date.toString() );
     	    }
             
-            input = lasProxy.executeGetMethodAndReturnStream(url+id+".das", null, 40);
+            input = lasProxy.executeGetMethodAndReturnStream(url+id+".das", null, timeout);
             das.parse(input);
             AttributeTable global = das.getAttributeTable("NC_GLOBAL");
             Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
@@ -292,7 +285,7 @@ public class ErddapProcessor {
                         String timeurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&time!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null, 20);
+                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null, timeout);
                         if ( stream != null ) {
                             jp = new JsonStreamParser(new InputStreamReader(stream));
                             JsonObject bounds = (JsonObject) jp.next();
@@ -353,7 +346,7 @@ public class ErddapProcessor {
                         String lonurl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null, 20);
+                        stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null, timeout);
 
                         if ( stream != null ) {
                             jp = new JsonStreamParser(new InputStreamReader(stream));
@@ -420,7 +413,7 @@ public class ErddapProcessor {
                         String laturl = url+id + ".json?"+URLEncoder.encode(trajID+",time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                         stream = null;
 
-                        stream = lasProxy.executeGetMethodAndReturnStream(laturl, null, 20);
+                        stream = lasProxy.executeGetMethodAndReturnStream(laturl, null, timeout);
 
 
                         if ( stream != null ) {
@@ -482,7 +475,7 @@ public class ErddapProcessor {
                     String zurl = url+id + ".json?"+URLEncoder.encode(trajID+","+name+",time,latitude,longitude&"+name+"!=NaN&distinct()&orderByMinMax(\""+name+"\")", "UTF-8");
                     stream = null;
 
-                    stream = lasProxy.executeGetMethodAndReturnStream(zurl, null, 20);
+                    stream = lasProxy.executeGetMethodAndReturnStream(zurl, null, timeout);
                     
 
                     if ( stream != null ) {
@@ -709,9 +702,12 @@ public class ErddapProcessor {
                 for (Iterator dataIt = data.keySet().iterator(); dataIt.hasNext();) {
                     String name = (String) dataIt.next();
                     // May already be done because it's a sub set variable??
-                    
+                    boolean dummy = false;
                     if ( !subsets.containsKey(name) ) {
-                        if ( i == 0 ) db.setProperty("tabledap_access", "dummy", name);
+                        if (!dummy && !name.toLowerCase().contains("time") && !name.toLowerCase().contains("lat") && !name.toLowerCase().contains("lon") && !name.toLowerCase().contains("depth") ) {
+                        	db.setProperty("tabledap_access", "dummy", name);
+                        	dummy = true;
+                        }
                         i++;
                         AttributeTable var = data.get(name);
                         VariableBean vb = new VariableBean();
