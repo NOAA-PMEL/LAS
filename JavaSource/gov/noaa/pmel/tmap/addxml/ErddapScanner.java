@@ -122,7 +122,13 @@ public class ErddapScanner {
 					ErddapReturn r = processor.process(u, uid, true, verbose);
 					// Only include the XML if it looks like it's fully specified.
 					if ( r.write ) {
-						if (r.type.equals("profile") ) count_profile++;
+						if (r.type.equals("profile") ) {
+							count_profile++;
+						} else if ( r.type.equals("trajectory") ) {
+							count_trajectory++;
+						} else if ( r.type.equals("timeseries") ) {
+							count_timeseries++;
+						}
 						CategoryBean cat = new CategoryBean();
 						cat.setName(title);
 						cat.setID("cat_"+uid);
