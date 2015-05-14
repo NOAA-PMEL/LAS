@@ -848,6 +848,8 @@ public class ErddapProcessor {
             }
             
         } catch (Exception e) {
+        	r.write = false;
+        	r.type = "failed";
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } 
 		return r; 
