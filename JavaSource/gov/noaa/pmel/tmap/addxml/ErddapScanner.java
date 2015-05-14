@@ -36,6 +36,19 @@ public class ErddapScanner {
 	protected static CommandLine cl;
 
 	protected static LASProxy lasProxy = new LASProxy();
+	
+	static int ukx = 0;
+	static int uky = 0;
+	static int ukz = 0;
+	static int ukt = 0;
+	
+	static int uktype = 0;
+	
+	static int total = 0;
+	
+	static int count_profile = 0;
+	static int count_timeseries = 0;
+	static int count_trajectory = 0;
 
 	/**
 	 * @param args
@@ -94,6 +107,7 @@ public class ErddapScanner {
 				int limit = rows.size();
 				// int limit = 10; //DEBUG
 				for (int i = 1; i < limit; i++) {
+					total++;
 					JsonArray row = (JsonArray) rows.get(i);
 					String fullurl = row.get(2).getAsString();
 					String title = row.get(6).getAsString();
@@ -103,9 +117,10 @@ public class ErddapScanner {
 
 
 
-					boolean write = processor.process(u, uid, true, verbose);
+					ErddapReturn r = processor.process(u, uid, true, verbose);
 					// Only include the XML if it looks like it's fully specified.
-					if ( write ) {
+					if ( r.write ) {
+						if (r.type.equals("profile") ) count_profile++;
 						CategoryBean cat = new CategoryBean();
 						cat.setName(title);
 						cat.setID("cat_"+uid);
@@ -122,9 +137,35 @@ public class ErddapScanner {
 						lc.addContent(topCat.toXml());
 						processor.outputXML(categoriesFile, lc, false);
 
+					} else {
+						if ( r.type != null && r.type.equals("unknown") ) uktype++;
+						if ( r.unknown_axis != null ) {
+							if ( r.unknown_axis.equals("x") ) {
+								ukx++;
+							} else if (r.unknown_axis.equals("y") ) {
+								uky++;
+							} else if ( r.unknown_axis.equals("z") ) {
+								ukz++;
+							} else if ( r.unknown_axis.equals("t") ) {
+								ukt++;
+							}
+						}
 					}
 
 				}
+				System.out.println(total+" dataset were examined.");
+				System.out.println(count_profile+" profiles were configured into LAS.");
+				System.out.println(count_trajectory+" trajectory were configured into LAS.");
+				System.out.println(count_timeseries+" timeseries were configured into LAS.");
+				
+				System.out.println(uktype + " data set were of a type that LAS cannot currently use.");
+				
+				System.out.println(ukx + " data sets had X limits which could not be determined.");
+				System.out.println(uky + " data sets had Y limits which could not be determined.");
+				System.out.println(ukz + " data sets had Z limits which could not be determined.");
+				System.out.println(ukt + " data sets had T limits which could not be determined.");
+
+
 			}
 		}
 	}

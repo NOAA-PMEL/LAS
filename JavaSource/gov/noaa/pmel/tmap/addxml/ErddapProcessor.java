@@ -79,7 +79,7 @@ public class ErddapProcessor {
     /**
      * @param args
      */
-    public boolean process(String url, String id, boolean do_not_write_UNKNOWN, boolean verbose) {
+    public ErddapReturn process(String url, String id, boolean do_not_write_UNKNOWN, boolean verbose) {
     	    DAS das = new DAS();
     	    this.url = url;
     	    this.id = id;
@@ -95,9 +95,11 @@ public class ErddapProcessor {
 
     	    variables = new ArrayList<VariableBean>();
     	    gb = new GridBean();
-    	    boolean write = true;
+    	    ErddapReturn r = new ErddapReturn();
+    	    
     	    
         try {
+        	r.write = true;
             if ( !url.endsWith("/") ) {
             	url = url + "/";
             }
@@ -126,12 +128,15 @@ public class ErddapProcessor {
                 if ( cdm_trajectory_variables_attribute != null ) {
                     subset_names = cdm_trajectory_variables_attribute;
                     isTrajectory = true;
+                    r.type = "trajectory";
                 } else if ( cdm_profile_variables_attribute != null ) {
                     subset_names = cdm_profile_variables_attribute;
                     isProfile = true;
+                    r.type = "profile";
                 } else if ( cdm_timeseries_variables_attribute != null ) {
                     subset_names = cdm_timeseries_variables_attribute;
                     isTimeseries = true;
+                    r.type = "timeseries";
                 }
                 Iterator<String> subset_variables_attribute_values = subset_names.getValuesIterator();
                 if ( subset_variables_attribute_values.hasNext() ) {
@@ -315,8 +320,9 @@ public class ErddapProcessor {
                             ab.setArange(arb);
                         } else {
                         	if ( do_not_write_UNKNOWN ) {
-                        		write = false;
-                        		return write;
+                        		r.write = false;
+                        		r.unknown_axis = "t";
+                        		return r;
                         	}
                             arb.setStart("UNKNOWN_START");
                             arb.setStep("UNKNOWN_STEP");
@@ -324,8 +330,9 @@ public class ErddapProcessor {
                         }
                     } else {
                     	if ( do_not_write_UNKNOWN ) {
-                    		write = false;
-                    		return write;
+                    		r.write = false;
+                    		r.unknown_axis = "t";
+                    		return r;
                     	}
                         arb.setStart("UNKNOWN_START");
                         arb.setStep("UNKNOWN_STEP");
@@ -385,8 +392,9 @@ public class ErddapProcessor {
                             }
                         } else {
                         	if ( do_not_write_UNKNOWN ) {
-                        		write = false;
-                        		return write;
+                        		r.write = false;
+                        		r.unknown_axis = "x";
+                        		return r;
                         	}
                             arb.setStart("UNKNOW_START");
                             arb.setStep("UNKNOW_STEP");
@@ -396,8 +404,9 @@ public class ErddapProcessor {
                         }
                     } else {
                     	if ( do_not_write_UNKNOWN ) {
-                    		write = false;
-                    		return write;
+                    		r.write = false;
+                    		r.unknown_axis = "x";
+                    		return r;
                     	}
                         arb.setStart("UNKNOWN_START");
                         arb.setStep("UNKNOWN_STEP");
@@ -454,8 +463,9 @@ public class ErddapProcessor {
                             ab.setArange(arb);                    
                         } else {
                         	if ( do_not_write_UNKNOWN ) {
-                        		write = false;
-                        		return write;
+                        		r.write = false;
+                        		r.unknown_axis = "y";
+                        		return r;
                         	}
                             arb.setStart("UNKNOW_START");
                             arb.setStep("UNKNOW_STEP");
@@ -464,8 +474,9 @@ public class ErddapProcessor {
                         }
                     } else {
                     	if ( do_not_write_UNKNOWN ) {
-                    		write = false;
-                    		return write;
+                    		r.write = false;
+                    		r.unknown_axis = "y";
+                    		return r;
                     	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
@@ -516,8 +527,9 @@ public class ErddapProcessor {
                         ab.setArange(arb);                    
                     } else {
                     	if ( do_not_write_UNKNOWN ) {
-                    		write = false;
-                    		return write;
+                    		r.write = false;
+                    		r.unknown_axis = "z";
+                    		return r;
                     	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
@@ -526,8 +538,9 @@ public class ErddapProcessor {
                     }
                     } else {
                     	if ( do_not_write_UNKNOWN ) {
-                    		write = false;
-                    		return write;
+                    		r.write = false;
+                    		r.unknown_axis = "z";
+                    		return r;
                     	}
                         arb.setStart("UNKNOW_START");
                         arb.setStep("UNKNOW_STEP");
@@ -816,26 +829,28 @@ public class ErddapProcessor {
                     AxisBean ab = (AxisBean) axesIt.next();
                     axesE.addContent(ab.toXml());
                 }
-                if ( write ) {
+                if ( r.write ) {
                 	outputXML(outputFile, datasetsE, true);
                 	outputXML(outputFile, gridsE, true);
                 	outputXML(outputFile, axesE, true);
                 }
-                return write;
+                return r;
             }
             if ( subset_names == null ) {
-                System.err.println("No cdm_trajectory_variables or profile_variables global attribute found in this data set.");
-                write = false;
+                System.err.println("No cdm_trajectory_variables, timeseries_variables or profile_variables global attribute found in this data set.");
+                r.write = false;
+                r.type = "unknown";
             }
             if ( variableAttributes == null ) {
                 System.err.println("No variables found.");
-                write = false;
+                r.type = "unknown";
+                r.write = false;
             }
             
         } catch (Exception e) {
             System.err.println("Error opening: "+url+id+" "+e.getMessage());
         } 
-		return write; 
+		return r; 
     }
     public String[] getMinMax(JsonObject bounds, String name) {
         JsonArray rows = (JsonArray) ((JsonObject) (bounds.get("table"))).get("rows");
