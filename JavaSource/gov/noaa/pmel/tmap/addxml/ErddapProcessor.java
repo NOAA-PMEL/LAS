@@ -69,6 +69,8 @@ public class ErddapProcessor {
     static boolean isTrajectory = false;
     static boolean isProfile = false;
     static boolean isTimeseries = false;
+    
+    DecimalFormat df = new DecimalFormat("#.##");
 
     public ErddapProcessor(List<String> axesToSkip) {
     	
@@ -364,11 +366,17 @@ public class ErddapProcessor {
 
                             String start = lonminmax[0];
                             String end = lonminmax[1];
-                            double size = Double.valueOf(end) - Double.valueOf(start);
+                            double size = Double.valueOf(end) - Double.valueOf(start);                          
+                            double c = Math.ceil(size);
+                            String ssize = String.valueOf((long) c+1);
+                            if ( ssize.equals("1") ) {
+                            	double s = Double.valueOf(start) - 1.0d;
+                            	start = df.format(s);
+                            	ssize = "3";
+                            }
+                            arb.setSize(ssize);
                             arb.setStart(start);
                             arb.setStep("1.0");
-                            double c = Math.ceil(size);
-                            arb.setSize(String.valueOf((long) (c+1)));
                             ab.setArange(arb);
                             if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
                                 db.setProperty("tabledap_access", "lon_domain", "0:360");
@@ -434,9 +442,15 @@ public class ErddapProcessor {
                             String end = latminmax[1];
                             double size = Double.valueOf(end) - Double.valueOf(start);
                             double c = Math.ceil(size);
+                            String ssize = String.valueOf((long) c+1);
+                            if ( ssize.equals("1") ) {
+                            	double s = Double.valueOf(start) - 1.0d;
+                            	start = df.format(s);
+                            	ssize = "3";
+                            }
                             arb.setStart(start);
-                            arb.setStep("1.0");
-                            arb.setSize(String.valueOf((long) c+1));
+                            arb.setStep("1.0");                        
+                            arb.setSize(ssize);
                             ab.setArange(arb);                    
                         } else {
                         	if ( do_not_write_UNKNOWN ) {
@@ -497,7 +511,6 @@ public class ErddapProcessor {
                         double size = Double.valueOf(end) - Double.valueOf(start);
                         double step = size/10.;
                         arb.setStart(start);
-                        DecimalFormat df = new DecimalFormat("#.##");
                         arb.setStep(df.format(step));
                         arb.setSize("10");
                         ab.setArange(arb);                    
