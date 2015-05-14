@@ -49,6 +49,8 @@ public class ErddapScanner {
 	static int count_profile = 0;
 	static int count_timeseries = 0;
 	static int count_trajectory = 0;
+	
+	static int noread = 0;
 
 	/**
 	 * @param args
@@ -139,6 +141,7 @@ public class ErddapScanner {
 
 					} else {
 						if ( r.type != null && r.type.equals("unknown") ) uktype++;
+						if ( r.type != null && r.type.equals("failed") ) noread++;
 						if ( r.unknown_axis != null ) {
 							if ( r.unknown_axis.equals("x") ) {
 								ukx++;
@@ -159,6 +162,7 @@ public class ErddapScanner {
 				System.out.println(count_timeseries+" timeseries were configured into LAS.");
 				
 				System.out.println(uktype + " data set were of a type that LAS cannot currently use.");
+				System.out.println(noread + " data sets could not be read from the server.");
 				
 				System.out.println(ukx + " data sets had X limits which could not be determined.");
 				System.out.println(uky + " data sets had Y limits which could not be determined.");
