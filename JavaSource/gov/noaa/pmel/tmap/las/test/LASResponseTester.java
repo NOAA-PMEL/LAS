@@ -525,6 +525,13 @@ public class LASResponseTester{
 			}
 			
 		}
+		Date now = new Date();
+		String timestamp = String.valueOf(now.getTime());
+		lr.setProperty("ferret", "annotations", "file");
+		lr.setProperty("result","annotations_ID", "annotations");
+		lr.setProperty("result","annotations_filename", timestamp+"_annotations.xml");
+		lr.setProperty("result","annotations_type","annotations");
+
 
 		HashMap<String, HashMap<String,String[]>> region = new HashMap<String, HashMap<String,String[]>>();
 
