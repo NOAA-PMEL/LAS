@@ -98,6 +98,7 @@ IF `($num) GT 0` THEN
 	    ELSE
 	       DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) minus
 	    ENDIF
+	 ENDIF
          DEFINE SYMBOL add_0_url = 1
       ENDIF
       IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) ($dataset_url_($num)_lab)
@@ -267,11 +268,11 @@ IF `(slen GT linelen)` THEN
    )
 
    IF `i1 LT slen` THEN 
-      LET slast = `STRLEN("($upper_right_line)")`;\
-      LET upper_right_line = SUBSTRING("($remainder)", `i1`, `slen-i1+1`);\
-      DEFINE SYMBOL upper_right_line = `upper_right_line`;\
-      IF `slast + STRLEN("($upper_right_line)") LE linelen` THEN CANCEL SYMBOL linebreak;\
-      DEFINE SYMBOL upper_right_out = ($upper_right_out)($pchar)($linebreak)($upper_right_line);\
+      LET slast = `STRLEN("($upper_right_line)")`
+      LET upper_right_line = SUBSTRING("($remainder)", `i1`, `slen-i1+1`)
+      DEFINE SYMBOL upper_right_line = `upper_right_line`
+      IF `slast + STRLEN("($upper_right_line)") LE linelen` THEN CANCEL SYMBOL linebreak
+      DEFINE SYMBOL upper_right_out = ($upper_right_out)($pchar)($linebreak)($upper_right_line)
    ENDIF
 
    DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_out)
