@@ -113,14 +113,16 @@ public class LASResponseTester{
 				        	// We cannot test subset variables for DSG data.
 				        	for ( int i = 0; i < variables.size(); i++ ) {
 				        		
-				        		firstVar = variables.get(i);
+				        		Variable candidate = variables.get(i);
+				        		
 				        		// find the first non-subset variable, and not time, lat or lon since these require
 				        		// special treatment to extract from the server properly
-				        		if ( firstVar.getAttributesAsMap().get("subset_variable") == null &&
-				        			 !firstVar.getName().toLowerCase().contains("time") && 
-				        			 !firstVar.getName().toLowerCase().contains("lat") &&
-				        			 !firstVar.getName().toLowerCase().contains("lon") && 
-				        			 !firstVar.getName().toLowerCase().contains("depth")) {
+				        		if ( candidate.getAttributesAsMap().get("subset_variable") == null &&
+				        			 !candidate.getName().toLowerCase().contains("time") && 
+				        			 !candidate.getName().toLowerCase().contains("lat") &&
+				        			 !candidate.getName().toLowerCase().contains("lon") && 
+				        			 !candidate.getName().toLowerCase().contains("depth")) {
+				        			firstVar = candidate;
 				        			break;
 				        		}
 				        	}
