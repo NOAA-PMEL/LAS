@@ -531,6 +531,7 @@ public class LASResponseTester{
 		lr.setProperty("result","annotations_ID", "annotations");
 		lr.setProperty("result","annotations_filename", timestamp+"_annotations.xml");
 		lr.setProperty("result","annotations_type","annotations");
+		lr.setProperty("data_0", "dataset_name", "Test data set");
 
 
 		HashMap<String, HashMap<String,String[]>> region = new HashMap<String, HashMap<String,String[]>>();
