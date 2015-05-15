@@ -120,8 +120,7 @@ public class LASResponseTester{
 				        		if ( candidate.getAttributesAsMap().get("subset_variable") == null &&
 				        			 !candidate.getName().toLowerCase().contains("time") && 
 				        			 !candidate.getName().toLowerCase().contains("lat") &&
-				        			 !candidate.getName().toLowerCase().contains("lon") && 
-				        			 !candidate.getName().toLowerCase().contains("depth")) {
+				        			 !candidate.getName().toLowerCase().contains("lon") ) {
 				        			firstVar = candidate;
 				        			break;
 				        		}
