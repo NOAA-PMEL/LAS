@@ -95,8 +95,6 @@ plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all]
 ! otherwise make a cloud of colored lines, changing color with each line.
 ! Should have a UI choice between the two styles.
 
-list nstations; pause
-
 IF `nstations LE 8` THEN
    
    let asp = 1
