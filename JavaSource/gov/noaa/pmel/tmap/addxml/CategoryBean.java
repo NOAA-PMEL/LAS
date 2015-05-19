@@ -28,17 +28,17 @@ public class CategoryBean {
 	private String category_include_header;
 	private String variable_include_header;
 	private String constrain_include_header;
-	private Vector filters;
-	private Vector categories;
-	private Vector contributors;
+	private List<FilterBean> filters;
+	private List<CategoryBean> categories;
+	private List<ContributorBean> contributors;
 	private String id;
 	// In esg we eliminate some sub-categories which we have to track.
 	private Set<String> catids = new HashSet<String>();
 
 	public CategoryBean() {
-		filters = new Vector();
-		categories = new Vector();
-		contributors = new Vector();
+		filters = new ArrayList<FilterBean>();
+		categories = new ArrayList<CategoryBean>();
+		contributors = new ArrayList<ContributorBean>();
 	}
 
 	public void setName(String name) {
@@ -73,7 +73,7 @@ public class CategoryBean {
 		this.constrain_include_header = constrain_include_header;
 	}
 
-	public void setFilters(Vector filters) {
+	public void setFilters(List<FilterBean> filters) {
 		this.filters = filters;
 	}
 	
@@ -85,11 +85,11 @@ public class CategoryBean {
 		filters.add(filter);
 	}
 
-	public void setCategories(Vector categories) {
+	public void setCategories(List<CategoryBean> categories) {
 		this.categories = categories;
 	}
 
-	public void setContributors(Vector contributors) {
+	public void setContributors(List<ContributorBean> contributors) {
 		this.contributors = contributors;
 	}
 
@@ -129,15 +129,15 @@ public class CategoryBean {
 		return constrain_include_header;
 	}
 
-	public Vector getFilters() {
+	public List<FilterBean> getFilters() {
 		return filters;
 	}
 
-	public Vector getCategories() {
+	public List<CategoryBean> getCategories() {
 		return categories;
 	}
 
-	public Vector getContributors() {
+	public List<ContributorBean> getContributors() {
 		return contributors;
 	}
 	public void addCatID(String catid) {
