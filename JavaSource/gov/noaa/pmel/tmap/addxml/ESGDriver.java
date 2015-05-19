@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -61,8 +62,8 @@ public class ESGDriver {
 			InvCatalog catalog = (InvCatalog) catfactory.readXML(url);
 			DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
 			DatasetBean ds = new DatasetBean();
-			Vector datasets = new Vector();
-			ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
+			List<DatasetBean> datasets = new ArrayList<DatasetBean>();
+			List<VariableBean> variables = new ArrayList<VariableBean>();
 			String id = catalog.getName();
 			try {
 				id = "id_"+JDOMUtils.MD5Encode(catalog.getName());

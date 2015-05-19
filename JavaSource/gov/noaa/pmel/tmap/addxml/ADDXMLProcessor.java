@@ -114,12 +114,14 @@ import ucar.nc2.dt.TrajectoryObsDataset;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
+import ucar.nc2.ft.grid.FmrcCS;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
+import ucar.unidata.geoloc.vertical.VerticalTransform;
 import uk.ac.rdg.resc.edal.time.AllLeapChronology;
 import uk.ac.rdg.resc.edal.time.NoLeapChronology;
 import uk.ac.rdg.resc.edal.time.ThreeSixtyDayChronology;
@@ -403,7 +405,7 @@ public class ADDXMLProcessor {
 
             DatasetsGridsAxesBean dgab = createBeansFromNetcdfDataset(data[id], false, null);
             if ( dgab != null ) {
-                Vector db = (Vector) dgab.getDatasets();
+                List<DatasetBean> db = dgab.getDatasets();
                 if (db != null && db.size() > 0) {
 
                     if (oneDataset) {
@@ -439,18 +441,18 @@ public class ADDXMLProcessor {
                             oneDb.setElement(databean.getElement());
                         }
 
-                        Vector grids = dgab.getGrids();
-                        Vector existingGrids = oneDgab.getGrids();
+                        List<GridBean> grids = dgab.getGrids();
+                        List<GridBean> existingGrids = oneDgab.getGrids();
                         if (existingGrids == null) {
-                            existingGrids = new Vector();
+                            existingGrids = new ArrayList<GridBean>();
                         }
                         existingGrids.addAll(grids);
                         oneDgab.setGrids(existingGrids);
 
-                        Vector axes = dgab.getAxes();
-                        Vector existingAxes = oneDgab.getAxes();
+                        List<AxisBean> axes = dgab.getAxes();
+                        List<AxisBean> existingAxes = oneDgab.getAxes();
                         if (existingAxes == null) {
-                            existingAxes = new Vector();
+                            existingAxes = new ArrayList<AxisBean>();
                         }
                         existingAxes.addAll(axes);
                         oneDgab.setAxes(existingAxes);
@@ -508,7 +510,7 @@ public class ADDXMLProcessor {
 
             // We've been stuffing in the dataset info into oneDb.  Stuff it into
             // oneDgab and print it.
-            Vector dsets = new Vector();
+            List<DatasetBean> dsets = new ArrayList<DatasetBean>();
             dsets.add(oneDb);
             oneDgab.setDatasets(dsets);
 
@@ -756,7 +758,7 @@ public class ADDXMLProcessor {
         Set<DatasetBean> DatasetBeans = new HashSet<DatasetBean>();
         Set<GridBean> GridBeans = new HashSet<GridBean>();
         Set<AxisBean> AxisBeans = new HashSet<AxisBean>();
-        Vector CategoryBeans = new Vector();
+        List<CategoryBean> CategoryBeans = new ArrayList<CategoryBean>();
 
         
             List ThreddsDatasets = catalog.getDatasets();
@@ -780,12 +782,12 @@ public class ADDXMLProcessor {
 
         // Discover and process all the THREDDS dataset elements that actually
         // connect to a data source.
-        Vector DGABeans = new Vector();
+        List<DatasetsGridsAxesBean> DGABeans = new ArrayList<DatasetsGridsAxesBean>();
         ThreddsDatasets = catalog.getDatasets();
         di = ThreddsDatasets.iterator();
         while (di.hasNext()) {
             InvDataset ThreddsDataset = (InvDataset) di.next();
-            Vector d = processDatasets(ThreddsDataset);
+            List<DatasetsGridsAxesBean> d = processDatasets(ThreddsDataset);
             DGABeans.addAll(d);
         }
 
@@ -793,7 +795,7 @@ public class ADDXMLProcessor {
         // If oneDataset is true, combine them before making the XML.
 
         if (oneDataset && DGABeans.size() > 0) {
-            Vector newDAGBVector = new Vector();
+            List<DatasetsGridsAxesBean> newDAGBVector = new ArrayList<DatasetsGridsAxesBean>();
             DatasetsGridsAxesBean newDAGB = new DatasetsGridsAxesBean();
             
             DatasetBean newDSB = new DatasetBean();
@@ -807,25 +809,25 @@ public class ADDXMLProcessor {
                 newDSB.setName(title);
             }
 
-            Vector newGrids = new Vector();
-            Vector newAxes = new Vector();
+            List<GridBean> newGrids = new ArrayList<GridBean>();
+            List<AxisBean> newAxes = new ArrayList<AxisBean>();
             for (Iterator dgabIter = DGABeans.iterator(); dgabIter.hasNext();) {
                 DatasetsGridsAxesBean aDAGB = (DatasetsGridsAxesBean) dgabIter.next();
-                Vector datasets = aDAGB.getDatasets();            
+                List<DatasetBean> datasets = aDAGB.getDatasets();            
                 for (Iterator ds = datasets.iterator(); ds.hasNext();) {
                     DatasetBean dsb = (DatasetBean) ds.next();
                     if (newDSB.getElement() == null) {
                         newDSB.setElement(dsb.getElement());
                     }
                     newDSB.setName(dsb.getName());
-                    ArrayList oldVars = dsb.getVariables();
-                    ArrayList newVariables = new ArrayList();
+                    List oldVars = dsb.getVariables();
+                    List newVariables = new ArrayList();
             
                     for (Iterator ovIt = oldVars.iterator(); ovIt.hasNext();) {
                         VariableBean var = (VariableBean) ovIt.next();
                         GridBean g = var.getGrid();
                         if (!newGrids.contains(g)) newGrids.add(g);
-                        Vector axes = g.getAxes();
+                        List<AxisBean> axes = g.getAxes();
                         for (Iterator axesIt = axes.iterator(); axesIt.hasNext(); ) {
                             AxisBean a = (AxisBean) axesIt.next();
                             if ( !newAxes.contains(a) ) newAxes.add(a);
@@ -846,7 +848,7 @@ public class ADDXMLProcessor {
                     newDSB.addAllVariables(newVariables);
                 }
             }
-            Vector newDatasets = new Vector();
+            List<DatasetBean> newDatasets = new ArrayList<DatasetBean>();
             newDatasets.add(newDSB);
             newDAGB.setDatasets(newDatasets);
             newDAGB.setGrids(newGrids);
@@ -873,21 +875,21 @@ public class ADDXMLProcessor {
                     lasdata.addContent(new Comment(dgab_temp.getError()));
                 }
                 else {
-                    Vector datasets = dgab_temp.getDatasets();
+                    List<DatasetBean> datasets = dgab_temp.getDatasets();
                     Iterator dsit = datasets.iterator();
                     while (dsit.hasNext()) {
                         DatasetBean db = (DatasetBean) dsit.next();
                         Element dsE = db.toXml();
                         datasetsElement.addContent(dsE);
                     }
-                    Vector grids = dgab_temp.getGrids();
+                    List<GridBean> grids = dgab_temp.getGrids();
                     Iterator git = grids.iterator();
                     while (git.hasNext()) {
                         GridBean gb = (GridBean) git.next();
                         Element gE = gb.toXml();
                         gridsElement.addContent(gE);
                     }
-                    Vector axes = dgab_temp.getAxes();
+                    List<AxisBean> axes = dgab_temp.getAxes();
                     Iterator ait = axes.iterator();
                     while (ait.hasNext()) {
                         AxisBean ab = (AxisBean) ait.next();
@@ -915,8 +917,8 @@ public class ADDXMLProcessor {
      * @param ThreddsDataset InvDataset
      * @return DatasetBean
      */
-    public static Vector processDatasets(InvDataset ThreddsDataset) {
-        Vector beans = new Vector();
+    public static List<DatasetsGridsAxesBean> processDatasets(InvDataset ThreddsDataset) {
+        List<DatasetsGridsAxesBean> beans = new ArrayList<DatasetsGridsAxesBean>();
         if ( uaf ) {
             if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
                 if ( !ThreddsDataset.getName().contains("automated cleaning process") ) {
@@ -982,14 +984,14 @@ public class ADDXMLProcessor {
         }
         return hasData;
     }
-    public static Vector processESGDatasets(Set<String> time_freqs, InvCatalog subCatalog) {
+    public static List<DatasetsGridsAxesBean> processESGDatasets(Set<String> time_freqs, InvCatalog subCatalog) {
 
-        Vector beans = new Vector();
+        List<DatasetsGridsAxesBean> beans = new ArrayList<DatasetsGridsAxesBean>();
         DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
         DatasetBean ds = new DatasetBean();
-        Vector datasets = new Vector();
-        Vector allGrids = new Vector();
-        Vector allAxes = new Vector();
+        List<DatasetBean> datasets = new ArrayList<DatasetBean>();
+        List<GridBean> allGrids = new ArrayList<GridBean>();
+        List<AxisBean> allAxes = new ArrayList<AxisBean>();
         ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
         for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
             InvDataset topDS = (InvDataset) topLevelIt.next();
@@ -1104,9 +1106,9 @@ public class ADDXMLProcessor {
             return dgab;
         }
         
-        Vector DatasetBeans = new Vector();
+        List<DatasetBean> DatasetBeans = new ArrayList<DatasetBean>();
         DatasetBean dataset = new DatasetBean();
-        UniqueVector GridBeans = new UniqueVector();
+        List<GridBean> GridBeans = new ArrayList<GridBean>();
         Set AllAxesBeans = new HashSet();
 
         if ( threddsDataset.getName().toLowerCase().contains("fmrc") || threddsDataset.getName().toLowerCase().contains("forecast model run collection") ) return dgab;
@@ -1143,7 +1145,7 @@ public class ADDXMLProcessor {
                                     !variable.getVocabularyName().equalsIgnoreCase("longtitude") &&  // Handle PFEG misspelling...
                                     !variable.getVocabularyName().equalsIgnoreCase("altitude") &&
                                     !variable.getVocabularyName().equalsIgnoreCase("depth")) {
-                                UniqueVector AxisBeans = new UniqueVector();
+                                List<AxisBean> AxisBeans = new ArrayList<AxisBean>();
                                 VariableBean las_var = new VariableBean();
                                 las_var.setElement(id+"-"+variable.getName());
                                 String vocab = variable.getVocabularyName();
@@ -1338,7 +1340,7 @@ public class ADDXMLProcessor {
                                     if ( !AxisBeans.contains(xAxis) ) {
                                         AxisBeans.add(xAxis);
                                     } else {
-                                        xAxis.setElement(AxisBeans.getMatchingID(xAxis));
+                                        xAxis.setElement(getMatchingID(AxisBeans, xAxis));
                                     }
                                     elementName = variable.getName()+"-"+id+"-y-axis";
                                     AxisBean yAxis = new AxisBean();
@@ -1358,7 +1360,9 @@ public class ADDXMLProcessor {
                                     if ( !AxisBeans.contains(yAxis) ) {
                                         AxisBeans.add(yAxis);
                                     } else {
-                                        yAxis.setElement(AxisBeans.getMatchingID(yAxis));
+                                    	String aaid = getMatchingID(AxisBeans, yAxis);
+                                    	
+                                    	yAxis.setElement(aaid);
                                     }
                                     elementName = variable.getName()+"-"+id+"-z-axis";
                                     AxisBean zAxis = new AxisBean();
@@ -1399,7 +1403,7 @@ public class ADDXMLProcessor {
                                         if ( !AxisBeans.contains(zAxis) ) {
                                             AxisBeans.add(zAxis);
                                         } else {
-                                            zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+                                            zAxis.setElement(getMatchingID(AxisBeans, zAxis));
                                         }
                                     }
 
@@ -1641,9 +1645,9 @@ public class ADDXMLProcessor {
                                             tAxis.setArange(tr);
                                         }
                                         if ( !AxisBeans.contains(tAxis) ) {
-                                            AxisBeans.addUnique(tAxis);
+                                            AxisBeans.add(tAxis);
                                         } else {
-                                            tAxis.setElement(AxisBeans.getMatchingID(tAxis));
+                                            tAxis.setElement(getMatchingID(AxisBeans, tAxis));
                                         }
                                     }
                                     GridBean grid = new GridBean();
@@ -1653,7 +1657,7 @@ public class ADDXMLProcessor {
                                         GridBeans.add(grid);
                                         AllAxesBeans.addAll(AxisBeans);
                                     } else {
-                                        grid.setElement(GridBeans.getMatchingID(grid));
+                                        grid.setElement(getMatchingID(GridBeans, grid));
                                     }
 
                                     las_var.setGrid(grid);
@@ -1687,7 +1691,7 @@ public class ADDXMLProcessor {
         
         DatasetBeans.add(dataset);
         dgab.setGrids(GridBeans);
-        Vector aa = new Vector();
+        List<AxisBean> aa = new ArrayList<AxisBean>();
         for (Iterator axIt = AllAxesBeans.iterator(); axIt.hasNext();) {
             AxisBean ab = (AxisBean) axIt.next();
             aa.add(ab);
@@ -1719,9 +1723,9 @@ public class ADDXMLProcessor {
         }
         return id;
     }
-    private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(Set<String> time_freqs, InvDataset threddsDataset, String url, Vector allGrids, Vector allAxes) {
+    private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(Set<String> time_freqs, InvDataset threddsDataset, String url, List<GridBean> allGrids, List<AxisBean> allAxes) {
         DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
-        Vector DatasetBeans = new Vector();
+        List<DatasetBean> DatasetBeans = new ArrayList<DatasetBean>();
         DatasetBean dataset = new DatasetBean();
         
         
@@ -1748,7 +1752,7 @@ public class ADDXMLProcessor {
                 List<Variable> vars = vars_container.getVariableList();
                 if ( vars.size() > 0 ) {
                     for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                        UniqueVector axisBeans = new UniqueVector();
+                        List<AxisBean> axisBeans = new ArrayList<AxisBean>();
 
                         Variable variable = (Variable) varIt.next();
 
@@ -1940,7 +1944,8 @@ public class ADDXMLProcessor {
                             }
                             zAxis.setV(zvs);
                         
-                            axisBeans.addUnique(zAxis);
+                            if ( !axisBeans.contains(zAxis) )
+                            	axisBeans.add(zAxis);
                             
                         }
                         // Try to collect the time information
@@ -2166,7 +2171,7 @@ public class ADDXMLProcessor {
         dgab.setDatasets(DatasetBeans);
         return dgab;
     }
-    private static GridBean getMatchingGrid(UniqueVector ab, Vector g) {
+    private static GridBean getMatchingGrid(List<AxisBean> ab, List<GridBean> g) {
         AxisBean x = null;
         AxisBean y = null;
         AxisBean z = null;
@@ -2186,7 +2191,7 @@ public class ADDXMLProcessor {
        
         for (Iterator gIt = g.iterator(); gIt.hasNext();) {
             GridBean gb = (GridBean) gIt.next();
-            Vector axs = gb.getAxes();
+            List<AxisBean> axs = gb.getAxes();
             if ( axs.size() == ab.size() ) {
                 AxisBean gx = null;
                 AxisBean gy = null;
@@ -2230,9 +2235,9 @@ public class ADDXMLProcessor {
         if ( dt.endsWith("Z") ) return dt.substring(0, dt.length() - 1);
         return dt;
     }
-    private static Vector getContributors(InvDataset ThreddsDataset) {
+    private static List<ContributorBean> getContributors(InvDataset ThreddsDataset) {
         List docs = ThreddsDataset.getDocumentation();
-        Vector contribs = new Vector();
+        List<ContributorBean> contribs = new ArrayList<ContributorBean>();
         for (Iterator dit = docs.iterator(); dit.hasNext(); ) {
             InvDocumentation doc = (InvDocumentation) dit.next();
             if (doc.hasXlink()) {
@@ -2253,7 +2258,7 @@ public class ADDXMLProcessor {
      */
     public static CategoryBean processESGCategories(InvCatalog subCatalog) {
         // This is the top level...
-        Vector topCats = new Vector();
+        List<CategoryBean> topCats = new ArrayList<CategoryBean>();
         CategoryBean topCB = new CategoryBean();
         for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
             InvDataset topDS = (InvDataset) topLevelIt.next();
@@ -2343,7 +2348,7 @@ public class ADDXMLProcessor {
                 category.addFilter(filter);
             }
         } else {
-            Vector subCats = new Vector();
+            List<CategoryBean> subCats = new ArrayList<CategoryBean>();
             for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
                 InvDataset subDataset = (InvDataset) subDatasetsIt.next();
                 // Process the sub-categories
@@ -2455,7 +2460,7 @@ public class ADDXMLProcessor {
             }
         }
 
-        Vector subCats = new Vector();
+        List<CategoryBean> subCats = new ArrayList<CategoryBean>();
         for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
             InvDataset subDataset = (InvDataset) subDatasetsIt.next();
             // Process the sub-categories
@@ -2481,10 +2486,10 @@ public class ADDXMLProcessor {
 
 
         DatasetsGridsAxesBean dagb = new DatasetsGridsAxesBean();
-        Vector DatasetBeans = new Vector();
+        List<DatasetBean> DatasetBeans = new ArrayList<DatasetBean>();
         DatasetBean dataset = new DatasetBean();
-        UniqueVector GridBeans = new UniqueVector();
-        UniqueVector AxisBeans = new UniqueVector();
+        List<GridBean> GridBeans = new ArrayList<GridBean>();
+        List<AxisBean> AxisBeans = new ArrayList<AxisBean>();
 
         if (group) {
             dataset.setGroup_name(group_name);
@@ -2501,6 +2506,7 @@ public class ADDXMLProcessor {
 
         GridDataset gridDs = null;
         TrajectoryObsDataset pointData = null;
+        FmrcCS fmrc = null;
 
         if (skip(curl)) {
             System.out.println("Skipping "+curl);
@@ -2520,13 +2526,16 @@ public class ADDXMLProcessor {
             //             
             //             
             gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
+            
             if ( gridDs == null ) {
-                gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
+                try {
+					pointData = (TrajectoryObsDataset) FeatureDatasetFactoryManager.open(FeatureType.TRAJECTORY, curl, null, error);
+				} catch (Exception e) {
+				    System.err.println("No data sets found.");
+				    System.exit(-1);
+				}
             }
-
-            if ( gridDs == null ) {
-                pointData = (TrajectoryObsDataset) FeatureDatasetFactoryManager.open(FeatureType.TRAJECTORY, curl, null, error);
-            }
+            
 
 
         } catch (IOException e) {
@@ -2615,7 +2624,7 @@ public class ADDXMLProcessor {
                  * necessary.
                  */
 
-                UniqueVector GridAxisBeans = new UniqueVector();
+                List<AxisBean> GridAxisBeans = new ArrayList<AxisBean>();
 
                 GridDatatype geogrid = grids.get(i);
 
@@ -2660,7 +2669,8 @@ public class ADDXMLProcessor {
                     System.out.println("\t Variable: " + geogrid.getName());
                     System.out.println("\t\t Longitude axis: ");
                 }
-                GridAxisBeans.addUnique(xaxis);
+                if ( !GridAxisBeans.contains(xaxis) )
+                	GridAxisBeans.add(xaxis);
                 if (verbose) {
                     System.out.println(xaxis.toString());
                 }
@@ -2681,22 +2691,32 @@ public class ADDXMLProcessor {
                     System.out.println("\t\t Latitude axis: ");
                 }
 
-                GridAxisBeans.addUnique(yaxis);
+                if ( !GridAxisBeans.contains(yaxis) ) 
+                	GridAxisBeans.add(yaxis);
                 if (verbose) {
                     System.out.println(yaxis.toString());
                 }
                 if (gcs.hasVerticalAxis()) {
-                    CoordinateAxis1D zAxis = gcs.getVerticalAxis();
-                    grid_name = grid_name + "-" + zAxis.getShortName();
-                    if (verbose) {
-                        System.out.println("\t\t Vertical axis: ");
-                    }
-                    AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
-                    GridAxisBeans.addUnique(zaxis);
-                    if (verbose) {
-                        System.out.println(zaxis.toString());
-                    }
-
+                	CoordinateAxis1D zAxis = gcs.getVerticalAxis();
+                	VerticalTransform vt = gcs.getVerticalTransform();
+                	grid_name = grid_name + "-" + zAxis.getShortName();
+                	if (verbose) {
+                		System.out.println("\t\t Vertical axis: ");
+                	}
+                	AxisBean zaxis = null;
+                	if ( zAxis != null && vt == null ) {
+                		zaxis = makeGeoAxis(zAxis, "z", elementName);
+                	} 
+                	if ( zAxis != null && vt != null ) {
+                		zaxis = makeVerticalAxis(zAxis, vt, "z", elementName);
+                	}
+                	if( zaxis != null ) {
+                		if ( !GridAxisBeans.contains(zaxis) )
+                			GridAxisBeans.add(zaxis);
+                		if (verbose) {
+                			System.out.println(zaxis.toString());
+                		}
+                	}
                 }
                 else {
                     if (verbose) {
@@ -2719,7 +2739,8 @@ public class ADDXMLProcessor {
                         return dagb;
                     }
                     if ( taxis != null ) {
-                        GridAxisBeans.addUnique(taxis);
+                    	if ( !GridAxisBeans.contains(taxis) )
+                    		GridAxisBeans.add(taxis);
                         if (verbose) {
                             System.out.println(taxis.toString());
                         }
@@ -2758,7 +2779,8 @@ public class ADDXMLProcessor {
                         eaxis.setV(vs);
                     }
                     if ( eaxis != null ) {
-                        GridAxisBeans.addUnique(eaxis);
+                    	if ( !GridAxisBeans.contains(eaxis) )
+                    		GridAxisBeans.add(eaxis);
                         if (verbose) {
                             System.out.println(eaxis.toString());
                         }
@@ -2824,9 +2846,11 @@ public class ADDXMLProcessor {
                 // Add the axis beans for this grid to the list of axis in this data source.
                 for (Iterator abit = GridAxisBeans.iterator(); abit.hasNext(); ) {
                     AxisBean ab = (AxisBean)abit.next();
-                    AxisBeans.addUnique(ab);
+                    if ( !AxisBeans.contains(ab) )
+                    	AxisBeans.add(ab);
                 }
-                GridBeans.addUnique(grid);
+                if ( !GridBeans.contains(grid) )
+                	GridBeans.add(grid);
 
             } // Loop over Grids
             DatasetBeans.add(dataset);
@@ -2901,8 +2925,8 @@ public class ADDXMLProcessor {
             return null;
         }
         DatasetBean dataset = (DatasetBean) beans.getDatasets().get(0);
-        Vector GridBeans = (Vector) beans.getGrids();
-        Vector AxisBeans = (Vector) beans.getAxes();
+        List<GridBean> GridBeans = beans.getGrids();
+        List<AxisBean> AxisBeans = beans.getAxes();
 
         Document doc = new Document();
         Element lasdata = new Element("lasdata");
@@ -2936,9 +2960,9 @@ public class ADDXMLProcessor {
     public static org.jdom.Document createXMLfromDatasetsGridsAxesBean(
             DatasetsGridsAxesBean beans) {
 
-        Vector dataset = (Vector) beans.getDatasets();
-        Vector GridBeans = (Vector) beans.getGrids();
-        Vector AxisBeans = (Vector) beans.getAxes();
+        List<DatasetBean> dataset = beans.getDatasets();
+        List<GridBean> GridBeans = beans.getGrids();
+        List<AxisBean> AxisBeans = beans.getAxes();
 
         Document doc = new Document();
         Element lasdata = new Element("lasdata");
@@ -3064,6 +3088,8 @@ public class ADDXMLProcessor {
             // Why, oh why would somebody do this, but they did.
             if (unitsString.startsWith("\"") ) unitsString = unitsString.substring(1, unitsString.length());
             if (unitsString.endsWith("\"") ) unitsString = unitsString.substring(0, unitsString.length()-1);
+            // TODO hack for now.
+            unitsString = unitsString.replace("calendar", "");
             dateUnit = new DateUnit(unitsString);
         } catch (Exception e) {
 
@@ -3394,6 +3420,7 @@ public class ADDXMLProcessor {
         String units_string = dateUnit.getUnitsString();
         String origin_string = units_string.substring(units_string.indexOf("since")+5, units_string.length() ).trim();
         DateTimeFormatter fmt;
+        boolean tryiso = false;
         if ( units_format != null ) {
             fmt = DateTimeFormat.forPattern(units_format);
         } else {
@@ -3416,18 +3443,26 @@ public class ADDXMLProcessor {
                 try {
                     origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(GregorianChronology.getInstanceUTC());
                 } catch ( UnsupportedOperationException  uoe2) {
-                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                    tryiso = true;
                 } catch (IllegalArgumentException iae2 ) {
-                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                	tryiso = true;
                 }
             } catch (IllegalArgumentException iae ) {
                 try {
                     origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(chrono);
                 } catch ( UnsupportedOperationException  uoe2) {
-                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                	tryiso = true;
                 } catch (IllegalArgumentException iae2 ) {
-                    System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                	tryiso = true;
                 }
+            }
+            if ( tryiso ) {
+            	DateTimeFormatter isof = ISODateTimeFormat.dateTimeParser().withChronology(chrono);
+            	try {
+            		origin = isof.parseDateTime(origin_string);
+            	} catch ( Exception e ) {
+            		System.err.print("Could not parse "+origin_string+" with ISODateTimeFormatter "+e.getMessage());
+            	}
             }
         }
         return origin;
@@ -3499,6 +3534,32 @@ public class ADDXMLProcessor {
         }
         return axisbean;
 
+    }
+    static private AxisBean makeVerticalAxis(CoordinateAxis1D axis, VerticalTransform vt, String type, String id) {
+    	  NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+          DecimalFormat fmt = (DecimalFormat) nf;
+          fmt.applyPattern("####.####");
+          AxisBean axisbean = new AxisBean();
+          axisbean.setType(type);
+          axisbean.setElement(axis.getShortName() + "-" + type + "-" + id);
+          ArangeBean arange = new ArangeBean();
+          
+          
+          double[] v = axis.getCoordValues();
+
+          // List Latitude south to north
+          if (v[0] > v[v.length - 1] && type.equals("y")) {
+              reverse(v);
+          }
+          axisbean.setArange(null);
+
+          /** @todo we want to use 4-log[base10](max-min). */
+          String[] vs = new String[v.length];
+          for (int i = 0; i < v.length; i++) {
+              vs[i] = fmt.format(v[i]);
+          }
+          axisbean.setV(vs);
+          return axisbean;
     }
     
 
@@ -3598,7 +3659,16 @@ public class ADDXMLProcessor {
         }
         return encoding;
     }
-    
+    private static String getMatchingID(List AxisBeans, LasBean yAxis) {
+    	String aaid = null;
+    	for (int i = 0; i < AxisBeans.size(); i++) {
+    		LasBean t = (LasBean) AxisBeans.get(i);
+    		if ( t.equals(yAxis) ) {
+    			aaid = t.getElement();
+    		}	                
+    	}
+    	return aaid;
+    }
     public void resetOptions() {
         title = null;
         global_title_attribute = null;

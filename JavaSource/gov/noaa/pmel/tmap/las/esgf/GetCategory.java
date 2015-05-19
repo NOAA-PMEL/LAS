@@ -110,23 +110,23 @@ public class GetCategory {
             }
             InvCatalogFactory factory = new InvCatalogFactory("default", false);
             InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-            Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
+            List<DatasetsGridsAxesBean> dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
             for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
                 DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
                 //TODO we need to convert7
-                Vector datasets = dagb.getDatasets();
+                List<DatasetBean> datasets = dagb.getDatasets();
                 for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
                     DatasetBean db = (DatasetBean) dsIt.next();
                     xmlout.output(db.toXml(), System.out);
                 }
                 
-                Vector grids = dagb.getGrids();
+                List<GridBean> grids = dagb.getGrids();
                 for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
                     GridBean gb = (GridBean) gIt.next();
                     xmlout.output(gb.toXml(), System.out);
                 }
                 
-                Vector axes = dagb.getAxes();
+                List<AxisBean> axes = dagb.getAxes();
                 for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
                     AxisBean ab = (AxisBean) aIt.next();
                     xmlout.output(ab.toXml(), System.out);

@@ -18,16 +18,16 @@ import org.jdom.Element;
  * @version 1.0
  */
 public class GridBean extends LasBean{
-	private Vector axes;
+	private List<AxisBean> axes;
 
 	public GridBean() {
 	}
 
-	public void setAxes(Vector axes) {
+	public void setAxes(List<AxisBean> axes) {
 		this.axes = axes;
 	}
 
-	public Vector getAxes() {
+	public List<AxisBean> getAxes() {
 		return axes;
 	}
     public Element toXml(boolean seven) {

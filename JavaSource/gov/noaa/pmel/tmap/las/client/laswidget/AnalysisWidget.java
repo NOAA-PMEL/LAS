@@ -100,6 +100,7 @@ public class AnalysisWidget extends Composite {
         AnalysisAxisSerializable zAxis = new AnalysisAxisSerializable();
         AnalysisAxisSerializable tAxis = new AnalysisAxisSerializable();
         AnalysisAxisSerializable eAxis = new AnalysisAxisSerializable();
+        AnalysisAxisSerializable fAxis = new AnalysisAxisSerializable();
 
         // The container
         AnalysisSerializable analysis = new AnalysisSerializable();
@@ -110,6 +111,7 @@ public class AnalysisWidget extends Composite {
         zAxis.setOp(null);
         tAxis.setOp(null);
         eAxis.setOp(null);
+        fAxis.setOp(null);
         if ( axis.equals("xy") ) {
             xAxis.setType("x");
             xAxis.setOp(op);
@@ -134,11 +136,19 @@ public class AnalysisWidget extends Composite {
         } else if ( axis.equals("t") ) {
             tAxis.setType("t");
             tAxis.setOp(op);
-        } 
+        } else if ( axis.equals("e") ) {
+        	eAxis.setType("e");
+        	eAxis.setOp(op);
+        } else if ( axis.equals("f") ) {
+        	fAxis.setType("f");
+        	fAxis.setOp(op);
+        }
         analysis.getAxes().put("x", xAxis);
         analysis.getAxes().put("y", yAxis);
         analysis.getAxes().put("z", zAxis);
         analysis.getAxes().put("t", tAxis);
+        analysis.getAxes().put("e", eAxis);
+        analysis.getAxes().put("f", fAxis);
         return analysis;
     }
 
@@ -175,6 +185,12 @@ public class AnalysisWidget extends Composite {
         }
         if ( grid.hasT() ) {
             analysisAxis.addItem("Time", "t");
+        }
+        if ( grid.hasE() ) {
+        	analysisAxis.addItem("Ensemble Member", "e");
+        }
+        if ( grid.hasF() ) {
+        	analysisAxis.addItem("Forecast Initialization", "f");
         }
     }
 

@@ -20,7 +20,7 @@ public class VariableConstraintLayout extends Composite {
 	VerticalPanel widgetPanel = new VerticalPanel();
 	HorizontalPanel topRow = new HorizontalPanel();
 	FlexTable layout = new FlexTable();
-	HelpPanel help = new HelpPanel();
+
 	VariableListBox constraintVariables = new VariableListBox();
 	List<VariableConstraintWidget> widgets = new ArrayList<VariableConstraintWidget>();
 	VariableConstraintWidget xConstraintWidget;
@@ -28,10 +28,10 @@ public class VariableConstraintLayout extends Composite {
 	boolean xOn = false;
 	boolean yOn = false;
 	public VariableConstraintLayout(String title, boolean show_variables) {
-		help.setPopupWidth("550px");
-		help.setPopupHeight("550px");
-		help.setHelpURL("../css/constraint_help.html");
-		topRow.add(help);
+//		help.setPopupWidth("550px");
+//		help.setPopupHeight("550px");
+//		help.setHelpURL("../css/constraint_help.html");
+//		topRow.add(help);
 		topRow.add(new HTML("<b>&nbsp;&nbsp;"+title+"&nbsp;&nbsp;</b>"));		
 		if ( show_variables ) {
 			topRow.add(constraintVariables);

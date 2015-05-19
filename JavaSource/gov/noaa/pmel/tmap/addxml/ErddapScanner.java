@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -17,7 +18,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.httpclient.HttpException;
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -29,6 +32,7 @@ public class ErddapScanner {
 	protected static String url = "http://osmc.noaa.gov/erddap/tabledap/";
 	protected static String id = "OSMCV4_DUO_SURFACE_TRAJECTORY";
 	protected static String search = "index.json?page=1&itemsPerPage=1000";
+	protected static String category_file = null;
 	protected static boolean verbose = false;
 	protected static String title = null;
 
@@ -55,6 +59,7 @@ public class ErddapScanner {
 	/**
 	 * @param args
 	 */
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 
 		try {
@@ -65,6 +70,7 @@ public class ErddapScanner {
 			id = cl.getOptionValue("id");
 			verbose = cl.hasOption("verbose");
 			title = cl.getOptionValue("title");
+			category_file = cl.getOptionValue("category");
 			if ( !url.endsWith("/") ) {
 				url = url+"/";
 			}
@@ -85,6 +91,35 @@ public class ErddapScanner {
 			// Process the given data set.
 			processor.process(url, id, false, verbose);
 		} else {
+			List<CategoryBean> categories = new ArrayList<CategoryBean>();
+			CategoryBean othercat;
+			if ( category_file != null ) {
+				Document doc = new Document();
+				try {
+					JDOMUtils.XML2JDOM(new File(category_file), doc);
+				} catch (IOException e) {
+					System.err.println("Error processing category file: "+e.getMessage());
+				} catch (JDOMException e) {
+					System.err.println("Error processing category file: "+e.getMessage());
+				}
+				Element r = doc.getRootElement();
+				List<Element> catsE = r.getChild("category").getChildren("category");
+				for (Iterator iterator = catsE.iterator(); iterator.hasNext();) {
+					Element cat = (Element) iterator.next();
+					CategoryBean cb = new CategoryBean();
+					cb.setName(cat.getAttributeValue("name"));
+					cb.setID(cat.getAttributeValue("ID"));
+					Element filter = cat.getChild("filter");
+					FilterBean fb = new FilterBean();
+					fb.setAction(filter.getAttributeValue("action"));
+					fb.setContains(filter.getAttributeValue("contains"));
+					cb.addFilter(fb);
+					categories.add(cb);
+					if ( cb.getID().equals("other_cat") ) {
+						othercat = cb;
+					}
+				}
+			}
 			String s = url+search;
 			InputStream stream = null;
 			try {
@@ -104,10 +139,12 @@ public class ErddapScanner {
 				topCat.setID("erddap_cats");
 				if ( title == null ) title = "Data from ERDDAP";
 				topCat.setName(title);
-				// The first one is a listing of all data sets, not the first tabledap data set.
-				Vector cats = new Vector();
+				
+				List<CategoryBean> cats = new ArrayList<CategoryBean>();
+				
 				int limit = rows.size();
 				// int limit = 10; //DEBUG
+				// The first one is a listing of all data sets, not the first tabledap data set.
 				for (int i = 1; i < limit; i++) {
 					total++;
 					JsonArray row = (JsonArray) rows.get(i);
@@ -137,13 +174,26 @@ public class ErddapScanner {
 						filter.setAction("apply-dataset");
 						filter.setContainstag(uid);
 						cat.addFilter(filter);
-						cats.add(cat);
+						
+						if ( categories.size() == 0 ) {
+							cats.add(cat);
+						} else {
+							// Figure out where to add the new cat.
+							for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
+								CategoryBean categoryBean = (CategoryBean) iterator.next();
+								String match = ((FilterBean) categoryBean.getFilters().get(0)).getContains();
+								if ( title.contains(match) ) {
+									categoryBean.addCategory(cat);
+								}
+							}
+						}
 
-						topCat.setCategories(cats);
-						// For now write it every time we can stop it and still use it.
-						Element lc = new Element("las_categories");
-						lc.addContent(topCat.toXml());
-						processor.outputXML(categoriesFile, lc, false);
+						if ( categories.size() == 0 ) {
+							topCat.setCategories(cats);
+						} else {
+							topCat.setCategories(categories);
+						}
+						
 
 					} else {
 						if ( r.type != null && r.type.equals("unknown") ) uktype++;
@@ -162,6 +212,14 @@ public class ErddapScanner {
 					}
 
 				}
+				Element lc = new Element("las_categories");
+				List<CategoryBean> c = topCat.getCategories();
+				for (Iterator catIt = c.iterator(); catIt.hasNext();) {
+					CategoryBean cbean = (CategoryBean) catIt.next();
+					cbean.setFilters(new ArrayList<FilterBean>());
+				}
+				lc.addContent(topCat.toXml());
+				processor.outputXML(categoriesFile, lc, false);
 				System.out.println(total+" dataset were examined.");
 				System.out.println(count_profile+" profiles were configured into LAS.");
 				System.out.println(count_trajectory+" trajectory were configured into LAS.");

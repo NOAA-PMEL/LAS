@@ -16,28 +16,28 @@ import java.util.*;
  * @version 1.0
  */
 public class DatasetsGridsAxesBean {
-  private Vector datasets;
-  private Vector grids;
-  private Vector axes;
+  private List<DatasetBean> datasets;
+  private List<GridBean> grids;
+  private List<AxisBean> axes;
   private String error;
   
   public DatasetsGridsAxesBean() {
-      datasets = new Vector();
-      grids = new Vector();
-      axes = new Vector();
+      datasets = new ArrayList<DatasetBean>();
+      grids = new ArrayList<GridBean>();
+      axes = new ArrayList<AxisBean>();
       error = null;
   }
   
 
-  public void setDatasets(Vector datasets) {
+  public void setDatasets(List<DatasetBean> datasets) {
     this.datasets = datasets;
   }
 
-  public void setGrids(Vector grids) {
+  public void setGrids(List<GridBean> grids) {
     this.grids = grids;
   }
 
-  public void setAxes(Vector axes) {
+  public void setAxes(List<AxisBean> axes) {
     this.axes = axes;
   }
 
@@ -45,15 +45,15 @@ public class DatasetsGridsAxesBean {
     this.error = error;
   }
 
-  public Vector getDatasets() {
+  public List<DatasetBean> getDatasets() {
     return datasets;
   }
 
-  public Vector getGrids() {
+  public List<GridBean> getGrids() {
     return grids;
   }
 
-  public Vector getAxes() {
+  public List<AxisBean> getAxes() {
     return axes;
   }
 

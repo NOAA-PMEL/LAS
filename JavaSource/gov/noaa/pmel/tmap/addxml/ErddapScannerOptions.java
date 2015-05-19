@@ -21,6 +21,9 @@ public class ErddapScannerOptions extends Options {
         
         Option axes = new Option("a", "axes", true, "By default, program will attempt to download the range of an axis. Use this option list which axes (xyzt) to skip.");
         addOption(axes);
+        
+        Option category = new Option("c", "category", true, "Read a category file and use it to organized the data sets.");
+        addOption(category);
     }
 
 }

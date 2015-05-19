@@ -4587,7 +4587,7 @@ public class LASConfig extends LASDocument {
 	 */
 	public ArrayList<CategoryBean> makeCategories(DatasetsGridsAxesBean dgab) {
 		ArrayList<CategoryBean> categories = new ArrayList<CategoryBean>();
-		Vector dsbeans = dgab.getDatasets();
+		List<DatasetBean> dsbeans = dgab.getDatasets();
 		for (Iterator dsbIt = dsbeans.iterator(); dsbIt.hasNext();) {
 			DatasetBean dsb = (DatasetBean) dsbIt.next();
 			CategoryBean cat = new CategoryBean();
@@ -4682,7 +4682,7 @@ public class LASConfig extends LASDocument {
 	}
 	public long addSrc(DatasetsGridsAxesBean dgab, int src_index, Element dsetsE, Element dataset, ArrayList<Element> src_datasets, ArrayList<Element> src_grids, ArrayList<Element> src_axes, HashMap<String, ArrayList<Element>> ds_children, Cache cache, String src_key) throws UnsupportedEncodingException {
 		long nextUpdate = 999999999999999999l;
-		Vector<DatasetBean> ds_beans = dgab.getDatasets();
+		List<DatasetBean> ds_beans = dgab.getDatasets();
 		for (Iterator dsbIt = ds_beans.iterator(); dsbIt.hasNext();) {
 			DatasetBean dsb = (DatasetBean) dsbIt.next();
 			if ( dsb.getNextUpdate() > 0 && dsb.getNextUpdate() < nextUpdate ) {
@@ -4714,7 +4714,7 @@ public class LASConfig extends LASDocument {
 			}
 		}
 
-		Vector<GridBean> g_beans = dgab.getGrids();
+		List<GridBean> g_beans = dgab.getGrids();
 		Element grids = new Element("grids");
 		for (Iterator gbIt = g_beans.iterator(); gbIt.hasNext();) {
 			GridBean gb = (GridBean) gbIt.next();
@@ -4722,7 +4722,7 @@ public class LASConfig extends LASDocument {
 		}
 		src_grids.add(grids);
 
-		Vector<AxisBean> a_beans = dgab.getAxes();
+		List<AxisBean> a_beans = dgab.getAxes();
 		Element axes = new Element("axes");
 		for (Iterator abIt = a_beans.iterator(); abIt.hasNext();) {
 			AxisBean ab = (AxisBean) abIt.next();
@@ -4810,7 +4810,7 @@ public class LASConfig extends LASDocument {
 				} catch (Exception e) {
                     log.error("Unable to set update creation update times");
 				}
-				Vector<DatasetBean> ds_beans = dgab.getDatasets();
+				List<DatasetBean> ds_beans = dgab.getDatasets();
 				for (Iterator dsbIt = ds_beans.iterator(); dsbIt.hasNext();) {
 					DatasetBean dsb = (DatasetBean) dsbIt.next();
 					dsb.setUpdate_interval(update_interval);
@@ -5460,13 +5460,13 @@ public class LASConfig extends LASDocument {
                         }
                         InvCatalogFactory factory = new InvCatalogFactory("default", false);
                         InvCatalog invCatalog = (InvCatalog) factory.readXML(catalog);
-                        Vector dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
+                        List<DatasetsGridsAxesBean> dagbs = ADDXMLProcessor.processESGDatasets(time_freqs, invCatalog);
                         // There's only going to be one...
                         String key_id = null;
                         Dataset ds = null;
                         for ( Iterator dagbIt = dagbs.iterator(); dagbIt.hasNext(); ) {
                             DatasetsGridsAxesBean dagb = (DatasetsGridsAxesBean) dagbIt.next();
-                            Vector datasets = dagb.getDatasets();
+                            List<DatasetBean> datasets = dagb.getDatasets();
                             for ( Iterator dsIt = datasets.iterator(); dsIt.hasNext(); ) {
                                 DatasetBean db = (DatasetBean) dsIt.next();
                                 String e = db.getElement();
@@ -5511,7 +5511,7 @@ public class LASConfig extends LASDocument {
 
                             // Add only if it doesn't exist already...
                             if ( ds == null ) {
-                                Vector grids = dagb.getGrids();
+                                List<GridBean> grids = dagb.getGrids();
                                 for ( Iterator gIt = grids.iterator(); gIt.hasNext(); ) {
                                     GridBean gb = (GridBean) gIt.next();
                                     Element grid = gb.toXml(true);
@@ -5523,7 +5523,7 @@ public class LASConfig extends LASDocument {
                                     gsE.addContent(grid);
                                 }
 
-                                Vector axes = dagb.getAxes();
+                                List<AxisBean> axes = dagb.getAxes();
                                 for ( Iterator aIt = axes.iterator(); aIt.hasNext(); ) {
                                     AxisBean ab = (AxisBean) aIt.next();
                                     Element axis = ab.toXml(true);

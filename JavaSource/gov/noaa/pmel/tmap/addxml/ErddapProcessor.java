@@ -271,7 +271,7 @@ public class ErddapProcessor {
                 String trajID = idVar.keySet().iterator().next();
 
 
-                UniqueVector axes = new UniqueVector();
+                List<AxisBean> axes = new ArrayList<AxisBean>();
                 if ( !timeVar.keySet().isEmpty() ) {
                     String name = timeVar.keySet().iterator().next();
                     AttributeTable var = timeVar.get(name);
