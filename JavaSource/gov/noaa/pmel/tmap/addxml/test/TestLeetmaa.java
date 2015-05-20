@@ -22,8 +22,8 @@ public class TestLeetmaa extends TestCase {
 	@Test
 	public final void testLeetmaa() {
 		String url = DODSNetcdfFile.canonicalURL("http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CMB/.Pacific/.monthly/dods");
-		String[] name = new String[]{"Vector of zonal wind stress and meridional wind stress", "Vector of zonal velocity and meridional velocity"};
-		String[] units = new String[]{"unitless", "cm/s"};
+		String[] name = new String[]{"Vector of zonal velocity and meridional velocity", "Vector of zonal wind stress and meridional wind stress"};
+		String[] units = new String[]{"cm/s", "unitless"};
 		NetcdfDataset ncds;
 		try {
 			ADDXMLProcessor addxml = new ADDXMLProcessor();
