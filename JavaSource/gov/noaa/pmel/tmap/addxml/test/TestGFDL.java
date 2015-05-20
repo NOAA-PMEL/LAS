@@ -22,8 +22,8 @@ public class TestGFDL extends TestCase {
 	 @Test
 	    public final void testGFDL() {
 	    	// Test to make sure variables with names that start with u or v but aren't vectors don't get included.  There should only be one composite.
-	    	String url = DODSNetcdfFile.canonicalURL("http://data1.gfdl.noaa.gov:8380/thredds3/dodsC/dc_CM2.1_R1_Cntr-ITFblock_monthly_ocean_tripolar_01010101-02001231");
-			String[] name = new String[]{"Vector of Grid_eastward Sea Water Velocity and Grid_northward Sea Water Velocity and Upward Sea Water Velocity"};
+	    	String url = DODSNetcdfFile.canonicalURL("http://data1.gfdl.noaa.gov:8080/thredds/dodsC/CM2.1U_CDFef_v1.0_r1ocean");
+			String[] name = new String[]{"Vector of "};
 			String[] units = new String[]{"m s-1"};
 			NetcdfDataset ncds;
 			try {
@@ -44,7 +44,7 @@ public class TestGFDL extends TestCase {
 					assertTrue(variable != null);
 					String vname = variable.getAttributeValue("name");
 					String vunits = variable.getAttributeValue("units");
-					assertTrue(vname.equals(name[index]));
+					assertTrue(vname.contains(name[index]));
 					assertTrue(vunits.equals(units[index]));
 					index++;
 				}

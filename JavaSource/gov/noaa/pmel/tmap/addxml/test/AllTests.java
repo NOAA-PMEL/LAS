@@ -9,7 +9,7 @@ public class AllTests {
 		Class[] testClasses = { TestCOADS.class, 
 				                TestGFDL.class, 
 				                TestLeetmaa.class, 
-				                TestNGDC.class,
+				                // TestNGDC.class, the data set has disappeared
 				                TestOISST.class,
 				                TestNYHOPS.class,
 				                // Data set off line ...  TestMask.class

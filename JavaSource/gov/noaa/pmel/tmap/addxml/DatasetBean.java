@@ -434,6 +434,7 @@ public class DatasetBean extends LasBean {
                     if ( matching_occurance_index >= 0 ) {
                         // Sort everybody
 
+                    	Collections.sort(uv_vectors);
                         int matches = 0;
                         // index p tells me which of x, X, u or U matched.
                         // index i checks the matches to make sure the partners have the corresponding y, Y, v or V and z, Z, w or W 
