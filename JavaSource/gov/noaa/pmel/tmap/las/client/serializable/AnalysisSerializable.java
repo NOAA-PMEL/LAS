@@ -80,6 +80,9 @@ public class AnalysisSerializable {
         if ( keys.contains("e") ) {
             al.append("e");
         }
+        if ( keys.contains("f") ) {
+        	al.append("f");
+        }
         return al.toString();
     }
     public String toString() {
