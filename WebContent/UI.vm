@@ -58,9 +58,9 @@
     <script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.UI/gov.noaa.pmel.tmap.las.UI.nocache.js"></script>
     
 <!--
-Moved reference to the UI.gxt.xml file so it will take precedence over the GWT theme and show in debug mode.
-    <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
+With SDM we don't need to compile in the style to see it so load the style in the page.
 -->
+    <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
     <link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
     <link rel="stylesheet" href="JavaScript/components/css/OLMapWidget.css" type="text/css"/>
   </head>
