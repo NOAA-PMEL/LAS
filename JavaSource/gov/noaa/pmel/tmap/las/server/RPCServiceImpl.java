@@ -307,7 +307,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	    } else if ( catid != null && dsid == null ) {
 	        id = catid;
 	    } else if ( catid != null && dsid != null ) {
-	        id = catid;
+	    	if ( catid.equals(dsid) ) {
+	    		id = dsid;
+	    	} else {
+	    		id = catid;
+	    	}
 	    }
 	    return getCategories(id);
 	}
