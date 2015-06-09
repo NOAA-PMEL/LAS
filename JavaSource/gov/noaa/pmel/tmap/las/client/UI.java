@@ -483,12 +483,12 @@ public class UI extends BaseUI implements EntryPoint {
             autoContourTextBox.setText("");
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
-            if (!xView.equals("xy")) {
-                differenceButton.setDown(false);
-                differenceButton.setEnabled(false);
-            } else {
+            if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(true);
+            } else {
+            	differenceButton.setDown(false);
+                differenceButton.setEnabled(false);
             }
         } else {
             autoContourButton.setEnabled(true);
@@ -1246,12 +1246,12 @@ public class UI extends BaseUI implements EntryPoint {
             }
 
             if ((!xVariable.isVector() && vector) || (!xVariable.isDiscrete() && scattered) || xVariable.isVector() && !vector || (xVariable.isDiscrete() && !scattered)) {
-                if (!xView.equals("xy")) {
-                    differenceButton.setDown(false);
-                    differenceButton.setEnabled(false);
-                } else {
+                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
+                } else {
+                	differenceButton.setDown(false);
+                    differenceButton.setEnabled(false);
                 }
                 for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
                     OutputPanel panel = (OutputPanel) panelIt.next();
@@ -1296,12 +1296,12 @@ public class UI extends BaseUI implements EntryPoint {
             }
         } else {
             if (xVariable.isVector() || xVariable.isDiscrete()) {
-                if (!xView.equals("xy")) {
-                    differenceButton.setDown(false);
-                    differenceButton.setEnabled(false);
-                } else {
+                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
+                } else {
+                	differenceButton.setDown(false);
+                    differenceButton.setEnabled(false);
                 }
             } else {
                 differenceButton.setDown(false);
@@ -1608,12 +1608,12 @@ public class UI extends BaseUI implements EntryPoint {
         xOrtho = Util.setOrthoAxes(xView, xVariable, true);
 
         if (xVariable.isVector() || xVariable.isDiscrete()) {
-            if (!xView.equals("xy")) {
-                differenceButton.setDown(false);
-                differenceButton.setEnabled(false);
-            } else {
+            if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(true);
+            } else {
+            	differenceButton.setDown(false);
+                differenceButton.setEnabled(false);
             }
         } else {
             differenceButton.setDown(false);
@@ -2611,12 +2611,12 @@ public class UI extends BaseUI implements EntryPoint {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
-                if (!xView.equals("xy")) {
-                    differenceButton.setDown(false);
-                    differenceButton.setEnabled(false);
-                } else {
+                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
+                } else {
+                	differenceButton.setDown(false);
+                    differenceButton.setEnabled(false);
                 }
             }
             setupPanelsAndRefreshNOforceLASRequest(false);
