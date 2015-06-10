@@ -22,6 +22,7 @@ DEFINE SYMBOL translate_math = 1
 LET vnames = ..varnames
 
 DEFINE SYMBOL var_mask = var_mask_0
+LET var_mask_0 = 1  ! may be redefined below.
 LET nmaskx = 0
 
 ! Gridded variables and mask-by variables are handled with XSEQUENCE after the 
