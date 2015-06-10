@@ -89,6 +89,9 @@ LET/QUIET PLMypolymark = PLMypolymark0[k=1:3]*PLMyscale
 ! subtract or add 360 from jlon and plot/over.
 ! --- original text --- 
 
+! here is how to show all the locations, so profilew will be marked 
+! with an x if there's no valid data in the color-by variable.
+!plot/vs/nolab/noax/over/sym=2/siz=0.1 x_var_data, y_var_data
 
 def sym word = "($data_var_in)"
 IF `STRCMP(($word),"TAX")` THEN
