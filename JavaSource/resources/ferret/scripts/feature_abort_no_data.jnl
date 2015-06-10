@@ -7,6 +7,19 @@
 ! 30-May-2008 ACM resolve #435 (and #336) if there is a query_result
 !             attribute get that string and use it in the abort script
 
+! For a list product, make a file with a note
+
+IF ($its_listing"0|0|1|*>1") THEN 
+
+   SAY/OUTFILE="($result_ferret_listing_filename)"/CLOBBER DATA SET: ($data_0_dataset_name)
+   SAY/OUTFILE="($result_ferret_listing_filename)"/APPEND  `..query_result`
+
+   sh sym region*
+   EXIT/PROGRAM
+ENDIF
+
+! For a graphics product make a blank plot, labeled with a message, call LAS_results, and exit
+
 ! Open the window
 GO LAS_open_window
 
