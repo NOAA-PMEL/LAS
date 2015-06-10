@@ -216,7 +216,7 @@ LET xhi = ($ppl$range_high)
 ! expect the color plot to be an overlay.
 
 IF ($ribbon"0|0|1|*>1") THEN
-   PLOT/VS/RIBBON/PALETTE=white/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`ylo`:`yhi` latplot, zplot, varplot
+   PLOT/VS/SYM=dot/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`ylo`:`yhi` latplot, zplot
    PLOT/VS/RIBBON/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`ylo`:`yhi`($qualifiers)/SET latplot, zplot, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
    PPL RIBBON/OVER
