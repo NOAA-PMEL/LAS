@@ -1209,7 +1209,10 @@ public class UI extends BaseUI implements EntryPoint {
             }
             autoContourButton.setEnabled(false);
         } else {
-            autoContourButton.setEnabled(true);
+        	if ( xView.length() == 2 ) {
+        		// Only makes sense for contour plot type plots...
+        		autoContourButton.setEnabled(true);
+        	}
         }
 
         // You should get a another call to refresh if you are waiting for
