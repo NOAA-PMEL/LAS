@@ -122,7 +122,6 @@ IF `IS_ELEMENT_OF_STR_N(attnames, "standard_name")` THEN
    DEFINE SYMBOL reverse_vert = ($posdirec"0|DEPTH>1|depth>1|*>0")
    IF `STRINDEX("($posdirec)", "sea_floor_depth") GT 0` THEN DEFINE SYMBOL reverse_vert = 1
 ENDIF
-pause
 
 ! If this symbol is set during this script, then
 ! the script will make a blank plot and exit.
