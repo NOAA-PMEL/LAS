@@ -258,7 +258,7 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/noaxes
 ! expect the color plot to be an overlay.
 
 IF ($ribbon"0|0|1|*>1") THEN
-   PLOT/sym=dot/NOKEY/NOLAB/VLIM=`(-1)*dhi`:0/HLIM=`xlo`:`xhi`/noaxes timplot, zplotvar
+   PLOT/VS/SYM=dot/NOKEY/NOLAB/VLIM=`(-1)*dhi`:0/HLIM=`xlo`:`xhi`/noaxes timplot, zplotvar
    PLOT/VS/OVER/RIBBON/LINE/MISS=blank/SYM=19/THICK/VLIM=`(-1)*dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET timplot, zplotvar, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
    PPL RIBBON/OVER
