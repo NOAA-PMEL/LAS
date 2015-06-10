@@ -9,6 +9,7 @@ LET/UNITS="`latitude,RETURN=units`"/TITLE="`latitude,RETURN=title`" lat = latitu
 
 LET amin = `min(lon[i=@MIN]-5, 180)`
 LET amax = `max(lon[i=@MAX]+5, -180)`
+
 GO LAS_is_range amin amax 
 
 LET xax_lo = ($ppl$range_low)
@@ -44,7 +45,6 @@ LET amin = `max(lat[i=@MIN]-5, -90)`
 LET amax = `min(lat[i=@MAX]+5,  90)`
 GO LAS_is_range amin amax
 
-
 LET yax_lo = ($ppl$range_low)
 LET yax_hi = ($ppl$range_high)
 LET del_ax = ($ppl$range_inc)
@@ -72,4 +72,14 @@ DEFINE SYMBOL land_palette = gray_light
 
 GO LAS_fland ($land_palette)
 
-PLOT/VS/OVER/NOLAB/NOKEY/SYM=17/SIZE=0.12/COLOR=($lonlatcolor"red") lon, lat
+! If it's a mooring or single point, make it more prominent.
+
+DEFINE SYMBOL symquals = /SIZE=0.12/THICK=1
+
+STAT lon
+LET lonconst = `($stat_std) LT 0.1`
+STAT lat 
+LET latconst = `($stat_std) LT 0.1`
+IF `lonconst + latconst EQ 2` THEN DEFINE SYMBOL symquals = /SIZE=0.3/THICK=3
+
+PLOT/VS/OVER/NOLAB/NOKEY/SYM=17($symquals)/COLOR=($lonlatcolor"red") lon, lat
