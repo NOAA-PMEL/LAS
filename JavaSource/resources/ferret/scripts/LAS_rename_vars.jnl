@@ -11,6 +11,7 @@
 ! symbol data_n_var to match the new file variable name.
 
 ! Do the same for variables longitude and latitude in the file.
+! If it's a featureType other than trajectory, also rename depth
 
 DEFINE SYMBOL num ($1"0")
 
@@ -43,6 +44,7 @@ IF `($feature_variable_in"0|*>1") EQ 0` THEN \
    IF ($exit_rename"0|*>1") THEN exit/loop;\
    )
 
+IF ($feature_type%0|Trajectory>0|none>0|*>1%) THEN DEFINE SYMBOL rename_depth = 1
 
 LET varnames = ..varnames
 LET nvars = ..nvars
@@ -56,6 +58,11 @@ REPEAT/RANGE=1:`nvars`/name=ivar (\
  IF ($vname"0|latitude>1|*>0") THEN ;\
     SET VAR/NAME=latitude_ latitude;\
     DEFINE SYMBOL latitude_in = latitude;\
+ ENDIF;\
+ IF `($rename_depth"0|*>1") AND ($vname"0|depth>1|*>0")` THEN ;\
+    SET VAR/NAME=depth_ depth;\
+    DEFINE SYMBOL depth_in = depth;\
+    DEFINE SYMBOL depth_done = 1;\
  ENDIF;\
  IF ($vname"0|($feature_variable)>1|*>0") THEN ;\
     SET VAR/NAME=($feature_variable)_ ($feature_variable);\
