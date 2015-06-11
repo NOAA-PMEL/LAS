@@ -44,6 +44,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -298,6 +299,7 @@ public class BaseUI {
      * set.
      */
     String xTileServer;
+    String xTileLayer;
 
     String xTlo;
 
@@ -459,7 +461,8 @@ public class BaseUI {
         hmb.setWidth("55px");
         rootPanel.add(hmb);
        
-        xTileServer = Util.getTileServer();
+        xTileServer = DOM.getElementById("wms-server").getPropertyString("content");
+        xTileLayer = DOM.getElementById("wms-layer").getPropertyString("content");
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
         // string if they are null.
@@ -500,7 +503,7 @@ public class BaseUI {
 
         xCatIDs = Util.getParameterStrings("catid");
 
-        xAxesWidget = new NavAxesGroup("Plot Coordinates", xControlsWidthPx, xTileServer);
+        xAxesWidget = new NavAxesGroup("Plot Coordinates", xControlsWidthPx, xTileServer, xTileLayer);
         xAxesWidget.ensureDebugId("xAxesWidget");
         xNavigationControls.ensureDebugId("xNavigationControls");
 
@@ -745,7 +748,7 @@ public class BaseUI {
                 boolean singlePanel = false;
 
 
-                OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer, annotationsControl.isDown());
+                OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer, xTileLayer, annotationsControl.isDown());
 
                 xPanelTable.setWidget(row, col, panel);
                 xPanelTable.getFlexCellFormatter().setAlignment(row, col, HasHorizontalAlignment.ALIGN_LEFT, HasVerticalAlignment.ALIGN_TOP);
