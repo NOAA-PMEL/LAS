@@ -28,8 +28,8 @@ public class NavAxesGroup extends Composite {
 	boolean hasE;
 	boolean hasF;
 	boolean axesPanelIsOpen = true;
-	public NavAxesGroup(String title, String width, String tile_server) {
-		refMap = new OLMapWidget("128px", "256px", tile_server);
+	public NavAxesGroup(String title, String width, String tile_server, String tile_layer) {
+		refMap = new OLMapWidget("128px", "256px", tile_server, tile_layer);
 		refMap.activateNativeHooks();
 		zAxisWidget = new AxisWidget();
 		zAxisWidget.setVisible(false);

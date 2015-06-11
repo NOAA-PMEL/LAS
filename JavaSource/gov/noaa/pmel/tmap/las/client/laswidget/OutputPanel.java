@@ -562,7 +562,7 @@ public class OutputPanel extends Composite implements HasName {
      * Builds a VizGal panel with a default plot for the variable. See {@code}
      * VizGal(LASRequest) if you want more options on the initial plot.
      */
-    public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type, String tile_server,
+    public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type, String tile_server, String tile_layer, 
             boolean annotationsShowing) {
 
         this.ID = id;
@@ -577,7 +577,7 @@ public class OutputPanel extends Composite implements HasName {
         eventBus = clientFactory.getEventBus();
         panelAxesWidgets = new AxesWidgetGroup(
         // "Coordinates Orthogonal to the Plot",
-                "", "horizontal", "", "Apply To " + ID, tile_server, eventBus);
+                "", "horizontal", "", "Apply To " + ID, tile_server, tile_layer, eventBus);
         spinImage = new Image(URLUtil.getImageURL() + "/mozilla_blu.gif");
         spinImage.setSize("18px", "18px");
         spin = new PopupPanel();

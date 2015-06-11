@@ -64,11 +64,11 @@ public class AxesWidgetGroup extends Composite {
      * @param ortho_title
      * @param layout
      */
-    public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server, EventBus eventBus) {
+    public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server, String tile_layer, EventBus eventBus) {
         mapPanel = new DisclosurePanel("Map");
         mapPanel.setWidth(xControlsWidthPx);
         menuWidgets = new FlexTable();
-        refMap = new OLMapWidget("128px", "256px", tile_server);
+        refMap = new OLMapWidget("128px", "256px", tile_server, tile_layer);
         refMap.activateNativeHooks();
         zWidget = new AxisWidget();
         zWidget.setVisible(false);
