@@ -14,6 +14,28 @@
   <head>
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta content="LAS" name="LAS-Profile" id="las-profile" />
+
+   <!--
+
+         Default:
+
+         WMS-URL: http://vmap0.tiles.osgeo.org/wms/vmap0
+         WMS-LAYER: basic
+
+         Alternatives:
+
+         WMS-URL: http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv
+         WMS-LAYER: layer: GEBCO_LATEST
+
+         WMS-URL: http://www.cmar.csiro.au/geoserver/ows 
+         WMS-LAYER: ea-be:World_Bright-Earth-e-Atlas-basemap
+
+         WMS-URL: http://data.fao.org/maps/ows
+         WMS-LAYER: COMMON:dark_bluemarble
+   -->
+
+    <meta content="http://data.fao.org/maps/ows" name="WMS-SERVER" id="wms-server" />
+    <meta content="COMMON:dark_bluemarble" name="WMS-LAYER" id="wms-layer" />
     
     <meta http-equiv="X-UA-Compatible" content="IE=9">
     <!--                                           -->
