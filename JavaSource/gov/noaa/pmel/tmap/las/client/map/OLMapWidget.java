@@ -50,6 +50,7 @@ import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.handler.PointHandler;
 import org.gwtopenmaps.openlayers.client.handler.RegularPolygonHandler;
 import org.gwtopenmaps.openlayers.client.handler.RegularPolygonHandlerOptions;
+import org.gwtopenmaps.openlayers.client.layer.ArcGIS93Rest;
 import org.gwtopenmaps.openlayers.client.layer.Boxes;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
@@ -183,8 +184,11 @@ public class OLMapWidget extends Composite {
 	// "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
 	// public static final String WMS_URL =
 	// "http://labs.metacarta.com/wms/vmap0";
+	// private final static String WMS_URL ="http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv";
+	// private final static String WMS_URL ="http://data.nodc.noaa.gov/arcgis/rest/services/NODC.Ocean.basemap1007/MapServer/WMSServer";
+	
 	private final static String WMS_URL = "http://vmap0.tiles.osgeo.org/wms/vmap0";
-
+	private final static String WMS_LAYER = "basic";
 	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
 	private EventBus eventBus;
 
@@ -192,23 +196,23 @@ public class OLMapWidget extends Composite {
 
 	public OLMapWidget() {
 		thisMapWidget = this;
-		init("128px", "256px", WMS_URL);
+		init("128px", "256px", WMS_URL, WMS_LAYER);
 	}
 
 	public OLMapWidget(String height, String width) {
 		thisMapWidget = this;
-		init(height, width, WMS_URL);
+		init(height, width, WMS_URL, WMS_LAYER);
 	}
 
 	/**
 	 * @wbp.parser.constructor
 	 */
-	public OLMapWidget(String height, String width, String tile_url) {
+	public OLMapWidget(String height, String width, String tile_url, String layer) {
 		thisMapWidget = this;
-		init(height, width, tile_url);
+		init(height, width, tile_url, layer);
 	}
 
-	private void init(String height, String width, String tile_url) {
+	private void init(String height, String width, String tile_url, String layer) {
 
 		eventBus = clientFactory.getEventBus();
 
@@ -461,7 +465,14 @@ public class OLMapWidget extends Composite {
 		map = mapWidget.getMap();
 		// Add a WMS layer for a little background
 		map.addLayer(wrapLayer);
-		setTileServer("Base Layer", WMS_URL, "image/png", "basic");
+		
+		if ( tile_url == null || (tile_url != null && tile_url.trim().equals("")) ) {
+			tile_url = WMS_URL;
+		}
+		if ( layer == null || (layer != null && layer.trim().equals("")) ) {
+			layer = WMS_LAYER;
+		}
+		setTileServer("Base Layer", tile_url, "image/png", layer);
 		map.addLayer(boxLayer);
 		map.addLayer(lineLayer);
 
