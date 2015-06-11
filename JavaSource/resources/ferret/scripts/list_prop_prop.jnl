@@ -211,6 +211,41 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 
 ENDIF  ! longitude, latitude
 
+! If this is a Feature-type dataset of any type other than aTrajectory dataset, 
+! see if there is a Depth variable and list it too.
+
+! Was depth already included in the input variables?
+
+DEFINE SYMBOL have_depth = 0
+REPEAT/RANGE=1:($data_count)/name=v (\
+DEFINE SYMBOL iv = `v-1`; \
+IF ($data_($iv)_var%0|depth>1|*>0%) THEN define symbol have_depth = 1;\
+IF ($data_($iv)_var%0|depth_>1|*>0%) THEN define symbol have_depth = 1;\
+LET attnames = ($data_($iv)_var).attnames;\
+IF `IS_ELEMENT_OF_STR_N(attnames, "depth") GE 1` THEN define symbol have_depth = 1)
+
+LET global_attnames = ..attnames
+LET nglobal_atts = ..nattrs
+DEFINE SYMBOL feature_type = none
+IF `IS_ELEMENT_OF_STR(global_attnames, "featureType") GT 0` THEN DEFINE SYMBOL feature_type = `..featureType`
+
+DEFINE SYMBOL depthvar = depth
+IF ($depth_done"0|*>1") THEN DEFINE SYMBOL depthvar = depth_
+
+IF `($feature_type%0|Trajectory>0|none>0|*>1%) AND (($have_depth) EQ 0) AND\
+  IS_ELEMENT_OF_STR_N(varnames, "($depthvar)") GE 1` THEN
+
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="`($depthvar),RETURN=title`"/UNITS="`($depthvar),RETURN=units`" Depth = SAMPLEI (($depthvar), compress_mask[i=1:`nok`])
+
+   LET nlist = `nlist + 1`
+   DEFINE SYMBOL vars_out = ($vars_out) Depth,
+
+ENDIF
+
 ! Define variables with titles
 
 IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
