@@ -45,6 +45,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -461,8 +462,12 @@ public class BaseUI {
         hmb.setWidth("55px");
         rootPanel.add(hmb);
        
-        xTileServer = DOM.getElementById("wms-server").getPropertyString("content");
-        xTileLayer = DOM.getElementById("wms-layer").getPropertyString("content");
+        Element wmsserver = DOM.getElementById("wms-server");
+        if ( wmsserver != null )
+        	xTileServer = wmsserver.getPropertyString("content");
+        Element wmslayer = DOM.getElementById("wms-layer");
+        if ( wmslayer != null )
+        	xTileLayer = wmslayer.getPropertyString("content");
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
         // string if they are null.
