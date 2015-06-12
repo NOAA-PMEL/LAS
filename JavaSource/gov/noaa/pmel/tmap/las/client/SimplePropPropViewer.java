@@ -1483,8 +1483,10 @@ public class SimplePropPropViewer implements EntryPoint {
                     String tid = vs.getAttributes().get("trajectory_id");
                     if ( tid != null && tid.equals("true") ) {
                         dsg_id = vs.getID();
-                    } else {
+                    } else if ( tid == null ) {
                         tid = vs.getAttributes().get("profile_id");
+                    } else {
+                    	tid = vs.getAttributes().get("timeseries_id");
                     }
                     if ( tid != null && tid.equals("true") ) {
                         dsg_id = vs.getID();
