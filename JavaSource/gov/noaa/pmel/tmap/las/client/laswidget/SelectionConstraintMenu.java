@@ -147,7 +147,10 @@ public class SelectionConstraintMenu extends Composite {
         String key_value = valuesList.getValue(index);
         String value = valuesList.getItemText(index);
         String variable = getShortName(currentVariable);
-        eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value, "eq"), SelectionConstraintMenu.this);
+        // Don't send an event if they click on the instructions.
+        if ( !value.equals(Constants.PICK) && !value.equals(Constants.APPEAR) ) {
+        	eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value, "eq"), SelectionConstraintMenu.this);
+        }
     }
     public ConstraintSerializable getConstraint() {
         int index = valuesList.getSelectedIndex();
