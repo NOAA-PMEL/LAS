@@ -1480,14 +1480,19 @@ public class SimplePropPropViewer implements EntryPoint {
                 List<VariableSerializable> included = new ArrayList<VariableSerializable>();
                 for (int i = 0; i < variables.length; i++) {
                     VariableSerializable vs = variables[i];
+                    
                     String tid = vs.getAttributes().get("trajectory_id");
-                    if ( tid != null && tid.equals("true") ) {
+                    String pid = vs.getAttributes().get("profile_id");
+                    String tsid = vs.getAttributes().get("timeseries_id");
+                    
+                    if ( (tid != null && tid.equals("true")) ||
+                    	 ( pid != null && pid.equals("true")) ||
+                         ( tsid != null && tsid.equals("true")) ) {
                         dsg_id = vs.getID();
-                    } else if ( tid == null ) {
-                        tid = vs.getAttributes().get("profile_id");
-                    } else {
-                    	tid = vs.getAttributes().get("timeseries_id");
                     }
+                    
+                    
+                   
                     if ( tid != null && tid.equals("true") ) {
                         dsg_id = vs.getID();
                     }
