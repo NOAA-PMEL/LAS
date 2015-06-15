@@ -404,13 +404,13 @@ public class OutputPanel extends Composite implements HasName {
                     double maxx = Math.max(world_startx, world_endx);
                     double miny = Math.min(world_starty, world_endy);
                     double maxy = Math.max(world_starty, world_endy);
-                    if (axisVertical.equals("z")) {
+                    if (axisVertical.equals("z") || axisVertical.equals("d")) {
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             mouse.setZ(miny, maxy);
                         }
                     }
-                    if (axisHorizontal.equals("z")) {
+                    if (axisHorizontal.equals("z") || axisVertical.equals("d")) {
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             mouse.setZ(minx, maxx);
