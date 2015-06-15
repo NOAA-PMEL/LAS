@@ -410,7 +410,7 @@ public class OutputPanel extends Composite implements HasName {
                             mouse.setZ(miny, maxy);
                         }
                     }
-                    if (axisHorizontal.equals("z") || axisVertical.equals("d")) {
+                    if (axisHorizontal.equals("z") || axisHorizontal.equals("d")) {
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             mouse.setZ(minx, maxx);
