@@ -377,6 +377,7 @@ public class AxisWidget extends Composite {
                 double dv2 = Double.valueOf(v2);
                 if ( zlo > dv1 && zlo <= dv2 ) {
                     lo_axis.setSelectedIndex(i+1);
+                    return;
                 }
             }
         }
