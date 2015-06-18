@@ -11,8 +11,6 @@ IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
 DEF SYM has_missing = 0
 
-! The first EXIT should really be EXIT/LOOP...
-
 REPEAT/RANGE=0:101:1/NAME=v ( \
   DEFINE SYMBOL v = `v`; \
   IF ($constraint_($v)_lhs"1|*>0") THEN EXIT/LOOP ; \
