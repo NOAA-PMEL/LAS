@@ -414,7 +414,7 @@ public class TabledapTool extends TemplateTool {
             } else if (operationID != null && operationID.equals("Trajectgory_correlation")) {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
-            } else if ( downloadall ) {
+            }  else if ( downloadall ) {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
             }  else {
@@ -445,7 +445,7 @@ public class TabledapTool extends TemplateTool {
                 }
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
                 ArrayList<String> vars = lasBackendRequest.getVariables();
-
+                
                 // If lat, lon and z are included as data variables, knock them out of this list.
                 vars.remove(latname);
                 vars.remove(lonname);
@@ -458,6 +458,15 @@ public class TabledapTool extends TemplateTool {
                     if (varIt.hasNext()) {
                         variables = variables + ",";
                     }
+                }
+                if ( operationID != null && (operationID.equals("Profile_2D_poly") || operationID.equals("Time_Series_Location_Plot") || operationID.equals("Trajectory_2D_poly")) ) {
+                	String mapvars = getTabledapProperty(lasBackendRequest, "map_variables").trim();
+                	if ( mapvars != null ) {
+                		if ( query.length() > 0 ) {
+                			query.append(",");
+                		}
+                		query.append(mapvars);
+                	}
                 }
                 // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
                 variables = variables.replace(cruiseid+",", "");
