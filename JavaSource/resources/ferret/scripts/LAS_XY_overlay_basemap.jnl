@@ -78,12 +78,8 @@ IF `(($region_x_range) LT topo_dx) OR  (($region_y_range) LT topo_dx)` THEN
 !   DEFINE SYMBOL basemap_yformat = PPL YFOR (dms)
 ENDIF
 
-! Draw the basemap exactly to the requested boundaries. This way a Trajectory that
-! goes off the edge and then back in will be drawn right to the edge.
-
 IF ($basemap_fill_type"FILL|FILL>1|fill>1|*>0") THEN
-   SHADE/NOLABELS/NOKEY/PALETTE=($basemap_palette)/LEVELS=($basemap_levels)/\
-   hlim=($region_x_lo):($region_x_hi)/vlim=($region_y_lo):($region_y_hi)/SET basevar
+   SHADE/NOLABELS/NOKEY/PALETTE=($basemap_palette)/LEVELS=($basemap_levels)/SET basevar
    ($basemap_xformat)
    ($basemap_yformat)
    ($basemap_axisformatting)
