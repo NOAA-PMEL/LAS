@@ -207,6 +207,7 @@ GO feature_labels
 
 ! Ribbon plot
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
+
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 
 IF `($drawthick"0|*>1") EQ 0` THEN 
@@ -277,14 +278,28 @@ SAY _________________ Start line plot: clock seconds:                           
 LET pre_plot = ($clock_secs)
 
 ! Draw the ribbon plot
+! With Ferret v6.95 and higher, and if there is a gap_var variable,
+! use the PLOT/VS/GAPLOC qualifier to pick up the pen, e.g. when 
+! the sample number is not sequential, indicating a gap due to 
+! region or constraints. See setup_dsg_variables.jnl
+
 IF ($single_color"0|*>1") THEN
-    ($plot_command)($qualifiers) x_var_data, y_var_data
+   DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data
+    ($plot_command)($qualifiers) ($plot_plot_vars)
 ELSE
 ! or /missing=blank or leave off for gray...
-   IF ($is_mooring"0|*>1") THEN
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+
+   DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data 
+   
+   IF `($ferret_version) GE 6.95 AND ($have_gap_var"0|*>1)` THEN 
+      DEFINE SYMBOL plot_command = ($plot_command)/GAPLOC=sample_number
+      DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data, gap_var
+   ENDIF
+
+   IF ($is_mooring"0|*>1") THEN  !?
+      ($plot_command)($qualifiers)/missing=black/SET ($plot_plot_vars) 
    ELSE
-      ($plot_command)($qualifiers)/missing=black/SET x_var_data, y_var_data, var_data 
+      ($plot_command)($qualifiers)/missing=black/SET ($plot_plot_vars)
    ENDIF
 
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top

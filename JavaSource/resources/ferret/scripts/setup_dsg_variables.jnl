@@ -85,12 +85,20 @@ IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_g
 
 LET npts = `lat_with_gaps,RETURN=isize`
 
+
 DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
 DEFINE SYMBOL data_y_var = lat_with_gaps
 DEFINE SYMBOL data_t_var = time_with_gaps  ! this was commented out. Why?
 
+IF `IS_ELEMENT_OF_STR_N(varnames, "sample_number") GT 0` THEN
+   LET sample_number_gaps = SEPARATE(sample_number[i=1:`npts`], ($rowvar), 0)   
+   LET gap_var = IF sample_number_gaps[i=@ddf] NE 1 THEN 1 ELSE 0
+   DEFINE SYMBOL have_gap_var = 1
+ENDIF
+
 IF ($data_z_var"0|*>1") THEN DEFINE SYMBOL data_z_var = vert_with_gaps
+
 
 !ENDIF ! nfeatures GT 1
 
