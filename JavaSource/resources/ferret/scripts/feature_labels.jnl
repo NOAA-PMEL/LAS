@@ -94,29 +94,33 @@ ENDIF
 IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
  DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
 
-! Notation about the decimation
+! Notation about the decimation (if data is pre-decimated)
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
 
-   LET approx_total = ($ngood_data)/($decimation_fraction)
-   LET approx_miss  = ($nbad_data)/($decimation_fraction)
-list approx_total, approx_miss
-   IF `approx_total GT 1.e6` THEN 
-      DEFINE SYMBOL approx_msg = `approx_total/1.e6,prec=2` million obs
-      IF `approx_miss GT 0` THEN DEFINE SYMBOL approx_msg = ($approx_msg) (plus `approx_miss/1.e6,prec=2` million missing)
-   ELIF `approx_total GT 1.e3` THEN 
-      DEFINE SYMBOL approx_msg = `approx_total/1.e3,prec=2` thousand obs 
-      IF `approx_miss GT 0` THEN DEFINE SYMBOL approx_msg = ($approx_msg) (plus `approx_miss/1.e3,prec=2` thousand missing)
+   LET full_total = -9999
+   LET frac_deci = ($decimation_fraction"0.1")   ! nominal number
+   IF `(IS_ELEMENT_OF_STR_N(varnames, "num_obs_original") NE 0) AND\
+    (IS_ELEMENT_OF_STR_N(varnames, "num_obs") NE 0)` THEN 
+    LET frac_deci = `num_obs[m=@sum]/num_obs_original[m=@sum]`
+   IF `frac_deci GT 1` THEN LET frac_deci = 0.5  ! just for testing
+   IF `frac_deci GT 0` THEN LET full_total = (($ngood_data) + ($nbad_data))/frac_deci
+
+   IF `full_total GT 1.e6` THEN 
+      DEFINE SYMBOL approx_msg = `full_total/1.e6,prec=2` million obs
+   ELIF `full_total GT 1.e3` THEN 
+      DEFINE SYMBOL approx_msg = `full_total/1.e3,prec=2` thousand obs 
    ELSE
-      DEFINE SYMBOL approx_msg = `approx_total,prec=2` obs (plus `approx_miss,prec=2` missing)
+      DEFINE SYMBOL approx_msg = `full_total,prec=2` obs
    ENDIF
 
-
-   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg)
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg) 
 
 ! Put a link to the doc containing description of the decimation scheme. 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   DEFINE SYMBOL note_($note_num)_lab = Subsample of ($ngood_data) points shown (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_reference.html>explanation</a>)
-
+   DEFINE SYMBOL note_($note_num)_lab = Subsample of ($ngood_data) valid points shown (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_reference.html>explanation</a>)
+   IF `($nbad_data"0") GT 0` THEN \
+      DEFINE SYMBOL note_($note_num)_lab = Subsample of ($ngood_data) valid and ($nbad_data) missing \
+points shown (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_reference.html>explanation</a>)
 ENDIF
 
 !---------------- end of feature_labels.jnl -------------------------
