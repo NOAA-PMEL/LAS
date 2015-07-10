@@ -18,7 +18,7 @@ IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN CANCEL SYMBOL var_mod
 ! modulo property with striding. 
 IF ($indx"|i>1|l>0") THEN
    CANCEL MODE LONG_LABEL
-   LET xaxlen = `($data_var),RETURN=xend` -  `($data_var),RETURN=xstart`
+   LET xaxlen = `($data_var),RETURN=xend` -  (`($data_var),RETURN=xstart`)
    SET MODE/LAST LONG_LABEL
    IF `xaxlen LT ($var_mod"0")` THEN DEFINE SYMBOL var_mod " "    ! its subspan modulo
 ENDIF
@@ -49,4 +49,5 @@ ELSE
 ENDIF
 
 ! End of $RCSfile ------------check_modulo_factor.jnl--------------------------
+
 
