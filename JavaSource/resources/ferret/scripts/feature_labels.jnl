@@ -95,13 +95,15 @@ IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
  DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
 
 ! Notation about the decimation (if data is pre-decimated)
+
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
 
    LET full_total = -9999
    LET frac_deci = ($decimation_fraction"0.1")   ! nominal number
-   IF `(IS_ELEMENT_OF_STR_N(varnames, "num_obs_original") NE 0) AND\
-    (IS_ELEMENT_OF_STR_N(varnames, "num_obs") NE 0)` THEN 
-    LET frac_deci = `num_obs[m=@sum]/num_obs_original[m=@sum]`
+   IF `(IS_ELEMENT_OF_STR_N(varnames, "nobs_full") NE 0) AND\
+    (IS_ELEMENT_OF_STR_N(varnames, "nobs_deci") NE 0)` THEN \
+    LET frac_deci = `nobs_deci[m=@sum]/nobs_full[m=@sum]`
+
    IF `frac_deci GT 1` THEN LET frac_deci = 0.5  ! just for testing
    IF `frac_deci GT 0` THEN LET full_total = (($ngood_data) + ($nbad_data))/frac_deci
 
