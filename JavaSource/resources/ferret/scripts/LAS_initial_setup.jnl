@@ -16,7 +16,7 @@ DEFINE SYMBOL initial_setup_done = 1
 
 ! Put the output into the log file so that FshowGO will list
 ! the tree of GO script calls.
-SET REDIRECT/APPEND/TEE/file="($result_debug_filename)"
+SET REDIRECT/APPEND/TEE/file="($result_debug_filename)" STDOUT,STDERR
 
 IF `($initialize_script_arg) EQ 0` THEN EXIT/SCRIPT
 
@@ -58,3 +58,5 @@ IF `(($reset_gifname"0|*>1") EQ 0) AND ($FERRET_VERSION"0") GE 6.721` THEN
       DEFINE SYMBOL reset_gifname = 1
    ENDIF
 ENDIF
+
+! End of file ------------ LAS_initial_setup.jnl--------------------------
