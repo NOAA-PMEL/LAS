@@ -17,9 +17,10 @@ IF `($data_num) EQ 1` THEN
    IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
 
    IF `STRLEN("($ferret_view)") GE 2` THEN
-      IF `(STRINDEX("($operation_ID)", "Plot") GT 0) OR \
-          (STRINDEX("($operation_ID)", "zoom") GT 0) OR \
-          (STRINDEX("($operation_ID)", "poly") GT 0)` \
-       THEN GO LAS_auto_levels
+      LET do_levels =  `(STRINDEX("($operation_ID)", "Plot") GT 0) OR (STRINDEX("($operation_ID)", "zoom") GT 0) OR  (STRINDEX("($operation_ID)", "poly") GT 0)`
+      IF `do_levels` THEN GO LAS_auto_levels
    ENDIF
 ENDIF
+
+! End of file ------------ LAS_initialize_var_levels.jnl--------------------------
+
