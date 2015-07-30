@@ -88,6 +88,11 @@ let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
 set win/asp=0.5
 ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
 
+let delr = ($ppl$range_high) - ($ppl$range_low)
+IF `(delr) LT ABS(0.01*($data_var)[i=@min])` THEN
+   LET delr = 0.05* ABS(($data_var)[i=@min])
+   ppl %range `($data_var)[i=@min] - delr`, `($data_var)[i=@max] + delr`,10
+ENDIF
 plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all] 
 
 ! Plot the lines.  For up to 8 lines, make separate labeled line plots
@@ -96,9 +101,8 @@ plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all]
 
 IF `nstations LE 8` THEN
    
-   let asp = 1
-   set win/asp=`asp`
-   
+   IF `nstations GT 1` THEN set win/asp=1
+
 ! Add another color, light gray, to make a line through the middle of each plot
    let ncolors = 7
    set mode linec:`ncolors`
@@ -122,6 +126,15 @@ IF `nstations LE 8` THEN
    
    ppl %range `plotmin`, `plotmax`,4
    let plotinc = ($ppl$range_inc)
+   
+   
+   LET delr = plotmax - plotmin
+   IF `(delr) LT ABS(0.01*plotmin)` THEN
+      LET delr = 0.05* ABS(plotmin)
+      ppl %range `plotmin-delr`, `plotmax+delr`,4
+      let plotmin = ($ppl$range_low) 
+      let plotmax = ($ppl$range_high) 
+   ENDIF
    
 ! Draw the time axis along the bottom of the page
    go margins 0.1,0.6
@@ -187,7 +200,6 @@ GO feature_labels
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels
 
-
 ! Save the results
 ! The script wants to get the time-axis end points.
 
@@ -195,7 +207,6 @@ DEFINE SYMBOL data_0_var = tt_all
 
 DEFINE SYMBOL result_type = tline
 GO LAS_results ($result_type)
-
 
 ! End of file ------------ Timeseries_station_plot.jnl--------------------------
 
