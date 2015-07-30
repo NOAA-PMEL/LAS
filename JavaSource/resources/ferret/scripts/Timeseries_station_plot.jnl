@@ -85,7 +85,6 @@ let var2d = EXPNDI_BY_M_COUNTS (($data_var), ($rowvar), maxrow)
 let id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)), maxrow)
 let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
 
-
 set win/asp=0.5
 ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
 
@@ -115,7 +114,8 @@ IF `nstations LE 8` THEN
    set view tv
    
 ! Define variables for consistent vertical axes for all the time series
-   plot/set temperature
+
+   plot/set ($ferret_plot_var)
    
    let plotmin = ($ppl$ymin1)
    let plotmax = ($ppl$ymax1)
@@ -144,7 +144,7 @@ IF `nstations LE 8` THEN
 ! Draw and label each timeseries. Define the time series from the
 ! time data in each individual feature, regrid to the overall time series
 ! so they will be positioned correctly.
-   
+
    repeat/range=1:`nstations`/name=q (\
    define symbol q = `q`; \
    set view vp_($q);\
@@ -153,11 +153,11 @@ IF `nstations LE 8` THEN
    show axis taxis;\
    let tempx = var2d[m=($q)];\
    let tt = t[gt=taxis];\
-   let tempt = reshape(tempx, tt);\
-   plot/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` tempt[gt=taxis_all]; \
+   let vart = reshape(tempx, tt);\
+   plot/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` vart[gt=taxis_all]; \
    plot/over/vs/line/nolab/color=7 tpts,ypts;\
-   plot/over/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` tempt[gt=taxis_all]; \
-   label/nouser 0.1, `($ppl$ylen)*0.9`, -1,0,0.12 @AS`station[m=($q)]`)
+   plot/over/color=red/axes=0,0,1,0/nolab/vlim=`plotmin`:`plotmax`:`plotinc` vart[gt=taxis_all]; \
+   label/nouser 0.1, `($ppl$ylen)*0.9`, -1,0,0.12 @AS`($feature_variable)[m=($q)]`)
 
 ELSE  ! more than 8 stations
 
