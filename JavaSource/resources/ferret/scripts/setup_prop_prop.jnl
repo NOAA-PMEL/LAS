@@ -171,7 +171,6 @@ IF `($vshape"0|E>1|*>0)` THEN
          ENDIF
       ENDIF
 
-
    ELSE
       LET/TITLE="($ferret_title_1)" yvar = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
@@ -185,9 +184,9 @@ IF ($its_prop_plot"0|*>1") THEN
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
    IF ($is_string"0|0|*>1") THEN 
       IF `STRINDEX("($ferret_plot_var_0)", "WOCE") GT 0` THEN 
-         LET plot_var_0 = STRFLOAT(($ferret_plot_var_0) )
-	    DEFINE SYMBOL ferret_plot_var_0 = plot_var_0
-	    LET/TITLE="($ferret_title_0)" xvar = plot_var_0
+         SET VAR/NAME=($ferret_plot_var_0)_00 ($ferret_plot_var_0)
+         LET ($ferret_plot_var_0) = STRFLOAT(($ferret_plot_var_0)_00 )
+         LET/TITLE="($ferret_title_0)" xvar = plot_var_0
       ENDIF
       IF `STRINDEX("($ferret_plot_var_0)", "tmonth") GT 0` THEN 
          LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
@@ -197,7 +196,28 @@ IF ($its_prop_plot"0|*>1") THEN
 	 ENDIF
    ENDIF
 
+   
+   DEFINE SYMBOL vtype = 0
+   LET gettype = ($ferret_plot_var_1)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+   DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+   IF ($is_string"0|0|*>1") THEN 
+      IF `STRINDEX("($ferret_plot_var_1)", "WOCE") GT 0` THEN 
+         SET VAR/NAME=($ferret_plot_var_1)_00 ($ferret_plot_var_1)
+         LET ($ferret_plot_var_1) = STRFLOAT(($ferret_plot_var_1)_00 )
+	    LET/TITLE="($ferret_title_1)" yvar = ($ferret_plot_var_1)
+      ENDIF
+      IF `STRINDEX("($ferret_plot_var_1)", "tmonth") GT 0` THEN 
+         LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+         LET plot_var_1 =  element_index_str_n( ($ferret_plot_var_1), month_labels) 
+	    DEFINE SYMBOL ferret_plot_var_1 = plot_var_1
+	    LET/TITLE="($ferret_title_1)" yvar = plot_var_1
+	 ENDIF
+   ENDIF
+   DEFINE SYMBOL data_x_var  = xvar
+   DEFINE SYMBOL data_y_var = yvar
 ENDIF
+
 ENDIF   ! data_count ge 2
 
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
