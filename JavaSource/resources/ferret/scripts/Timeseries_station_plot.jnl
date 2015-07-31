@@ -89,9 +89,8 @@ set win/asp=0.5
 ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
 
 let delr = ($ppl$range_high) - ($ppl$range_low)
-IF `(delr) LT ABS(0.01*($data_var)[i=@min])` THEN
-   LET delr = 0.05* ABS(($data_var)[i=@min])
-   ppl %range `($data_var)[i=@min] - delr`, `($data_var)[i=@max] + delr`,10
+IF `($ppl$range_high) EQ ($ppl$range_low)` THEN
+   ppl %range `($data_var)[i=@min] - ($ppl$range_inc)`, `($data_var)[i=@max] + ($ppl$range_inc)`,10
 ENDIF
 plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all] 
 
@@ -126,20 +125,20 @@ IF `nstations LE 8` THEN
    
    ppl %range `plotmin`, `plotmax`,4
    let plotinc = ($ppl$range_inc)
-   
+   sh sym ppl$range*
    
    LET delr = plotmax - plotmin
-   IF `(delr) LT ABS(0.01*plotmin)` THEN
-      LET delr = 0.05* ABS(plotmin)
-      ppl %range `plotmin-delr`, `plotmax+delr`,4
+   IF `plotmax EQ plotmin` THEN
+      ppl %range `plotmin-($ppl$range_inc)`, `plotmax + ($ppl$range_inc)`,4
       let plotmin = ($ppl$range_low) 
       let plotmax = ($ppl$range_high) 
+      let plotinc = ($ppl$range_inc)
    ENDIF
-   
+ 
 ! Draw the time axis along the bottom of the page
    go margins 0.1,0.6
    plot/nolab/axes=0,1,0,0/vlim=`plotmin`:`plotmax` t[gt=taxis_all] 
-   
+
 ! Define viewports for the time series plots
    let y2 = 0.98
    let del = 0.92/nstations
