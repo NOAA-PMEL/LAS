@@ -430,6 +430,8 @@ public class TabledapTool extends TemplateTool {
                                 if ( query.length() > 0 && !query.toString().endsWith(",") ) {
                                     query.append(",");
                                 }
+                                // Remove the metadata variable from the variables list. Otherwise it shows up twice
+                                vars.remove(e);
                                 query.append(e);
                             }
                         }
@@ -439,6 +441,8 @@ public class TabledapTool extends TemplateTool {
                             if ( query.length() > 0 && !query.toString().endsWith(",") ) {
                                 query.append(",");
                             }
+                            // Remove the metadata variable from the variables list. Otherwise it shows up twice
+                            vars.remove(extra_metadata);
                             query.append(extra_metadata);
                         }
                     }
