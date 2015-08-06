@@ -418,6 +418,9 @@ public class TabledapTool extends TemplateTool {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
             }  else {
+                // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
+                ArrayList<String> vars = lasBackendRequest.getVariables();
+                
                 // Only add the extras if the variable list does not come from configuraiton.
                 // Some things might need something besides x,y,z and t in the file so...
                 String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
@@ -447,9 +450,6 @@ public class TabledapTool extends TemplateTool {
                         }
                     }
                 }
-                // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
-                ArrayList<String> vars = lasBackendRequest.getVariables();
-                
                 // If lat, lon and z are included as data variables, knock them out of this list.
                 vars.remove(latname);
                 vars.remove(lonname);
