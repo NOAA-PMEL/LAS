@@ -465,12 +465,30 @@ public class TabledapTool extends TemplateTool {
                 }
                 if ( operationID != null && (operationID.equals("Profile_2D_poly") || operationID.equals("Time_Series_Location_Plot") || operationID.equals("Trajectory_2D_poly")) ) {
                 	String mapvars = getTabledapProperty(lasBackendRequest, "map_variables").trim();
-                	if ( mapvars != null ) {
-                		if ( query.length() > 0 ) {
-                			query.append(",");
-                		}
-                		query.append(mapvars);
-                	}
+                        if ( mapvars != null && !mapvars.equals("") ) {
+                            if ( mapvars.contains(",") ) {
+                                String[] extras = mapvars.split(",");
+                                for (int i = 0; i < extras.length; i++) {
+                                    String e = extras[i].trim();
+                                    if ( query.indexOf(e) < 0 ) {
+                                        if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                            query.append(",");
+                                        }
+                                        vars.remove(e);
+                                        query.append(e);
+                                    }
+                                }
+
+                            } else {
+                                if ( query.indexOf(mapvars) < 0 ) {
+                                    if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                        query.append(",");
+                                    }
+                                    vars.remove(mapvars);
+                                    query.append(mapvars);
+                                }
+                            }
+                        }
                 }
                 // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
                 variables = variables.replace(cruiseid+",", "");
