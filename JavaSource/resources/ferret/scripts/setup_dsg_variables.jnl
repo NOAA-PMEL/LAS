@@ -92,8 +92,17 @@ DEFINE SYMBOL data_y_var = lat_with_gaps
 DEFINE SYMBOL data_t_var = time_with_gaps  ! this was commented out. Why?
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "sample_number") GT 0` THEN
-   LET sample_number_gaps = SEPARATE(sample_number[i=1:`npts`], ($rowvar), 0)   
+   LET sample_number_gaps = SEPARATE(sample_number[i=1:`npts`], ($rowvar), 0)
    LET gap_var = IF sample_number_gaps[i=@ddf] NE 1 THEN 1 ELSE 0
+
+!!! test code for pick up the pen if a delta-distance
+   LET deg2rad = 4*atan(1)/180
+   LET cos_corr = COS(deg2rad*(($region_y_hi)+(($region_y_lo)) )/2)
+   LET difx = lon_with_gaps[i=@shf:1]-lon_with_gaps
+   LET dify = lat_with_gaps[i=@shf:1]-lat_with_gaps
+   let distsq = cos_corr* (difx*difx+dify*dify)
+   LET gap_var = IF sample_number_gaps[i=@ddf] NE 1 OR distsq GT 100 THEN 1 ELSE 0
+!!! end of test code
    DEFINE SYMBOL have_gap_var = 1
 ENDIF
 
