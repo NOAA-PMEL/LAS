@@ -455,14 +455,6 @@ public class TabledapTool extends TemplateTool {
                 vars.remove(lonname);
                 vars.remove(zname);
                 vars.remove(time);
-                String variables = "";
-                for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                    String variable = (String) varIt.next();
-                    variables = variables+variable;
-                    if (varIt.hasNext()) {
-                        variables = variables + ",";
-                    }
-                }
                 if ( operationID != null && (operationID.equals("Profile_2D_poly") || operationID.equals("Time_Series_Location_Plot") || operationID.equals("Trajectory_2D_poly")) ) {
                 	String mapvars = getTabledapProperty(lasBackendRequest, "map_variables").trim();
                         if ( mapvars != null && !mapvars.equals("") ) {
@@ -489,6 +481,14 @@ public class TabledapTool extends TemplateTool {
                                 }
                             }
                         }
+                }
+                String variables = "";
+                for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                    String variable = (String) varIt.next();
+                    variables = variables+variable;
+                    if (varIt.hasNext()) {
+                        variables = variables + ",";
+                    }
                 }
                 // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
                 variables = variables.replace(cruiseid+",", "");
