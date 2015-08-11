@@ -81,7 +81,7 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
  DEFINE SYMBOL feature_type = trajectorie
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
+DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown 
 
 IF `(($its_prop_plot"0|0|1|*>1") EQ 0) AND ($nbad_data"0|0|*>1")` THEN 
    IF `($ngood_data) NE 0` THEN DEFINE SYMBOL plusmissing = (plus ($nbad_data) missing)
@@ -98,24 +98,59 @@ IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
 
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
 
-   LET full_total = -9999
-   LET frac_deci = ($decimation_fraction"0.1")   ! nominal number
-   IF `(IS_ELEMENT_OF_STR_N(varnames, "nobs_full") NE 0) AND\
-    (IS_ELEMENT_OF_STR_N(varnames, "nobs_deci") NE 0)` THEN \
-    LET frac_deci = `nobs_deci[m=@sum]/nobs_full[m=@sum]`
+   LET full_good = -9999
 
-   IF `frac_deci GT 1` THEN LET frac_deci = 1 ! Just in case
-   IF `frac_deci GT 0` THEN LET full_total = (($ngood_data) + ($nbad_data))/frac_deci
-
-   IF `full_total GT 1.e6` THEN 
-      DEFINE SYMBOL approx_msg = `full_total/1.e6,prec=2` million obs
-   ELIF `full_total GT 1.e3` THEN 
-      DEFINE SYMBOL approx_msg = `full_total/1.e3,prec=2` thousand obs 
-   ELSE
-      DEFINE SYMBOL approx_msg = `full_total,prec=2` obs
+   IF `(IS_ELEMENT_OF_STR_N(varnames, "nobs_full") EQ 0) OR\
+    (IS_ELEMENT_OF_STR_N(varnames, "nobs_deci") EQ 0)` THEN 
+       MESSAGE/ERROR **ERROR nobs_full and nobs_deci not in the netCDF file"
+       EXIT/PROGRAM
    ENDIF
 
-   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg) 
+! compute overall fraction for decimation of the cruises returned
+    LET frac_deci = `nobs_deci[m=@sum]/nobs_full[m=@sum]`
+
+   IF `frac_deci GT 1` THEN
+      LET frac_deci = 1 
+      
+   ELIF `frac_deci GT 0` THEN 
+      LET full_good = ($ngood_data)/frac_deci
+      LET full_bad  = ($nbad_data)/frac_deci
+   ENDIF
+
+! Make the computation on a per-cruise basis, the count of good data
+! in the cruise related to the decimation fraction for that cruise
+
+   LET frac_deci = nobs_deci/nobs_full
+
+   LET ok = if ($data_var_in) then 1
+   LET ok2d = EXPNDI_BY_M_COUNTS(ok, rowsize, `rowsize[m=@max]`)
+   LET ok_cruise = ok2d[x=@sum] 
+   LET ok_cruise_full = IF frac_deci GT 0 THEN ok_cruise/frac_deci ELSE 0
+   LET full_good = ok_cruise_full[m=@SUM]
+
+
+   IF `full_good GT 1.e6` THEN 
+      DEFINE SYMBOL approx_msg = `full_good/1.e6,prec=2` million
+   ELIF `full_good GT 1.e3` THEN 
+      DEFINE SYMBOL approx_msg = `full_good/1.e3,prec=2` thousand 
+   ELSE
+      DEFINE SYMBOL approx_msg = `full_good,prec=2`
+   ENDIF
+
+   IF `($nbad_data"0|*") GT 0` THEN
+      LET full_bad = full_good * ($nbad_data)/($ngood_data)
+      IF `full_bad GT 1.e6` THEN 
+         DEFINE SYMBOL approx_bad = `full_bad/1.e6,prec=2` million
+      ELIF `full_bad GT 1.e3` THEN 
+         DEFINE SYMBOL approx_bad = `full_bad/1.e3,prec=2` thousand 
+      ELSE
+         DEFINE SYMBOL approx_bad = `full_bad,prec=2`
+      ENDIF
+   ENDIF
+
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg) valid obs
+   IF ($approx_bad"0|*>1") THEN \
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), approx. ($approx_msg) valid obs plus ($approx_bad) missing
 
 ! Put a link to the doc containing description of the decimation scheme. 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
