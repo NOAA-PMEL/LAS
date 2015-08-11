@@ -91,8 +91,14 @@ ppl %range `($data_var)[i=@min]`, `($data_var)[i=@max]`,10
 let delr = ($ppl$range_high) - ($ppl$range_low)
 IF `($ppl$range_high) EQ ($ppl$range_low)` THEN
    ppl %range `($data_var)[i=@min] - ($ppl$range_inc)`, `($data_var)[i=@max] + ($ppl$range_inc)`,10
+   
+   IF `($ppl$range_high) EQ ($ppl$range_low)` THEN
+      DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 0.01*ABS(($ppl$range_low))`
+      DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 0.01*ABS(($ppl$range_high))`
+   ENDIF
 ENDIF
 plot/nolab/vlim=($ppl$range_low):($ppl$range_high) t[gt=taxis_all] 
+
 
 ! Plot the lines.  For up to 8 lines, make separate labeled line plots
 ! otherwise make a cloud of colored lines, changing color with each line.
@@ -133,10 +139,17 @@ IF `nstations LE 8` THEN
       let plotmin = ($ppl$range_low) 
       let plotmax = ($ppl$range_high) 
       let plotinc = ($ppl$range_inc)
+      
+      IF `plotmin EQ plotmax` THEN
+         LET plotmin = `plotmin - 0.01*ABS(plotmin)`
+         LET plotmax = `plotmax + 0.01*ABS(plotmax)`
+      ENDIF
    ENDIF
  
 ! Draw the time axis along the bottom of the page
    go margins 0.1,0.6
+   list plotmin, plotmax
+   
    plot/nolab/axes=0,1,0,0/vlim=`plotmin`:`plotmax` t[gt=taxis_all] 
 
 ! Define viewports for the time series plots
@@ -160,8 +173,9 @@ IF `nstations LE 8` THEN
    repeat/range=1:`nstations`/name=q (\
    define symbol q = `q`; \
    set view vp_($q);\
-   define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
-   npoints=2000/units=seconds/t0="`time.time_origin`" taxis; \
+   let timem = time2d[m=($q)];\
+   let ntm = `timem[i=@ngd]`;\
+   define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
    show axis taxis;\
    let tempx = var2d[m=($q)];\
    let tt = t[gt=taxis];\
