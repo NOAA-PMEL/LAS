@@ -108,6 +108,7 @@ IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN
 
 ! compute overall fraction for decimation of the cruises returned
     LET frac_deci = `nobs_deci[m=@sum]/nobs_full[m=@sum]`
+    LET frac_deci_all = `nobs_deci[m=@sum]/nobs_full[m=@sum]`
 
    IF `frac_deci GT 1` THEN
       LET frac_deci = 1 
@@ -116,25 +117,25 @@ IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN
       LET full_good = ($ngood_data)/frac_deci
       LET full_bad  = ($nbad_data)/frac_deci
    ENDIF
+   let full_all = `full_good`
 
 ! Make the computation on a per-cruise basis, the count of good data
 ! in the cruise related to the decimation fraction for that cruise
 
-   LET frac_deci = nobs_deci/nobs_full
+   LET frac_deci = nobs_deci/nobs_full  ! fraction for each feature
 
-   LET ok = if ($data_var_in) then 1
+   LET ok = IF ($data_var_in) THEN 1
    LET ok2d = EXPNDI_BY_M_COUNTS(ok, rowsize, `rowsize[m=@max]`)
    LET ok_cruise = ok2d[x=@sum] 
    LET ok_cruise_full = IF frac_deci GT 0 THEN ok_cruise/frac_deci ELSE 0
    LET full_good = ok_cruise_full[m=@SUM]
 
-
    IF `full_good GT 1.e6` THEN 
-      DEFINE SYMBOL approx_msg = `full_good/1.e6,prec=2` million
+      DEFINE SYMBOL approx_msg = `full_good/1.e6,prec=3` million
    ELIF `full_good GT 1.e3` THEN 
       DEFINE SYMBOL approx_msg = `full_good/1.e3,prec=2` thousand 
    ELSE
-      DEFINE SYMBOL approx_msg = `full_good,prec=2`
+      DEFINE SYMBOL approx_msg = `full_good,prec=3`
    ENDIF
 
    IF `($nbad_data"0|*") GT 0` THEN
