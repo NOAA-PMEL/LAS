@@ -106,7 +106,7 @@ IF ($nolabels_decimation_counts"0|*>1") THEN ! make points-shown annotations or 
    DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s) shown
 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   DEFINE SYMBOL note_($note_num)_lab = Data subsampled for efficiency in making the visualization (<a target=&quot;_blank&quot; href=docs/piecewise_decimation_reference.html>explanation</a>)
+   DEFINE SYMBOL note_($note_num)_lab = Data subsampled for efficiency (<a target=&quot;_blank&quot; href=docs/piecewise_decimation_reference.html>explanation</a>)
 ELSE  ! make points-shown annotations or not
 
    LET full_good = -9999
