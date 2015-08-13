@@ -96,7 +96,18 @@ IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
 
 ! Notation about the decimation (if data is pre-decimated)
 
+! Don't label the decimation counts.  It's too inaccurate and confusing.
+DEFINE SYMBOL nolabels_decimation_counts = 1
+
 IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN 
+
+IF ($nolabels_decimation_counts"0|*>1") THEN ! make points-shown annotations or not
+
+   DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s) shown
+
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = Data subsampled for efficiency in making the visualization (<a target=&quot;_blank&quot; href=docs/piecewise_decimation_reference.html>explanation</a>)
+ELSE  ! make points-shown annotations or not
 
    LET full_good = -9999
 
@@ -159,6 +170,8 @@ IF `($piecewise_decimation"0|*>1") AND ($ngood_data) GT 0` THEN
    IF `($nbad_data"0") GT 0` THEN \
       DEFINE SYMBOL note_($note_num)_lab = Subsample of ($ngood_data) valid and ($nbad_data) missing \
 points shown (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_reference.html>explanation</a>)
+
+ENDIF ! make points-shown annotations or not
 ENDIF
 
 !---------------- end of feature_labels.jnl -------------------------
