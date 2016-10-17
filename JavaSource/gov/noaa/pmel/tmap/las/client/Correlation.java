@@ -29,9 +29,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -64,6 +63,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -72,6 +72,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -95,7 +96,6 @@ import com.google.gwt.xml.client.XMLParser;
  */
 public class Correlation implements EntryPoint {
     ImageData scaledImage;
-	Logger logger = Logger.getLogger(Correlation.class.getName());
 	private static final AppConstants CONSTANTS = GWT.create(AppConstants.class);
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
 	CruiseIconWidget cruiseIcons = new CruiseIconWidget();
@@ -243,7 +243,6 @@ public class Correlation implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		logger.setLevel(Level.ALL);
 
 		ClientFactory cf = GWT.create(ClientFactory.class);
 		eventBus = cf.getEventBus();
@@ -433,9 +432,9 @@ public class Correlation implements EntryPoint {
 			public void onChange(ChangeEvent event) {
 
 				VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
-				if (varY.getName().toLowerCase().equals("latitude")
-						|| varY.getName().toLowerCase().equals("longitude")
-						|| varY.getName().toLowerCase().equals("time")) {
+				if (varY.getName().toLowerCase(Locale.ENGLISH).equals("latitude")
+						|| varY.getName().toLowerCase(Locale.ENGLISH).equals("longitude")
+						|| varY.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 					yVariableConstraint.setVisible(false);
 					yVariableConstraint.setApply(false);
 					yVariableConstraint.setActive(false);
@@ -510,6 +509,7 @@ public class Correlation implements EntryPoint {
 		spaceTimeTopRow
 				.add(new HTML(
 						"<b>&nbsp;&nbsp;Latitude, Longitude and Time Constraints:</b>&nbsp;"));
+		spaceTimeTopRow.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		spaceTimeConstraints.add(spaceTimeTopRow);
 		spaceTimeConstraints.add(mapConstraint);
 		spaceTimeConstraints.add(timePanel);
@@ -571,9 +571,9 @@ public class Correlation implements EntryPoint {
 	}
     public void setXConstraint() {
         VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
-        if (varX.getName().toLowerCase().equals("latitude")
-                || varX.getName().toLowerCase().equals("longitude")
-                || varX.getName().toLowerCase().equals("time")) {
+        if (varX.getName().toLowerCase(Locale.ENGLISH).equals("latitude")
+                || varX.getName().toLowerCase(Locale.ENGLISH).equals("longitude")
+                || varX.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
             xVariableConstraint.setVisible(false);
             xVariableConstraint.setApply(false);
             xVariableConstraint.setActive(false);
@@ -777,7 +777,7 @@ public class Correlation implements EntryPoint {
 	        pushHistory(lasRequest.toString());
 	    }
 
-	    RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+	    RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, UriUtils.sanitizeUri(url));
 	    try {
 	        sendRequest.sendRequest(null, lasRequestCallback);
 	    } catch (RequestException e) {
@@ -816,8 +816,7 @@ public class Correlation implements EntryPoint {
 				spin.hide();
 				VerticalPanel p = new VerticalPanel();
 				ScrollPanel sp = new ScrollPanel();
-				HTML result = new HTML(doc);
-				evalScripts(result.getElement());
+				HTML result = new HTML(HtmlSanitizerUtil.sanitizeHtml(doc));
 				p.add(result);
 				PushButton again = new PushButton("Try Again");
 				again.setWidth("75px");
@@ -868,18 +867,6 @@ public class Correlation implements EntryPoint {
 								sendRequest.setHeader("If-Modified-Since",
 										new Date().toString());
 								sendRequest.setHeader("max-age", "0");
-								logger.info("Pragma:"
-										+ sendRequest.getHeader("Pragma"));
-								logger.info("cache-directive:"
-										+ sendRequest
-												.getHeader("cache-directive"));
-								logger.info("max-age:"
-										+ sendRequest.getHeader("max-age"));
-								logger.info("If-Modified-Since:"
-										+ sendRequest
-												.getHeader("If-Modified-Since"));
-								logger.info("calling sendRequest with url:"
-										+ url);
 								sendRequest.sendRequest(null,
 										lasRequestCallback);
 							} catch (RequestException e) {
@@ -893,8 +880,7 @@ public class Correlation implements EntryPoint {
 								Node text = result.getFirstChild();
 								if (text instanceof Text) {
 									Text t = (Text) text;
-									HTML error = new HTML(t.getData()
-											.toString().trim());
+									HTML error = new HTML(UriUtils.fromString(t.getData().toString().trim()).asString());
 									outputPanel.setWidget(outputPanelRow, 0, error);
 								}
 							}
@@ -954,7 +940,7 @@ public class Correlation implements EntryPoint {
 					}
 				}
 				if (!imageurl.equals("")) {
-					plotImage = new IESafeImage(imageurl);
+					plotImage = new IESafeImage(HtmlSanitizerUtil.sanitizeHtml(imageurl).asString());
 					x_per_pixel = (x_axis_upper_right - x_axis_lower_left)
 							/ Double.valueOf(x_plot_size);
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)
@@ -967,14 +953,11 @@ public class Correlation implements EntryPoint {
 
 							@Override
 							public void onLoad(LoadEvent event) {
-								logger.info("image onLoad called");
 								int width = plotImage.getWidth();
 								int height = plotImage.getHeight();
 								// Set global maximums
 								image_w = width;
-								logger.info("image_w:" + image_w);
 								image_h = height;
-								logger.info("image_h:" + image_h);
 								String w = width - 18 + "px";
 								lasAnnotationsPanel.setPopupWidth(w);
 								lasAnnotationsPanel.setPopupLeft(outputPanel
@@ -986,7 +969,6 @@ public class Correlation implements EntryPoint {
 
                                     @Override
                                     public void onMouseDown(MouseDownEvent event) {
-                                        logger.setLevel(Level.ALL);
 
                                         startx = event.getX();
                                         starty = event.getY();
@@ -1007,22 +989,19 @@ public class Correlation implements EntryPoint {
 
                                             world_endx = world_startx;
                                             world_endy = world_starty;
-                                            logger.info("(world_startx, world_starty):(" + world_startx + ", " + world_starty + ")");
-                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
+
 
                                             setTextValues();
                                             xVariableConstraint.setApply(true);
                                             yVariableConstraint.setApply(true);
 
                                         }
-                                        logger.setLevel(Level.ALL);
                                     }
                                 });
                                 drawingCanvas.addMouseMoveHandler(new MouseMoveHandler() {
 
                                     @Override
                                     public void onMouseMove(MouseMoveEvent event) {
-                                        logger.setLevel(Level.ALL);
                                         int currentx = event.getX();
                                         int currenty = event.getY();
                                         // If you drag it out, we'll
@@ -1064,9 +1043,7 @@ public class Correlation implements EntryPoint {
                                             world_endx = x_axis_lower_left + (currentx - x_offset_from_left * imageScaleRatio) * scaled_x_per_pixel;
                                             world_endy = y_axis_lower_left + ((y_image_size * imageScaleRatio - currenty) - y_offset_from_bottom * imageScaleRatio)
                                                     * scaled_y_per_pixel;
-                                            logger.info("(world_endx, world_endy):(" + world_endx + ", " + world_endy + ")");
                                             setTextValues();
-                                            logger.info("randomColor.value():" + randomColor.value());
                                             drawingCanvasContext.setFillStyle(randomColor);
                                             drawingCanvasContext.clearRect(0, 0, drawingCanvas.getCoordinateSpaceWidth(), drawingCanvas.getCoordinateSpaceHeight());
                                             drawingCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
@@ -1075,7 +1052,6 @@ public class Correlation implements EntryPoint {
                                         if (outx && outy) {
                                             draw = false;
                                         }
-                                        logger.setLevel(Level.ALL);
                                     }
                                 });
                                 resize(Window.getClientWidth(), Window.getClientHeight());
@@ -1087,19 +1063,16 @@ public class Correlation implements EntryPoint {
 
                             @Override
                             public void onMouseUp(MouseUpEvent event) {
-                                logger.setLevel(Level.ALL);
                                 // If we're still drawing when the mouse goes
                                 // up, record the position.
                                 if (draw) {
                                     endx = event.getX();
                                     endy = event.getY();
-                                    logger.info("(endx, endy):(" + endx + ", " + endy + ")");
                                 }
                                 draw = false;
                                 outx = false;
                                 outy = false;
                                 setConstraints();
-                                logger.setLevel(Level.ALL);
                             }
                         });
                     } else {
@@ -1120,18 +1093,10 @@ public class Correlation implements EntryPoint {
 
                     }
 				}
-				logger.info("(world_startx, world_starty):(" + world_startx
-						+ ", " + world_starty + ")");
-				logger.info("(world_endx, world_endy):(" + world_endx + ", "
-						+ world_endy + ")");
 				world_startx = x_axis_lower_left;
 				world_endx = x_axis_upper_right;
 				world_starty = y_axis_lower_left;
 				world_endy = y_axis_upper_right;
-				logger.warning("(world_startx, world_starty):(" + world_startx
-						+ ", " + world_starty + ")");
-				logger.warning("(world_endx, world_endy):(" + world_endx + ", "
-						+ world_endy + ")");
 				setTextValues();
 				printURL = Util.getAnnotationsFrag(annourl, imageurl);
 			}
@@ -1202,15 +1167,15 @@ public class Correlation implements EntryPoint {
 	                    xVariables.addItem(variables[i]);
 	                    yVariables.addItem(variables[i]);
 	                    colorVariables.addItem(variables[i]);
-	                    if (!variables[i].getName().toLowerCase().equals("latitude")
-	                            && !variables[i].getName().toLowerCase().equals("longitude")
-	                            && !variables[i].getName().toLowerCase().equals("time") ) {
+	                    if (!variables[i].getName().toLowerCase(Locale.ENGLISH).equals("latitude")
+	                            && !variables[i].getName().toLowerCase(Locale.ENGLISH).equals("longitude")
+	                            && !variables[i].getName().toLowerCase(Locale.ENGLISH).equals("time") ) {
 	                        constraintsLayout.addItem(variables[i]);
 	                    }
 	                    if (variables[i].getID().equals(varid)) {
 	                        index = i;
 	                    }
-	                    if (variables[i].getName().toLowerCase().contains("time")) {
+	                    if (variables[i].getName().toLowerCase(Locale.ENGLISH).contains("time")) {
 	                        time_index = i;
 	                    }
 	                }
@@ -1239,15 +1204,15 @@ public class Correlation implements EntryPoint {
 
 	            VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
 	            constraintsLayout.addWidgetForY(yVariableConstraint);
-	            if (varY.getName().toLowerCase().equals("latitude")) {
+	            if (varY.getName().toLowerCase(Locale.ENGLISH).equals("latitude")) {
 	                yVariableConstraint.setVariable(varY);
 	                yVariableConstraint.setActive(false);
 	                yVariableConstraint.setVisible(false);
-	            } else if (varY.getName().toLowerCase().equals("longitude")) {
+	            } else if (varY.getName().toLowerCase(Locale.ENGLISH).equals("longitude")) {
 	                yVariableConstraint.setVariable(varY);
 	                yVariableConstraint.setActive(false);
 	                yVariableConstraint.setVisible(false);
-	            } else if (varY.getName().toLowerCase().equals("time")) {
+	            } else if (varY.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 	                yVariableConstraint.setVariable(varY);
 	                yVariableConstraint.setActive(false);
 	                yVariableConstraint.setVisible(false);
@@ -1258,15 +1223,15 @@ public class Correlation implements EntryPoint {
 
 	            VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
 	            constraintsLayout.addWidgetForX(xVariableConstraint);
-	            if (varX.getName().toLowerCase().equals("latitude")) {
+	            if (varX.getName().toLowerCase(Locale.ENGLISH).equals("latitude")) {
 	                xVariableConstraint.setVariable(varX);
 	                xVariableConstraint.setActive(false);
 	                xVariableConstraint.setVisible(false);
-	            } else if (varX.getName().toLowerCase().equals("longitude")) {
+	            } else if (varX.getName().toLowerCase(Locale.ENGLISH).equals("longitude")) {
 	                xVariableConstraint.setVariable(varX);
 	                xVariableConstraint.setActive(false);
 	                xVariableConstraint.setVisible(false);
-	            } else if (varX.getName().toLowerCase().equals("time")) {
+	            } else if (varX.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 	                xVariableConstraint.setVariable(varX);
 	                xVariableConstraint.setActive(false);
 	                xVariableConstraint.setVisible(false);
@@ -1334,7 +1299,7 @@ public class Correlation implements EntryPoint {
 	                String id = con.get("id");
 	                String plotv = plotVariable(varid);
 	                VariableSerializable v = xDatasetVariables.get(varid);
-	                if (v != null && v.getName().toLowerCase().equals("latitude")) {
+	                if (v != null && v.getName().toLowerCase(Locale.ENGLISH).equals("latitude")) {
 	                    if (op.equals("gt") || op.equals("ge")) {
 	                        mapConstraint.setCurrentSelection(
 	                                Double.valueOf(value), Double.valueOf(yhi),
@@ -1349,7 +1314,7 @@ public class Correlation implements EntryPoint {
 	                                Double.valueOf(xhi));
 	                    }
 	                } else if (v != null
-	                        && v.getName().toLowerCase().equals("longitude")) {
+	                        && v.getName().toLowerCase(Locale.ENGLISH).equals("longitude")) {
 	                    if (op.equals("gt") || op.equals("ge")) {
 	                        mapConstraint.setCurrentSelection(Double.valueOf(ylo),
 	                                Double.valueOf(yhi), Double.valueOf(value),
@@ -1364,7 +1329,7 @@ public class Correlation implements EntryPoint {
 	                                Double.valueOf(value));
 	                    }
 	                } else if (v != null
-	                        && v.getName().toLowerCase().equals("time")) {
+	                        && v.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 	                    if (op.equals("gt") || op.equals("ge")) {
 	                        timeConstraint.setLo(value);
 	                    } else if (op.equals("eq")) {
@@ -1706,9 +1671,9 @@ public class Correlation implements EntryPoint {
 			VariableSerializable varX = xVariables.getVariable(xVariables
 					.getSelectedIndex());
 			xVariableConstraint.setVariable(varX);
-			if (varX.getName().toLowerCase().equals("latitude")
-					|| varX.getName().toLowerCase().equals("longitude")
-					|| varX.getName().toLowerCase().equals("time")) {
+			if (varX.getName().toLowerCase(Locale.ENGLISH).equals("latitude")
+					|| varX.getName().toLowerCase(Locale.ENGLISH).equals("longitude")
+					|| varX.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 				xVariableConstraint.setVisible(false);
 				xVariableConstraint.setApply(false);
 				xVariableConstraint.setActive(false);
@@ -1722,9 +1687,9 @@ public class Correlation implements EntryPoint {
 			VariableSerializable varY = yVariables.getVariable(yVariables
 					.getSelectedIndex());
 			yVariableConstraint.setVariable(varY);
-			if (varY.getName().toLowerCase().equals("latitude")
-					|| varY.getName().toLowerCase().equals("longitude")
-					|| varY.getName().toLowerCase().equals("time")) {
+			if (varY.getName().toLowerCase(Locale.ENGLISH).equals("latitude")
+					|| varY.getName().toLowerCase(Locale.ENGLISH).equals("longitude")
+					|| varY.getName().toLowerCase(Locale.ENGLISH).equals("time")) {
 				yVariableConstraint.setVisible(false);
 				yVariableConstraint.setApply(false);
 				yVariableConstraint.setActive(false);
@@ -2059,7 +2024,6 @@ public class Correlation implements EntryPoint {
 	}
 
 	String getPlotWidth() {
-		logger.fine("entering getPlotWidth()");
 		int antipadding = 0;// 100;
 		String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
 		if (plotImage != null) {
@@ -2068,7 +2032,6 @@ public class Correlation implements EntryPoint {
 			int wt = (int) ((plotImage.getWidth() - antipadding) * imageScaleRatio);
 			w = wt + "px";
 		}
-		logger.fine("exiting getPlotWidth(), retuning w:" + w);
 		return w;
 	}
 
@@ -2088,8 +2051,6 @@ public class Correlation implements EntryPoint {
 	 * @param windowHeight
 	 */
 	void resize(int windowWidth, int windowHeight) {
-		logger.info("resize called with windowWidth=" + windowWidth
-				+ " and windowHeight=" + windowHeight);
 		try {
 			IESafeImage plotImage = (IESafeImage) outputPanel.getWidget(shadowCanvasRow, 0);
 			if (plotImage != null) {
@@ -2100,17 +2061,13 @@ public class Correlation implements EntryPoint {
 						.getOffsetWidth();
 				int newPlotImageWidth = windowWidth - leftPaddingWidth
 						- leftControlsWidth;
-				logger.info("newPlotImageWidth=" + newPlotImageWidth);
 				int plotImageWidth = plotImage.getWidth();
-				logger.info("plotImageWidth=" + plotImageWidth);
 				if (newPlotImageWidth != plotImageWidth) {
 					setPlotWidth(newPlotImageWidth);
 					// Check that height is still small enough
 					int newPlotImageHeight = windowHeight - topAndBottomPadding
 							- lasAnnotationsPanel.getOffsetHeight();
-					logger.info("newPlotImageHeight=" + newPlotImageHeight);
 					int plotImageHeight = plotImage.getHeight();
-					logger.info("plotImageHeight=" + plotImageHeight);
 					if (newPlotImageHeight < plotImageHeight) {
 						setPlotHeight(plotImage, newPlotImageHeight);
 					}
@@ -2118,9 +2075,7 @@ public class Correlation implements EntryPoint {
 					// It's the correct width, so now check the height
 					int newPlotImageHeight = windowHeight - topAndBottomPadding
 							- lasAnnotationsPanel.getOffsetHeight();
-					logger.info("newPlotImageHeight=" + newPlotImageHeight);
 					int plotImageHeight = plotImage.getHeight();
-					logger.info("plotImageHeight=" + plotImageHeight);
 					if (newPlotImageHeight != plotImageHeight) {
 						setPlotHeight(plotImage, newPlotImageHeight);
 						// Check that width is still small enough
@@ -2130,9 +2085,7 @@ public class Correlation implements EntryPoint {
 								.getOffsetWidth();
 						newPlotImageWidth = windowWidth - leftPaddingWidth
 								- leftControlsWidth;
-						logger.info("newPlotImageWidth=" + newPlotImageWidth);
 						plotImageWidth = plotImage.getWidth();
-						logger.info("plotImageWidth=" + plotImageWidth);
 						if (newPlotImageWidth < plotImageWidth) {
 							setPlotWidth(newPlotImageWidth);
 						}
@@ -2140,7 +2093,6 @@ public class Correlation implements EntryPoint {
 				}
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 			e.printStackTrace();
 		}
 	}
@@ -2204,27 +2156,5 @@ public class Correlation implements EntryPoint {
 			}
 		}
 	};
-    /**
-     * Evaluate scripts in an HTML string. Will eval both <script
-     * src=""></script> and <script>javascript here</scripts>.
-     * 
-     * @param element
-     *            a new HTML(text).getElement()
-     */
-    public static native void evalScripts(com.google.gwt.user.client.Element element)
-    /*-{
-        var scripts = element.getElementsByTagName("script");
-
-        for (i = 0; i < scripts.length; i++) {
-            // if src, eval it, otherwise eval the body
-            if (scripts[i].hasAttribute("src")) {
-                var src = scripts[i].getAttribute("src");
-                var script = $doc.createElement('script');
-                script.setAttribute("src", src);
-                $doc.getElementsByTagName('body')[0].appendChild(script);
-            } else {
-                $wnd.eval(scripts[i].innerHTML);
-            }
-        }
-    }-*/;
+ 
 }

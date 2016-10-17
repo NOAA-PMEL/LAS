@@ -45,17 +45,7 @@ clean-more:
 	rm -fr conf/server
 	rm -fr WebContent/JavaScript/gwt-unitCache
 	rm -fr WebContent/JavaScript/components/WEB-INF
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.InteractiveDownloadData
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.PPT
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.InteractiveDownloadDataJUnit
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.DateWidgetTest
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.Correlation
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.SPPV
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.ColumnEditor
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.UI
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.ClimateAnalysis
-	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget
+	rm -fr WebContent/JavaScript/components/gov.noaa.pmel.tmap.las.*
 	rm -fr build
 
 .PHONY: clean 

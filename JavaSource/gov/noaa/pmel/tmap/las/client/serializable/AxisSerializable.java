@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class AxisSerializable extends Serializable implements IsSerializable {
 	
-	String ID;
+	
 	String type;
 	String hi;
 	String lo;

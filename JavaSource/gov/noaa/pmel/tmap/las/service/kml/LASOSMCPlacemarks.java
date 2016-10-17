@@ -30,7 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * For generating a collection of place marks for OSMC data
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class LASOSMCPlacemarks implements LASPlacemarks{
 
-    private static Logger log = Logger.getLogger(LASOSMCPlacemarks.class);
+    private static Logger log = LoggerFactory.getLogger(LASOSMCPlacemarks.class);
 
     String gridFileName;
     HashMap<String, String> initLASReq;
@@ -227,11 +228,24 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
             dis.close();
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.error("no placemarks");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("no placemarks");
         } catch (Exception e){
             log.warn("noplacemarks");
+        } finally {
+        	if ( bis != null )
+				try {
+					bis.close();
+				} catch (IOException e) {
+		            log.error("Close error " + e.getMessage());
+				}
+        	if ( dis != null )
+				try {
+					dis.close();
+				} catch (IOException e) {
+		            log.error("Close error " + e.getMessage());
+				}
         }
 
         System.out.println("finish extractPoints");

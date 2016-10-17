@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 import org.jdom.Element;
 
+import thredds.servlet.Log;
+
 public class LASMapScale extends LASDocument {
 
     private static final long serialVersionUID = 703675281298155235L;
@@ -23,7 +25,7 @@ public class LASMapScale extends LASDocument {
         super();
     }
 
-    public LASMapScale(File map_scale) throws FileNotFoundException, IOException {
+    public LASMapScale(File map_scale) throws Exception {
         BufferedReader scaleReader;
 
         FileReader f = new FileReader(map_scale);
@@ -32,46 +34,52 @@ public class LASMapScale extends LASDocument {
         HashMap<String, String> scale = new HashMap<String, String>();
         if (scaleReader != null) {
 
-            String line = scaleReader.readLine();
-            while (line != null) {
-                /*
-                 * Look for number followed by a ":" and a "/" surrounded by
-                 * blanks to distinquish from the data URL value. This is the
-                 * old more complicated output style from Ferret.. 1 / 1:
-                 * "DATA_0_URL" "http://www.cdc.noa..." 2 / 2: "DATA_0_VAR"
-                 * "otemp" 3 / 3: "DATA_1_URL" " " 4 / 4: "DATA_1_VAR" " " 5 /
-                 * 5: "PPL$XMIN" "62.50" 6 / 6: "PPL$XMAX" "348.5" 7 / 7:
-                 * "PPL$YMIN" "-64.50" 8 / 8: "PPL$YMAX" "74.50"
-                 */
+        	try {
+        		String line = scaleReader.readLine();
+        		while (line != null) {
+        			/*
+        			 * Look for number followed by a ":" and a "/" surrounded by
+        			 * blanks to distinquish from the data URL value. This is the
+        			 * old more complicated output style from Ferret.. 1 / 1:
+        			 * "DATA_0_URL" "http://www.cdc.noa..." 2 / 2: "DATA_0_VAR"
+        			 * "otemp" 3 / 3: "DATA_1_URL" " " 4 / 4: "DATA_1_VAR" " " 5 /
+        			 * 5: "PPL$XMIN" "62.50" 6 / 6: "PPL$XMAX" "348.5" 7 / 7:
+        			 * "PPL$YMIN" "-64.50" 8 / 8: "PPL$YMAX" "74.50"
+        			 */
 
-                //
-                if (line.contains("[1-9]:") && line.contains(" / ")) {
-                    // Split on the : and use the second half...
-                    String[] halves = line.split(":");
-                    if (halves.length > 1) {
-                        // See below...
-                        String[] parts = halves[1].split("\"");
-                        scale.put(parts[1], parts[3]);
-                    }
-                }
-                /*
-                 * Simpler style without the mulitple line numbers, ":" and "/"
-                 * "PPL$XMIN" "122.2" "PPL$XMAX" "288.8" "PPL$YMIN" "-35.00"
-                 * "PPL$YMAX" "45.00" "PPL$XPIXEL" "776" "PPL$YPIXEL" "483"
-                 * "PPL$WIDTH" "12.19" "PPL$HEIGHT" "7.602" "PPL$XORG" "1.200"
-                 * "VP_TOP_MARGIN" "1.4" "VP_RT_MARGIN" "1" "AX_HORIZ" "X"
-                 * "AX_HORIZ_POSTV" " " "AX_VERT" "Z" "AX_VERT_POSTV" "down"
-                 * "DATA_EXISTS" "1" "DATA_MIN" "3.608" "DATA_MAX" "8.209"
-                 */
-                else {
-                    // Just split on the quotes
-                    // See JavaDoc on split for explanation
-                    // of why we get 4 parts with the repeated quotes.
-                    String[] parts = line.split("\"");
-                    scale.put(parts[1], parts[3]);
-                }
-                line = scaleReader.readLine();
-            }
+        			//
+        			if (line.contains("[1-9]:") && line.contains(" / ")) {
+        				// Split on the : and use the second half...
+        				String[] halves = line.split(":");
+        				if (halves.length > 1) {
+        					// See below...
+        					String[] parts = halves[1].split("\"");
+        					scale.put(parts[1], parts[3]);
+        				}
+        			}
+        			/*
+        			 * Simpler style without the mulitple line numbers, ":" and "/"
+        			 * "PPL$XMIN" "122.2" "PPL$XMAX" "288.8" "PPL$YMIN" "-35.00"
+        			 * "PPL$YMAX" "45.00" "PPL$XPIXEL" "776" "PPL$YPIXEL" "483"
+        			 * "PPL$WIDTH" "12.19" "PPL$HEIGHT" "7.602" "PPL$XORG" "1.200"
+        			 * "VP_TOP_MARGIN" "1.4" "VP_RT_MARGIN" "1" "AX_HORIZ" "X"
+        			 * "AX_HORIZ_POSTV" " " "AX_VERT" "Z" "AX_VERT_POSTV" "down"
+        			 * "DATA_EXISTS" "1" "DATA_MIN" "3.608" "DATA_MAX" "8.209"
+        			 */
+        			else {
+        				// Just split on the quotes
+        				// See JavaDoc on split for explanation
+        				// of why we get 4 parts with the repeated quotes.
+        				String[] parts = line.split("\"");
+        				scale.put(parts[1], parts[3]);
+        			}
+        			line = scaleReader.readLine();
+        		}
+        	} catch (Exception e) {
+        		throw new Exception(e);
+        	} finally {
+        		scaleReader.close();
+        	}
 
         }
 

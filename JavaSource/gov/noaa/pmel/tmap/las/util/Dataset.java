@@ -32,6 +32,9 @@ public class Dataset extends Container implements DatasetInterface {
     public String getCATID() {
         return element.getAttributeValue("catid");
     }
+    public void setCATID(String catid) {
+        element.setAttribute("catid", catid);
+    }
     public void setVariables(ArrayList<Variable> variables) {
     	element.removeChild("variables");
     	Element varsE = new Element("variables");

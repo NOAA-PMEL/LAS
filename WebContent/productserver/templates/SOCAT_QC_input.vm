@@ -101,15 +101,7 @@
 					comment += socatQC.crossnoneComment + socatQC.commentSpacer;
 				}
 
-				var userComment = document.getElementById("addlcomment").value.trim();
-				// listing each of these problems individually - maybe one day we can fix some or all
-				userComment = userComment.replace(/\'/g,"")
-				userComment = userComment.replace(/\"/g,"");
-				userComment = userComment.replace(/</g," less than ")
-				userComment = userComment.replace(/>/g," more than ");
-				userComment = userComment.replace(/%/g," percent")
-				userComment = userComment.replace(/&/g," and ");
-				comment += userComment;
+				comment += document.getElementById("addlcomment").value.trim();
 
 				document.getElementById("comment").value = comment.trim();
 			};
@@ -173,14 +165,22 @@
 				switch( flag ) {
 				case "A":
 				case "B":
-				case "C":
 					if ( ! ( document.getElementById("soptrue").checked ||
 							(comment.indexOf(socatQC.soptrueComment) >= 0) ) ) {
-						window.alert("Approved methods/SOP criteria must be followed for QC flag A, B, and C");
+						window.alert("Approved methods/SOP criteria must be followed for QC flag A and B");
 						return false;
 					}
 					break;
 				default:
+					// if specified SOP was not followed, make sure something was specified
+					// in the additional comments; TODO: search for keywords
+					if ( document.getElementById("sopfalse").checked ) {
+						var userComment = document.getElementById("addlcomment").value.trim();
+						if ( userComment.length < 8 ) {
+							window.alert("Please specify what methods/SOP criteria were not followed in the additional comments");
+							return false;
+						}
+					}
 					break;
 				}
 
@@ -196,6 +196,15 @@
 					}
 					break;
 				default:
+					// if specified metadata was missing, make sure something was specified
+					// in the additional comments; TODO: search for keywords
+					if ( document.getElementById("metalacking").checked ) {
+						var userComment = document.getElementById("addlcomment").value.trim();
+						if ( userComment.length < 8 ) {
+							window.alert("Please specify what metadata is missing in the additional comments");
+							return false;
+						}
+					}
 					break;
 				}
 
@@ -254,14 +263,43 @@
 			};
 
 			/**
+			 * Encode a string as a hex string to ensure contents are not interpreted
+			 * as something other than a string parameter.
+			 *
+			 * @param original
+			 * 		string to be encoded
+			 * @returns
+			 * 		hex string
+			 */
+			socatQC.hexEncode = function(original) {
+				var hex, k;
+				var result = "";
+				for (k = 0; k < original.length; k++) {
+					hex = original.charCodeAt(k).toString(16);
+					result += ("000" + hex).slice(-4);
+				}
+				return result;
+                        }
+
+			/**
 			 * Submit the QC flag.  Checks the selected comments are sufficient 
 			 * for the selected flag then makes the LAS request.
 			 */
 			socatQC.submitQC = function() {
 				var reviewer = "$user_name";
-				var regionId = document.getElementById("region").value;
 				var flag = document.getElementById("flag").value;
 				var comment = document.getElementById("comment").value.trim();
+				var regionInputs = document.getElementById("regions").getElementsByTagName("input");
+				var regionIDs = "";
+				for (var k = 0; k < regionInputs.length; k++) {
+					if ( regionInputs[k].checked ) {
+						regionIDs += regionInputs[k].value.trim();
+					}
+				}
+				if ( regionIDs == "" ) {
+					window.alert("Please select one or more regions");
+					return;
+				}
 
 				if ( comment.length < 8 ) {
 					window.alert("Please enter a valid comment");
@@ -277,8 +315,8 @@
 						return;
 					}
 				}
-				else if ( regionId == "G" ) {
-					if ( ! window.confirm("This global-region QC flag will override all regional QC flags for this dataset.  Is this okay?") ) {
+				else if ( regionIDs.indexOf("G") >= 0 ) {
+					if ( ! window.confirm("The global-region QC flag will override all regional QC flags (even those not selected) for this dataset.  Is this okay?") ) {
 						return;
 					}
 				}
@@ -286,13 +324,13 @@
 				var Req = new LASRequest('$las_request.toJavaScriptSafeString()');
 				Req.setOperation("SOCAT_QC_submit");
 				Req.setProperty("qc","cruise_ID","$las_request.getProperty('qc', 'cruise_ID')");
-				Req.setProperty("qc","region_ID",regionId);
+				Req.setProperty("qc","region_IDs",regionIDs);
 				Req.setProperty("qc","flag",flag);
-				Req.setProperty("qc","comment",comment);
+				Req.setProperty("qc","comment", socatQC.hexEncode(comment));
 				Req.setProperty("qc","reviewer",reviewer);
 
 				var reqXmlText = Req.getXMLText();
-				reqXmlText = escape(reqXmlText);
+				reqXmlText = encodeURIComponent(reqXmlText);
 				document.location="ProductServer.do?xml=" + reqXmlText;
 			};
 
@@ -320,6 +358,7 @@
 
 		<style>
 			h4.toplabel { margin-bottom: 0.0em; }
+			div.regions { margin-left: 2.0em; margin-top: 0.5em; margin-bottom:0.5em; }
 			div.value { margin-top: 0.0em; margin-bottom: 2.0em; }
 			div.radiolabel { margin-left: 1.0em; margin-top: 1.0em; margin-bottom: 0.0em; }
 			div.radiovalue { margin-left: 2.0em; margin-top: 0.25em; margin-bottom: 0.25em; }
@@ -337,8 +376,8 @@
 
 			<h3>QC for $las_request.getProperty("qc", "expocode")</h3>
 			<h4>Reviewer: $user_name</h4>
-			<h4>Region: 
-				<select id="region">
+			<h4 class="toplabel">Regions:</h4>
+			<div class="regions" id="regions">
 #set($last=$las_webrowset.last())
 #set($size = $las_webrowset.getRow())
 #set($first=$las_webrowset.beforeFirst())
@@ -347,19 +386,18 @@
   #set($next=$las_webrowset.next())
     #if ($las_webrowset.getString('region_id') != 'G')
       #if ($las_request.getProperty('qc', 'region_name') == $las_webrowset.getString('region_name') )
-					<option id="$las_webrowset.getString('region_id')" value="$las_webrowset.getString('region_id')" selected="true">$las_webrowset.getString('region_name')&nbsp;</option>
+				<input type="checkbox" name="region" value="$las_webrowset.getString('region_id')" checked />&nbsp;$las_webrowset.getString('region_name') <br />
       #else
-					<option id="$las_webrowset.getString('region_id')" value="$las_webrowset.getString('region_id')">$las_webrowset.getString('region_name')&nbsp;</option>
+				<input type="checkbox" name="region" value="$las_webrowset.getString('region_id')" />&nbsp;$las_webrowset.getString('region_name') <br />
       #end
     #end
 #end
 #if ($las_request.getProperty('qc', 'region_name') == 'Global')
-					<option id="G" value="G" selected="true">Global&nbsp;</option>
+				<input type="checkbox" name="region" value="G" checked />&nbsp;Global&nbsp;(override&nbsp;regional&nbsp;QC&nbsp;flags)<br \>
 #else
-					<option id="G" value="G">Global&nbsp;</option>
+				<input type="checkbox" name="region" value="G" />&nbsp;Global&nbsp;(override&nbsp;regional&nbsp;QC&nbsp;flags)<br \>
 #end
-				</select>
-			</h4>
+			</div>
 
 			<h4 class="toplabel">Quality Control Criteria:</h4>
 			<div class="value">
@@ -389,11 +427,11 @@
 				<div class="radiolabel">Followed approved methods/SOP criteria</div>
 				<div class="radiovalue">
 					<input class="radio" type="radio" name="followedsop" id="soptrue" />
-					<label for="soptrue">true (A, B, C)</label>
+					<label for="soptrue">true (A, B)</label>
 				</div>
 				<div class="radiovalue">
 					<input class="radio" type="radio" name="followedsop" id="sopfalse" />
-					<label for="sopfalse">false (D, E)</label>
+					<label for="sopfalse">false (C, D, E) - specify not followed in additional comments</label>
 				</div>
 				<div class="radiovalue">
 					<input class="radio" type="radio" name="followedsop" id="sopnocomment" checked />
@@ -407,7 +445,7 @@
 				</div>
 				<div class="radiovalue">
 					<input class="radio" type="radio" name="fullmeta" id="metalacking" />
-					<label for="metalacking">incomplete (D)</label>
+					<label for="metalacking">incomplete (D) - specify missing in additional comments</label>
 				</div>
 				<div class="radiovalue">
 					<input class="radio" type="radio" name="fullmeta" id="metanocomment" checked />

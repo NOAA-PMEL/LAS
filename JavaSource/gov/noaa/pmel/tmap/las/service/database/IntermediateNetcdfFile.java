@@ -4,6 +4,8 @@ import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.exception.LASRowLimitException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASIconWebRowSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -12,15 +14,11 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Document;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -37,9 +35,8 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.units.DateUnit;
-import ucar.nc2.units.SimpleUnit;
 public class IntermediateNetcdfFile {
-    final Logger log = Logger.getLogger(IntermediateNetcdfFile.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(IntermediateNetcdfFile.class.getName());
     protected String[] varNames;
     protected String zname="";
     protected String tname="";
@@ -73,7 +70,7 @@ public class IntermediateNetcdfFile {
 			String name = (String) varIt.next();
 			String grid = lasBackendRequest.getDataAttribute(name, "grid_type");
 			if ( grid != null ) {
-				trajectory = trajectory && grid.toLowerCase().equals("trajectory");
+				trajectory = trajectory && grid.toLowerCase(Locale.ENGLISH).equals("trajectory");
 			}
 		}
     
@@ -549,6 +546,9 @@ public class IntermediateNetcdfFile {
 
     	if ( needsProfID ) {
     		PROF_ID = new ArrayDouble.D1(indexSize);
+    	} else {
+    		// combat null deference :-)
+    		PROF_ID = new ArrayDouble.D1(1);
     	}
 
     	ArrayDouble.D1 trdim = new ArrayDouble.D1(2);
@@ -683,13 +683,14 @@ public class IntermediateNetcdfFile {
     					data.set(index, d);
     					columns.set(col-1, data);
     					if (zname.equals(varNames[col-1]) && needsProfID ) {
-    						if ( index == 0 ) {
+    						if ( index == 0 && PROF_ID != null) {
     							PROF_ID.set(index, prof_id_num);
     						} else {
     							if ( data.get(index) <= data.get(index-1)) {
     								prof_id_num = prof_id_num + 1.f;
     							}
-    							PROF_ID.set(index, prof_id_num);
+    							if ( PROF_ID != null)
+    								PROF_ID.set(index, prof_id_num);
     						}
     					}    
     				} else if (type == DataType.FLOAT) {
@@ -756,9 +757,9 @@ public class IntermediateNetcdfFile {
     	if ( trajectory ) {  
     		LASIconWebRowSet icon_webrowset = new LASIconWebRowSet();
     		Dimension trajectory_dim = netcdfFile.addDimension("trajectory", trajectory_ids.size());
-    		if ( trajectory_data_type.equals(DataType.DOUBLE) ) {
+    		if ( trajectory_data_type != null && trajectory_data_type.equals(DataType.DOUBLE) ) {
     			
-    		} else if ( trajectory_data_type.equals(DataType.CHAR) ) {
+    		} else if ( trajectory_data_type != null &&  trajectory_data_type.equals(DataType.CHAR) ) {
     			trajectory_id_char_data = new ArrayChar.D2(trajectory_ids.size(), cruise_id_width);
     			trajectory_count_data = new ArrayInt.D1(trajectory_ids.size());
     			int inx = 0;

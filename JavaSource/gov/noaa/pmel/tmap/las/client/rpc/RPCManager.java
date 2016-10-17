@@ -24,6 +24,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.GwtEvent.Type;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class RPCManager {
@@ -119,8 +120,9 @@ public class RPCManager {
 
         @Override
         public void onSuccess(CategorySerializable[] result) {
-            String catid = result[0].getID();
-            String dsid = result[0].getDatasetSerializable().getID();
+        	
+            String catid = UriUtils.fromString(result[0].getID()).asString();
+            String dsid = UriUtils.fromString(result[0].getDatasetSerializable().getID()).asString();
             removeGetCategoriesEvent(catid, dsid);
             eventBus.fireEventFromSource(new CategoriesReturnedEvent(result), RPCManager.this);
             

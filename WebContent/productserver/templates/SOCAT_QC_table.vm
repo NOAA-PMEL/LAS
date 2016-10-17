@@ -18,10 +18,11 @@ $las_response.toString()
 <!-- LAS SERVER OK -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-<title>History of Quality Control Evaluations for SOCAT Cruise $las_request.getProperty("qc","cruise_ID") -- $las_config.getTitle()</title>
+<title>History of Quality Control Evaluations for $las_request.getProperty("qc","expocode")</title>
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
 <script style="text/javascript" src="JavaScript/components/sorttable.js"></script>
+<link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css">
 <script>
 function linkify(text)
 {
@@ -46,11 +47,11 @@ function toggleConstraints () {
 	if (document.getElementById('constraints_toggle_hide').style.display=='none') {
 		document.getElementById('constraints_toggle_hide').style.display='';
 		document.getElementById('constraints_toggle').style.display='none';
-		document.getElementById('Metadata_table').className='sortable showOnepointfiveminus';
+		document.getElementById('Metadata_table').className='sortable showOnepointfiveminus datatable';
 	} else {
 		document.getElementById('constraints_toggle').style.display='';
 		document.getElementById('constraints_toggle_hide').style.display='none';
-		document.getElementById('Metadata_table').className='sortable hideOnepointfiveminus';
+		document.getElementById('Metadata_table').className='sortable hideOnepointfiveminus datatable';
 	}
 }
 
@@ -299,7 +300,7 @@ fieldset p .note {
         <td>
           <fieldset id="Metadata_instructions">
             <legend>Help</legend>
-            <span>History of Quality Control Evaluations for SOCAT Cruise $las_request.getProperty("qc","cruise_ID")</span>
+            <span>History of Quality Control Evaluations for $las_request.getProperty("qc","expocode")</span>
           </fieldset>
         </td>
       </tr>
@@ -330,8 +331,6 @@ fieldset p .note {
     <h3>No results found to match your query.</h3>
 #else
 ## Not empty.  Write the rows.
-    ## Set up an alternator tool to color every other row.
-    #set($color = $alternator.auto('#F3E7C9','#FFFFFF'))
 
     ## Get the metadata so we have the column names and
     ## the number of columns.
@@ -339,18 +338,18 @@ fieldset p .note {
     #set($metadata = $las_webrowset.getMetaData())
     #set($cols = $metadata.getColumnCount())
 
-    <table id="Metadata_table" class="sortable hideOnepointfiveminus">
+    <table id="Metadata_table" class="sortable hideOnepointfiveminus datatable">
         ## Set the column headers including one for the row number.
         <thead><tr>
 ##if ($readonly == false)
              <th></th>
 ##end  
-				<th title="Formal Expocode name of cruise">Expocode</th>
+				<th title="Formal Expocode name of dataset">Expocode</th>
 				<th title="Region for which this QC flag was assigned">Region</th>
-				<th title="SOCAT QC flag assigned to cruise">Flag</th>
-				<th title="Time and Day when SOCAT QC flag assigned to cruise">Flag Timestamp</th>
+				<th title="SOCAT QC flag assigned to dataset">Flag</th>
+				<th title="Time and Day when SOCAT QC flag assigned to dataset">Flag Timestamp</th>
 				<th title="Name of reviewer who submitted this flag">Reviewer</th>
-				<th title="Version in which flag was added to the cruise">Version<br />Flagged</th>
+				<th title="Version in which flag was added to the dataset">Version<br />Flagged</th>
 				<th title="Comments added by reviewer regarding this flag">Comments</th>
 
 
@@ -360,8 +359,8 @@ fieldset p .note {
        #foreach ($row in [01..$size])
           ## Advance the row.  We do this at the top since we are currently before the first row (see beforeFirst() above).
           #set($next=$las_webrowset.next())
-          ## Use the alternator to change the color of every other row.
-       	  #if ($las_webrowset.getString(6)=="3.0")
+          ## Use CSS color of every other row.
+       	  #if ( ($las_webrowset.getString(6)=="3.0") || ($las_webrowset.getString(6)=="4.0") )
           	<tr class="twoplus">
           #else
           	<tr class="onepointfiveminus">
@@ -370,7 +369,7 @@ fieldset p .note {
 ##if ($readonly == false)
 	<td align="right">
 ##		#if ($las_webrowset.getString(1)=="0")
-             <button onclick="submitQC('$las_webrowset.getString(1)','$las_webrowset.getString(2)')">Submit QC</button>
+             <button onclick="submitQC('$las_webrowset.getString(1)','$las_webrowset.getString(2)')">Add QC</button>
 ##    	#end
    	</td>
 ##end

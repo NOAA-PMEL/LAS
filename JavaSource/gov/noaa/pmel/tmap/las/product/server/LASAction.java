@@ -9,25 +9,21 @@
  */
 package gov.noaa.pmel.tmap.las.product.server;
 
-import java.util.ArrayList;
+import java.util.Map;
 
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
-import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
-import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
-import gov.noaa.pmel.tmap.las.util.Variable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.struts2.interceptor.ApplicationAware;
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import com.opensymphony.xwork2.ActionSupport;
+
 
 /**
  * This action takes in a blob of request XML and stores the variable definition in the session scope.  The definition of the variable
@@ -35,8 +31,12 @@ import org.apache.struts.action.ActionMapping;
  * @author rhs
  *
  */
-public class LASAction extends Action {
-	private static Logger log = Logger.getLogger(LASAction.class.getName());
+public class LASAction extends ActionSupport implements ServletRequestAware, ServletResponseAware, ApplicationAware {
+	public HttpServletRequest request;
+	public HttpServletResponse response;
+	public Map<String, Object> contextAttributes;
+	ProgressForm progress = new ProgressForm();
+	private static Logger log = LoggerFactory.getLogger(LASAction.class.getName());
 	   public static void logerror(HttpServletRequest request) {
 	        LASBackendResponse error = (LASBackendResponse) request.getSession().getAttribute("las_response");
 	        log.error(error.getResult("las_message"));
@@ -64,4 +64,24 @@ public class LASAction extends Action {
 	            log.error(trace[0].toString());
 	        }           
 	    }
+
+		@Override
+		public void setServletRequest(HttpServletRequest request) {
+			this.request = request;
+		}
+
+		@Override
+		public void setServletResponse(HttpServletResponse response) {
+			this.response = response;
+		}
+		
+		@Override
+		public void setApplication(Map<String, Object> servletContextAttributes) {
+			this.contextAttributes = servletContextAttributes;
+		}
+
+		public void setProgressForm(ProgressForm progress) {
+			this.progress = progress;
+		}
+		
 }

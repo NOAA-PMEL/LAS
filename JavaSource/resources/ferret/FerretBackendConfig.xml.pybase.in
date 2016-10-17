@@ -10,9 +10,10 @@
                  las_tfds_data_dir="@TDS_DATA@"
                  iosp_base_dir="resources/iosp"
                  opendap_base_url = "http://@SERVLET_ROOT_URL@/thredds/dodsC/output">
-                                <arg>-cimport sys; import pyferret; (errval, errmsg) = pyferret.init(sys.argv[1:], True)</arg>
-                                <arg>-gif</arg>
-                                <arg>-script</arg>
+        <arg>-cimport sys; import pyferret; (errval, errmsg) = pyferret.init(sys.argv[1:], True)</arg>
+        <arg>-nodisplay</arg>
+        <arg>-server</arg>
+        <arg>-script</arg>
 
     </invoker>
 	<cacher dataset="true" dataset_queue_size="10000" dataset_size="40"
@@ -23,6 +24,12 @@
               <key>PPL+ error</key>
               <text>
                 An error occurred in the service that was creating your product.
+              </text>
+           </message>
+           <message type="startsWith" level="error">
+              <key>**ERROR Differencing is not implemented between unlike Curvilienar/Rectilinear grids</key>
+              <text>
+                  Differencing is not implemented between unlike Curvilienar/Rectilinear grids
               </text>
            </message>
            <message type="startsWith" level="error">

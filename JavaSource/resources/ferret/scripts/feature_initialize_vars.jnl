@@ -28,6 +28,12 @@ LET num_e = `($data_var),return = msize`
 
 IF `num_e GT ($numobs)` THEN DEFINE SYMBOL numobs = `num_e`
 
+LET attnames = ($data_var).attnames
+IF `IS_ELEMENT_OF_STR_N(attnames, "positive") GT 0` THEN 
+   DEFINE SYMBOL pos = `($data_var).positive`
+   IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down = 1
+ENDIF
+
 ! Are the rowsize variables in the E direction?
 DEFINE SYMBOL rdir = `($rowvar),RETURN=shape` 
 DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")

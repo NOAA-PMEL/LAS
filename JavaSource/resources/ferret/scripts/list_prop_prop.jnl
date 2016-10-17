@@ -118,7 +118,7 @@ IF ($color_by"0|*>1") THEN
 
 
       DEFINE SYMBOL zshape = `zvar,RETURN=shape`
-      IF `($zshape"0|E>1|*>0)` THEN
+      IF `($zshape"0|E>1|POINT>1|*>0)` THEN
 
          ! Expand all strings into obs axis
          IF ($is_string"0|*>1") THEN 
@@ -261,8 +261,8 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
 ! expand metadata variables onto the X axis
    IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
    DEFINE SYMBOL zshape = `($ferret_plot_var_0),RETURN=shape`
-   IF `($zshape"0|E>1|*>0)` THEN
-      ! Expand all strings into obs axis
+   IF `($zshape"0|E>1|POINT>1|*>0)` THEN
+      ! Expand all strings into obs axis 
       IF ($is_string"0|*>1") THEN 
          LET ($ferret_plot_var_0)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_0), ($rowvar), `($rowvar)[m=@sum]`)
       ELSE
@@ -287,7 +287,7 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
 
    IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
-   
+
 ! expand metadata variables onto the X axis
    DEFINE SYMBOL zshape = `($ferret_plot_var_1),RETURN=shape`
    IF `($zshape"0|E>1|*>0)` THEN
@@ -308,16 +308,19 @@ ENDIF
 
 IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN 
    
+   LET gettype = ($ferret_plot_var_2)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+
    LET ii = i[g=($timevar)]
    LET iindices = IF constraints_mask THEN ii
    LET compress_mask = COMPRESSI(iindices)
    LET nok = `compress_mask[i=@ngd]`
    LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
-   
+
 ! expand metadata variables onto the X axis
-   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
    DEFINE SYMBOL zshape = `($ferret_plot_var_2),RETURN=shape`
-   IF `($zshape"0|E>1|*>0)` THEN
+   IF `($zshape"0|E>1|POINT>1|*>0)` THEN
       ! Expand all strings into obs axis
       IF ($is_string"0|*>1") THEN 
          LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)

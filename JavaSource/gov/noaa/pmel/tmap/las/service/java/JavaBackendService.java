@@ -22,7 +22,8 @@ import java.util.Properties;
 import java.util.Vector;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.jdom.JDOMException;
@@ -32,7 +33,7 @@ import org.jdom.JDOMException;
  *
  */
 public class JavaBackendService {
-    private static Logger log = Logger.getLogger(JavaBackendService.class.getName());
+    private static Logger log = LoggerFactory.getLogger(JavaBackendService.class.getName());
     
     public String fiveMinutes(String backendRequestXML, String cacheFileName) throws JDOMException, IOException, Exception {
         LASBackendRequest lasBackendRequest = new LASBackendRequest();    
@@ -64,7 +65,7 @@ public class JavaBackendService {
             } catch (InterruptedException e) {
                 lasBackendResponse.setError("fiveMinutes had trouble sleeping. ", e);
             }
-            if ( cf != null & cf.exists() ) {
+            if ( cf != null && cf.exists() ) {
                 lasBackendResponse.setError("Java backend request canceled.");
                 if ( !cf.delete() ) {
                     lasBackendResponse.setError("Could not remove cancel file.");
@@ -184,14 +185,25 @@ public class JavaBackendService {
         return lasBackendResponse.toString();
     }
     private void copyBytes (String inputFile, String outputFile) throws IOException {
-        FileInputStream in = new FileInputStream(inputFile);
-        FileOutputStream out = new FileOutputStream(outputFile);
-        int c;
+    	FileInputStream in = null;
+		FileOutputStream out = null;
+    	try {
+    		in = new FileInputStream(inputFile);
+    		out = new FileOutputStream(outputFile);
+    		int c;
 
-        while ((c = in.read()) != -1)
-            out.write(c);
+    		while ((c = in.read()) != -1)
+    			out.write(c);
 
-        in.close();
-        out.close();
+    		in.close();
+    		out.close();
+    	} catch (Exception e) {
+    		
+    	} finally {
+    		if ( in != null ) 
+    			in.close();
+    		if ( out != null ) 
+    		    out.close();
+    	}
     }
 }

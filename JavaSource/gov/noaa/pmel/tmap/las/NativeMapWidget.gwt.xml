@@ -5,7 +5,11 @@
 	<inherits name="com.google.gwt.i18n.I18N" />
 	<inherits name="com.google.gwt.json.JSON" />
 
-	<source path="client" />
+        <source path="client">
+           <exclude name="**/inventory/**"/>
+           <exclude name="**/Inventory.java"/>
+        </source>
+
 
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->

@@ -100,10 +100,27 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	}
 	public boolean isDiscrete() {
 	    return getAttributes().get("grid_type").equals("trajectory") || 
+	    		getAttributes().get("grid_type").equals("trajectoryprofile") ||
 	            getAttributes().get("grid_type").equals("scattered") || 
 	            getAttributes().get("grid_type").equals("point") ||
 	            getAttributes().get("grid_type").equals("timeseries") ||
 	            getAttributes().get("grid_type").equals("profile") ; //TODO   ||   OTHER DSG TYPES
+	}
+	public boolean isSubset() {
+		if ( getAttributes().get("subset_variable") != null ) {
+			return getAttributes().get("subset_variable").equals("true");
+		} else {
+			return false;
+		}
+	}
+	public boolean isPoint() {
+		return getAttributes().get("grid_type").equals("point");
+	}
+	public boolean isTimeSeries() {
+		return getAttributes().get("grid_type").equals("timeseries");
+	}
+	public boolean isTrajectory() {
+		return getAttributes().get("grid_type").equals("trajectory");
 	}
     public String getShortname() {
         return shortname;

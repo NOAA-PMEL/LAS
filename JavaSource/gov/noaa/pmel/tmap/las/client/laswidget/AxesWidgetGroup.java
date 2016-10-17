@@ -69,7 +69,6 @@ public class AxesWidgetGroup extends Composite {
         mapPanel.setWidth(xControlsWidthPx);
         menuWidgets = new FlexTable();
         refMap = new OLMapWidget("128px", "256px", tile_server, tile_layer);
-        refMap.activateNativeHooks();
         zWidget = new AxisWidget();
         zWidget.setVisible(false);
         eWidget = new EnsembleAxisWidget();

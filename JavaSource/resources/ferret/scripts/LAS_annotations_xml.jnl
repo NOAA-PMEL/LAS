@@ -60,7 +60,7 @@ ENDIF
 
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
-   go write_to_xml
+   GO write_to_xml
 
    IF `($note_num"0") GT 0` THEN
       REPEAT/RANGE=1:($note_num)/NAME=m (\

@@ -49,6 +49,8 @@ GO setup_prop_prop
 DEFINE SYMBOL viewsave = ($ferret_view)
 DEFINE SYMBOL ferret_view = aa  
 
+IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 0.8
+IF ($ferret_plot_var_0"|time>1|*>0") THEN DEFINE SYMBOL win_aspect = 0.3
 GO LAS_open_window
 
 DEFINE SYMBOL ferret_view = ($viewsave)
@@ -124,7 +126,7 @@ IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN
       DEFINE SYMBOL tunits = ($data_0_units)
    ELSE
       DEFINE SYMBOL t_units = `($data_0_var),return=units`AA 
-      IF `STRLEN("$tunits)") GT 2` THEN DEFINE SYMBOL tunits = ($data_0_units"`($data_0_var),return=units`")
+      IF `STRLEN("($t_units)") GT 2` THEN DEFINE SYMBOL tunits = ($data_0_units"`($data_0_var),return=units`")
    ENDIF
 ENDIF
 
@@ -138,7 +140,14 @@ IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN
 ENDIF
 
 ! Polygon plot
-GO LAS_xytvar_setup
+
+! If this is a Watch Circle plot, set that up. 
+! This is a hack, which can be generalized with properties or attributes.
+
+GO setup_watch_circle
+
+IF `its_watch_circle EQ 0` THEN GO LAS_xytvar_setup
+
 IF ($put_label"0|*>1") THEN DEFINE SYMBOL all_missing = 1
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), 0
@@ -290,7 +299,7 @@ ELSE
         DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 	DEFINE SYMBOL dokey = 0
      ELSE
-        DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+        IF `STRINDEX(UPCASE("($qualifiers)"), "/KEY") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
 	DEFINE SYMBOL dokey = 1
      ENDIF
    
@@ -338,6 +347,23 @@ ELSE
 
    DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($qualifiers)
+
+! If the color-by variable has units of "count", set up color levels and palette appropriately.
+
+   IF `STRINDEX(UPCASE("($data_2_units)"), "COUNT" ) GT 0` THEN 
+	LET countmm = minmax(constraints_mask*($data_var))
+	LET ncount = `INT(countmm[i=2] - countmm[i=1] + 1)`
+	IF `ncount LE 30` THEN
+	   LET locount = `INT(countmm[i=1])`
+	   LET hicount = `INT(countmm[i=2]+0.5)`
+	   DEFINE SYMBOL ferret_fill_levels = (`locount`,`countmm[i=2]`,1)/KEY=CENTER
+	ELSE
+	   DEFINE SYMBOL ferret_fill_levels = 30/KEY=CENTER
+	ENDIF
+	IF `($ferret_palette"0|*>1") EQ 0 AND ncount LE 10` THEN define symbol ferret_palette = ten_by_levels
+	IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = thirty_by_levels
+	DEFINE SYMBOL qualifiers = ($qualifiers)/levels=($ferret_fill_levels)/KEY=CENTER/palette=($ferret_palette)
+   ENDIF
 
    IF ($ribbon"0") THEN
       ($plot_command)($qualifiers) ($plot_arg)

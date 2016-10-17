@@ -35,23 +35,27 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.apache.http.HttpException;
+import org.apache.struts2.ServletActionContext;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.safehtml.shared.UriUtils;
 
 public class Confluence extends LASAction {
 
-	private static Logger log = Logger.getLogger(Confluence.class.getName());
+	private static Logger log = LoggerFactory.getLogger(Confluence.class.getName());
 
 	private static final LASProxy lasProxy = new LASProxy();
 
 	private String request_format;
+	
+	private static String LAZY_START = "lazy_start";
+	private static String BATCH = "batch";
 
 	public static final HashMap<String, String[]> ajaxCalls =   
 		new HashMap<String, String[]>()   
@@ -95,26 +99,23 @@ public class Confluence extends LASAction {
 					put(Constants.GET_ANNOTATIONS_KEY, Constants.GET_ANNOTATIONS);
 				}  
 			};
-		public ActionForward execute(ActionMapping mapping,
-				ActionForm form,
-				HttpServletRequest request,
-				HttpServletResponse response){
+		public String execute(){
 
-			String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+			String lazy_start = (String) contextAttributes.get(LASConfigPlugIn.LAS_LAZY_START_KEY);
 	        if ( lazy_start != null && lazy_start.equals("true") ) {
 	        	// Start the initialization and forward to lazy start page
-	        	String init_running = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY);
+	        	String init_running = (String) contextAttributes.get(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY);
 	        	if ( init_running == null ) {
-	        		servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY, "true");
-	        	    InitThread thread = new InitThread(servlet.getServletContext());
+	        		contextAttributes.put(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY, "true");
+	        	    InitThread thread = new InitThread(ServletActionContext.getServletContext());
 	        	    thread.start();
 	        	}
 	        	log.debug("Init is running...");
-	        	return mapping.findForward("lazy_start");
+	        	return LAZY_START;
 	        }
 			
 			String openid = request.getParameter("openid");
-			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+			LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 
 			ArrayList<Tributary> servers = new ArrayList<Tributary>();
 
@@ -154,7 +155,7 @@ public class Confluence extends LASAction {
 								if ( varid != null ) {
 									q.append("&varid="+varid);
 								}
-								response.sendRedirect(q.toString());
+								response.sendRedirect(UriUtils.sanitizeUri(q.toString()));
 							} else {
 								response.sendRedirect("localGetUI.do");
 							}
@@ -168,7 +169,7 @@ public class Confluence extends LASAction {
 							if ( varid != null ) {
 								q.append("&varid="+varid);
 							}
-							response.sendRedirect(q.toString());
+							response.sendRedirect(UriUtils.sanitizeUri(q.toString()));
 						}
 						if ( dsids != null && varid != null ) {
 							request.getSession().setAttribute("varid", varid);
@@ -178,10 +179,10 @@ public class Confluence extends LASAction {
 								q.append("&dsid="+dsids[i]);
 							}
 							q.append("&varid="+varid);
-							response.sendRedirect(q.toString());
+							response.sendRedirect(UriUtils.sanitizeUri(q.toString()));
 						}
 						if (catids == null && dsids == null ) {
-							return mapping.findForward(Constants.CATEGORIES_REQUIRED_KEY);
+							return Constants.CATEGORIES_REQUIRED_KEY;
 						}
 					} else {
 						response.sendRedirect("localGetUI.do");
@@ -193,7 +194,7 @@ public class Confluence extends LASAction {
 						String[] parts = dsid.split(Constants.NAME_SPACE_SPARATOR);
 						String server_key = parts[0];
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
-							return mapping.findForward(Constants.GET_DATASETS_KEY);
+							return Constants.GET_DATASETS_KEY;
 						}
 
 						dsid = parts[1];
@@ -203,7 +204,7 @@ public class Confluence extends LASAction {
 						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} else {
 						// Send it to the local server which will work most of the time..
-						return mapping.findForward(Constants.GET_DATASETS_KEY);
+						return Constants.GET_DATASETS_KEY;
 					}
 					
 				} else if ( url.contains(Constants.GET_CATEGORIES) ) {
@@ -270,7 +271,7 @@ public class Confluence extends LASAction {
 
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
 
-							return mapping.findForward(Constants.GET_CATEGORIES_KEY);
+							return Constants.GET_CATEGORIES_KEY;
 
 						} else {
 
@@ -297,7 +298,7 @@ public class Confluence extends LASAction {
 						String[] parts = opid.split(Constants.NAME_SPACE_SPARATOR);
 						String server_key = parts[0];
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
-							return mapping.findForward(Constants.GET_OPTIONS_KEY);
+							return Constants.GET_OPTIONS_KEY;
 						}
 
 						opid = parts[1];
@@ -307,7 +308,7 @@ public class Confluence extends LASAction {
 						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} else {
 						// Send it to the local server which will work most of the time..
-						return mapping.findForward(Constants.GET_OPTIONS_KEY);
+						return Constants.GET_OPTIONS_KEY;
 					}
 				} else if ( url.contains(Constants.GET_ANNOTATIONS) ) {
 					String catid = request.getParameter("catid");
@@ -316,12 +317,12 @@ public class Confluence extends LASAction {
 						if ( server_key != null ) {
 							if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
 								// Process here as normal...
-								return mapping.findForward(Constants.GET_ANNOTATIONS_KEY);
+								return Constants.GET_ANNOTATIONS_KEY;
 							} else {
 								Tributary trib = lasConfig.getTributary(server_key);
 								String las_url = trib.getURL();
 								if ( proxy.equalsIgnoreCase("full") ) {
-									return processRequest(mapping, request, response, lasConfig, las_url, server_key, openid);
+									return processRequest(request, response, lasConfig, las_url, server_key, openid);
 								} else {
 									las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 									lasProxy.executeGetMethodAndStreamResult(las_url, response);
@@ -333,17 +334,17 @@ public class Confluence extends LASAction {
 					String xml = request.getParameter("xml");
 					if ( xml == null ) {
 						// Local request for the info page...
-						return mapping.findForward("LocalProductServer");
+						return "LocalProductServer";
 					}
 					LASUIRequest ui_request = new LASUIRequest();
 					try {
 						JDOMUtils.XML2JDOM(xml, ui_request);
 					} catch (IOException e) {
 						logerror(request, "Failed to parse XML request.", e);
-						return mapping.findForward("error");					
+						return ERROR;					
 					} catch (JDOMException e) {
 						logerror(request, "Failed to parse XML request.", e);
-						return mapping.findForward("error");
+						return ERROR;
 					}
 					ArrayList<String> ids = ui_request.getDatasetIDs();
 
@@ -353,11 +354,11 @@ public class Confluence extends LASAction {
 						service = lasConfig.getService(op);
 					} catch (JDOMException e) {
 						logerror(request, "Unable to find service name.", e);
-						return mapping.findForward("error");
+						return ERROR;
 					}
 					if ( ids.size() == 0 || (service !=null && service.equals("template")) ) {
 						// Forward to the local server...
-						return mapping.findForward("LocalProductServer");
+						return "LocalProductServer";
 					} else if ( ids.size() > 1 ) {
 						// Check to see how many servers are needed for this product.
 
@@ -374,11 +375,11 @@ public class Confluence extends LASAction {
 							// Multiple variables, but one server so send to the appropriate server.
 							if ( key.equals(lasConfig.getBaseServerURLKey()) ) {
 								// Process here as normal...
-								return mapping.findForward(Constants.LOCAL_PRODUCT_SERVER_KEY);
+								return Constants.LOCAL_PRODUCT_SERVER_KEY;
 							} else {
 								String las_url = tribs.get(key).getURL();
 								if ( proxy.equalsIgnoreCase("full") ) {
-									return processRequest(mapping, request, response, lasConfig, las_url, key, openid);
+									return processRequest(request, response, lasConfig, las_url, key, openid);
 								} else {
 									las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 									lasProxy.executeGetMethodAndStreamResult(las_url, response);
@@ -386,20 +387,20 @@ public class Confluence extends LASAction {
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
-							return new ActionForward(Constants.LOCAL_PRODUCT_SERVER+"?remote_las=true&xml="+xml);
+							return Constants.LOCAL_PRODUCT_SERVER+"?remote_las=true&xml="+xml;
 						}
 					} else {
 
 						// Get the server key and forward to that server...
 						String server_key = ids.get(0).split(Constants.NAME_SPACE_SPARATOR)[0];
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
-							return mapping.findForward("LocalProductServer");
+							return "LocalProductServer";
 						}
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
 
 						if ( proxy.equalsIgnoreCase("full") ) {
-							return processRequest(mapping, request, response, lasConfig, las_url, server_key, openid);
+							return processRequest(request, response, lasConfig, las_url, server_key, openid);
 						} else {
 							las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 							lasProxy.executeGetMethodAndStreamResult(las_url, response);
@@ -423,55 +424,56 @@ public class Confluence extends LASAction {
 					}
 					if ( url.contains(Constants.GET_DATACONSTRAINTS) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_DATACONSTRAINTS_KEY);
+							return Constants.GET_DATACONSTRAINTS_KEY;
 						} else {
 							las_url = las_url + Constants.GET_DATACONSTRAINTS + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_GRID) ) {
 						if ( local ) {	
-							return mapping.findForward(Constants.GET_GRID_KEY);
+							return Constants.GET_GRID_KEY;
 						} else {
 							las_url = las_url + Constants.GET_GRID + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_METADATA) ) {
 						if ( local ) {
-							return new ActionForward("/LocalProductServer.do?xml="+GetMetadata.prepareURL(request, response));
+							GetMetadata gm = new GetMetadata();
+							return "/LocalProductServer.do?xml="+gm.prepareURL(request, response);
 						} else {		
 							las_url = las_url + Constants.GET_METADATA + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_OPERATIONS) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_OPERATIONS_KEY);
+							return Constants.GET_OPERATIONS_KEY;
 						} else {
 							las_url = las_url + Constants.GET_OPERATIONS + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_REGIONS) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_REGIONS_KEY);
+							return Constants.GET_REGIONS_KEY;
 						} else {
 							las_url = las_url + Constants.GET_REGIONS + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VARIABLES) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_VARIABLES_KEY);
+							return Constants.GET_VARIABLES_KEY;
 						} else {
 							las_url = las_url + Constants.GET_VARIABLES + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VARIABLE) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_VARIABLE_KEY);
+							return Constants.GET_VARIABLE_KEY;
 						} else {
 							las_url = las_url + Constants.GET_VARIABLE + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VIEWS) ) {
 						if ( local ) {
-							return mapping.findForward(Constants.GET_VIEWS_KEY);
+							return Constants.GET_VIEWS_KEY;
 						} else {
 							las_url = las_url + Constants.GET_VIEWS + "?" + request.getQueryString();
 						}
 					}
 					if ( !local ) {
-						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						lasProxy.executeGetMethodAndStreamResult(UriUtils.sanitizeUri(las_url), response);
 					}					
 				}
 			} catch (HttpException e) {
@@ -552,16 +554,16 @@ public class Confluence extends LASAction {
 			}
 			return cats;
 		}
-		private ActionForward processRequest(ActionMapping mapping, HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key, String openid) throws JDOMException, HttpException, IOException, LASException {
+		private String processRequest(HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key, String openid) throws JDOMException, HttpException, IOException, LASException {
 			String requestXML = request.getParameter("xml");
 			LASUIRequest lasRequest = new LASUIRequest();
 			if ( requestXML != null ) {
 				try {
-	        		String temp = URLDecoder.decode(requestXML, "UTF-8");
+	        		String temp = JDOMUtils.decode(requestXML, "UTF-8");
 	        		requestXML = temp;
 	        	} catch (UnsupportedEncodingException e) {
 	        		LASAction.logerror(request, "Error decoding the XML request query string.", e);
-	        		return mapping.findForward("error");
+	        		return ERROR;
 	        	}
 
 	        	try {
@@ -570,7 +572,7 @@ public class Confluence extends LASAction {
 	        		request.setAttribute("las_request", lasRequest);
 	        	} catch (Exception e) {
 	        		LASAction.logerror(request, "Error parsing the request XML. ", e);
-	        		return mapping.findForward("error");
+	        		return ERROR;
 	        	}
 	        }
 			LASUIRequest originalRequest = (LASUIRequest) lasRequest.clone();
@@ -611,7 +613,7 @@ public class Confluence extends LASAction {
 			JDOMUtils.XML2JDOM(xml_response, resDoc);
 			if ( resDoc.getResultByType("batch") != null ) {
 			    request.setAttribute("las_response", resDoc);
-			    return mapping.findForward("batch");
+			    return BATCH;
 			}
 			List<Result> results = resDoc.getResults();
 			LASBackendResponse confluence_response = new LASBackendResponse();
@@ -621,6 +623,9 @@ public class Confluence extends LASAction {
 				String result_url = result.getURL();
 				File file = new File(result_file);
 				String filename = lasConfig.getOutputDir()+File.separator+server_key+"_"+file.getName();
+				if ( filename.contains("../") || filename.contains("/..") ) {
+					throw new IOException("Illegal file name.");
+				}
 				File outfile = new File(filename);
 				Element cr = new Element("result");
 				// Copy the attributes.
@@ -652,6 +657,6 @@ public class Confluence extends LASAction {
 			request.setAttribute("las_response", confluence_response);
 			request.setAttribute("las_request", originalRequest);
 			request.setAttribute("las_config", lasConfig);
-			return new ActionForward("/productserver/templates/"+template+".vm");
+			return "/productserver/templates/"+template+".vm";
 		}
 }

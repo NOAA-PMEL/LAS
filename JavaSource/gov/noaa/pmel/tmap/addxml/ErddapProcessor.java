@@ -4,15 +4,19 @@ import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import opendap.dap.Attribute;
@@ -30,6 +34,8 @@ import org.joda.time.chrono.GregorianChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
+import ucar.unidata.util.Format;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -65,16 +71,23 @@ public class ErddapProcessor {
 	private static String TRAJECTORY = "cdm_trajectory_variables";
 	private static String PROFILE = "cdm_profile_variables";
 	private static String TIMESERIES = "cdm_timeseries_variables";
-
-	private static String POINT_TYPE = "point";
-
+	private static String POINT = "cdm_point_variables";
+	
 
 	static boolean isTrajectory = false;
 	static boolean isProfile = false;
 	static boolean isTimeseries = false;
 	static boolean isPoint = false;
+	static boolean isTrajectoryProfile = false;
+	
+	static boolean default_supplied = false;
 
 	DecimalFormat df = new DecimalFormat("#.##");
+	private static final DecimalFormat decimalFormat = new DecimalFormat("###############.###############");
+	
+	DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); 
+	DateTimeFormatter shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(GregorianChronology.getInstance(DateTimeZone.UTC)).withZone(DateTimeZone.UTC);
+	DateTimeFormatter mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(GregorianChronology.getInstance(DateTimeZone.UTC)).withZone(DateTimeZone.UTC);
 
 	public ErddapProcessor(List<String> axesToSkip) {
 
@@ -83,7 +96,7 @@ public class ErddapProcessor {
 	/**
 	 * @param args
 	 */
-	public ErddapReturn process(String url, String id, boolean do_not_write_UNKNOWN, boolean verbose) {
+	public ErddapReturn process(String url, String id, boolean append, boolean auto_display, boolean do_not_write_UNKNOWN, boolean hours, double hours_step, boolean minutes, boolean verbose, String[] properties, String[] varproperties, String[] display, String[] skip, boolean separate) {
 		DAS das = new DAS();
 		this.url = url;
 		this.id = id;
@@ -101,8 +114,11 @@ public class ErddapProcessor {
 		gb = new GridBean();
 		ErddapReturn r = new ErddapReturn();
 
+		InputStream stream = null;
+		JsonStreamParser jp = null;
 
 		try {
+			
 			r.write = true;
 			if ( !url.endsWith("/") ) {
 				url = url + "/";
@@ -110,6 +126,10 @@ public class ErddapProcessor {
 			DateTime date = new DateTime();
 			if ( verbose ) {
 				System.out.println("Processing: " + url + id + " at "+date.toString() );
+			}
+			if ( url.contains("OSMC_PROFILERS") ) {
+				r.write = false;
+				return r;
 			}
 
 			input = lasProxy.executeGetMethodAndReturnStream(url+id+".das", null, timeout);
@@ -119,7 +139,8 @@ public class ErddapProcessor {
 			Attribute cdm_profile_variables_attribute = global.getAttribute(PROFILE);
 			Attribute cdm_timeseries_variables_attribute = global.getAttribute(TIMESERIES);
 			Attribute cdm_data_type = global.getAttribute("cdm_data_type");
-			String grid_type = cdm_data_type.getValueAt(0).toLowerCase();
+			Attribute altitude_proxy = global.getAttribute("altitude_proxy");
+			String grid_type = cdm_data_type.getValueAt(0).toLowerCase(Locale.ENGLISH);
 			Attribute subset_names = null;
 			Attribute title_attribute = global.getAttribute("title");
 			String title = "No title global attribute";
@@ -128,23 +149,31 @@ public class ErddapProcessor {
 				title = titleIt.next();
 			}
 			AttributeTable variableAttributes = das.getAttributeTable("s");
-			if ( ( (cdm_data_type != null && grid_type.equalsIgnoreCase(POINT_TYPE) ) || cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null || cdm_timeseries_variables_attribute != null ) && variableAttributes != null ) {
-				if ( cdm_trajectory_variables_attribute != null ) {
-					subset_names = cdm_trajectory_variables_attribute;
-					isTrajectory = true;
-					r.type = "trajectory";
-				} else if ( cdm_profile_variables_attribute != null ) {
-					subset_names = cdm_profile_variables_attribute;
-					isProfile = true;
-					r.type = "profile";
-				} else if ( cdm_timeseries_variables_attribute != null ) {
-					subset_names = cdm_timeseries_variables_attribute;
-					isTimeseries = true;
-					r.type = "timeseries";
-				} else if ( grid_type.equalsIgnoreCase(POINT_TYPE) ) {
-					subset_names = null;
-					isPoint = true;
-					r.type = "point";
+			if ( ( (cdm_data_type != null && grid_type.equalsIgnoreCase(CdmDatatype.POINT) ) || cdm_profile_variables_attribute !=null || cdm_trajectory_variables_attribute != null || cdm_timeseries_variables_attribute != null ) && variableAttributes != null ) {
+				if ( grid_type.equals("trajectoryprofile") ) {
+					isTrajectoryProfile = true;
+					r.type=CdmDatatype.TRAJECTORYPROFILE;
+				} else {
+					if ( cdm_trajectory_variables_attribute != null && cdm_profile_variables_attribute != null ) {
+						isTrajectoryProfile = true;
+						r.type = CdmDatatype.TRAJECTORYPROFILE;
+					} else if ( cdm_trajectory_variables_attribute != null ) {
+						subset_names = cdm_trajectory_variables_attribute;
+						isTrajectory = true;
+						r.type = CdmDatatype.TRAJECTORY;
+					} else if ( cdm_profile_variables_attribute != null ) {
+						subset_names = cdm_profile_variables_attribute;
+						isProfile = true;
+						r.type = CdmDatatype.PROFILE;
+					} else if ( cdm_timeseries_variables_attribute != null ) {
+						subset_names = cdm_timeseries_variables_attribute;
+						isTimeseries = true;
+						r.type = CdmDatatype.TIMESERIES;
+					} else if ( grid_type.equalsIgnoreCase(CdmDatatype.POINT) ) {
+						subset_names = null;
+						isPoint = true;
+						r.type = CdmDatatype.POINT;
+					}
 				}
 				if ( subset_names != null ) {
 					Iterator<String> subset_variables_attribute_values = subset_names.getValuesIterator();
@@ -198,20 +227,24 @@ public class ErddapProcessor {
 					// Look at the attributes and classify any variable as either time, lat, lon, z or a data variable.
 					if ( var.hasAttribute("_CoordinateAxisType") ) {
 						String type = var.getAttribute("_CoordinateAxisType").getValueAt(0);
-						if ( type.toLowerCase().equals("time") ) {
+						if ( type.toLowerCase(Locale.ENGLISH).equals("time") ) {
 							timeVar.put(name, var);
-						} else if ( type.toLowerCase().equals("lon") ) {
+						} else if ( type.toLowerCase(Locale.ENGLISH).equals("lon") ) {
 							lonVar.put(name, var);
-						} else if ( type.toLowerCase().equals("lat") ) {
+						} else if ( type.toLowerCase(Locale.ENGLISH).equals("lat") ) {
 							latVar.put(name, var);
-						} else if ( type.toLowerCase().equals("height") ) {
+						} else if ( type.toLowerCase(Locale.ENGLISH).equals("height") ) {
 							zVar.put(name, var);
 						}
 					} else {
-						if ( name.toLowerCase().contains("tmonth") ) {
+						if ( name.toLowerCase(Locale.ENGLISH).contains("tmonth") ) {
 							monthOfYear.put(name, var);
 						}
-						if ( !data.containsKey(name) && !subsets.containsKey(name) && !idVar.containsKey(name) ) {
+						boolean skipCheck = false;
+						if ( skip != null ) {
+							skipCheck = Arrays.asList(skip).contains(name);
+						}
+						if ( !data.containsKey(name) && !subsets.containsKey(name) && !idVar.containsKey(name) && !skipCheck ) {
 							data.put(name, var);
 						}
 					}
@@ -268,8 +301,18 @@ public class ErddapProcessor {
 				Element axesE = new Element("axes");
 				// Build the LAS configuration.
 				DatasetBean db = new DatasetBean();
+				
+				if ( properties != null && properties.length > 0 ) {
+					for (int i = 0; i < properties.length; i++) {
+						// Split n-1 times so ui:default:file:blah#blah gets all of the stuff after the second ":"
+						String[] parts = properties[i].split(":", 3);
+						if ( parts[0].equals("ui") && parts[1].equals("default") ) default_supplied = true;
+						db.setProperty(parts[0], parts[1], parts[2]);
+					}
+				}
 
-				db.setElement(id);
+				String las_id = "id-"+id;
+				db.setElement(las_id);
 				db.setName(title);            
 
 				db.setUrl(url);
@@ -283,6 +326,19 @@ public class ErddapProcessor {
 					dsgIDVariablename = idVar.keySet().iterator().next();
 				}
 
+				// Get the ISO Metadata
+				String isourl = url+id+".iso19115";
+				stream = null;
+
+				IsoMetadata meta = new IsoMetadata();
+				stream = lasProxy.executeGetMethodAndReturnStream(isourl, null, timeout);
+				if ( stream != null ) {
+					JDOMUtils.XML2JDOM(new InputStreamReader(stream), meta);
+					meta.init();
+				} else { 
+					r.write = false;
+					return r;
+				}
 
 				List<AxisBean> axes = new ArrayList<AxisBean>();
 				if ( !timeVar.keySet().isEmpty() ) {
@@ -290,62 +346,107 @@ public class ErddapProcessor {
 					AttributeTable var = timeVar.get(name);
 					db.setProperty("tabledap_access", "time", name);
 					AxisBean ab = new AxisBean();
+					if ( display != null && !display[0].equals("minimal") ) {
+						if ( display.length == 1 ) {
+							ab.setDisplay_lo(display[0]);
+						} else if (display.length == 2 ){
+							String t0text = display[0];
+							String t1text = display[1];
+							DateTime dt0;
+							DateTime dt1;
+							try {
+								dt0 = shortFerretForm.parseDateTime(t0text);
+							} catch (Exception e) {
+								try {
+									dt0 = mediumFerretForm.parseDateTime(t0text);
+								} catch (Exception e1) {
+									dt0 = null;
+								} 
+							}
+							try {
+								dt1 = shortFerretForm.parseDateTime(t1text);
+							} catch (Exception e) {
+								try {
+									dt1 = mediumFerretForm.parseDateTime(t1text);
+								} catch (Exception e1) {
+									dt1 = null;
+								}
+							}
+							if ( dt1 != null && dt0 != null ) {
+								if ( dt0.isBefore(dt1)) {
+									ab.setDisplay_lo(t0text);
+									ab.setDisplay_hi(t1text);
+								} else {
+									ab.setDisplay_lo(t1text);
+									ab.setDisplay_hi(t0text);
+								}
+							}
+						}
+					}
 					ab.setElement(name+"-"+id);
 					ab.setType("t");
-					ab.setUnits("days");
+					if ( minutes ) {
+						ab.setUnits("minutes");
+					} else if ( hours ) {
+						ab.setUnits("hours");					
+					} else {
+						ab.setUnits("days");
+					}
 					Attribute ua = var.getAttribute("units");
 					if ( ua != null ) {
 						String units = ua.getValueAt(0);
 						db.setProperty("tabledap_access", "time_units", units);
 					}
 					ArangeBean arb = new ArangeBean();
-					InputStream stream = null;
-					JsonStreamParser jp = null;
+					
 					if ( !axesToSkip.contains("t") ) {
-						String timequery = "";
-						if ( dsgIDVariablename != null ) {
-							timequery = dsgIDVariablename+",";
+
+						String start = meta.getTlo();
+						String end = meta.getThi();
+						
+						if ( start == null || end == null ) {
+							throw new Exception("Time metadata not found.");
 						}
-						timequery = timequery+"time,latitude,longitude&time!=NaN&distinct()&orderByMinMax(\""+name+"\")";
-						String timeurl = url+id + ".json?"+URLEncoder.encode(timequery, "UTF-8");
-						stream = null;
 
-						stream = lasProxy.executeGetMethodAndReturnStream(timeurl, null, timeout);
-						if ( stream != null ) {
-							jp = new JsonStreamParser(new InputStreamReader(stream));
-							JsonObject bounds = (JsonObject) jp.next();
-							String[] timeminmax = getMinMax(bounds, name);
-							stream.close();
+						// This should be time strings in ISO Format
 
-							String start = timeminmax[0];
-							String end = timeminmax[1];
+						Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+						DateTimeFormatter iso = ISODateTimeFormat.dateTimeParser().withChronology(chrono).withZone(DateTimeZone.UTC);
 
-							// This should be time strings in ISO Format
+						DateTime dtstart = iso.parseDateTime(start);
+						DateTime dtend = iso.parseDateTime(end);
 
-							Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-							DateTimeFormatter iso = ISODateTimeFormat.dateTimeParser().withChronology(chrono).withZone(DateTimeZone.UTC);
+						int days = Days.daysBetween(dtstart.withTimeAtStartOfDay() , dtend.withTimeAtStartOfDay() ).getDays();
 
-							DateTime dtstart = iso.parseDateTime(start);
-							DateTime dtend = iso.parseDateTime(end);
-
-							int days = Days.daysBetween(dtstart.withTimeAtStartOfDay() , dtend.withTimeAtStartOfDay() ).getDays();
-							DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); 
-							arb.setStart(hoursfmt.print(dtstart.withTimeAtStartOfDay()));
-							arb.setStep("1");
-							// Fudge
-							days = days + 1;
-							arb.setSize(String.valueOf(Long.valueOf(days)));
-							ab.setArange(arb);
+						if ( hours || minutes ) {
+							arb.setStart(hoursfmt.print(dtstart));
 						} else {
-							if ( do_not_write_UNKNOWN ) {
-								r.write = false;
-								r.unknown_axis = "t";
-								return r;
-							}
-							arb.setStart("UNKNOWN_START");
-							arb.setStep("UNKNOWN_STEP");
-							arb.setSize("UNKNOWN_SIZE");
+							arb.setStart(hoursfmt.print(dtstart.withTimeAtStartOfDay()));
 						}
+						arb.setStep("1");
+
+						// Fudge
+						days = days + 1;
+
+						if ( minutes ) {
+							// Days are now minutes :-)
+							days = days*24*60;
+						} else if ( hours ) {
+							// Days are now hours :-)
+							days = (int) (days*24*Math.rint(1.d/hours_step));
+							arb.setStep(decimalFormat.format(hours_step));
+
+						} 
+
+						arb.setSize(String.valueOf(Long.valueOf(days)));
+						
+						// If we're scanning a catalog set the display dates so the entire data set is not requested with the first plot.
+						if ( auto_display ) {
+							ab.setDisplay_lo(mediumFerretForm.print(dtstart));
+							ab.setDisplay_hi(mediumFerretForm.print(dtstart.plusDays(1)));
+						}
+						ab.setArange(arb);
+
 					} else {
 						if ( do_not_write_UNKNOWN ) {
 							r.write = false;
@@ -356,6 +457,7 @@ public class ErddapProcessor {
 						arb.setStep("UNKNOWN_STEP");
 						arb.setSize("UNKNOWN_SIZE");
 					}
+
 					ab.setArange(arb);
 					axes.add(ab);
 				}
@@ -374,56 +476,53 @@ public class ErddapProcessor {
 					}
 					ArangeBean arb = new ArangeBean();     
 					if ( !axesToSkip.contains("x") ) {
-						// Do a query to get the longitude range from the dataset.
-						InputStream stream = null;
-						JsonStreamParser jp = null;
-						String lonquery = "";
-						if ( dsgIDVariablename != null ) {
-							lonquery = dsgIDVariablename+",";
+
+						String start = meta.getXlo();
+						String end = meta.getXhi();
+						double dmin = -180.0d;
+						double dmax = 180.0d;
+						if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
+							db.setProperty("tabledap_access", "lon_domain", "0:360");
+							dmin = 0.0d;
+							dmax = 360.0d;
+						} else {
+							db.setProperty("tabledap_access", "lon_domain", "-180:180");
 						}
-						lonquery = lonquery+"time,latitude,longitude&longitude!=NaN&distinct()&orderByMinMax(\""+name+"\")";
-						String lonurl = url+id + ".json?"+URLEncoder.encode(lonquery, "UTF-8");
-						stream = null;
+						double dstart = Double.valueOf(start);
+						double dend = Double.valueOf(end);
+						double size = dend - dstart;  
+						String ssize = String.valueOf(Math.round(size));
+						// Fudge it up if the interval is really small...
+						if ( size < 355.0 ) {
+							double fudge = size*.15;
+							if ( size < 1.0d ) {
+								fudge = .25;
+							}
+							dstart = dstart - fudge;
+							
+							if ( dstart < dmin ) {
+								dstart = dmin;
+							}
+							dend = dend + fudge;
+							if ( dend > dmax ) {
+								dend = dmax;
+							}
 
-						stream = lasProxy.executeGetMethodAndReturnStream(lonurl, null, timeout);
-
-						if ( stream != null ) {
-							jp = new JsonStreamParser(new InputStreamReader(stream));
-							JsonObject bounds = (JsonObject) jp.next();
-							String[] lonminmax = getMinMax(bounds, name);
-							stream.close();
-
-							String start = lonminmax[0];
-							String end = lonminmax[1];
-							double size = Double.valueOf(end) - Double.valueOf(start);                          
-							double c = Math.ceil(size);
-							String ssize = String.valueOf((long) c+1);
+							double c = Math.ceil(dend - dstart);
+							ssize = String.valueOf((long) c+1);
 							if ( ssize.equals("1") ) {
 								double s = Double.valueOf(start) - 1.0d;
 								start = df.format(s);
 								ssize = "3";
 							}
-							arb.setSize(ssize);
-							arb.setStart(start);
-							arb.setStep("1.0");
-							ab.setArange(arb);
-							if ( Math.abs(Double.valueOf(start)) > 180.d || Math.abs(Double.valueOf(end)) > 180.d ) {
-								db.setProperty("tabledap_access", "lon_domain", "0:360");
-							} else {
-								db.setProperty("tabledap_access", "lon_domain", "-180:180");
-							}
-						} else {
-							if ( do_not_write_UNKNOWN ) {
-								r.write = false;
-								r.unknown_axis = "x";
-								return r;
-							}
-							arb.setStart("UNKNOW_START");
-							arb.setStep("UNKNOW_STEP");
-							arb.setSize("UNKNOW_SIZE");
-							ab.setArange(arb);
-							db.setProperty("tabledap_access", "lon_domain", "UNKNOWN:UNKNOWN");
 						}
+						double step = (dend - dstart)/(Double.valueOf(ssize) - 1.0d);
+						arb.setSize(ssize);
+						arb.setStart(decimalFormat.format(dstart));
+						arb.setStep(decimalFormat.format(step));
+						ab.setArange(arb);
+						
+
 					} else {
 						if ( do_not_write_UNKNOWN ) {
 							r.write = false;
@@ -454,50 +553,40 @@ public class ErddapProcessor {
 					}
 					ArangeBean arb = new ArangeBean();      
 					if ( !axesToSkip.contains("y") ) {
-						InputStream stream = null;
-						JsonStreamParser jp = null;
-						String latquery = "";
-						if ( dsgIDVariablename != null ) {
-							latquery = dsgIDVariablename+",";
-						}
-						latquery = latquery+"time,latitude,longitude&latitude!=NaN&distinct()&orderByMinMax(\""+name+"\")";
-						String laturl = url+id + ".json?"+URLEncoder.encode(latquery, "UTF-8");
-						stream = null;
 
-						stream = lasProxy.executeGetMethodAndReturnStream(laturl, null, timeout);
-
-
-						if ( stream != null ) {
-							jp = new JsonStreamParser(new InputStreamReader(stream));
-							JsonObject bounds = (JsonObject) jp.next();
-							String[] latminmax = getMinMax(bounds, name);
-							stream.close();
-
-							String start = latminmax[0];
-							String end = latminmax[1];
-							double size = Double.valueOf(end) - Double.valueOf(start);
-							double c = Math.ceil(size);
-							String ssize = String.valueOf((long) c+1);
-							if ( ssize.equals("1") ) {
+						String start = meta.getYlo();
+						String end = meta.getYhi();
+						double dstart = Double.valueOf(start);
+						double dend = Double.valueOf(end);
+						double size = dend - dstart; 
+						String ssize = String.valueOf(Math.round(size));
+						if ( size < 85.0 ) {
+							double fudge = size * .15;
+							if ( size < 1.0d ) {
+								fudge = .25;
+							}
+							dstart = dstart - fudge;
+							if ( dstart < -90.0d ) {
+								dstart = -90.0d;
+							}
+							dend = dend + fudge;
+							if ( dend > 90.0d ) {
+								dend = 90.;
+							}
+							double c = Math.ceil(dend - dstart);
+							ssize = String.valueOf((long) c + 1);
+							if (ssize.equals("1")) {
 								double s = Double.valueOf(start) - 1.0d;
 								start = df.format(s);
 								ssize = "3";
 							}
-							arb.setStart(start);
-							arb.setStep("1.0");                        
-							arb.setSize(ssize);
-							ab.setArange(arb);                    
-						} else {
-							if ( do_not_write_UNKNOWN ) {
-								r.write = false;
-								r.unknown_axis = "y";
-								return r;
-							}
-							arb.setStart("UNKNOW_START");
-							arb.setStep("UNKNOW_STEP");
-							arb.setSize("UNKNOW_SIZE");
-							ab.setArange(arb);
 						}
+						double step = (dend - dstart)/(Double.valueOf(ssize) - 1.0d);
+						arb.setStart(decimalFormat.format(dstart));
+						arb.setStep(decimalFormat.format(step));                        
+						arb.setSize(ssize);
+						ab.setArange(arb);                    
+
 					} else {
 						if ( do_not_write_UNKNOWN ) {
 							r.write = false;
@@ -513,7 +602,10 @@ public class ErddapProcessor {
 				}
 				/*
 				 * For profiles, grab the depth and make 10 equal levels.
+				 * 
+				 * 
 				 */
+				// TODO look for the cdm_alititude_proxy attribute do a query since there won't be metadata.
 				if ( !zVar.keySet().isEmpty() ) {
 					String name = zVar.keySet().iterator().next();
 					db.setProperty("tabledap_access", "altitude", name);
@@ -528,33 +620,44 @@ public class ErddapProcessor {
 					}
 					ArangeBean arb = new ArangeBean();         
 					if ( !axesToSkip.contains("z") ) {
-						InputStream stream = null;
-						JsonStreamParser jp = null;
-						String zquery = "";
-						if ( dsgIDVariablename != null ) {
-							zquery = dsgIDVariablename+",";
+
+						String start = meta.getZlo();
+						String end = meta.getZhi();
+						if ( start == null || end == null || altitude_proxy != null ) {
+							// If it was a proxy, there's no metadata.
+							// Pull the range from the data.
+							stream = null;
+							jp = null;
+							String zquery = "";
+							
+							String nanDistinct = "&"+name+"!=NaN&distinct()";
+							if ( zquery.length() > 0 ) {
+								zquery = zquery + ",";
+							}
+							zquery = zquery+name+"&orderByMinMax(\""+name+"\")";
+							String zurl = url+id + ".json?"+URLEncoder.encode(zquery, "UTF-8");
+							stream = null;
+
+							stream = lasProxy.executeGetMethodAndReturnStream(zurl, null, timeout);
+
+
+							if ( stream != null ) {
+								jp = new JsonStreamParser(new InputStreamReader(stream));
+								JsonObject bounds = (JsonObject) jp.next();
+								String[] zminmax = getMinMax(bounds, name);
+								stream.close();
+
+								start = zminmax[0];
+								end = zminmax[1];
+							}
 						}
-						zquery = zquery+","+name+"time,latitude,longitude&"+name+"!=NaN&distinct()&orderByMinMax(\""+name+"\")";
-						String zurl = url+id + ".json?"+URLEncoder.encode(zquery, "UTF-8");
-						stream = null;
-
-						stream = lasProxy.executeGetMethodAndReturnStream(zurl, null, timeout);
-
-
-						if ( stream != null ) {
-							jp = new JsonStreamParser(new InputStreamReader(stream));
-							JsonObject bounds = (JsonObject) jp.next();
-							String[] zminmax = getMinMax(bounds, name);
-							stream.close();
-
-							String start = zminmax[0];
-							String end = zminmax[1];
+						if ( start != null && end != null ) {
 							double size = Double.valueOf(end) - Double.valueOf(start);
 							double step = size/10.;
 							arb.setStart(start);
 							arb.setStep(df.format(step));
 							arb.setSize("10");
-							ab.setArange(arb);                    
+							ab.setArange(arb);   
 						} else {
 							if ( do_not_write_UNKNOWN ) {
 								r.write = false;
@@ -577,6 +680,7 @@ public class ErddapProcessor {
 						arb.setSize("UNKNOW_SIZE");
 						ab.setArange(arb);
 					}
+
 					axes.add(ab);            
 				}
 
@@ -592,13 +696,16 @@ public class ErddapProcessor {
 					AttributeTable idvar = idVar.get(dsgIDVariablename);
 					VariableBean idvb = addSubset(dsgIDVariablename, idvar);
 					idvb.addAttribute("color_by", "true");
-					idvb.addAttribute(grid_type.toLowerCase()+"_id", "true");
-					idvb.addAttribute("grid_type", grid_type.toLowerCase());
+					idvb.addAttribute(grid_type.toLowerCase(Locale.ENGLISH)+"_id", "true");
+					idvb.addAttribute("grid_type", grid_type.toLowerCase(Locale.ENGLISH));
 					variables.add(idvb);
 				}
 
 				if ( isTrajectory ) {
 					idcg.setAttribute("name", "Individual Trajectory(ies)");
+				}
+				if ( isTrajectoryProfile ) {
+					idcg.setAttribute("name", "Trajectory Profiles(s)");
 				}
 				if ( isProfile ) {
 					idcg.setAttribute("name", "Individual Profile(s)");
@@ -642,7 +749,7 @@ public class ErddapProcessor {
 						String name = (String) subsetIt.next();
 						AttributeTable var = subsets.get(name);
 						VariableBean vb = addSubset(name, var);
-						vb.addAttribute("grid_type", grid_type.toLowerCase());
+						vb.addAttribute("grid_type", grid_type.toLowerCase(Locale.ENGLISH));
 						variables.add(vb);
 						Element c = new Element("constraint");
 						c.setAttribute("type", "subset");
@@ -666,6 +773,14 @@ public class ErddapProcessor {
 					allv.append(key);
 					if ( subIt.hasNext() ) allv.append(",");
 				}
+				
+				// Z name zn is used below as well...
+				
+				String zn = null;
+				if ( !zVar.keySet().isEmpty() ) {
+					zn = zVar.keySet().iterator().next();
+				}
+				
 				db.setProperty("tabledap_access", "all_variables", allv.toString());
 				/*
 				 * There is a page that will show thumbnails of property-property plots.
@@ -713,10 +828,7 @@ public class ErddapProcessor {
 				String timen = timeVar.keySet().iterator().next();
 
 
-				String zn = null;
-				if ( !zVar.keySet().isEmpty() ) {
-					zn = zVar.keySet().iterator().next();
-				}
+				
 				List<String> data_variable_ids = new ArrayList();
 				for (Iterator subIt = data.keySet().iterator(); subIt.hasNext();) {
 					String key = (String) subIt.next();
@@ -732,6 +844,12 @@ public class ErddapProcessor {
 						pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
 					} else if ( TIMESERIES.contains(grid_type) ) {
 						pairs.append(timen+"-"+id+","+key+"-"+id+"\n");
+					} else if ( POINT.contains(grid_type) ) {
+						if ( zn != null && !zn.equals("") ) {
+							pairs.append(key+"-"+id+","+zn+"-"+id+"\n");
+						}
+						pairs.append(key+"-"+id+","+latn+"-"+id+"\n");
+						pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
 					}
 					data_variable_ids.add(key+"-"+id);
 				}
@@ -778,7 +896,7 @@ public class ErddapProcessor {
 					// May already be done because it's a sub set variable??
 							boolean dummy = false;
 					if ( !subsets.containsKey(name) ) {
-						if (!dummy && !name.toLowerCase().contains("time") && !name.toLowerCase().contains("lat") && !name.toLowerCase().contains("lon") && !name.toLowerCase().contains("depth") ) {
+						if (!dummy && !name.toLowerCase(Locale.ENGLISH).contains("time") && !name.toLowerCase(Locale.ENGLISH).contains("lat") && !name.toLowerCase(Locale.ENGLISH).contains("lon") && !name.toLowerCase(Locale.ENGLISH).contains("depth") ) {
 							db.setProperty("tabledap_access", "dummy", name);
 							dummy = true;
 						}
@@ -804,7 +922,7 @@ public class ErddapProcessor {
 						}
 						vb.setUrl("#"+name);
 						vb.setGrid(gb);
-						vb.addAttribute("grid_type", grid_type.toLowerCase());
+						vb.addAttribute("grid_type", grid_type.toLowerCase(Locale.ENGLISH));
 						variables.add(vb);   
 					}
 
@@ -812,22 +930,44 @@ public class ErddapProcessor {
 
 				db.setProperty("tabledap_access", "table_variables", dsgIDVariablename);
 
+				// add any variable properties.
+				for (Iterator varid = variables.iterator(); varid.hasNext();) {
+					VariableBean variableb = (VariableBean) varid.next();
+					if ( varproperties != null && varproperties.length > 0 ) {
+						for (int p = 0; p < varproperties.length; p++) {
+							// Split n-1 times so any ":" after the third remain
+							String[] parts = varproperties[p].split(":", 4);
+							if ( variableb.getUrl().endsWith(parts[0]) ) {
+								variableb.setProperty(parts[1], parts[2], parts[3]);
+							}
+						}
+					}
+				}
+				
+				
 				db.addAllVariables(variables);
 
-				File outputFile = new File("las_from_erddap.xml");
+				File outputFile;
+				if ( separate ) {
+					outputFile = new File(id+".xml");
+				} else {
+					outputFile = new File("las_from_erddap.xml");
+				}
 
 				// Add all the tabledap_access properties
 
 				//TODO "Profile"
 				if (dsgIDVariablename != null){
-					db.setProperty("tabledap_access", grid_type.toLowerCase()+"_id", dsgIDVariablename);
+					db.setProperty("tabledap_access", grid_type.toLowerCase(Locale.ENGLISH)+"_id", dsgIDVariablename);
 				}
-				db.setProperty("tabledap_access", "server", "TableDAP "+grid_type.toLowerCase());
+				db.setProperty("tabledap_access", "server", "TableDAP "+grid_type.toLowerCase(Locale.ENGLISH));
 				db.setProperty("tabledap_access", "title", title);
 
 				db.setProperty("tabledap_access", "id", id);
 
-				db.setProperty("ui", "default", "file:ui.xml#"+grid_type.toLowerCase());
+				if ( !default_supplied ) {
+				   db.setProperty("ui", "default", "file:ui.xml#"+grid_type.toLowerCase(Locale.ENGLISH));
+				}
 
 				if ( !monthOfYear.keySet().isEmpty() ) {
 					String name = monthOfYear.keySet().iterator().next();
@@ -872,7 +1012,7 @@ public class ErddapProcessor {
 					axesE.addContent(ab.toXml());
 				}
 				if ( r.write ) {
-					outputXML(outputFile, datasetsE, true);
+					outputXML(outputFile, datasetsE, !separate);
 					outputXML(outputFile, gridsE, true);
 					outputXML(outputFile, axesE, true);
 				}
@@ -892,8 +1032,22 @@ public class ErddapProcessor {
 		} catch (Exception e) {
 			r.write = false;
 			r.type = "failed";
-			System.err.println("Error opening: "+url+id+" "+e.getMessage());
-		} 
+			String message = "";
+			if ( e != null ) {
+				String m = e.getMessage();
+				if ( m != null )
+					message = e.getMessage();
+			}
+			System.err.println("Error opening: "+url+id+" "+message);
+		} finally {
+			if ( stream != null ) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					System.err.println("Error closing stream.  "+e.getMessage());
+				}
+			}
+		}
 		return r; 
 	}
 	public String[] getMinMax(JsonObject bounds, String name) {

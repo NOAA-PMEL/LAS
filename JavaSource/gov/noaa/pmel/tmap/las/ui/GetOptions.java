@@ -4,6 +4,7 @@
  */
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Category;
@@ -21,12 +22,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,7 +37,7 @@ import org.json.XML;
  * @struts.action validate="true"
  */
 public class GetOptions extends ConfigService {
-	private static Logger log = Logger.getLogger(GetOptions.class.getName());
+	private static Logger log = LoggerFactory.getLogger(GetOptions.class.getName());
 	/*
 	 * Generated Methods
 	 */
@@ -53,12 +50,11 @@ public class GetOptions extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response) {
+	public String execute() {
 		String query = request.getQueryString();
 		if ( query != null ) {
 			try{
-				query = URLDecoder.decode(query, "UTF-8");
+				query = JDOMUtils.decode(query, "UTF-8");
 				log.info("START: "+request.getRequestURL()+"?"+query);
 			} catch (UnsupportedEncodingException e) {
 				// Don't care we missed a log message.
@@ -66,7 +62,7 @@ public class GetOptions extends ConfigService {
 		} else {
 			log.info("START: "+request.getRequestURL());
 		}
-		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 		String opid = request.getParameter("opid");
 		String format = request.getParameter("format");
 

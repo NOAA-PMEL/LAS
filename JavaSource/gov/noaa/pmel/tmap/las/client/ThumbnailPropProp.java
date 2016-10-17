@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -41,6 +42,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -316,13 +318,27 @@ public class ThumbnailPropProp implements EntryPoint {
         lr0.removeVariables();
         String id0 = plot_pairs.get(plotindex).get(0);
         String id1 = plot_pairs.get(plotindex).get(1);
+        String id2 = null;
+        if ( plot_pairs.get(plotindex).size() > 2 ) {
+        	id2 = plot_pairs.get(plotindex).get(2);
+        }
         lr0.addVariable(dsid, id0, 0);
         lr0.addVariable(dsid, id1, 0);
+        if ( id2 != null ) {
+            lr0.addVariable(dsid, id2, 0);
+        }
         lr0.removeConstraints();
         lr0.addConstraint(idConstraint);
         VariableSerializable v0 = xAllDatasetVariables.get(id0);
         VariableSerializable v1 = xAllDatasetVariables.get(id1);
+        VariableSerializable v2 = null;
+        if ( id2 != null ) {
+            v2 = xAllDatasetVariables.get(id2);
+        }
         currentTitle = v1.getName()+" vs "+v0.getName();
+        if ( v2 != null ) {
+        	currentTitle = currentTitle + " colored by " + v2.getName();
+        }
         GridSerializable g0 = v0.getGrid();
         lr0.setRange("x", g0.getXAxis().getLo(), g0.getXAxis().getHi(), 0);
         lr0.setRange("y", g0.getYAxis().getLo(), g0.getYAxis().getHi(), 0);
@@ -333,6 +349,9 @@ public class ThumbnailPropProp implements EntryPoint {
         lr0.setRange("t", tlo, thi, 0);
         lr0.setProperty("las", "output_type", "xml");
         lr0.setProperty("data", "count", "2");
+        if ( id2 != null ) {
+            lr0.setProperty("data", "count", "3");
+        }
         return lr0;
     }
     private int row (int index) {
@@ -360,9 +379,7 @@ public class ThumbnailPropProp implements EntryPoint {
             if (doc.length() <= 1 || !doc.substring(0, doc.length()/2).contains("<?xml")) {
                 
                 ScrollPanel sp = new ScrollPanel();
-                // Make the native java script in the HTML error page active.
-                evalScripts(new HTML(response.getText()).getElement());
-                HTML result = new HTML(doc);
+                HTML result = new HTML(HtmlSanitizerUtil.sanitizeHtml(doc));
                 sp.add(result);
                 plots.setWidget(0, 0, sp);
                 
@@ -390,7 +407,7 @@ public class ThumbnailPropProp implements EntryPoint {
                 currentRequest.removeProperty("ferret", "thumb");
                 plotwidth = (Window.getClientWidth()-80)/4;
                 plotheight = (Window.getClientHeight()-80)/3;
-                final String url = Util.getProductServer() + "?xml=" + URL.encode(currentRequest.toString()) + "&catid="+dsid;
+                final String url = Util.getProductServer() + "?xml=" + URL.encode(currentRequest.toString()) + "&catid="+catid;
                 plot.addClickHandler(new ClickHandler() {
                     
                     @Override
@@ -411,7 +428,7 @@ public class ThumbnailPropProp implements EntryPoint {
                        Image nextplot = new Image(nexturl);
                        r.setOperation("SPPV", "V7");
                        r.removeProperty("ferret", "thumb");
-                       final String nurl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + "&catid="+dsid;
+                       final String nurl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + "&catid="+catid;
                        nextplot.addClickHandler(new ClickHandler() {
 
                         @Override
@@ -478,29 +495,33 @@ public class ThumbnailPropProp implements EntryPoint {
             plot_pairs = new ArrayList<List<String>>();
             if ( thumbnail_properties != null) {
                 String p = thumbnail_properties.get("coordinate_pairs");
-                String[] pair_strings = p.split("\\s+");
-                for (int i = 0; i < pair_strings.length; i++) {
-                    String[] pseparate = pair_strings[i].split(",");
-                    List<String> apair = new ArrayList<String>();
-                    for (int j = 0; j < pseparate.length; j++) {
-                        apair.add(pseparate[j].trim());
-                    }
-                    plot_pairs.add(apair);
+                if ( p != null && !p.equals("") ) {
+                	String[] pair_strings = p.split("\\s+");
+                	for (int i = 0; i < pair_strings.length; i++) {
+                		String[] pseparate = pair_strings[i].split(",");
+                		List<String> apair = new ArrayList<String>();
+                		for (int j = 0; j < pseparate.length; j++) {
+                			apair.add(pseparate[j].trim());
+                		}
+                		plot_pairs.add(apair);
+                	}
                 }
                 String d = thumbnail_properties.get("variable_pairs");
-                String[] data_strings = d.split("\\s+");
-                for (int i = 0; i < data_strings.length; i++) {
-                    String[] pseparate = data_strings[i].split(",");
-                    List<String> apair = new ArrayList<String>();
-                    // Add only those data pairs that match the current variable.
-                    if (pseparate.length > 1 ) {
-                    	if ( varid.equals(pseparate[0]) || varid.equals(pseparate[1]) ) {
-                    		for (int j = 0; j < pseparate.length; j++) {
-                    			apair.add(pseparate[j].trim());
-                    		}
-                    		plot_pairs.add(apair);
-                    	}
-                    }                
+                if ( d != null && !d.equals("") ) {
+                	String[] data_strings = d.split("\\s+");
+                	for (int i = 0; i < data_strings.length; i++) {
+                		String[] pseparate = data_strings[i].split(",");
+                		List<String> apair = new ArrayList<String>();
+                		// Add only those data pairs that match the current variable.
+                		if (pseparate.length > 1 ) {
+                			if ( varid.equals(pseparate[0]) || varid.equals(pseparate[1]) ) {
+                				for (int j = 0; j < pseparate.length; j++) {
+                					apair.add(pseparate[j].trim());
+                				}
+                				plot_pairs.add(apair);
+                			}
+                		}                
+                	}
                 }
             }
         }
@@ -530,7 +551,7 @@ public class ThumbnailPropProp implements EntryPoint {
              
              
              */
-            JSONValue jsonV = JSONParser.parseLenient(json);
+            JSONValue jsonV = JSONParser.parseStrict(json);
             JSONObject jsonO = jsonV.isObject();
             if ( jsonO != null) {
                 JSONObject table = (JSONObject) jsonO.get("table");
@@ -547,7 +568,7 @@ public class ThumbnailPropProp implements EntryPoint {
                     if  ( value.endsWith("") ) value = value.substring(0,value.length()-1);
                     if  ( value.startsWith("") ) value = value.substring(1,value.length());
                     
-                    metadata.put(name.toUpperCase(), value);
+                    metadata.put(name.toUpperCase(Locale.ENGLISH), value);
                 }
             }
             showMetadata();
@@ -576,31 +597,10 @@ public class ThumbnailPropProp implements EntryPoint {
         for (Iterator metaIt = metadata.keySet().iterator(); metaIt.hasNext();) {
             String name = (String) metaIt.next();
             String value = metadata.get(name);
-            metadataTable.setWidget(0, index, new HTML("<strong>"+name+":</strong>&nbsp;&nbsp;&nbsp;"+value));
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            builder.appendHtmlConstant("<strong>").append(HtmlSanitizerUtil.sanitizeHtml(name)).appendHtmlConstant(":</strong>&nbsp;&nbsp;&nbsp;").append(HtmlSanitizerUtil.sanitizeHtml(value));
+            metadataTable.setWidget(0, index, new HTML(builder.toSafeHtml()));
             index++;
         }
     }
-    /**
-     * Evaluate scripts in an HTML string. Will eval both <script
-     * src=""></script> and <script>javascript here</scripts>.
-     * 
-     * @param element
-     *            a new HTML(text).getElement()
-     */
-    public static native void evalScripts(com.google.gwt.user.client.Element element)
-    /*-{
-        var scripts = element.getElementsByTagName("script");
-
-        for (i = 0; i < scripts.length; i++) {
-            // if src, eval it, otherwise eval the body
-            if (scripts[i].hasAttribute("src")) {
-                var src = scripts[i].getAttribute("src");
-                var script = $doc.createElement('script');
-                script.setAttribute("src", src);
-                $doc.getElementsByTagName('body')[0].appendChild(script);
-            } else {
-                $wnd.eval(scripts[i].innerHTML);
-            }
-        }
-    }-*/;
 }

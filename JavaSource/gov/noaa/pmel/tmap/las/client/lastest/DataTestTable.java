@@ -10,6 +10,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -29,7 +30,8 @@ public class DataTestTable extends Composite {
 			} else {
 				results = Arrays.asList(ds[i].getResults());
 			}
-			tablePanel.add(new HTML("<h4>"+ds[i].getName()+"</h4>"));
+			String name = UriUtils.fromString(ds[i].getName()).asString();
+			tablePanel.add(new HTML("<h4>"+name+"</h4>"));
 			CellTable<TestResult> table = new CellTable<TestResult>();
 			table.setWidth("100%", false);
 

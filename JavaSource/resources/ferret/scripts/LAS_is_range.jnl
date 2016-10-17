@@ -9,10 +9,19 @@ LET baddat = 0
 
 CANCEL SYMBOL dm_labels
 
-LET ax_lo = `$1`
-LET ax_hi = `$2`
-DEFINE SYMBOL ax_lo = `$1`
-DEFINE SYMBOL ax_hi = `$2`
+LET ok = IFV ($1) THEN 1 ELSE 0
+IF `ok` THEN 
+   DEFINE SYMBOL ax_lo = `($1)`
+ELSE 
+   DEFINE SYMBOl ax_lo = bad
+ENDIF
+LET ok = IFV ($2) THEN 1 ELSE 0
+IF `ok` THEN 
+   DEFINE SYMBOL ax_hi = `($2)`
+ELSE 
+   DEFINE SYMBOl ax_hi = bad
+ENDIF
+
 
 IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
   LET ax_lo = 0
@@ -26,6 +35,9 @@ IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN
   DEFINE SYMBOL  put_label = 1
   EXIT/SCRIPT ! Data All Missing or Inconsistent Variable Constraints
 ENDIF 
+
+LET ax_lo = `$1`
+LET ax_hi = `$2`
 
 ! Time is in seconds.
 IF ($is_time"0|0|*>1") THEN
@@ -48,21 +60,14 @@ IF ($is_time"0|0|*>1") THEN
       LET ax_hi = `(ax_hi +hrsec),prec=12`
 
    ELSE
-      IF `ABS(($ax_hi)-($ax_lo)) LT 2*daysec` THEN
-         LET ax_lo = `(ax_lo - .5*daysec),prec=12`
-         LET ax_hi = `(ax_hi + .5*daysec),prec=12`
-      ELIF `ABS(($ax_hi)-($ax_lo)) LT 5*daysec` THEN
-         LET ax_lo = `(ax_lo - 2*daysec),prec=12`
-         LET ax_hi = `(ax_hi + 2*daysec),prec=12`
-      ELIF `ABS(($ax_hi)-($ax_lo)) LT 15*daysec` THEN
-         LET ax_lo = `(ax_lo - 5*daysec),prec=12`
-         LET ax_hi = `(ax_hi + 5*daysec),prec=12`
+      IF `ABS(($ax_hi)-($ax_lo)) LT 180*daysec` THEN
+        ! do nothing
       ELIF `ABS(($ax_hi)-($ax_lo)) LT 365*daysec` THEN
          LET ax_lo = `(ax_lo - 15*daysec),prec=12`
          LET ax_hi = `(ax_hi + 15*daysec),prec=12`
       ELIF `ABS(($ax_hi)-($ax_lo)) LT 5*365*daysec` THEN
-         LET ax_lo = `(ax_lo - 60*daysec),prec=12`
-         LET ax_hi = `(ax_hi + 60*daysec),prec=12`
+         LET ax_lo = `(ax_lo - 30*daysec),prec=12`
+         LET ax_hi = `(ax_hi + 30*daysec),prec=12`
       ELSE
          LET ax_lo = `(ax_lo - 180*daysec),prec=12`
          LET ax_hi = `(ax_hi + 180*daysec),prec=12`

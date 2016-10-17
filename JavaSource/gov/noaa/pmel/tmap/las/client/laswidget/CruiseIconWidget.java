@@ -14,6 +14,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -54,21 +55,21 @@ public class CruiseIconWidget extends Composite {
 			}
 		}
 		String url = Util.getProductServer()+"?xml="+URL.encode(request.toString());
-    	RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+    	RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, UriUtils.sanitizeUri(url));
 		try {
 			sendRequest.sendRequest(null, iconListRequestCallback);
 		} catch (RequestException e) {
 			message.setVisible(true);
-			message.setHTML(e.toString());
+			message.setHTML("Unable to icon list");
 		}
     }
     public void init(String iconurl) {
-    	RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, iconurl);
+    	RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, UriUtils.sanitizeUri(iconurl));
     	try {
     		sendRequest.sendRequest(null, iconCallback);
     	} catch (RequestException e) {
     		message.setVisible(true);
-    		message.setHTML(e.toString());
+    		message.setHTML("Unable to get icon list.");
     	}
     }
     public List<String> getCheckedIconList() {
@@ -124,7 +125,7 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onError(Request request, Throwable e) {
 			message.setVisible(true);
-			message.setHTML(e.toString());
+			message.setHTML("Unable to get icons");
 		}
 
 		@Override
@@ -142,7 +143,7 @@ public class CruiseIconWidget extends Composite {
 		@Override
 		public void onError(Request request, Throwable e) {
 			message.setVisible(true);
-			message.setHTML(e.toString());
+			message.setHTML("Could not get icons.");
 		}
 
 		@Override

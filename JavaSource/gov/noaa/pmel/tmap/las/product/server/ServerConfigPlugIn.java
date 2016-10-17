@@ -11,15 +11,12 @@ import java.io.File;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.struts.action.ActionServlet;
-import org.apache.struts.action.PlugIn;
-import org.apache.struts.config.ModuleConfig;
 
 /**
  * @author Roland Schweitzer
  *
  */
-public class ServerConfigPlugIn implements PlugIn {
+public class ServerConfigPlugIn {
     
     /**  Servlet context key server config is stored under */
     public final static String SERVER_CONFIG_KEY = "server_config";
@@ -47,12 +44,11 @@ public class ServerConfigPlugIn implements PlugIn {
      *@param  config                The ModuleConfig for our owning module
      * @throws Exception 
      */
-    public void init(ActionServlet servlet, ModuleConfig config) throws ServletException {
+    public void init(ServletContext context) throws ServletException {
         
-        ServletContext context = servlet.getServletContext();
         
         if ((configFileName == null || configFileName.length() == 0)) {
-            throw new ServletException("No LAS configuration file specified.");
+            throw new ServletException("No server configuration file specified.");
         }
         
         File configFile = new File(configFileName);

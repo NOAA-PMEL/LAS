@@ -9,8 +9,13 @@
       <inherits name="com.google.gwt.json.JSON" />
        <!--  The nifty printing utility -->
       <inherits name='br.com.freller.tool.PrintTest'/>
+
       
-      <source path="client"/>
+      <source path="client">
+         <exclude name="**/inventory/**"/>
+         <exclude name="**/Inventory.java"/>
+      </source>
+
 	
       <!-- Inherit the default GWT style sheet.  You can change       -->
       <!-- the theme of your GWT application by uncommenting          -->

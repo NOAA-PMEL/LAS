@@ -4,9 +4,6 @@
  */
 package gov.noaa.pmel.tmap.las.product.server;
 
-import javax.servlet.http.HttpServletRequest;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionMapping;
 
 /** 
  * MyEclipse Struts
@@ -15,7 +12,7 @@ import org.apache.struts.action.ActionMapping;
  * XDoclet definition:
  * @struts.form name="ProgressForm"
  */
-public class ProgressForm extends ActionForm {
+public class ProgressForm {
     /*
      * Generated fields
      */
@@ -27,14 +24,6 @@ public class ProgressForm extends ActionForm {
      * Generated Methods
      */
 
-    /** 
-     * Method reset
-     * @param mapping
-     * @param request
-     */
-    public void reset(ActionMapping mapping, HttpServletRequest request) {
-        
-    }
 
     /** 
      * Returns the email.

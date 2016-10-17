@@ -1,6 +1,44 @@
 package gov.noaa.pmel.tmap.las.server;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpException;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.GregorianChronology;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
+import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
+
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
@@ -38,53 +76,39 @@ import gov.noaa.pmel.tmap.las.util.Option;
 import gov.noaa.pmel.tmap.las.util.Region;
 import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.servlet.http.HttpServletRequest;
-
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DAS;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.io.IOUtils;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.joda.time.Chronology;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.chrono.GregorianChronology;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import ucar.unidata.geoloc.LatLonPoint;
-import ucar.unidata.geoloc.LatLonPointImpl;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	private static final LASProxy lasProxy = new LASProxy();
-	
+	private static Logger log = LoggerFactory.getLogger(RPCServiceImpl.class.getName());
+    @Override
+    protected SerializationPolicy doGetSerializationPolicy(javax.servlet.http.HttpServletRequest request,
+    		java.lang.String moduleBaseURL,
+    		java.lang.String strongName) {
+
+    	SerializationPolicy serializationPolicy = null;
+
+		String policyFile = moduleBaseURL + strongName + ".gwt.rpc";
+		
+    	try {		
+    		log.warn("Attempting to read serialization policy from: "+policyFile);
+    		InputStream is = lasProxy.executeGetMethodAndReturnStream(policyFile, null);
+    		serializationPolicy = SerializationPolicyLoader.loadFromStream(is, null);
+    	} catch (IOException e) {
+    		log.error("Unable to get serializaiton policy from: "+policyFile+" "+e.getMessage());
+    	} catch (HttpException e) {
+    		log.error("Unable to get serializaiton policy from: "+policyFile+" "+e.getMessage());
+    	} catch (ParseException e) {
+    		log.error("Unable to get serializaiton policy from: "+policyFile+" "+e.getMessage());
+    	}
+
+    	log.warn("Module base for serialization policy successfully read from: "+policyFile);
+    	return serializationPolicy;
+
+    }
 
 	/**
 	 * @return
@@ -660,8 +684,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 }
             }
             return facets;
-        } catch ( HttpException e ) {
-            throw new RPCException(e.getMessage());
         } catch ( IOException e ) {
             throw new RPCException(e.getMessage());
         } catch ( JDOMException e ) {
@@ -696,11 +718,19 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 Tributary tributary = (Tributary) iterator.next();
                 String search_base = tributary.getURL().replace("las", "esg-search/search");
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                lasProxy.executeGetMethodAndStreamResult(search_base+"?"+query, stream);
-                ESGFSearchDocument doc = new ESGFSearchDocument();
-                JDOMUtils.XML2JDOM(stream.toString(), doc);
-                if ( doc.getStatus() == 0 ) {
-                    datasets = doc.getDatasets();
+                boolean success = true;
+                try {
+                	lasProxy.executeGetMethodAndStreamResult(search_base+"?"+query, stream);
+                } catch (Exception e ) {
+                	success = false;
+                }
+                if ( success ) {
+                	ESGFSearchDocument doc = new ESGFSearchDocument();
+                	JDOMUtils.XML2JDOM(stream.toString(), doc);
+                	if ( doc.getStatus() == 0 ) {
+                		datasets = doc.getDatasets();
+                	}
+                	if ( datasets.size() > 0 ) break;
                 }
             }
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
@@ -713,8 +743,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
                 }
             }
             return datasets;
-        } catch ( HttpException e ) {
-            throw new RPCException(e.getMessage());
         } catch ( IOException e ) {
             throw new RPCException(e.getMessage());
         } catch ( JDOMException e ) {
@@ -951,7 +979,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         return outerSequenceValues;
     }
     @Override
-    public String getERDDAPJSON(String dsid, String varid, String trajectory_id, String variables) throws RPCException {
+    public String getERDDAPGeometry(String catid, String dsid, String varid, String variables) throws RPCException {
         LASConfig lasConfig = getLASConfig();
         Dataset dataset;
         InputStream jsonStream;
@@ -968,7 +996,49 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("timeseries_id");
             }
-            url = url + id + ".json" + "?" + variables + "&" + id_name + "=\""+trajectory_id+"\"" + "&distinct()";
+            
+            url = url + id + ".json" + "?" + variables + "&distinct()";
+            if ( variables.contains("time") ) {
+            	url = url + "&orderBy(\"time\")";
+            }
+
+            jsonStream = new URL(url).openStream();
+            String jsonText = IOUtils.toString(jsonStream);
+            
+            jsonText = jsonText.replace("\"rows\"", "\"catid\":\""+catid+"\",\n\"rows\"");
+            
+            return jsonText;
+        } catch (JDOMException e) {
+            throw new RPCException(e.getMessage());
+        } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        } catch (MalformedURLException e) {
+            throw new RPCException(e.getMessage());
+        } catch (IOException e) {
+            throw new RPCException(e.getMessage());
+        }
+    }
+    @Override
+    public String getERDDAPJSON(String dsid, String varid, String platform_id_value, String variables) throws RPCException {
+        LASConfig lasConfig = getLASConfig();
+        Dataset dataset;
+        InputStream jsonStream;
+       
+        try {
+            dataset = lasConfig.getDataset(dsid);
+            String url = lasConfig.getDataAccessURL(dsid, varid, false);
+            Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
+            String id = props.get("tabledap_access").get("id");
+            String id_name = props.get("tabledap_access").get("trajectory_id");
+            if ( id_name == null || id_name.trim().length() == 0 ) {
+                id_name = props.get("tabledap_access").get("profile_id");
+            }
+            if ( id_name == null || id_name.trim().length() == 0 ) {
+                id_name = props.get("tabledap_access").get("timeseries_id");
+            }
+            
+            url = url + id + ".json" + "?" + variables + "&" + id_name + "=\""+platform_id_value+"\"" + "&distinct()";
+            
             jsonStream = new URL(url).openStream();
             String jsonText = IOUtils.toString(jsonStream);
             return jsonText;

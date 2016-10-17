@@ -12,6 +12,7 @@ $las_response.toString()
 <html>
 <!-- LAS SERVER OK -->
 <head>
+    <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css">
     <!-- Let IE know to use the IE9 standard browser and document modes -->
     <meta http-equiv="X-UA-Compatible" content="IE=9">
     
@@ -64,9 +65,7 @@ $las_response.toString()
 Download these data <a href='javascript:gocsv()'>as a comma separated values (CSV) file</a> or <a href='javascript:gotsv()'>as a tab separated values (TSV) file</a></a>.
 <br>
 <br>
-##Write the rows.
-    ## Set up an alternator tool to color every other row.
-    #set($color = $alternator.auto('#F3E7C9','#FFFFFF'))
+##Write the rows.  
 
     ## Get the metadata so we have the column names and
     ## the number of columns.
@@ -75,7 +74,7 @@ Download these data <a href='javascript:gocsv()'>as a comma separated values (CS
     #set($cols = $metadata.size())
         
     #set($size = $las_datatable.getData().get($metadata.get(0)).size())
-    <table border="2" cellpadding="4">
+    <table border="2" cellpadding="4" class="DataTable">
         ## Set the column headers including one for the row number.
         <tr>
              <th>Row</th>
@@ -87,8 +86,8 @@ Download these data <a href='javascript:gocsv()'>as a comma separated values (CS
        ## Loop over the rows...
        #set($s = $size - 1)
        #foreach ($row in [0..$s])
-          ## Use the alternator to change the color of every other row.
-          <tr bgcolor="$color">
+          ## Color of rows set by CSS.
+          <tr>
              ## Add the row number
              #set($r = $row + 1)
              <td nowrap="nowrap" align="right">$r</td>

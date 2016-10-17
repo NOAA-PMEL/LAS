@@ -8,6 +8,8 @@ import gov.noaa.pmel.socat.dashboard.shared.SocatWoceEvent;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 
@@ -15,17 +17,12 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 
-
-import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.Element;
 
 import com.google.gson.JsonArray;
@@ -35,10 +32,14 @@ import com.google.gson.JsonStreamParser;
 
 public class SaveEdits extends LASAction {
 
-	private static Logger log = Logger.getLogger(SaveEdits.class.getName());
+	private static Logger log = LoggerFactory.getLogger(SaveEdits.class.getName());
 	private static final String DATABASE_CONFIG = "DatabaseBackendConfig.xml";
 	private static final String DATABASE_NAME = "SOCATFlags";
+	
+	private static String ERROR = "error";
+	private static String EDITS = "edits";
 
+	
 	private String socatQCVersion;
 	private DsgNcFileHandler dsgHandler;
 	private DatabaseRequestHandler databaseHandler;
@@ -79,15 +80,21 @@ public class SaveEdits extends LASAction {
 		String selectUsername = dbParams.getAttributeValue("user");
 		log.debug("selectUsername=" + selectUsername);
 		String selectPassword = dbParams.getAttributeValue("password");
-		log.debug("selectPassword=" + selectPassword);
+		// Logging this sets off security alarm bells...                                   log.debug("selectPassword=" + selectPassword);
 		String updateUsername = dbParams.getAttributeValue("updateUser");
 		log.debug("updateUsername=" + updateUsername);
 		String updatePassword = dbParams.getAttributeValue("updatePassword");
-		log.debug("updatePassword=" + updatePassword);
-		// The database URLs in the LAS config files do not have the jdbc: prefix
-		databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
-				selectUsername, selectPassword, updateUsername, updatePassword);
-		log.debug("database request handler configuration successful");
+		// Logging this sets off security alarm bells...                                   log.debug("updatePassword=" + updatePassword);
+		if ( (updateUsername != null) && (updatePassword != null) ) {
+			// The database URLs in the LAS config files do not have the jdbc: prefix
+			databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
+					selectUsername, selectPassword, updateUsername, updatePassword);
+			log.debug("database request handler configuration successful");
+		}
+		else {
+			databaseHandler = null;
+			log.debug("database request handler not created");
+		}
 
 		socatQCVersion = dbParams.getAttributeValue("socatQCVersion");
 		log.debug("socatQCVersion=" + socatQCVersion);
@@ -100,13 +107,25 @@ public class SaveEdits extends LASAction {
 		log.debug("erddapDsgFlag=" + erddapDsgFlag);
 		String erddapDecDsgFlag = dbParams.getAttributeValue("erddapDecDsgFlag");
 		log.debug("erddapDecDsgFlag=" + erddapDecDsgFlag);
-		dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag);
-		log.debug("DSG file handler configuration successful");
+		if ( (dsgFileDir != null) && (decDsgFileDir != null) &&
+			 (erddapDsgFlag != null) && (erddapDecDsgFlag != null) ) {
+			// FerretConfig object not needed for just assigning WOCE flags
+			dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag, null);
+			log.debug("DSG file handler configuration successful");
+		}
+		else {
+			dsgHandler = null;
+			log.debug("DSG file handler not created");
+		}
 	}
 
 	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String execute() throws Exception {
+		// Make sure this is configured for setting WOCE flags
+		if ( (socatQCVersion == null) || (dsgHandler == null) || (databaseHandler == null) ) {
+			logerror(request, "LAS not configured to allow editing of WOCE flags", "Illegal action");
+			return ERROR;
+		}
 
 		// Parser to convert Ferret date strings into Date objects
 		SimpleDateFormat fullDateParser = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
@@ -119,7 +138,7 @@ public class SaveEdits extends LASAction {
 			username = request.getUserPrincipal().getName();
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get the username for WOCE flagging", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		JsonStreamParser parser = new JsonStreamParser(request.getReader());
@@ -131,16 +150,17 @@ public class SaveEdits extends LASAction {
 			tempname = message.get("temp_file").getAsString();
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get temp_file for WOCE flagging", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// WOCE flag comment
 		String comment;
 		try {
-			comment = message.get("comment").getAsString();
+			String encodedComment = message.get("comment").getAsString();
+			comment = new String(DatatypeConverter.parseHexBinary(encodedComment), "UTF-16");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get the comment for WOCE flagging", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// List of data points getting the WOCE flag
@@ -151,7 +171,7 @@ public class SaveEdits extends LASAction {
 				throw new IllegalArgumentException("No edits given");
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get the edits for WOCE flagging", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// Create the list of (incomplete) data locations for the WOCE event
@@ -166,8 +186,8 @@ public class SaveEdits extends LASAction {
 					// Neither the name nor the value should be null.
 					// Because of going through Ferret, everything will be uppercase
 					// but just to be sure....
-					String name = rowEntry.getKey().trim().toUpperCase();
-					String value = rowEntry.getValue().getAsString().trim().toUpperCase();
+					String name = rowEntry.getKey().trim().toUpperCase(Locale.ENGLISH);
+					String value = rowEntry.getValue().getAsString().trim().toUpperCase(Locale.ENGLISH);
 					if ( name.equals("EXPOCODE") || name.equals("EXPOCODE_") ) {
 						if ( expocode == null )
 							expocode = value;
@@ -220,16 +240,16 @@ public class SaveEdits extends LASAction {
 				logerror(request, "dataName = " + dataName, "");
 			if ( woceFlag != null )
 				logerror(request, "woceFlag = " + woceFlag, "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		if ( expocode == null ) {
 			logerror(request, "No EXPOCODE given in the WOCE flags", "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 		if ( woceFlag == null ) {
 			logerror(request, "No WOCE_CO2_WATER given in the WOCE flags", "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 		if ( dataName == null ) {
 			dataName = Constants.geoposition_VARNAME;
@@ -238,7 +258,7 @@ public class SaveEdits extends LASAction {
 			String varName = Constants.VARIABLE_NAMES.get(dataName);
 			if ( varName == null ) {
 				logerror(request, "Unknown data variable '" + dataName + "'", "");
-				return mapping.findForward("error");
+				return ERROR;
 			}
 			dataName = varName;
 		}
@@ -263,7 +283,7 @@ public class SaveEdits extends LASAction {
 			logerror(request, "expocode = " + expocode + 
 							"; dataName = " + dataName + 
 							"; woceFlag = " + woceFlag, "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// Save the (complete) WOCE event to the database
@@ -275,18 +295,14 @@ public class SaveEdits extends LASAction {
 			logerror(request, "expocode = " + expocode + 
 							"; dataName = " + dataName + 
 							"; woceFlag = " + woceFlag, "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
-
-		// Notify ERDDAP of the full DSG file update
-		dsgHandler.flagErddap(false);
-		log.debug("ERDDAP flagged the the full DSG files were updated");
 
 		log.info("Assigned WOCE event (also updated " + tempname + "): \n" + 
 				woceEvent.toString());
 
 		request.setAttribute("expocode", expocode);
-		return mapping.findForward("edits");
+		return EDITS;
 	}
 
 }

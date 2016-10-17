@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.product.server;
 
 import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.las.client.ClimateAnalysis;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
@@ -8,10 +9,16 @@ import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASRSSFeed;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
+import gov.noaa.pmel.tmap.las.service.BackendService;
 import gov.noaa.pmel.tmap.las.service.ProductLocalService;
-import gov.noaa.pmel.tmap.las.service.ProductWebService;
+import gov.noaa.pmel.tmap.las.service.database.DatabaseBackendService;
+import gov.noaa.pmel.tmap.las.service.ferret.FerretBackendService;
+import gov.noaa.pmel.tmap.las.service.kml.KMLBackendService;
+import gov.noaa.pmel.tmap.las.service.tabledap.TabledapBackendService;
+import gov.noaa.pmel.tmap.las.util.Constants;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -33,10 +40,9 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.joda.time.DateTime;
@@ -50,9 +56,8 @@ public class ProductServerRunner  extends Thread  {
     protected LASConfig lasConfig = null;
     protected ServerConfig serverConfig = null;
     protected HttpServletRequest request = null;
-    protected ActionMapping mapping = null;
     protected Cache cache = null;  
-    protected ActionForward errorAction = null;    
+    protected String errorAction = null;    
     protected LASBackendResponse compoundResponse = null;
     protected int currentOp;
     protected int statusOp;
@@ -68,14 +73,17 @@ public class ProductServerRunner  extends Thread  {
     protected boolean previous_batch_error;
     protected long start;
     protected long current_start;
+    
+    private String BATCH_ERROR = "batch_error";
+    private String ERROR = "error";
+    private String CANCEL = "cancel";
 
-    private static Logger log = Logger.getLogger(ProductServerRunner.class.getName());
-    public ProductServerRunner (ProductRequest productRequest, LASConfig lasConfig, ServerConfig serverConfig, HttpServletRequest request, ActionMapping mapping, Cache cache) {
+    private static Logger log = LoggerFactory.getLogger(ProductServerRunner.class.getName());
+    public ProductServerRunner (ProductRequest productRequest, LASConfig lasConfig, ServerConfig serverConfig, HttpServletRequest request, Cache cache) {
         this.productRequest = productRequest;
         this.lasConfig = lasConfig;
         this.serverConfig = serverConfig;
         this.request = request;
-        this.mapping = mapping;
         this.cache = cache;
         this.currentOp = 0;
         this.statusOp= 0;
@@ -135,7 +143,7 @@ public class ProductServerRunner  extends Thread  {
                 hit = true; 
                 cache.remove(compoundResponseFileName);
                 previous_batch_error = true;
-                errorAction = mapping.findForward("batch_error");
+                errorAction = BATCH_ERROR;
                 stillWorking=false;
             } else {
                 hit = cache.cacheHit(compoundResponse);
@@ -316,11 +324,29 @@ public class ProductServerRunner  extends Thread  {
                         log.debug("Running backend service at "+backendServerURL+".");
                         
                         try {
-                            ProductWebService productWebService = new ProductWebService(
-                                    backendRequestDocument, backendServerURL,
-                                    methodName, productCacheKey);
-                            productWebService.run();
-                            responseXML = productWebService.getResponseXML();
+                        	// Run the service here rather than over a SOAP connection...
+                       
+                        	String serviceName = productRequest.getServiceName(key);
+                        	if ( serviceName.equals(Constants.FERRET_SERVICE) ) {
+                        		FerretBackendService ferretService = new FerretBackendService();
+                        		responseXML = ferretService.getProduct(backendRequestDocument.toString(), productCacheKey);
+                        	} else if ( serviceName.equals(Constants.DATABASE_SERVICE) ) {
+                        		DatabaseBackendService dbService = new DatabaseBackendService();
+                        		responseXML = dbService.getProduct(backendRequestDocument.toString(), productCacheKey);
+                        	} else if ( serviceName.equals(Constants.TABLEDAP_SERVICE) ) {
+                        		TabledapBackendService tdService = new TabledapBackendService();
+                        		responseXML = tdService.getProduct(backendRequestDocument.toString(), productCacheKey);
+                        	} else if ( serviceName.equals(Constants.KML_SERVICE) ) {
+                        		KMLBackendService kmlService = new KMLBackendService();
+                        		responseXML = kmlService.mapScaleToKML(backendRequestDocument.toString(), productCacheKey);                        		
+                        	}
+                        	
+//                            ProductWebService productWebService = new ProductWebService(
+//                                    backendRequestDocument, backendServerURL,
+//                                    methodName, productCacheKey);
+//                            productWebService.run();
+//                            responseXML = productWebService.getResponseXML();
+                        	
                         } catch (Exception e) {
                             setError(session, "Error was returned from the backend server.", e.toString());
                             break;
@@ -419,7 +445,7 @@ public class ProductServerRunner  extends Thread  {
         error = true;
         compoundResponse = lasResponse;
         session.setAttribute("las_response", compoundResponse);
-        errorAction = mapping.findForward("error");
+        errorAction = ERROR;
         stillWorking=false; 
     }
 
@@ -570,8 +596,15 @@ public class ProductServerRunner  extends Thread  {
         return stillWorking;
     }
 
-    public void setCancel(boolean cancel) {
-        this.cancel = cancel;
+    public void setCancel(boolean cancel) throws IOException {
+    	File cancelFile = getCurrentBackendRequest().getCancelFile();
+    	cancelFile.createNewFile();
+    	error = true;
+    	compoundResponse.setError("las_message", "LAS has asked the service to stop.");
+    	compoundResponse.addError("exception_message", "You may keep working.");
+    	errorAction = CANCEL;
+    	stillWorking=false; 
+    	this.cancel = cancel;
     }
     public int getCurrentOp() {
         return currentOp;
@@ -598,14 +631,14 @@ public class ProductServerRunner  extends Thread  {
     /**
      * @return Returns the action.
      */
-    public ActionForward getErrorAction() {
+    public String getErrorAction() {
         return errorAction;
     }
 
     /**
      * @param action The action to set.
      */
-    public void setErrorAction(ActionForward action) {
+    public void setErrorAction(String action) {
         this.errorAction = action;
     }
 
@@ -680,7 +713,7 @@ public class ProductServerRunner  extends Thread  {
         compoundResponse.setError("las_message", las_error);
         compoundResponse.addError("exception_message", exception_message);
         session.setAttribute("las_response", compoundResponse);
-        errorAction = mapping.findForward("error");
+        errorAction = ERROR;
         stillWorking=false; 
     }
     

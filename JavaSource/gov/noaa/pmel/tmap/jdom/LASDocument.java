@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.jdom.filter.FindPropertyGroupFilter;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -76,12 +77,18 @@ public class LASDocument extends Document {
                 
                 return getByID(type, parent, id);
             } else {
+            	if ( xpathValue.contains("../") || xpathValue.contains("ancestor") ) {
+            		throw new JDOMException("Illegal XPath value.");
+            	}
                 // Do the old style xpath search...
                 Object jdomO = this;
                 XPath xpath = XPath.newInstance(xpathValue);
                 return (Element) xpath.selectSingleNode(jdomO);   
             }
         }else {
+        	if ( xpathValue.contains("../") || xpathValue.contains("ancestor") ) {
+        		throw new JDOMException("Illegal XPath value.");
+        	}
             Object jdomO = this;
             XPath xpath = XPath.newInstance(xpathValue);
             return (Element) xpath.selectSingleNode(jdomO);   
@@ -125,7 +132,7 @@ public class LASDocument extends Document {
         format.setOmitDeclaration(true);
         String xml = toString(format);
         
-        xml = xml.replaceAll("\"","\\\\\"");
+        //xml = xml.replaceAll("\"","\\\\\"");
         xml = xml.replaceAll("'","\\\\'");;
         xml = xml.replaceAll("\\r\\n","");
         xml = xml.replaceAll("\\r","");
@@ -172,8 +179,9 @@ public class LASDocument extends Document {
     }
     
     public void write(File file) {
-        try {
-            FileWriter xmlout = new FileWriter(file);
+    	FileWriter xmlout = null;
+        try {        
+        	xmlout = new FileWriter(file);
             org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
             format.setLineSeparator(System.getProperty("line.separator"));
             XMLOutputter outputter = new XMLOutputter(format);
@@ -183,6 +191,14 @@ public class LASDocument extends Document {
         } catch (java.io.IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
+        } finally {
+        	if ( xmlout != null ) {
+        		try {
+					xmlout.close();
+				} catch (IOException e) {
+					//
+				}
+        	}
         }
         
     }

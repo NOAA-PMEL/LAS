@@ -156,7 +156,7 @@ IF ($shade_underlay) THEN
 
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-   ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
+   ($plot_type)/NOKEY/($qualifiers)/OVER/NOLAB ($ferret_diff_var)
 ELSE
    ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels

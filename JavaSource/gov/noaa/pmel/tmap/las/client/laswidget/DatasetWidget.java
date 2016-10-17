@@ -12,6 +12,7 @@ import gov.noaa.pmel.tmap.las.client.util.Util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,6 +23,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -241,8 +243,8 @@ public class DatasetWidget extends Tree implements HasName {
                     String name = "x";
                     String value = "y";
                     if ( filter.getAttribute().equals("name") ) {
-                        name = cat.getName().toLowerCase();
-                        value = filter.getValue().toLowerCase();
+                        name = cat.getName().toLowerCase(Locale.ENGLISH);
+                        value = filter.getValue().toLowerCase(Locale.ENGLISH);
 
                     } else if ( filter.getAttribute().equals("ID") ) {
                         name = cat.getID();
@@ -265,14 +267,14 @@ public class DatasetWidget extends Tree implements HasName {
 
         private void loadItem(VariableSerializable[] vars) {
             for ( int j = 0; j < vars.length; j++ ) {
-                // Do not include variables with subset_variable="true" used to denote "selector" variables in in-situ data sets like SOCAT
-                // TODO and for now no variables with character string values
-                // if ( Util.keep(vars[j].getDSID(), vars[j].getName()) && Util.keep(vars[j].getDSID(), vars[j].getAttributes()) ) {    
+            	
+            	
+             if ( !vars[j].isTimeSeries() || !vars[j].isSubset() ) {
                     TreeItem item = new TreeItem();
                     item.setText(vars[j].getName());
                     item.setUserObject(vars[j]);
                     currentlySelected.addItem(item);
-                // }
+                }
             }
         }
     };
@@ -322,12 +324,13 @@ public class DatasetWidget extends Tree implements HasName {
                     if ( c.getDoc() != null ) {
                         String url = c.getDoc();
                         if ( !c.getDoc().equals("") ) {
-                            Anchor link = new Anchor("Documentation", url, "_blank");
+                            Anchor link = new Anchor("Documentation", UriUtils.sanitizeUri(url), "_blank");
                             innerLayout.add(link);
                         }
                     }
-                    if ( c.getAttributes().get("children_dsid") != null ) {
-                        Anchor meta = new Anchor("Variable and Grid Description", "getMetadata.do?dsid=" + c.getAttributes().get("children_dsid"), "_blank");
+                    String csid =  c.getAttributes().get("children_dsid");
+                    if ( csid != null ) {
+                        Anchor meta = new Anchor("Variable and Grid Description", "getMetadata.do?dsid=" + csid, "_blank");
                         innerLayout.add(meta);
                     }
                     inner.add(innerLayout);

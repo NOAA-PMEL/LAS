@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.io.IOException;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * A single Google Earth placemark
@@ -21,7 +22,7 @@ import org.apache.log4j.Logger;
  */
 public class GEPlacemark{
 
-    private static Logger log = Logger.getLogger(GEPlacemark.class);
+    private static Logger log = LoggerFactory.getLogger(GEPlacemark.class);
 
     String kmlString;
     String point_lat;

@@ -1,7 +1,10 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.HtmlSanitizerUtil;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -45,7 +48,7 @@ public class LinkButton extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 
-                html.setHTML("<p style=\"word-wrap: break-word;\">"+Window.Location.getHref()+"</p>");
+                html.setHTML("<p style=\"word-wrap: break-word;\">"+UriUtils.sanitizeUri(Window.Location.getHref())+"</p>");
                 linkDialog.setPopupPosition(linkButton.getAbsoluteLeft(), linkButton.getAbsoluteTop());
                 linkDialog.show();
                 

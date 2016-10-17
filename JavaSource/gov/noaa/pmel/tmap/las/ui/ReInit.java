@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import java.io.BufferedReader;
@@ -11,25 +12,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.struts2.ServletActionContext;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
-public class ReInit extends Action {
-	private static Logger log = Logger.getLogger(ReInit.class.getName());
-	/* (non-Javadoc)
-	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-	throws Exception {
+public class ReInit extends LASAction {
+	private static Logger log = LoggerFactory.getLogger(ReInit.class.getName());
+	private static String REINIT = "reinit";
+
+	public String execute()	throws Exception {
 		LASConfigPlugIn plugin = new LASConfigPlugIn();
 		log.debug("Running reinit action.");
-		ServletContext context = (ServletContext) servlet.getServletContext();
+		ServletContext context = ServletActionContext.getServletContext();
 		String reinit = request.getParameter("reinit");
 		if ( reinit != null && reinit.equals("force") ) {
 			context.setAttribute("lock", "true");
@@ -62,7 +57,7 @@ public class ReInit extends Action {
 
 		}
 		context.removeAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
-		return mapping.findForward("reinit");
+		return REINIT;
 	}
 
 }

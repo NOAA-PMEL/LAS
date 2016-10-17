@@ -103,7 +103,7 @@
       #set($taxis = $grid.getTime())
       <td align="center"> $taxis.getLo() : $taxis.hi </td>
       #end
-      <td align="center"> $var.getUnits() </td>
+      <td align="center"> $!var.getUnits() </td>
       </tr>
    #end
    

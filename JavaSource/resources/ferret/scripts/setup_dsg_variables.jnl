@@ -5,7 +5,9 @@
 ! * Fix longitudes crossing the dateline.
 ! See piecewise_linear_decimation.jnl which calls this script 
 ! and computes piecewise linear decimation
-!
+! 8/2016 *acm* If the Ferret property traj_discrete has been set, check 
+! whether the distance between points is large; if so plot as discrete 
+! points connected with a thin line.
 
 IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
@@ -37,7 +39,12 @@ LET lat_with_gaps = ($data_y_var)
 LET time_with_gaps = ($data_t_var)
 LET var_with_gaps = ($data_var)
 
-
+IF `($data_count) GT 1` THEN LET var_1_with_gaps = ($data_1_var)
+IF `($data_count) GT 2` THEN LET var_2_with_gaps = ($data_2_var)
+IF `($data_count) GT 3` THEN LET var_3_with_gaps = ($data_3_var)
+IF `($data_count) GT 4` THEN LET var_4_with_gaps = ($data_4_var)
+IF `($data_count) GT 5` THEN LET var_5_with_gaps = ($data_5_var)
+   
 LET varnames = ..varnames
 IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_gaps
 
@@ -53,12 +60,16 @@ IF `($its_prop_plot"0|0|1|*>1") EQ 0` THEN
       DEFINE SYMBOL ngood_data = ($stat_ngood)
       DEFINE SYMBOL nbad_data = ($stat_nbad)
    ELSE
-      DEFINE SYMBOL ngood_data = `($data_var)[i=@ngd]`
-      DEFINE SYMBOL nbad_data = `($numobs) - ($ngood_data)`
+      DEFINE SYMBOL zshape = `($data_var),RETURN=shape`
+      IF `($zshape"0|E>1|POINT>1|*>0)` THEN
+         DEFINE SYMBOL ngood_data = `($data_var),return=size`
+         DEFINE SYMBOL nbad_data = 0
+      ELSE
+         DEFINE SYMBOL ngood_data = `($data_var)[i=@ngd]`
+         DEFINE SYMBOL nbad_data = `($numobs) - ($ngood_data)`
+      ENDIF
    ENDIF
 ENDIF
-
-!IF `($nfeatures"0") GT 1` THEN 
 
 DEFINE SYMBOL n_gaps = `($nfeatures) - 1`
 
@@ -79,12 +90,36 @@ IF ($data_z_var"0|*>1") THEN \
 LET/units="`($data_var),return=units`" var_with_gaps = SEPARATE(($data_var)[i=1:`npts`], ($rowvar), 0)   
 IF ($is_string) THEN LET/units="`($data_var),return=units` "/title="`($data_var),return=title`" var_with_gaps = SEPARATE_STR(($data_var)[i=1:`npts`], ($rowvar), 0)
 
+IF `($data_count) GT 1` THEN 
+   LET/units="`($data_1_var),return=units`" var_1_with_gaps = SEPARATE(($data_1_var)[i=1:`npts`], ($rowvar), 0)   
+   DEFINE SYMBOL data_var_1 = var_1_with_gaps
+ENDIF
+
+IF `($data_count) GT 2` THEN 
+   LET/units="`($data_2_var),return=units`" var_2_with_gaps = SEPARATE(($data_2_var)[i=1:`npts`], ($rowvar), 0)   
+   DEFINE SYMBOL data_var_2 = var_2_with_gaps
+ENDIF
+
+IF `($data_count) GT 3` THEN 
+   LET/units="`($data_3_var),return=units`" var_3_with_gaps = SEPARATE(($data_3_var)[i=1:`npts`], ($rowvar), 0)   
+   DEFINE SYMBOL data_var_3 = var_3_with_gaps
+ENDIF
+
+IF `($data_count) GT 4` THEN 
+   LET/units="`($data_4_var),return=units`" var_4_with_gaps = SEPARATE(($data_4_var)[i=1:`npts`], ($rowvar), 0)   
+   DEFINE SYMBOL data_var_4 = var_4_with_gaps
+ENDIF
+
+IF `($data_count) GT 5` THEN 
+   LET/units="`($data_5_var),return=units`" var_5_with_gaps = SEPARATE(($data_5_var)[i=1:`npts`], ($rowvar), 0)   
+   DEFINE SYMBOL data_var_5 = var_5_with_gaps
+ENDIF
+
 ! keep original attributes (e.g. time origin may be needed later)
 LET varnames = ..varnames
 IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_gaps
 
 LET npts = `lat_with_gaps,RETURN=isize`
-
 
 DEFINE SYMBOL data_var = var_with_gaps
 DEFINE SYMBOL data_x_var = lon_with_gaps
@@ -108,8 +143,29 @@ ENDIF
 
 IF ($data_z_var"0|*>1") THEN DEFINE SYMBOL data_z_var = vert_with_gaps
 
+! If the Ferret property traj_discrete has been set, check whether the 
+! distance between points is large; if so plot as discrete points connected
+! with a thin line.
 
-!ENDIF ! nfeatures GT 1
+IF ($ferret_traj_discrete"0|*>1") THEN
+
+   go earth_distance  ($region_y_lo),  ($region_x_lo), ($region_y_hi), ($region_x_hi), diagonal 
+   define symbol diagonal = `diagonal`
+
+   let lat_2 =  lat_with_gaps[i=@shf:1]
+   let lon_2 =  lon_with_gaps[i=@shf:1]
+
+   go earth_distance  lat_with_gaps, lon_with_gaps, lat_2, lon_2, delta_diff
+
+   LET rel_dist =  delta_diff/ ($diagonal)
+   LET mask = IF rel_dist GT 0.02 THEN 1
+
+   IF `mask[i=@ngd]/ lon_with_gaps[i=@ngd] GT 0.1` THEN 
+      DEFINE SYMBOL thinline = 1
+      DEFINE SYMBOL qualifiers ($qualifiers)/SYM=26/SIZ=0.08/THICK=3
+   ENDIF
+
+ENDIF ! ferret_traj_discrete
 
 LET nout_lonlat = `($data_var)[i=@ngd]`
 DEFINE SYMBOL nout_lonlat = `nout_lonlat` 

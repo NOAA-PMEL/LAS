@@ -93,6 +93,7 @@ IF ($add_region_z"0|*>1") THEN
  GO compare_axes ($ivar) ($need_z) t;\
       IF ($cancel_it"0|*>1") THEN CANCEL SYMBOL add_region_z;\
 )
+ENDIF
 
 !CANCEL DATA/ALL
 

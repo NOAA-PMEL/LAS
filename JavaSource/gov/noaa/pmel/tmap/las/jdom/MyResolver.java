@@ -43,7 +43,7 @@ public class MyResolver implements EntityResolver {
             }
             
             // Returning null causes the caller to try accessing the systemid
-            return null;
+            return new InputSource(new StringReader(""));
     }
 
 }

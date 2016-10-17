@@ -46,12 +46,12 @@ IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND ( ($num) GT 0 )` THEN
        DEFINE SYMBOL clon_imin 1
        DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
        
-       IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+       IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax AND (($xstride) GT 1)` THEN \
 	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
 	    
 	 DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          DEFINE SYMBOL clat_jmax = `MIN(jymax, INT(($clat_jmax)/($ystride)) )`
-	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
+	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax AND (($ystride) GT 1)` THEN \
 	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
 
    ENDIF

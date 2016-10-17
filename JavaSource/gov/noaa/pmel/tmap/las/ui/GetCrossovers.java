@@ -3,6 +3,8 @@ package gov.noaa.pmel.tmap.las.ui;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
@@ -22,22 +24,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.Document;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
-import org.apache.log4j.Logger;
+import org.owasp.encoder.Encode;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -47,7 +46,7 @@ import com.google.gson.JsonStreamParser;
 
 public class GetCrossovers extends LASAction {
 
-    private static Logger log = Logger.getLogger(GetCrossovers.class.getName());
+    private static Logger log = LoggerFactory.getLogger(GetCrossovers.class.getName());
     DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
 
     DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
@@ -67,22 +66,22 @@ public class GetCrossovers extends LASAction {
     double latDelta = (CUTOFF / EARTH_AUTHALIC_RADIUS_KM) * 
             (180.0 / Math.PI);
 
-    /* (non-Javadoc)
-     * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
-    @Override
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			        throws Exception {	
+    public String execute() throws Exception {	
 	    
-	    
+        InputStream stream = null;
+        JsonStreamParser jp = null;
+        InputStream st = null;
 
         
 	    LASProxy lasProxy = new LASProxy();
-	    LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+	    LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 	    String tid = request.getParameter("tid");
+	    tid = Encode.forJava(tid);
+	    String catid = request.getParameter("catid");
 	    String dsid = request.getParameter("dsid");
+	    dsid = Encode.forJava(dsid);
 	    String xml = request.getParameter("xml");
+	    xml = Encode.forXml(xml);
 	    
 	    List<String> candiateCruises = new ArrayList<String>();
 	    List<Crossover> crossingCruises = new ArrayList<Crossover>();
@@ -90,15 +89,16 @@ public class GetCrossovers extends LASAction {
 	    if ( dsid != null ) {
 	        String latid = null;
 	        String lonid = null;
-	        List<Category> c = lasConfig.getCategories(dsid);
+	        if ( catid == null || catid.equals("") ) catid = dsid;
+	        List<Category> c = lasConfig.getCategories(catid);
 	        Dataset dataset = c.get(0).getDataset();
 	        Map<String, Map<String, String>> properties = dataset.getPropertiesAsMap();
 	        List<Variable> variables =  lasConfig.getVariables(dsid);
 	        for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                 Variable variable = (Variable) varIt.next();
-                if ( variable.getName().toLowerCase().equals("latitude") ) {
+                if ( variable.getName().toLowerCase(Locale.ENGLISH).equals("latitude") ) {
                     latid = variable.getID();
-                } else if ( variable.getName().toLowerCase().equals("longitude") ) {
+                } else if ( variable.getName().toLowerCase(Locale.ENGLISH).equals("longitude") ) {
                     lonid = variable.getID();
                 }
             }
@@ -109,11 +109,11 @@ public class GetCrossovers extends LASAction {
 	                String table = tabledap.get("table_variables");
                     String document_base = tabledap.get("document_base");
                     String id = tabledap.get("id");
-                    // String did = tabledap.get("decimated_id");
 
-                    // Ignore the decimated data set for this operation.
-                    String did = null;
-                    
+                    // Use or ignore the decimated data set for this operation ?
+                    String did = tabledap.get("decimated_id");
+                    // String did = null;
+
                     String traj_id_name = tabledap.get("trajectory_id");
                    
                     
@@ -151,8 +151,7 @@ public class GetCrossovers extends LASAction {
 	                                // Call out to ERDDAP for the lat/lon/time box.
 	                                try {
 	                                    String laturl = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",latitude,longitude,time&"+traj_id_name+"=\""+tid+"\"&distinct()&orderByMinMax(\"latitude\")","UTF-8");
-	                                    InputStream stream = null;
-	                                    JsonStreamParser jp = null;
+
 
 	                                    stream = lasProxy.executeGetMethodAndReturnStream(laturl, response);
 	                                    jp = new JsonStreamParser(new InputStreamReader(stream));
@@ -236,12 +235,7 @@ public class GetCrossovers extends LASAction {
 	                                        bsw.close();
 	                                        return null;
 	                                    }
-	                                } catch (Exception e) {
-	                                    bsw.write("check failed");
-	                                    bsw.flush();
-	                                    bsw.close();
-	                                    return null;
-	                                }
+	                                
 	                                StringBuilder crosslinks = new StringBuilder("<div>none");
 	                                if ( candiateCruises.size() > 0 ) {
 	                                    // We found some.  Compute the cross overs.
@@ -249,9 +243,9 @@ public class GetCrossovers extends LASAction {
 	                                    // get the data for the selected cruise.
 	                                    String selectedCruiseURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+tid+"\"&orderBy(\"time\")", "UTF-8");
                                                                         
-	                                    InputStream stream = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
+	                                    stream = lasProxy.executeGetMethodAndReturnStream(selectedCruiseURL, response);
 	                                    if ( stream != null ) {
-	                                        JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(stream));
+	                                        jp = new JsonStreamParser(new InputStreamReader(stream));
 	                                        selectedCruise = (JsonObject) jp.next();
 	                                        stream.close();
 	                                    }
@@ -261,9 +255,9 @@ public class GetCrossovers extends LASAction {
 	                                            String cid = (String) cIt.next();
                                                 String potentialCrossURL = dataurl + ".json?"+URLEncoder.encode(traj_id_name+",time,latitude,longitude,temp,fCO2_recommended&"+traj_id_name+"=\""+cid+"\"&orderBy(\"time\")", "UTF-8");
 
-	                                            InputStream st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
+	                                            st = lasProxy.executeGetMethodAndReturnStream(potentialCrossURL, response);
 	                                            if ( st != null ) {
-	                                                JsonStreamParser jp = new JsonStreamParser(new InputStreamReader(st));
+	                                                jp = new JsonStreamParser(new InputStreamReader(st));
 	                                                JsonObject potentialCross = (JsonObject) jp.next();
 	                                                Crossover cross = checkCrossover(selectedCruise, potentialCross);
 	                                                st.close();
@@ -319,7 +313,7 @@ public class GetCrossovers extends LASAction {
 	                                                        crosslinks.replace(0, crosslinks.length(), "<div>");
 	                                                    }
 	                                                    
-	                                                    crosslinks.append("<a target=\"_blank\" href=\"ProductServer.do?catid="+dsid+"&amp;xml="+lasRequest.toEncodedURLString()+"\">"+cid+"</a>\n");
+	                                                    crosslinks.append("<a target=\"_blank\" href=\"ProductServer.do?catid="+catid+"&amp;dsid="+dsid+"&amp;xml="+lasRequest.toEncodedURLString()+"\">"+cid+"</a>\n");
 	                                                }
 	                                            }
 	                                        }
@@ -329,7 +323,17 @@ public class GetCrossovers extends LASAction {
 	                                bsw.write(crosslinks.toString());
 	                                bsw.flush();
 	                                bsw.close();
-
+	                                } catch (Exception e) {
+	                                    bsw.write("check failed");
+	                                    bsw.flush();
+	                                    bsw.close();
+	                                    return null;
+	                                } finally {
+	                                    if ( stream != null ) 
+	                                    	stream.close();
+	                                    if ( st != null )
+	                                    	st.close();
+	                                }
 
 	                            }
 	                        }

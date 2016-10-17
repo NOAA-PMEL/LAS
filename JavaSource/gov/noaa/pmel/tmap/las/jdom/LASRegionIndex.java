@@ -12,14 +12,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 import org.jdom.Element;
 
 public class LASRegionIndex extends LASDocument {
 
-    private static Logger log = Logger.getLogger(LASRegionIndex.class.getName());
+    private static Logger log = LoggerFactory.getLogger(LASRegionIndex.class.getName());
     private static final long serialVersionUID = 703675281298155235L;
     /**
      * 
@@ -38,82 +40,90 @@ public class LASRegionIndex extends LASDocument {
 
         ArrayList<HashMap> sections = new ArrayList<HashMap>();
 
-        String line = indexReader.readLine();
-        HashMap<String, String> section = new HashMap<String, String>();
-        HashMap<String, String> original = new HashMap<String, String>();
-        while ( line != null ) {
-            /* The Ferret output looks like this:
-                 "data region" " "
-                 "original_region"
-                 "original_x_lo" "-180.0"
-                 "original_x_hi" "180.0"
-                 "original_y_lo" "-89.0"
-                 "original_y_hi" "89.0"
-                 "original_z_lo" " "
-                 "original_z_hi" " "
-                 "original_t_lo" "15-Jan"
-                 "original_t_hi" "15-Jan"
-                 "original_k_lo" " "
-                 "original_k_hi" " "
-                 "original_l_lo" "1"
-                 "original_l_hi" "1"
-                 "end original_region"
-                 "section" "1"
-                 "x_lo"    "-181"
-                 "x_hi"    "19"
-                 "i_lo"    "-100"
-                 "i_hi"    "0"
-                 "y_lo"    "-89"
-                 "y_hi"    "89"
-                 "j_lo"    "1"
-                 "j_hi"    "90"
-                 "z_lo"    " "
-                 "z_hi"    " "
-                 "k_lo"    " "
-                 "k_hi"    " "
-                 "t_lo"    "16-JAN"
-                 "t_hi"    "16-JAN"
-                 "l_lo"    "1"
-                 "l_hi"    "1"
-                 "end section"
-                 "section" "2"
-                 "x_lo"    "59"
-                 "x_hi"    "179"
-                 "i_lo"    "20"
-                 "i_hi"    "80"
-                 "y_lo"    "-89"
-                 "y_hi"    "89"
-                 "j_lo"    "1"
-                 "j_hi"    "90"
-                 "z_lo"    " "
-                 "z_hi"    " "
-                 "k_lo"    " "
-                 "k_hi"    " "
-                 "t_lo"    "16-JAN"
-                 "t_hi"    "16-JAN"
-                 "l_lo"    "1"
-                 "l_hi"    "1"
-                 "end section"
-                 "end region" 
-             */
-            if ( line.contains("\"section\"") ) {
-                if (section.size() == 0) {
-                    sections.add(section);
-                }
-                else if ( section.size() > 0 ) {                  
-                    section = new HashMap<String, String>();
-                    sections.add(section);
-                }
-            } else if ( (line.contains("hi") || line.contains("lo")) && !line.contains("original") ) {
-                // Split on the " and use the parts.  See JavaDoc on split for explanation...
-                String[] parts = line.split("\"");
-                section.put(parts[1], parts[3]);
-            } else if ( (line.contains("hi") || line.contains("lo")) && line.contains("original") ) {
-                String[] parts = line.split("\"");
-                original.put(parts[1], parts[3]);
-            }
-            line = indexReader.readLine();
-        }     
+        HashMap<String, String> original;
+		try {
+			String line = indexReader.readLine();
+			HashMap<String, String> section = new HashMap<String, String>();
+			original = new HashMap<String, String>();
+			while ( line != null ) {
+			    /* The Ferret output looks like this:
+			         "data region" " "
+			         "original_region"
+			         "original_x_lo" "-180.0"
+			         "original_x_hi" "180.0"
+			         "original_y_lo" "-89.0"
+			         "original_y_hi" "89.0"
+			         "original_z_lo" " "
+			         "original_z_hi" " "
+			         "original_t_lo" "15-Jan"
+			         "original_t_hi" "15-Jan"
+			         "original_k_lo" " "
+			         "original_k_hi" " "
+			         "original_l_lo" "1"
+			         "original_l_hi" "1"
+			         "end original_region"
+			         "section" "1"
+			         "x_lo"    "-181"
+			         "x_hi"    "19"
+			         "i_lo"    "-100"
+			         "i_hi"    "0"
+			         "y_lo"    "-89"
+			         "y_hi"    "89"
+			         "j_lo"    "1"
+			         "j_hi"    "90"
+			         "z_lo"    " "
+			         "z_hi"    " "
+			         "k_lo"    " "
+			         "k_hi"    " "
+			         "t_lo"    "16-JAN"
+			         "t_hi"    "16-JAN"
+			         "l_lo"    "1"
+			         "l_hi"    "1"
+			         "end section"
+			         "section" "2"
+			         "x_lo"    "59"
+			         "x_hi"    "179"
+			         "i_lo"    "20"
+			         "i_hi"    "80"
+			         "y_lo"    "-89"
+			         "y_hi"    "89"
+			         "j_lo"    "1"
+			         "j_hi"    "90"
+			         "z_lo"    " "
+			         "z_hi"    " "
+			         "k_lo"    " "
+			         "k_hi"    " "
+			         "t_lo"    "16-JAN"
+			         "t_hi"    "16-JAN"
+			         "l_lo"    "1"
+			         "l_hi"    "1"
+			         "end section"
+			         "end region" 
+			     */
+			    if ( line.contains("\"section\"") ) {
+			        if (section.size() == 0) {
+			            sections.add(section);
+			        }
+			        else if ( section.size() > 0 ) {                  
+			            section = new HashMap<String, String>();
+			            sections.add(section);
+			        }
+			    } else if ( (line.contains("hi") || line.contains("lo")) && !line.contains("original") ) {
+			        // Split on the " and use the parts.  See JavaDoc on split for explanation...
+			        String[] parts = line.split("\"");
+			        section.put(parts[1], parts[3]);
+			    } else if ( (line.contains("hi") || line.contains("lo")) && line.contains("original") ) {
+			        String[] parts = line.split("\"");
+			        original.put(parts[1], parts[3]);
+			    }
+			    line = indexReader.readLine();
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if ( indexReader != null )
+				indexReader.close();
+		}
         Element region = new Element("region");
 
         this.setRootElement(region);

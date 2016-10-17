@@ -15,6 +15,8 @@
 ! Fixes to the check on the Y region for XY plots - if the init script renames
 ! a file variable, an error occurred the second time the init script was called.
 !
+! 10/4/2016 fixes so init scripts still work
+
 
 GO LAS_initial_setup
 
@@ -54,7 +56,7 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
 
 !  We need to have the region and data symbols so initialize these.
 !  The product script will run these again with the new y region settings.
-          IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
+          IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($dset($1"0"))
 
 
           IF ($data_0_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_0_var)
@@ -93,6 +95,16 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
        ELSE
           DEFINE SYMBOL two_parter = 1
        ENDIF
+       
+! Cancel the dataset initialized above; the initialization will be done
+! in xy_plot_2D, and if there is an init script, for instance, things will break.
+! Also cancel any defined variables from an init script.
+
+       IF ($ferret_init_script"0|*>1") THEN
+          CANCEL VARIABLE/ALL
+          CANCEL DATA 1
+       ENDIF
+
        go xy_plot_2D
    ENDIF
 

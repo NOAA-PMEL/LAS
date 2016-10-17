@@ -17,7 +17,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.httpclient.HttpException;
+import org.apache.http.HttpException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -35,6 +35,17 @@ public class ErddapScanner {
 	protected static String category_file = null;
 	protected static boolean verbose = false;
 	protected static String title = null;
+	protected static boolean hours = false;
+	protected static boolean minutes = false;
+	protected static double hours_step;
+	protected static String[] properties;
+	protected static String[] varproperties;
+	protected static String[] skip;
+	protected static String[] display;
+	protected static boolean separate_files = false;
+	protected static String basename = "las_from_erddap";
+	
+	protected static boolean auto_display = false;
 
 	protected static ErddapScannerOptions opts = new ErddapScannerOptions();
 	protected static CommandLine cl;
@@ -53,6 +64,8 @@ public class ErddapScanner {
 	static int count_profile = 0;
 	static int count_timeseries = 0;
 	static int count_trajectory = 0;
+	static int count_trajectoryProfile = 0;
+	static int count_point = 0;
 	
 	static int noread = 0;
 
@@ -66,19 +79,43 @@ public class ErddapScanner {
 			CommandLineParser parser = new GnuParser();
 
 			cl = parser.parse(opts, args);
+			properties = cl.getOptionValues("property");
+			varproperties = cl.getOptionValues("varprop");
+			display = cl.getOptionValues("display");
+			// -d with no options
+			if ( cl.hasOption("display") && display == null ) {
+				auto_display = true;
+			}
+			skip = cl.getOptionValues("skip");
 			url = cl.getOptionValue("url");
 			id = cl.getOptionValue("id");
 			verbose = cl.hasOption("verbose");
 			title = cl.getOptionValue("title");
+			hours = cl.hasOption("hours");
+			if ( hours ) {
+				String hsv = cl.getOptionValue("hours");
+				hours_step = Double.valueOf(hsv).doubleValue();
+			}
+			minutes = cl.hasOption("minutes");
 			category_file = cl.getOptionValue("category");
 			if ( !url.endsWith("/") ) {
 				url = url+"/";
 			}
+			if ( hours && minutes ) {
+				String header = "Either choose to use hours or minutes, but not both.";
+				String footer = "";
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp("addDiscrete", header, opts, footer, true);
+				System.exit(-1);
+			}
+			separate_files = cl.hasOption("files");
+			
 		} catch (ParseException e) {
 			String header = "An error occurred with the command line processing\n";
 			String footer = "";
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("addDiscrete", header, opts, footer, true);
+			System.exit(-1);
 		}
 		String skipaxes = cl.getOptionValue("axes");
 		List<String> axesToSkip = new ArrayList<String>();
@@ -89,7 +126,7 @@ public class ErddapScanner {
 		ErddapProcessor processor = new ErddapProcessor(axesToSkip);
 		if ( id != null ) {
 			// Process the given data set.
-			processor.process(url, id, false, verbose);
+			processor.process(url, id, false, auto_display, false, hours, hours_step, minutes, verbose, properties, varproperties, display, skip, false);
 		} else {
 			List<CategoryBean> categories = new ArrayList<CategoryBean>();
 			CategoryBean othercat;
@@ -143,28 +180,34 @@ public class ErddapScanner {
 				List<CategoryBean> cats = new ArrayList<CategoryBean>();
 				
 				int limit = rows.size();
-				// int limit = 10; //DEBUG
+
 				// The first one is a listing of all data sets, not the first tabledap data set.
 				for (int i = 1; i < limit; i++) {
 					total++;
 					JsonArray row = (JsonArray) rows.get(i);
 					String fullurl = row.get(2).getAsString();
-					String title = row.get(6).getAsString();
+					String title = row.get(7).getAsString();
 
 					String u = fullurl.substring(0, fullurl.lastIndexOf("/"));
 					String uid = fullurl.substring(fullurl.lastIndexOf("/")+1);
 
 
+					boolean append = false;
+					if ( i > 1 ) append = true;
 
-					ErddapReturn r = processor.process(u, uid, true, verbose);
+					ErddapReturn r = processor.process(u, uid, append, auto_display, true, hours, hours_step, minutes, verbose, properties, varproperties, display, skip, separate_files);
 					// Only include the XML if it looks like it's fully specified.
 					if ( r.write ) {
-						if (r.type.equals("profile") ) {
+						if (r.type.equals(CdmDatatype.PROFILE) ) {
 							count_profile++;
-						} else if ( r.type.equals("trajectory") ) {
+						} else if ( r.type.equals(CdmDatatype.TRAJECTORYPROFILE) ) {
+							count_trajectoryProfile++;
+						} else if ( r.type.equals(CdmDatatype.TRAJECTORY) ) {
 							count_trajectory++;
-						} else if ( r.type.equals("timeseries") ) {
+						} else if ( r.type.equals(CdmDatatype.TIMESERIES) ) {
 							count_timeseries++;
+						} else if ( r.type.equals(CdmDatatype.POINT) ) {
+							count_point++;
 						}
 						CategoryBean cat = new CategoryBean();
 						cat.setName(title);
@@ -172,7 +215,7 @@ public class ErddapScanner {
 
 						FilterBean filter = new FilterBean();
 						filter.setAction("apply-dataset");
-						filter.setContainstag(uid);
+						filter.setContainstag("id-"+uid);
 						cat.addFilter(filter);
 						
 						if ( categories.size() == 0 ) {
@@ -213,17 +256,19 @@ public class ErddapScanner {
 
 				}
 				Element lc = new Element("las_categories");
-				List<CategoryBean> c = topCat.getCategories();
-				for (Iterator catIt = c.iterator(); catIt.hasNext();) {
-					CategoryBean cbean = (CategoryBean) catIt.next();
-					cbean.setFilters(new ArrayList<FilterBean>());
-				}
+//				List<CategoryBean> c = topCat.getCategories();
+//				for (Iterator catIt = c.iterator(); catIt.hasNext();) {
+//					CategoryBean cbean = (CategoryBean) catIt.next();
+//					cbean.setFilters(new ArrayList<FilterBean>());
+//				}
 				lc.addContent(topCat.toXml());
 				processor.outputXML(categoriesFile, lc, false);
 				System.out.println(total+" dataset were examined.");
-				System.out.println(count_profile+" profiles were configured into LAS.");
-				System.out.println(count_trajectory+" trajectory were configured into LAS.");
-				System.out.println(count_timeseries+" timeseries were configured into LAS.");
+				System.out.println(count_point+" point data sets were configured into LAS.");
+				System.out.println(count_profile+" profile data sets were configured into LAS.");
+				System.out.println(count_trajectory+" trajectory data sets were configured into LAS.");
+				System.out.println(count_trajectoryProfile+" trajectory profile data sets were configured into LAS.");
+				System.out.println(count_timeseries+" timeseries data sets were configured into LAS.");
 				
 				System.out.println(uktype + " data set were of a type that LAS cannot currently use.");
 				System.out.println(noread + " data sets could not be read from the server.");

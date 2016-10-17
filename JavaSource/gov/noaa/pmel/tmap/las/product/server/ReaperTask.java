@@ -3,25 +3,20 @@ package gov.noaa.pmel.tmap.las.product.server;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
-import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.FileListing;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimerTask;
 
 import javax.servlet.ServletContext;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 public class ReaperTask extends TimerTask {
 
@@ -60,7 +55,7 @@ public class ReaperTask extends TimerTask {
         ArrayList<NameValuePair> pair = serverConfig.getServiceNamesAndURLs();
         for (Iterator pairIt = pair.iterator(); pairIt.hasNext();) {
             NameValuePair nameValuePair = (NameValuePair) pairIt.next();
-            String name = nameValuePair.getName().toLowerCase();
+            String name = nameValuePair.getName().toLowerCase(Locale.ENGLISH);
             String servicedir = JDOMUtils.getResourcePath(this, "resources/"+name+"/temp");
             try {
                 if ( servicedir != null ) {

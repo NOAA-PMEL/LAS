@@ -5,6 +5,8 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.test.LASTestOptions;
 
 import java.io.BufferedReader;
@@ -13,16 +15,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchService;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,12 +27,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.Logger;
-import org.apache.struts.action.ActionServlet;
-import org.apache.struts.action.PlugIn;
-import org.apache.struts.config.ModuleConfig;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
@@ -43,7 +34,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class LASConfigPlugIn implements PlugIn {
+public class LASConfigPlugIn {
 
 	private static boolean reinit_flag = false;
 
@@ -84,7 +75,7 @@ public class LASConfigPlugIn implements PlugIn {
 	 */
 	public final static String LAS_FTDS_UP_KEY = "ftds_up";
 
-	private static Logger log = Logger.getLogger(LASConfigPlugIn.class.getName());
+	private static Logger log = LoggerFactory.getLogger(LASConfigPlugIn.class.getName());
 
 	private ServletContext context;
 
@@ -161,28 +152,10 @@ public class LASConfigPlugIn implements PlugIn {
 	 *@exception  ServletException  if we cannot configure ourselves correctly
 	 * @throws IOException 
 	 */
-	public void init(ActionServlet servlet, ModuleConfig config)
+	public void init(ServletContext context)
 	throws ServletException {
 
-		context = servlet.getServletContext();
-		
-		try {
-			PropertyConfigurator.configure(context.getRealPath("WEB-INF/classes/log4j.xml"));
-		} catch (Exception e) {
-			// Couldn't set up logging, but we're moving on...
-		}
-		
-		String version;
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(context.getRealPath("WEB-INF/classes/resources/version.txt"))));
-			version = reader.readLine();
-		} catch (FileNotFoundException e) {
-			version = "7";
-		} catch (IOException e) {
-			version = "7";
-		}
-		
-		context.setAttribute(LAS_VERSION_KEY, version);
+		this.context = context;
 
 		if ((configFileName == null || configFileName.length() == 0)) {
 			throw new ServletException("No LAS configuration file specified.");
@@ -647,11 +620,11 @@ public class LASConfigPlugIn implements PlugIn {
 	            try {
 	                interval = Long.valueOf(interval_string);
 	                age = Long.valueOf(age_string);
-	                if ( ivunits.toLowerCase().contains("hour") ) {
+	                if ( ivunits.toLowerCase(Locale.ENGLISH).contains("hour") ) {
 	                    interval = interval * 1000*60*60;
 	                    age = age * 1000*60*60;
 	                    // timeunit defaults to hours
-	                } else if (ivunits.toLowerCase().contains("day") ) {
+	                } else if (ivunits.toLowerCase(Locale.ENGLISH).contains("day") ) {
 	                    interval = interval * 1000*60*60*24;         
 	                    age = age * 1000*60*60*24;
 	                    timeunit = TimeUnit.DAYS;
@@ -681,26 +654,11 @@ public class LASConfigPlugIn implements PlugIn {
 	            context.setAttribute(REAP_SCHEDULER, scheduler);
 	        }
 	        
-	        // Watch the config directory and reload if something changes...
-	        WatchService watcher = FileSystems.getDefault().newWatchService();
-	        Path conf = configFile.getParentFile().toPath();
-	        conf.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-	        Reload reload = new Reload(watcher, context);
-	        reload.start();
+
 	    }
 	    log.info("Initialization finished.");
 	}
-	public void destroy() {
-	    log.error("Shutting down LAS");
-	    ScheduledExecutorService scheduler1 = (ScheduledExecutorService) context.getAttribute(TEST_SCHEDULER);
-	    if ( scheduler1 != null ) {
-	        scheduler1.shutdownNow();
-	    }
-	    ScheduledExecutorService scheduler2 = (ScheduledExecutorService) context.getAttribute(REAP_SCHEDULER);
-        if ( scheduler2 != null ) {
-            scheduler2.shutdownNow();
-        }
-	}
+
 
 	public void update(ServletContext context) throws ServletException, JDOMException, UnsupportedEncodingException, LASException {
 		this.context = context;

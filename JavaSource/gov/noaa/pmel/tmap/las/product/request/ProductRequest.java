@@ -29,7 +29,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a POJO that is the instantiation of an entire
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 
 public class ProductRequest {
-    static private Logger log = Logger.getLogger(ProductServerAction.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(ProductServerAction.class.getName());
     protected LASUIRequest lasRequest = null;
     protected String cacheKey = null;
     protected boolean useCache = true;

@@ -7,10 +7,16 @@ public class URLUtil {
 		return getBaseURL() + "images/";
 	}
 	public static String getBaseURL() {
+		// TODO ~~ Warning ~~ very specific to our directory structure when deployed...
 		String moduleRelativeURL = GWT.getModuleBaseURL();
-		int first_path_slash = moduleRelativeURL.indexOf("/", moduleRelativeURL.indexOf("://")+4);
-		int second_path_slash = moduleRelativeURL.indexOf("/", first_path_slash+1);
-		String base =  moduleRelativeURL.substring(0, second_path_slash) + "/";
+		// Lop off the last "/"
+		String base = moduleRelativeURL.substring(0, moduleRelativeURL.length()-1);
+		// The component name...
+		base = base.substring(0, base.lastIndexOf("/"));
+		// The "components" sub-directory
+		base = base.substring(0, base.lastIndexOf("/"));
+		// The "JavaScript" sub-directory (keep the "/")
+		base = base.substring(0, base.lastIndexOf("/")+1);
 		return base;
 	}
 }

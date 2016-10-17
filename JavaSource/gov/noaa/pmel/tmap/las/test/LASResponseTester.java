@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.las.test;
 
 
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
-import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
@@ -25,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.jdom.Element;
@@ -118,9 +118,9 @@ public class LASResponseTester{
 				        		// find the first non-subset variable, and not time, lat or lon since these require
 				        		// special treatment to extract from the server properly
 				        		if ( candidate.getAttributesAsMap().get("subset_variable") == null &&
-				        			 !candidate.getName().toLowerCase().contains("time") && 
-				        			 !candidate.getName().toLowerCase().contains("lat") &&
-				        			 !candidate.getName().toLowerCase().contains("lon") ) {
+				        			 !candidate.getName().toLowerCase(Locale.ENGLISH).contains("time") && 
+				        			 !candidate.getName().toLowerCase(Locale.ENGLISH).contains("lat") &&
+				        			 !candidate.getName().toLowerCase(Locale.ENGLISH).contains("lon") ) {
 				        			firstVar = candidate;
 				        			break;
 				        		}
@@ -387,13 +387,14 @@ public class LASResponseTester{
 		
 		boolean inProgress = true;
 		int noProgress = 0;
+		InputStream instream = null;
 		while(inProgress && (noProgress < 2)){
 			try{
 				//send request to ProductServer
 				URL url = new URL(requestURL);
 				URLConnection conn = url.openConnection();
 				conn.connect();
-				InputStream instream = conn.getInputStream();
+				instream = conn.getInputStream();
 				String contentType = conn.getContentType();
 				char[] buf = new char[4096];
 				BufferedReader is = new BufferedReader(new InputStreamReader(instream));
@@ -441,6 +442,14 @@ public class LASResponseTester{
 				if ( !web_output ) System.out.println("error in making request to product server");
 				e.printStackTrace();
 				break;
+			} finally {
+				if ( instream != null ) {
+					try {
+						instream.close();
+					} catch (IOException e) {
+						System.err.println("Error closing stream.  "+e.getMessage());
+					}
+				}
 			}
 		}
 		//if the request was sent more than 3 times; kill it

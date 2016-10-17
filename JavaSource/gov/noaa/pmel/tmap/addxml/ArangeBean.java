@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import org.apache.log4j.Logger;
 
 
 /**
@@ -22,7 +21,6 @@ public class ArangeBean extends LasBean {
   private String size;
   private String end;
   
-  private static Logger log = Logger.getLogger(ArangeBean.class.getName());
 
   public ArangeBean() {
   }
@@ -72,15 +70,12 @@ public boolean equals(LasBean bean) {
 		b = (ArangeBean) bean;
 	}
 	if ( !size.equals(b.getSize() )) {
-		log.debug("Size compare failed");
 		return false;
 	}
 	if ( !step.equals(b.getStep() )) {
-		log.debug("Step compare failed.");
 		return false;
 	}
 	if ( !start.equals(b.getStart() )) {
-		log.debug("Start compare failed.");
 		return false;
 	}
 	return true;

@@ -125,6 +125,7 @@ public class VariableBean extends LasBean {
                             prop.addContent(v);
                             groupE.addContent(prop);
                         }
+                        propertiesE.addContent(groupE);
                     }
                 } else {
                     for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
@@ -138,7 +139,8 @@ public class VariableBean extends LasBean {
                             n.setText(value);
                             groupE.addContent(n);
                         }
-                    }
+                        propertiesE.addContent(groupE);
+                    }                
                 }
             variable.addContent(propertiesE);
         }

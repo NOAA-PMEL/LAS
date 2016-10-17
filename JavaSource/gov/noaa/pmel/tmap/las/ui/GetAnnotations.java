@@ -7,27 +7,14 @@ package gov.noaa.pmel.tmap.las.ui;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASAnnotations;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** 
  * MyEclipse Struts
@@ -49,10 +36,13 @@ public class GetAnnotations extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	private static Logger log = Logger.getLogger(GetAnnotations.class.getName());
-	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
+	private static Logger log = LoggerFactory.getLogger(GetAnnotations.class.getName());
+	private static String TEMPLATE = "template";
+	private String template;
+	
+	public String execute() throws Exception {    
 		log.info("START: "+request.getRequestURL());
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
         request.setAttribute("base_server_url", lasConfig.getBaseServerURL());
 	
 		String template = request.getParameter("template");
@@ -84,20 +74,27 @@ public class GetAnnotations extends ConfigService {
 				}
 			}
 			log.info("END:   "+request.getRequestURL());
-			return new ActionForward("/productserver/templates/"+template);
+			
+			setTemplate("/productserver/templates/"+template);
+			return TEMPLATE;
 		} else {
 			LASAnnotations lasAnnotations = new LASAnnotations();
 			lasAnnotations.setDatasetTitle("Error processing annotations file.");
 			request.setAttribute("las_annotations", lasAnnotations);
 			log.error("Unable to process annontations.");
 			log.info("END:   "+request.getRequestURL());
-			return new ActionForward("/productserver/templates/"+template);
+			setTemplate("/productserver/templates/"+template);
+			return TEMPLATE;
 		}
 	}
 	private void loadAnnotations(String file, LASAnnotations lasAnnotations) {
 		try {
-			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+			LASConfig lasConfig = (LASConfig)contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 			if ( file != null ) {
+				String odir = lasConfig.getOutputDir();
+				if ( odir.contains("/..") || odir.contains("../") || file.contains("/..") || file.contains("../") ) {
+					throw new Exception("Illegal file name.");
+				}
 				File f = new File(lasConfig.getOutputDir()+File.separator+file);
 				JDOMUtils.XML2JDOM(f, lasAnnotations);
 			}
@@ -107,5 +104,11 @@ public class GetAnnotations extends ConfigService {
 			lasAnnotations.setDatasetTitle("Error processing annotations file.");
 			log.error("Unable to process annontations."+e.getMessage());			
 		}
+	}
+	public String getTemplate() {
+		return template;
+	}
+	public void setTemplate(String template) {
+		this.template = template;
 	}
 }

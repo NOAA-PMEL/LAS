@@ -7,8 +7,6 @@ package gov.noaa.pmel.tmap.las.ui;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
-import gov.noaa.pmel.tmap.las.ui.json.JSONUtil;
-import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 
 import java.io.IOException;
@@ -16,20 +14,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-
-import org.apache.log4j.Logger;
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.jdom.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -54,9 +42,8 @@ public class GetDatasets extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = Logger.getLogger(GetDatasets.class.getName());
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-            HttpServletRequest request, HttpServletResponse response) {
+    private static Logger log = LoggerFactory.getLogger(GetDatasets.class.getName());
+    public String execute() {
 		String query = request.getQueryString();
 		if ( query != null ) {
 			try{
@@ -99,7 +86,7 @@ public class GetDatasets extends ConfigService {
         }
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         log.debug("Processing request for dataset list.");
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY); 
                 
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
 		try {

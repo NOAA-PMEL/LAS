@@ -226,14 +226,6 @@ if ( ! -d $classesDir ) {
     print "Created a directory for the webapp classes and resources.\n\n";
 }
 
-## Write out the initial copy of the las.properties file.
-## genLas.pl will read this and add some stuff it needs.
-    open OUT,">$classesDir/las.properties" or die "Can't open $classesDir/las.properties'";
-    print OUT "las.db.host=dummy_value\n";
-    print OUT "las.db.user=dummy_value\n";
-    print OUT "las.db.password=dummy_value\n";
-    print OUT "las.db.dbase=dummy_value\n";
-
 
 #
 # Get the path to access the LAS UI
@@ -475,7 +467,6 @@ my @Scripts = qw(build.xml
                  JavaSource/resources/ferret/FerretBackendConfig.xml.pybase
                  JavaSource/resources/kml/KMLBackendConfig.xml
                  JavaSource/resources/database/DatabaseBackendConfig.xml
-                 WebContent/WEB-INF/struts-config.xml
                  WebContent/WEB-INF/web.xml
                  JavaSource/log4j.xml
                  WebContent/TestLinks.html
@@ -694,6 +685,10 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[9] = $serverConf."/profile_ui.xml";
     $sample_in[10] = "conf/example/timeseries_ui.xml";
     $sample_out[10] = $serverConf."/timeseries_ui.xml";
+    $sample_in[11] = "conf/example/timeseries_only_ui.xml";
+    $sample_out[11] = $serverConf."/timeseries_only_ui.xml";
+    $sample_in[12] = "conf/example/point_ui.xml";
+    $sample_out[12] = $serverConf."/point_ui.xml";
 
     for ( my $i = 0; $i <= $#sample_in; $i++ ) {
        if ( -f $sample_out[$i] ) {
@@ -783,7 +778,7 @@ open SCRIPT_OUT, ">startserver.sh" or die "Can't open startserver.sh";
 print SCRIPT_OUT <<EOL;
 #!/bin/sh
 JAVA_HOME="$java_home"
-JAVA_OPTS="-Djava.awt.headless=true -Xmx256M -Xms256M"
+JAVA_OPTS="-Djava.awt.headless=true -Xmx2048M -Xms2048M"
 CATALINA_PID="$LasConfig{webapps}/UI_PID"
 CATALINA_HOME="$LasConfig{jakarta_home}"
 export JAVA_HOME JAVA_OPTS CLASSPATH CATALINA_PID CATALINA_HOME

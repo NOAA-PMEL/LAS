@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.io.IOException;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * A point that represents an OSMC insitu observation
@@ -21,7 +22,7 @@ import org.apache.log4j.Logger;
  */
 public class OSMCInsituPoint extends LASInsituPoint{
 
-    private static Logger log = Logger.getLogger(OSMCInsituPoint.class);
+    private static Logger log = LoggerFactory.getLogger(OSMCInsituPoint.class);
 
     private String lat;
     private String lon;

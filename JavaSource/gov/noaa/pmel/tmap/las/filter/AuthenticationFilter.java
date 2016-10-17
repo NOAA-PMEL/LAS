@@ -18,12 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 public class AuthenticationFilter implements Filter {
-	private static Logger log = Logger.getLogger(AuthenticationFilter.class.getName());
+	private static Logger log = LoggerFactory.getLogger(AuthenticationFilter.class.getName());
 	private String databaseUrl;
 	private String selectUser;
 	private String selectPass;
@@ -51,7 +52,7 @@ public class AuthenticationFilter implements Filter {
 		selectPass = filterConfig.getInitParameter("selectPassword");
 		if ( selectPass == null ) 
 			throw new ServletException("selectPassword not defined in the AuthenticationFilter configuration");
-		Connection catConn;
+		Connection catConn = null;
 		try {
 			catConn = DriverManager.getConnection(databaseUrl, selectUser, selectPass);
 			if ( catConn == null )
@@ -59,6 +60,14 @@ public class AuthenticationFilter implements Filter {
 			catConn.close();
 		} catch (SQLException ex) {
 			throw new ServletException("Unable to make a connection to the database for AuthenticationFilter: " + ex.getMessage());
+		} finally {
+			if ( catConn !=  null ) {
+				try {
+					catConn.close();
+				} catch (SQLException e) {
+					log.error("Connection failed to close.");
+				}
+			}
 		}
 	}
 

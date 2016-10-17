@@ -94,7 +94,8 @@ public class Constraint {
             String[] parts = rhs.split("_ns_");
             StringBuilder r = new StringBuilder();
             for (int i = 0; i < parts.length; i++) {
-            	String p = Pattern.quote(parts[i]);
+            	
+            	String p = parts[i]; // Don't use quote pattern... Pattern.quote(parts[i]);
                 r.append(p);
                 if ( i < parts.length - 1 ) {
                     r.append("|");

@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.addxml;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.jdom.*;
 
 /**
@@ -20,8 +19,6 @@ import org.jdom.*;
  */
 public class AxisBean extends LasBean {
 	
-    private static Logger log = Logger.getLogger(AxisBean.class.getName());
-
 	private String type;
 	private String units;
 	private String display_lo;
@@ -139,6 +136,12 @@ public class AxisBean extends LasBean {
         } else {
             axis = new Element(this.getElement());
         }
+        if ( display_lo != null) {
+        	axis.setAttribute("display_lo", display_lo);
+        }
+        if ( display_hi != null ) {
+        	axis.setAttribute("display_hi", display_hi);
+        }
         if ( this.type == null ) {
             System.err.println("Axis has no identifying type.  Setting to 'q'.  Check output.");
             this.type = "q";
@@ -217,54 +220,45 @@ public class AxisBean extends LasBean {
 	public boolean equals(LasBean bean) {
 		AxisBean b = null;
 		if ( !(bean instanceof AxisBean) ) {
-			log.debug("Compare failed.  Not comparing to an axis.");
 			return false;
 		} else {
 			b = (AxisBean) bean;
 		}
 		if ( type != null ) {
 		   if ( !type.equals(b.getType() )) {
-			   log.debug("Type compare failed.");
 			   return false;
 		   }
 		}
 		if ( units != null ) {
 			if ( !units.equals(b.getUnits() )) {
-				log.debug("Units compare failed.");
 				return false;
 			}
 		}
 		if ( display_lo != null ) {
 			if ( !display_lo.equals(b.getDisplay_lo() )) {
-				log.debug("display_lo compare failed.");
 				return false;
 			}
 		}
 		if ( display_hi != null ) {
 			if ( !display_hi.equals(b.getDisplay_hi() )) {
-				log.debug("display_hi compare failed.");
 				return false;
 			}
 		}
 		if ( ddefault != null ) {
 			if ( !ddefault.equals(b.getDdefault()) ) {
-				log.debug("ddefault compare failed.");
 				return false;
 			}
 		}
 		if ( v != null ) {
 			if ( b.getV() == null ) {
-				log.debug("v list compare failed.");
 				return false;
 			}
 			String[] bv = b.getV();
 			if ( v.length != bv.length ) {
-				log.debug("V compare failed on length.");
 				return false;
 			} else {
 				for (int i = 0; i < bv.length; i++) {
 					if ( !bv[0].equals(v[0] ) ) {
-						log.debug("V compare failed i="+i+" v= "+v[i]+" v="+bv[i]);
 						return false;
 					}
 				}
@@ -272,11 +266,9 @@ public class AxisBean extends LasBean {
 		}
 		if ( arange != null ) {
 			if ( b.getArange() == null ) {
-				log.debug("Arange compare failed.");
 				return false;
 			}
 			if ( !arange.equals(b.getArange() )) {
-				log.debug("Arange compare failed.");
 				return false;
 			}
 		}

@@ -4,12 +4,13 @@ import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 /**
  * A widget that shows the "non-plot" operations from an LAS (like Google Earth, animation, etc).
  * @author rhs
@@ -108,12 +109,12 @@ public class OperationsMenu extends Composite {
 	
 	    for (int i = 0; i < ops.length; i++) {
 			OperationSerializable op = ops[i];
-			String category = op.getAttributes().get("category").toLowerCase();
+			String category = op.getAttributes().get("category").toLowerCase(Locale.ENGLISH);
 			List<String> views = op.getViews();
 			for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 				String op_view = (String) viewIt.next();
 				if ( category.equals("comparison")) {
-					if ( op.getName().toLowerCase().contains("compar") ) {
+					if ( op.getName().toLowerCase(Locale.ENGLISH).contains("compar") ) {
 						if ( op_view.equals(view) ) {
 							if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
 								if ( !hasComparison ) {
@@ -160,11 +161,11 @@ public class OperationsMenu extends Composite {
 				} else if ( category.contains("table") && !category.contains("trajectory") ) {
 					if ( op_view.equals(view) ) {
 						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-							if ( op.getName().toLowerCase().contains("values") ) {
+							if ( op.getName().toLowerCase(Locale.ENGLISH).contains("values") ) {
 								showValuesButton.setOperation(op);
 								showValuesButton.setEnabled(true);
 							}
-							if ( op.getName().toLowerCase().contains("download") ) {
+							if ( op.getName().toLowerCase(Locale.ENGLISH).contains("download") ) {
 								saveAsButton.setOperation(op);
 								saveAsButton.setEnabled(true);
 							}
@@ -173,7 +174,7 @@ public class OperationsMenu extends Composite {
 				} else if ( category.equals("file") ) {
 					if ( op_view.equals(view) ) {
 						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-							if ( op.getName().toLowerCase().contains("script") ) {
+							if ( op.getName().toLowerCase(Locale.ENGLISH).contains("script") ) {
 								exportToDesktopButton.setOperation(op);
 								exportToDesktopButton.setEnabled(true);
 							}
@@ -182,7 +183,7 @@ public class OperationsMenu extends Composite {
 				} else if ( category.equals("climate_analysis") ) {
 				    if ( op_view.equals(view) ) {
 				        if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-                            if ( op.getName().toLowerCase().contains("climate analysis") ) {
+                            if ( op.getName().toLowerCase(Locale.ENGLISH).contains("climate analysis") ) {
                                 climateAnalysis.setOperation(op);
                                 climateAnalysis.setVisible(true);
                                 climateAnalysis.setEnabled(true);
@@ -192,7 +193,7 @@ public class OperationsMenu extends Composite {
 				} else if ( category.equals("trajectory_table") ) {
                     if ( op_view.equals(view) ) {
                         if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-                            if ( op.getName().toLowerCase().contains("trajectory table") ) {
+                            if ( op.getName().toLowerCase(Locale.ENGLISH).contains("trajectory table") ) {
                                 dsgTable.setOperation(op);
                                 dsgTable.setVisible(true);
                                 dsgTable.setEnabled(true);
@@ -202,7 +203,7 @@ public class OperationsMenu extends Composite {
                 } else if ( category.equals("thumbnails") ) {
                     if ( op_view.equals(view) ) {
                         if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) ) {
-                            if ( op.getName().toLowerCase().contains("thumbnail") ) {
+                            if ( op.getName().toLowerCase(Locale.ENGLISH).contains("thumbnail") ) {
                                thumbnailTable.setOperation(op);
                                thumbnailTable.setVisible(true);
                                thumbnailTable.setEnabled(true);

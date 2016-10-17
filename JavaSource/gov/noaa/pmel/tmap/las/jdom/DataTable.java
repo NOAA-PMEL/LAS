@@ -33,64 +33,71 @@ public class DataTable {
         boolean headersStart = false;
         boolean dataStart = false;
         int cols = 0;
-        while ( line != null ) {
-            if ( line.contains("Column ") ) {
-                cols++;
-                columnStart = true;
-            } else if ( line.contains("Total ") ) {
-                // add the total to the preamble below
-            } else if ( line.trim().length() == 0 ) {
-                // Skip any line that is all white space...
-            } else {
-                if ( columnStart ) {
-                    columnEnd = true;
-                }
-            }
+        try {
+			while ( line != null ) {
+			    if ( line.contains("Column ") ) {
+			        cols++;
+			        columnStart = true;
+			    } else if ( line.contains("Total ") ) {
+			        // add the total to the preamble below
+			    } else if ( line.trim().length() == 0 ) {
+			        // Skip any line that is all white space...
+			    } else {
+			        if ( columnStart ) {
+			            columnEnd = true;
+			        }
+			    }
 
-            
-            if ( columnStart && columnEnd && !headersStart) {
-                headersStart = true;
-                headers = line.trim().split(",");
-                List<String> h = new ArrayList<String>();
-                for (int i = 0; i < headers.length; i++) {
-                    String value = headers[i];
-                    if ( value.startsWith("\"")) {
-                        value = value.substring(1, value.length());
-                    }
-                    if ( value.endsWith("\"") ) {
-                        value = value.substring(0, value.length()-1);
-                    }
-                    h.add(value);
-                }
-                setHeaders(h);
-            } else if ( !headersStart && !columnEnd ) {
-                preamble.add(line.trim());
-            }
-            if (headersStart) {
-                if ( dataStart ) {
-                    if ( line.contains("---- M") ) line = reader.readLine(); // Skip some debug output for now...
-                    String[] values = line.trim().split(",");
-                    for (int i = 0; i < getHeaders().size(); i++ ) {
-                        String header = getHeaders().get(i);
-                        List<String> datalist = data.get(header);
-                        if ( datalist == null ) {
-                            datalist = new ArrayList<String>();
-                            data.put(header, datalist);
-                        }
-                        String value = values[i];
-                        if ( value.startsWith("\"")) {
-                            value = value.substring(1, value.length());
-                        }
-                        if ( value.endsWith("\"") ) {
-                            value = value.substring(0, value.length()-1);
-                        }
-                        datalist.add(value);
-                    }
-                }
-                dataStart = true;
-            }
-            line = reader.readLine();
-        }
+			    
+			    if ( columnStart && columnEnd && !headersStart) {
+			        headersStart = true;
+			        headers = line.trim().split(",");
+			        List<String> h = new ArrayList<String>();
+			        for (int i = 0; i < headers.length; i++) {
+			            String value = headers[i];
+			            if ( value.startsWith("\"")) {
+			                value = value.substring(1, value.length());
+			            }
+			            if ( value.endsWith("\"") ) {
+			                value = value.substring(0, value.length()-1);
+			            }
+			            h.add(value);
+			        }
+			        setHeaders(h);
+			    } else if ( !headersStart && !columnEnd ) {
+			        preamble.add(line.trim());
+			    }
+			    if (headersStart) {
+			        if ( dataStart ) {
+			            if ( line.contains("---- M") ) line = reader.readLine(); // Skip some debug output for now...
+			            String[] values = line.trim().split(",");
+			            for (int i = 0; i < getHeaders().size(); i++ ) {
+			                String header = getHeaders().get(i);
+			                List<String> datalist = data.get(header);
+			                if ( datalist == null ) {
+			                    datalist = new ArrayList<String>();
+			                    data.put(header, datalist);
+			                }
+			                String value = values[i];
+			                if ( value.startsWith("\"")) {
+			                    value = value.substring(1, value.length());
+			                }
+			                if ( value.endsWith("\"") ) {
+			                    value = value.substring(0, value.length()-1);
+			                }
+			                datalist.add(value);
+			            }
+			        }
+			        dataStart = true;
+			    }
+			    line = reader.readLine();
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if ( reader != null )
+				reader.close();
+		}
         setData(data);
     }
     public List<String> getPreamble() {

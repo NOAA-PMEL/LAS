@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module>
+  <source path="client">
+    <exclude name="**/inventory/**"/>
+    <exclude name="**/Inventory.java"/>
+  </source>
   <!-- Inherit the core Web Toolkit stuff.                        -->
   <inherits name='com.google.gwt.user.User'/>
 
@@ -14,7 +18,8 @@
 	<replace-with class="gov.noaa.pmel.tmap.las.client.ClientFactoryImpl">
 		<when-type-is class="gov.noaa.pmel.tmap.las.client.ClientFactory" />
 	</replace-with>
-  	<inherits name="com.google.gwt.json.JSON" />
+   	<inherits name="com.google.gwt.json.JSON" />
+
   
 	<!-- GWT Joda Time implementation. -->
 	<inherits name='org.gwttime.Time' />

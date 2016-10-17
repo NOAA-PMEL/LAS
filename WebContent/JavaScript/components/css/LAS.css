@@ -1,4 +1,15 @@
 /** Add css rules here for your application. */
+/* Table style for data tables with alternating colors. */
+
+	/*  Define the background color for all the ODD background rows  */
+	.DataTable tr:nth-child(odd){ 
+		background: #F3E7C9;
+	}
+	/*  Define the background color for all the EVEN background rows  */
+	.DataTable tr:nth-child(even){
+		background: #FFFFFF;
+	}
+
 
 /* CSS for the WOCE flag editor. */
 .EDITOR-PushButton-up,

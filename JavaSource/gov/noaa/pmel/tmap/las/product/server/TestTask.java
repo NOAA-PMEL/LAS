@@ -11,13 +11,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.jdom.JDOMException;
 
 public class TestTask extends TimerTask {
 	ServletContext context;
-	private static Logger log = Logger.getLogger(TestTask.class.getName());
+	private static Logger log = LoggerFactory.getLogger(TestTask.class.getName());
 	public TestTask(ServletContext context) {
 		this.context = context;
 	}

@@ -9,8 +9,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 import gov.noaa.pmel.tmap.las.client.util.MultiCallback;
 
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -50,8 +48,7 @@ import com.google.gwt.http.client.Response;
  * 
  */
 public class OutputPanelRequestController implements RequestController {
-	private final Logger logger = Logger
-			.getLogger(OutputPanelRequestController.class.getName());
+
 	private HashMap<String, MultiCallback> seenUrls = new HashMap<String, MultiCallback>();
 
 	/**
@@ -59,7 +56,6 @@ public class OutputPanelRequestController implements RequestController {
 	 */
 	public OutputPanelRequestController() {
 		super();
-		logger.setLevel(Level.OFF);
 	}
 
 	/**
@@ -69,8 +65,6 @@ public class OutputPanelRequestController implements RequestController {
 	public void done(MultiCallback multiCallback) {
 		String url = multiCallback.getUrl();
 		Object previousValue = seenUrls.remove(url);
-		logger.info("done with seen multiCallback url:" + url + " and value:"
-				+ previousValue.toString());
 	}
 
 	/**
@@ -83,27 +77,20 @@ public class OutputPanelRequestController implements RequestController {
 		if ((source instanceof OutputPanel)
 				|| (sourceString.contains(".OutputPanel$"))) {
 			String sourceName = event.getSourceName();
-			logger.info("event.getSourceName():" + sourceName);
 			String url = event.getUrl();
 			String requestCallbackObjectName = event
 					.getRequestCallbackObjectName();
 			if (seenUrls.containsKey(url)) {
-				logger.info("Already seen url:" + url);
 				// Set the multiCallback for the current url to use
 				// the current requestCallback when the request is done
 				MultiCallback multiCallback = seenUrls.get(url);
 				boolean addSucessful = multiCallback.add(sourceName,
 						requestCallbackObjectName);
-				logger.info("Attempt to add sourceName:" + sourceName
-						+ ", requestCallbackObjectName:"
-						+ requestCallbackObjectName + " to multiCallback:"
-						+ multiCallback + " was:" + addSucessful);
 				// save the current url and multiCallback back into
 				// seenUrls
 				Object previousValue = seenUrls.put(url, multiCallback);
 				if (previousValue == null)
 					previousValue = "null";
-				logger.info("seenUrls.put(url, multiCallback) returned previousValue:"+previousValue);
 			} else {
 				try {
 					RequestBuilder sendRequest = event.getRequestBuilder();
@@ -114,19 +101,13 @@ public class OutputPanelRequestController implements RequestController {
 					// save the current url and multiCallback in seenUrls,
 					seenUrls.put(url, multiCallback);
 					// then send the request with multiCallback
-					logger.info("Calling sendRequest for sourceName:"
-							+ sourceName + " with multiCallback:"
-							+ multiCallback);
 					Request request = sendRequest.sendRequest(null,
 							multiCallback);
-					logger.info("request:" + request);
 				} catch (Exception e) {
-					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 				}
 			}
 		} else {
-			logger.warning("The source is NOT and instanceof OutputPanel. source:"
-					+ sourceString);
+
 		}
 	}
 

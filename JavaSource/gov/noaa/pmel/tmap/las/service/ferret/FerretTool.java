@@ -2,42 +2,33 @@ package gov.noaa.pmel.tmap.las.service.ferret;
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.jdom.LASBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.service.RuntimeEnvironment;
 import gov.noaa.pmel.tmap.las.service.Task;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
-import gov.noaa.pmel.tmap.las.util.Message;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
-
-import org.apache.log4j.Logger;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.jdom.JDOMException;
 
 public class FerretTool extends TemplateTool{
-    final Logger log = Logger.getLogger(FerretTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(FerretTool.class.getName());
     LASFerretBackendConfig lasFerretBackendConfig;
     
     public FerretTool(String service, String configFile) throws LASException, IOException {
@@ -172,9 +163,12 @@ public class FerretTool extends TemplateTool{
         }
              
         log.debug("Checking for errors.");
-        String output = ferretTask.getOutput();
-        String stderr = ferretTask.getStderr();
-        
+        String output = "";
+    	String stderr = "";
+        if ( ferretTask != null ) {
+        	output = ferretTask.getOutput();
+        	stderr = ferretTask.getStderr();
+        }
         // Make a debug file so we can see what happened.
         String debug_filename = lasBackendRequest.getResultAsFileByType("debug");
         if ( debug_filename != null && !debug_filename.equals("") ) {

@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -59,7 +59,7 @@ public class FacetSerializable implements IsSerializable {
                 buffer.append(ch);
                 capitalizeNext = true;
             } else if (capitalizeNext) {
-                buffer.append(ch.toUpperCase());
+                buffer.append(ch.toUpperCase(Locale.ENGLISH));
                 capitalizeNext = false;
             } else {
                 buffer.append(ch);

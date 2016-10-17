@@ -14,32 +14,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.struts2.interceptor.ApplicationAware;
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
 import org.jdom.JDOMException;
 
-public class CacheManager extends Action {
-	private static Logger log = Logger.getLogger(CacheManager.class.getName());
-	/* (non-Javadoc)
-	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
+import com.opensymphony.xwork2.ActionSupport;
+
+public class CacheManager extends ActionSupport implements ServletRequestAware, ServletResponseAware, ApplicationAware {
+	private static Logger log = LoggerFactory.getLogger(CacheManager.class.getName());
+	private HttpServletRequest request;
+	private HttpServletResponse response;
+	private Map<String, Object> contextAttributes;
+	
+	private static String CACHE = "cache";
+    private CacheForm cacheForm;
+
+	public String execute()
 	throws Exception {
-        CacheForm cacheForm = (CacheForm) form;
 		log.debug("Running cache manager action.");
-		ServletContext context = (ServletContext) servlet.getServletContext();
-		Cache cache = (Cache) context.getAttribute(ServerConfigPlugIn.CACHE_KEY);
+		
+		Cache cache = (Cache) contextAttributes.get(ServerConfigPlugIn.CACHE_KEY);
 		String key = null;
 		String clean = null;
 		if ( cacheForm != null ) {
@@ -76,12 +79,15 @@ public class CacheManager extends Action {
 				response.sendRedirect("CacheManager.do");
 				return null;
 			}
-			LASConfig lasConfig = (LASConfig) context.getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+			LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 			HashMap<String, HashSet<String>> datasets = new HashMap<String, HashSet<String>>();
 			HashMap<String, HashSet<String>> dataset_keys = new HashMap<String, HashSet<String>>();
 			HashMap<String, ArrayList<String>> keyToDatasetMap = new HashMap<String, ArrayList<String>>();
 			for (Iterator cacheIt = cache.keySet().iterator(); cacheIt.hasNext();) {
 				String filename = (String) cacheIt.next();
+				if ( filename.contains("../") || filename.contains("/..") ) {
+					throw new Exception("Illegal cache file name.");
+				}
 				if ( filename.contains("_request") ) {
 					LASUIRequest las_request = new LASUIRequest();
 
@@ -112,6 +118,10 @@ public class CacheManager extends Action {
 
 
 							LASBackendResponse las_response = new LASBackendResponse();
+							
+							if ( name.contains("../") || name.contains("/..") ) {
+								throw new Exception("Illegal file name.");
+							}
 
 							try {
 								JDOMUtils.XML2JDOM(new File(name), las_response);
@@ -169,7 +179,22 @@ public class CacheManager extends Action {
             request.setAttribute("size", cache.getCurrentBytes());
             request.setAttribute("numfiles", cache.size());
             
-            return mapping.findForward("cache");
+            return CACHE;
 		}
+	}
+	@Override
+	public void setServletRequest(HttpServletRequest request) {
+		this.request = request;
+	}
+	@Override
+	public void setServletResponse(HttpServletResponse response) {
+		this.response = response;
+	}
+	@Override
+	public void setApplication(Map<String, Object> contextAttributes) {
+		this.contextAttributes = contextAttributes;
+	}
+	public void setCacheForm(CacheForm cacheForm) {
+		this.cacheForm = cacheForm;
 	}
 }

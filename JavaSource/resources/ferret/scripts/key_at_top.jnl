@@ -7,7 +7,7 @@ IF `($ferret_plot_key"1|0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 DEFINE SYMBOL horizontal_key = 1
 
-LET key_label_size = 0.075
+LET key_label_size = 0.08
 
 ppl ylab
 ppl xlab

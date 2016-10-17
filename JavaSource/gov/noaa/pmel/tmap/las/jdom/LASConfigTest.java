@@ -35,7 +35,7 @@ public class LASConfigTest extends TestCase {
     public final void testServerConfig() {
         // TODO Auto-generated method stub
         
-        File file = new File("C:\\Documents and Settings\\Roland Schweitzer\\My Documents\\workspace\\TestData\\server\\las.xml");
+        File file = new File("las.xml");
         
         LASConfig las_config = new LASConfig();
         
@@ -47,7 +47,7 @@ public class LASConfigTest extends TestCase {
             System.out.println("Could not parse the las config file "+file+" "+e.toString());
         }
         
-        String v7OperationsFileName = "C:\\Documents and Settings\\Roland Schweitzer\\My Documents\\workspace\\TestData\\server\\operationsV7.xml";
+        String v7OperationsFileName = "operationsV7.xml";
         
         File v7OperationsFile = new File(v7OperationsFileName);
         LASDocument v7operationsDoc = new LASDocument();
@@ -131,19 +131,21 @@ public class LASConfigTest extends TestCase {
             }
         
         int i=1;
-        for (Iterator opIt = options.iterator(); opIt.hasNext();) {
-            Option option = (Option) opIt.next();
-            System.out.println("Option "+i);
-            System.out.println("Title:  " + option.getTitle());
-            System.out.println("Type:  " + option.getType());
-            ArrayList<NameValuePair> items = option.getMenu();
-            if (items != null) {
-                for (Iterator itemIt = items.iterator(); itemIt.hasNext();) {
-                    NameValuePair item = (NameValuePair) itemIt.next();
-                    System.out.println("\tLabel:  "+item.getName()+" Value: "+item.getValue());
-                }
-            }
-            i++;
-        }  
+        if ( options != null ) {
+        	for (Iterator opIt = options.iterator(); opIt.hasNext();) {
+        		Option option = (Option) opIt.next();
+        		System.out.println("Option "+i);
+        		System.out.println("Title:  " + option.getTitle());
+        		System.out.println("Type:  " + option.getType());
+        		ArrayList<NameValuePair> items = option.getMenu();
+        		if (items != null) {
+        			for (Iterator itemIt = items.iterator(); itemIt.hasNext();) {
+        				NameValuePair item = (NameValuePair) itemIt.next();
+        				System.out.println("\tLabel:  "+item.getName()+" Value: "+item.getValue());
+        			}
+        		}
+        		i++;
+        	}  
+        }
     }
 }

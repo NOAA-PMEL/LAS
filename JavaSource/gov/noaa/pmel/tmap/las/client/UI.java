@@ -11,6 +11,7 @@ import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.OperationChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.UpdateFinishedEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariablePluralityEvent;
 import gov.noaa.pmel.tmap.las.client.event.VariableSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
@@ -34,7 +35,6 @@ import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -48,10 +48,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -413,9 +412,6 @@ public class UI extends BaseUI implements EntryPoint {
             xView = tokenMap.get("view");
             String panelHeaderHiddenString = tokenMap.get("panelHeaderHidden");
             boolean panelHeaderHidden = Boolean.parseBoolean(panelHeaderHiddenString);
-            Level level = Level.INFO;
-            if (!panelHeaderHidden)
-                level = Level.SEVERE;
             if (panelHeaderHidden != xPanelHeaderHidden) {
                 handlePanelShowHide();
             }
@@ -483,7 +479,7 @@ public class UI extends BaseUI implements EntryPoint {
             autoContourTextBox.setText("");
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
-            if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
+            if ( xView.equals("xy") ) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(true);
             } else {
@@ -514,6 +510,10 @@ public class UI extends BaseUI implements EntryPoint {
             } else if (xNewVariable.isDiscrete()) {
                 if ( xNewVariable.getAttributes().get("grid_type").equals("trajectory") ) {
                     xOperationID = "Trajectory_interactive_plot";
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("trajectoryprofile") ) {
+                	xOperationID = "Trajectory_interactive_plot";
+                } else if ( xNewVariable.getAttributes().get("grid_type").equals("point") ) {
+                	xOperationID = "Point_location_value_plot";
                 } else if ( xNewVariable.getAttributes().get("grid_type").equals("profile") ) {
                     xOperationID = "Profile_interactive_plot";
                 } else if ( xNewVariable.getAttributes().get("grid_type").equals("timeseries") ) {
@@ -533,7 +533,7 @@ public class UI extends BaseUI implements EntryPoint {
         }
         // Regardless, if it's a trajectory we need to change the widget values.
         if ( xNewVariable.isDiscrete() && xNewVariable.getProperties().get("tabledap_access") != null ) {
-            xTrajectoryConstraint.clearConstraints();
+        	xTrajectoryConstraint.clearConstraints();
             xTrajectoryConstraint.init(xNewVariable.getCATID(), xNewVariable.getDSID(), xNewVariable.getID());
 //            getComparePanel().getOutputControlPanel().setVisible(false);
         } else {
@@ -600,13 +600,33 @@ public class UI extends BaseUI implements EntryPoint {
         Map<String, String> constraints = xVariable.getProperties().get("constraints");
         if ( constraints != null ) {
             for (Iterator keyIt = constraints.keySet().iterator(); keyIt.hasNext();) {
+            	String op = "is";
+            	String type = "selection";
                 String key = (String) keyIt.next();
                 String value = constraints.get(key);
+                if ( value.contains(",") ) {
+                	String[] parts = value.split(",");
+                	if ( parts.length == 3 ) {
+                		type= parts[0];
+                		op = parts[1];
+                		value = parts[2];
+                	} else if ( parts.length == 2 ) {
+                		op = parts[0];
+                		value = parts[1];
+                	}
+                }
                 String key_trim = key;
                 if ( key.contains("_cidx") ) {
                     key_trim = key.substring(0, key.indexOf("_cidx"));
                 }
-                eventBus.fireEventFromSource(new AddSelectionConstraintEvent(key_trim, value, key_trim, value, "is"), UI.this);
+                if ( type != null && ( type.equals("selection") || type.equals("text") ) ) {
+                	eventBus.fireEventFromSource(new AddSelectionConstraintEvent(key_trim, value, key_trim, value, op), UI.this);
+                } else {
+                	eventBus.fireEventFromSource(new VariableConstraintEvent(xVariable.getDSID(), xVariable.getID(), value, op, key_trim, value, op, true), UI.this);
+
+                	
+                	                                                     //(String dsid, String varid, String lhs, String op1, String variable, String rhs, String op2, boolean apply)
+                }
             }
         }
     }
@@ -629,7 +649,6 @@ public class UI extends BaseUI implements EntryPoint {
          * 
          * Then there are "constraintCount" strings of the form TYPE_VARIABLE_cr_VALUE_cr_KEY_cr_KEYVALUE with parameter name constraintN.
          */
-         
          String cCount = tokenMap.get("constraintCount");
          List<ConstraintAnchor> cons = new ArrayList<ConstraintAnchor>();
          if ( cCount != null ) {
@@ -653,7 +672,7 @@ public class UI extends BaseUI implements EntryPoint {
              xTrajectoryConstraint.setSelectedPanelIndex(panelIndex);
              xTrajectoryConstraint.setConstraints(cons);
          } else {
-             if ( !xVariable.isDiscrete() ) {
+             if ( xVariable != null && !xVariable.isDiscrete() ) {
                  xTrajectoryConstraint.setActive(false);
                  xTrajectoryConstraint.setVisible(false);
                  //             getComparePanel().getOutputControlPanel().setVisible(true);
@@ -679,6 +698,11 @@ public class UI extends BaseUI implements EntryPoint {
         for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panelIt.next();
             panel.setOperation(xOperationID, xView);
+            String aAx = null;
+            if ( xAnalysisWidget.isActive() ) {
+            	aAx = xAnalysisWidget.getAnalysisAxis();
+            }
+            panel.showOrthoAxes(xView, aAx, xPanelCount);
         }
 
         if (xAnalysisWidget.isActive()) {
@@ -887,7 +911,7 @@ public class UI extends BaseUI implements EntryPoint {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonVisible(false);
         }
 
-        if (xVariable.isVector() || xVariable.isDiscrete()) {
+        if (xVariable.isVector() || (xVariable.isDiscrete() && !xVariable.isTimeSeries()) ) {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(false);
         } else {
             xPanels.get(0).getVariableControls().getLatestListBox().setAddButtonEnabled(true);
@@ -1249,7 +1273,7 @@ public class UI extends BaseUI implements EntryPoint {
             }
 
             if ((!xVariable.isVector() && vector) || (!xVariable.isDiscrete() && scattered) || xVariable.isVector() && !vector || (xVariable.isDiscrete() && !scattered)) {
-                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
+                if ( xView.equals("xy") ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
                 } else {
@@ -1299,7 +1323,7 @@ public class UI extends BaseUI implements EntryPoint {
             }
         } else {
             if (xVariable.isVector() || xVariable.isDiscrete()) {
-                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
+                if ( xView.equals("xy") ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
                 } else {
@@ -1361,6 +1385,7 @@ public class UI extends BaseUI implements EntryPoint {
         // variable.
         String intervals = xVariable.getGrid().getIntervals().replace(v, "");
         String view = xView;
+        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
         // Eliminate the transformed axis from the previous view.
         // This works because area is the only 2D analysis axis.
         if (v.equals("xy")) {
@@ -1375,14 +1400,20 @@ public class UI extends BaseUI implements EntryPoint {
         if (view.equals("")) {
             if (intervals.contains("xy")) {
                 xView = "xy";
+                xOrtho.remove("x");
+                xOrtho.remove("y");
             } else if (intervals.contains("t") && xVariable.getGrid().hasT()) {
                 xView = "t";
+                xOrtho.remove("t");
             } else if (intervals.contains("z") && xVariable.getGrid().hasZ()) {
                 xView = "z";
+                xOrtho.remove("z");
             } else if (intervals.contains("x")) {
                 xView = "x";
+                xOrtho.remove("x");
             } else if (intervals.contains("y")) {
                 xView = "y";
+                xOrtho.remove("y");
             }
         } else {
             xView = view;
@@ -1395,10 +1426,12 @@ public class UI extends BaseUI implements EntryPoint {
 
         // Set the default operation.
         xOperationID = xOperationsWidget.setZero(xView);
-        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
+        
 
         for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
             OutputPanel panel = (OutputPanel) panIt.next();
+            panel.setAnalysis(xAnalysisWidget.getAnalysisSerializable());
+            panel.setAnalysisAxes(xAnalysisWidget.getAnalysisAxis());
             panel.setOperation(xOperationID, xView);
             panel.showOrthoAxes(xView, getAnalysisAxis(), xPanelCount);
         }
@@ -1528,6 +1561,19 @@ public class UI extends BaseUI implements EntryPoint {
         } else {
             xAnalysisWidget.setVisible(true);
         }
+        // If the data set has defaults specified, use them...
+        Map<String, Map<String, String>> properties = xVariable.getProperties();
+        if ( properties != null ) {
+        	Map<String, String> product_server = properties.get("product_server");
+        	if ( product_server != null ) {
+        		String opid = product_server.get("default_operation");
+        		String dv = product_server.get("default_view");
+        		if ( opid != null && !opid.equals("") && dv != null && !dv.equals("") ) {
+        			xOperationID = opid;
+        			xView = dv;
+        		}
+        	}
+        }
         xOperationsWidget.setOperations(xVariable.getGrid(), xOperationID, xView, ops);
         xOperationID = xOperationsWidget.getCurrentOperation().getID();
         xOptionID = xOperationsWidget.getCurrentOperation().getOptionsID();
@@ -1561,8 +1607,10 @@ public class UI extends BaseUI implements EntryPoint {
      */
     private void setupMainPanel() {
         if ( xTrajectoryConstraint.isActive() ) {
+        	differenceButton.setEnabled(false);
             xAnalysisWidget.setVisible(false);
         } else {
+        	differenceButton.setEnabled(true);
             xAxesWidget.setVisible(true);
         }
         autoContourButton.setDown(false);
@@ -1611,7 +1659,7 @@ public class UI extends BaseUI implements EntryPoint {
         xOrtho = Util.setOrthoAxes(xView, xVariable, true);
 
         if (xVariable.isVector() || xVariable.isDiscrete()) {
-            if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
+            if ( xView.equals("xy") ) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(true);
             } else {
@@ -1806,41 +1854,43 @@ public class UI extends BaseUI implements EntryPoint {
     }
 
     private void turnOffAnalysis() {
-        xAnalysisWidget.setActive(false);
-        for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
-            OutputPanel panel = (OutputPanel) panIt.next();
-            panel.setAnalysis(null);
-        }
-        xOperationID = ops[0].getID();
-        xOperationsWidget.setOperations(xVariable.getGrid(), ops[0].getID(), xView, ops);
-        tOperationsMenu.setMenus(ops, xView);
-        tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
-        tOperationsMenu.setCorrelationButtonEnabled(true);
-        setOperationsClickHandler(xVizGalOperationsClickHandler);
-        xOrtho = Util.setOrthoAxes(xView, xVariable, true);
-        xAxesWidget.showViewAxes(xView, xOrtho, null);
-        xOperationID = xOperationsWidget.setZero(xView);
-        if ( xVariable.isDiscrete() ) {
-            xAxesWidget.getRefMap().setTool("xy");
-        } else {
-            xAxesWidget.getRefMap().setTool(xView);
-        }
-        GridSerializable grid = xVariable.getGrid();
-        for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
-            OutputPanel panel = (OutputPanel) panIt.next();
-            panel.setOperation(xOperationID, xView);
-            if (grid.hasZ()) {
-                panel.setRange("z", false);
-            }
-            if (grid.hasT()) {
-                panel.setRange("t", false);
-            }
-            panel.showOrthoAxes(xView, null, xPanelCount);
-            panel.setOrthoRanges(xView);
-        }
-        xAxesWidget.setMessage("");
-        xAxesWidget.showMessage(false);
-        xAxesWidget.getRefMap().resizeMap();
+    	// Only turn it off if it's already on.
+    	xAnalysisWidget.setActive(false);
+    	for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+    		OutputPanel panel = (OutputPanel) panIt.next();
+    		panel.setAnalysis(null);
+    	}
+    	xOperationID = ops[0].getID();
+    	xOperationsWidget.setOperations(xVariable.getGrid(), ops[0].getID(), xView, ops);
+    	tOperationsMenu.setMenus(ops, xView);
+    	tOperationsMenu.enableByView(xView, xVariable.getGrid().hasT());
+    	tOperationsMenu.setCorrelationButtonEnabled(true);
+    	setOperationsClickHandler(xVizGalOperationsClickHandler);
+    	xOrtho = Util.setOrthoAxes(xView, xVariable, true);
+    	xAxesWidget.showViewAxes(xView, xOrtho, null);
+    	xOperationID = xOperationsWidget.setZero(xView);
+    	if ( xVariable.isDiscrete() ) {
+    		xAxesWidget.getRefMap().setTool("xy");
+    	} else {
+    		xAxesWidget.getRefMap().setTool(xView);
+    	}
+    	GridSerializable grid = xVariable.getGrid();
+    	for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+    		OutputPanel panel = (OutputPanel) panIt.next();
+    		panel.setOperation(xOperationID, xView);
+    		if (grid.hasZ()) {
+    			panel.setRange("z", false);
+    		}
+    		if (grid.hasT()) {
+    			panel.setRange("t", false);
+    		}
+    		panel.showOrthoAxes(xView, null, xPanelCount);
+    		panel.setOrthoRanges(xView);
+    	}
+    	xAxesWidget.setMessage("");
+    	xAxesWidget.showMessage(false);
+    	xAxesWidget.getRefMap().resizeMap();
+
     }
 
     private boolean waitForRPC() {
@@ -1889,7 +1939,6 @@ public class UI extends BaseUI implements EntryPoint {
                 // and leave others alone
                 setupOutputPanels(numPanels, Constants.IMAGE);
                 // resize OutputPanel(s) according to the current Window size
-                // logger.info("compareMenuChanged() calling resize(...)");
                 // resize(Window.getClientWidth(), Window.getClientHeight());
                 String galleryHistory = getGalleryToken();
                 Map<String, String> galleryTokens = Util.getTokenMap(galleryHistory);
@@ -2045,25 +2094,18 @@ public class UI extends BaseUI implements EntryPoint {
                 // There is no other noLongerRequireUpdateTimer, so it's safe to
                 // make one
                 noLongerRequireUpdateTimer = new Timer() {
-                    private final Logger logger = Logger.getLogger(Timer.class.getName());
 
                     @Override
                     public void run() {
-                        logger.setLevel(Level.ALL);
                         if (noLongerRequireUpdateTimer != null) {
                             // Then the field was not cancelled and nulled by a
                             // new setUpdateRequired(true) call that is likely
                             // History related
                             required_update = false;
-                            logger.info("run(): required_update set to:" + required_update);
                             noLongerRequireUpdateTimer = null;
-                            logger.info("run(): noLongerRequireUpdateTimer nulled");
-                            logger.severe("Setting loadingModule = false");
                             loadingModule = false;
                         } else {
-                            logger.severe("run(): noLongerRequireUpdateTimer IS null, even though run was called on this:" + this);
                         }
-                        // logger.setLevel(Level.OFF);
                     }
                 };
                 // Schedule the timer to run once later.
@@ -2253,7 +2295,7 @@ public class UI extends BaseUI implements EntryPoint {
                         for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
                             String key = opIt.next();
                             String value = options.get(key);
-                            if (!value.toLowerCase().equals("default") && !value.equals("")) {
+                            if (!value.toLowerCase(Locale.ENGLISH).equals("default") && !value.equals("")) {
                                 lasRequest.setProperty("ferret", key, value);
                             }
                         }
@@ -2388,6 +2430,10 @@ public class UI extends BaseUI implements EntryPoint {
                     tOperationsMenu.setCorrelationButtonEnabled(false);
                     String v = analysis.getAnalysisAxis();
                     setAnalysisAxes(v);
+                    for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+                    	OutputPanel p = (OutputPanel) panelIt.next();
+                    	p.setAnalysis(analysis.getAnalysisSerializable());
+                    }
                 } else {
                     turnOffAnalysis();
                 }
@@ -2614,7 +2660,7 @@ public class UI extends BaseUI implements EntryPoint {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
-                if ( xView.equals("xy") || xVariable.isDiscrete()  ) {
+                if ( xView.equals("xy") ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(true);
                 } else {
@@ -2717,7 +2763,7 @@ public class UI extends BaseUI implements EntryPoint {
                 if ( lb.getName().contains("Panel-0") ) {
                     VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
                     xNewVariable = v;
-                    if (v.isVector() || v.isDiscrete()) {
+                    if (v.isVector() || (v.isDiscrete() && !v.isTimeSeries()) ) {
                         lb.setAddButtonEnabled(false);
                     } else {
                         lb.setAddButtonEnabled(true);

@@ -33,49 +33,30 @@
  */
 package gov.noaa.pmel.tmap.las.service.kml;
 
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
+import gov.noaa.pmel.tmap.las.jdom.LASKMLBackendConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import gov.noaa.pmel.tmap.las.service.TemplateTool;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.log4j.Logger;
-
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.jdom.JDOMException;
-
-import gov.noaa.pmel.tmap.exception.LASException;
-import gov.noaa.pmel.tmap.jdom.LASDocument;
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
-import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
-import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASKMLBackendConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
-import gov.noaa.pmel.tmap.las.service.TemplateTool;
-
-import org.jdom.Document;
-import org.jdom.Element;
-
-import java.util.Iterator;
-
-import ucar.nc2.*;
 
 /**
  * @author Roland Schweitzer and Jing Y. Li
@@ -83,7 +64,7 @@ import ucar.nc2.*;
  */
 public class KMLTool extends TemplateTool  {
 
-    final Logger log = Logger.getLogger(KMLTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(KMLTool.class.getName());
     LASKMLBackendConfig kmlBackendConfig;
 
     /**
@@ -119,7 +100,7 @@ public class KMLTool extends TemplateTool  {
         //System.out.println("entering run");
         VelocityContext context = new VelocityContext(getToolboxContext());
         Properties p = new Properties();
-        InputStream is;
+        InputStream is = null;
         is = this.getClass().getClassLoader().getResourceAsStream("resources/kml/velocity.properties");
         String template = JDOMUtils.getResourcePath(this, "resources/kml/templates");
         if (is == null) {
@@ -131,7 +112,15 @@ public class KMLTool extends TemplateTool  {
                 throw new LASException("Cannot find kml backend templates directory.");
             }
         } else {
-            p.load(is);
+            try {
+				p.load(is);
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				if ( is != null ) {
+					is.close();
+				}
+			}
         }
         if ( p.getProperty("file.resource.loader.path") == null ) {
             if ( template != null ) {
@@ -235,7 +224,8 @@ public class KMLTool extends TemplateTool  {
             // We need to package these and send them back to the UI.
         }
         ve.mergeTemplate(kml,"ISO-8859-1", context, kmlWriter);
-        kmlWriter.close();
+        if ( kmlWriter != null )
+        	kmlWriter.close();
         writeKMZ(kmz, output);
         lasBackendResponse.addResponseFromRequest(lasBackendRequest);
         return lasBackendResponse;
@@ -319,7 +309,8 @@ public class KMLTool extends TemplateTool  {
             // We need to package these and send them back to the UI.
         }
         ve.mergeTemplate(kml,"ISO-8859-1", context, kmlWriter);
-        kmlWriter.close();
+        if ( kmlWriter != null )
+        	kmlWriter.close();
         
         writeKMZ(kmz, output);
         

@@ -13,10 +13,10 @@ IF `shapeit EQ 0` THEN EXIT/SCRIPT
 
 LET gettype = ($reshape_var)
 DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
-IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
 DEFINE SYMBOL expnd_fcn = EXPND_BY_LEN
-IF ($is_string"0") THEN DEFINE SYMBOL expnd_fcn = EXPND_BY_LEN_STR
+IF ($is_string) THEN DEFINE SYMBOL expnd_fcn = EXPND_BY_LEN_STR
 
 LET total_obs = `longitude,return=isize`
 SET var/name=($reshape_var)_in ($reshape_var)

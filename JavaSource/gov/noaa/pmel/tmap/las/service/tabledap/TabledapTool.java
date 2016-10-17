@@ -4,9 +4,14 @@
 package gov.noaa.pmel.tmap.las.service.tabledap;
 
 import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASTabledapBackendConfig;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 import gov.noaa.pmel.tmap.las.service.database.IntermediateNetcdfFile;
@@ -14,22 +19,27 @@ import gov.noaa.pmel.tmap.las.util.Constraint;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.jdom.Element;
+import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.GregorianChronology;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -56,11 +66,9 @@ import ucar.nc2.Variable;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.ft.FeatureCollection;
-import ucar.nc2.ft.FeatureDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
 import ucar.nc2.ft.FeatureDatasetPoint;
 import ucar.nc2.ft.PointFeature;
-import ucar.nc2.ft.PointFeatureCollectionIterator;
 import ucar.nc2.ft.PointFeatureIterator;
 import ucar.nc2.ft.TrajectoryFeature;
 import ucar.nc2.ft.TrajectoryFeatureCollection;
@@ -69,11 +77,8 @@ import ucar.nc2.time.CalendarDateUnit;
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImpl;
 
-import com.cohort.util.Calendar2;
 import com.cohort.util.MustBe;
 import com.cohort.util.String2;
-import com.cohort.util.Test;
-
 
 /**
  * Creates an intermediate netCDF file from a Tabledap dataset
@@ -99,7 +104,12 @@ import com.cohort.util.Test;
  *
  */
 public class TabledapTool extends TemplateTool {
-    
+	
+	Chronology chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+	DateTimeFormatter ferretFormatHHmm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+	DateTimeFormatter ferretFormatHHmmss = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+	DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+	 
     LASProxy lasProxy = new LASProxy();
 
     LASTabledapBackendConfig tabledapBackendConfig;  //force its compilation
@@ -115,7 +125,7 @@ public class TabledapTool extends TemplateTool {
     String decid;
     String id;
     boolean full = false;
-    final Logger log = Logger.getLogger(TabledapTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(TabledapTool.class.getName());
     
     /**
      * This default constructor uses the TemplateTool base class to initialize all
@@ -147,28 +157,15 @@ public class TabledapTool extends TemplateTool {
         //If exception occurs in try/catch block, 'causeOfError' was the cause.
         String causeOfError = "Unexpected error: "; 
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
-        
-      //has the request been canceled (method 2)?    
-        String cancelFileName = lasBackendRequest.getResult("cancel");
-        File cancel = null;
-        if (cancelFileName != null && cancelFileName.length() > 0) {
-            causeOfError = "Unable to create cancelFileName=" + cancelFileName + ": ";
-            cancel = new File(cancelFileName);
-        }            
+           
         //then standard check can be done any time
-        if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
-            return lasBackendResponse;
-        
-        try {      
-        //First: has the request already been canceled (method 1)?
-        if (lasBackendRequest.isCancelRequest()) {           
-            lasBackendResponse.setError("Tabledap backend request canceled.");
-            causeOfError = "Tabledap lasBackendRequest failed to cancel request: ";
-            File cancel2 = new File(lasBackendRequest.getResult("cancel"));
-            cancel2.createNewFile();
-            log.debug("Tabledap backend request canceled: " + lasBackendRequest.toCompactString());
+        if ( lasBackendRequest.isCanceled() ) {
+        	lasBackendResponse.setError("ERDDAP data request canceled.");
             return lasBackendResponse;
         }
+        
+        try {      
+
         //get the name for the .nc results file
         causeOfError = "Unable to get backend request's resultsAsFile(netcdf): ";
         String netcdfFilename = lasBackendRequest.getResultAsFile("netcdf");
@@ -219,7 +216,7 @@ public class TabledapTool extends TemplateTool {
                 throw new Exception("Could not build queries");
             }
             DateTime dt = new DateTime();
-            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+           
             if ( query2 == null ) {
                 File temp_file = new File(netcdfFilename+".temp");
 
@@ -231,12 +228,18 @@ public class TabledapTool extends TemplateTool {
                     dt = new DateTime();
                     log.debug("TableDapTool query="+dsUrl);
                     log.info("{TableDapTool starting file pull for the only file at "+fmt.print(dt));
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl, temp_file, null);
+                    lasProxy.executeERDDAPMethodAndSaveResult(dsUrl, temp_file, null);
                     dt = new DateTime();
+                    if (lasBackendRequest.isCanceled()) {
+                    	lasBackendResponse.setError("ERDDAP data request canceled.");
+                        return lasBackendResponse;
+                    }
                     log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
                     //was the request canceled?
-                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                    if (lasBackendRequest.isCanceled()) {
+                    	lasBackendResponse.setError("ERDDAP data request canceled.");
                         return lasBackendResponse;
+                    }
 
                     temp_file.renameTo(new File(netcdfFilename));
                     dt = new DateTime();
@@ -247,7 +250,7 @@ public class TabledapTool extends TemplateTool {
                         message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
                         message = message.substring(0, message.indexOf(")"));
                     }
-                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                    if ( message.toLowerCase(Locale.ENGLISH).contains("query produced no matching") ) {
                         writeEmpty(netcdfFilename);
                     } else {
                         causeOfError = "Data source error: " + message;
@@ -269,15 +272,22 @@ public class TabledapTool extends TemplateTool {
                 log.info("{TableDapTool starting file pull for file 1 at "+fmt.print(dt));
 
                 try {
-
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl1, temp_file1, null);
+                	if (lasBackendRequest.isCanceled()) {
+                    	lasBackendResponse.setError("ERDDAP data request canceled.");
+                        return lasBackendResponse;
+                	}
+                    lasProxy.executeERDDAPMethodAndSaveResult(dsUrl1, temp_file1, null);
+                    if (lasBackendRequest.isCanceled()) {
+                    	lasBackendResponse.setError("ERDDAP data request canceled.");
+                        return lasBackendResponse;
+                    }
                 } catch (Exception e) {
                     String message = e.getMessage();
                     if ( e.getMessage().contains("com.cohort") ) {
                         message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
                         message = message.substring(0, message.indexOf(")"));
                     }
-                    if ( message.toLowerCase().contains("query produced no matching") ) {
+                    if ( message.toLowerCase(Locale.ENGLISH).contains("query produced no matching") ) {
                         // one empty search
                         empty1 = true;
                     } else {
@@ -288,19 +298,21 @@ public class TabledapTool extends TemplateTool {
                 dt = new DateTime();
                 log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
                 //was the request canceled?
-                if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                if (lasBackendRequest.isCanceled()) {
+                	lasBackendResponse.setError("ERDDAP data request canceled.");
                     return lasBackendResponse;
+                }
                 log.debug("TableDapTool query="+dsUrl2);
                 log.info("{TableDapTool starting file pull for file 2 at "+fmt.print(dt));
                 try {
-                    lasProxy.executeGetMethodAndSaveResult(dsUrl2, temp_file2, null);
+                    lasProxy.executeERDDAPMethodAndSaveResult(dsUrl2, temp_file2, null);
                 } catch (Exception e) {
                     String message = e.getMessage();
                     if ( e.getMessage().contains("com.cohort") ) {
                         message = message.substring(message.indexOf("com.cohort.util.SimpleException: "), message.length());
                         message = message.substring(0, message.indexOf(")"));
                     }
-                    if ( message.toLowerCase().contains("query produced no matching" ) ) {
+                    if ( message.toLowerCase(Locale.ENGLISH).contains("query produced no matching" ) ) {
                         // two empty searches
                         empty2 = true;
                     } else {
@@ -319,8 +331,10 @@ public class TabledapTool extends TemplateTool {
                     dt = new DateTime();
                     log.info("{TableDapTool finished file pull for the only file at "+fmt.print(dt));
                     //was the request canceled?
-                    if (isCanceled(cancel, lasBackendRequest, lasBackendResponse))
+                    if (lasBackendRequest.isCanceled()) {
+                    	lasBackendResponse.setError("ERDDAP data request canceled.");
                         return lasBackendResponse;
+                    }
                     merge(netcdfFilename, temp_file1, temp_file2);
                     temp_file1.delete();
                     temp_file2.delete();
@@ -360,6 +374,8 @@ public class TabledapTool extends TemplateTool {
             String pid = getTabledapProperty(lasBackendRequest, "profile_id");
             String sid = getTabledapProperty(lasBackendRequest, "timeseries_id");
             
+            cruiseid = null;
+            
             if ( tid != null && !tid.equals("") ) {
             	cruiseid = tid;
             } else if ( pid != null && !pid.equals("") ) {
@@ -367,8 +383,12 @@ public class TabledapTool extends TemplateTool {
             } else if ( sid != null && !sid.equals("") ) {
             	cruiseid = sid;
             }
-           
-            required(cruiseid, causeOfError);
+                       
+            // We don't really need to require this, point data do not have one. 
+            
+            // We just need to deal with the fact it might be null.
+            
+            // required(cruiseid, causeOfError);
 
             String lon_domain = getTabledapProperty(lasBackendRequest, "lon_domain");
             
@@ -415,9 +435,14 @@ public class TabledapTool extends TemplateTool {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
             }  else if ( downloadall ) {
-                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                String all = getTabledapProperty(lasBackendRequest, "downloadall_variables").trim();
+                // If the custom download all is not set, use the default.
+                if ( all == null || all.equals("") ) {
+                	all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                }
                 query.append(all);
             }  else {
+            	
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
                 ArrayList<String> vars = lasBackendRequest.getVariables();
                 
@@ -433,7 +458,6 @@ public class TabledapTool extends TemplateTool {
                                 if ( query.length() > 0 && !query.toString().endsWith(",") ) {
                                     query.append(",");
                                 }
-                                // Remove the metadata variable from the variables list. Otherwise it shows up twice
                                 vars.remove(e);
                                 query.append(e);
                             }
@@ -444,55 +468,58 @@ public class TabledapTool extends TemplateTool {
                             if ( query.length() > 0 && !query.toString().endsWith(",") ) {
                                 query.append(",");
                             }
-                            // Remove the metadata variable from the variables list. Otherwise it shows up twice
                             vars.remove(extra_metadata);
                             query.append(extra_metadata);
                         }
                     }
                 }
+
+                
                 // If lat, lon and z are included as data variables, knock them out of this list.
                 vars.remove(latname);
                 vars.remove(lonname);
                 vars.remove(zname);
                 vars.remove(time);
+                
                 if ( operationID != null && (operationID.equals("Profile_2D_poly") || operationID.equals("Time_Series_Location_Plot") || operationID.equals("Trajectory_2D_poly")) ) {
                 	String mapvars = getTabledapProperty(lasBackendRequest, "map_variables").trim();
-                        if ( mapvars != null && !mapvars.equals("") ) {
-                            if ( mapvars.contains(",") ) {
-                                String[] extras = mapvars.split(",");
-                                for (int i = 0; i < extras.length; i++) {
-                                    String e = extras[i].trim();
-                                    if ( query.indexOf(e) < 0 ) {
-                                        if ( query.length() > 0 && !query.toString().endsWith(",") ) {
-                                            query.append(",");
-                                        }
-                                        vars.remove(e);
-                                        query.append(e);
-                                    }
-                                }
+                	 if ( mapvars != null && !mapvars.equals("") ) {
+                         if ( mapvars.contains(",") ) {
+                             String[] extras = mapvars.split(",");
+                             for (int i = 0; i < extras.length; i++) {
+                                 String e = extras[i].trim();
+                                 if ( query.indexOf(e) < 0 ) {
+                                     if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                         query.append(",");
+                                     }
+                                     vars.remove(e);
+                                     query.append(e);
+                                 }
+                             }
 
-                            } else {
-                                if ( query.indexOf(mapvars) < 0 ) {
-                                    if ( query.length() > 0 && !query.toString().endsWith(",") ) {
-                                        query.append(",");
-                                    }
-                                    vars.remove(mapvars);
-                                    query.append(mapvars);
-                                }
-                            }
-                        }
+                         } else {
+                             if ( query.indexOf(mapvars) < 0 ) {
+                                 if ( query.length() > 0 && !query.toString().endsWith(",") ) {
+                                     query.append(",");
+                                 }
+                                 vars.remove(mapvars);
+                                 query.append(mapvars);
+                             }
+                         }
+                     }
                 }
                 String variables = "";
                 for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                    String variable = (String) varIt.next();
-                    variables = variables+variable;
-                    if (varIt.hasNext()) {
-                        variables = variables + ",";
-                    }
+                	String variable = (String) varIt.next();
+                	// Apparently ERDDAP gets mad if you list the trajectory_id in the request...
+                	if ( cruiseid == null || (cruiseid != null && !variable.equals(cruiseid)) ) {
+                		variables = variables+variable;
+                		if (varIt.hasNext()) {
+                			variables = variables + ",";
+                		}
+                	}
                 }
-                // Apparently ERDDAP gets mad if you list the trajectory_id in the request...
-                variables = variables.replace(cruiseid+",", "");
-                variables = variables.replace(cruiseid, "");
+
                 if ( variables.endsWith(",") ) {
                     variables = variables.substring(0, variables.length()-1);
                 }
@@ -580,13 +607,51 @@ public class TabledapTool extends TemplateTool {
             String yhi = lasBackendRequest.getYhi();
             String zlo = lasBackendRequest.getZlo();
             String zhi = lasBackendRequest.getZhi();
+            
             String s = lasBackendRequest.getTlo();  //in Ferret format
-            String tlo = s.length() == 0 ? "" : 
-                Calendar2.formatAsISODateTimeT(Calendar2.parseDDMonYYYYZulu(s)); //throws exception if trouble
+            String tlo = "";
+            if ( s.length() > 0 ) {
+            	s = JDOMUtils.decode(s, "UTF-8");
+            	s = s.replace("\"","");
+            	DateTime loDT = null;
+            	try {
+					loDT = ferretFormatHHmmss.parseDateTime(s);
+				} catch (Exception e1) {
+					try {
+						loDT = ferretFormatHHmm.parseDateTime(s);
+					} catch (Exception e2) {
+						// Carry on to the null check below.
+					}
+				}
+            	if ( loDT != null ) {
+            		tlo = fmt.print(loDT);
+            	} else {
+            		throw new LASException("Could not parse date: "+s);
+            	}
+            }
+            
             s = lasBackendRequest.getThi();  //in Ferret format
-            String thi = s.length() == 0 ? "" : 
-                Calendar2.formatAsISODateTimeT(Calendar2.parseDDMonYYYYZulu(s)); //throws exception if trouble
-
+            String thi = "";
+            if ( s.length() > 0 ) {
+            	s = JDOMUtils.decode(s, "UTF-8");
+            	s = s.replace("\"","");
+            	DateTime hiDT = null;
+            	try {
+            		hiDT = ferretFormatHHmmss.parseDateTime(s);
+            	} catch (Exception e1 ) {
+            		try {
+            			hiDT = ferretFormatHHmm.parseDateTime(s);
+            		} catch (Exception e2) {
+            			// Carry on to the null check.
+            		}
+            	}
+            	if ( hiDT != null ) {
+            		thi = fmt.print(hiDT);
+            	} else {
+            		throw new LASException("Could not parse date: "+s);
+            	}
+            }
+           
             //add region constraints other than lon
             if (ylo.length() > 0) query.append("&"+latname+">=" + ylo);
             if (yhi.length() > 0) query.append("&"+latname+"<=" + yhi);
@@ -599,12 +664,18 @@ public class TabledapTool extends TemplateTool {
                 if ( !orderby.equals("") && !orderby.equals("none") ) {
                     query.append("&orderBy(\""+orderby+"\")");
                 } else {
-                    if ( !orderby.equals("none") ) {
+                    if ( !orderby.equals("none") && cruiseid != null ) {
                         query.append("&orderBy(\""+cruiseid+","+time+"\")");
+                    } else {
+                        query.append("&orderBy(\""+time+"\")");
                     }
                 }
             } else {
-                query.append("&orderBy(\""+cruiseid+","+time+"\")");
+            	if ( cruiseid != null ) {
+            		query.append("&orderBy(\""+cruiseid+","+time+"\")");
+            	} else {
+                    query.append("&orderBy(\""+time+"\")");
+            	}
             }
             
 
@@ -816,7 +887,7 @@ public class TabledapTool extends TemplateTool {
         Map<String, Array> subsetvars2 = new HashMap<String, Array>();
         for (Iterator iterator = vars.iterator(); iterator.hasNext();) {
             Variable variable = (Variable) iterator.next();
-            if ( variable.getDimension(0).getShortName().equals(trajdim_org.getShortName())) {
+            if ( trajdim_org != null && variable.getDimension(0).getShortName().equals(trajdim_org.getShortName())) {
                 Array a1 = variable.read();
                 subsetvars1.put(variable.getShortName(), a1);
                 Variable v2 = trajset2.findVariable(variable.getShortName());
@@ -829,7 +900,9 @@ public class TabledapTool extends TemplateTool {
 
         obsdim1 = trajset1.findDimension(obsdimname);
         Dimension obsdim2 = trajset2.findDimension(obsdimname);
-        obscount2 = trajset2.findVariable(obscount1.getShortName());
+        if ( obscount1 != null ) {
+        	obscount2 = trajset2.findVariable(obscount1.getShortName());
+        }
         Variable tv = trajset2.findVariable(trajidname);
         Array trajids2 = tv.read();
 
@@ -1492,7 +1565,7 @@ public class TabledapTool extends TemplateTool {
             for ( int index = 0; index < s.getShape()[0]; index++ ) {
                 DataRow rowdata = datarows.get(offset+index);
                 rowdata.getData().put(name, s.getString(index));
-                if ( name.equals(cruiseid) ) {
+                if ( cruiseid != null && name.equals(cruiseid) ) {
                     rowdata.setId(s.getString(index));
                 }
             }
@@ -1529,7 +1602,7 @@ public class TabledapTool extends TemplateTool {
             for ( int index = 0; index < s.getShape()[0]; index++ ) {
                 DataRow rowdata = datarows.get(offset+index);
                 rowdata.getData().put(name, s.get(index));
-                if ( name.equals(cruiseid) ) {
+                if ( cruiseid != null && name.equals(cruiseid) ) {
                     rowdata.setId(s.get(index));
                 }
             }
@@ -1620,23 +1693,6 @@ public class TabledapTool extends TemplateTool {
         if (s == null || s.equals("")) 
             throw new LASException ("Required value wasn't specified: " + id + ".");
         return s;
-    }
-
-    /**
-     * This checks if the request was canceled and caller should return.
-     *
-     * @return true if canceled and caller should return the lasBackendResponse.
-     */
-    protected boolean isCanceled(File cancel, LASBackendRequest lasBackendRequest,
-        LASBackendResponse lasBackendResponse) {
-
-        //was the request canceled?
-        if (cancel != null && cancel.exists()) {
-            lasBackendResponse.setError("Request canceled.");
-            log.debug("Request cancelled:" + lasBackendRequest.toCompactString());
-            return true;
-        }
-        return false;
     }
 
     /**

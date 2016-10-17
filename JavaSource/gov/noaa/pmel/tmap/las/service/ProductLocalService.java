@@ -5,33 +5,24 @@ package gov.noaa.pmel.tmap.las.service;
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.util.Category;
-import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Variable;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.exception.MethodInvocationException;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
@@ -41,7 +32,7 @@ import org.jdom.Namespace;
  *
  */
 public class ProductLocalService extends ProductService {
-    final Logger log = Logger.getLogger(ProductLocalService.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(ProductLocalService.class.getName());
     
     /**
      * @param lasBackendRequest
@@ -203,7 +194,7 @@ public class ProductLocalService extends ProductService {
             } catch (InterruptedException e) {
                 lasBackendResponse.setError("fiveMinutes had trouble sleeping. ", e);
             }
-            if ( cf != null & cf.exists() ) {
+            if ( cf != null && cf.exists() ) {
                 lasBackendResponse.setError("Java backend request canceled.", "Returning cancel response.");
                 if ( !cf.delete() ) {
                     lasBackendResponse.setError("Could not remove cancel file.", "Remove from cache");

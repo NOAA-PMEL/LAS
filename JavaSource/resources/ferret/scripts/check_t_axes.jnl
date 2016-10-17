@@ -24,10 +24,10 @@ IF `IS_ELEMENT_OF_STR (all_attrs, "ferret_definition") EQ 1` THEN
 ENDIF
 
 ! See if that variable had a modulo time axis
-SET DATA/SAVE
-SET DATA 1
+!SET DATA/SAVE
+!SET DATA 1
 DEFINE SYMBOL mod_len = "`($orig_var_1),RETURN=tmod`"
-SET DATA/RESTORE
+!SET DATA/RESTORE
 
 ! Now see if the variable ferret_var_1 has any non-missing data. 
 IF `STRCMP(($mod_len), " ") EQ 0` THEN 
@@ -38,3 +38,7 @@ IF `STRCMP(($mod_len), " ") EQ 0` THEN
      EXIT/PROGRAM
   ENDIF
 ENDIF
+
+
+!---------------- end of check_t_axes.jnl -------------------------
+

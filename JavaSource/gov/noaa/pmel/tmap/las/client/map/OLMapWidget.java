@@ -16,6 +16,8 @@
  */
 package gov.noaa.pmel.tmap.las.client.map;
 
+import java.util.Locale;
+
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
@@ -326,7 +328,6 @@ public class OLMapWidget extends Composite {
 								dataBounds.getUpperRightY(),
 								dataBounds.getLowerLeftX(),
 								dataBounds.getUpperRightX());
-						featureAdded();
 						if (mapListener != null) {
 							mapListener.onFeatureChanged();
 						}
@@ -560,7 +561,6 @@ public class OLMapWidget extends Composite {
 				selectionMade = true;
 				eventBus.fireEventFromSource(new FeatureModifiedEvent(getYlo(),
 						getYhi(), getXlo(), getXhi()), thisMapWidget);
-				featureModified();
 			}
 
 		};
@@ -771,7 +771,6 @@ public class OLMapWidget extends Composite {
 						center.lat() - 90., center.lon() + 180.0,
 						center.lat() + 90.));
 			}
-			mapMoved();
 		}
 	};
 	MapClickListener mapClickListener = new MapClickListener() {
@@ -813,7 +812,6 @@ public class OLMapWidget extends Composite {
 					.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1307,7 +1305,7 @@ public class OLMapWidget extends Composite {
 			double ylo = textWidget.getYlo();
 			double yhi = textWidget.getYhi();
 			String oentry = tb.getText();
-			String entry = oentry.trim().toLowerCase();
+			String entry = oentry.trim().toLowerCase(Locale.ENGLISH);
 			if (entry.contains("s") && entry.contains("-")) {
 				Window.alert("Either use a minus sign or an \"S\" to denote southern latitudes, not both");
 			} else if (entry.contains("n") && entry.contains("-")) {
@@ -1359,7 +1357,6 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(),
 					currentSelection.getUpperRightX());
 			panMapToSelection();
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1376,7 +1373,7 @@ public class OLMapWidget extends Composite {
 			double ylo = textWidget.getYlo();
 			double yhi = textWidget.getYhi();
 			String oentry = tb.getText();
-			String entry = oentry.trim().toLowerCase();
+			String entry = oentry.trim().toLowerCase(Locale.ENGLISH);
 			if (entry.contains("s") && entry.contains("-")) {
 				Window.alert("Either use a minus sign or an \"S\" to denote southern latitudes, not both");
 			} else if (entry.contains("n") && entry.contains("-")) {
@@ -1428,7 +1425,6 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(),
 					currentSelection.getUpperRightX());
 			panMapToSelection();
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1444,7 +1440,7 @@ public class OLMapWidget extends Composite {
 			double xlo = textWidget.getXlo();
 			double xhi = textWidget.getXhi();
 			String oentry = tb.getText();
-			String entry = oentry.trim().toLowerCase();
+			String entry = oentry.trim().toLowerCase(Locale.ENGLISH);
 			if (entry.contains("w") && entry.contains("-")) {
 				Window.alert("Either use a minus sign or an \"W\" to denote west longitudes, not both");
 			} else if (entry.contains("e") && entry.contains("-")) {
@@ -1511,7 +1507,6 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(currentSelection.getLowerLeftY(),
 					currentSelection.getUpperRightY(), xlo, xhi);
 			panMapToSelection();
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1528,7 +1523,7 @@ public class OLMapWidget extends Composite {
 			double xlo = textWidget.getXlo();
 			double xhi = textWidget.getXhi();
 			String oentry = tb.getText();
-			String entry = oentry.trim().toLowerCase();
+			String entry = oentry.trim().toLowerCase(Locale.ENGLISH);
 			if (entry.contains("w") && entry.contains("-")) {
 				Window.alert("Either use a minus sign or an \"W\" to denote west longitudes, not both");
 			} else if (entry.contains("e") && entry.contains("-")) {
@@ -1592,7 +1587,6 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(currentSelection.getLowerLeftY(),
 					currentSelection.getUpperRightY(), xlo, xhi);
 			panMapToSelection();
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1652,7 +1646,6 @@ public class OLMapWidget extends Composite {
 			// This call back is called by the drawing control when a feature is
 			// added by drawing.
 			// We need to call it ourselves when the region widget fires.
-			featureAdded();
 			if (mapListener != null) {
 				mapListener.onFeatureChanged();
 			}
@@ -1749,80 +1742,4 @@ public class OLMapWidget extends Composite {
 		boxLayer.destroyFeatures();
 		lineLayer.destroyFeatures();
 	}
-
-	public static native void featureAdded() /*-{
-		if (typeof $wnd.featureAddedCallback == 'function') {
-			$wnd.featureAddedCallback();
-		}
-	}-*/;
-
-	public static native void featureModified() /*-{
-		if (typeof $wnd.featureModifiedCallback == 'function') {
-			$wnd.featureModifiedCallback();
-		}
-	}-*/;
-
-	public static native void mapMoved()/*-{
-		if (typeof $wnd.mapMovedCallback == 'function') {
-			$wnd.mapMovedCallback();
-		}
-	}-*/;
-
-	public static native void mapDone()/*-{
-		if (typeof $wnd.mapDoneCallback == 'function') {
-			$wnd.mapDoneCallback();
-		}
-	}-*/;
-
-	public native void activateNativeHooks()/*-{
-		var localMap = this;
-		$wnd.setWMSTileServer = function(name, wms_url, format, layers) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTileServer(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(name,wms_url,format,layers);
-		}
-		$wnd.mapResize = function() {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::resizeMap()();
-		}
-		$wnd.setMapCurrentSelection = function(slat, nlat, wlon, elon) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setCurrentSelection(DDDD)(slat, nlat, wlon, elon);
-		}
-		$wnd.setMapTool = function(tool) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTool(Ljava/lang/String;)(tool);
-		}
-		$wnd.setMapRegions = function(regions) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setNamedRegions(Lcom/google/gwt/core/client/JavaScriptObject;)(regions);
-		}
-		$wnd.setMapDataExtent = function(slat, nlat, wlon, elon, delta) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setDataExtent(DDDDD)(slat, nlat, wlon, elon, delta);
-		}
-		$wnd.getMapZoom = function() {
-			var zm = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getZoom()();
-			return zm;
-		}
-		$wnd.getMapXhi = function() {
-			var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getXhi()();
-			return p;
-		}
-		$wnd.getMapXlo = function() {
-			var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getXlo()();
-			return p;
-		}
-		$wnd.getMapYhi = function() {
-			var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getYhi()();
-			return p;
-		}
-		$wnd.getMapYlo = function() {
-			var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getYlo()();
-			return p;
-		}
-		$wnd.isFeatureEditing = function() {
-			var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::isEditing()();
-			return p;
-		}
-		$wnd.zoomAndPanToSelection = function() {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::zoomMapToSelection()();
-		}
-		$wnd.panToSelection = function() {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::panMapToSelection()();
-		}
-	}-*/;
 }

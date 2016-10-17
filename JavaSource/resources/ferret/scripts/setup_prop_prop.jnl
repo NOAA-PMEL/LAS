@@ -1,4 +1,5 @@
 ! setup_prop_prop.jnl
+! 10/4/2016 fixes so init scripts still work
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -113,11 +114,17 @@ ENDIF
 ! Initialize the second variable.
 ! In fact the region and dataset will be the
 ! same as for var 0 (for now anyway)
+! Cancel the dataset so that another application of the
+! init script will work.
 
 IF `($data_count"0") GE 2` THEN 
 
 GO LAS_initialize_region 1
-DEFINE SYMBOL data_1_url = ($data_0_url)
+DEFINE SYMBOL data_1_url = ($data_0_url)  ! same data anyway...
+
+IF `($data_1_url"($data_0_url)|($data_0_url)>1|*>0") AND \
+($ferret_init_script"0|*>1")` THEN CANCEL DATA ($data_num)
+
 GO LAS_initialize_data 1
 
 IF ($error_status"0|*>1") THEN
@@ -225,9 +232,16 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ! Initialize the 3rd variable.
    ! In fact the region and dataset will be the
    ! same as for var 0 (for now anyway)
+   
+   ! Cancel the dataset so that another application of the
+   ! init script will work.
 
    GO LAS_initialize_region 2
    DEFINE SYMBOL data_2_url = ($data_0_url)
+
+   IF `($data_2_url"($data_0_url)|($data_0_url)>1|*>0") AND \
+    ($ferret_init_script"0|*>1")` THEN CANCEL DATA ($data_num)
+
    GO LAS_initialize_data 2
    
    IF ($error_status"0|*>1") THEN
@@ -241,6 +255,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+
 ! Is it a varible on the E axis of a DSG file?
 
    DEFINE SYMBOL vshape = `($ferret_plot_var_2),RETURN=shape`

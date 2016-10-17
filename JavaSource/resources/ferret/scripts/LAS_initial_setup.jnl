@@ -6,6 +6,11 @@
 !
 ! IF the job is not going to produce an image, send in argument of 0,
 ! then this will exit after doing the FshowGO setup.
+!
+! 10/4/2016 fixes so init scripts still work
+
+
+SET MODE VERIFY:ALWAYS
 
 DEFINE SYMBOL initialize_script_arg = ($1"2")
 
@@ -19,6 +24,9 @@ DEFINE SYMBOL initial_setup_done = 1
 SET REDIRECT/APPEND/TEE/file="($result_debug_filename)" STDOUT,STDERR
 
 IF `($initialize_script_arg) EQ 0` THEN EXIT/SCRIPT
+
+
+IF ($program_name"0|PyFerret>1|*>0") THEN EXIT/SCRIPT
 
 ! Reset the default gif filename used internally by Ferret.
 ! This must be done before PPLUS is opened.  Some of the scripts use PPL

@@ -567,17 +567,26 @@ public class LASBackendResponse extends LASDocument {
      * @throws IOException
      */
     public WebRowSet getResultAsWebRowSet(String ID, String db_type) throws SQLException, FileNotFoundException, IOException {
-    	WebRowSet rowset;
-    	
-    	if ( db_type.equals("oracle") ) {
-    		rowset = new OracleWebRowSet();
-    		System.setProperty("javax.xml.parsers.SAXParserFactory","com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
-    	} else {
-    		rowset = new WebRowSetImpl();
-    	}
-        if ( getResultElement(ID).getAttributeValue("type").equals("webrowset") ) {
-    	   rowset.readXml(new FileInputStream(new File(getResultAsFile(ID))));
-        }
+    	WebRowSet rowset = null;
+    	FileInputStream stream = null;
+    	try {
+			stream = new FileInputStream(new File(getResultAsFile(ID)));
+			if ( db_type.equals("oracle") ) {
+				rowset = new OracleWebRowSet();
+				System.setProperty("javax.xml.parsers.SAXParserFactory","com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+			} else {
+				rowset = new WebRowSetImpl();
+			}
+			if ( getResultElement(ID).getAttributeValue("type").equals("webrowset") ) {
+			   rowset.readXml(stream);
+			}
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if ( stream != null ) {
+				stream.close();
+			}
+		}
 
     	return rowset;
     }
@@ -673,7 +682,6 @@ public class LASBackendResponse extends LASDocument {
     /**
      * Set an error for this response, which will remove all other results.
      * @param message the message for the error being set.
-     * @deprecated
      */
     public void setError(String message) {       
         Element backend_response = getRootElement();

@@ -11,6 +11,7 @@ package gov.noaa.pmel.tmap.iosp;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -21,6 +22,7 @@ import org.jdom.JDOMException;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
+import org.owasp.encoder.Encode;
 
 /**
  *The Document class is the base class for all XML documents used by the IOSP code.
@@ -57,8 +59,9 @@ public class IOSPDocument extends Document {
      */
     public Element getElementByXPath(String xpathValue) throws JDOMException {
         // E.g. xpathValue="/lasdata/operations/operation[@ID='Plot']"
+    	String xpv = Encode.forJava(xpathValue);
         Object jdomO = this;
-        XPath xpath = XPath.newInstance(xpathValue);
+        XPath xpath = XPath.newInstance(xpv);
         return (Element) xpath.selectSingleNode(jdomO);   
     }
     
@@ -156,8 +159,9 @@ public class IOSPDocument extends Document {
      * @param file the File to write to
      */
     public void write(File file) {
+    	FileWriter xmlout = null;
         try {
-            FileWriter xmlout = new FileWriter(file);
+            xmlout = new FileWriter(file);
             org.jdom.output.Format format = org.jdom.output.Format
             .getPrettyFormat();
             format.setLineSeparator(System.getProperty("line.separator"));
@@ -168,6 +172,14 @@ public class IOSPDocument extends Document {
         } catch (java.io.IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
+        } finally {
+        	if ( xmlout != null ) {
+        		try {
+					xmlout.close();
+				} catch (IOException e) {
+					//
+				}
+        	}
         }
         
     }

@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import org.apache.commons.httpclient.auth.CredentialsProvider;
+import org.apache.http.client.CredentialsProvider;
+
 
 public abstract class LASCredentialsProvider implements CredentialsProvider{
 

@@ -2,6 +2,7 @@
 ! full_view2 is for property-property plots to use.
 ! 10/13 change X=0.06 to X=0.07 throughout. When the vertical
 ! axis labels need more than 2 digits, we need more space.
+! 9/16 Set Y spacing to 0.07 throughout, needed for Time labels using PPLUS
 
 ! Google Earth plots need no margins. This has already been set up.
 IF ($its_GE"0|*>1") THEN 
@@ -17,8 +18,14 @@ CAN view
 LET y_up = 0.92
 IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN LET y_up = 0.9
 
-DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:`y_up` full_view
-DEFINE VIEW/AXES/X=0.08:0.99/y=0.06:`y_up` full_view2
+DEFINE VIEW/AXES/X=0.08:0.99/y=0.07:`y_up` full_view
+DEFINE VIEW/AXES/X=0.08:0.99/y=0.07:`y_up` full_view2
+
+! Give prop-prop plots a little more space at the left for labels.
+IF ($its_prop_prop_plot"0|*>1") THEN
+   DEFINE VIEW/AXES/X=0.1:0.99/y=0.07:`y_up` full_view
+   DEFINE VIEW/AXES/X=0.1:0.99/y=0.07:`y_up` full_view2
+ENDIF
 
 IF ($ferret_thumb"0|*>1") THEN  
    DEFINE VIEW/AXES/X=0.12:0.99/y=0.09:`y_up` full_view
@@ -31,21 +38,21 @@ IF ($ferret_view%0|yt>1|zt>1|t>1|*>0%) THEN
 ENDIF
 
 IF ($ferret_view%0|xt>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:`y_up`  full_view
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:`y_up`  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:`y_up`  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:`y_up`  full_view2
 ENDIF
 
 IF ($ferret_view%0|t>1|*>0%) THEN 
 !   DEFINE VIEW/AXES/X=0.08:0.98/y=0.08:0.99  full_view  ! for tics outside the plot box
 !   DEFINE VIEW/AXES/X=0.08:0.98/y=0.08:0.99  full_view2
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:0.99  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:0.99  full_view2
 ENDIF
 
 ! Thumbnail plots need bigger axis labels. Make the margins bigger.
 IF ($ferret_view%0|x>1|y>1|z>1|*>0%) THEN 
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view
-   DEFINE VIEW/AXES/X=0.08:0.98/y=0.06:0.99  full_view2
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:0.99  full_view
+   DEFINE VIEW/AXES/X=0.08:0.98/y=0.07:0.99  full_view2
 ENDIF
 
 SET VIEW full_view

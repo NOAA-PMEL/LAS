@@ -2,6 +2,8 @@
 ! speed up finding the bounding-box.
 
 ! get_curv_coord_bbox.jnl
+! Fixing ticket 1732: remove the kludge, returning the whole range
+! of indices if we don not have a map file.
 
 ! get the I,J range from curvilinear coordinate variables for
 ! the requested output rectangle defined by 
@@ -52,24 +54,22 @@ LET ncurv_y = `($ferret_curvi_coord_lon),RETURN=jsize`
 LET del_x = (($ferret_curv_lon_max) - (($ferret_curv_lon_min)) )/(ncurv_x/2)
 LET del_y = (($ferret_curv_lat_max) - (($ferret_curv_lat_min)) )/(ncurv_y/2)
 
+
 ! If the whole grid, or nearly the whole grid, is specified, we are done.
+! Make it half the grid...
+
 IF ($ferret_curv_lon_min"0|*>1") THEN
 
-   LET xlodiff =  ABS(($ferret_curv_lon_min) - (($region_x_lo)) )
-   LET xhidiff =  ABS(($ferret_curv_lon_max) - (($region_x_hi)) )
-   LET ylodiff =  ABS(($ferret_curv_lat_min) - (($region_y_lo)) )
-   LET yhidiff =  ABS(($ferret_curv_lat_max) - (($region_y_hi)) )
+   LET ndel_x = `0.5*ABS(($ferret_curv_lon_min) - ($ferret_curv_lon_max))`
+   LET ndel_y = `0.5*ABS(($ferret_curv_lat_min) - ($ferret_curv_lat_max))`
+   
+   LET xcurvdiff = ABS(($ferret_curv_lon_max) - (($ferret_curv_lon_min)) )
+   LET xregdiff  = ABS(($region_x_hi)  - (($region_x_lo)))
+   LET ycurvdiff = ABS(($ferret_curv_lat_max) - (($ferret_curv_lat_min)) )
+   LET yregdiff  = ABS(($region_y_hi) - (($region_y_lo)) )
 
-   LET ndel_x = del_x
-   IF `ncurv_x GT 6` THEN LET ndel_x = 5*del_x
-   LET ndel_y = del_y
-   IF `ncurv_y GT 6` THEN LET ndel_y = 5*del_y
-
-   LET ndel_x = `0.1*ABS(($ferret_curv_lon_min) - ($ferret_curv_lon_max))`
-   LET ndel_y = `0.1*ABS(($ferret_curv_lat_min) - ($ferret_curv_lat_max))`
-
-   IF `(MAX((xlodiff), (xhidiff)) LT ndel_x) AND\ 
-       (MAX((ylodiff), (yhidiff)) LT ndel_y)` THEN
+   IF `(ABS(xcurvdiff - xregdiff) LT ndel_x) AND\ 
+       (ABS(ycurvdiff - yregdiff) LT ndel_y)` THEN
       LET clon_imin = 1
       LET clon_imax = ncurv_x
 
@@ -79,7 +79,7 @@ IF ($ferret_curv_lon_min"0|*>1") THEN
       DEFINE SYMBOL clon_imin `clon_imin`
       DEFINE SYMBOL clon_imax `clon_imax`
       DEFINE SYMBOL clat_jmin `clat_jmin`
-      DEFINE  SYMBOL clat_jmax `clat_jmax`
+      DEFINE SYMBOL clat_jmax `clat_jmax`
 
       GO cancel_temp_regions
       EXIT/SCRIPT
@@ -200,6 +200,21 @@ IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
    EXIT/SCRIPT
 ENDIF  ! if we have a map 
 LET kludge = 1
+
+
+!!!!!!!!!!!!!!!!
+! THE LOGIC BELOW JUST FAILS FOR SOME GRIDS AND REGIONS.
+! RETURN THE WHOLE GRID.
+
+DEFINE SYMBOL clon_imin 1
+DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon),RETURN=isize`
+DEFINE SYMBOL clat_jmin 1
+DEFINE SYMBOL clat_jmax `($ferret_curvi_coord_lat),RETURN=jsize`
+
+EXIT/SCRIPT
+
+!!!!!!!!!!!!!!!!
+
 
 IF `kludge LT 1` THEN
    LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]

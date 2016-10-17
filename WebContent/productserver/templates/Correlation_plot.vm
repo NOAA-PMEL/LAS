@@ -67,8 +67,8 @@
   <td class="regularBackground" width="409px" style="vertical-align:top;word-wrap:pre;" id="leftControls">
     <div style="padding:0px 10px 10px 10px"  class="regularBackground" id="button_panel"></div>
     <div style="padding:10px" id="space_time_constraints"></div>
-    <div style="padding:0px 10px 10px 10px" class="regularBackground noBottomBorder" id="data_selection"></div>
-    <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBottomBorder" id="data_constraints"></div>
+    <div style="padding:0px 10px 10px 10px" id="data_selection"></div>
+    <div style="padding:0px 10px 10px 10px" id="data_constraints"></div>
   </td>
   <td style="vertical-align:top;" id="correlationOutputs">
      <div style="padding:10px" id="correlation"></div>

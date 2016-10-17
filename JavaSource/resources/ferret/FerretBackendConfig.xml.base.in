@@ -25,6 +25,12 @@
               </text>
            </message>
            <message type="startsWith" level="error">
+              <key>**ERROR Differencing is not implemented between unlike Curvilienar/Rectilinear grids</key>
+              <text>
+                  Differencing is not implemented between unlike Curvilienar/Rectilinear grids
+              </text>
+           </message>
+           <message type="startsWith" level="error">
               <key>**ERROR Sorry. This server cannot yet perform a time analysis and a month-of-the-year constraint together.</key>
               <text>
                   Sorry. This server cannot yet perform a time analysis and a month-of-the-year constraint together.
