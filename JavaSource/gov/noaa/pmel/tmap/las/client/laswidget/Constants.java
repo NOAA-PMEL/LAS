@@ -37,6 +37,8 @@ public class Constants {
     public static String PICK = "Choose variable from the group above,";
     public static String APPEAR = "then a value from the list that appears here.";
     public static String LOADING = "Loading values from server...";
+    public static String ONLYONE = "There is only one value.";
+    public static String ONLYONE2 = "Selecting it will have no effect.";
     
     public static String UPDATE_NEEDED = "APPLY-NEEDED";
     

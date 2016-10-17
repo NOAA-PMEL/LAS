@@ -10,25 +10,21 @@ SET DATA/SAVE
 
 DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 180)`
 
+DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
 
-IF `($basemap_area) LT 0.2` THEN
-  DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
-
-  IF `($basemap_area) LT 0.08` THEN \
+IF `($basemap_area) LT 0.08` THEN 
   DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
 
+  GO LAS_define_etopo
+
   IF `($basemap_area) LT 0.02` THEN
-     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc") EQ 0` THEN \
-        DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc"
+     IF ($topo2_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo2_url)"
   ENDIF  
 
   IF `($basemap_area) LT 0.001` THEN
-   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN \
-      DEFINE SYMBOL basemap_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc"
+   IF ($topo1_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo1_url)"
   ENDIF
-
-ELSE 
-  DEFINE SYMBOL basemap_url = ($basemap_url"etopo60")
+  
 ENDIF
 
 DEFINE SYMBOL basemap_fill_type = FILL

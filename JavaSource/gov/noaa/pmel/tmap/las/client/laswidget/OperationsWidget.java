@@ -180,7 +180,8 @@ public class OperationsWidget extends Composite {
                             if ( (view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) 
                                     || op.getID().contains("Trajectory_interactive_plot") 
                                     || op.getID().contains("Profile_interactive_plot")
-                                    || op.getID().contains("Timeseries_interactive_plot")) { // TODO, this is a hack for specific operations...
+                                    || op.getID().contains("Timeseries_interactive_plot")
+                                    || op.getID().contains("Point_location_value_plot")) { // TODO, this is a hack for specific operations...
                                 if ( !hasXYMap ) {
                                     xyMapTable.clear();
                                     hasXYMap = true;
@@ -409,13 +410,14 @@ public class OperationsWidget extends Composite {
             }
         }
         setMenu();
-        int totOps = xyMapRow + linePlotsRow + sectionPlotsRow + hofmullerPlotsRow;
-        if ( totOps == 1 ) {
-            // There is no operations choice to be made...
-            this.setVisible(false);
-        } else {
-            this.setVisible(true);
-        }
+//        int totOps = xyMapRow + linePlotsRow + sectionPlotsRow + hofmullerPlotsRow;
+        
+//        if ( totOps == 1 ) {
+//            // There is no operations choice to be made...
+//            this.setVisible(false);
+//        } else {
+//            this.setVisible(true);
+//        }
     }
 
     public OperationSerializable[] getOperationsSerializable() {

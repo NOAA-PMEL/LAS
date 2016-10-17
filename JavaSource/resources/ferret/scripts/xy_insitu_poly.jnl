@@ -19,6 +19,7 @@ DEFINE SYMBOL data_initialization_script = LAS_initialize_data_insitu
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
+set mem/siz=300
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -35,14 +36,32 @@ GO LAS_url_label 0
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
+GO LAS_set_plot_qualifiers
+
 ! Make a basemap plot similar to refmap.
 ! Graticule and axis settings are applied in this step.
 
-GO LAS_insitu_basemap
+DEFINE SYMBOL basemap_palette = grayscale
 
-! Define plot qualifiers for polygon overlay
+DEFINE SYMBOL basemap_levels = (-inf)(-20000,-1000,500)(-1000,0,100)
+
+IF ($ferret_bathymetry_style"1|grayscale>1|*>0") THEN 
+   PPL COLOR,7,55,55,55     ! gray
+ENDIF
+
+IF ($ferret_bathymetry_style"0|white>1|*>0") THEN DEFINE SYMBOL basemap_palette = white
+IF ($ferret_bathymetry_style"0|blue>1|*>0") THEN 
+   DEFINE SYMBOL basemap_palette = osmc_bluescale
+   DEFINE SYMBOL basemap_levels = (-20000)(-10000,0,10000)
+ENDIF
+
+GO LAS_XY_overlay_basemap
+
+
+! Define plot qualifiers for polygon overlay  (these should go into LAS_set_plot_qualifiers?)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
+
 
 IF ($ferret_poly_levels"0|*>1") THEN 
   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels)
@@ -69,18 +88,19 @@ ELSE
 ENDIF
 
 DEFINE SYMBOL poly_command poly($qualifiers)
-LABEL/NOUSER `($ppl$xlen)/2`, `-1*($ppl$yorg)/2`, 0, 0, 0.14, ($ferret_plot_title)
+IF `($ferret_annotations%0|*>1%) EQ 0` THEN \
+ LABEL/NOUSER `($ppl$xlen)/2`, `-1*($ppl$yorg)/2`, 0, 0, 0.14, ($ferret_plot_title)
 
 ! Make the polygon overlay plot
 
 IF ($ferret_plot_var"0|*>1") THEN
    GO polymark ($poly_command)/SET ($data_x_var) ($data_y_var) ($ferret_plot_var) ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-   PPL POLYGON
+   PPL POLYGON/OVER
 ELSE
    GO polymark ($poly_command)/SET ($data_x_var) ($data_y_var) " " ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-   PPL POLYGON
+   PPL POLYGON/OVER
 ENDIF
 
 ! What if the x locations are a modulo-360 distance outside the region?

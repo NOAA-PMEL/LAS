@@ -5,13 +5,10 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
-import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,9 +17,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.httpclient.HttpException;
+import org.apache.http.HttpException;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 

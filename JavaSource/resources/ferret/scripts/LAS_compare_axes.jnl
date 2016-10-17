@@ -13,7 +13,7 @@ DEFINE SYMBOL ax2 = `($var2),RETURN=($dim1)axis`
 IF `STRCMP("($ax1)", "($ax2)") NE 0` THEN 
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = GRID
-   EXIT
+   EXIT/SCRIPT
 ENDIF
 
 IF `ndim GT 1` THEN 
@@ -24,6 +24,6 @@ IF `ndim GT 1` THEN
    IF `STRCMP("($ax1)", "($ax2)") NE 0` THEN 
       DEFINE SYMBOL error_status = ERROR
       DEFINE SYMBOL error_type = GRID
-      EXIT
+      EXIT/SCRIPT
    ENDIF
-EXIT
+ENDIF

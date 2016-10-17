@@ -4,6 +4,7 @@
 	<inherits name="com.google.gwt.i18n.I18N" />
 	<inherits name="com.google.gwt.json.JSON" />
 
+
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
 	<!-- any one of the following lines. -->
@@ -19,6 +20,7 @@
     <set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
+
 	<inherits name="com.google.gwt.xml.XML" />
 	<!-- GWT Joda Time implementation. -->
 	<inherits name='org.gwttime.Time' />
@@ -31,7 +33,11 @@
 		<when-type-is class="gov.noaa.pmel.tmap.las.client.ClientFactory" />
 	</replace-with>
 	<!-- Specify the paths for translatable code -->
-	<source path='client' />
+        <source path="client">
+           <exclude name="**/inventory/**"/>
+           <exclude name="**/Inventory.java"/>
+        </source>
+
 
 	<!-- Specify the application specific style sheet. -->
 	<stylesheet src="../css/LAS.css" />

@@ -821,7 +821,10 @@ public class BaseUI {
             }
         }
         xPanelCount = numPanels;
-        // if ( numPanels == 1 ) {
+        if ( numPanels == 1 ) {
+            xPanelWidth = getPanelWidth(numPanels);
+            xPanels.get(0).setWidth(xPanelWidth);
+        }
         // xComparisonAxesSelector.setVisible(false);
         // //xAxesWidget.setOrthoTitle("Other Axes");
         // } else {

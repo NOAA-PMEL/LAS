@@ -20,7 +20,11 @@
   <entry-point class='gov.noaa.pmel.tmap.las.client.map.example.MapExample'/>
 
   <!-- Specify the paths for translatable code                    -->
-  <source path='client'/>
+  <source path="client">
+    <exclude name="**/inventory/**"/>
+    <exclude name="**/Inventory.java"/>
+  </source>
+
   <source path='shared'/>
 
 </module>

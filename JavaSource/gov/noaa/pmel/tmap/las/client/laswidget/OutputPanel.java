@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.AppConstants;
 import gov.noaa.pmel.tmap.las.client.BaseUI.Mouse;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.HtmlSanitizerUtil;
 import gov.noaa.pmel.tmap.las.client.event.CancelEvent;
 import gov.noaa.pmel.tmap.las.client.event.ControlVisibilityEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
@@ -22,7 +23,6 @@ import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.EnsembleAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -35,10 +35,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -66,6 +65,10 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -74,6 +77,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasName;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -404,13 +408,13 @@ public class OutputPanel extends Composite implements HasName {
                     double maxx = Math.max(world_startx, world_endx);
                     double miny = Math.min(world_starty, world_endy);
                     double maxy = Math.max(world_starty, world_endy);
-                    if (axisVertical.equals("z") || axisVertical.equals("d")) {
+                    if (axisVertical.equals("z") || (axisVertical.equals("d") && !operationID.equals("Timeseries_station_plot")) ) {
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             mouse.setZ(miny, maxy);
                         }
                     }
-                    if (axisHorizontal.equals("z") || axisHorizontal.equals("d")) {
+                    if (axisHorizontal.equals("z") || (axisHorizontal.equals("d") && !operationID.equals("Timeseries_station_plot")) ) {
                         for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
                             Mouse mouse = mouseIt.next();
                             mouse.setZ(minx, maxx);
@@ -584,6 +588,9 @@ public class OutputPanel extends Composite implements HasName {
         spin.add(spinImage);
         spin.setSize("18px", "18px");
 
+        // Align to the middle
+        topControls.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        
         // Creating plotImage this early causes error in Chrome
         // plotImage = new Image();
         // Also init the front canvas and context
@@ -624,6 +631,7 @@ public class OutputPanel extends Composite implements HasName {
         eventBus.addHandler(FeatureModifiedEvent.TYPE, featureModifiedHandler);
         eventBus.addHandler(ControlVisibilityEvent.TYPE, hideControlsHandler);
         eventBus.addHandler(VariableSelectionChangeEvent.TYPE, variableChangeHandler);
+        eventBus.addHandler(SelectionEvent.getType(), datasetSelectionHandler);
         // TODO: move this logic into the AxesWidgetGroup (or its
         // presenter/activity if one is made)
         datasetButton.addOpenClickHandler(datasetOpenHandler);
@@ -667,29 +675,29 @@ public class OutputPanel extends Composite implements HasName {
         }
     };
    
-    /**
-     * Evaluate scripts in an HTML string. Will eval both <script
-     * src=""></script> and <script>javascript here</scripts>.
-     * 
-     * @param element
-     *            a new HTML(text).getElement()
-     */
-    public static native void evalScripts(com.google.gwt.user.client.Element element)
-    /*-{
-		var scripts = element.getElementsByTagName("script");
-
-		for (i = 0; i < scripts.length; i++) {
-			// if src, eval it, otherwise eval the body
-			if (scripts[i].hasAttribute("src")) {
-				var src = scripts[i].getAttribute("src");
-				var script = $doc.createElement('script');
-				script.setAttribute("src", src);
-				$doc.getElementsByTagName('body')[0].appendChild(script);
-			} else {
-				$wnd.eval(scripts[i].innerHTML);
-			}
-		}
-    }-*/;
+//    /**
+//     * Evaluate scripts in an HTML string. Will eval both <script
+//     * src=""></script> and <script>javascript here</scripts>.
+//     * 
+//     * @param element
+//     *            a new HTML(text).getElement()
+//     */
+//    public static native void evalScripts(com.google.gwt.user.client.Element element)
+//    /*-{
+//		var scripts = element.getElementsByTagName("script");
+//
+//		for (i = 0; i < scripts.length; i++) {
+//			// if src, eval it, otherwise eval the body
+//			if (scripts[i].hasAttribute("src")) {
+//				var src = scripts[i].getAttribute("src");
+//				var script = $doc.createElement('script');
+//				script.setAttribute("src", src);
+//				$doc.getElementsByTagName('body')[0].appendChild(script);
+//			} else {
+//				$wnd.eval(scripts[i].innerHTML);
+//			}
+//		}
+//    }-*/;
 
     /**
      * @param options
@@ -1049,7 +1057,7 @@ public class OutputPanel extends Composite implements HasName {
             for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
                 String key = opIt.next();
                 String value = options.get(key);
-                if (!value.toLowerCase().equals("default") && !value.equals("")) {
+                if (!value.toLowerCase(Locale.ENGLISH).equals("default") && !value.equals("")) {
                     lasRequest.setProperty("ferret", key, value);
                 }
             }
@@ -1072,7 +1080,8 @@ public class OutputPanel extends Composite implements HasName {
                     w = w - 10;
                 }
                 messagePanel.setWidth(w + "px");
-                messagePanel.show(plotWidget.getAbsoluteLeft() + 15, plotWidget.getAbsoluteTop() + 350, "Cancel the current request before making another.");
+                if ( url.equals(currentURL) )  // Only message if the URL is the same
+                    messagePanel.show(plotWidget.getAbsoluteLeft() + 15, plotWidget.getAbsoluteTop() + 350, "Cancel the current request before making another.");
 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -1599,7 +1608,7 @@ public class OutputPanel extends Composite implements HasName {
             for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
                 String key = opIt.next();
                 String value = options.get(key);
-                if (!value.toLowerCase().equals("default") && !value.equals("")) {
+                if (!value.toLowerCase(Locale.ENGLISH).equals("default") && !value.equals("")) {
                     lasRequest.setProperty("ferret", key, value);
                 }
             }
@@ -1653,7 +1662,8 @@ public class OutputPanel extends Composite implements HasName {
                     w = w - 10;
                 }
                 messagePanel.setWidth(w + "px");
-                messagePanel.show(pw.getAbsoluteLeft() + 15, pw.getAbsoluteTop() + 350, "Cancel the current request before making another.");
+                if ( url.equals(currentURL) )  // Only message if the URL is the same.
+                    messagePanel.show(pw.getAbsoluteLeft() + 15, pw.getAbsoluteTop() + 350, "Cancel the current request before making another.");
 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -1679,7 +1689,6 @@ public class OutputPanel extends Composite implements HasName {
                     // logger.info("Just called sendRequest.sendRequest(null, lasRequestCallback);");
                     // } catch ( RequestException e ) {
                     LASRequestEvent lasRequestEvent = new LASRequestEvent(url, RequestBuilder.GET, "lasRequestCallback", getName());
-                    Logger.getLogger(this.getClass().getName()).info(getName() + " in refreshPlot(...) is firing lasRequestEvent:" + lasRequestEvent + " with url:" + url);
                     eventBus.fireEventFromSource(lasRequestEvent, this);
                 } catch (Exception e) {
                     spin.hide();
@@ -1847,6 +1856,7 @@ public class OutputPanel extends Composite implements HasName {
     public void setOperation(String id, String v) {
         operationID = id;
         view = v;
+        setOrtho();
         setMapTool(v);
     }
 
@@ -2359,7 +2369,7 @@ public class OutputPanel extends Composite implements HasName {
      * @throws NumberFormatException
      */
     int convertPXtoInt(String size) throws NumberFormatException {
-        String widthTrimmedLowerCase = size.trim().toLowerCase();
+        String widthTrimmedLowerCase = size.trim().toLowerCase(Locale.ENGLISH);
         widthTrimmedLowerCase = widthTrimmedLowerCase.substring(0, widthTrimmedLowerCase.length() - 2);
         widthTrimmedLowerCase = widthTrimmedLowerCase.trim();
         int widthInt = Integer.valueOf(widthTrimmedLowerCase);
@@ -2378,7 +2388,7 @@ public class OutputPanel extends Composite implements HasName {
         return w;
     }
 
-    void setAnalysisAxes(String value) {
+    public void setAnalysisAxes(String value) {
 
         // Eliminate the transformed axis from the acceptable intervals for the
         // current variable.
@@ -2390,14 +2400,20 @@ public class OutputPanel extends Composite implements HasName {
         if (newView.equals("")) {
             if (intervals.contains("xy")) {
                 view = "xy";
+                ortho.remove("x");
+                ortho.remove("y");
             } else if (intervals.contains("t") && ds_grid.hasT()) {
                 view = "t";
+                ortho.remove("t");
             } else if (intervals.contains("z") && ds_grid.hasZ()) {
                 view = "z";
+                ortho.remove("z");
             } else if (intervals.contains("x")) {
                 view = "x";
+                ortho.remove("x");
             } else if (intervals.contains("y")) {
                 view = "y";
+                ortho.remove("y");
             }
         } else {
             view = newView;
@@ -2563,7 +2579,7 @@ public class OutputPanel extends Composite implements HasName {
             currentURL = currentURL + "&error=true";
             spin.hide();
             updating = false;
-            HTML error = new HTML(exception.toString());
+            HTML error = new HTML(HtmlSanitizerUtil.sanitizeHtml(exception.toString()));
             Widget size = grid.getWidget(plotRow, 0);
             error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
             grid.setWidget(plotRow, 0, error);
@@ -2588,13 +2604,13 @@ public class OutputPanel extends Composite implements HasName {
                 }
             }
             if (!isObviouslyXML) {
-                currentURL = currentURL + "&error=true";
-                evalScripts(new HTML(response.getText()).getElement());
+                currentURL = currentURL + "&error=true";                
                 VerticalPanel p = new VerticalPanel();
                 p.ensureDebugId("VerticalPanel");
                 ScrollPanel sp = new ScrollPanel();
                 sp.ensureDebugId("ScrollPanel");
-                HTML result = new HTML(doc);
+                SafeHtml docSafe = HtmlSanitizerUtil.sanitizeHtml(doc);
+                HTML result = new HTML(docSafe);
                 p.add(result);
                 sp.add(p);
                 sp.setSize("30em", "20em");
@@ -2617,7 +2633,7 @@ public class OutputPanel extends Composite implements HasName {
                             // HTML image = new
                             // HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
                             image_ready = true;
-                            imageurl = result.getAttribute("url");
+                            imageurl = UriUtils.fromString(result.getAttribute("url")).asString();
                         } else if ( typeAttribute.equals("pdf") ) {
                             formatChooser.setPdfUrl(result.getAttribute("url"));
                         } else if ( typeAttribute.equals("svg") ) {
@@ -2711,8 +2727,8 @@ public class OutputPanel extends Composite implements HasName {
                             if (result.getAttribute("ID").equals("las_message")) {
                                 Node text = result.getFirstChild();
                                 if (text instanceof Text) {
-                                    Text t = (Text) text;
-                                    HTML error = new HTML(t.getData().toString().trim());
+                                    Text t = (Text) text;                                    
+                                    HTML error = new HTML(HtmlSanitizerUtil.sanitizeHtml(t.getData().toString().trim()));
                                     error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
                                     grid.setWidget(plotRow, 0, error);
                                 }
@@ -2724,8 +2740,10 @@ public class OutputPanel extends Composite implements HasName {
                             grid.setWidget(plotRow, 0, cancelButton);
                             lasRequest.setProperty("product_server", "ui_timeout", "3");
                             String url = Util.getProductServer() + "?xml=" + URL.encode(lasRequest.toString());
-                            if (currentURL.contains("cancel"))
+                            
+                            if (currentURL.contains("cancel") && !url.contains("cancel") ) {
                                 url = url + "&cancel=true";
+                            }
                             RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
                             try {
                                 updating = true;
@@ -2736,10 +2754,7 @@ public class OutputPanel extends Composite implements HasName {
                                 sendRequest.setHeader("If-Modified-Since", new Date().toString());
                                 sendRequest.setHeader("max-age", "0");
                                 LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
-                                Logger.getLogger(this.getClass().getName()).info(
-                                        getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
                                 eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
-                                // } catch (RequestException e) {
                             } catch (Exception e) {
                                 HTML error = new HTML(e.toString());
                                 error.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -3049,7 +3064,7 @@ public class OutputPanel extends Composite implements HasName {
                     if ( variable.getAttributes().get("grid_type").equals(vizGalVariable.getAttributes().get("grid_type") )) {
                         applyVariableChange(variable, true);
                     } else {
-                        Window.alert("The grid type of the new varible must match the grid type of the varible in the upper left.");
+                        Window.alert("LAS cannot compare data on a grid with in-situ data.");
                     }
                 }
             }
@@ -3070,14 +3085,23 @@ public class OutputPanel extends Composite implements HasName {
                     // Using LASRequestEvent Controller so a cancel in one
                     // OutputPanel cancels related requests too
                     LASRequestEvent lasRequestEvent = new LASRequestEvent(sendRequest, "lasRequestCallback", getName());
-                    Logger.getLogger(this.getClass().getName()).info(
-                            getName() + " is firing lasRequestEvent:" + lasRequestEvent + " with sendRequest:" + sendRequest + "and url:" + sendRequest.getUrl());
                     eventBus.fireEventFromSource(lasRequestEvent, thisOutputPanel);
                     // } catch (RequestException e) {
                 } catch (Exception e) {
                     Window.alert("Unable to cancel request.");
                 }
             }
+        }
+    };
+    SelectionHandler<TreeItem> datasetSelectionHandler = new SelectionHandler<TreeItem>() {
+        @Override
+        public void onSelection(SelectionEvent<TreeItem> event) {
+
+        	TreeItem item = event.getSelectedItem();
+        	Object v = item.getUserObject();
+        	if (v instanceof VariableSerializable) {
+        		datasetButton.close();
+        	}
         }
     };
 }

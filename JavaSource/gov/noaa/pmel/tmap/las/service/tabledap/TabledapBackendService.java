@@ -1,22 +1,18 @@
 package gov.noaa.pmel.tmap.las.service.tabledap;
 
-import java.io.File;
-import java.io.IOException;
-
-
-import org.apache.log4j.Logger;
-import org.jdom.JDOMException;
-
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.service.BackendService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 public class TabledapBackendService extends BackendService {
-    final Logger log = Logger.getLogger(TabledapBackendService.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(TabledapBackendService.class.getName());
     public String getProduct(String backendRequestXML, String outputFileName) throws Exception {
         try {
             LASBackendRequest lasBackendRequest = new LASBackendRequest();      

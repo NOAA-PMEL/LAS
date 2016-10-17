@@ -19,7 +19,7 @@
 ! After this script is run, the value of the Ferret symbol $fer_last_error contains 
 ! an error string if an unexpected error was encountered.
 
-!set mem/siz=300
+set mem/siz=300
 
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
@@ -154,6 +154,7 @@ LET is_numeric = 1
 LET attnames = ($varname).attnames 
 
 ! These attributes are available for a transformed variable.
+
 IF `IS_ELEMENT_OF_STR_N(attnames, "ferret_datatype") NE 0` THEN
   DEFINE SYMBOL data_type = `($varname).ferret_datatype`
 ELIF `IS_ELEMENT_OF_STR_N(attnames, "infile_datatype") NE 0` THEN

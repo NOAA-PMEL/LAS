@@ -221,11 +221,35 @@ LET xhi = ($ppl$range_high)
 ! First plot sets up plot symbols. The reset_labels and color-key labeled by dates
 ! expect the color plot to be an overlay.
 
-IF ($ribbon"0|0|1|*>1") THEN
-   PLOT/VS/SYM=dot/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`xlo`:`xhi` lonplot, zplot
-   PLOT/VS/RIBBON/OVER/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET lonplot, zplot, varplot
+! For LAS_results:
+DEFINE SYMBOL AX_VERT_POSTV = down
+
+! Make a blank plot with the correct X axis on the horizal and depth
+! axis on the vertical.
+
+
+
+DEFINE AXIS/z=`dlo`:`dhi`/depth/npoints=100 vaxis
+DEFINE SYMBOL vunits= `($data_z_var),RETURN=units`AAA
+IF `STRCMP("($vunits)", "AAA")` THEN SET AXIS/UNITS=`($data_z_var),RETURN=units` vaxis
+
+DEFINE AXIS/x=`xlo`:`xhi`/npoints=100 haxis
+DEFINE SYMBOL vunits= `($data_x_var),RETURN=units`AAA
+IF `STRCMP("($vunits)", "AAA")` THEN SET AXIS/UNITS=`($data_x_var),RETURN=units` haxis
+
+DEFINE SYMBOL insitu_blankvar = blankvar
+LET blankvar = 100+x[gx=haxis] + z[gz=vaxis]
+SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) blankvar
+ANNOTATE/norm/xpos=-0.05/ypos=0.5/angle=90/halign=0/siz=0.12 "`($data_z_var),return=units`"
+
+
+IF ($ribbon"1|0|1|*>1") THEN
+
+   PLOT/OVER/VS/SYM=dot/NOKEY/NOLAB/VLIM=`dhi`:0/HLIM=`xlo`:`xhi` lonplot, zplot
+   PLOT/OVER/VS/RIBBON/LINE/SYM=19/THICK/VLIM=`dhi`:0/HLIM=`xlo`:`xhi`($qualifiers)/SET lonplot, zplot, varplot
       IF ($ferret_annotations%0|*>1%) THEN GO reset_labels
    PPL RIBBON/OVER
+
 ELSE
 
 ! To make wiggly waterfall plots

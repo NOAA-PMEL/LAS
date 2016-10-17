@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Convert an HTTP header to a JSONObject and back.
@@ -74,7 +75,7 @@ public class HTTP {
         String         t;
 
         t = x.nextToken();
-        if (t.toUpperCase().startsWith("HTTP")) {
+        if (t.toUpperCase(Locale.ENGLISH).startsWith("HTTP")) {
 
 // Response
 

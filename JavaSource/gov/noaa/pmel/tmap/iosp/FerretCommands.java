@@ -9,6 +9,8 @@
  */
 package gov.noaa.pmel.tmap.iosp;
 
+import java.util.Locale;
+
 /**
  * This is a helper class that is used to hunt through a file and determine
  * if the file (or String) contains Ferret commands.
@@ -70,7 +72,7 @@ public class FerretCommands {
     static public boolean containsCommand(String string) {
     	if ( string.length() == 0 ) return false;
         for ( int i=0; i<command.length; i++ ) {
-            if ( string.toUpperCase().contains(command[i]))  {
+            if ( string.toUpperCase(Locale.ENGLISH).contains(command[i]))  {
                 return true;
             }
         }
@@ -83,7 +85,7 @@ public class FerretCommands {
      */
     static public boolean containsForbiddenCommand(String string) {
         for ( int i=0; i<forbidden_command.length; i++ ) {
-            if ( string.toUpperCase().contains(forbidden_command[i]))  {
+            if ( string.toUpperCase(Locale.ENGLISH).contains(forbidden_command[i]))  {
                 return true;
             }
         }

@@ -107,14 +107,13 @@ ENDIF
 
 IF `($data_title"0|*>1") EQ 0` THEN
   IF `($has_units"0|*>1") EQ 0` THEN 
-     SYMBOL has_units = STRCMP (" ", "`($data_var),return=units`")
-     SYMBOL has_units = `($has_units) OR ($data_units"0|*>1")`
+     DEFINE SYMBOL has_units = STRCMP (" ", "`($data_var),return=units`")
+     DEFINE SYMBOL has_units = `($has_units) OR ($data_units"0|*>1")`
   ENDIF
   IF ($has_units"0|*>1") THEN \
   DEFINE SYMBOL ferret_plot_title "($data_var) ($data_units)"
   CANCEL SYMBOL has_units
 ENDIF
-
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 IF ($analysis_def"0|*>1") THEN  ! analysis_def from curvi data or transform

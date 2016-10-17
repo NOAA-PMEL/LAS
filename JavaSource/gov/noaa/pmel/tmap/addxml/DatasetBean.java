@@ -331,19 +331,19 @@ public class DatasetBean extends LasBean {
         for (int v = 0; v < variables.size(); v++ ) {
             VariableBean var = (VariableBean) variables.get(v);
             String vname = var.getShortName();
-            if ( vname.toLowerCase().contains(Util.zonal) ) {
+            if ( vname.toLowerCase(Locale.ENGLISH).contains(Util.zonal) ) {
                 List<String> vector = new ArrayList<String>();
                 vector.add(var.getElement());
-                String match_name = vname.toLowerCase().replace(Util.zonal, Util.meridional);
+                String match_name = vname.toLowerCase(Locale.ENGLISH).replace(Util.zonal, Util.meridional);
                 for (int j = 0; j < variables.size(); j++ ) {
                     VariableBean vVar = variables.get(j);
-                    if ( vVar.getShortName().toLowerCase().equals(match_name) ) {
+                    if ( vVar.getShortName().toLowerCase(Locale.ENGLISH).equals(match_name) ) {
                         vector.add(vVar.getElement());
                     }
                     // look for vertical dimension
                     for ( int k = 0; k < Util.verticalComponentNames.length; k++) {
                         String vertical_match = vname.replace(Util.zonal, Util.verticalComponentNames[k]);
-                        if ( vVar.getShortName().toLowerCase().equals(vertical_match) ) {
+                        if ( vVar.getShortName().toLowerCase(Locale.ENGLISH).equals(vertical_match) ) {
                             vector.add(vVar.getElement());
                         }
                     }
@@ -382,7 +382,7 @@ public class DatasetBean extends LasBean {
             String name = var.getName();
             int matching_occurance_index = -1;
             // Don't match mask variables...
-            if ( !name.toLowerCase().contains("mask") ) {
+            if ( !name.toLowerCase(Locale.ENGLISH).contains("mask") ) {
                 for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
                     List<String> uv_vectors = new ArrayList<String>();
                     // Look for x, X, u or U

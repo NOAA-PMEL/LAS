@@ -7,7 +7,11 @@
       <replace-with class="gov.noaa.pmel.tmap.las.client.ClientFactoryImpl">
         <when-type-is class="gov.noaa.pmel.tmap.las.client.ClientFactory" />
       </replace-with>
-      <source path="client"/>
+      <source path="client">
+         <exclude name="**/inventory/**"/>
+         <exclude name="**/Inventory.java"/>
+      </source>
+
 	
       <!-- Inherit the default GWT style sheet.  You can change       -->
       <!-- the theme of your GWT application by uncommenting          -->
@@ -18,6 +22,7 @@
       
       <!-- GWT Joda Time implementation. -->
       <inherits name='org.gwttime.Time' />      
+
 
       <!-- Other module inherits.  -->
       <inherits name="com.google.gwt.maps.GoogleMaps" />                   

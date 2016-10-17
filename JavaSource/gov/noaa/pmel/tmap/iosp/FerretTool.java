@@ -15,16 +15,17 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 /**
  * This is the Tool class (based on the Anagram Tool class) that runs Ferret so it can do work for the IOSP.
  * @author rhs
  *
  */
 public class FerretTool extends Tool{
-    static private Logger log = Logger.getLogger(FerretTool.class.getName());
-    //final Logger log = Logger.getLogger(FerretTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(FerretTool.class.getName());
+    //private final static Logger log = LoggerFactory.getLogger(FerretTool.class.getName());
     FerretConfig ferretConfig;
     String scriptDir;
     String tempDir;
@@ -113,6 +114,11 @@ public class FerretTool extends Tool{
             journalName = "ferret_operation"
                 + "_" + System.currentTimeMillis();
         }
+        
+        if ( tempDir.contains("../") || tempDir.contains("/..") || cacheKey.contains("../") || cacheKey.contains("/..") || journalName.contains("../") || journalName.contains("/..") ) {
+        	throw new Exception("Illegal file name.");
+        	
+        }
 
         File jnlFile = new File(tempDir +File.separator+ cacheKey + File.separator + journalName + ".jnl");
 
@@ -137,12 +143,22 @@ public class FerretTool extends Tool{
         }
 
         log.debug("Running Ferret task.");
+        
+        if ( temporary_filename.contains("../") || temporary_filename.contains("/..") ) {
+        	throw new Exception("Illegal temporary file name.");
+        }
 
+        if ( output_filename.contains("../") || output_filename.contains("/..") ) {
+        	throw new Exception("Illegal output file name.");
+        }
+        
         File temp_file = new File(temporary_filename);
         File out_file = new File(output_filename);
         try {
-        	temp_file.createNewFile();
-            ferretTask.run();
+        	if ( ferretTask != null ) {
+        		temp_file.createNewFile();
+        		ferretTask.run();
+        	}
             
         } catch (Exception e) {
             log.error("Ferret did not run correctly. "+e.toString());
@@ -156,6 +172,10 @@ public class FerretTool extends Tool{
         
         String output = ferretTask.getOutput();
         String stderr = ferretTask.getStderr();
+        if ( output.contains("/..") || output.contains("../") || stderr.contains("/..") || stderr.contains("../") ) {
+        	throw new Exception("Illegal file name.");
+        }
+        
         if ( !ferretTask.getHasError() || stderr.contains("**ERROR: regridding") ) {
             // Everything worked.  Create output.
 
@@ -165,6 +185,10 @@ public class FerretTool extends Tool{
             if ( output_filename != null && !output_filename.equals("") ) {
 
                 String logfile = output_filename+".log";
+                
+                if ( logfile.contains("../") || logfile.contains("/..") ) {
+                	throw new Exception("Illegal log file name.");
+                }
                 log.debug("Writing output to "+output_filename);
                 PrintWriter logwriter = new PrintWriter(new FileOutputStream(logfile));               
                 logwriter.println(output);
@@ -209,6 +233,9 @@ public class FerretTool extends Tool{
         File cacheDir = new File (tempDir);
         String header_filename = tempDir+File.separator+"header.xml";
         String header_temp_filename = header_filename+".tmp";
+        if ( header_filename.contains("../") || header_filename.contains("/..") ) {
+        	throw new Exception("Illegal header file name.");
+        }
         if ( !cacheDir.isDirectory() ) {
             cacheDir.mkdir();
         } else {
@@ -239,9 +266,11 @@ public class FerretTool extends Tool{
             // We need to package these and send them back to the UI.
         }
 
-        jnlWriter.println(jnl);
-        jnlWriter.flush();
-        jnlWriter.close();
+        if ( jnlWriter != null ) {
+        	jnlWriter.println(jnl);
+        	jnlWriter.flush();
+        	jnlWriter.close();
+        }
 
     }
     /**

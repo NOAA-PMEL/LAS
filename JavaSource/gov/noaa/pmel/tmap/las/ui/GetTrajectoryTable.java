@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.erddap.util.ERDDAPUtil;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
@@ -32,9 +33,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -45,6 +43,7 @@ import org.joda.time.chrono.GJChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.owasp.encoder.Encode;
 
 import ucar.unidata.geoloc.LatLonPoint;
 import ucar.unidata.geoloc.LatLonPointImpl;
@@ -58,13 +57,9 @@ import com.google.gson.JsonStreamParser;
 
 public class GetTrajectoryTable extends LASAction {
 
-	/* (non-Javadoc)
-	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			        throws Exception {	
+	private static String ERROR = "error";
+
+	public String execute() throws Exception {	
 	   
         Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
 	    
@@ -78,7 +73,7 @@ public class GetTrajectoryTable extends LASAction {
         DateTimeFormatter iso_fmt = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         
 	    LASProxy lasProxy = new LASProxy();
-	    LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+	    LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 	    String xml = request.getParameter("xml");
 	    String dsid;
 	    String xlo = null;
@@ -89,6 +84,11 @@ public class GetTrajectoryTable extends LASAction {
 	    String zhi = null;
 	    String tlo = null;
 	    String thi = null;
+	    
+	    InputStream input = null;
+	    
+	    String catid = request.getParameter("catid");
+	    		
 	    LASUIRequest lasUIRequest = (LASUIRequest) request.getAttribute("las_request");
 	    if ( lasUIRequest != null ) {
 
@@ -113,25 +113,29 @@ public class GetTrajectoryTable extends LASAction {
 	            productRequest.makeRequest(operationElement, lasConfig, lasUIRequest, "false", "ANY");
 	        } catch ( LASException e ) {
 	            logerror(request, e.getMessage(), e);
-	            return mapping.findForward("error");
+	            return ERROR;
 	        } catch ( UnsupportedEncodingException e) {
 	            logerror(request, "Error creating the product request.", e);
-	            return mapping.findForward("error");
+	            return ERROR;
 	        } catch ( JDOMException e) {
 	            logerror(request, "Error creating the product request.", e);
-	            return mapping.findForward("error");
+	            return ERROR;
 	        }
 	        List<LASBackendRequest> reqs = productRequest.getRequestXML();
 	        LASBackendRequest backRequest = reqs.get(0);
 	        
 	        // lasRequest below try to be backRequest
 	        
-	        List<Category> c = lasConfig.getCategories(dsid);
-	        Dataset dataset = c.get(0).getDataset();
+	        Dataset dataset = lasConfig.getFullDataset(dsid);
 	        Map<String, Map<String, String>> properties = dataset.getPropertiesAsMap();
 	        String baseurl = lasConfig.getBaseServerURL();
-	        String context = baseurl.substring(baseurl.lastIndexOf("/"), baseurl.length());
-	        baseurl = context + "/" + "ProductServer.do";
+                if ( !baseurl.endsWith("/") ) {
+                    baseurl = baseurl  + "/";
+                }
+                // Put back the thing the LASConfig method just stripped off.
+                baseurl = baseurl + "ProductServer.do";
+	        //String context = baseurl.substring(baseurl.lastIndexOf("/"), baseurl.length());
+	        //baseurl = context + "/" + "ProductServer.do";
 	        if ( properties != null ) {
 
 
@@ -239,7 +243,7 @@ public class GetTrajectoryTable extends LASAction {
                             boolean smallarea = false;
 
                             if ( lon_domain.contains("180") ) {
-                                if (xlo.length() > 0 && xhi.length() > 0 ) {
+                                if (xlo != null && xhi != null && xlo.length() > 0 && xhi.length() > 0 ) {
 
                                     double xhiDbl = String2.parseDouble(xhi);
                                     double xloDbl = String2.parseDouble(xlo);
@@ -255,10 +259,10 @@ public class GetTrajectoryTable extends LASAction {
                                         double xspan = Math.abs(xhiDbl - xloDbl);
                                         double yloDbl = -90.d;
                                         double yhiDbl = 90.d;
-                                        if (ylo.length() > 0) {
+                                        if (ylo != null && ylo.length() > 0) {
                                             yloDbl = Double.valueOf(ylo);
                                         }
-                                        if (yhi.length() > 0) {
+                                        if (yhi != null && yhi.length() > 0) {
                                             yhiDbl = Double.valueOf(yhi);
                                         }
                                         double yspan = Math.abs(yhiDbl - yloDbl);
@@ -285,7 +289,7 @@ public class GetTrajectoryTable extends LASAction {
                                 String csvurl = fulldataurl + ".csv";
 
                                 if ( document_base != null && !document_base.endsWith("/") ) document_base = document_base + "/";
-                                if ( table != null && !table.equals("") ) {
+                                if ( table != null ) {
                                     url = url + "?" + table;
                                     response.setContentType("application/xhtml+xml");
                                     Document doc = new Document();
@@ -339,7 +343,7 @@ public class GetTrajectoryTable extends LASAction {
                                                 dlo = shortFerretForm.parseDateTime(tlo);
                                             } catch (Exception e1) {
                                                 logerror(request, "Error parsing dates...", e);
-                                                return mapping.findForward("error");
+                                                return ERROR;
                                             }
                                         }
                                         String dtlo = iso_fmt.print(dlo.getMillis());
@@ -354,7 +358,7 @@ public class GetTrajectoryTable extends LASAction {
                                                 dhi = shortFerretForm.parseDateTime(thi);
                                             } catch (Exception e1) {
                                                 logerror(request, "Error parsing dates...", e);
-                                                return mapping.findForward("error");
+                                                return ERROR;
                                             }
                                         }
                                         String dthi = iso_fmt.print(dhi.getMillis());
@@ -394,7 +398,7 @@ public class GetTrajectoryTable extends LASAction {
                                         // Each of these pieces has been encoded as it was constructed
                                         fullquery = fullquery+encodedConstraints;
                                         url = url + fullquery;
-                                        InputStream input = lasProxy.executeGetMethodAndReturnStream(url, response);
+                                        input = lasProxy.executeGetMethodAndReturnStream(url, response);
                                         OutputStream output = response.getOutputStream();
 
                                         BufferedWriter bsw = new BufferedWriter(new OutputStreamWriter(output));
@@ -499,7 +503,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     dsgQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
                                                     csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
                                                     if ( socat ) {
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"\">Documentation</a>"+"</td>\n");
+                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"/"+parts[0]+"\">Documentation</a>"+"</td>\n");
                                                     }
 
                                                     LASUIRequest download = (LASUIRequest) lasUIRequest.clone();
@@ -510,7 +514,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     download.setRange("t", gridtlo_ferret, gridthi_ferret);
                                                     download.addTextConstraint(dsg_id, "is", parts[0], null);
 
-                                                    String ps = baseurl + "?catid="+dsid+"&amp;xml="+download.toEncodedURLString();
+                                                    String ps = baseurl + "?catid="+catid+"&amp;dsid="+dsid+"&amp;xml="+download.toEncodedURLString();
 
                                                     row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href='"+ps+"'>Save As...</a></td>\n");
 
@@ -544,13 +548,16 @@ public class GetTrajectoryTable extends LASAction {
                                                             reader.close();
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
                                                         row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
+                                                    } finally {
+                                                    	if ( stream != null )
+                                                    		stream.close();
                                                     }
 
                                                     if ( socat ) {
 
                                                     	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
                                                     	// Add the link to load a list of potential crosses to the table.
-                                                    	row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
+                                                    	row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?catid="+catid+"&amp;dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
                                                     	row.append("\n</td>");
 
                                                     	// Add the QC link
@@ -563,7 +570,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     	// Add the link to load a list of potential crosses to the table.
                                                     	String qc_url = "ProductServer.do?xml="+qcRequest.toEncodedURLString();
 
-                                                    	row.append("<a href=\""+qc_url+"\">Edit the QC Flag</a>");
+                                                    	row.append("<a target=\"_blank\" href=\""+qc_url+"\">Examine QC Flags</a>");
                                                     	row.append("\n</td>");
 
                                                     	// ADD a THUMBNAIL table link...
@@ -575,7 +582,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     	thumb.removeTextConstraintByLHS(cruise_id);
                                                     	
                                                     	thumb.addTextConstraint(cruise_id, "eq", parts[0], null);
-                                                    	String thumburl = "ProductServer.do?catid="+dsid+"&amp;xml="+thumb.toEncodedURLString();
+                                                    	String thumburl = "ProductServer.do?catid="+catid+"&amp;xml="+thumb.toEncodedURLString();
                                                     	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
                                                     	row.append("<a target=\"_blank\" href=\""+thumburl+"\">Thumbnails</a>");
                                                     	row.append("\n</td>");
@@ -603,8 +610,8 @@ public class GetTrajectoryTable extends LASAction {
                                         }
                                     }
                                 } else {
-                                    logerror(request, "Unable to fetch information from server...","query = "+URLDecoder.decode(url, "UTF-8"));
-                                    return mapping.findForward("error");
+                                    logerror(request, "Unable to fetch information from server...","query = "+JDOMUtils.decode(url, "UTF-8"));
+                                    return ERROR;
                                 }
                             }
                         }

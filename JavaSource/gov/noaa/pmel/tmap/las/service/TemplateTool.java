@@ -3,12 +3,13 @@ package gov.noaa.pmel.tmap.las.service;
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.util.Message;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,8 +22,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.view.XMLToolboxManager;
@@ -32,7 +31,7 @@ public class TemplateTool extends Tool {
     public VelocityEngine ve = new VelocityEngine();
     Map toolboxContext;
     private File configFile;
-    final Logger log = Logger.getLogger(TemplateTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(TemplateTool.class.getName());
     
     public TemplateTool() {    
     }
@@ -80,10 +79,9 @@ public class TemplateTool extends Tool {
         } else {
             throw new LASException("Config file "+ configPath +" not found.");
         }
-        
+        InputStream tbis = this.getClass().getClassLoader().getResourceAsStream("resources/services/toolbox.xml");
         XMLToolboxManager toolboxManager = new XMLToolboxManager();
-        try {
-            InputStream tbis = this.getClass().getClassLoader().getResourceAsStream("resources/services/toolbox.xml");
+        try {         
             if ( tbis == null ) {
                 String toolboxPath = getResourcePath("resources/services/toolbox.xml");
                 tbis = new FileInputStream(toolboxPath);
@@ -93,6 +91,9 @@ public class TemplateTool extends Tool {
         } catch (Exception e) {
             // TODO Auto-generated catch block
             throw new LASException("The Velocity toolbox configuration toolbox.xml not found. "+e.toString());
+        } finally {
+        	if ( tbis != null)
+        	    tbis.close();
         }
         toolboxContext = toolboxManager.getToolbox(null);
     }

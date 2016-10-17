@@ -14,6 +14,8 @@
 ! code that sits behind a Live Access Server (LAS). 
 !
 
+SET MODE verify:always  ! allows for debugging
+
 ! Set any Ferret modes
 !
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE

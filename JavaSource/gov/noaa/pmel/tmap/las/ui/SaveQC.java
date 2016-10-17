@@ -19,22 +19,25 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import javax.xml.bind.DatatypeConverter;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.jdom.Element;
 
 public class SaveQC extends LASAction {
 
-	private static Logger log = Logger.getLogger(SaveQC.class.getName());
+	private static Logger log = LoggerFactory.getLogger(SaveQC.class.getName());
 	private static final String DATABASE_CONFIG = "DatabaseBackendConfig.xml";
 	private static final String DATABASE_NAME = "SOCATFlags";
 
 	private String socatQCVersion;
 	private DsgNcFileHandler dsgHandler;
 	private DatabaseRequestHandler databaseHandler;
+	
+	private static String ERROR = "error";
+	private static String QC = "qc";
 
 	/**
 	 * Creates with the SOCAT UploadDashboard DsgNcFileHandler and DatabaseRequestHandler
@@ -72,15 +75,21 @@ public class SaveQC extends LASAction {
 		String selectUsername = dbParams.getAttributeValue("user");
 		log.debug("selectUsername=" + selectUsername);
 		String selectPassword = dbParams.getAttributeValue("password");
-		log.debug("selectPassword=" + selectPassword);
+		// Logging this sets off security alarm bells...                                   log.debug("selectPassword=" + selectPassword);
 		String updateUsername = dbParams.getAttributeValue("updateUser");
 		log.debug("updateUsername=" + updateUsername);
 		String updatePassword = dbParams.getAttributeValue("updatePassword");
-		log.debug("updatePassword=" + updatePassword);
-		// The database URLs in the LAS config files do not have the jdbc: prefix
-		databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
-				selectUsername, selectPassword, updateUsername, updatePassword);
-		log.debug("database request handler configuration successful");
+		// Logging this sets off security alarm bells...                                   log.debug("updatePassword=" + updatePassword);
+		if ( (updateUsername != null) && (updatePassword != null) ) {
+			// The database URLs in the LAS config files do not have the jdbc: prefix
+			databaseHandler = new DatabaseRequestHandler(databaseDriver, "jdbc:" + databaseUrl, 
+					selectUsername, selectPassword, updateUsername, updatePassword);
+			log.debug("database request handler configuration successful");
+		}
+		else {
+			databaseHandler = null;
+			log.debug("database request handler not created");
+		}
 
 		socatQCVersion = dbParams.getAttributeValue("socatQCVersion");
 		log.debug("socatQCVersion=" + socatQCVersion);
@@ -93,13 +102,25 @@ public class SaveQC extends LASAction {
 		log.debug("erddapDsgFlag=" + erddapDsgFlag);
 		String erddapDecDsgFlag = dbParams.getAttributeValue("erddapDecDsgFlag");
 		log.debug("erddapDecDsgFlag=" + erddapDecDsgFlag);
-		dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag);
-		log.debug("DSG file handler configuration successful");
+		if ( (dsgFileDir != null) && (decDsgFileDir != null) &&
+				 (erddapDsgFlag != null) && (erddapDecDsgFlag != null) ) {
+			// FerretConfig object not needed for just assigning QC flags
+			dsgHandler = new DsgNcFileHandler(dsgFileDir, decDsgFileDir, erddapDsgFlag, erddapDecDsgFlag, null);
+			log.debug("DSG file handler configuration successful");
+		}
+		else {
+			dsgHandler = null;
+			log.debug("DSG file handler not created");
+		}
 	}
 
 	@Override
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String execute() throws Exception {
+		// Make sure this is configured for setting WOCE flags
+		if ( (socatQCVersion == null) || (dsgHandler == null) || (databaseHandler == null) ) {
+			logerror(request, "LAS not configured to allow editing of QC flags", "Illegal action");
+			return ERROR;
+		}
 
 		// Get the request from the query parameter.
 		String requestXML = request.getParameter("xml");
@@ -116,11 +137,11 @@ public class SaveQC extends LASAction {
 		// If it wasn't built in the filter try to build it here
 		if (lasRequest == null && (requestXML != null && !requestXML.equals("")) ) {
 			try {
-				String temp = URLDecoder.decode(requestXML, "UTF-8");
+				String temp = JDOMUtils.decode(requestXML, "UTF-8");
 				requestXML = temp;
 			} catch (UnsupportedEncodingException e) {
 				LASAction.logerror(request, "Error decoding the XML request query string.", e);
-				return mapping.findForward("error");
+				return ERROR;
 			}
 
 			// Create a lasRequest object.
@@ -131,7 +152,7 @@ public class SaveQC extends LASAction {
 				request.setAttribute("las_request", lasRequest);
 			} catch (Exception e) {
 				LASAction.logerror(request, "Error parsing the request XML. ", e);
-				return mapping.findForward("error");
+				return ERROR;
 			}
 		}
 
@@ -139,9 +160,16 @@ public class SaveQC extends LASAction {
 		// String version = lasRequest.getProperty("socat_vars", "version");
 
 		String expocode = lasRequest.getProperty("qc", "cruise_ID");
-		String regionID = lasRequest.getProperty("qc", "region_ID");
+		String regionIDs = lasRequest.getProperty("qc", "region_IDs");
 		String flag = lasRequest.getProperty("qc", "flag");
-		String comment = lasRequest.getProperty("qc", "comment");
+		String comment;
+		try {
+			String encodedComment = lasRequest.getProperty("qc", "comment");
+			comment = new String(DatatypeConverter.parseHexBinary(encodedComment), "UTF-16");
+		} catch ( Exception ex ) {
+			logerror(request, "Unable to get the comment for QC flagging", ex);
+			return ERROR;
+		}
 		String reviewer = lasRequest.getProperty("qc", "reviewer");
 		// String override = lasRequest.getProperty("qc", "override");
 
@@ -150,11 +178,11 @@ public class SaveQC extends LASAction {
 			expocode = upperExpocode;
 		} catch (Exception ex) {
 			logerror(request, "Invalid expocode '" + expocode + "' specified", "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
-		if ( regionID.isEmpty() ) {
+		if ( regionIDs.isEmpty() ) {
 			logerror(request, "No region ID specified", "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 		if ( flag.isEmpty() ) {
 			// Empty flag is acceptable - just a QC comment
@@ -162,7 +190,7 @@ public class SaveQC extends LASAction {
 		}
 		if ( comment.isEmpty() ) {
 			logerror(request, "No comment provided", "");
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// Validate the reviewer assigning this QC flag
@@ -172,31 +200,39 @@ public class SaveQC extends LASAction {
 			username = request.getUserPrincipal().getName();
 		} catch ( Exception ex ) {
 			logerror(request, "Unable to get the username for QC flagging", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 		if ( (username == null) || ! username.equalsIgnoreCase(reviewer) ) {
 			logerror(request, "Invalid username " + username + " for reviewer " + reviewer, "");
-			return mapping.findForward("error");
+			return ERROR;
+		}
+
+		// If a global flag is in the list of regions, 
+		// only assign the global flag and ignore other regions
+		if ( regionIDs.contains("G") ) {
+			regionIDs = "G";
 		}
 
 		// Create the QC event
 		SocatQCEvent qcEvent = new SocatQCEvent();
 		qcEvent.setSocatVersion(socatQCVersion);
 		qcEvent.setExpocode(expocode);
-		qcEvent.setRegionID(regionID.charAt(0));
 		qcEvent.setUsername(username);
 		qcEvent.setComment(comment);
 		qcEvent.setFlag(flag.charAt(0));
 		qcEvent.setFlagDate(new Date());
-
-		// Add the QC event to the database
-		try {
-			databaseHandler.addQCEvent(qcEvent);
-			log.debug("QC event " + qcEvent.toString() + " added to the database");
-		} catch (Exception ex) {
-			logerror(request, "Unable to record the QC event " + 
-					qcEvent.toString() + " in the database", ex);
-			return mapping.findForward("error");
+		// Assign a QC event for each region in regionIDs
+		for (int k = 0; k < regionIDs.length(); k++) {
+			qcEvent.setRegionID(regionIDs.charAt(k));
+			// Add the QC event to the database
+			try {
+				databaseHandler.addQCEvent(qcEvent);
+				log.info("QC event " + qcEvent.toString() + " added to the database");
+			} catch (Exception ex) {
+				logerror(request, "Unable to record the QC event " + 
+						qcEvent.toString() + " in the database", ex);
+				return ERROR;
+			}
 		}
 
 		// Update the QC event flag to assign to the DSG files
@@ -207,20 +243,20 @@ public class SaveQC extends LASAction {
 		} catch (Exception ex) {
 			logerror(request, "Unable to obtain from the database " +
 					"the QC flag to assign to the DSG files", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
 		// Update the QC flag in the DSG files
 		try {
 			dsgHandler.updateQCFlag(qcEvent);
-			log.debug("QC event " + qcEvent.toString() + " added to the DSG files");
+			log.info("QC event " + qcEvent.toString() + " added to the DSG files");
 		} catch (Exception ex) {
 			logerror(request, "Unable to record the QC flag " + 
 					qcEvent.getFlag().toString() + " in the DSG files", ex);
-			return mapping.findForward("error");
+			return ERROR;
 		}
 
-		return mapping.findForward("qc");
+		return QC;
 	}
 
 }

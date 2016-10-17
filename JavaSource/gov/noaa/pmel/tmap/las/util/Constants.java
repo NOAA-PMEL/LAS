@@ -49,5 +49,19 @@ public class Constants {
 	//public static final String[] SEARCH_URL={"http://pcmdi9.llnl.gov/esg-search/search", "http://esgdata.gfdl.noaa.gov/esg-search/search", "http://esg-datanode.jpl.nasa.gov/esg-search/search"};
 	public static final String ESGF_REPLICAS = "false";
     //public static final String SEARCH_URL="http://esg-datanode.jpl.nasa.gov/esg-search/search";
+
+	// Services to be run by the product server...
+	public static final String FERRET_SERVICE = "ferret";
+	public static final String CLIMATE_ANALYSIS_SERVICE = "climate_analysis";
+	public static final String SHAPE_SERVICE = "shape";
+	public static final String DRDS_SERVICE = "drds";
+	public static final String DATABASE_SERVICE = "database";
+	public static final String OBIS_SERVICE = "obis";
+	public static final String IOBIS_SERVICE = "iobis";
+	public static final String KML_SERVICE = "kml";
+	public static final String FREGRID_SERVICE = "fregrid";
+	public static final String TABLEDAP_SERVICE = "tabledap";
+	
+	
 	
 }

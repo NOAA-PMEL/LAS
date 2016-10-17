@@ -22,6 +22,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.TextConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintAnchor;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
@@ -39,9 +40,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -74,16 +74,15 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -139,9 +138,9 @@ public class SimplePropPropViewer implements EntryPoint {
     FlexTable controlPanel = new FlexTable();
     VerticalPanel topPanel = new VerticalPanel();
     FlexTable outputPanel = new FlexTable();
-    UserListBox yVariables = new UserListBox(XSELECTOR, true);
-    UserListBox xVariables = new UserListBox(YSELECTOR, true);
-    UserListBox colorVariables = new UserListBox(COLORSELECTOR, true);
+    private UserListBox xVariables = new UserListBox(XSELECTOR, true);
+    private UserListBox yVariables = new UserListBox(YSELECTOR, true);
+    private UserListBox colorVariables = new UserListBox(COLORSELECTOR, true);
     AlertButton update = new AlertButton("Update Plot", Constants.UPDATE_NEEDED);
     PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
@@ -159,6 +158,7 @@ public class SimplePropPropViewer implements EntryPoint {
     String dsid;
     String varid;
     String varTwoId;
+    String varThreeId;
     String currentURL;
     String operationID;
     // Drawing start position
@@ -368,8 +368,8 @@ public class SimplePropPropViewer implements EntryPoint {
         });
         
         // Never show the add button...
-        yVariables.setMinItemsForAddButtonToBeVisible(10000);
         xVariables.setMinItemsForAddButtonToBeVisible(10000);
+        yVariables.setMinItemsForAddButtonToBeVisible(10000);
         colorVariables.setMinItemsForAddButtonToBeVisible(10000);
 
         print.addStyleDependentName("SMALLER");
@@ -435,6 +435,8 @@ public class SimplePropPropViewer implements EntryPoint {
             if ( varid.contains("'") ) varid = varid.substring(varid.indexOf("\'")+1, varid.lastIndexOf("\'"));
             varTwoId = lasRequest.getVariable(1);
             if ( varTwoId != null && varTwoId.contains("'") ) varTwoId = varTwoId.substring(varTwoId.indexOf("\'")+1, varTwoId.lastIndexOf("\'"));
+            varThreeId = lasRequest.getVariable(2);
+            if ( varThreeId != null && varThreeId.contains("'") ) varThreeId = varThreeId.substring(varThreeId.indexOf("\'")+1, varThreeId.lastIndexOf("\'"));
             xlo = lasRequest.getRangeLo("x", 0);
             xhi = lasRequest.getRangeHi("x", 0);
             ylo = lasRequest.getRangeLo("y", 0);
@@ -748,8 +750,8 @@ public class SimplePropPropViewer implements EntryPoint {
 
         String zlo = null;
         String zhi = null;
-        String vix = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
-        GridSerializable grid = yVariables.getUserObject(yVariables.getSelectedIndex()).getGrid();
+        String vix = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
+        GridSerializable grid = xVariables.getUserObject(xVariables.getSelectedIndex()).getGrid();
         if (grid.hasT()) {
 
             if (tlo != null && thi != null) {
@@ -790,8 +792,8 @@ public class SimplePropPropViewer implements EntryPoint {
         } else {
             lasRequest.removeProperty("las", "output_type");
         }
-        String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
-        if (netcdf != null && contained && yVariables.getUserObject(0).isDiscrete() ) {
+        String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
+        if (netcdf != null && contained && xVariables.getUserObject(0).isDiscrete() ) {
             if ( plot ) {
                 operationID = "Trajectory_correlation_plot"; // No data base access;
             } else {
@@ -822,7 +824,7 @@ public class SimplePropPropViewer implements EntryPoint {
             } else {
                 currentIconList = new ArrayList<String>();
             }
-        } else if ((!contained || netcdf == null) && ( yVariables.getUserObject(0).isDiscrete() )) {
+        } else if ((!contained || netcdf == null) && ( xVariables.getUserObject(0).isDiscrete() )) {
             // This should only occur when the app loads for the first time...
             if ( plot ) {
                 operationID = "Trajectory_correlation_extract_and_plot";
@@ -835,6 +837,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
             // Grab the existing variable to be used as y
             String vy = varid;
+            if ( defaulty != null ) vy = defaulty;
             String vds = dsid;
             // Because there is no netCDF we know this is the first request.
             if ( varid.equals(dsg_id) ) {
@@ -874,7 +877,7 @@ public class SimplePropPropViewer implements EntryPoint {
                         }
                     }
                 } else {
-                    vds = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
+                    vds = xVariables.getUserObject(yVariables.getSelectedIndex()).getDSID();
                 }
 
                 if ( vds != null ) {
@@ -884,8 +887,8 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
 
 
-                    yVariables.setVariable(xAllDatasetVariables.get(vy));
                     xVariables.setVariable(xAllDatasetVariables.get(vx));
+                    yVariables.setVariable(xAllDatasetVariables.get(vy));
 
                 }
             }
@@ -943,8 +946,7 @@ public class SimplePropPropViewer implements EntryPoint {
                 VerticalPanel p = new VerticalPanel();
                 ScrollPanel sp = new ScrollPanel();
                 // Make the native java script in the HTML error page active.
-                evalScripts(new HTML(response.getText()).getElement());
-                HTML result = new HTML(doc);
+                HTML result = new HTML(HtmlSanitizerUtil.sanitizeHtml(doc));
                 p.add(result);
                 PushButton again = new PushButton("Try Again");
                 again.setWidth("75px");
@@ -999,7 +1001,7 @@ public class SimplePropPropViewer implements EntryPoint {
                                 Node text = result.getFirstChild();
                                 if (text instanceof Text) {
                                     Text t = (Text) text;
-                                    HTML error = new HTML(t.getData().toString().trim());
+                                    HTML error = new HTML(HtmlSanitizerUtil.sanitizeHtml(t.getData().toString().trim()));
                                     outputPanel.setWidget(2, 0, error);
                                 }
                             }
@@ -1075,7 +1077,7 @@ public class SimplePropPropViewer implements EntryPoint {
                     }
                 }
                 if (!imageurl.equals("")) {
-                    plotImage = new IESafeImage(imageurl);
+                    plotImage = new IESafeImage(HtmlSanitizerUtil.sanitizeHtml(imageurl).asString());
                     x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
                     y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
                     // If you are not going to pop the history, hide the spinner.
@@ -1265,11 +1267,11 @@ public class SimplePropPropViewer implements EntryPoint {
         // TODO treat an x or y axis with time differently.  First problem, how do you know it's time.  Check the id against the time id tabledap property?
 
         constraintWidgetGroup.clearTextFields();
-        String xid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
-        String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
         String yid = yVariables.getUserObject(yVariables.getSelectedIndex()).getID();
         String yname = yVariables.getUserObject(yVariables.getSelectedIndex()).getName();
-        String dsid = yVariables.getUserObject(yVariables.getSelectedIndex()).getDSID();
+        String xid = xVariables.getUserObject(xVariables.getSelectedIndex()).getID();
+        String xname = xVariables.getUserObject(xVariables.getSelectedIndex()).getName();
+        String dsid = xVariables.getUserObject(xVariables.getSelectedIndex()).getDSID();
 
         VariableConstraintAnchor ctax1;  
         VariableConstraintAnchor ctax2;
@@ -1286,7 +1288,7 @@ public class SimplePropPropViewer implements EntryPoint {
         }
 
 
-        if ( xname.toLowerCase().contains("time") ) {
+        if ( xname.toLowerCase(Locale.ENGLISH).contains("time") ) {
             // Calculate time from the map scale...
             String tmin;
             String tmax;
@@ -1344,7 +1346,7 @@ public class SimplePropPropViewer implements EntryPoint {
             miny = world_endy;
             maxy = world_starty;
         }
-        if ( yname.toLowerCase().contains("time") ) {
+        if ( yname.toLowerCase(Locale.ENGLISH).contains("time") ) {
             // Calculate time from the map scale...
 
             String tmin;
@@ -1391,7 +1393,7 @@ public class SimplePropPropViewer implements EntryPoint {
     private void boundByFixed(VariableConstraintAnchor a) {        
         ConstraintDisplay match = (ConstraintDisplay) fixedConstraintPanel.findMatchingAnchor(a);
         if ( match != null ) {
-            if ( a.getKey().toLowerCase().contains("time") ) {
+            if ( a.getKey().toLowerCase(Locale.ENGLISH).contains("time") ) {
                 String av = a.getValue();
                 String mv = match.getValue();
                 String op = match.getOp();
@@ -1437,6 +1439,11 @@ public class SimplePropPropViewer implements EntryPoint {
             
             CategorySerializable cat = config.getCategorySerializable();
             
+            GridSerializable grid = config.getGrid();
+            String zid = "";
+            if ( grid != null && grid.hasZ() ) {
+            	zid = grid.getZAxis().getID();
+            }
             
           
             
@@ -1476,6 +1483,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
                 VariableSerializable vtosety = null;
                 VariableSerializable vtosetx = null;
+                VariableSerializable vtosetc = null;
                 // Only include variables that are in the all_variables tabledap_access property.
                 List<VariableSerializable> included = new ArrayList<VariableSerializable>();
                 for (int i = 0; i < variables.length; i++) {
@@ -1503,17 +1511,18 @@ public class SimplePropPropViewer implements EntryPoint {
                 for (Iterator idIt = xAllDatasetVariables.keySet().iterator(); idIt.hasNext();) {
                     String id = (String) idIt.next();
                     VariableSerializable vs = xAllDatasetVariables.get(id);
+                    
                     if ( allvariables.contains(vs.getShortname().trim()) ||
                             vs.getShortname().trim().equals("longitude") ||
-                            vs.getShortname().trim().equals("latitude")  ||
-                            vs.getShortname().trim().equals("depth") ||
+                            vs.getShortname().trim().equals("latitude")  || 
+                            vs.getShortname().trim().equals("depth") || vs.getID().trim().equals(zid) ||
                             vs.getShortname().trim().equals("time") || 
                             vs.getID().equals(dsg_id) ) {
                         included.add(vs);
                     }
                 }
-                yVariables.setVariables(included);
                 xVariables.setVariables(included);
+                yVariables.setVariables(included);
                 colorVariables.setVariables(included);
                 if ( dsg_id != null && !dsg_id.equals("") ) {
                     colorVariables.setVariable(xAllDatasetVariables.get(dsg_id));
@@ -1522,33 +1531,47 @@ public class SimplePropPropViewer implements EntryPoint {
                 }
                 
                 // These are the variables filtered for vectors and sub-set variables
-                List<VariableSerializable> filtered = yVariables.getVariables();
+                List<VariableSerializable> filtered = xVariables.getVariables();
                 for (int n = 0; n < filtered.size(); n++) {
                     VariableSerializable variableSerializable = (VariableSerializable) filtered.get(n);
                     xFilteredDatasetVariables.put(variableSerializable.getID(), variableSerializable);
                 }
-                vtosety = xFilteredDatasetVariables.get(varid);
-                if ( varTwoId != null ) {
-                  vtosetx = xFilteredDatasetVariables.get(varTwoId);
+                // If both are set, the first one is x and the second is y.
+                // If on is set, it comes from the main interface so it should be on the y-axis
+                if ( varTwoId != null && !varTwoId.equals("") ) { 
+                	vtosetx = xFilteredDatasetVariables.get(varid);
+                	if ( varTwoId != null ) {
+                		vtosety = xFilteredDatasetVariables.get(varTwoId);
+                	}
+                } else {
+                	vtosety = xFilteredDatasetVariables.get(varid);
                 }
-                yVariables.setAddButtonVisible(false);
+                if ( varThreeId != null && !varThreeId.equals("") ) {
+                	vtosetc = xFilteredDatasetVariables.get(varThreeId);
+                }
                 xVariables.setAddButtonVisible(false);
+                yVariables.setAddButtonVisible(false);
                 colorVariables.setAddButtonVisible(false);
                 
-                if (vtosety != null) {
-                    xVariables.setVariable(vtosety);
+                // vtosety and vtosetx are for the thumbnail to prop-prop, so only take action if both are set.
+                if (vtosety != null && vtosetx != null) {
+                    yVariables.setVariable(vtosety);
                 } else {
-                    if ( defaulty != null )
-                        xVariables.setVariable(xFilteredDatasetVariables.get(defaulty));
+                    if ( defaulty != null ) {
+                        yVariables.setVariable(xFilteredDatasetVariables.get(defaulty));
+                    }
                 }
-                if (vtosetx != null ) {
-                    yVariables.setVariable(vtosetx);
+                if (vtosetx != null && vtosety != null) {
+                    xVariables.setVariable(vtosetx);
                 } else {
-                    if ( defaultx != null )
-                        yVariables.setVariable(xFilteredDatasetVariables.get(defaultx));
+                    if ( defaultx != null ) {
+                        xVariables.setVariable(xFilteredDatasetVariables.get(defaultx));
+                    }
                 }
-                
-                String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
+                if (vtosetx != null && vtosety != null && vtosetc != null) {
+                    colorVariables.setVariable(vtosetc);
+                }
+                String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
                 if (grid_type.equals("regular")) {
                     operationID = "prop_prop_plot";
                 } else if (grid_type.equals("trajectory") || grid_type.equals("profile") ) { // Try it with an OR for now. May require a new operation. //TODO decide if needs a new operation
@@ -1563,18 +1586,20 @@ public class SimplePropPropViewer implements EntryPoint {
                 // Now that we've done all that work to set up the state, we will over-ride the state with the values in the properties if they exist.
                 // Unless we came in with two variables already selected.  :-)
                 
-                if ( vtosetx == null ) {
-                    if ( defaultx != null ) {
-                        xVariables.setSelectedVariableById(defaultx);
-                    }
-                }
-                if ( vtosety == null ) {
+                if ( vtosety == null) {
                     if ( defaulty != null ) {
                         yVariables.setSelectedVariableById(defaulty);
                     }
                 }
-                if ( defaultcb != null ) {
-                    colorVariables.setSelectedVariableById(defaultcb);
+                if ( vtosetx == null) {
+                    if ( defaultx != null ) {
+                        xVariables.setSelectedVariableById(defaultx);
+                    }
+                }
+                if ( vtosetc == null ) {
+                	if ( defaultcb != null ) {
+                		colorVariables.setSelectedVariableById(defaultcb);
+                	}
                 }
 
 
@@ -1804,7 +1829,7 @@ public class SimplePropPropViewer implements EntryPoint {
     }
 
     private void warn(String message) {
-        String grid_type = yVariables.getUserObject(0).getAttributes().get("grid_type");
+        String grid_type = xVariables.getUserObject(0).getAttributes().get("grid_type");
         // Don't warn if the grid type is regular...
         if (!grid_type.contains("reg")) {
             warnText.setText(message);
@@ -2085,8 +2110,8 @@ public class SimplePropPropViewer implements EntryPoint {
         }
     };
     private String plotVariable(String id) {
-        VariableSerializable varX = yVariables.getUserObject(yVariables.getSelectedIndex());
-        VariableSerializable varY = xVariables.getUserObject(xVariables.getSelectedIndex());
+        VariableSerializable varX = xVariables.getUserObject(xVariables.getSelectedIndex());
+        VariableSerializable varY = yVariables.getUserObject(yVariables.getSelectedIndex());
         
         if (varX.getID().equals(id))
             return "x";
@@ -2104,27 +2129,4 @@ public class SimplePropPropViewer implements EntryPoint {
 
     }
     
-    /**
-     * Evaluate scripts in an HTML string. Will eval both <script
-     * src=""></script> and <script>javascript here</scripts>.
-     * 
-     * @param element
-     *            a new HTML(text).getElement()
-     */
-    public static native void evalScripts(com.google.gwt.user.client.Element element)
-    /*-{
-        var scripts = element.getElementsByTagName("script");
-
-        for (i = 0; i < scripts.length; i++) {
-            // if src, eval it, otherwise eval the body
-            if (scripts[i].hasAttribute("src")) {
-                var src = scripts[i].getAttribute("src");
-                var script = $doc.createElement('script');
-                script.setAttribute("src", src);
-                $doc.getElementsByTagName('body')[0].appendChild(script);
-            } else {
-                $wnd.eval(scripts[i].innerHTML);
-            }
-        }
-    }-*/;
 }

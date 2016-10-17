@@ -2,42 +2,32 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
-import gov.noaa.pmel.tmap.las.client.event.CategoriesReturnedEvent;
 import gov.noaa.pmel.tmap.las.client.event.ConfigReturnedEvent;
-import gov.noaa.pmel.tmap.las.client.event.GetCategoriesEvent;
 import gov.noaa.pmel.tmap.las.client.event.GetConfigEvent;
-import gov.noaa.pmel.tmap.las.client.event.GridChangeEvent;
-import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.RemoveSelectionConstraintEvent;
+import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
-import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
-import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.StackLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -121,8 +111,10 @@ public class ConstraintWidgetGroup extends Composite {
                 CategorySerializable cat = event.getConfigSerializable().getCategorySerializable();
                 VariableSerializable[] variables = cat.getDatasetSerializable().getVariablesSerializable();
                 variableConstraints.setVariables(variables);
-                validConstraints.setVariables(variables);               
+                validConstraints.setVariables(variables);   
+                List<ConstraintAnchor> cs = getAnchors();
                 init(gs);
+                setConstraints(cs);
             }
         });
        
@@ -298,40 +290,48 @@ public class ConstraintWidgetGroup extends Composite {
     public void init(List<ERDDAPConstraintGroup> constraintGroups) {
         panel = 0;
         displayPanel.clear();
+        
         if ( constraintPanel.getWidgetCount() > 0 ) constraintPanel.clear();
         for (Iterator iterator = constraintGroups.iterator(); iterator.hasNext();) {
             ERDDAPConstraintGroup erddapConstraintGroup = (ERDDAPConstraintGroup) iterator.next();
+            
+            String name = erddapConstraintGroup.getName();
+            SafeHtmlBuilder builder = new SafeHtmlBuilder();
+            builder.appendHtmlConstant("<div style='font-size:.7em'>").appendEscaped(name).appendHtmlConstant("</div");
+            SafeHtml title = builder.toSafeHtml();
+            
+            
             if ( erddapConstraintGroup.getType().equals("selection") ) {
                 SelectionConstraintPanel selectionConstraintPanel = new SelectionConstraintPanel();
                 selectionConstraintPanel.init(erddapConstraintGroup);
                 constraintPanel.add(selectionConstraintPanel, erddapConstraintGroup.getName(), 22);       
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals("subset")) {
                 SubsetConstraintPanel subsetConstraintPanel = new SubsetConstraintPanel();
                 subsetConstraintPanel.init(erddapConstraintGroup);
                 constraintPanel.add(subsetConstraintPanel, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals("season") ) {
                 SeasonConstraintPanel seasonConstraintPanel = new SeasonConstraintPanel();
                 seasonConstraintPanel.init(erddapConstraintGroup);
                 constraintPanel.add(seasonConstraintPanel, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals(Constants.VARIABLE_CONSTRAINT) ) {
                 constraintPanel.add(variableConstraints, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals("valid") ) {
                 constraintPanel.add(validConstraints, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             } else if ( erddapConstraintGroup.getType().equals("regex") ) {
                 RegexSubsetConstraintPanel regexSubsetConstraintPanel = new RegexSubsetConstraintPanel();
                 regexSubsetConstraintPanel.init(erddapConstraintGroup);
                 constraintPanel.add(regexSubsetConstraintPanel, erddapConstraintGroup.getName(), 22);
-                constraintPanel.setHeaderHTML(panel, "<div style='font-size:.7em'>"+erddapConstraintGroup.getName()+"</div>");
+                constraintPanel.setHeaderHTML(panel, title);
                 panel++;
             }
         }

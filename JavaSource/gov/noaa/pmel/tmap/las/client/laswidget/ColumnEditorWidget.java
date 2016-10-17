@@ -231,7 +231,8 @@ public class ColumnEditorWidget extends Composite {
                 }
                 String comment_text = comment.getText();
                 if ( comment_text != null && !comment_text.equals("") ) {
-                    message.put("comment", new JSONString(comment_text));
+                    String encodedText = hexEncode(comment_text);
+                    message.put("comment", new JSONString(encodedText));
                     oracle.add(comment_text);
                     comments.add(comment_text);
                     oracle.setDefaultSuggestionsFromText(comments);
@@ -354,6 +355,26 @@ public class ColumnEditorWidget extends Composite {
         initWidget(mainpanel);
     }
 
+    /**
+     * Encode a string as a hex string to ensure contents are not interpreted
+     * as something other than a string parameter.  Written in JavaScript to
+     * ensure to no questions about the encoding in the JavaScript created 
+     * and for consistency with SOCAT_QC_input.vm
+     *
+     * @param original
+     *     string to be encoded
+     * @returns
+     *     hex string
+     */
+    private static native String hexEncode(String original) /*-{
+        var hex, k;
+        var result = "";
+        for (k = 0; k < original.length; k++) {
+        hex = original.charCodeAt(k).toString(16);
+            result += ("000" + hex).slice(-4);
+        }
+        return result;
+    }-*/;
 
     private void columns() {
         CellFormatter cellFormatter = datatable.getCellFormatter();

@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.service.kml;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import java.io.IOException;
@@ -13,28 +14,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *@author Jing Yang Li
  *
  */
-public final class GEServerAction extends Action {
-    private static Logger log = Logger.getLogger(GEServerAction.class);
+public final class GEServerAction extends LASAction {
+    private static Logger log = LoggerFactory.getLogger(GEServerAction.class.getName());
 
-    public ActionForward execute(ActionMapping mapping,
-            ActionForm form,
-            HttpServletRequest request,
-            HttpServletResponse response) 
+    public String execute() 
     throws ServletException, IOException{
 
         log.info("START: GEServerAction");
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 
         //use Google Earth Mime type
         response.setContentType("application/keyhole");

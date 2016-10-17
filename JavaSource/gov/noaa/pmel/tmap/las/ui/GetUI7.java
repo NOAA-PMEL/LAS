@@ -8,20 +8,9 @@ import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.apache.struts2.ServletActionContext;
 
 /** 
  * MyEclipse Struts
@@ -43,17 +32,18 @@ public class GetUI7 extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = Logger.getLogger(GetUI.class.getName());
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
-    	ServletContext context = (ServletContext) servlet.getServletContext();
-        String lazy_start = (String) context.getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+    private static Logger log = LoggerFactory.getLogger(GetUI.class.getName());
+    private static String V7UI = "V7UI";
+    private static String LAZY_START = "lazy_start";
+    public String execute() throws Exception {    
+        String lazy_start = (String) contextAttributes.get(LASConfigPlugIn.LAS_LAZY_START_KEY);
         String data_url = request.getParameter("data_url");
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
         if ( lazy_start != null && lazy_start.equals("true") ) {
         	// Start the initialization and forward to lazy start page
-        	InitThread thread = new InitThread(context);
+        	InitThread thread = new InitThread(ServletActionContext.getServletContext());
         	thread.start();
-        	return mapping.findForward("lazy_start");
+        	return LAZY_START;
         } else {
         	// forward to the UI
         	
@@ -61,7 +51,7 @@ public class GetUI7 extends ConfigService {
         		String ids = lasConfig.getIDs(data_url);
         		response.sendRedirect("getUI.do?"+ids);
         	} 
-        	return new ActionForward("/productserver/templates/V7UI.vm");
+        	return V7UI;
         }
     }
 }

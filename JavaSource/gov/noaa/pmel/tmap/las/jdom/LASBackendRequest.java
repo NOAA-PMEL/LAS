@@ -26,7 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
@@ -51,7 +52,7 @@ public class LASBackendRequest extends LASDocument {
 	 */
     private static final long serialVersionUID = 8177345236093847495L;
 
-    private static Logger log = Logger.getLogger(LASBackendRequest.class.getName());
+    private static Logger log = LoggerFactory.getLogger(LASBackendRequest.class.getName());
     /**
      * A convenience method that will report if the &lt;cancel&gt; element is present
      * in the request.  If so the service is supposed to stop processing any request it
@@ -61,13 +62,14 @@ public class LASBackendRequest extends LASDocument {
      */
     public boolean isCancelRequest () throws IOException {
         Element cancel = this.getRootElement().getChild("cancel");
-        if ( cancel != null ) {
-            String cancelFileName = getResultAsFile("cancel");
-            if ( cancelFileName == null || cancelFileName.equals("") ) {
-            	throw new IOException("Operation was not configured to allow it to be canceled.  No cancel result defined.  Operation not canceled.");
-            }
-            File cancelFile = new File(cancelFileName);
-            cancelFile.createNewFile();
+        String cancelFileName = getResultAsFile("cancel");
+        if ( cancelFileName == null || cancelFileName.equals("") ) {
+        	throw new IOException("Operation was not configured to allow it to be canceled.  No cancel result defined.  Operation not canceled.");
+        }
+        File cancelFile = new File(cancelFileName);
+        // Should have been created by the runner.
+        if ( cancel != null || cancelFile.exists() ) {
+        	cancelFile.delete();
             return true;
         } else {
             return false;
@@ -1929,7 +1931,7 @@ public class LASBackendRequest extends LASDocument {
             String name = (String) varIt.next();
             String grid = getDataAttribute(name, "grid_type");
             if ( grid != null ) {
-                trajectory = trajectory && grid.toLowerCase().equals("trajectory");
+                trajectory = trajectory && grid.toLowerCase(Locale.ENGLISH).equals("trajectory");
             }
         }
         return trajectory;

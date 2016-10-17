@@ -62,8 +62,11 @@ public class Scanner {
 		    String base = "http://"+host.substring(0, host.lastIndexOf("/"));
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
-			SAXParser xmlparser = factory.newSAXParser();			
+			SAXParser xmlparser = null;	
 			try {
+				factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+				xmlparser = factory.newSAXParser();
 				xmlparser.parse(scan, esgCatalogHandler);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

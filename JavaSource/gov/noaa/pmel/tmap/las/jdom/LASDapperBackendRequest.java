@@ -22,7 +22,8 @@ import ucar.nc2.units.DateUnit;
 import ucar.nc2.units.SimpleUnit;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -37,7 +38,7 @@ public class LASDapperBackendRequest extends LASBackendRequest {
      * from the product server.
      */
     private static final long serialVersionUID = 8177345236093847496L;  //super class is 5 at end
-    private static Logger log = Logger.getLogger(LASDapperBackendRequest.class.getName());
+    private static Logger log = LoggerFactory.getLogger(LASDapperBackendRequest.class.getName());
 
     /**
      * This throws an LASException("Required value wasn't specified: " + id)

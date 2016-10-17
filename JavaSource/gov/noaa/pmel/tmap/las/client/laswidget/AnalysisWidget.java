@@ -153,7 +153,11 @@ public class AnalysisWidget extends Composite {
     }
 
     public boolean isActive() {
-        return analysisType.getSelectedIndex() > 0;// apply.getValue();
+    	if ( analysisType != null ) {
+    		return analysisType.getSelectedIndex() > 0;// apply.getValue();
+    	} else {
+    		return false;
+    	}
     }
 
     public void setActive(boolean active) {

@@ -16,13 +16,14 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 
 
 import thredds.servlet.DatasetSource;
@@ -45,12 +46,16 @@ public class FerretDataSource implements DatasetSource {
     /* (non-Javadoc)
      * @see thredds.servlet.DatasetSource#getNetcdfFile(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    static private Logger log = Logger.getLogger(FerretDataSource.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(FerretDataSource.class.getName());
     public NetcdfFile getNetcdfFile(HttpServletRequest req, HttpServletResponse res) throws IOException {
         StringBuffer jnl = new StringBuffer("DEFINE ALIAS letdeq1 let/d=1\nDEFINE ALIAS ATTRCMD SET ATT/LIKE=\n");
         
         StringBuffer urlbuf = req.getRequestURL();
         String url = URLDecoder.decode(urlbuf.toString(), "UTF-8");
+        if ( url.length() == urlbuf.length() ) {
+        	// Length unchanged, decoding was unnecessary.
+        	url = urlbuf.toString();
+        }
 
         log.debug("building netcdf file from "+url);
         
@@ -148,7 +153,9 @@ public class FerretDataSource implements DatasetSource {
         String script = data_path+File.separator+"data_expr_"+key+".jnl";
 
         log.debug("using "+script+" for temporary script file.");
-        
+        if ( script.contains("../") || script.contains("/..") ) {
+        	throw new IOException("Illegal script file name.");
+        }
         File script_file = new File(script);
         if (!script_file.exists()) {
            PrintWriter data_script = new PrintWriter(new FileOutputStream(script_file));

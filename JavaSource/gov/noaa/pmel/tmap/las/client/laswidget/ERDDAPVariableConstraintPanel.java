@@ -3,11 +3,11 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.VariableConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
-import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 
 import com.google.gwt.core.client.GWT;
@@ -20,9 +20,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
 
 public class ERDDAPVariableConstraintPanel extends Composite {
 
@@ -108,7 +106,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
             // Filter out the subset variables since they don't have range values 
             // TODO better way to identify the time variable.
             if ( (variableSerializable.getAttributes().get("subset_variable") == null || !variableSerializable.getAttributes().get("subset_variable").equals("true")) 
-                    &&  !variableSerializable.getName().toLowerCase().contains("time") ) {
+                    &&  !variableSerializable.getName().toLowerCase(Locale.ENGLISH).contains("time") ) {
                 variablesListBox.addItem(variableSerializable);          
             }
         }
@@ -121,7 +119,7 @@ public class ERDDAPVariableConstraintPanel extends Composite {
         for (int i = 0; i < variables.length; i++) {
             // Filter subset variable which do not have a range...
             if ( (variables[i].getAttributes().get("subset_variable") == null || !variables[i].getAttributes().get("subset_variable").equals("true"))
-                    && !variables[i].getName().toLowerCase().contains("time") ) {
+                    && !variables[i].getName().toLowerCase(Locale.ENGLISH).contains("time") ) {
                 variablesListBox.addItem(variables[i]);
             }
         }

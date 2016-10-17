@@ -17,7 +17,6 @@ import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.service.ProductLocalService;
-import gov.noaa.pmel.tmap.las.service.ProductWebService;
 import gov.noaa.pmel.tmap.las.util.Institution;
 
 import java.io.BufferedReader;
@@ -46,12 +45,9 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
 
 import ucar.nc2.constants.FeatureType;
@@ -67,19 +63,28 @@ import com.sun.rowset.WebRowSetImpl;
  *
  */
 public final class ProductServerAction extends LASAction {
-    private static Logger log = Logger.getLogger(ProductServerAction.class.getName());
+	
+	public String template;
+	
+    private static Logger log = LoggerFactory.getLogger(ProductServerAction.class.getName());
     private static LASProxy lasProxy= new LASProxy();
 
-    public ActionForward execute(ActionMapping mapping,
-            ActionForm form,
-            HttpServletRequest request,
-            HttpServletResponse response){
+    // Mapping strings
+    private static String LAZY_START = "lazy_start";
+    private static String ERROR = "error";
+    private static String MAINTENANCE = "maintenance";
+    private static String INFO = "info";
+    private static String FTDS_DOWN = "ftds_down";
+    private static String CANCEL = "cancel";
+    private static String PROGRESS = "progress";
+    // Mapping strings
+    
+    public String execute(){
 
-        ProgressForm progress = (ProgressForm) form;
 		String query = request.getQueryString();
 		if ( query != null ) {
 			try{
-				query = URLDecoder.decode(query, "UTF-8");
+				query = JDOMUtils.decode(query, "UTF-8");
 				log.info("START: "+request.getRequestURL()+"?"+query);
 			} catch (UnsupportedEncodingException e) {
 				// Don't care we missed a log message.
@@ -88,24 +93,24 @@ public final class ProductServerAction extends LASAction {
 			log.info("START: "+request.getRequestURL());
 		}
         log.debug("Entering ProductServerAction");
-        String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+        String lazy_start = (String) contextAttributes.get(LASConfigPlugIn.LAS_LAZY_START_KEY);
         if ( lazy_start != null && lazy_start.equals("true") ) {
-        	return mapping.findForward("lazy_start");
+        	return LAZY_START;
         }
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+        LASConfig lasConfig = (LASConfig)contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
         // Same for the ServerConfig
-        ServerConfig serverConfig = (ServerConfig)servlet.getServletContext().getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
+        ServerConfig serverConfig = (ServerConfig)contextAttributes.get(ServerConfigPlugIn.SERVER_CONFIG_KEY);
         // Get the global cache object.
-        Cache cache = (Cache) servlet.getServletContext().getAttribute(ServerConfigPlugIn.CACHE_KEY);
+        Cache cache = (Cache) contextAttributes.get(ServerConfigPlugIn.CACHE_KEY);
         // Get the version string
-        String version = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_VERSION_KEY);
+        String version = (String) contextAttributes.get(LASConfigPlugIn.LAS_VERSION_KEY);
         if ( version == null ) {
         	version = "7";
         }
         
-        boolean ftds_up = Boolean.valueOf((String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY));
+        boolean ftds_up = Boolean.valueOf((String) contextAttributes.get(LASConfigPlugIn.LAS_FTDS_UP_KEY));
         
         Institution institution = null;
         try {
@@ -122,18 +127,18 @@ public final class ProductServerAction extends LASAction {
             serverBaseURL = lasConfig.getBaseServerURL();
         } catch (JDOMException e) {
             logerror(request, "Error getting product server URL...", e);
-            return mapping.findForward("error");
+            return ERROR;
         }
         
         if (serverURL.equals("")) {
             logerror(request, "No product server URL defined.", "Check las.xml operations element...");
-            return mapping.findForward("error");
+            return ERROR;
         }
         
         // See if the server is being reinitialized.  If so, stop.
-        String lock = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
+        String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
         if ( lock != null && lock.equals("true") ) {
-        	return mapping.findForward("maintenance");
+        	return MAINTENANCE;
         }
         // Get the request from the query parameter.
         String requestXML = request.getParameter("xml");
@@ -182,10 +187,10 @@ public final class ProductServerAction extends LASAction {
             }
             catch (Exception e) {
                 logerror(request, "Error creating info page..", e);
-                return mapping.findForward("error");
+                return ERROR;
             }
             log.debug("Returning info page.");
-            return mapping.findForward("info"); 
+            return INFO; 
         }
         
        
@@ -195,11 +200,11 @@ public final class ProductServerAction extends LASAction {
         // If it wasn't built in the filter try to build it here
         if (lasRequest == null && (requestXML != null && !requestXML.equals("")) ) {
         	try {
-        		String temp = URLDecoder.decode(requestXML, "UTF-8");
+        		String temp = JDOMUtils.decode(requestXML, "UTF-8");
         		requestXML = temp;
         	} catch (UnsupportedEncodingException e) {
         		LASAction.logerror(request, "Error decoding the XML request query string.", e);
-        		return mapping.findForward("error");
+        		return ERROR;
         	}
 
         	// Create a lasRequest object.
@@ -210,7 +215,7 @@ public final class ProductServerAction extends LASAction {
         		request.setAttribute("las_request", lasRequest);
         	} catch (Exception e) {
         		LASAction.logerror(request, "Error parsing the request XML. ", e);
-        		return mapping.findForward("error");
+        		return ERROR;
         	}
         }
         
@@ -223,7 +228,7 @@ public final class ProductServerAction extends LASAction {
         	// If it's marked as down, test it...
         	if ( !ftds_up ) {
         		if ( !testFTDS(lasConfig) ) {
-        		    return mapping.findForward("ftds_down");
+        		    return FTDS_DOWN;
         		}
         	}
         }
@@ -263,13 +268,13 @@ public final class ProductServerAction extends LASAction {
             productRequest = new ProductRequest(lasConfig, lasRequest, debug, JSESSIONID);
         } catch ( LASException e ) {
             logerror(request, e.getMessage(), e);
-            return mapping.findForward("error");
+            return ERROR;
         } catch ( UnsupportedEncodingException e) {
             logerror(request, "Error creating the product request.", e);
-            return mapping.findForward("error");
+            return ERROR;
         } catch ( JDOMException e) {
             logerror(request, "Error creating the product request.", e);
-            return mapping.findForward("error");
+            return ERROR;
         }
         
          
@@ -283,17 +288,18 @@ public final class ProductServerAction extends LASAction {
                     if ( mimeType != null && !mimeType.equals("") ) {
                         request.setAttribute("las_mime_type", mimeType);
                     }
-                    
-                    return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
+                    template = "productserver/templates/"+productRequest.getTemplate()+".vm";
+                    return "template";
+                    // ???? what to do with this situation.... return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
                 }
             } catch (LASException e) {
                 logerror(request, "Error checking for 'template' service. ", e);
-                return mapping.findForward("error");
-            }
+                return ERROR;
+            } 
   
         log.debug("Starting ProductServerRunner thread.");
-        ProductServerRunner productServerRunner = (ProductServerRunner) servlet.getServletContext().getAttribute("runner_"+productRequest.getCacheKey());
-        HashSet<String> sessions = (HashSet) servlet.getServletContext().getAttribute("sessions_"+productRequest.getCacheKey());
+        ProductServerRunner productServerRunner = (ProductServerRunner) contextAttributes.get("runner_"+productRequest.getCacheKey());
+        HashSet<String> sessions = (HashSet) contextAttributes.get("sessions_"+productRequest.getCacheKey());
         // The only way to share jobs is if the cache is being used.
         // If it's not in the cache, then you can't guarantee it will
         // still be around for the second job.
@@ -301,7 +307,7 @@ public final class ProductServerAction extends LASAction {
         if ( productServerRunner != null ) {
         	
             synchronized(productServerRunner) {
-                
+            	
                 if ( email != null ) {
                     productServerRunner.setEmails(email);
                     progress.setEmail("Comma separated list of email addresses.");
@@ -320,134 +326,27 @@ public final class ProductServerAction extends LASAction {
                 // has requested it be cancelled so stop the current ActionRunner thread.
                 if ( cancel && sessions.size() == 1) {
                     log.debug("Request canceled.");
-                    productServerRunner.setCancel(true);
-                    // Send cancel request to current service
-                    // and forward user to 'cancel' page.
-                    LASBackendRequest backendRequestDocument = productServerRunner.getCurrentBackendRequest();
-                    int currentOp = productServerRunner.getCurrentOp();
-                    backendRequestDocument.setCancel();
-                    String key = productRequest.getOperationID(currentOp);
-                    String backendServerURL = null;
-                    String productCacheKey=null;
-                    String methodName = null;
                     
-                        try {
-                            backendServerURL = serverConfig.getServerURL(productRequest.getServiceName(key));
-                            methodName = serverConfig.getMethodName(productRequest.getServiceName(key));
-                            productCacheKey = productRequest.getCacheKey(key);
-                        } catch (LASException e) {
-                            logerror(request, "Unable to send cancel request to backend service.", e);
-                            removeOnError(productRequest);
-                            return mapping.findForward("error");
-                        }
-                    
-                    log.debug("Job canceled.  Send cancel request to backend service.");
-                    ProductWebService productWebService = null;
-                    ProductLocalService productLocalService = null;
+                    // All this needs to do is tell the thread it has been canceled and create the cancel file so the service will stop.
                     try {
-                    	if ( !backendServerURL.equals("local")) {
-                    		productWebService = new ProductWebService(backendRequestDocument, 
-                    				backendServerURL, 
-                    				methodName, 
-                    				productCacheKey);
-                    	} else {
-                    		productLocalService = new ProductLocalService(
-                                    backendRequestDocument, backendServerURL,
-                                    methodName, productCacheKey);
-                            /*
-                             * The gobbledygook below is the code necessary to invoke a method in a class when
-                             * the name of the method is a variable (we know the class it's productLocalService).  
-                             * The result if methodName="getTHREDDS" is to invoke the following:
-                             * productLocalService.getTHREDDS(lasBackendRequest, lasConfig, serverConfig);
-                             * 
-                             * Add the time out tester here.  Could use a bit more generality.
-                             */
-                            Object[] oargs = null;
-                            Method method = null;
-                            if ( methodName.equals("getTHREDDS")) {
-                            	Class[] args = new Class[3];
-                            	args[0] = backendRequestDocument.getClass();
-                            	args[1] = lasConfig.getClass();
-                            	args[2] = serverConfig.getClass();
-                            	method = productLocalService.getClass().getMethod(methodName, args);
-                            	oargs = new Object[3];
-                            	oargs[0] = backendRequestDocument;
-                            	oargs[1] = lasConfig;
-                            	oargs[2] = serverConfig;
-                            	
-                            } else if ( methodName.equals("fiveMinutes") ) {
-                            	Class[] args = new Class[1];
-                            	args[0] = backendRequestDocument.getClass();
-                            	method = productLocalService.getClass().getMethod(methodName, args);
-                            	oargs = new Object[1];
-                            	oargs[0] = backendRequestDocument;
-                            }
-                            if (method != null ) {
-                               method.invoke(productLocalService, oargs);
-                            }   
-                    	}
-                    } catch (LASException e) {
-                        logerror(request, "Error building Web service request for "+ methodName , e);
+						productServerRunner.setCancel(true);
+					} catch (IOException e) {
+						logerror(request, "Unable to cancel this request.", e);
                         removeOnError(productRequest);
-                        return mapping.findForward("error");
-                    } catch (IOException e) {
-                        logerror(request, "Error building Web service request for "+ methodName , e);
-                        removeOnError(productRequest);
-                        return mapping.findForward("error");
-                    } catch (SecurityException e) {
-                    	logerror(request, "Error building Local service request for "+ methodName , e);
-                    	removeOnError(productRequest);
-                        return mapping.findForward("error");
-					} catch (NoSuchMethodException e) {
-						logerror(request, "Error building Local service request for "+ methodName , e);
-						removeOnError(productRequest);
-                        return mapping.findForward("error");
-					} catch (IllegalArgumentException e) {
-						logerror(request, "Error running Local service request for "+ methodName , e);
-						removeOnError(productRequest);
-                        return mapping.findForward("error");
-					} catch (IllegalAccessException e) {
-						logerror(request, "Error running Local service request for "+ methodName , e);
-						removeOnError(productRequest);
-                        return mapping.findForward("error");
-					} catch (InvocationTargetException e) {
-						logerror(request, "Error running Local service request for "+ methodName , e);
-						removeOnError(productRequest);
-                        return mapping.findForward("error");
+                        return ERROR;
 					}
-                    String responseXML="";
-                    LASBackendResponse lasResponse = new LASBackendResponse();
-                    try {
-                    	if ( !backendServerURL.equals("local") ) {
-                    		productWebService.run();
-                    		responseXML = productWebService.getResponseXML();
-                    	} else {
-                    		responseXML = productLocalService.getResponseXML();
-                    	}
-                    } catch (Exception e) {
-                    	logerror(request, "Error was returned from the backend server.", e);
-                    	removeOnError(productRequest);
-                    	return mapping.findForward("error");
-                    }
-                    log.debug("Finished canceling request.");
-                    
-                    try {
-                        JDOMUtils.XML2JDOM(responseXML, lasResponse);
-                    } catch (Exception e) {
-                        logerror(request, "Error parsing the XML returned from the backend server.", e);
-                        removeOnError(productRequest);
-                        return mapping.findForward("error");
-                    }
+                    LASBackendResponse lasResponse = productServerRunner.getCompoundResponse();
+
                     request.setAttribute("server_url", serverURL);
 
                     if ( sessions != null ) {
                         request.setAttribute("JSESSIONID", JSESSIONID);
                     }
-                    request.setAttribute("las_response", lasResponse);
-                    servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());
-                    servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
+                    request.getSession().setAttribute("las_response", lasResponse);
+                    contextAttributes.remove("sessions_"+productRequest.getCacheKey());
+                    contextAttributes.remove("runner_"+productRequest.getCacheKey());
                     log.debug("Returning.  Request canceled");
-                    return mapping.findForward("cancel");
+                    return CANCEL;
                 }
                 
                 // If there is a request runner that matches this one already running, get it...
@@ -496,7 +395,7 @@ public final class ProductServerAction extends LASAction {
                     } catch (Exception e) {
                         logerror(request, "Error joining the thread creating this product.", e);
                         removeOnError(productRequest);
-                        return mapping.findForward("error");
+                        return ERROR;
                     }
                     
                     // We're not done yet.
@@ -515,25 +414,32 @@ public final class ProductServerAction extends LASAction {
                         request.setAttribute("seconds", productServerRunner.getSeconds());
                         request.setAttribute("date", productServerRunner.getDate());
                         log.debug("Returning progress page.");
-                        return mapping.findForward("progress");
+                        return PROGRESS;
                     }
                 }                
             }
         } else {
             log.debug("Starting request by creating the ProductServerRunner.");
             // Create a new runner and start the thread to do the job.
-            productServerRunner = new ProductServerRunner(productRequest,lasConfig, serverConfig, request, mapping, cache);
+            productServerRunner = new ProductServerRunner(productRequest,lasConfig, serverConfig, request, cache);
             if ( JSESSIONID != null && !JSESSIONID.equals("")) {
                 productServerRunner.setJESSIONID(JSESSIONID);
             }
             productServerRunner.start();
+        	
+        	String fn = productServerRunner.getCurrentBackendRequest().getResultAsFile("cancel");
+        	File cf = new File(fn);
+        	if ( cf.exists() ) {
+        		logerror(request, "This exact request was just canceled and we haven't finished cleaning up our mess.", new Exception("Try again a bit later."));
+        		return ERROR;
+        	}
             if ( sessions == null && JSESSIONID != null && !JSESSIONID.equals("")) {
                 sessions = new HashSet<String>();
                 sessions.add(JSESSIONID);
-                servlet.getServletContext().setAttribute("sessions_"+productRequest.getCacheKey(), sessions);
+                contextAttributes.put("sessions_"+productRequest.getCacheKey(), sessions);
                 request.setAttribute("JSESSIONID", JSESSIONID);
             }
-            servlet.getServletContext().setAttribute("runner_"+productRequest.getCacheKey(), productServerRunner);
+            contextAttributes.put("runner_"+productRequest.getCacheKey(), productServerRunner);
             synchronized(productServerRunner) {
                 try {
                     long timeout = productServerRunner.getProgressTimeout()*1000;
@@ -550,7 +456,7 @@ public final class ProductServerAction extends LASAction {
                 } catch (Exception e) {
                     logerror(request, "Could not join the newly created action runner thread", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
                 
                 if (productServerRunner.stillWorking() && productServerRunner.isAlive()) {
@@ -568,18 +474,18 @@ public final class ProductServerAction extends LASAction {
                     request.setAttribute("seconds", productServerRunner.getSeconds());
                     request.setAttribute("date", productServerRunner.getDate());
                     log.debug("Returning progress page.");
-                    return mapping.findForward("progress");
+                    return PROGRESS;
                     
                 }
             }
         }
         
-        ActionForward errorAction = productServerRunner.getErrorAction();
+        String errorAction = productServerRunner.getErrorAction();
         
         // An error occurred.  Forward to the error action.
         if ( errorAction != null ) {
-            servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());
-            servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
+            contextAttributes.remove("sessions_"+productRequest.getCacheKey());
+            contextAttributes.remove("runner_"+productRequest.getCacheKey());
             logerror(request);
             return errorAction;
         }
@@ -637,15 +543,15 @@ public final class ProductServerAction extends LASAction {
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the annotations file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 } catch (IOException e) {
                     logerror(request, "Error parsing the annotations file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 } catch (JDOMException e) {
                 	logerror(request, "Error parsing the annotations file.", e);
                 	removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
 				}
                 
                 // Put these objects in the context so the output template can use them.
@@ -696,18 +602,18 @@ public final class ProductServerAction extends LASAction {
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the map scale file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 } catch (IOException e) {
                     logerror(request, "Error parsing the map scale file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
                 try {
                     JDOMUtils.XML2JDOM(map_buffer.toString(), lasMapScale);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
                 // Put these objects in the context so the output template can use them.
                 request.setAttribute("las_map_scale", lasMapScale);
@@ -722,7 +628,7 @@ public final class ProductServerAction extends LASAction {
                     logerror(request, "Error parsing the map scale file.", e);
                     removeOnError(productRequest);
                     map_scale_file.delete();
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
                 // Put these objects in the context so the output template can use them.
                 request.setAttribute("las_map_scale", lasMapScale);
@@ -750,18 +656,18 @@ public final class ProductServerAction extends LASAction {
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the region index file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 } catch (IOException e) {
                     logerror(request, "Error parsing the region file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
                 try {
                     JDOMUtils.XML2JDOM(index_buffer.toString(), lasRegionIndex);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
             }            
 
@@ -776,7 +682,7 @@ public final class ProductServerAction extends LASAction {
                 } catch (Exception e) {
                     logerror(request, "Error parsing the region index file.", e);
                     removeOnError(productRequest);
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
 
                 // Put these objects in the context so the output template can use them.
@@ -796,13 +702,13 @@ public final class ProductServerAction extends LASAction {
 			} catch (JDOMException e) {
 				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
 				removeOnError(productRequest);
-        		return mapping.findForward("error");
+        		return ERROR;
 			} catch (LASException e) {
 				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
 				removeOnError(productRequest);
-        		return mapping.findForward("error");
+        		return ERROR;
 			}           
-        	WebRowSet webrowset;
+        	WebRowSet webrowset = null;
         	try {
         		if ( db_type.contains("oracle") ) {
         			webrowset = new OracleWebRowSet();
@@ -813,7 +719,7 @@ public final class ProductServerAction extends LASAction {
         	} catch (Exception e) {
         		logerror(request, "Unable to create webrowset: ", e);
         		removeOnError(productRequest);
-        		return mapping.findForward("error");
+        		return ERROR;
         	}
         	if ( compoundResponse.isResultByTypeRemote("webrowset")) {
 
@@ -828,15 +734,22 @@ public final class ProductServerAction extends LASAction {
         			} catch (MalformedURLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
         				removeOnError(productRequest);
-        				return mapping.findForward("error");
+        				return ERROR;
         			} catch (IOException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
         				removeOnError(productRequest);
-        				return mapping.findForward("error");
+        				return ERROR;
         			} catch (SQLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
         				removeOnError(productRequest);
-        				return mapping.findForward("error");
+        				return ERROR;
+        			} finally {
+        				if ( webrowset != null )
+							try {
+								webrowset.close();
+							} catch (SQLException e) {
+								//
+							}
         			}
         		}            
 
@@ -850,11 +763,11 @@ public final class ProductServerAction extends LASAction {
         			} catch (FileNotFoundException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
         				removeOnError(productRequest);
-        				return mapping.findForward("error");
+        				return ERROR;
         			} catch (SQLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
         				removeOnError(productRequest);
-        				return mapping.findForward("error");
+        				return ERROR;
         			}
         			// Put these objects in the context so the output template can use them.
         			request.setAttribute("las_webrowset", webrowset);
@@ -862,8 +775,8 @@ public final class ProductServerAction extends LASAction {
         	}
         }
         // Remove the runner from the servlet context.
-        servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());
-        servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
+        contextAttributes.remove("sessions_"+productRequest.getCacheKey());
+        contextAttributes.remove("runner_"+productRequest.getCacheKey());
         
         // Log the access to the product server.
         if ( query != null ) {
@@ -875,17 +788,17 @@ public final class ProductServerAction extends LASAction {
             
         	if ( stream_ids == null ) {
         		logerror(request, "No stream_ID parameter values found.", "Set stream_ID=resultID for the result you want streamed.");
-        		return mapping.findForward("error");
+        		return ERROR;
         	}
         	if ( stream_ids.length > 1 ) {
         		logerror(request, "Streaming for more than one result has not yet been implemented.", "Stay tuned.");
-        		return mapping.findForward("error");
+        		return ERROR;
         	}
             log.debug("Streaming output requested for "+stream_ids[0]);
             String mimeType = compoundResponse.getStreamedMimeType(stream_ids[0]);
             if ( mimeType == null || mimeType.equals("")) {
                 logerror(request, "Cannot stream result.", "Cannot find MIME type for streamed result.");
-                return mapping.findForward("error");
+                return ERROR;
             }
             response.setContentType(mimeType);
             log.debug("Steaming output MIME type set to: "+mimeType);
@@ -907,14 +820,14 @@ public final class ProductServerAction extends LASAction {
                         if ( remote ) {
                             if (!ImageIO.write(ImageIO.read(new URL(urlToStream)),"png",sos)) {
                                 logerror(request, "Cannot stream result.", "Cannot find writer for image.");
-                                return mapping.findForward("error");
+                                return ERROR;
                             }
                         } else {
                             // There is no writer for "gif" images.  Always write as PNG.
                             // Check that the writer is found since we got burned by this once.
                             if (!ImageIO.write(ImageIO.read(new File(fileToStream)),"png",sos)) {
                                 logerror(request, "Cannot stream result.", "Cannot find writer for image.");
-                                return mapping.findForward("error");
+                                return ERROR;
                             }
                         }
                         sos.flush();
@@ -935,7 +848,10 @@ public final class ProductServerAction extends LASAction {
                             textReader = new BufferedReader(f);
                         } catch (FileNotFoundException e) {
                             logerror(request, "Cannot stream result.", "Cannot find text file to stream.");
-                            return mapping.findForward("error");
+                            return ERROR;
+                        } finally {
+                        	if ( textReader != null )
+                        		textReader.close();
                         }
                         if (textReader != null) {
                             try {
@@ -947,7 +863,13 @@ public final class ProductServerAction extends LASAction {
                                 writer.flush();
                             } catch (IOException e) {
                                 logerror(request, "Cannot stream result.", "Cannot stream text output file.");
-                                return mapping.findForward("error");
+                                return ERROR;
+                            } finally {
+                            	if ( textReader != null)
+                            		textReader.close();
+                            	if ( writer != null )
+                            		writer.close();
+                            	
                             }
                         }
                         
@@ -958,7 +880,7 @@ public final class ProductServerAction extends LASAction {
                 }
             } else {
                 logerror(request, "Streamed result not found.", "Cannot find a streamable result with ID = "+stream_ids[0]);
-                return mapping.findForward("error");
+                return ERROR;
             }            
             return null;
         } else {            
@@ -968,7 +890,7 @@ public final class ProductServerAction extends LASAction {
             
             if ( output_template == null || output_template.equals("") ) {
                 logerror(request, "No output template defined for this operation.", "Add output template to the operation XML configuraiton file.");
-                return mapping.findForward("error");
+                return ERROR;
             }
             
             String mimeType = productRequest.getTemplateMimeType();
@@ -976,13 +898,18 @@ public final class ProductServerAction extends LASAction {
             if ( mimeType != null && !mimeType.equals("") ) {
                 request.setAttribute("las_mime_type", mimeType);
             }
-            return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
+            template = "/productserver/templates/"+productRequest.getTemplate()+".vm";			
+
+            return "template";
+            
+            /// return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
+            
         }
         
     }
     private void removeOnError(ProductRequest productRequest) {
-        servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());
-        servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
+        contextAttributes.remove("sessions_"+productRequest.getCacheKey());
+        contextAttributes.remove("runner_"+productRequest.getCacheKey());
     }
     private boolean testFTDS(LASConfig lasConfig) {
 		int max = 10;
@@ -995,7 +922,7 @@ public final class ProductServerAction extends LASAction {
 				ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dodsurl);
 				StringBuilder error = new StringBuilder();
 				GridDataset gridDs = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
-				servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY, "true");
+				contextAttributes.put(LASConfigPlugIn.LAS_FTDS_UP_KEY, "true");
 				return true;
 			} catch (IOException e) {
 				log.error("IO error testing FTDS URL = " + e);
@@ -1009,7 +936,13 @@ public final class ProductServerAction extends LASAction {
 				}
 			}
 		}
-		servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY, "false");
+		contextAttributes.put(LASConfigPlugIn.LAS_FTDS_UP_KEY, "false");
 		return false;
 	}
+    public void setTempalte(String template) {
+    	this.template = template;
+    }
+    public String getTemplate() {
+    	return this.template;
+    }
 }

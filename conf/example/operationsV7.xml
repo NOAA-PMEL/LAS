@@ -1,5 +1,41 @@
 <?xml version="1.0"?>
 <operations>
+<!-- Point Data operations -->
+  <!-- This is the default XY plot. -->
+  <operation name="Point Location value Plot" ID="Point_location_value_plot" output_template="zoom" default="true" category="visualization">
+    <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Timeseries_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+    </operation>
+    <operation chained="true" name="In-situ location and value plot" ID="Plot_insitu_XY_locations_and_values" output_template="zoom" service_action="Plot_insitu_XY_locations_and_values">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <response ID="PlotResp" type="HTML" index="1">
+        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".png"/>
+        <result type="svg" ID="plot_svg" file_suffix=".svg"/>
+        <result type="ps" ID="plot_ps" file_suffix=".ps"/>
+        <result type="pdf" ID="plot_pdf" file_suffix=".pdf"/>
+        <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+        <result type="js_total" ID="js_total" file_suffix=".js"/>
+        <result type="map_data" ID="map_data" file_suffix=".txt"/>
+        <result type="image" ID="ref_map" file_suffix=".png"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+        <result type="cancel" ID="cancel"/>
+        <result type="xml" ID="webrowset" file_suffix=".xml"/>
+      </response>
+      <service>ferret</service>
+    </operation>
+    <optiondef IDREF="Timeseries_Options"/>
+    <region>
+      <intervals name="xyt" type="Maps" title="Latitude-Longitude"/>
+    </region>
+  </operation>
 <!-- Time series (station) data operations -->
   <!-- This is the default XY plot. -->
   <operation name="Timeseries Location Plot" ID="Timeseries_interactive_plot" output_template="zoom" default="true" category="visualization">
@@ -36,7 +72,7 @@
       <intervals name="xyt" type="Maps" title="Latitude-Longitude"/>
     </region>
   </operation>
-  <operation name="Multi-station Timeseries Plot" ID="Timeseries_station_plot" output_template="zoom" default="true" category="visualization">
+  <operation name="Multi-station Timeseries Plot" ID="Timeseries_station_plot" output_template="zoom" default="true" category="visualization" minvars="1" maxvars="100000">
     <operation name="Database Extraction" ID="DBExtract" output_template="" service_action="Timeseries_station_plot">
       <response ID="DBExtractResponse">
         <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -65,7 +101,7 @@
       </response>
       <service>ferret</service>
     </operation>
-    <optiondef IDREF="Timeseries_Options"/>
+    <optiondef IDREF="Options_1D_7"/>
     <region>
       <intervals name="xyt" type="Line Plots" title="Time Series"/>
     </region>
@@ -395,6 +431,9 @@
     </operation>
      <region>
       <intervals name="xyt"/>
+      <intervals name="xt"/>
+      <intervals name="yt"/>
+      <intervals name="zt"/>
     </region>
   </operation>
 

@@ -46,6 +46,7 @@ public interface RPCServiceAsync {
 	public void getERDDAPOuterSequenceValues(String dsid, String varid, String key, ERDDAPConstraint constraint, List<ConstraintSerializable> constraints, AsyncCallback<Map<String, String>> outerSequenceValueCallback);
 	public void getERDDAPConstraintGroups(String dsid, AsyncCallback<List<ERDDAPConstraintGroup>> constraints);
 	public void getERDDAPJSON(String dsid, String varid, String trajectory_id, String variables, AsyncCallback<String> json);
+	public void getERDDAPGeometry(String catid, String dsid, String varid, String variables, AsyncCallback<String> json);
 	/*
 	 * Everything below this is for the ESGF serach interface.
 	 */

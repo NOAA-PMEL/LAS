@@ -7,15 +7,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.Logger;
 import org.jdom.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import thredds.catalog.InvAccess;
@@ -26,7 +28,7 @@ import thredds.catalog.ServiceType;
 
 public class ESGDriver {
 
-	private static final Logger log = Logger.getLogger(ESGDriver.class);
+	private static final Logger log = LoggerFactory.getLogger(ESGDriver.class);
 	public static void main(String[] args) {
 		String src = "http://tds.prototype.ucar.edu/thredds/esgcet/catalog.xml";
 		String base = src.substring(0, src.lastIndexOf("/")+1);
@@ -34,6 +36,8 @@ public class ESGDriver {
 		CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 		SAXParser parser;
 		try {
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 			parser = factory.newSAXParser();			
 			parser.parse(src, esgCatalogHandler);
 		} catch (ParserConfigurationException e) {
@@ -81,7 +85,7 @@ public class ESGDriver {
 	                // These will be the catalog containers that will contain the aggregations...
 					for (Iterator grandChildrenIt = topDS.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
 						InvDataset grandChild = (InvDataset) grandChildrenIt.next();
-						if ( grandChild.hasAccess() && (grandChild.getName().toLowerCase().contains("aggregation") || grandChild.getID().toLowerCase().contains("aggregation"))) {
+						if ( grandChild.hasAccess() && (grandChild.getName().toLowerCase(Locale.ENGLISH).contains("aggregation") || grandChild.getID().toLowerCase(Locale.ENGLISH).contains("aggregation"))) {
 							// We are done.
 							String durl = null;
 							InvAccess access = null;

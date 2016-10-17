@@ -4,6 +4,7 @@
  */
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
@@ -21,11 +22,8 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,7 +35,7 @@ import org.json.JSONObject;
  * @struts.action validate="true"
  */
 public class GetOperations extends ConfigService {
-	private static Logger log = Logger.getLogger(GetOperations.class.getName());
+	private static Logger log = LoggerFactory.getLogger(GetOperations.class.getName());
 	/*
 	 * Generated Methods
 	 */
@@ -50,13 +48,12 @@ public class GetOperations extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response) {
-		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+	public String execute() {
+		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 		String query = request.getQueryString();
 		if ( query != null ) {
 			try{
-				query = URLDecoder.decode(query, "UTF-8");
+				query = JDOMUtils.decode(query, "UTF-8");
 				log.info("START: "+request.getRequestURL()+"?"+query);
 			} catch (UnsupportedEncodingException e) {
 				// Don't care we missed a log message.

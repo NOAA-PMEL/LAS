@@ -5,7 +5,7 @@
 	<property name="jakarta.home" value="@JAKARTA_HOME@" />
 	<property name="jakarta.lib" value="@JAKARTA_LIB@" />
         <property name="map_version" value="1.1"/>
-        <property name="version" value="7.3"/>
+        <property name="version" value="8.4"/>
 	<property name="deploy.home"
 		value="${jakarta.home}/webapps/${app.name}" />
 	<property name="dist.war"
@@ -110,7 +110,6 @@
 	</target>
 
 	<target name="dist" depends="prepare,compile">
-	    <echo file="WebContent/WEB-INF/classes/resources/version.txt" message="${version}"/>
 		<war jarfile="${app.name}.war"
 			webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="WebContent/WEB-INF/classes" includes="**" />
@@ -169,6 +168,11 @@
 				<include name="resources/iosp/**" />
 			</fileset>
 		</copy>
+		<copy todir="${jakarta.home}/webapps/thredds/WEB-INF/lib">
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="log4j-*.jar" />
+			</fileset>
+		</copy>
 		<copy file="JavaSource/resources/ferret/FerretBackendConfig.xml"
 			tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml" />
 	</target>
@@ -189,6 +193,11 @@
 		</copy>
 		<copy file="JavaSource/resources/ferret/FerretBackendConfig.xml"
 			tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml" />
+		<copy todir="${jakarta.home}/webapps/thredds/WEB-INF/lib">
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="log4j-*.jar" />
+			</fileset>
+		</copy>
 		<!-- remove any symbolic links because the delete task follows symbolic links -->
 		<exec executable="find">
 			<arg line="${deploy.home} -type l -delete" />

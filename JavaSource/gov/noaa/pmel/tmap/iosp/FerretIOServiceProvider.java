@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import org.apache.log4j.Level;
-
-import org.apache.log4j.Logger;
-import org.apache.tools.ant.types.selectors.TypeSelector.FileType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -40,8 +40,6 @@ import ucar.ma2.Section;
 import ucar.ma2.StructureDataIterator;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-
-import ucar.nc2.NCdump;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Structure;
@@ -67,7 +65,7 @@ import ucar.unidata.io.RandomAccessFile;
  * 
  */
 public class FerretIOServiceProvider implements IOServiceProvider {
-	static private Logger log = Logger.getLogger(FerretIOServiceProvider.class
+	private final static Logger log = LoggerFactory.getLogger(FerretIOServiceProvider.class
 			.getName());
 	RandomAccessFile raf;
 	static private final long maxHeader = 512;
@@ -224,12 +222,16 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		log.debug("process the XML header in " + xmlHeader);
 		// Process the XML.
 		Document header = new Document();
+
+		if ( xmlHeader.contains("/..") || xmlHeader.contains("../") ) {
+			throw new IOException("Illegal file name.");
+		}
 		File headerFile = new File(xmlHeader);
 		try {
 			JDOMUtils.XML2JDOM(headerFile, header);
 		} catch (Exception e) {
 			headerFile
-					.renameTo(new File(headerFile.getAbsoluteFile() + ".bad"));
+			.renameTo(new File(headerFile.getAbsoluteFile() + ".bad"));
 			log.error("Error processing header file XML " + e.getMessage());
 			throw new IOException("Error processing XML header file "
 					+ e.getMessage());
@@ -489,6 +491,12 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		// Simplest form of caching is that the exact file we need already
 		// exists.
 
+		if ( filename.contains("/..") || filename.contains("../") ) {
+			throw new IOException("Illegal data file path.");
+		}
+		if ( temp_filename.contains("../") || temp_filename.contains("/..") ) {
+			throw new IOException("Illegal temporary file name.");
+		}
 		File datatemp = new File(filename);
 		File temp_file = new File(temp_filename);
 		// Create a range section that pulls out the whole block from the
@@ -718,7 +726,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 				.hasNext();) {
 			String aname = (String) attIt.next();
 			String value = ferretAttributes.get(aname).getValue();
-			String type = ferretAttributes.get(aname).getType().trim().toLowerCase();
+			String type = ferretAttributes.get(aname).getType().trim().toLowerCase(Locale.ENGLISH);
 
 			// Will this have array types?
 			if (type.equals("double")) {
@@ -792,7 +800,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 					value = attribute.getChildTextNormalize("value").trim();
 					aname = attribute.getAttributeValue("name").trim();
 					atype = attribute.getAttributeValue("type").trim()
-					.toLowerCase();
+					.toLowerCase(Locale.ENGLISH);
 					
 				}
 				if ( value != null && !value.equals("") && 
@@ -970,5 +978,17 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         // TODO Auto-generated method stub
         return 0;
     }
+
+	@Override
+	public void reacquire() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void release() throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

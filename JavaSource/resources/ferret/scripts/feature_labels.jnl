@@ -81,18 +81,31 @@ IF `($c_s"0|*>1") AND ($feature_type"0|trajectory>1|*>0")` THEN\
  DEFINE SYMBOL feature_type = trajectorie
 
 DEFINE SYMBOL note_num = `($note_num"0") + 1`
-DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown 
+IF ($its_profile_map"0|*>1") THEN
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s) locations shown
+ELSE
+   DEFINE SYMBOL note_($note_num)_lab =  ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown 
+ENDIF
 
 IF `(($its_prop_plot"0|0|1|*>1") EQ 0) AND ($nbad_data"0|0|*>1")` THEN 
    IF `($ngood_data) NE 0` THEN DEFINE SYMBOL plusmissing = (plus ($nbad_data) missing)
    IF `($ngood_data) EQ 0` THEN DEFINE SYMBOL plusmissing = (($nbad_data) missing)
-   DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown ($plusmissing)
+   IF ($its_profile_map"0|*>1") THEN
+      DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s) locations shown
+   ELSE
+      DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown ($plusmissing)
+   ENDIF
 ENDIF
 
 ! If the constraint was where the color variable is valid, then no need for (0 missing)
 
-IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
- DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
+IF ($its_profile_map"0|*>1") THEN
+   IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
+    DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s) locations shown
+ELSE
+   IF `($has_missing"0|0>1|*>0") AND ($nbad_data"1|0>1|*>0")` THEN \
+    DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s), ($ngood_data) points shown
+ENDIF
 
 ! Notation about the decimation (if data is pre-decimated)
 
@@ -106,7 +119,7 @@ IF ($nolabels_decimation_counts"0|*>1") THEN ! make points-shown annotations or 
    DEFINE SYMBOL note_($note_num)_lab = ($prof_traj_shown) ($feature_type)($c_s) shown
 
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
-   DEFINE SYMBOL note_($note_num)_lab = Data subsampled for efficiency (<a target=&quot;_blank&quot; href=docs/piecewise_decimation_reference.html>explanation</a>)
+   DEFINE SYMBOL note_($note_num)_lab = Data subsampled for efficiency (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_reference.html>explanation</a>)
 ELSE  ! make points-shown annotations or not
 
    LET full_good = -9999
@@ -173,5 +186,7 @@ points shown (<a target=&quot;_blank&quot; href=doc/piecewise_decimation_referen
 
 ENDIF ! make points-shown annotations or not
 ENDIF
+
+
 
 !---------------- end of feature_labels.jnl -------------------------

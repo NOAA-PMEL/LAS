@@ -59,4 +59,21 @@ IF `($ferret_cruise_list"0|*>1")` THEN
 
 ENDIF
 
+! If a Ferret "annotate_with" property was set, and if there is just one feature 
+! in the selection,see if that variable is in the file and make a notation.
+
+IF ($ferret_annotate_with"0|*>1") THEN
+   LET nfeature = `($rowvar),RETURN=msize`
+   IF `nfeature EQ 1` THEN 
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      LET notevar = "($ferret_annotate_with)"
+      LET varnames = ..varnames
+      IF `IS_ELEMENT_OF_STR_N(varnames, notevar) GT 0` THEN 
+         LET notestring = "`($ferret_annotate_with)`"
+         IF `STRINDEX(notestring, ";") GT 0` THEN LET notestring = "`STR_REPLACE(notestring, ";", ",")`"
+         DEFINE SYMBOL note_($note_num)_lab = NOTE: `notestring`
+      ENDIF
+   ENDIF
+ENDIF
+
 !-----------------End of set_constraint_labels ---------------------------------

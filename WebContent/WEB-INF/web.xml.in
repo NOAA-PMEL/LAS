@@ -1,219 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-	<display-name>Live Access Server</display-name>
-	<description />
-
-
-	<!-- Maximum interval of inactivity before a session becomes invalid
-		in minutes. -->
-	<session-config>
-		<session-timeout>180</session-timeout>
-	</session-config>
-	<listener>
-		<listener-class>
-			org.apache.axis.transport.http.AxisHTTPSessionListener
-		</listener-class>
-	</listener>
-	    <listener>
-        <description>LAS Session Listener for Confluence/Tributary Server (Sister Servers) Variable Clean-up</description>
-        <listener-class>gov.noaa.pmel.tmap.las.session.LASSessionListener</listener-class>
-    </listener>
-<!--  Apply an input filter every LAS request via the Struts Action class servlet. -->
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         version="2.4" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee   http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+  <display-name>Live Access Server</display-name>
+  <discription>Live Access Server (LAS) is a general purpose web application for the display and analysis of climate data.</discription>
+  <session-config>
+    <session-timeout>180</session-timeout>
+  </session-config>
+  <listener>
+    <description>LAS Session Listener for Confluence/Tributary Server (Sister Servers) Variable Clean-up</description>
+    <listener-class>gov.noaa.pmel.tmap.las.session.LASSessionListener</listener-class>
+  </listener>
+  <listener>
+    <description>LAS Context Listener which will read the context parameters below and initialize LAS with the configuration files specified.</description>
+    <listener-class>            
+      gov.noaa.pmel.tmap.las.product.server.LASServletContextListener      
+    </listener-class>
+  </listener>
+  <context-param>
+    <param-name>version</param-name>
+    <param-value>8.4</param-value>
+  </context-param>
+  <context-param>
+    <param-name>configFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/las.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>v7OperationsFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/operationsV7.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>lasUIFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/ui.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>serverConfigFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/productserver.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>lasServersFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/las_servers.xml</param-value>
+  </context-param>
+  <context-param>
+    <param-name>lasServersStaticFileName</param-name>
+    <param-value>@JAKARTA_HOME@/content/@APPNAME@/conf/server/las_servers_static.xml</param-value>
+  </context-param>
+  <servlet>
+    <servlet-name>velocity</servlet-name>
+    <servlet-class>         
+      gov.noaa.pmel.tmap.las.view.LASVelocityViewServlet
+    </servlet-class>
+    <init-param>
+      <param-name>org.apache.velocity.toolbox</param-name>
+      <param-value>/WEB-INF/toolbox.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>org.apache.velocity.properties</param-name>
+      <param-value>/WEB-INF/velocity.properties</param-value>
+    </init-param>
+    <load-on-startup>10</load-on-startup>
+  </servlet>
+  <!-- Map *.vm files to Velocity -->
+  <servlet-mapping>
+    <servlet-name>velocity</servlet-name>
+    <url-pattern>*.vm</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>RPCServlet</servlet-name>
+    <servlet-class>gov.noaa.pmel.tmap.las.server.RPCServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RPCServlet</servlet-name>
+    <url-pattern>/rpc</url-pattern>
+  </servlet-mapping>
+  <!--  Apply an input filter every LAS request.   -->
   <filter>
     <filter-name>RequestInputFilter</filter-name>
     <filter-class>gov.noaa.pmel.tmap.las.filter.RequestInputFilter</filter-class>
   </filter>
-
-  
-<filter-mapping>
+  <filter-mapping>
     <filter-name>RequestInputFilter</filter-name>
-    <servlet-name>action</servlet-name>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
-<!-- End of LAS input filters -->
-	<servlet>
-		<servlet-name>AxisServlet</servlet-name>
-		<servlet-class>
-			org.apache.axis.transport.http.AxisServlet
-		</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>AdminServlet</servlet-name>
-		<servlet-class>
-			org.apache.axis.transport.http.AdminServlet
-		</servlet-class>
-		<load-on-startup>100</load-on-startup>
-	</servlet>
-	<servlet>
-		<servlet-name>SOAPMonitorService</servlet-name>
-		<servlet-class>
-			org.apache.axis.monitor.SOAPMonitorService
-		</servlet-class>
-		<init-param>
-			<param-name>SOAPMonitorPort</param-name>
-			<param-value>5001</param-value>
-		</init-param>
-		<load-on-startup>100</load-on-startup>
-	</servlet>
-	<servlet>
-		<servlet-name>action</servlet-name>
-		<servlet-class>
-			org.apache.struts.action.ActionServlet
-		</servlet-class>
-		<init-param>
-			<param-name>config</param-name>
-			<param-value>/WEB-INF/struts-config.xml</param-value>
-		</init-param>
-		<init-param>
-			<param-name>debug</param-name>
-			<param-value>3</param-value>
-		</init-param>
-		<init-param>
-			<param-name>detail</param-name>
-			<param-value>3</param-value>
-		</init-param>
-		<load-on-startup>0</load-on-startup>
-	</servlet>
-	<!-- Define Velocity template compiler -->
-	<servlet>
-		<servlet-name>velocity</servlet-name>
-		<servlet-class>
-			gov.noaa.pmel.tmap.las.view.LASVelocityViewServlet
-		</servlet-class>
-
-		<init-param>
-			<param-name>org.apache.velocity.toolbox</param-name>
-			<param-value>/WEB-INF/toolbox.xml</param-value>
-		</init-param>
-
-		<init-param>
-			<param-name>org.apache.velocity.properties</param-name>
-			<param-value>/WEB-INF/velocity.properties</param-value>
-		</init-param>
-		<load-on-startup>10</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>*.jws</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>AxisServlet</servlet-name>
-		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>SOAPMonitorService</servlet-name>
-		<url-pattern>/SOAPMonitor</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>action</servlet-name>
-		<url-pattern>*.do</url-pattern>
-	</servlet-mapping>
-	<!-- Map *.vm files to Velocity -->
-	<servlet-mapping>
-		<servlet-name>velocity</servlet-name>
-		<url-pattern>*.vm</url-pattern>
-	</servlet-mapping>
-
-	<!-- WMS/ -->
-	<servlet>
-		<servlet-name>WMSServlet</servlet-name>
-		<servlet-class>au.org.tpac.servlet.WMSServlet</servlet-class>
-		<init-param>
-			<param-name>lasXMLFile</param-name>
-			<param-value>@PWD@/conf/server/las.xml</param-value>
-		</init-param>
-		<init-param>
-			<param-name>legendConfigFile</param-name>
-			<param-value>
-				@PWD@/WebContent/legendConfig/legendConfig.txt
-			</param-value>
-		</init-param>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WMSServlet</servlet-name>
-		<url-pattern>/wms_servlet</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>WMSLegnendServlet</servlet-name>
-		<servlet-class>
-			au.org.tpac.servlet.WMSLegnendServlet
-		</servlet-class>
-		<init-param>
-			<param-name>top</param-name>
-			<param-value>80</param-value>
-		</init-param>
-		<init-param>
-			<param-name>width</param-name>
-			<param-value>55</param-value>
-		</init-param>
-		<init-param>
-			<param-name>bottom</param-name>
-			<param-value>80</param-value>
-		</init-param>
-	</servlet>
-        <servlet>
-            <servlet-name>RPCServlet</servlet-name>
-            <servlet-class>gov.noaa.pmel.tmap.las.server.RPCServiceImpl</servlet-class>
-        </servlet>
-	<servlet-mapping>
-	    <servlet-name>RPCServlet</servlet-name>
-	    <url-pattern>/rpc</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>WMSLegnendServlet</servlet-name>
-		<url-pattern>/wms_legend</url-pattern>
-	</servlet-mapping>
-	<!-- /WMS -->
-
-	<!-- currently the W3C havent settled on a media type for WSDL;
-		http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
-		for now we go with the basic 'it's XML' response -->
-	<mime-mapping>
-		<extension>wsdl</extension>
-		<mime-type>text/xml</mime-type>
-	</mime-mapping>
-
-
-	<mime-mapping>
-		<extension>xsd</extension>
-		<mime-type>text/xml</mime-type>
-	</mime-mapping>
-
+  <!-- End of LAS input filters -->
+  <!-- Unless there is an illegal parameter, LAS will pass the request along the filter chain to this filter which will handle every other request.         
+       This struts filter does not forward to this is the end of the filter chain.        Static content will not be served unless it's location is specified in the struts.xml
+       
+         <constant name="struts.action.excludePattern" value="/las-spring/output/*.*" />           
+  -->
+  <filter>
+    <filter-name>struts2</filter-name>
+    <filter-class>             
+      org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter 	    
+    </filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>struts2</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <mime-mapping>
+    <extension>wsdl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
   <!-- ++++++++++ Setup security restrictions ++++++++++ -->
-  <!--   
-         This set up can be used in conjunction with any https access
-         you have configured for TDS.  If you want to use your own
-         LAS specific https access set up, mimic these configuration changes
-         and configure in your own users and roles in the tomcat config.
-    -->
-  <!-- Default is to not allow DELETE, PUT, POST -->
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>not allowed</web-resource-name>
-      <url-pattern>/*</url-pattern>
-      <http-method>DELETE</http-method>
-      <http-method>PUT</http-method>
-      <!-- http-method>POST</http-method -->
-    </web-resource-collection>
-    <auth-constraint/>
-  </security-constraint>
-
-  <!-- This allows "remote configuration":
-    /thredds/debug gives access to various debug and status info.
-    ThreddsDefault servlet aliases /thredds/root/ to "{tomcat_home}/webapps/thredds/"
-    ThreddsDefault servlet aliases /thredds/dataDir/path to "dirLocation/" where path is mapped to dirLocation through a
-      datasetRoot or datasetScan element in the catalog. -->
+  <!--      This set up can be used in conjunction with any https access
+            you have configured for TDS.  If you want to use your own          
+            LAS specific https access set up, mimic these configuration changes
+            and configure in your own users and roles in the tomcat config.     
+  -->
+  <!-- This allows "remote configuration":     
+      /thredds/debug gives access to various debug and status info.
+      ThreddsDefault servlet aliases /thredds/root/ to "{tomcat_home}/webapps/thredds/"
+      ThreddsDefault servlet aliases /thredds/dataDir/path to "dirLocation/" where path is mapped to dirLocation through a       
+      datasetRoot or datasetScan element in the catalog. 
+  -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>sensitive read access</web-resource-name>
       <url-pattern>/ReInit.do</url-pattern>
       <url-pattern>/admin.do</url-pattern>
       <url-pattern>/CacheManager.do</url-pattern>
-      <http-method>GET</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>tdsConfig</role-name>
@@ -222,14 +133,11 @@
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
-
   <!-- ThreddsDefault servlet aliases /thredds/content/ to "{tomcat_home}/content/thredds/"   -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>sensitive read and write access</web-resource-name>
       <url-pattern>/content/*</url-pattern>
-      <http-method>GET</http-method>
-      <http-method>PUT</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>tdsConfig</role-name>
@@ -238,14 +146,10 @@
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
-
-  <!-- Setup security restrictions on THREDDS server HTTP POST capabilities in CatalogGen. -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>cataloggen configuration</web-resource-name>
       <url-pattern>/cataloggen/admin/*</url-pattern>
-      <http-method>GET</http-method>
-      <http-method>POST</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>tdsConfig</role-name>
@@ -254,13 +158,11 @@
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
-
   <!-- default restricted access uses DIGEST, but not HTTPS -->
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>restricted access datasets</web-resource-name>
       <url-pattern>/restrictedAccess/*</url-pattern>
-      <http-method>GET</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>restrictedDatasetUser</role-name>
@@ -269,22 +171,18 @@
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
-
   <!-- can only have one login-config for extire context. -->
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>THREDDS Data Server</realm-name>
   </login-config>
-
   <!-- Define security roles. -->
   <security-role>
     <description>The configuration role allows users to configure the THREDDS server.</description>
     <role-name>tdsConfig</role-name>
   </security-role>
-
   <security-role>
     <description>User who can access restricted datasets.</description>
     <role-name>restrictedDatasetUser</role-name>
   </security-role>
-
 </web-app>

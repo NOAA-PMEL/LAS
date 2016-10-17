@@ -3,25 +3,21 @@
  */
 package gov.noaa.pmel.tmap.las.service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Map;
-import java.util.Properties;
-
 import gov.noaa.pmel.tmap.exception.LASException;
-import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.view.XMLToolboxManager;
-import org.jdom.Element;
 
 /**
  * @author Roland Schweitzer
@@ -37,7 +33,7 @@ public class ProductService {
     public VelocityEngine ve = new VelocityEngine();
     Map toolboxContext;
     
-    final Logger log = Logger.getLogger(ProductService.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(ProductService.class.getName());
     
     public ProductService (LASBackendRequest lasBackendRequest, String serverURL, String methodName, String outputFileName) throws LASException, IOException {
         this.lasBackendRequest = lasBackendRequest;
@@ -82,8 +78,9 @@ public class ProductService {
         }
         
         XMLToolboxManager toolboxManager = new XMLToolboxManager();
+        InputStream tbis = null;
         try {
-            InputStream tbis = this.getClass().getClassLoader().getResourceAsStream("resources/services/toolbox.xml");
+            tbis = this.getClass().getClassLoader().getResourceAsStream("resources/services/toolbox.xml");
             if ( tbis == null ) {
                 String toolboxPath = JDOMUtils.getResourcePath(this, "resources/services/toolbox.xml");
                 tbis = new FileInputStream(toolboxPath);
@@ -93,6 +90,9 @@ public class ProductService {
         } catch (Exception e) {
             // TODO Auto-generated catch block
             throw new LASException("The Velocity toolbox configuration toolbox.xml not found. "+e.toString());
+        } finally {
+        	if ( tbis != null ) 
+        		tbis.close();
         }
         toolboxContext = toolboxManager.getToolbox(null);
         

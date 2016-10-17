@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.lastest;
 
+import gov.noaa.pmel.tmap.las.client.HtmlSanitizerUtil;
 import gov.noaa.pmel.tmap.las.client.serializable.TestDataset;
 import gov.noaa.pmel.tmap.las.client.serializable.TestResult;
 
@@ -33,7 +34,7 @@ public class ProductTestTable extends Composite {
 	}
 	public ProductTestTable(TestDataset[] ds, boolean failed) {
 		for (int i = 0; i < ds.length; i++) {
-			panel.add(new HTML("<h4>"+ds[i].getName()+"</h4>"));
+			panel.add(new HTML("<h4>"+HtmlSanitizerUtil.sanitizeHtml(ds[i].getName())+"</h4>"));
 			TestResult[] results;
 			if (failed) {
 				results = ds[i].getFailedResults();
@@ -48,8 +49,10 @@ public class ProductTestTable extends Composite {
 
 				@Override
 				public SafeHtml getValue(TestResult result) {
-					String s = "<a href=\""+result.getUrl()+"\">"+result.getUrl()+"</a>";
-					return SafeHtmlUtils.fromTrustedString(s);
+					
+					SafeHtmlBuilder builder = new SafeHtmlBuilder();
+					builder.appendHtmlConstant("<a href=\"").appendEscaped(result.getUrl()).appendHtmlConstant("\">").appendEscaped(result.getUrl()).appendHtmlConstant("</a>");
+					return builder.toSafeHtml();
 				}
 				
 			};

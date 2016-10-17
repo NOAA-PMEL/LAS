@@ -6,10 +6,10 @@ import gov.noaa.pmel.tmap.las.product.server.LASAction;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,11 +23,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class RequestInputFilter implements Filter {
-    private static Logger log = Logger.getLogger(RequestInputFilter.class.getName());
+    private static Logger log = LoggerFactory.getLogger(RequestInputFilter.class.getName());
     /*
      * For the record these values could have been passed in via parameters in the web.xml...
      * 
@@ -90,14 +91,20 @@ public class RequestInputFilter implements Filter {
     	"debug",
     	"dojo.preventCache",
     	"dsid",
+    	"dsID",
     	"email",
     	"end",
     	"embutton",
     	"format",
     	"file",
     	"image",
+        "initXHi",
+        "initXLo",
+        "initYHi",
+        "initYLo",
     	"JSESSIONID",
     	"key",
+    	"lasxmldoc",
 		"log_level",
 		"opendap",
 		"openid",
@@ -111,6 +118,7 @@ public class RequestInputFilter implements Filter {
 		"template",
 		"test",
 		"varid",
+		"varID",
 		"view",
 		"xml",
 		"xlo",
@@ -123,7 +131,11 @@ public class RequestInputFilter implements Filter {
                 "thi",
                 "tid",
 		"xpath",
-		"gwt.codesvr"
+		"gwt.codesvr",
+		"provider",
+		"code",
+		"state",
+		"remove_url"
     };
     private final static Set<String> LAS_PARAMETERS = new HashSet<String>(Arrays.asList(p));
 	
@@ -215,10 +227,12 @@ public class RequestInputFilter implements Filter {
             	return;
             }
             String requestXML = request.getParameter("xml");
+            if ( requestXML == null ) {
+              requestXML = request.getParameter("lasxmldoc");
+            }
             if ( (requestXML != null && !requestXML.equals("")) ) {
             	try {
-            		String temp = URLDecoder.decode(requestXML, "UTF-8");
-            		requestXML = temp;
+            		requestXML = JDOMUtils.decode(requestXML, "UTF-8");
             	} catch (UnsupportedEncodingException e) {
             		LASAction.logerror(request, "Error decoding the XML request query string.", e);
             		response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal xml query parameter value.");
@@ -250,11 +264,11 @@ public class RequestInputFilter implements Filter {
 		}
 		if ( value.length > 1 ) return false;
 		
-		if ( !value[0].trim().toLowerCase().equals("debug") && 
-			 !value[0].trim().toLowerCase().equals("info") && 
-			 !value[0].trim().toLowerCase().equals("warn") && 
-			 !value[0].trim().toLowerCase().equals("error") &&
-			 !value[0].trim().toLowerCase().equals("fatal")
+		if ( !value[0].trim().toLowerCase(Locale.ENGLISH).equals("debug") && 
+			 !value[0].trim().toLowerCase(Locale.ENGLISH).equals("info") && 
+			 !value[0].trim().toLowerCase(Locale.ENGLISH).equals("warn") && 
+			 !value[0].trim().toLowerCase(Locale.ENGLISH).equals("error") &&
+			 !value[0].trim().toLowerCase(Locale.ENGLISH).equals("fatal")
 			 ) return false;
 		return true;
 	}

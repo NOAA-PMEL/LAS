@@ -8,7 +8,7 @@
 ! 2/11/2008 ACM Add DATA_MIN, DATA_MAX and DATA_EXISTS to the map scale file for 2D plots. 
 ! 5/2010    ACM Add axis direction symbols for 1D plots: axis_vert or axis_horiz give the 
 !       indep axis, use D for the dep axis.
-!      
+!
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
 ! 4/2014    ACM Add time units, origin and calendar to map scale file
@@ -25,7 +25,14 @@
 
 IF `($its_GE"0|*>1")` THEN DEFINE SYMBOL trans = /TRANS
 
-IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
+IF ($program_name"0|PyFerret>1|*>0") THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
+!   IF ($result_plot_pdf_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_pdf_filename)"
+!   IF ($result_plot_ps_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
+!   IF ($result_plot_svg_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_svg_filename)"
+ELSE
+   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
+ENDIF
 
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
@@ -52,8 +59,8 @@ ELSE
       IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
    ELSE
       IF ($basemap_url"0|0|*>1") THEN
- USE ($basemap_url)
- LET the_plot_var = ($basemap_var)
+         USE ($basemap_url)
+         LET the_plot_var = ($basemap_var)
       ENDIF
    ENDIF
 ENDIF
@@ -62,6 +69,12 @@ ENDIF
 ! commands too long for the Ferret command-line buffer. 
 
 ! Always write the map_scale file.
+
+! If an insitu waterfall plot made a "blankvar" plot underlying the color plot,
+! re-draw that to use in making the reference map. It has the correct time/space
+! size and units.
+
+IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insitu_blankvar)
 
 !Do not write out the url and variable name output. This info is not saved
 !when map_scale.xml is generated anyway. (See ferret ticket 1933)
@@ -101,11 +114,11 @@ ENDIF
 
    IF ($region_0_x_lo_orig"0|*>1") THEN
       IF `($region_0_x_lo_orig) - ($XAXIS_MIN) LT (-350)` THEN 
- DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
- DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
+         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
+         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
       ELIF `($region_0_x_lo_orig) - ($XAXIS_MIN) GT   350 ` THEN 
- DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
- DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
+         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
+         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
       ENDIF
    ENDIF
 
@@ -147,61 +160,71 @@ ENDIF
       LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
       LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
       IF ($haxis_taxname"0|*>1") THEN 
- LET tt= t[GT=($haxis_taxname)]
-	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
-	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
-	 DEFINE SYMBOL haxis_tunits = `tt,RETURN=tunits`
-	 DEFINE SYMBOL haxis_torigin = `tt,RETURN=t0`
-	 DEFINE SYMBOL haxis_tcalendar = `tt,RETURN=calendar`
- LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
- LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
+         LET tt= t[GT=($haxis_taxname)]
+         LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
+         LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
+         DEFINE SYMBOL haxis_tunits = `tt,RETURN=tunits`
+         DEFINE SYMBOL haxis_torigin = `tt,RETURN=t0`
+         DEFINE SYMBOL haxis_tcalendar = `tt,RETURN=calendar`
+         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
-	 SET DATA 1
- LET tt= t[GT=($data_0_var),d=($dset0%1%)]
-	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
-	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
-	 DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
-	 DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-	 DEFINE SYMBOL haxis_tunits = `($data_0_var),RETURN=tunits`
-	 DEFINE SYMBOL haxis_torigin = `($data_0_var),RETURN=t0`
-	 DEFINE SYMBOL haxis_tcalendar = `($data_0_var),RETURN=calendar`
- LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
- LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
- LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+         SET DATA 1
+	 LET time_map_var = ($data_0_var)
+	 IF ($insitu_blankvar"0|*>1) THEN LET time_map_var = ($insitu_blankvar)
+         LET tt= t[GT=time_map_var]
+
+         LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
+	 IF `($xaxis_min%($ppl$xmin1)%) LT tboxlo[gt=tt,L=1]` THEN LET t1 = tboxlo[gt=tt,L=1]
+
+         LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
+	 LET thi = tboxhi[gt=tt,L=`tt,return=lsize`]
+	 IF `($xaxis_max%($ppl$xmax1)%) GT thi` THEN LET t2 = thi
+
+         DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
+         DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
+         DEFINE SYMBOL haxis_tunits = `time_map_var,RETURN=tunits`
+         DEFINE SYMBOL haxis_torigin = `time_map_var,RETURN=t0`
+         DEFINE SYMBOL haxis_tcalendar = `time_map_var,RETURN=calendar`
+
+         LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND", "HAXIS_TUNITS", "HAXIS_TORIGIN", "HAXIS_TCALENDAR"}
+         LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)", "($HAXIS_TUNITS)", "($HAXIS_TORIGIN)", "($HAXIS_TCALENDAR)"}
+         LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
+
 
    IF ($VAXIS_tstart"0|*>1") THEN
       LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
       LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
       IF ($vaxis_taxname"0|*>1") THEN 
- LET tt= t[GT=($vaxis_taxname)]
-	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
-	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
-	 DEFINE SYMBOL vaxis_tunits = `tt,RETURN=tunits`
-	 DEFINE SYMBOL vaxis_torigin = `tt,RETURN=t0`
-	 DEFINE SYMBOL vaxis_tcalendar = `tt,RETURN=calendar`
- LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
- LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
+         LET tt= t[GT=($vaxis_taxname)]
+         LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
+         LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
+         DEFINE SYMBOL vaxis_tunits = `tt,RETURN=tunits`
+         DEFINE SYMBOL vaxis_torigin = `tt,RETURN=t0`
+         DEFINE SYMBOL vaxis_tcalendar = `tt,RETURN=calendar`
+         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
-	 SET DATA 1
- LET tt= t[GT=($data_0_var),d=($dset0%1%)]
-	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
-	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
-	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
-	 DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
-	 DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
-	 DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
-	 DEFINE SYMBOL vaxis_tcalendar = `($data_0_var),RETURN=calendar`
- LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
- LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
- LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+         SET DATA 1
+         LET tt= t[GT=($data_0_var),d=($dset0%1%)]
+         LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
+         LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
+         DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
+         DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
+         DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
+         DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
+         DEFINE SYMBOL vaxis_tcalendar = `($data_0_var),RETURN=calendar`
+         LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND", "VAXIS_TUNITS", "VAXIS_TORIGIN", "VAXIS_TCALENDAR"}
+         LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)", "($VAXIS_TUNITS)", "($VAXIS_TORIGIN)", "($VAXIS_TCALENDAR)"}
+         LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
       ENDIF
    ENDIF
 
@@ -226,91 +249,92 @@ ENDIF
 
 ! Find the axis directions
 
-! Remove striding so we can get the attributes of axes
-
       IF `($native_curvilinear_xy"0") EQ 0` THEN 
 
+      IF `($ferret_version) GE 6.98` THEN LET coordnames = ..coordnames
       IF ($ax_horiz"0|*>1") THEN
- DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
- IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-	    IF `($($ax_horiz)stride"0") GT 1` THEN 
-	       CANCEL AXIS/STRIDE `($ax_horiz)_strided_var,RETURN=($ax_horiz)axis`
-       DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_horiz)axis`
-	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
-  LET attlist = (($the_axis)).attnames
-	       ELSE
-  LET attlist = ($the_axis).attnames
-	       ENDIF
+         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
+
+! Remove striding so we can get the attributes of axes
+         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+            IF `($($ax_horiz)stride"0") GT 1` THEN 
+               CANCEL AXIS/STRIDE `($ax_horiz)_strided_var,RETURN=($ax_horiz)axis`
+               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_horiz)axis`
+            ENDIF
+         ENDIF
+
+         IF `($ferret_version) GE 6.98` THEN 
+	    IF `IS_ELEMENT_OF_STR_N(coordnames, "($the_axis)") GT 0`  THEN
+	       DEFINE SYMBOL the_axis = (($the_axis))
+	       LET attlist = ($the_axis).attnames
+	       IF `IS_ELEMENT_OF_STR_N(attlist, "positive") GT 0` THEN \
+	       DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
 	    ENDIF
- ELSE
-    LET attlist = (($the_axis)).attnames
- ENDIF
-	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
-	   DEFINE SYMBOL the_axis = (($the_axis))
- IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
- DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
+	 ENDIF
       ELSE
- DEFINE SYMBOL ax_horiz = D
+         DEFINE SYMBOL ax_horiz = D
       ENDIF
 
       IF ($ax_vert"0|*>1") THEN
- DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
- IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-	    IF `($($ax_vert)stride"0") GT 1` THEN 
-	       CANCEL AXIS/STRIDE `($ax_vert)_strided_var,RETURN=($ax_vert)axis`
-       DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_vert)axis`
-	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
-  LET attlist = (($the_axis)).attnames
-	       ELSE
-  LET attlist = ($the_axis).attnames
-	       ENDIF
-    ENDIF
- ELSE
-    LET attlist = (($the_axis)).attnames
- ENDIF
-	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
-	   DEFINE SYMBOL the_axis = (($the_axis))
- IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
- DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+      IF `($ax_vert_postv"0|*>1") NE 1` THEN   ! AX_VERT_POSTV already defined for waterfall plot?
+         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
+
+         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+            IF `($($ax_vert)stride"0") GT 1` THEN 
+               CANCEL AXIS/STRIDE `($ax_vert)_strided_var,RETURN=($ax_vert)axis`
+               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_vert)axis`
+            ENDIF
+         ENDIF
+
+         IF `($ferret_version) GE 6.98` THEN 
+	    IF `IS_ELEMENT_OF_STR_N(coordnames, "($the_axis)") GT 0`  THEN
+	       DEFINE SYMBOL the_axis = (($the_axis))
+	       LET attlist = ($the_axis).attnames
+	       IF `IS_ELEMENT_OF_STR_N(attlist, "positive") GT 0` THEN \
+	       DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+	    ENDIF
+	 ENDIF
+      ENDIF  ! AX_VERT_POSTV already defined
       ELSE
- DEFINE SYMBOL ax_vert = D
+         DEFINE SYMBOL ax_vert = D
       ENDIF
       
-      ENDIF  ! curvilinear
+      ENDIF  ! not curvilinear
+
       IF ($ax_horiz"0|*>1") THEN DEFINE SYMBOL ax_horiz = `DNCASE("($ax_horiz)")`
       IF ($ax_vert"0|*>1") THEN DEFINE SYMBOL ax_vert = `DNCASE("($ax_vert)")`
 
-* Find the data min, max.  If all data was bad, send blank strings to the output.
+! Find the data min, max.  If all data was bad, send blank strings to the output.
 
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
 
       IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
- DEFINE SYMBOL DATA_EXISTS = 0
- CANCEL SYMBOL DATA_MIN
- CANCEL SYMBOL DATA_MAX
+         DEFINE SYMBOL DATA_EXISTS = 0
+         CANCEL SYMBOL DATA_MIN
+         CANCEL SYMBOL DATA_MAX
       ELSE
- DEFINE SYMBOL DATA_EXISTS = 1
- DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
- DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
-	 IF ($data_max"0|bad>1|1.E+34>1|*>0") THEN 
-	    CANCEL SYMBOL data_min
-	    CANCEL SYMBOL data_max
-	    DEFINE SYMBOL DATA_EXISTS = 0
-	 ENDIF
-	 IF ($data_min"0|bad>1|1.E+34>1|*>0") THEN 
-	    CANCEL SYMBOL data_min
-	    CANCEL SYMBOL data_max
-	    DEFINE SYMBOL DATA_EXISTS = 0
-	 ENDIF
+         DEFINE SYMBOL DATA_EXISTS = 1
+         DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
+         DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
+         IF ($data_max"0|bad>1|1.E+34>1|*>0") THEN 
+            CANCEL SYMBOL data_min
+            CANCEL SYMBOL data_max
+            DEFINE SYMBOL DATA_EXISTS = 0
+         ENDIF
+         IF ($data_min"0|bad>1|1.E+34>1|*>0") THEN 
+            CANCEL SYMBOL data_min
+            CANCEL SYMBOL data_max
+            DEFINE SYMBOL DATA_EXISTS = 0
+         ENDIF
       ENDIF
 
       IF ($its_prop_prop_plot"0|*>1") THEN
-  DEFINE SYMBOL ax_horiz = ($data_0_id)
-	  DEFINE SYMBOL ax_vert = ($data_1_id)
-	  CANCEL SYMBOL DATA_MAX
-	  CANCEL SYMBOL DATA_MIN
-	  DEFINE SYMBOL DATA_EXISTS = 1
-	  IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
+          DEFINE SYMBOL ax_horiz = ($data_0_id)
+          DEFINE SYMBOL ax_vert = ($data_1_id)
+          CANCEL SYMBOL DATA_MAX
+          CANCEL SYMBOL DATA_MIN
+          DEFINE SYMBOL DATA_EXISTS = 1
+          IF ($all_missing"0|*>1") THEN DEFINE SYMBOL DATA_EXISTS = 0
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
@@ -326,12 +350,12 @@ ENDIF
    IF ($LEV_NUM"0|*>1") THEN
       LET syms_names = "LEVELS_STRING"
       IF ($LEV_OPNLEVS"0|*>1") THEN 
- LET syms_vals = "($LEV_OPNLEVS)"
+         LET syms_vals = "($LEV_OPNLEVS)"
       ELIF `(($LEV_MIN"0|*>1") + ($LEV_MAX"0|*>1") + ($LEV_DEL"0|*>1")) EQ 3` THEN
- IF `STRCMP("($LEV_DEL%1%)", "none") EQ 0` THEN DEFINE SYMBOL lev_del = 1
- LET syms_vals = "(($LEV_MIN),($LEV_MAX),($LEV_DEL))"
+         IF `STRCMP("($LEV_DEL%1%)", "none") EQ 0` THEN DEFINE SYMBOL lev_del = 1
+         LET syms_vals = "(($LEV_MIN),($LEV_MAX),($LEV_DEL))"
       ELSE
- LET syms_vals = "($LEV_TEXT%v%)"
+         LET syms_vals = "($LEV_TEXT%v%)"
       ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF
@@ -353,6 +377,7 @@ IF  ($ferret_use_ref_map%0|false>0|*>1%) THEN
   SET VIEW full
   GO std_refmap ($region_0_x_lo) ($region_0_x_hi) ($region_0_y_lo) ($region_0_y_hi) $1%box% ($ref_magnify%0%) ($ref_xcompress%0%) ($ref_ycompress%0%)
   FRAME/FORMAT=gif/FILE="($result_ref_map_filename)"
+
 ENDIF
 
 ! End of file ------------LAS_results.jnl--------------------------

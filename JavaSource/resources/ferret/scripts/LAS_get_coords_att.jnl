@@ -4,11 +4,14 @@
 ! coordinates listed for 2D coordinates having units of degrees 
 ! longitude or latitude, and set the properties accordingly
 
-! If the configuratino has the properties already, use those.
+! Fixing ticket 1732 and related issues: if there are coordinates
+! attributes, use them.
+
+
+! If the configuration has the properties already, use those.
 
 IF ($ferret_curvi_coord_lon"0|*>1") THEN EXIT/SCRIPT
 IF ($ferret_curvi_coord_lat"0|*>1") THEN EXIT/SCRIPT
-
 
 ! Get the coordinates attribute for a variable. IF it exists
 ! then parse it up and see if there are 2D lon and lat coordinate
@@ -24,43 +27,46 @@ IF `has_coord EQ 0` THEN exit/script
 
 LET varcoords = "`($data_orig_var).coordinates`"
 
-! Trim off leading white space.
-! Compress out extra spaces so there is just one.
-
-PPL SET C1 "`($data_orig_var).coordinates`"
-PPL SET C2 $EDIT( C1, TRIM)
-PPL SET C1 "($C2)"
-PPL SET C2 $EDIT( C1, COMPRESS)
-LET varcoords = "($C2)"
-
 ! Get first coordinate variable.
 ! The CF standard has coordinates separated by spaces.
 ! Some coordinates attributes have commas or space-and-comma.
 
-IF `(STRINDEX(varcoords, ",") GT 0) AND (STRINDEX(varcoords, " ") GT 0)` THEN
-   PPL SET C1 "`($data_orig_var).coordinates`"
-   PPL SET C2 $EDIT( C1, COLLAPSE)
-   LET varcoords = "($C2)"
-ENDIF
-LET space = STRINDEX(varcoords, " ")
-IF `space EQ 0` THEN LET space = STRINDEX(varcoords, ",")
 
-IF `space GT 0` THEN 
-   LET coordstring = substring(varcoords, 1, `space-1`)
-ELSE
-   LET coordstring = varcoords
-ENDIF
+! Turn comma, comma-space or two-spaces into single spaces.
+
+   DEFINE SYMBOL newstring = `varcoords`
+   REPEAT/RANGE=1:6 (\
+   LEt varcoords = "($newstring)";\
+   LET loca = STRINDEX(varcoords, ",");\
+   IF `loca EQ 0` THEN EXIT/LOOP;\
+   LET len = STRLEN(varcoords);\
+   DEFINE SYMBOL str1 = `SUBSTRING(varcoords, 1, loca-1)`;\
+   DEFINE SYMBOL str1 = ($str1) `substring(varcoords, loca+1, len)`;\
+   DEFINE SYMBOL newstring = ($str1))
+
+   DEFINE SYMBOL newstring = `varcoords`
+   REPEAT/RANGE=1:6 (\
+   LEt varcoords = "($newstring)";\
+   LET loca = STRINDEX(varcoords, "  ");\
+   IF `loca EQ 0` THEN EXIT/LOOP;\
+   LET len = STRLEN(varcoords);\
+   DEFINE SYMBOL str1 = `SUBSTRING(varcoords, 1, loca-1)`;\
+   DEFINE SYMBOL str1 = ($str1) `substring(varcoords, loca+2, len)`;\
+   DEFINE SYMBOL newstring = ($str1))
+
+LET space = STRINDEX(varcoords, " ")
+LET coordstring = "`SUBSTRING(varcoords, 1, space-1)`"
 
 DEFINE SYMBOL coordstring = `coordstring`
 
 ! Is it a variable (and not a dimension) of the datset?
 
 LET isvar = IS_ELEMENT_OF_STR (allvars, "($coordstring)")
+
+list isvar
 IF `isvar NE 0` THEN
 
 ! Is it 2D?  IF so does it have longitude or latitude units?
-
-sh sym coordstring
 
    LET pseudo_names = {\
 "'i'", "'j'", "'k'", "'l'", "'x'", "'y'", "'z'", "'t'", "'xbox'", "'ybox'", "'zbox'", "'tbox'", \
@@ -101,3 +107,5 @@ IF `(($ferret_curvi_coord_lon"0|*>1") + ($ferret_curvi_coord_lat"0|*>1")) EQ 1` 
   MESSAGE/ERROR **Only one longitude/latitude coordinate found: ($ferret_curvi_coord_lon)($ferret_curvi_coord_lat). 
   EXIT/PROGRAM
 ENDIF
+
+

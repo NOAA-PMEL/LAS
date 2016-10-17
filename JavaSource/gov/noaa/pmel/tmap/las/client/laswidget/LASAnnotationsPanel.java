@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.HtmlSanitizerUtil;
 import gov.noaa.pmel.tmap.las.client.event.ResizeEvent;
 import gov.noaa.pmel.tmap.las.client.event.StringValueChangeEvent;
 
@@ -16,6 +17,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -99,7 +101,7 @@ public class LASAnnotationsPanel extends Composite {
 	}
 
 	public void setAnnotationsHTMLURL(String url) {
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, UriUtils.sanitizeUri(url));
 		try {
 			sendRequest.sendRequest(null, annotationsHTMLCallback);
 		} catch (RequestException e) {
@@ -108,7 +110,7 @@ public class LASAnnotationsPanel extends Composite {
 	}
 
 	public void setAnnotationsHTML(String html) {
-		HTML annotations = new HTML(html);
+		HTML annotations = new HTML(HtmlSanitizerUtil.sanitizeHtml(html));
 		setup();
 		add(annotations);
 		// setWidth(CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH());

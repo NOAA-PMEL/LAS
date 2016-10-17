@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.commons.httpclient.HttpException;
+import org.apache.http.HttpException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -18,8 +18,6 @@ import org.jdom.output.XMLOutputter;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
 import visad.data.in.TimeFactorer;
-
-
 import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 import gov.noaa.pmel.tmap.addxml.AxisBean;
 import gov.noaa.pmel.tmap.addxml.DatasetBean;

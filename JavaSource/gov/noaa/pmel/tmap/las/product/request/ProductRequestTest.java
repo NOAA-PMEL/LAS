@@ -29,7 +29,7 @@ public class ProductRequestTest extends TestCase {
         
         LASConfig sc = new LASConfig();
         try {
-            File file = new File("C:\\Documents and Settings\\Roland Schweitzer\\My Documents\\workspace\\LPS\\WebContent\\lasproduct\\testdata\\las\\server\\las.xml");
+            File file = new File("las.xml");
             JDOMUtils.XML2JDOM(file, sc);
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -37,7 +37,7 @@ public class ProductRequestTest extends TestCase {
         }
         sc.mergeProperites();
         Element output_dir = new Element("output_dir");
-        output_dir.setText("C:\\Documents and Settings\\Roland Schweitzer\\My Documents\\workspace\\LPS\\.deployables\\LPS\\output");
+        output_dir.setText("output");
         sc.getRootElement().addContent(output_dir);
         
         LASUIRequest lr = new LASUIRequest();

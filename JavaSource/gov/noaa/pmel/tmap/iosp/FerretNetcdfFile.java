@@ -11,8 +11,9 @@ package gov.noaa.pmel.tmap.iosp;
 
 import java.io.IOException;
 
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import ucar.nc2.NetcdfFile;
 import ucar.unidata.io.RandomAccessFile;
@@ -25,7 +26,7 @@ import ucar.unidata.io.RandomAccessFile;
  */
 public class FerretNetcdfFile extends NetcdfFile {
 
-    static private Logger log = Logger.getLogger(FerretNetcdfFile.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(FerretNetcdfFile.class.getName());
 
     /**
      * Construct a new netCDF file from the RandomAccessFile (which contains the resulting Ferret script) and TDS request URI that was used to

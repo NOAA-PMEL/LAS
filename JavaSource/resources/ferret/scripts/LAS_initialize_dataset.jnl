@@ -22,6 +22,118 @@
 
 DEFINE SYMBOL num ($1"0")
 
+
+! Check whether the source data was part of a 'chained' operation.
+!ACM note: How does this jibe with what I do below changing data_url to data_num??
+
+! Try opening the dataset before doing all the other setup.
+
+IF ($data_($num)_chained"0|1|*>1) THEN
+  DEFINE SYMBOL data_url \"($data_($num)_file)\"
+ELSE
+  DEFINE SYMBOL data_url \"($data_($num)_url)\"
+ENDIF
+
+SET DATA ($data_url)
+
+IF ($fer_last_error"0|0|1|*>1") THEN
+  IF `($error_status"0|*>1") EQ 0` THEN  ! if errors not yet set.
+     DEFINE SYMBOL error_status = ERROR
+     DEFINE SYMBOL error_type = DATA
+     DEFINE SYMBOL error_string = The ($data_var) source file -- ($data_url) did not open uccessfully.
+  ENDIFs
+  EXIT/SCRIPT
+ENDIF
+
+! IF it is an F-TDS url, Check for mismatched curvilinear grids or one curvilienar and
+! one rectilienar grid.
+
+IF `STRINDEX(($data_url), "jnl_expr_") GT 0` THEN
+
+   IF ($ferret_curvi_coord_lon"0|*>1") THEN  
+      DEFINE SYMBOL save_ferret_curvi_coord_lon = ($ferret_curvi_coord_lon)
+      CANCEL SYMBOL ferret_curvi_coord_lon
+   ENDIF
+   IF ($ferret_curvi_coord_lat"0|*>1") THEN 
+      DEFINE SYMBOL save_ferret_curvi_coord_lat = ($ferret_curvi_coord_lat)
+      CANCEL SYMBOL ferret_curvi_coord_lat
+   ENDIF
+
+   DEFINE SYMBOL plain_url = ($data_($num)_dataset_url)
+   IF `STRINDEX("($plain_url)", "file:") GT 0` THEN
+      LET slen = STRLEN("($plain_url)")
+      DEFINE SYMBOL plain_url = `SUBSTRING("($plain_url)", 6, slen-5)`
+   ENDIF
+   SET DATA "($plain_url)"
+
+   DEFINE SYMBOL data_orig_var = ($data_($num)_var)
+
+   IF `STRINDEX("($data_($num)_var)", "_transformed") GT 0` THEN
+      LET under = STRINDEX("($data_($num)_var)", "_transformed")
+      LET find_last = SUBSTRING("($data_($num)_var)", 1, under-1)
+      LET under2 = STRRINDEX(find_last, "_")
+      DEFINE SYMBOL data_orig_var = `SUBSTRING(find_last, 1, under2-1)`
+   ENDIF
+
+   GO LAS_get_coords_att
+
+   IF `($num) GT 0 AND ($ferret_curvi_coord_lon"0|*>1")` THEN
+      IF ($save_ferret_curvi_coord_lon"0|*>1") THEN
+         IF `($ferret_curvi_coord_lon"|($save_ferret_curvi_coord_lon)>1|*>0") EQ 0` THEN
+	    DEFINE SYMBOL error_status = ERROR
+	    DEFINE SYMBOL error_type = DATA
+	    DEFINE SYMBOL error_string =\
+	    Differencing is not implemented between unlike Curvilienar/Rectilinear grids
+	    EXIT/SCRIPT
+         ENDIF
+	 
+      ELSE
+         IF ($ferret_curvi_coord_lon"0|*>1") THEN
+	    DEFINE SYMBOL error_status = ERROR
+	    DEFINE SYMBOL error_type = DATA
+	    DEFINE SYMBOL error_string =\
+	    Differencing is not implemented between unlike Curvilienar/Rectilinear grids
+	    EXIT/SCRIPT
+         ENDIF
+      ELSE
+         LET same = 1
+         LET lon0 = ($save_ferret_curvi_coord_lon)[d=`($num)-1`]
+         LET lon1 = ($ferret_curvi_coord_lon)[d=($num)]
+	 LET x0 = `lon0,return=isize`
+	 LET x1 = `lon1,return=isize`
+	 IF `x0 NE x1` THEN same = 0
+	 LET y0 = `lon0,return=jsize`
+	 LET y1 = `lon1,return=jsize`
+	 IF `y0 NE y1` THEN same = 0
+	 let difflon = lon0 - lon1
+	 if `difflon[x=@max,y=@max] NE 0` THEN same = 0
+	 
+         LET lat0 = ($save_ferret_curvi_coord_lat)[d=`($num)-1`]
+         LET lat1 = ($ferret_curvi_coord_lat)[d=($num)]
+	 LET x0 = `lat0,return=isize`
+	 LET x1 = `lat1,return=isize`
+	 IF `x0 NE x1` THEN same = 0
+	 LET y0 = `lat0,return=jsize`
+	 LET y1 = `lat1,return=jsize`
+	 IF `y0 NE y1` THEN same = 0
+	 LET difflat = lat0 - lat1
+	 IF `difflat[x=@max,y=@max] NE 0` THEN same = 0
+
+	 IF `same NE 1` THEN
+	    DEFINE SYMBOL error_status = ERROR
+	    DEFINE SYMBOL error_type = DATA
+	    DEFINE SYMBOL error_string =\
+	    Differencing is not implemented between unlike Curvilienar/Rectilinear grids
+	    EXIT/SCRIPT
+         ENDIF
+      ENDIF
+   ENDIF
+
+   CANCEL DATA "($plain_url)"
+   SET DATA ($data_url)
+
+ENDIF
+
 IF `($num) EQ 0 AND ($data_count) GT 1 and ($check_multi_regions_done"0|*>1) EQ 0` THEN
    GO LAS_check_multi_regions
    DEFINE SYMBOL check_multi_regions_done = 1
@@ -30,14 +142,6 @@ ENDIF
 ! TODO:  It would be nice if the java code removed this dependency upon
 ! TODO:  whether an operation was 'chained' or not.
 
-! Check whether the source data was part of a 'chained' operation.
-!ACM note: How does this jibe with what I do below changing data_url to data_num??
-
-IF ($data_($num)_chained"0|1|*>1) THEN
-  DEFINE SYMBOL data_url \"($data_($num)_file)\"
-ELSE
-  DEFINE SYMBOL data_url \"($data_($num)_url)\"
-ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN 
    DEFINE SYMBOL data_var ($data_($num)_var)

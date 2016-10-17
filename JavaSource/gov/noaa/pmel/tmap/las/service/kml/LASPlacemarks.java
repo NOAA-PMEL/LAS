@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * For generating a collection of place marks for LAS data

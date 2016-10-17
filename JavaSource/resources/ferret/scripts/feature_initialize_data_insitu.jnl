@@ -4,6 +4,7 @@
 ! 
 ! Author: ansley 
 ! 9/2012 (from Jons_initialize_data_insitu.jnl)
+! 10/4/2016 fixes so init scripts still work
 !
 DEFINE SYMBOL num ($1"0")
 
@@ -24,10 +25,12 @@ ELSE
 ENDIF
 
 ! Text variables have units of "text". In this case don't include units with the title
+! remove any labels that are degrees_east, etc, which are redundant
 
 IF ($data_($num)_units"0|1|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
    IF ($data_units"0|text>1|none>1|*>0") THEN CANCEL SYMBOL data_units
+   IF ($data_units"0|degrees_east>1|degrees_north>1|*>0") THEN CANCEL SYMBOL data_units
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title =($data_($num)_title) (($data_($num)_units))
 ENDIF
 
@@ -75,11 +78,12 @@ IF `nglobal_atts GT 0` THEN
 ! Set dataset annotations 
 ! Do not annotate with variable - it's the location/time that's unavailable
    
-      GO LAS_url_label 0
-      CANCEL SYMBOL variable_lab 
+         GO LAS_url_label 0
+         CANCEL SYMBOL variable_lab 
 
 ! This script makes a blank plot, labeled with a message, calls LAS_results, and exits
-      GO feature_abort_no_data
+         GO feature_abort_no_data
+      ENDIF
 
    ENDIF
 ENDIF
@@ -136,10 +140,32 @@ IF `(($num)+1) eq ($data_count)` THEN
    IF `($data_($num)_var"0|($feature_variable)>1|*>0") AND ($rowvar"0|*>1")` THEN LET color_by_feature = 1
 ENDIF
 
+! Make the RowSize and other metadata variables be on the E axis.
+
 IF ($rowvar"0|*>1") THEN 
    DEFINE SYMBOL rdir = `($rowvar),RETURN=shape`
    DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
-   LET longest = ($rowvar)[($rind)=@max]+2
+   LET setnum = `($rowvar),RETURN=dsetnum`
+   IF ($rind"|I>1|*>0") THEN 
+      LET esiz = `($rowvar),RETURN=isize`
+      DEFINE AXIS/E=1:`esiz`:1 `($rowvar),RETURN=xaxis`M
+      DEFINE SYMBOL eaxis = `($rowvar),RETURN=xaxis`M
+      DEFINE SYMBOL rind = M
+      LET varnames = ..varnames
+
+       REPEAT/RANGE=1:`..nvars`/NAME=q\
+       (DEFINE SYMBOL q = `q`;\
+       DEFINE SYMBOL vname = `varnames[i=($q)]`;\
+       DEFINE SYMBOl vshape = `($vname),RETURN=shape`;\
+       LET vsiz =  `($vname),RETURN=size`;\
+       IF `($vshape"|X>1|*>0) and vsiz EQ esiz` THEN ;\
+          SET VAR/NAME=($vname)_in ($vname);\
+          LET/D=`setnum` ($vname) = RESHAPE(($vname)_in, _E[ge=($eaxis)]);\
+          SET ATT/LIKE=($vname)_in ($vname);\
+       ENDIF;\
+       )
+   ENDIF
+   LET longest = ($rowvar)[m=@max]+2
 ENDIF
 
 ! Other variables on the E axis to be colored the same way.
@@ -230,7 +256,8 @@ IF `($vshape"0|E>1|*>0) AND  (STRCMP("($data_var)", "($feature_variable)") NE 0)
 ENDIF
 ENDIF
 
-IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN  ! map plot, do decimation
+IF `($its_prop_prop_plot"0|*>1") EQ 0 and ($its_trajectory_map"0|*>1")` THEN  ! map plot, do decimation
+
 IF ($rowvar"0|*>1") THEN 
 
 ! DSG file. Do decimation if there are over num_decimate points.
@@ -267,7 +294,7 @@ ENDIF  ! map plot, do decimation
 LET data_num = `($data_($num)_var),RETURN=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 
-IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
+IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($data_num)
 
 ! There may be a variable representing measurements to use in coloring 
 ! a track plot, etc.

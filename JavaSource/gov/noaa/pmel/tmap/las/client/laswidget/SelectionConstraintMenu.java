@@ -1,40 +1,32 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.event.AddSelectionConstraintEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.ConstraintSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
-import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.SetSelectionModel;
 
 public class SelectionConstraintMenu extends Composite {
     
@@ -43,6 +35,9 @@ public class SelectionConstraintMenu extends Composite {
 
     // Current selection values
     ListBox valuesList = new ListBox();
+    
+    // Use a message if there is only one.
+    Label onlyOne = new Label("There is only one value.");
     
     // The data set for this group.
     String dsid;
@@ -73,30 +68,43 @@ public class SelectionConstraintMenu extends Composite {
     
     protected AsyncCallback<Map<String, String>> outerSequenceValuesCallback = new AsyncCallback<Map<String,String>>() {
 
-        @Override
-        public void onFailure(Throwable caught) {
-            Window.alert("Unable to get variable values from the server. "+caught.getMessage());
-        }
+    	@Override
+    	public void onFailure(Throwable caught) {
+    		Window.alert("Unable to get variable values from the server. "+caught.getMessage());
+    	}
 
-        @Override
-        public void onSuccess(Map<String, String> result) {
-            currentValues = result;
-            valuesList.clear();
-            if ( adjust ) {
-                valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
-            }
-            for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
-                String key_value = (String) rIt.next();
-                String value = (String) result.get(key_value);
-                valuesList.addItem(value, key_value);
-            }
-            if (notify) fireChoice();
-        }
+    	@Override
+    	public void onSuccess(Map<String, String> result) {
+    		currentValues = result;
+    		valuesList.clear();
+    		if ( result.keySet().size() == 1 ) {
+    			valuesList.setVisibleItemCount(2);
+    			valuesList.addItem(Constants.ONLYONE);
+    			valuesList.addItem(Constants.ONLYONE2);
+    			if ( notify ) {
+    				String key_value = result.keySet().iterator().next();
+    				String value = (String) result.get(key_value);
+    				String variable = getShortName(currentVariable);
+    				eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value, "eq"), SelectionConstraintMenu.this);
+    			}
+    		} else {
+    			if ( adjust ) {
+    				valuesList.setVisibleItemCount(Math.min(result.keySet().size(), 10));
+    			}
+    			for (Iterator rIt = result.keySet().iterator(); rIt.hasNext();) {
+    				String key_value = (String) rIt.next();
+    				String value = (String) result.get(key_value);
+    				valuesList.addItem(value, key_value);
+    			}
+    			if (notify) fireChoice();
+    		}
+    	}
     };
     
     
     public SelectionConstraintMenu() {
         valuesList.setVisibleItemCount(10);
+       
         valuesList.addChangeHandler(new ChangeHandler(){
 
             @Override
@@ -115,7 +123,7 @@ public class SelectionConstraintMenu extends Composite {
                     for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
                         String key_value = (String) rIt.next();
                         String value = (String) currentValues.get(key_value);
-                        if ( value.toLowerCase().contains(f.toLowerCase()) ) {
+                        if ( value.toLowerCase(Locale.ENGLISH).contains(f.toLowerCase(Locale.ENGLISH)) ) {
                             valuesList.addItem(value, key_value);
                         }
                     }
@@ -148,7 +156,7 @@ public class SelectionConstraintMenu extends Composite {
         String value = valuesList.getItemText(index);
         String variable = getShortName(currentVariable);
         // Don't send an event if they click on the instructions.
-        if ( !value.equals(Constants.PICK) && !value.equals(Constants.APPEAR) ) {
+        if (  !value.equals(Constants.PICK) && !value.equals(Constants.APPEAR) && !value.equals(Constants.ONLYONE) && !value.equals(Constants.ONLYONE2) ) {
         	eventBus.fireEventFromSource(new AddSelectionConstraintEvent(variable, value, key, key_value, "eq"), SelectionConstraintMenu.this);
         }
     }

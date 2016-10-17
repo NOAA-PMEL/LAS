@@ -7,14 +7,6 @@ $las_response.brief().toJSON()
 ####  $las_response.toString()
 
 #else
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<!-- LAS SERVER OK -->
-<head>
-    <!-- Let IE know to use the IE9 standard browser and document modes -->
-    <meta http-equiv="X-UA-Compatible" content="IE=9">
-<title>LAS Output</title>
               <style type="text/css">
                 .tableBorderDark {
 	          border: double;
@@ -56,9 +48,6 @@ $las_response.brief().toJSON()
                 	cursor: hand;
                 }
               </style>
-</head>
-<body bgcolor="white" onload="resizeme();">
-
 <br><br>
 <table>
 <tr>
@@ -83,54 +72,20 @@ LAS was trying to access these servers:
 </ol>
 
 #end
-    <span class="smallErrorText">Advanced users may <a  id="displayText" href="javascript:toggle();">
-#if ( $debug=="true" || $debug=="debug" )
-hide
-#else
-see
+#set($debugText=$las_response.getResultByType('debug').getAttributeValue('url'))
+#if($debugText)
+    <span class="smallErrorText">Advanced users may <a href="$debugText" target="_blank">see</a> more technical information.
 #end
-</a> more technical information.
                                  
-#if ("$!institution.getContact()" != "")
+#if ($institution.getContact())
 <p><a href="mailto:$institution.getContact()?subject=LAS Error&body=Type message and paste the URL here.">Email to the site administrator.</a>
 #end
 
-#if ( $debug=="true" || $debug=="debug" )
-<div id="debug_text" style="display: block">
-#else
-<div id="debug_text" style="display: none">
-#end
 <hr>
 #parse("/productserver/templates/revision.vm")
 Server at Revision r${revision}
-<pre>
-$las_response.getResult("exception_message")
-</pre>
 </div>
-</body>
-<script type="text/javascript">
-        function resizeme() {
-                if(parent!=self)
-                 if(parent.document.getElementById("output")) {
-                        parent.document.getElementById("output").height=window.screen.height+20;
-                        parent.document.getElementById("output").width=window.screen.width+20;
-                }
-        }
-function toggle() {
-	var ele = document.getElementById("debug_text");
-	var text = document.getElementById("displayText");
-	if(ele.style.display == "block") {
-    		ele.style.display = "none";
-		text.innerHTML = "see";
-  	}
-	else {
-		ele.style.display = "block";
-		text.innerHTML = "hide";
-	}
-} 
-</script>
 
-</html>
 
 #end
 

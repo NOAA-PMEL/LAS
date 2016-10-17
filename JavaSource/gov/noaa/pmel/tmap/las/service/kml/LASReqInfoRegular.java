@@ -8,14 +8,15 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.io.File;
 
 public class LASReqInfoRegular{
 
-    final static Logger log = Logger.getLogger(LASReqInfoRegular.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(LASReqInfoRegular.class.getName());
 
     public static HashMap<String,String> getLASReqInfo(String las_req_info_file){
         LASDocument lasReqInfo = new LASDocument();

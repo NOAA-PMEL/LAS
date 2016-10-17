@@ -14,8 +14,17 @@
 <!-- UI Configuration for Profile Plots -->
 <!ENTITY profile_ui SYSTEM "profile_ui.xml">
 
-<!-- UI Configuration for Profile Plots -->
+<!-- UI Configuration for TrajectoryProfile Plots -->
+<!ENTITY trajectoryprofile_ui SYSTEM "trajectoryprofile_ui.xml">
+
+<!-- UI Configuration for Timeseries Plots -->
 <!ENTITY timeseries_ui SYSTEM "timeseries_ui.xml">
+
+<!-- UI Configuration for Timeseries Plots with no map plot-->
+<!ENTITY timeseries_only_ui SYSTEM "timeseries_only_ui.xml">
+
+<!-- UI Configuration for Point Data Plots-->
+<!ENTITY point_ui SYSTEM "point_ui.xml">
 
 ]>
 <lasui title="@TITLE@">
@@ -26,7 +35,10 @@
     &insitu_demo_ui;
     &trajectory_ui;
     &profile_ui;
+    &trajectoryprofile_ui;
     &timeseries_ui;
+    &timeseries_only_ui;
+    &point_ui;
 
     <images>
         <image name="Image_StdWorld" url="gifs/java_0_world.gif" 

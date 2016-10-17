@@ -10,6 +10,9 @@
 !              add to the title, "from data sampled every xxx"
 ! 12/2013 ACM  Always draw with ribbon plot style
 !
+! 8/2016 *acm* If the Ferret property traj_discrete has been set, check 
+! whether the distance between points is large; if so plot as discrete 
+! points connected with a thin line.
 
 IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=200
 
@@ -181,7 +184,7 @@ PPL SHASET PROTECT
 !  GO LAS_fland brown_dark
 !  GO LAS_fland green_pine
 
-GO LAS_fland ($ferret_land_palette"green_pine")
+GO LAS_fland ($ferret_land_palette"gray_dark")
 
 PPL SHASET PROTECT
 SAY _________________ After land underlay clock seconds:                         ($clock_secs)
@@ -207,6 +210,10 @@ GO feature_labels
 
 ! Ribbon plot
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/LINE/FAST
+IF ($thinline"0|*>1") THEN 
+   DEFINE SYMBOL plot_command = PLOT/VS/RIBBON
+   DEFINE SYMBOL thinline_plot_vars = x_var_data, y_var_data
+ENDIF
 
 !DEFINE SYMBOL plot_command = PLOT/VS/RIBBON/SYM=dot
 
@@ -299,7 +306,8 @@ ELSE
    IF ($is_mooring"0|*>1") THEN  !?
       ($plot_command)($qualifiers)/missing=black/SET ($plot_plot_vars) 
    ELSE
-      ($plot_command)($qualifiers)/missing=black/SET ($plot_plot_vars)
+      IF ($thinline"0|*>1") THEN PLOT/VS/LINE/OVER/NOLAB/COLOR=black ($thinline_plot_vars)
+      ($plot_command)($qualifiers)/MISSING=black/SET ($plot_plot_vars)
    ENDIF
 
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
@@ -387,10 +395,6 @@ ELSE
         DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
       ENDIF)
 ENDIF
-
-! Add cruise information on the top
-!GO Trajectory_label_cruise_pts
-!GO feature_labels  !done already...
 
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels

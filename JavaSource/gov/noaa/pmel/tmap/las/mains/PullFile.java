@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-import org.apache.commons.httpclient.HttpException;
+import org.apache.http.HttpException;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;

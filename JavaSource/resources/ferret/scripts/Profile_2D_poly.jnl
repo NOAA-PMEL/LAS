@@ -146,8 +146,9 @@ PPL SHASET PROTECT
 !  GO LAS_fland black
 !  GO LAS_fland navy
 !  GO LAS_fland brown_dark
+!  GO LAS_fland green_pine
 
-GO LAS_fland green_pine
+GO LAS_fland gray_dark
 PPL SHASET PROTECT
 
 ! Turn on annotate_key, which persists until turned off
@@ -191,8 +192,30 @@ LET/UNITS=degrees_east  x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing
 LET/UNITS=degrees_north y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
 
 ! Draw the pie plot
+!GO insitu_pie_xy
 
-GO insitu_pie_xy
+! Just draw symbols at each location
+! If lon and lat are on the obs axis, pull out a single location
+! for each feature id.
+
+DEFINE SYMBOL lonshape = `x_var_data,return=shape`
+DEFINE SYMBOL latshape = `y_var_data,return=shape`
+DEFINE SYMBOL feature_shape = `($feature_variable),return=shape`
+
+IF ($lonshape"0|($feature_shape)>0|*>1) THEN
+   LET longest = ($rowvar)[($rind)=@max]+2
+   LET data_var_x =  EXPNDI_BY_Z_COUNTS(x_var_data, xsequence(($rowvar)),`longest`)
+   LET data_var_y =  EXPNDI_BY_Z_COUNTS(y_var_data, xsequence(($rowvar)),`longest`)
+
+   LET xpoints = data_var_x[k=1]
+   LET ypoints = data_var_y[k=1]
+ELSE
+   LET xpoints = ($data_x_var)
+   LET ypoints = ($data_y_var)
+ENDIF
+
+PLOT/OVER/NOLAB/VS/THICK=3/SYM=28/SIZ=.08/COLOR=lightblue xpoints, ypoints
+PLOT/OVER/NOLAB/VS/SYM=28/SIZ=.12/COLOR=black xpoints, ypoints
 
 IF ($ferret_plot_var"0|*>1") THEN
    LET data_range = minmax(var_data)
@@ -264,6 +287,7 @@ ENDIF
 
 ! Add cruise information on the top
 GO feature_labels  
+
 
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels

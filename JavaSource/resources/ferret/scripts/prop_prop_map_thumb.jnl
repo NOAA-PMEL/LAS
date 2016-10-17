@@ -82,4 +82,9 @@ STAT lat
 LET latconst = `($stat_std) LT 0.1`
 IF `lonconst + latconst EQ 2` THEN DEFINE SYMBOL symquals = /SIZE=0.3/THICK=3
 
-PLOT/VS/OVER/NOLAB/NOKEY/SYM=17($symquals)/COLOR=($lonlatcolor"red") lon, lat
+IF ($zvar"0|*>1") THEN 
+   RIBBON/VS/OVER/NOLAB/KEY=HORIZ,CONT,CENT/SYM=17($symquals)/\
+PALETTE=($ferret_palette"red")/LEVELS=($ferret_fill_levels"v") lon, lat, ($zvar)
+ELSE
+   PLOT/VS/OVER/NOLAB/NOKEY/SYM=17($symquals)/COLOR=($lonlatcolor"red") lon, lat
+ENDIF

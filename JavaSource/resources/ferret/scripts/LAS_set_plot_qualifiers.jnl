@@ -34,6 +34,27 @@ SET MODE LINECOLORS:($nlinecolors)
 PPL COLOR,7,70,70,70     ! gray
 PPL COLOR,8,100,100,100  ! white
 
+! For time plots, turn on horizontal graticule lines, unless graticules 
+! have been turned off explicitly. Ignore choice of white - its in the menu 
+! but useless for line plots.
+
+LET has_t = ($fview"0|T>1|*>0") 
+IF `STRLEN("($fview)") EQ 2 AND STRINDEX("($fview)", "T") GT 0` THEN LET has_t = 1
+
+IF `has_t AND ($ferret_use_graticules"1|none>0|notic>0|white>0|*>1)` THEN
+  DEFINE SYMBOL onegrat = HGRAT
+  IF `STRLEN("($fview)") EQ 2 AND STRINDEX("($fview)", "X") GT 0` THEN DEFINE SYMBOL onegrat = VGRAT
+  IF ($ferret_use_graticules"0|black>1") THEN
+     DEFINE SYMBOL qualifiers = ($qualifiers)/($onegrat)=(DASH,COLOR=black)
+  ELSE
+     DEFINE SYMBOL qualifiers = ($qualifiers)/($onegrat)=(DASH,COLOR=7)
+  ENDIF
+  DEFINE SYMBOL ferret_use_graticules = none  ! done, so skip the next IF block
+ENDIF
+
+! Otherwise turn them on only if requested 
+
+
 ! Either none or notic removes graticules from the plot 
 IF ($ferret_use_graticules"1|none>0|notic>0|*>1) THEN
   DEFINE SYMBOL graticuleColor = black
@@ -48,6 +69,7 @@ IF ($ferret_use_graticules"1|none>0|notic>0|*>1) THEN
 ! If graticules are turned on, turn the tic marks off. (?)
 !  PPL TICS,0,0,0,0
 ENDIF
+
 
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.

@@ -4,53 +4,22 @@
  */
 package gov.noaa.pmel.tmap.las.ui;
 
-import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
-import gov.noaa.pmel.tmap.addxml.AxisBean;
-import gov.noaa.pmel.tmap.addxml.DatasetBean;
-import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
-import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.exception.LASException;
-import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
-import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
-import gov.noaa.pmel.tmap.las.util.Constants;
-import gov.noaa.pmel.tmap.las.util.Dataset;
-import gov.noaa.pmel.tmap.las.util.Variable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.httpclient.HttpException;
-import org.apache.log4j.Logger;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.jdom.Document;
-import org.jdom.Element;
 import org.jdom.JDOMException;
-
-import thredds.catalog.InvCatalog;
-import thredds.catalog.InvCatalogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** 
  * MyEclipse Struts
@@ -72,15 +41,17 @@ public class GetUI extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = Logger.getLogger(GetUI.class.getName());
+    private static Logger log = LoggerFactory.getLogger(GetUI.class.getName());
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
-        ServletContext context = (ServletContext) servlet.getServletContext();
+    private static String ERROR = "error";
+    
+    public String execute() throws Exception {    
+        //ServletContext context = (ServletContext) servlet.getServletContext();
         StringBuilder query = new StringBuilder();
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-        ServerConfig serverConfig = (ServerConfig) servlet.getServletContext().getAttribute(LASConfigPlugIn.SERVER_CONFIG_KEY);
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
+        ServerConfig serverConfig = (ServerConfig) contextAttributes.get(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");
-        String data_url = request.getParameter("data_url");
+        String[] data_url = request.getParameterValues("data_url");
 
         if ( cat_ids != null ) {
             if ( lasConfig.pruneCategories() ) {
@@ -119,7 +90,7 @@ public class GetUI extends ConfigService {
                     if ( trace.length > 0 ) {
                         log.error(trace[0].toString());
                     }           
-                    return mapping.findForward("error");
+                    return ERROR;
                 }
 
                 request.getSession().setAttribute("catid", cat_ids);
@@ -155,11 +126,37 @@ public class GetUI extends ConfigService {
                 }
             } 
         }
-        if ( data_url != null && !data_url.equals("") ) {
-            String ids = lasConfig.getIDs(data_url);
-            query.append(ids);
+        if ( data_url != null ) {
+        	for (int i = 0; i < data_url.length; i++ ) {
+            	log.debug("Found a data url to add... "+data_url[i]);
+
+        		String ids = lasConfig.getIDs(data_url[i]);
+        		// Load all the data if necessary, but only use the first when loading the UI for the default plot
+        		if ( i == 0 ) {
+        			
+                	log.debug("Set ids from data url to... "+ids);
+
+        			query.append(ids);
+        		}
+        		
+        	}
+        	// Now that they are added, all at once set up the F-TDS URLs
+	        String fds_base = serverConfig.getFTDSBase();
+	        String fds_dir = serverConfig.getFTDSDir();
+	        try {
+	            log.debug("Adding F-TDS attributes to data set.");
+	            log.debug("base url: "+fds_base+" local directory "+fds_dir);
+	            lasConfig.addFDS(fds_base, fds_dir);
+	        } catch (LASException e) {
+	            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+	        } catch (JDOMException e) {
+	            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+	        } catch (IOException e) {
+	            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+	        }
         }
         if ( query.length() > 0 ) query.insert(0, "?");
+        log.debug("forwarding to UI.vm"+query.toString());
         // forward to the UI
         response.sendRedirect("UI.vm"+query.toString());
         return null;

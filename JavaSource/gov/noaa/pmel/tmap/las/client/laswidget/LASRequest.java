@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -168,6 +167,13 @@ public class LASRequest {
      * @param value
      */
     public void setProperty(String group_name, String property_name, String property_value) {
+    	
+    	// Sanitize all input into properties.
+   
+        group_name = SimpleHtmlSanitizer.sanitizeHtml(group_name).asString();        
+        property_name = SimpleHtmlSanitizer.sanitizeHtml(property_name).asString();
+        property_value = SimpleHtmlSanitizer.sanitizeHtml(property_value).asString();
+    	
         NodeList l = document.getDocumentElement().getElementsByTagName("properties");
         Element properties;
         if ( l != null && l.getLength() > 0 ) {
@@ -229,6 +235,9 @@ public class LASRequest {
      * @param region
      */
     public void setRange(String axis_type, String lo, String hi, int index) {
+    	
+    	// Sanitize input
+
         NodeList regions = document.getElementsByTagName("region");
         if ( index >= 0 && index < regions.getLength() ) {
 
@@ -331,6 +340,7 @@ public class LASRequest {
      * @param value
      */
     public void addVariableConstraint(String dataset, String variable, String op, String value, String cid) {
+    	
         Element constraint = document.createElement("constraint");
         constraint.setAttribute("type", "variable");
         if ( cid != null ) {
@@ -354,6 +364,7 @@ public class LASRequest {
      * @param rhs
      */
     public void addConstraint(String lhs, String op, String rhs, String cid, String label) {
+    	
         Element constraint = document.createElement("constraint");
         constraint.setAttribute("type", "text");
         if ( cid != null ) {

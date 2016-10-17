@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.jdom.Element;
 
@@ -147,8 +148,8 @@ public class ServerConfig extends LASDocument {
     	if ( cache != null ) {
     		String size = cache.getAttributeValue("bytes");
     		if (size != null) {
-    			if ( size.toLowerCase().contains("mb")) {
-    				size = size.substring(0, size.toLowerCase().indexOf("mb"));
+    			if ( size.toLowerCase(Locale.ENGLISH).contains("mb")) {
+    				size = size.substring(0, size.toLowerCase(Locale.ENGLISH).indexOf("mb"));
     				return Long.valueOf(size).longValue() * (long)(Math.pow(2, 20));  // number of megabytes * 1 megabyte :-)
     			}
     			return Long.valueOf(size).longValue();

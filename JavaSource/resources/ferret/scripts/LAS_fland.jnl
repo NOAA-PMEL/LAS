@@ -37,17 +37,16 @@ IF `fland_area LT fland_cutoff` THEN
 
    DEFINE SYMBOL land_levels = (0,10000,10000)
 
-   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc") EQ 0` THEN \
-     DEFINE SYMBOL topo_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo2.nc"
+
+   GO LAS_define_etopo
+
+   IF ($topo2_url"0|*>1") THEN DEFINE SYMBOL topo_url = "($topo2_url)"
 
    IF `fland_area LT 0.001` THEN
-     IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN \
-        DEFINE SYMBOL topo_url = "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/etopo1.nc"
+     IF ($topo1_url"0|*>1") THEN DEFINE SYMBOL topo_url = "($topo1_url)"
    ENDIF
 
-   IF `($topo_url"0|*>1") EQ 0` THEN 
-      DEFINE SYMBOL topo_url = etopo5
-   ENDIF
+   IF `($topo_url"0|*>1") EQ 0` THEN DEFINE SYMBOL topo_url = etopo5
 
    USE ($topo_url)
    SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=($fland_palette)/OVERLAY rose($map_reg)

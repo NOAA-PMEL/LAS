@@ -7,7 +7,7 @@
 
 <title>LAS Output -- $las_config.getTitle()</title>
 <p>Your QC flag has been saved.</p>
-<p>Use your browser back button to return to the table of cruises.</p>
-<i>You will need to reload the table of cruises page to see the new values in the table.</i>
+<p>Use your browser back button to return to the table of datasets.</p>
+<i>You will need to reload the table of datasets page to see the new values in the table.</i>
 <p>You may close this window.</p>
 </html>

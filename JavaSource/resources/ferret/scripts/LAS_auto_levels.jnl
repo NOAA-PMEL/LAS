@@ -108,9 +108,9 @@ DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 IF ($ferret_fill_levels"0|*>1") THEN
 
-   PPL AXNMTC 0,0 ! Turn on PPL so we can do the edit to remove any spaces (can occur in animations)
-   PPL SET nospaces $EDIT (ferret_fill_levels, COLLAPSE)
-   DEFINE SYMBOL ferret_fill_levels = ($nospaces)
+!   PPL AXNMTC 0,0 ! Turn on PPL so we can do the edit to remove any spaces (can occur in animations)
+!   PPL SET nospaces $EDIT (ferret_fill_levels, COLLAPSE)
+!   DEFINE SYMBOL ferret_fill_levels = ($nospaces)
 
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
    DEFINE SYMBOL ferret_fill_levels = ($up_fill_levels) 

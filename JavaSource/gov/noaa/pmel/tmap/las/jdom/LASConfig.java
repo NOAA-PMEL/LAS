@@ -30,6 +30,10 @@ import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraint;
 import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.proxy.LASProxy;
 import gov.noaa.pmel.tmap.las.test.LASTestOptions;
@@ -65,6 +69,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -73,11 +78,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
-import org.apache.log4j.Logger;
-
+import org.apache.http.HttpException;
 import org.jdom.Attribute;
 import org.jdom.Content;
 import org.jdom.Document;
@@ -102,7 +105,7 @@ import thredds.catalog.InvDataset;
  *
  */
 public class LASConfig extends LASDocument {
-    private static Logger log = Logger.getLogger(LASConfig.class.getName());
+    private static Logger log = LoggerFactory.getLogger(LASConfig.class.getName());
     private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
     private static LASProxy lasProxy = new LASProxy();
     private static String time_formats[] = {
@@ -246,14 +249,60 @@ public class LASConfig extends LASDocument {
 
     	return new HashMap<String, String>();
     }
-    public String getIDs(String data_url) throws JDOMException, LASException {
+    public String getIDs(String data_url) throws JDOMException, LASException, HttpException, IOException {
         Map<String, String> ids = getIDMap(data_url);
 
         if ( ids.size() > 0 ) {
             return "dsid="+ids.get("dsid")+"&varid="+ids.get("varid");
+        } else {
+        	// Add the data sets via addXML, then get the ID map again
+        	
+        	// Force t to be regular.
+        	HashMap<String, String> options = new HashMap<String, String>();
+        	options.put("force", "t");
+        	
+        	Vector dagbs = updateSrc(data_url, "netcdf", null, null, options);
+        	Element datasets = new Element("datasets");
+        	Element grids = new Element("grids");
+        	Element axes = new Element("axes");
+        	for (Iterator dagIt = dagbs.iterator(); dagIt.hasNext();) {
+				DatasetsGridsAxesBean bean = (DatasetsGridsAxesBean) dagIt.next();
+				List<DatasetBean> d = bean.getDatasets();
+				List<GridBean> g = bean.getGrids();
+				List<AxisBean> a = bean.getAxes();
+				for (Iterator dIt = d.iterator(); dIt.hasNext();) {
+					DatasetBean dBean = (DatasetBean) dIt.next();
+                    Element ds = dBean.toXml(true);
+                    if ( !hasCategories() ) {
+                    	ds.setAttribute("catid", dBean.getElement());
+                    }
+					datasets.addContent(ds);
+				}
+				for (Iterator gIt = g.iterator(); gIt.hasNext(); ) {
+					GridBean gBean = (GridBean) gIt.next();
+					grids.addContent(gBean.toXml(true));
+				}
+				for (Iterator aIt = a.iterator(); aIt.hasNext(); ) {
+					AxisBean aBean = (AxisBean) aIt.next();
+					axes.addContent(aBean.toXml(true));
+				}
+				
+			}
+        	if ( dagbs.size() > 0 ) {
+        		getRootElement().addContent(datasets);
+        		getRootElement().addContent(grids);
+        		getRootElement().addContent(axes);
+        		convertToSeven(true);
+                mergeProperites();
+                addIntervalsAndPoints();    
+                addGridType();
+        	}
+        	Date now = new Date();
+			File debug = new File(getOutputDir()+"/las_debug_add_"+now.getTime()+".xml");
+			write(debug);
+        	ids = getIDMap(data_url);
+        	return "dsid="+ids.get("dsid")+"&varid="+ids.get("varid");
         }
-
-        return "";
     }
     private Map<String, String> findDataURL(String data_url, Category category) throws JDOMException, LASException {
 
@@ -271,15 +320,7 @@ public class LASConfig extends LASDocument {
     				    ids.put("dsid", variable.getDSID());
     				    ids.put("varid", variable.getID());
     					return ids;
-    				} else {
-    					if ( variable.getAttributesAsMap().get("grid_type") != null && variable.getAttributesAsMap().get("grid_type").equals("regular") ) {
-    						Map<String, String> ids = new HashMap<String, String>();
-    						ids.put("catid", category.getID());
-    						ids.put("dsid", variable.getDSID());
-    						ids.put("varid", variable.getID());
-    						return ids;
-    					}
-    				}
+    				} 
     			}
     		}
     		return new HashMap<String, String>();
@@ -744,7 +785,17 @@ public class LASConfig extends LASDocument {
 
             axis.setAttribute("lo", lodt.toString(longfmt));
             DateTime hidt = new DateTime();
-            if ( units.contains("hour") ) {
+            if ( units.contains("minute") ) {
+                axis.setAttribute("hourNeeded", "true");
+                axis.setAttribute("dayNeeded", "true");
+                axis.setAttribute("monthNeeded", "true");
+                axis.setAttribute("yearNeeded", "true");;
+            	int minutes = (int) Math.round((size-1)*step);
+            	int minuteInterval = (int) Math.round(step*60.);
+                axis.setAttribute("minuteInterval", String.valueOf(minuteInterval) );
+                hidt = lodt.plus(Period.minutes(minutes));
+            	axis.setAttribute("hi", hidt.toString(longfmt));
+            } else if ( units.contains("hour") ) {
                 axis.setAttribute("hourNeeded", "true");
                 axis.setAttribute("dayNeeded", "true");
                 axis.setAttribute("monthNeeded", "true");
@@ -1752,7 +1803,7 @@ public class LASConfig extends LASDocument {
 	    Element variable = getElementByXPath(xpathValue);
 	    return variable.getAttributes();
 	}
-	public void addEnsembleIDs() throws JDOMException, LASException {
+	public void addEnsembleIDs() throws JDOMException, LASException, HttpException, IOException {
 		Element root = getRootElement();
 		String version = root.getAttributeValue("version");
 		if ( version != null && !version.contains("7.")) {
@@ -3034,20 +3085,22 @@ public class LASConfig extends LASDocument {
                     hi = new NameValuePair("y_hi", "");
                 }
                 Element arange = axis.getChild("arange");
-                if (arange == null) {
+                if (lo != null && hi != null && arange == null) {
                     List v = axis.getChildren("v");
                     Element v0 = (Element) v.get(0);
                     Element vN = (Element) v.get(v.size()-1);
                     lo.setValue(v0.getTextTrim());
                     hi.setValue(vN.getTextTrim());
                 } else {
-                    String st = arange.getAttributeValue("start");
-                    lo.setValue(st);
-                    double start = Double.valueOf(st).doubleValue();
-                    long step = Long.valueOf(arange.getAttributeValue("step")).longValue();
-                    double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
-                    double end = start+(size-1)*step;
-                    hi.setValue(String.valueOf(end));
+                	if ( lo != null && hi != null ) {
+                		String st = arange.getAttributeValue("start");
+                		lo.setValue(st);
+                		double start = Double.valueOf(st).doubleValue();
+                		long step = Long.valueOf(arange.getAttributeValue("step")).longValue();
+                		double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
+                		double end = start+(size-1)*step;
+                		hi.setValue(String.valueOf(end));
+                	}
                 }
                 region.add(lo);
                 region.add(hi);
@@ -3414,7 +3467,17 @@ public class LASConfig extends LASDocument {
 
 		                t.setLo(lodt.toString(fmt));
 		                DateTime hidt = new DateTime();
-		                if ( units.contains("hour") ) {
+		                if ( units.contains("minute") ) {
+		                	t.setHourNeeded(true);
+		                	t.setDayNeeded(true);
+		                	t.setMonthNeeded(true);
+		                	t.setYearNeeded(true);
+		                	int minutes = (int) Math.round((size-1)*step);
+		                	int minuteInterval = (int) Math.round(step*60.);
+			                t.setMinuteInterval(minuteInterval);
+		                	hidt = lodt.plus(Period.minutes(minutes));
+		                	t.setHi(hidt.toString(fmt));
+		                } else if ( units.contains("hour") ) {
 		                    t.setHourNeeded(true);
 		                    t.setDayNeeded(true);
 		                    t.setMonthNeeded(true);
@@ -4610,10 +4673,12 @@ public class LASConfig extends LASDocument {
 		if ( esg ) {
 			top.setName("ESG Catalog");
 			String base = src.substring(0, src.lastIndexOf("/")+1);
-			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParserFactory factory = SAXParserFactory.newInstance();		
 			CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 			SAXParser parser;
 			try {
+				factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 				parser = factory.newSAXParser();			
 				parser.parse(src, esgCatalogHandler);
 			} catch (ParserConfigurationException e) {
@@ -4768,27 +4833,27 @@ public class LASConfig extends LASDocument {
 					created = df.print(nt);
 
 					String expire_time = ymd.print(nt) + " " + update_time+":00";
-					if ( update_interval.toLowerCase().contains("milli") ||
-						 update_interval.toLowerCase().contains("sec") ||
-						 update_interval.toLowerCase().contains("min") ||
-						 update_interval.toLowerCase().contains("hour") ||
-						 update_interval.toLowerCase().contains("day") ||
-						 update_interval.toLowerCase().contains("week") ) {
+					if ( update_interval.toLowerCase(Locale.ENGLISH).contains("milli") ||
+						 update_interval.toLowerCase(Locale.ENGLISH).contains("sec") ||
+						 update_interval.toLowerCase(Locale.ENGLISH).contains("min") ||
+						 update_interval.toLowerCase(Locale.ENGLISH).contains("hour") ||
+						 update_interval.toLowerCase(Locale.ENGLISH).contains("day") ||
+						 update_interval.toLowerCase(Locale.ENGLISH).contains("week") ) {
 						String[] interval = update_interval.split(" ");
 						int n = Integer.valueOf(interval[0]).intValue();
 						String units = interval[1];
 						int millis = n;
-						if ( units.toLowerCase().contains("milli") ) {
+						if ( units.toLowerCase(Locale.ENGLISH).contains("milli") ) {
 							millis = n;
-						} else if ( units.toLowerCase().contains("sec") ) {
+						} else if ( units.toLowerCase(Locale.ENGLISH).contains("sec") ) {
 							millis = n*1000;
-						} else if ( units.toLowerCase().contains("min") ) {
+						} else if ( units.toLowerCase(Locale.ENGLISH).contains("min") ) {
 							millis = n*60*1000;
-						} else if ( units.toLowerCase().contains("hour") ) {
+						} else if ( units.toLowerCase(Locale.ENGLISH).contains("hour") ) {
 							millis = n*60*60*1000;
-						} else if ( units.toLowerCase().contains("day") ) {
+						} else if ( units.toLowerCase(Locale.ENGLISH).contains("day") ) {
 							millis = n*24*60*60*1000;
-						} else if ( units.toLowerCase().contains("week") ) {
+						} else if ( units.toLowerCase(Locale.ENGLISH).contains("week") ) {
 							millis = n*7*24*60*60*1000;
 						}
 						Period p = new Period(0, 0, 0, millis);
@@ -4829,6 +4894,8 @@ public class LASConfig extends LASDocument {
 				CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 				SAXParser parser;
 				try {
+					factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+					factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 					parser = factory.newSAXParser();			
 					parser.parse(src, esgCatalogHandler);
 				} catch (ParserConfigurationException e) {
@@ -5019,12 +5086,14 @@ public class LASConfig extends LASDocument {
 	}
 	public Dataset getFullDataset(String dsID) throws JDOMException, LASException {
 		Dataset dataset = getDataset(dsID);
+		dataset.setCATID(dsID);
 		ArrayList<Variable> variables = getFullVariables(dsID);
 		dataset.setVariables(variables);
 		return dataset;
 	}
 	public Dataset getFullDatasetNoGrids(String dsID) throws JDOMException, LASException {
 		Dataset dataset = getDataset(dsID);
+		dataset.setCATID(dsID);
 		ArrayList<Variable> variables = getVariables(dsID);
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
@@ -5476,6 +5545,7 @@ public class LASConfig extends LASDocument {
                                 
                                 Element dataset = db.toXml(true);
                                 dataset.setAttribute("date", time_added);
+                                dataset.setAttribute("catid", db.getElement());
                                 Element variables = dataset.getChild("variables");
                                 if ( variables != null ) {
                                     List<Element> vars = variables.getChildren("variable");
@@ -5662,7 +5732,15 @@ public class LASConfig extends LASDocument {
             }
         }
         
-        Collections.sort(categories, new ContainerComparator("name"));
+        if ( categories.size() > 0 ) {
+        	Category one = categories.get(0);
+        	if ( one.getAttributesAsMap().containsKey("sort_order") ) {
+        		Collections.sort(categories, new ContainerComparator("sort_order"));
+        	} else {
+        		Collections.sort(categories, new ContainerComparator("name"));
+        	}
+        }
+       
 
         
         CategorySerializable[] cats = new CategorySerializable[categories.size()];
@@ -5804,6 +5882,44 @@ public class LASConfig extends LASDocument {
         }
         return groups;
     }
+    public void removeByXpath(Set<String> toRemove) throws Exception {
+    	for (Iterator idIt = toRemove.iterator(); idIt.hasNext();) {
+            String xpath = (String) idIt.next();
+            Element element = null;
+            element = getElementByXPath(xpath);
+            if ( element != null ) {
+                Parent p = element.getParent();
+                p.removeContent(element);
+            } else {
+                log.debug("Could not find "+xpath);
+            }
+
+        }
+    }
+    public void removeDataset(String dsid) throws Exception {
+    	Dataset dataset = getDataset(dsid);
+    	if ( dataset != null ) {
+    		Set<String> toRemove = new HashSet<String>();
+    		toRemove.add("/lasdata/datasets/dataset[@ID='"+dataset.getID()+"']");
+    		List<Variable> variables = dataset.getVariables();
+    		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+    			Variable variable = (Variable) varIt.next();
+
+    			Grid grid = variable.getGrid();
+    			toRemove.add("/lasdata/grids/grid[@ID='"+grid.getID()+"']");
+    			List<Axis> axes = grid.getAxes();
+    			for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
+    				Axis axis = (Axis) axisIt.next();
+    				toRemove.add("/lasdata/axes/axis[@ID='"+axis.getID()+"']");
+    			}
+    			TimeAxis taxis = grid.getTime();
+    			if ( taxis != null ) {
+    				toRemove.add("/lasdata/axes/axis[@ID='"+taxis.getID()+"']");
+    			}
+    		}
+    		removeByXpath(toRemove);
+    	}
+    }
     public void removeOldDatasets(DateTime then) throws Exception {
         // "/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']"
        
@@ -5837,19 +5953,8 @@ public class LASConfig extends LASDocument {
                 }
             }
 
-            for (Iterator idIt = toRemove.iterator(); idIt.hasNext();) {
-                String xpath = (String) idIt.next();
-                Element element = null;
-                element = getElementByXPath(xpath);
-                if ( element != null ) {
-                    Parent p = element.getParent();
-
-                    p.removeContent(element);
-                } else {
-                    System.out.println("Could not find "+xpath);
-                }
-
-            }    
+            removeByXpath(toRemove);
+            
             File v7 = new File(getOutputDir()+"/"+format.print(new DateTime())+"lasV7.xml");
             try {
                 write(v7);

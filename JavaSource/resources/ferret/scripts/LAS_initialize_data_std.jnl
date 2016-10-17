@@ -30,13 +30,31 @@
 ! in the dataset configuration as ferret_init_commands, whose the value is a set
 ! of Ferret commands separated by semicolons.
 !
+! 10/4/2016 fixes so init scripts still work
+!
 GO LAS_initialize_dataset ($1"0")
 
-IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
+IF ($fer_last_error"0|0|1|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = DATA
+  DEFINE SYMBOL error_string = The ($data_var) source file -- ($data_url) did not open successfully.
+  EXIT/SCRIPT
+ENDIF
+
+! Errors set in initialization of dataset ...
+IF ($error_status"0|ERROR>1|*>1") THEN 
+    MESSAGE/ERRORR **ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
+IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($dset($1"0"))
 
 IF ($ferret_init_commands"0|*>1") THEN 
   ($ferret_init_commands)
 ENDIF
+
+IF `($data_var"0|*>1") EQ 0` THEN DEFINE SYMBOL data_var = ($data_($num)_var)
+IF `($data_orig_var"0|*>1") EQ 0` THEN DEFINE SYMBOL data_orig_var = ($data_($num)_var)
 
 GO LAS_initialize_variable 
 DEFINE SYMBOL variable_($1"0")_lab = ($data_title) ($data_units)

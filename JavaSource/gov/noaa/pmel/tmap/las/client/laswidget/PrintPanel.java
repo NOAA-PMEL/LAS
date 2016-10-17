@@ -5,6 +5,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -32,7 +33,7 @@ public class PrintPanel extends Composite {
 
 		@Override
 		public void onResponseReceived(Request request, Response response) {
-			HTMLPanel html = new HTMLPanel(response.getText());
+			HTMLPanel html = new HTMLPanel(UriUtils.fromString(response.getText()).asString());
 			panel.add(html);
 		}
     	

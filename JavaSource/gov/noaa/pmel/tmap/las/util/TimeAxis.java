@@ -146,6 +146,7 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
     
     public TimeAxisSerializable getTimeAxisSerializable() {
     	TimeAxisSerializable t = new TimeAxisSerializable();
+    	t.setUnits(getAttributesAsMap().get("units"));
     	t.setType(getType());
 		t.setID(getID());
 		t.setHi(getHi());

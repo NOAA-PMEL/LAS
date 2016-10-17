@@ -9,8 +9,8 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
@@ -70,7 +70,7 @@ public class SubsetConstraintPanel extends Composite {
                     for (Iterator rIt = currentValues.keySet().iterator(); rIt.hasNext();) {
                         String key_value = (String) rIt.next();
                         String value = (String) currentValues.get(key_value);
-                        if ( value.toLowerCase().contains(f.toLowerCase()) ) {
+                        if ( value.toLowerCase(Locale.ENGLISH).contains(f.toLowerCase(Locale.ENGLISH)) ) {
                             valuesList.addItem(value, key_value);
                         }
                     }
@@ -99,7 +99,7 @@ public class SubsetConstraintPanel extends Composite {
                     //  the key and the variable are always the same in this case.
                     
                     // Don't send an event if they click on the instructions.
-                    if ( !value.equals(Constants.PICK) && !value.equals(Constants.APPEAR)) {
+                    if ( !value.equals(Constants.PICK) && !value.equals(Constants.APPEAR) && !value.equals(Constants.ONLYONE) && !value.equals(Constants.ONLYONE2) ) {
                     	eventBus.fireEventFromSource(new AddSelectionConstraintEvent(shortName, value, shortName, key_value, "eq"), SubsetConstraintPanel.this);
                     }
                 }

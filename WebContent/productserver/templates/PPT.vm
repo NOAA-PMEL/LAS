@@ -93,7 +93,7 @@
   <div id="help">
     <fieldset id="Metadata_instructions">
 	  <legend>Help</legend>
-	  <span>Select the desired cruise.  Press the Update Plot button.  Click on a thumb-nail plot to enlarge it.</span>
+	  <span>Select the desired feature.  Press the Update Plot button.  Click on a thumbnail plot to enlarge it.</span>
 	</fieldset>
   </div>
   <div id="controls"></div>

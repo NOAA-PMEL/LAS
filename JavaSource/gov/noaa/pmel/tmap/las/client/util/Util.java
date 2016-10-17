@@ -82,7 +82,7 @@ public class Util {
 		if ( !view.contains("f") && grid.hasF() ) {
 			ortho.add("f");
 		}
-		if ( !view.contains("t") && grid.hasT() || (panelVar.isDiscrete() && !navPanel) ) {
+		if ( !view.contains("t") && grid.hasT() ) {
 			ortho.add("t");
 		}
 		if ( !view.contains("z") && grid.hasZ() ) {
@@ -107,8 +107,7 @@ public class Util {
 				String value = parts[1];
 				if ( !value.contains("ferret_") ) {
 					tokenMap.put(name, value);
-				}       ClientFactory clientFactory = GWT.create(ClientFactory.class);
-		        EventBus eventBus = clientFactory.getEventBus();
+				}
 			}
 		}
 		return tokenMap;

@@ -263,20 +263,16 @@ public class UserListBox extends Composite {
          clear();
          allVariables.clear();
          for ( int i = 0; i < variables.size(); i++ ) {
-             VariableSerializable v = variables.get(i);
-             // TODO 
-             // Used filter on variables we can't plot,
-             // now we don't, eventually we will be able to plot "text" variables on the map, but now we can't plot them anywhere so remove them from the list.
-             
-             String uunnts = v.getAttributes().get("units");
-//             if ( Util.keep(v.getDSID(), v.getName()) && Util.keep(v.getDSID(), v.getAttributes()) ) {
-                add(v);
-                if((i==0) && (variableMetadataView!=null)){
-                    variableMetadataView.setDSID(v.getDSID());
-                }
-//             } else if ( colorBy == true && v.getAttributes().get("color_by") != null && v.getAttributes().get("color_by").equals("true") ) {
-//                 add(v);
-//             }
+        	 VariableSerializable v = variables.get(i);
+
+        	 String uunnts = v.getAttributes().get("units");
+        	 // Time series sub-set variables are not very interesting to plot.
+        	 if ( !v.isTimeSeries() || !v.isSubset() ) {
+        		 add(v);
+        		 if((i==0) && (variableMetadataView!=null)){
+        			 variableMetadataView.setDSID(v.getDSID());
+        		 }
+        	 }
          }
          setAddButtonVisible(variables.size() > 1);
      }

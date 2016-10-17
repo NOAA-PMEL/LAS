@@ -5,13 +5,18 @@
       <inherits name="com.google.gwt.i18n.I18N"/>
       <inherits name="com.google.gwt.json.JSON" />
       <inherits name="com.google.gwt.activity.Activity" />
+
 	  <!-- This will allow logger messages to show in the client's browser: -->
 	  <!-- <inherits name="com.google.gwt.logging.Logging"/> -->
       
       <replace-with class="gov.noaa.pmel.tmap.las.client.ClientFactoryImpl">
         <when-type-is class="gov.noaa.pmel.tmap.las.client.ClientFactory" />
       </replace-with>
-      <source path="client"/>
+      <source path="client">
+         <exclude name="**/inventory/**"/>
+         <exclude name="**/Inventory.java"/>
+      </source>
+
 	
       <!-- Inherit the default GWT style sheet.  You can change       -->
       <!-- the theme of your GWT application by uncommenting          -->

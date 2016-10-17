@@ -1,0 +1,23 @@
+! see if there are etopo2 and etopo1 in the same
+! directory as etopo5
+
+USE etopo5
+LET epath = "`rose,RETURN=dsetpath`" 
+LET eloc = STRINDEX(epath,"etopo")
+LET justpath = SUBSTRING(epath,1,eloc-1)
+
+IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo2.nc") EQ 0` THEN 
+   DEFINE SYMBOL topo2_url = http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo2.nc
+ELSE
+   LET e2file = STRCAT(justpath, "etopo2.nc")
+   IF `TEST_OPENDAP(e2file) EQ 0` THEN DEFINE SYMBOL topo2_url = `e2file`
+ENDIF
+
+IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN 
+   DEFINE SYMBOL topo1_url = http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo2.nc
+ELSE
+   LET e1file = STRCAT(justpath, "etopo1.nc")
+   IF `TEST_OPENDAP(e2file) EQ 0` THEN DEFINE SYMBOL topo1_url = `e1file`
+ENDIF
+
+CANCEL DATA etopo5

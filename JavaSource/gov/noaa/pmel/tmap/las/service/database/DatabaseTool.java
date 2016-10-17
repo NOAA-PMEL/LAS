@@ -6,13 +6,12 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASDatabaseBackendConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -20,13 +19,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.HashMap;
 
 import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
-
-import org.apache.log4j.Logger;
 
 import org.apache.velocity.VelocityContext;
 import org.jdom.JDOMException;
@@ -39,7 +35,7 @@ public class DatabaseTool extends TemplateTool {
     
     LASDatabaseBackendConfig databaseBackendConfig;
     
-    final Logger log = Logger.getLogger(DatabaseTool.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(DatabaseTool.class.getName());
     int ti = 0;
     public DatabaseTool() throws LASException, IOException {
        
@@ -260,12 +256,13 @@ public class DatabaseTool extends TemplateTool {
         
         String ncmlFilename = lasBackendRequest.getResultAsFile("ncml");
         log.debug("got ncml filename: "+ncmlFilename); // debug
+        FileOutputStream os = null;
         if (ncmlFilename != null && !ncmlFilename.equals("") ) {
         	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Making ncml file.");
             try {
                 NetcdfFile ncfile = NetcdfFile.open(netcdfFilename);
                 log.debug("opened ncml file"); // debug
-                FileOutputStream os = new FileOutputStream(new File(ncmlFilename));
+                os = new FileOutputStream(new File(ncmlFilename));
                 log.debug("made stream"); // deubg
                 ncfile.writeNcML(os, ncmlFilename);
                 log.debug("wrote ncml file");
@@ -276,6 +273,15 @@ public class DatabaseTool extends TemplateTool {
                     lasBackendResponse.setError("Unable to create netCDF file to dump to NcML: ", eml);
                     return lasBackendResponse;
                 }
+            } finally {
+            	if ( os != null ) {
+            		try {
+						os.close();
+						
+					} catch (IOException e) {
+						log.error("Failed to close output stream.  "+e.getMessage());
+					}
+            	}
             }
             log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished making ncml file.");
             ti++;
@@ -297,19 +303,25 @@ public class DatabaseTool extends TemplateTool {
                 }
                 File webrowsetFile = new File(xmlFilename);
                 FileWriter fw = new FileWriter(webrowsetFile);
-                rset.beforeFirst();
-                webrowset.writeXml(rset, fw);               
+                if ( rset != null ) {
+                	rset.beforeFirst();
+                	webrowset.writeXml(rset, fw);             
+                }
             } catch (Exception e) {
                 lasBackendResponse.setError("Unable to create  XML file: ", e);
                 return lasBackendResponse;
+            } finally {
+                try { if ( rset != null) rset.close(); } catch(Exception e) { }
+                try { if ( stmt != null) stmt.close(); } catch(Exception e) { }
+                try { if ( con != null) con.close(); } catch(Exception e) { }
             }
             log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished makeing webrowset file.");
             ti++;
         }
         log.debug("finished with xml file");
-        try { rset.close(); } catch(Exception e) { }
-        try { stmt.close(); } catch(Exception e) { }
-        try { con.close(); } catch(Exception e) { }
+        try { if ( rset != null) rset.close(); } catch(Exception e) { }
+        try { if ( stmt != null) stmt.close(); } catch(Exception e) { }
+        try { if ( con != null) con.close(); } catch(Exception e) { }
         
         
         if (lasBackendRequest.isCanceled()) {
@@ -380,7 +392,7 @@ public class DatabaseTool extends TemplateTool {
         // make the giant symbol collection to be handed to Ferret.
         
         
-//        if ( lasBackendRequest.getProperty("database", "name").toLowerCase().contains("socat") ) {
+//        if ( lasBackendRequest.getProperty("database", "name").toLowerCase(Locale.ENGLISH).contains("socat") ) {
 //        	Socat socat = new Socat();
 //        	context.put("socat", socat);
 //        }

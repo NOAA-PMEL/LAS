@@ -13,6 +13,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -243,7 +244,7 @@ public class LASAnnotationsButton extends Composite {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			
-			String text = response.getText();
+			String text = UriUtils.fromString(response.getText()).asString();
 			setAnnotationsHTML(text);
 			
 		}

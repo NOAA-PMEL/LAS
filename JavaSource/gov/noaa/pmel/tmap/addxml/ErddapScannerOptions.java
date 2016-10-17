@@ -24,6 +24,29 @@ public class ErddapScannerOptions extends Options {
         
         Option category = new Option("c", "category", true, "Read a category file and use it to organized the data sets.");
         addOption(category);
+        
+        Option hours = new Option("h", "hours", true, "Use the value as the step in hours instead of the default step of a day");
+        addOption(hours);
+        
+        Option minutes = new Option("m", "minutes", false, "Use of set of minutes instead of the default stop of a day");
+        addOption(minutes);
+        
+        Option property = new Option("p", "property", true, "A property to add to the data set of the form group:name:value, e.g. -p product_server:default_operation:Timeseries_station_plot");
+        addOption(property);
+        
+        Option varproperty = new Option("r", "varprop", true, "A property to add to the named variable of the form variable:group:name:value, e.g. -r variable_name:ferret:dep_axis_scale:\"0.5,3.5,0.5\"");
+        addOption(varproperty);
+        
+        Option skip = new Option("s", "skip", true, "The short name of a variable to leave out of the LAS configuration.");
+        addOption(skip);
+        
+        Option display = new Option("d", "display", true, "Dates to display by default. Earliest or only is used as display_lo. Latest used as display_hi. -d 15-Oct-2015 -d 31-Oct-2015");
+        display.setOptionalArg(true);
+        addOption(display);
+        
+        Option file = new Option("f", "files", false, "Write output in separate files.");
+        file.setOptionalArg(true);
+        addOption(file);
     }
 
 }

@@ -7,7 +7,10 @@
 	<inherits name="com.google.gwt.json.JSON" />
 	<!-- This will allow logger messages to show in the client's browser: -->
 	<!-- <inherits name="com.google.gwt.logging.Logging"/> -->
-	<source path="client" />
+	<source path="client">
+           <exclude name="**/inventory/**"/>
+           <exclude name="**/Inventory.java"/>
+        </source>
 
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
@@ -15,9 +18,9 @@
  	<inherits name='com.google.gwt.user.theme.standard.Standard' /> 
 	<!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
 	<!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/> -->
-	<inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
 	<inherits name="com.google.gwt.xml.XML" />
+        <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
 
 	<!-- GWT Joda Time implementation. -->
 	<inherits name='org.gwttime.Time' />

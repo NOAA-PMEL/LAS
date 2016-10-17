@@ -26,19 +26,35 @@ DEFINE SYMBOL yvar = constraints_mask*yvar
 LET p = ($xvar) 
 LET q = ($yvar)
 
+! Are the variables longitude and latitude (when the dataset is not of trajectory type)
+! If so then connect the dots and do not draw the regression line
+
+DEFINE SYMBOL propunits = none`($ferret_prop_var),return=units`
+DEFINE SYMBOL plotunits = none`($ferret_plot_var),return=units`
+IF `STRLEN("($propunits)") GT 4` THEN DEFINE SYMBOL propunits = `($ferret_prop_var),return=units`
+IF `STRLEN("($plotunits)") GT 4` THEN DEFINE SYMBOL plotunits = `($ferret_plot_var),return=units`
+
+LET itsa_lon_prop = `STRINDEX("($propunits)", "east") GT 0 OR STRINDEX("($data_0_units)", "east") GT 0`
+LET itsa_lat_plot = `STRINDEX("($plotunits)", "north") GT 0 OR STRINDEX("($data_1_units)", "north") GT 0` 
+
+IF `itsa_lon_prop + itsa_lat_plot EQ 2` THEN 
+   DEFINE SYMBOL connect_dots = 1
+   DEFINE SYMBOL do_rsquare = 0
+ENDIF
+
 CANCEL SYMBOL set_window_quals
 
 ! If they are not lon, lat, or time, put axis labels on the plot.
 ! (easier to understand, e.g. SST as a fcn of AIRT)
 
 IF ($variable_0_lab"0|*>1") THEN 
-   DEFINE SYMBOL ax_label_x PPL XLAB ($variable_0_lab)
+   DEFINE SYMBOL ax_label_x PPL XLAB @AC($variable_0_lab)
    IF ($ferret_prop_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_x
    IF ($ferret_prop_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_x
    IF ($ferret_prop_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_x
 ENDIF
 IF ($variable_1_lab"0|*>1") THEN 
-   DEFINE SYMBOL ax_label_y PPL YLAB ($variable_1_lab)
+   DEFINE SYMBOL ax_label_y PPL YLAB @AC($variable_1_lab)
    IF ($ferret_plot_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_y
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
    IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
@@ -155,8 +171,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
-   LET amin = `min(p_var[i=@MIN]-5, 180)` 
-   LET amax = `max(p_var[i=@MAX]+5, -180)`
+   LET amin = MIN(p_var[i=@MIN]-5, 180)
+   LET amax = MAX(p_var[i=@MAX]+5, -180)
 
 
 ! Initialize   
@@ -180,8 +196,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    
    LET amin360 = xvar_360[i=@MIN]
    LET amax360 = xvar_360[i=@MAX]
-   LET amin = `min(xvar_360[i=@MIN]-5, 360)` 
-   LET amax = `max(xvar_360[i=@MAX]+5, 0)`
+   LET amin = MIN(xvar_360[i=@MIN]-5, 360)
+   LET amax = MAX(xvar_360[i=@MAX]+5, 0)
 
     DEFINE SYMBOL isbad =  `(amax - amin) `  ! a constraint on longitude may make amin,amax bad.
     LET adiff = amax - amin
@@ -191,8 +207,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
 
       LET ax_lo360 = `xvar_360[i=@MIN]`
       LET ax_hi360 = `xvar_360[i=@MAX]`
-      LET ax_lo360 = `min(xvar_360[i=@MIN]-5, 360)` 
-      LET ax_hi360 = `max(xvar_360[i=@MAX]+5, 0)`
+      LET ax_lo360 = `MIN(xvar_360[i=@MIN]-5, 360)` 
+      LET ax_hi360 = `MAX(xvar_360[i=@MAX]+5, 0)`
 
       IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
          LET xvar = xvar_360
@@ -208,8 +224,8 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       ENDIF
 
       CANCEL SYMBOL put_label  ! an all-missing label may not be needed if we are using LON+360
-      LET amin = `ax_lo`
-      LET amax = `ax_hi`
+      LET amin = ax_lo
+      LET amax = ax_hi
       GO LAS_is_range ax_lo ax_hi ! get del_ax
       LET ax_lo = `amin`
       let ax_hi = `amax`
@@ -309,8 +325,8 @@ IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
 
-   LET amin = `max(p_var[i=@MIN]-5, -90)`
-   LET amax = `min(p_var[i=@MAX]+5,  90)`
+   LET amin = MAX(p_var[i=@MIN]-5, -90)
+   LET amax = MIN(p_var[i=@MAX]+5,  90)
 
    GO LAS_is_range amin amax
 
@@ -449,8 +465,8 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
    LET amin = q_var[i=@MIN]
    LET amax = q_var[i=@MAX]
    
-   LET amin = `max(q_var[i=@MIN]-5, -90)`
-   LET amax = `min(q_var[i=@MAX]+5,  90)`
+   LET amin = MAX(q_var[i=@MIN]-5, -90)
+   LET amax = MIN(q_var[i=@MAX]+5,  90)
 
    GO LAS_is_range amin amax  ! get del_ax
    LET ax_lo = `amin`
@@ -582,7 +598,22 @@ ENDIF
 PPL SHADE
 
 ! If put_label was defined, something caused one or both variables to be all BAD.
+
 IF ($put_label"0|*>1") THEN 
+
+   DEFINE SYMBOL vtype = `xvar,return=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN 
+      LET ylab_bad = ($ppl$ylen) - 1
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> has an invalid data type. Choose another variable
+      EXIT/SCRIPT
+   ENDIF
+
+   DEFINE SYMBOL xvtype = `yvar,return=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN 
+      LET ylab_bad = ($ppl$ylen) - 1
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> has an invalid data type. Choose another variable
+      EXIT/SCRIPT
+   ENDIF
 
 ! add labels if a whole variable is all-bad
 ! p is masked XVAR
