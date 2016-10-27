@@ -44,8 +44,8 @@ IF `($win_aspect) LT 0.01` THEN \
 
 
 ! Open the window. For PyFerret, use /OUTLINE to take care of the pesky white-line issue
-
-IF ($program_name"0|PyFerret>1|*>0") THEN DEFINE SYMBOL set_window_quals = ($set_window_quals)/OUTLINE=0.7 1
+! 10/2016: Not necessary when running pyferret with -png option
+!! IF ($program_name"0|PyFerret>1|*>0") THEN DEFINE SYMBOL set_window_quals = ($set_window_quals)/OUTLINE=0.7 1
 
 SET WINDOW($set_window_quals)
 
