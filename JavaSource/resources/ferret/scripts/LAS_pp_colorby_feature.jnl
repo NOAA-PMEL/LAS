@@ -180,14 +180,22 @@ IF `($feature_max) LE ($feature_max_labels)` THEN
       GO LAS_set_poly_scale
       DEFINE SYMBOL ferret_poly_scale 0.5*($ferret_poly_scale)
    ENDIF
-   IF `($ferret_poly_scale) GE 0.4` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/THICK=1
+
+! *** draw outlines only when running Ferret.  Too slow in PyFerret.
+   IF `($ferret_poly_scale) GE 0.4` THEN
+      IF ($program_name"0|Ferret>1|*>0") THEN \
+       DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/THICK=1
+    ENDIF
+
 ELSE
    DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=black
    DEFINE SYMBOL poly_scale = 0.4
    DEFINE SYMBOL plot_using_sym = 1
 ENDIF
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
+! *** draw outlines only when running Ferret.  Too slow in PyFerret.
+IF ($program_name"0|Ferret>1|*>0") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE
+
 DEFINE SYMBOL poly_command POLY($qualifiers)
 DEFINE SYMBOL line_color = blue
 
