@@ -399,6 +399,7 @@ IF `nstations EQ 1` THEN
       ELSE
 	 PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` ($plot_all)
       ENDIF
+
       IF ($plot_pos_down"0|0|1|*>1") THEN
          ppl %range `ymn,prec=8`,`ymx,prec=8`, 5
          DEFINE SYMBOL yax_range = `-1*($ppl$range_inc)`
@@ -412,8 +413,7 @@ IF `nstations EQ 1` THEN
    set win/clear
    set view full_view
 
-   LET vartt = reshape(($data_var), tt)
-   LET vart = vartt[gt=tt_all@bin]
+   LET vart = reshape(($data_var), tt)
 
    IF `($data_count) EQ 1` THEN 
       PLOT/COLOR=Blue($axset)/nolab($qualifiers) vart
@@ -589,18 +589,13 @@ IF `nstations LE max_separate_stations` THEN
    set view vp_($q);\
    let timem = time2d[m=($q)];\
    let ntm = `timem[i=@ngd]`;\
-   IF `ntm LT 10000` THEN ;\
-     define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
-   ELSE; \
-     let nstride = `INT(0.5+ntm/10000)`; \
-     define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`:`nstride`]; \
-   ENDIF;\
+   define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
    let tt = t[gt=taxis];\
    let tempx = var2d[m=($q)];\
    let vart = reshape(tempx, tt);\
-   plot/color=Blue($axset)/nolab($qualifiers)($vert) vart[gt=taxis_all]; \
+   plot/color=Blue($axset)/nolab($qualifiers)($vert) vart; \
    IF `nstations GT 1` THEN plot/over/vs/line/nolab/color=7 tpts,ypts;\
-   IF `nstations GT 1` THEN plot/over/color=Blue/nolab($qualifiers) vart[gt=taxis_all];\
+   IF `nstations GT 1` THEN plot/over/color=Blue/nolab($qualifiers) vart;\
    label/nouser 0.1, `($ppl$ylen)*0.9`, -1,0,0.12 @AS`($feature_variable)[m=($q)]`)
 
    ENDIF  ! allbad
@@ -620,14 +615,12 @@ ELSE  ! more than max_separate_stations stations
       LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    ELSE
 
-   let nt = 2000
-
    let colrx = id2d[m=1]
    def sym cshp = `colrx,return=shape`
 
    repeat/range=1:`nstations`/name=q (\
    define symbol q = `q`; \
-   let ntt = MIN(nt,rowsize[m=($q)]);\ 
+   let ntt = rowsize[m=($q)];\ 
    define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
    npoints=`ntt`/units=seconds/t0="`time.time_origin`" taxis; \
    show axis taxis;\
@@ -639,7 +632,7 @@ ELSE  ! more than max_separate_stations stations
    let vart = reshape(tempx, tt);\
    let colort = reshape(colrx, tt);\
    plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort;\
-   ppl shaset reset; list/L=1 colort)
+   ppl shaset reset; list/L=1 colort; sh grid vart; pause)
    
    ENDIF  ! allbad
 ENDIF
