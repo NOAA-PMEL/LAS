@@ -608,7 +608,7 @@ IF ($put_label"0|*>1") THEN
       EXIT/SCRIPT
    ENDIF
 
-   DEFINE SYMBOL xvtype = `yvar,return=dtype`
+   DEFINE SYMBOL vtype = `yvar,return=dtype`
    IF ($vtype"0|CHAR>1|*>0") THEN 
       LET ylab_bad = ($ppl$ylen) - 1
       LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> has an invalid data type. Choose another variable
