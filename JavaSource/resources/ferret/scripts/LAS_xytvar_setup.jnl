@@ -1,6 +1,8 @@
 ! LAS_xytvar_setup.jnl 
 ! ACM 3/2009
 ! 5/2014  Fixes to XY map plots
+! 10/2016 Performance fixes. The underlay plot can be on a coarser grid 
+!         while the overlay will be done with full resolution data.
 !
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -297,7 +299,7 @@ DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis
 DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis1 
 
 LET dep_var = x[gx=haxis]
-LET dep_var1 = x[gx=haxis1]
+LET dep_var1 = x[gx=haxis1]; sh var dep_var1
 
 LET amin = q_var[i=@MIN]
 LET amax = q_var[i=@MAX]
@@ -382,6 +384,14 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    ELSE
 
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2d
+
+
+! Coarser axis for the all-missing plot that will make the underlay.
+      let thaxis = t[gt=haxis]
+      let nthaxis = `thaxis,return=lsize`
+      IF `nthaxis GT 2000` THEN \
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`/npoints=2000/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2d
 
       DEFINE SYMBOL timeaxis = haxis
       DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
@@ -393,10 +403,10 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
       DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
       DEFINE SYMBOL haxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
       DEFINE SYMBOL haxis_taxname = haxis
-
    ENDIF
 
    LET dep_var = 0*t[gt=haxis]
+   LET dep_var2d = 0*t[gt=haxis2d]
 
    ! A time-lon plot would normally plot with time on the vertical
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
@@ -538,7 +548,6 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
       DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
       DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
       DEFINE SYMBOL vaxis_taxname = vaxis
-
    ENDIF
 
    LET indep_var = 0*t[gt=vaxis]
@@ -568,6 +577,8 @@ IF ($ferret_thumb"0|0|*>1") THEN
 ENDIF
 
 LET bvar = dep_var + indep_var
+IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
+
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
 IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
@@ -661,6 +672,7 @@ ENDIF
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    SET VIEW ($view2)
    LET bvar = dep_var1 + indep_var1
+   IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
    LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
    SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
    SET MODE/LAST nodata_lab
@@ -671,9 +683,11 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
    IF `($ferret_plot_var"0|time>1|TIME>1|hours_1970>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
       SET VIEW ($view2)
       LET bvar = dep_var1 + indep_var1
+      IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
       LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
       SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
       SET MODE/LAST nodata_lab
+
       EXIT/SCRIPT
    ENDIF
 ENDIF
