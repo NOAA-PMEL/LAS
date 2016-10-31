@@ -24,6 +24,18 @@
                 An error occurred in the service that was creating your product.
               </text>
            </message>
+	   <message type="startsWith" level="error">
+              <key>**ERROR Invalid data type for variable</key>
+              <text>
+                  Cannot plot a non-numeric variable. Please choose another variable, or List the data.
+              </text>
+           </message>
+           <message type="startsWith" level="error">
+              <key>**ERROR Invalid data type for variable</key>
+              <text>
+                  Cannot plot a non-numeric variable. Please choose another variable, or Show or List the data.
+              </text>
+           </message>
            <message type="startsWith" level="error">
               <key>**ERROR Differencing is not implemented between unlike Curvilienar/Rectilinear grids</key>
               <text>
