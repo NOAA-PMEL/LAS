@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1036,10 +1037,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("timeseries_id");
             }
+            String n = URLEncoder.encode("\""+platform_id_value+"\"", "UTF-8");
+            String q = variables + "&" + id_name + "="+n;
+            url = url + id + ".json" + "?" + q + "&distinct()";
             
-            url = url + id + ".json" + "?" + variables + "&" + id_name + "=\""+platform_id_value+"\"" + "&distinct()";
-            
-            jsonStream = new URL(url).openStream();
+            jsonStream = lasProxy.executeGetMethodAndReturnStream(url, null);
             String jsonText = IOUtils.toString(jsonStream);
             return jsonText;
         } catch (JDOMException e) {
@@ -1050,7 +1052,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             throw new RPCException(e.getMessage());
         } catch (IOException e) {
             throw new RPCException(e.getMessage());
-        }
+        } catch (HttpException e) {
+        	 throw new RPCException(e.getMessage());
+		}
        
     }
    
