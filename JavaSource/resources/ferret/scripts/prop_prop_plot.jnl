@@ -42,6 +42,21 @@ CANCEL SYMBOL ferret_palette
 
 GO setup_prop_prop
 
+
+ ! Check for data types
+DEFINE SYMBOL vtype = `($ferret_plot_var_0),RETURN=dtype`
+IF ($vtype"0|CHAR>1|*>0") THEN \
+  DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_0). Choose another variable.
+
+DEFINE SYMBOL vtype = `($ferret_plot_var_1),RETURN=dtype`
+IF ($vtype"0|CHAR>1|*>0") THEN \
+   DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_1). Choose another variable.
+
+IF ($error_string"0|*>1") THEN
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
 ! Open the window, apply size, scale options
 
 ! dont want to set the aspect ratio using xy region, so reset
