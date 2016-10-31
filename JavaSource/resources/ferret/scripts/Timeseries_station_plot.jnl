@@ -3,6 +3,7 @@
 ! 
 ! Author: Ansley Manke
 ! Date: Nov 2014
+! 10/2016   ACM Catch and issue an error for string variables
 !
 ! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
 !
@@ -122,7 +123,15 @@ let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
 
 DEFINE SYMBOL axset = /axes=0,1,1,0
 
+DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN 
+   DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_0). Choose another variable.
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
 LET dmm = MINMAX (($data_var)) 
+
 ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
 
 IF ($ppl$range_low"|($ppl$range_high)>1|*>0") THEN
@@ -632,7 +641,7 @@ ELSE  ! more than max_separate_stations stations
    let vart = reshape(tempx, tt);\
    let colort = reshape(colrx, tt);\
    plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort;\
-   ppl shaset reset; list/L=1 colort; sh grid vart; pause)
+   ppl shaset reset; list/L=1 colort; sh grid vart)
    
    ENDIF  ! allbad
 ENDIF

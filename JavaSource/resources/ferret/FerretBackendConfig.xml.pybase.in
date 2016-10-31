@@ -32,6 +32,12 @@
                   Differencing is not implemented between unlike Curvilienar/Rectilinear grids
               </text>
            </message>
+	   <message type="startsWith" level="error">
+              <key>**ERROR Invalid data type for variable</key>
+              <text>
+                  Cannot plot a non-numeric variable. Please choose another variable, or List the data.
+              </text>
+           </message>
            <message type="startsWith" level="error">
               <key>**ERROR Sorry. This server cannot yet perform a time analysis and a month-of-the-year constraint together.</key>
               <text>
