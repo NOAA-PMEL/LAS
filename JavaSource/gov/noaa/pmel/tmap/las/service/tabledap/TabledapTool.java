@@ -425,7 +425,7 @@ public class TabledapTool extends TemplateTool {
             
          
             
-           
+            ArrayList<String> vars = lasBackendRequest.getVariables();
             // If the operation is the prop-prop plot, we need all the variables.
             if ( operationID != null && operationID.equals("Trajectgory_thumbnails") ) {
                 Map<String, String> thumbnail_properties = lasBackendRequest.getPropertyGroup("thumbnails");
@@ -440,11 +440,19 @@ public class TabledapTool extends TemplateTool {
                 if ( all == null || all.equals("") ) {
                 	all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 }
+                
                 query.append(all);
+                
+                for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+					String v = (String) varIt.next();
+					if ( !all.contains(v) && !v.equals(latname) && !v.equals(lonname) && !v.equals(zname) && !v.equals(time) ) {
+						query.append(","+v);
+					}
+				}
             }  else {
             	
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
-                ArrayList<String> vars = lasBackendRequest.getVariables();
+               
                 
                 // Only add the extras if the variable list does not come from configuraiton.
                 // Some things might need something besides x,y,z and t in the file so...
