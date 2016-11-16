@@ -152,9 +152,16 @@ IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
    IF `ymx-ymn GT 20` THEN LET ydl = ($ppl$range_inc)
 ENDIF
 
+IF `ymn EQ ymx` THEN
+   LET ymn = `ymn-1`
+   LET ymx = `ymx+1`
+ENDIF
+
 ! Underlay plot with the time axis and the right vertical range
 SET VIEW full_view
+sh axis taxis_all
 PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+
 IF `($data_var)[i=@ngd] EQ 0 AND ($data_count) eq 1` then
    LET nstations = 1
    LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
