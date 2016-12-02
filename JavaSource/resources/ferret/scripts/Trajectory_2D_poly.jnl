@@ -404,8 +404,6 @@ KEYMARK 0
 
 ! Save the results
 
-IF `($do_icons"0|*>1") AND ($result_webrowset_filename"0|*>1")` THEN  GO feature_key
-
 GO LAS_results box
 
 ! End of file ------------Trajectory_2D_poly.jnl--------------------------

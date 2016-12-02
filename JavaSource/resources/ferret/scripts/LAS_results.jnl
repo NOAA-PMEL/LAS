@@ -34,6 +34,9 @@ ELSE
    IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
 ENDIF
 
+! For feature-type plots, with an ID variable, write the xml file
+IF `($do_icons"0|*>1") AND ($result_webrowset_filename"0|*>1")` THEN  GO feature_key
+
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
 ! that are set when making the plot. If a colorbar is made, do that after the
@@ -177,15 +180,19 @@ IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insit
 	 IF ($insitu_blankvar"0|*>1) THEN LET time_map_var = ($insitu_blankvar)
          LET tt= t[GT=time_map_var]
 
-         LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
-	 IF `($xaxis_min%($ppl$xmin1)%) LT tboxlo[gt=tt,L=1]` THEN LET t1 = tboxlo[gt=tt,L=1]
+! See Ferret ticket 2483
+! With Ferret v7.02 11/2016, the xaxis_min, xaxis_max correctly represent the start and end
+! points of the plotted axis which PPLUS may haave extended beyond the time axis coordinates. 
+! (Previously these contained the time-axis coordinates). Even if the values in XAXIS_MIN 
+! and XAXIS_MAX may lie outside the coordinate range of the time axis, the function 
+! TAX_DATESTRING returns the correct dates using the time units and origin from the axis.
 
-         LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
-	 LET thi = tboxhi[gt=tt,L=`tt,return=lsize`]
-	 IF `($xaxis_max%($ppl$xmax1)%) GT thi` THEN LET t2 = thi
+	 LET min_ax = ($xaxis_min%($ppl$xmin1)%)
+	 LET max_ax = ($xaxis_max%($ppl$xmax1)%)
 
-         DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
-         DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
+         DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(min_ax, tt, "seconds")`
+         DEFINE SYMBOL haxis_tend = `TAX_DATESTRING(max_ax, tt, "seconds")`
+
          DEFINE SYMBOL haxis_tunits = `time_map_var,RETURN=tunits`
          DEFINE SYMBOL haxis_torigin = `time_map_var,RETURN=t0`
          DEFINE SYMBOL haxis_tcalendar = `time_map_var,RETURN=calendar`
