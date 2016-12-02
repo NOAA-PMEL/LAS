@@ -8,7 +8,10 @@
 !
 DEFINE SYMBOL num ($1"0")
 
-DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
+! The dataset_id should be the ERDDAP dataset ID. Check that it's defined anf
+! if not set it to the dataset_name
+
+IF `($data_($num)_dataset_id"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
 ! The variable at the x and y locations
 
