@@ -34,9 +34,6 @@ ELSE
    IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
 ENDIF
 
-! For feature-type plots, with an ID variable, write the xml file
-IF `($do_icons"0|*>1") AND ($result_webrowset_filename"0|*>1")` THEN  GO feature_key
-
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
 ! that are set when making the plot. If a colorbar is made, do that after the

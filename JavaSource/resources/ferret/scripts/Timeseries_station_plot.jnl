@@ -4,6 +4,7 @@
 ! Author: Ansley Manke
 ! Date: Nov 2014
 ! 10/2016   ACM Catch and issue an error for string variables
+! 12/2016 fixes for case when first variable is all-missing
 !
 ! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
 !
@@ -130,39 +131,51 @@ DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
    EXIT/PROGRAM
 ENDIF
 
-LET dmm = MINMAX (($data_var)) 
+IF `($data_var)[i=@ngd] GT 0` THEN
+   LET dmm = MINMAX (($data_var)) 
 
-ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
+   ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
 
-IF ($ppl$range_low"|($ppl$range_high)>1|*>0") THEN
-   LET dm1 = 0.95*($ppl$range_low)
-   LET dm2 = 1.05*($ppl$range_low)
-   ppl %range `dm1,prec=15`,`dm2,prec=15`, 5
-ENDIF
-LET ymn = ($ppl$range_low)
-LET ymx = ($ppl$range_high)
-LET ydl = ($ppl$range_inc)
+   IF ($ppl$range_low"|($ppl$range_high)>1|*>0") THEN
+     LET dm1 = 0.95*($ppl$range_low)
+      LET dm2 = 1.05*($ppl$range_low)
+      ppl %range `dm1,prec=15`,`dm2,prec=15`, 5
+   ENDIF
+   LET ymn = ($ppl$range_low)
+   LET ymx = ($ppl$range_high)
+   LET ydl = ($ppl$range_inc)
+   
+   IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
+       LET dmm = minmax(($data_var))
+       LET ymn = `dmm[i=1]-1`
+       LET ymx = `dmm[i=2]+1`
+       LET ydl = 0.5
+       IF `ymx-ymn GT 10` THEN LET ydl = 1
+       IF `ymx-ymn GT 20` THEN LET ydl = ($ppl$range_inc)
+   ENDIF
 
-IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-   LET dmm = minmax(($data_var))
-   LET ymn = `dmm[i=1]-1`
-   LET ymx = `dmm[i=2]+1`
-   LET ydl = 0.5
-   IF `ymx-ymn GT 10` THEN LET ydl = 1
-   IF `ymx-ymn GT 20` THEN LET ydl = ($ppl$range_inc)
-ENDIF
-
-IF `ymn EQ ymx` THEN
-   LET ymn = `ymn-1`
-   LET ymx = `ymx+1`
-ENDIF
+   IF `ymn EQ ymx` THEN
+      LET ymn = `ymn-1`
+      LET ymx = `ymx+1`
+   ENDIF
 
 ! Underlay plot with the time axis and the right vertical range
-SET VIEW full_view
-sh axis taxis_all
-PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+   SET VIEW full_view
+   sh axis taxis_all
+
+   SET VIEW full_view
+   sh axis taxis_all
+   PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+
+ELSE  ! no valid data_var data
+   LET ymn = -1
+   LET ymx = 1
+   LET ydl = 0.5
+ENDIF
 
 IF `($data_var)[i=@ngd] EQ 0 AND ($data_count) eq 1` then
+   
+   PLOT/NOLAB/VLIM=-1:1 `-100` + 0*t[gt=taxis_all]
    LET nstations = 1
    LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    DEFINE SYMBOL allbad = 1
@@ -191,6 +204,7 @@ IF `(nstations GT 1) AND ($ferret_use_graticules"0|none>0|notic>0|white>0|*>1)` 
      DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=7)
   ENDIF
 ENDIF
+
 ! when coloring multiple line plots, define a palette and color levels
 
 IF `nstations GT max_separate_stations` THEN
@@ -209,6 +223,7 @@ IF ($ferret_line_color"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/col
 
 
 ! one station and multi-variables
+
 IF `nstations EQ 1` THEN
 
 
@@ -279,10 +294,11 @@ IF `nstations EQ 1` THEN
          let ydl = `MAX(ydl,yd)`
 	 
          DEFINE SYMBOL comma = ,
-      ENDIF
+      ENDIF  ! ngd GT 0
    
-      IF `($data_count) GT 1` THEN 
-         IF `($data_var_1)[i=@ngd] GT 0` THEN DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_1)
+      IF `($data_count) GT 1` THEN
+      IF `($data_var_1)[i=@ngd] GT 0` THEN 
+         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_1)
          
          LET dmm = MINMAX (($data_var_1)) 
          ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -306,9 +322,12 @@ IF `nstations EQ 1` THEN
          let ymx = `MAX(ymx,y2)`
          let ydl = `MAX(ydl,yd)`
          DEFINE SYMBOL comma = ,
-      ENDIF
-      IF `($data_count) GT 2` THEN 
-         IF `($data_var_1)[i=@ngd] GT 0` THEN DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_2)
+      ENDIF ! ngd GT 0
+      ENDIF ! data count
+
+      IF `($data_count) GT 2` THEN
+      IF `($data_var_2)[i=@ngd] GT 0` THEN 
+         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_2)
          
          LET dmm = MINMAX (($data_var_2)) 
          ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -331,9 +350,12 @@ IF `nstations EQ 1` THEN
          let ymx = `MAX(ymx,y2)`
          let ydl = `MAX(ydl,yd)`
          DEFINE SYMBOL comma = ,
-      ENDIF
-      IF `($data_count) GT 3` THEN 
-         IF `($data_var_1)[i=@ngd] GT 0` THEN DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_3)
+      ENDIF ! ngd GT 0
+      ENDIF ! data count > 2
+
+      IF `($data_count) GT 3` THEN
+      IF `($data_var_3)[i=@ngd] GT 0` THEN 
+         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_3)
          
          LET dmm = MINMAX (($data_var_3)) 
          ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -356,9 +378,12 @@ IF `nstations EQ 1` THEN
          let ymx = `MAX(ymx,y2)`
          let ydl = `MAX(ydl,yd)`
          DEFINE SYMBOL comma = ,
-      ENDIF
-      IF `($data_count) GT 4` THEN 
-         IF `($data_var_1)[i=@ngd] GT 0` THEN DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_4)
+      ENDIF ! ngd GT 0
+      ENDIF ! data count > 3
+
+      IF `($data_count) GT 4` THEN
+      IF `($data_var_4)[i=@ngd] GT 0` THEN 
+         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_4)
          
          LET dmm = MINMAX (($data_var_4)) 
          ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -381,9 +406,12 @@ IF `nstations EQ 1` THEN
          let ymx = `MAX(ymx,y2)`
          let ydl = `MAX(ydl,yd)`
          DEFINE SYMBOL comma = ,
-      ENDIF
-      IF `($data_count) GT 5` THEN 
-         IF `($data_var_1)[i=@ngd] GT 0` THEN DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_5)
+      ENDIF ! ngd GT 0
+      ENDIF ! data count > 4
+
+      IF `($data_count) GT 5` THEN
+      IF `($data_var_5)[i=@ngd] GT 0` THEN 
+         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_5)
          
          LET dmm = MINMAX (($data_var_5)) 
          ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -405,7 +433,8 @@ IF `nstations EQ 1` THEN
          let ymn = `MIN(ymn,y1)`
          let ymx = `MAX(ymx,y2)`
          let ydl = `MAX(ydl,yd)`
-      ENDIF
+      ENDIF ! ngd GT 0
+      ENDIF ! data count > =5
    
 ! if everything is all-missing, still define this symbol
       IF `($plot_all"0|*>1") EQ 0` THEN DEFINE SYMBOL plot_all = ($data_var)
@@ -413,7 +442,7 @@ IF `nstations EQ 1` THEN
       IF `ymn EQ ymx` THEN 
          PLOT/NOLAB ($plot_all)
       ELSE
-	 PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` ($plot_all)
+	 PLOT/NOLAB($vlims) ($plot_all)
       ENDIF
 
       IF ($plot_pos_down"0|0|1|*>1") THEN
@@ -423,7 +452,6 @@ IF `nstations EQ 1` THEN
       ELSE
          DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($yaxis_min):($yaxis_max)
       ENDIF
-   
    ENDIF  ! set vert axis scale
 
    set win/clear
@@ -487,6 +515,7 @@ IF `nstations EQ 1` THEN
       PLOT/OVER/NOLAB/COLOR=Blue vart
       IF ($allbad"0|*>1") THEN LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    ENDIF
+   
 ELSE
 
 ! Plot the lines. For up to max_separate_stations, make separate labeled 

@@ -30,8 +30,6 @@ IF `STRINDEX(strvar, "'") GT 0` THEN
    DEFINE SYMBOL rhs = `SUBSTRING(strvar, s1+1, slen-2)`
 ENDIF
 
-IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
-
 ! RHS for month ranges may be a comma-separated list
 LET month_labels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
 
