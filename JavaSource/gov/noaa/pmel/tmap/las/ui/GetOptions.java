@@ -62,10 +62,17 @@ public class GetOptions extends ConfigService {
 		} else {
 			log.info("START: "+request.getRequestURL());
 		}
-		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
+		
 		String opid = request.getParameter("opid");
 		String format = request.getParameter("format");
 
+		String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	sendError(response, "options", format, "Site updating. Reload and try again in a minute.");
+        	return null;
+        }
+		
+		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
 		
 		// Handle the case of a forward from a confluence server to retrieve local options.
 

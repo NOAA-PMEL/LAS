@@ -49,7 +49,7 @@ public class GetOperations extends ConfigService {
 	 * @return ActionForward
 	 */
 	public String execute() {
-		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
+		
 		String query = request.getQueryString();
 		if ( query != null ) {
 			try{
@@ -70,6 +70,15 @@ public class GetOperations extends ConfigService {
 		if ( format == null ) {
 			format = "json";
 		}
+		
+		LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
+		
+		String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	sendError(response, "operations", format, "Site updating. Reload and try again in a minute.");
+        	return null;
+        }
+		
 		boolean error = false;
 		
 		try {

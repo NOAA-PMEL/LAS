@@ -86,6 +86,13 @@ public class GetDatasets extends ConfigService {
         }
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         log.debug("Processing request for dataset list.");
+        
+        String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	sendError(response, "datasets", format, "Site updating. Reload and try again in a minute.");
+        	return null;
+        }
+        
         LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY); 
                 
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
