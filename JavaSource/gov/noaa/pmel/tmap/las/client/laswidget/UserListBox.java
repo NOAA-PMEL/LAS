@@ -267,12 +267,12 @@ public class UserListBox extends Composite {
 
         	 String uunnts = v.getAttributes().get("units");
         	 // Time series sub-set variables are not very interesting to plot.
-        	 if ( !v.isTimeSeries() || !v.isSubset() ) {
-        		 add(v);
-        		 if((i==0) && (variableMetadataView!=null)){
-        			 variableMetadataView.setDSID(v.getDSID());
-        		 }
+        	 
+        	 add(v);
+        	 if((i==0) && (variableMetadataView!=null)){
+        		 variableMetadataView.setDSID(v.getDSID());
         	 }
+
          }
          setAddButtonVisible(variables.size() > 1);
      }
