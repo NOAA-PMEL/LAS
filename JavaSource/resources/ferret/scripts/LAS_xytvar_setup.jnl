@@ -577,7 +577,9 @@ IF ($ferret_thumb"0|0|*>1") THEN
 ENDIF
 
 LET bvar = dep_var + indep_var
+stat bvar
 IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
+stat bvar; !pause
 
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
@@ -612,7 +614,7 @@ PPL SHADE
 
 IF ($put_label"0|*>1") THEN 
 
-   DEFINE SYMBOL vtype = `xvar,return=dtype`
+   DEFINE SYMBOL xvtype = `xvar,return=dtype`
    IF ($vtype"0|CHAR>1|*>0") THEN 
       LET ylab_bad = ($ppl$ylen) - 1
       LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> has an invalid data type. Choose another variable
@@ -672,7 +674,7 @@ ENDIF
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    SET VIEW ($view2)
    LET bvar = dep_var1 + indep_var1
-   IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
+   IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var1
    LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
    SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
    SET MODE/LAST nodata_lab
@@ -683,7 +685,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
    IF `($ferret_plot_var"0|time>1|TIME>1|hours_1970>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
       SET VIEW ($view2)
       LET bvar = dep_var1 + indep_var1
-      IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
+      IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var1
       LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
       SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
       SET MODE/LAST nodata_lab
