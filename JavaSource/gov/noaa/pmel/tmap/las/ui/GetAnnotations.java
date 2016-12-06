@@ -42,6 +42,18 @@ public class GetAnnotations extends ConfigService {
 	
 	public String execute() throws Exception {    
 		log.info("START: "+request.getRequestURL());
+		
+		String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	LASAnnotations lasAnnotations = new LASAnnotations();
+			lasAnnotations.setDatasetTitle("Site updating. Reload and try again.");
+			request.setAttribute("las_annotations", lasAnnotations);
+			log.error("Site updating during processing of annontations.");
+			log.info("END:   "+request.getRequestURL());
+			setTemplate("/productserver/templates/"+template);
+			return TEMPLATE;
+        }
+        
         LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
         request.setAttribute("base_server_url", lasConfig.getBaseServerURL());
 	

@@ -48,6 +48,18 @@ public class GetUI extends ConfigService {
     public String execute() throws Exception {    
         //ServletContext context = (ServletContext) servlet.getServletContext();
         StringBuilder query = new StringBuilder();
+        
+        String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	String las_message = "Unable to initialize UI.";
+            LASBackendResponse lasBackendResponse = new LASBackendResponse();
+            lasBackendResponse.setError("las_message", las_message);
+            lasBackendResponse.addError("exception_message", "System is updating. Reload and try again.");
+            request.setAttribute("las_response", lasBackendResponse);           
+            return ERROR;
+        }
+        
+        
         LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
         ServerConfig serverConfig = (ServerConfig) contextAttributes.get(LASConfigPlugIn.SERVER_CONFIG_KEY);
         String[] cat_ids = request.getParameterValues("catid");

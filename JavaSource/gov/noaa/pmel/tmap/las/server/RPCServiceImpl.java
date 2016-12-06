@@ -116,6 +116,10 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	 * @throws RPCException
 	 */
 	LASConfig getLASConfig() throws RPCException {
+		String lock = (String) getServletContext().getAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	throw new RPCException("Site updating. Reload and try again in a minute.");
+        }
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(
 				LASConfigPlugIn.LAS_CONFIG_KEY);
 		if (lasConfig == null) {

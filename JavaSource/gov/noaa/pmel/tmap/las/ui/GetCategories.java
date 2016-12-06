@@ -60,12 +60,19 @@ public class GetCategories extends ConfigService {
 			log.info("START: "+request.getRequestURL());
 		}
 		
-		
-		LASConfig lasConfig = (LASConfig)contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		String format = request.getParameter("format");
 		if ( format == null ) {
 			format = "json";
 		}
+		
+		String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	sendError(response, "categories", format, "Site updating. Reload and try again in a minute.");
+        	return null;
+        }
+		
+		LASConfig lasConfig = (LASConfig)contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY); 
+		
 		String catid = request.getParameter("catid");
 				
 		ArrayList<Category> categories = new ArrayList<Category>();

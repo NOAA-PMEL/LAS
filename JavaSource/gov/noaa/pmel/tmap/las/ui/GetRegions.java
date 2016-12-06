@@ -66,13 +66,21 @@ public class GetRegions extends ConfigService {
 		} else {
 			log.info("START: "+request.getRequestURL());
 		}
-        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
+        
         String dsID = request.getParameter("dsid");
         String varID = request.getParameter("varid");
         String format = request.getParameter("format");        
         if ( format == null ) {
             format = "json";
         }
+        
+        String lock = (String) contextAttributes.get(LASConfigPlugIn.LAS_LOCK_KEY);
+        if ( lock != null && lock.equals("true") ) {
+        	sendError(response, "regions", format, "Site updating. Reload and try again in a minute.");
+        	return null;
+        }
+        
+        LASConfig lasConfig = (LASConfig) contextAttributes.get(LASConfigPlugIn.LAS_CONFIG_KEY);
        
         try {
             ArrayList<Region> Regions = lasConfig.getRegions(dsID, varID);
