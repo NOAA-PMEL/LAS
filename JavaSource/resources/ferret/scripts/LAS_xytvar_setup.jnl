@@ -375,8 +375,15 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    CANCEL SYMBOL data_1_units
    DEFINE SYMBOL data_1_title = Time
 
-   IF `baddat EQ 1` THEN
-      DEFINE AXIS/t=1:2:1/t0=1-jan-1970/units=seconds haxis
+   IF `baddat EQ 1` THEN  ! plot the time axis with a label, no valid data
+   
+      LET since_loc = STRINDEX("($tunits)","since") - 2
+      IF `since_loc GT 1` THEN 
+         LET tunits = SUBSTRING("($tunits)",1,`since_loc`)
+         DEFINE SYMBOL tunits = `tunits`
+      ENDIF
+
+      DEFINE AXIS/t/T0="`($data_t_var).time_origin`"/units="($tunits)" haxis = ($ferret_prop_var)
       LET tt = t[gt=haxis]
       DEFINE SYMBOL win_asp = /ASPECT=0.75
       DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
@@ -384,14 +391,15 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    ELSE
 
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
-      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2d
-
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2k
+      DEFINE SYMBOL haxis2k_defined = 1
 
 ! Coarser axis for the all-missing plot that will make the underlay.
       let thaxis = t[gt=haxis]
       let nthaxis = `thaxis,return=lsize`
       IF `nthaxis GT 2000` THEN \
-      DEFINE AXIS/T=`ax_lo`:`ax_hi`/npoints=2000/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2d
+      DEFINE AXIS/T=`ax_lo`:`ax_hi`/npoints=2000/T0="`($data_t_var).time_origin`"/units=($tunits) haxis2k
+      DEFINE SYMBOL haxis2k_defined = 1
 
       DEFINE SYMBOL timeaxis = haxis
       DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
@@ -406,7 +414,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    ENDIF
 
    LET dep_var = 0*t[gt=haxis]
-   LET dep_var2d = 0*t[gt=haxis2d]
+   IF ($haxis2k_defined"0|1") THEN LET dep_var2k = 0*t[gt=haxis2k]
 
    ! A time-lon plot would normally plot with time on the vertical
    IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
@@ -529,9 +537,14 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
    DEFINE SYMBOL is_time = 1
    GO LAS_is_range amin amax
 
-   IF `baddat EQ 1` THEN
-      DEFINE AXIS/t=1:2:1 vaxis
+   IF `baddat EQ 1` THEN  ! plot the time axis with a label, no valid data
+      LET since_loc = STRINDEX("($tunits)","since") - 2
+      IF `since_loc GT 1` THEN 
+         LET tunits = SUBSTRING("($tunits)",1,`since_loc`)
+         DEFINE SYMBOL tunits = `tunits`
+      ENDIF
 
+      DEFINE AXIS/t/T0="`($data_t_var).time_origin`"/units=($tunits"seconds")  vaxis = ($ferret_plot_var)
       DEFINE SYMBOL win_asp = /ASPECT=0.75
       DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
       LET tt = t[gt=vaxis]
@@ -578,8 +591,8 @@ ENDIF
 
 LET bvar = dep_var + indep_var
 stat bvar
-IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var
-stat bvar; !pause
+IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var
+stat bvar
 
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
@@ -674,7 +687,7 @@ ENDIF
 IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    SET VIEW ($view2)
    LET bvar = dep_var1 + indep_var1
-   IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var1
+   IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
    LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
    SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
    SET MODE/LAST nodata_lab
@@ -685,7 +698,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
    IF `($ferret_plot_var"0|time>1|TIME>1|hours_1970>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
       SET VIEW ($view2)
       LET bvar = dep_var1 + indep_var1
-      IF `dep_var2d,RETURN=defined` then LET bvar = dep_var2d + indep_var1
+      IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
       LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
       SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
       SET MODE/LAST nodata_lab
