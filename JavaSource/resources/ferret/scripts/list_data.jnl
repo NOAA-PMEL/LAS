@@ -10,6 +10,7 @@
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 ! 8/ 9/2007 ACM Allow for multiple variables, appending each to the file
 !               until all are written.
+! 12/2016 set list precision to 7
 !
 ! list_data.jnl creates a listing, CDF or ASCII (based on std_list.jnl)
 ! Assumes symbol ferret_format which will be one of "cdf" "txt" "tsv" "csv" "asc"
@@ -30,7 +31,7 @@ IF ($ferret_format%0|asc>1|*>0) THEN
   
   IF ($ferret_data_format"0|tsv>1|csv>1|asc>1|*>0") THEN 
      DEFINE SYMBOL frmt ($frmt) = ($frmt)/($ferret_data_format"|tsv>format=tab|csv>format=comma|asc>heading=enhanced")
-     SET LIST/PREC=6
+     SET LIST/PREC=7
    ENDIF
 ENDIF
 

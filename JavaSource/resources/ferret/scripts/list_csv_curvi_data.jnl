@@ -4,6 +4,7 @@
 ! Author: ansley 
 ! Date: 2011/05/16
 !      4/2013 ACM Implement the Ferret property ferret_start_memory
+! 12/2016 set list precision to 7
 !
 ! Called by list_csv_data.jnl 
 ! Write csv data: date/time, X, Y, Z, var1, var2, ...
@@ -123,7 +124,7 @@ IF `size* nlist GT max_size` THEN
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
-SET LIST/PREC=6/FILE="($result_ferret_listing_filename)"
+SET LIST/PREC=7/FILE="($result_ferret_listing_filename)"
 LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F16.0) SIZE
 
 DEFINE SYMBOL list_quals = APPEND

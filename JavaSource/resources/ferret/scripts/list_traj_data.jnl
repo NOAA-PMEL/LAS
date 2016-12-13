@@ -3,6 +3,7 @@
 ! Author: ansley 
 ! Date: Sep 19 2011
 !      4/2013 ACM Implement the Ferret property ferret_start_memory
+!      12/2016 set list precision to 7
 !
 !
 ! Called by Trajectory_Data_Convert_File.jnl 
@@ -74,7 +75,7 @@ IF `size* nlist GT max_size` THEN
 ENDIF
 
 
-SET LIST/prec=6
+SET LIST/PREC=7
 SET LIST/FILE="($result_ferret_listing_filename)"
 
 IF ($dataset_title_att"0|*>1") THEN 

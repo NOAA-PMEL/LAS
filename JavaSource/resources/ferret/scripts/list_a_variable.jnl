@@ -11,6 +11,7 @@
 ! 20-Mar-2013 Fix LAS ticket 1511. Keep axis names in their original form, no upcase,
 !             and don't rename them according to the subset. 
 !             Also write the URL of the original dataset.
+! 12/2016 set list precision to 7
 !
 ! Called by list_data.jnl Initialize and write a single variable, appending 
 ! it to the ascii or netCDF output file.
@@ -20,7 +21,7 @@
 
 DEFINE SYMBOL var_num = $1
 
-SET LIST/PREC=6
+SET LIST/PREC=7
 
 ! Cannot list out a pseudo-variable, e.g. Z. In the initialization,
 ! check for pseutonames. If the variable name is a pseudo-var name, 
