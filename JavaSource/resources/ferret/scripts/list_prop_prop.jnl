@@ -11,6 +11,8 @@
 ! If the variables are strings, use SAMPLEI to apply any masks.
 ! Use the original variable name when expanding a feature_variable to list.
 
+! 12/2016 set list precision to 7
+
 set mode ver:always
 
 
@@ -21,7 +23,7 @@ IF ($ferret_data_format"0|csv>1|tsv>1|asc>1|*>0") THEN
 ENDIF
 
 SET LIST/FILE="($result_ferret_listing_filename)"
-SET LIST/prec=6
+SET LIST/PREC=7
 
 DEFINE SYMBOL its_listing = 1
 sh sym data_count
