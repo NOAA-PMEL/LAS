@@ -54,10 +54,13 @@ LET varcoords = "`($data_orig_var).coordinates`"
    DEFINE SYMBOL str1 = ($str1) `substring(varcoords, loca+2, len)`;\
    DEFINE SYMBOL newstring = ($str1))
 
+! If there is a space at the end, remove it
+DEFINE SYMBOL coordstring = `varcoords`
 LET space = STRINDEX(varcoords, " ")
-LET coordstring = "`SUBSTRING(varcoords, 1, space-1)`"
-
-DEFINE SYMBOL coordstring = `coordstring`
+IF `space GT 0` THEN 
+   LET coordstring = "`SUBSTRING(varcoords, 1, space-1)`"
+   DEFINE SYMBOL coordstring = `coordstring`
+ENDIF
 
 ! Is it a variable (and not a dimension) of the datset?
 
@@ -108,4 +111,5 @@ IF `(($ferret_curvi_coord_lon"0|*>1") + ($ferret_curvi_coord_lat"0|*>1")) EQ 1` 
   EXIT/PROGRAM
 ENDIF
 
+! ----- End of LAS_get_coords_att.jnl ------------------------------------------------
 
