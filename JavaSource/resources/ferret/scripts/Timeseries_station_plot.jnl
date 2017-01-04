@@ -457,10 +457,14 @@ IF `nstations EQ 1` THEN
    set win/clear
    set view full_view
 
+! Plot the variables, first putting them on the time axis. Use @BIN regridding, so any long gaps will
+! not have a line drawn across them. 
+
    LET vart = reshape(($data_var), tt)
+   LET vart_0 = vart[gt=tt_all@bin]
 
    IF `($data_count) EQ 1` THEN 
-      PLOT/COLOR=Blue($axset)/nolab($qualifiers) vart
+      PLOT/COLOR=Blue($axset)/nolab($qualifiers) vart_0
       IF ($allbad"0|*>1") THEN LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    ENDIF
 
@@ -511,8 +515,9 @@ IF `nstations EQ 1` THEN
       IF `($data_5_units"0|none>0|*>1") EQ 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_5_units))
    ENDIF
 
+! Overlay the first variable, so it is not obscured by the remaining ones.
    IF `($data_count) GT 1` THEN 
-      PLOT/OVER/NOLAB/COLOR=Blue vart
+      PLOT/OVER/NOLAB/COLOR=Blue vart_0
       IF ($allbad"0|*>1") THEN LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    ENDIF
    
