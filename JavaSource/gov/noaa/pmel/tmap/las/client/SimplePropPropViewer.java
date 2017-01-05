@@ -1499,7 +1499,6 @@ public class SimplePropPropViewer implements EntryPoint {
                         dsg_id = vs.getID();
                     }
                     
-                    
                    
                     if ( tid != null && tid.equals("true") ) {
                         dsg_id = vs.getID();
@@ -1519,6 +1518,7 @@ public class SimplePropPropViewer implements EntryPoint {
                             vs.getShortname().trim().equals("time") || 
                             vs.getID().equals(dsg_id) ) {
                         included.add(vs);
+                        Window.alert("including "+vs.getShortname());
                     }
                 }
                 xVariables.setVariables(included);
@@ -1787,6 +1787,13 @@ public class SimplePropPropViewer implements EntryPoint {
         String vx = lasRequest.getVariable(0);
         String vy = lasRequest.getVariable(1);
         String vc = lasRequest.getVariable(2);
+        
+        xVariables.setSelectedVariableById(vx);
+        yVariables.setSelectedVariableById(vy);
+        if ( vc != null && !vc.equals("") ) {
+            colorVariables.setSelectedVariableById(vc);
+        }
+
         
         String count = lasRequest.getProperty("data", "count");
         int c = 2;
