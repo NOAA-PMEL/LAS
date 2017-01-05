@@ -1518,7 +1518,6 @@ public class SimplePropPropViewer implements EntryPoint {
                             vs.getShortname().trim().equals("time") || 
                             vs.getID().equals(dsg_id) ) {
                         included.add(vs);
-                        Window.alert("including "+vs.getShortname());
                     }
                 }
                 xVariables.setVariables(included);
