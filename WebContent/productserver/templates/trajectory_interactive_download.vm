@@ -73,6 +73,7 @@ $las_response.toString()
   var reqZHi;
 
   var dataFormat = 0; //0:netCDF,1:ascii,2:csv  // arcGrid and shape file not used, may want shape file back...
+  var dataVariables = 1; // 0:minimal, 1:standard, 2:everything
 
   var newReq;
 
@@ -124,6 +125,7 @@ $las_response.toString()
 
   function launch(){
     genFormatMenu();
+    genVariablesMenu();
     // For trajectory data just use the request and do not set up menus.  
     // if(dataHasT){genDateWidget();}
     // if(dataHasZ){genDepthWidget();}
@@ -132,13 +134,23 @@ $las_response.toString()
   function genFormatMenu(){
     //data format
     fmt = "";
-    fmt += " <SELECT NAME='download_format' onChange='setDataFormat(this.selectedIndex)'> ";
-    fmt += " <OPTION SELECTED VALUE=0>NetCDF ";
-    fmt += " <OPTION VALUE=1>ASCII ";
-    fmt += " <OPTION VALUE=2>CSV ";
-    // fmt += " <OPTION VALUE=3>arcGrid ";
-    fmt += " </SELECT><br><br>";
+    fmt += "<select name='download_format' onChange='setDataFormat(this.selectedIndex)'> ";
+    fmt += "<option value=0 selected>NetCDF</option>";
+    fmt += "<option value=1>TSV</option>";
+    fmt += "<option value=2>CSV</option>";
+    fmt += "</select>";
     document.getElementById("format").innerHTML = fmt;
+  }
+
+  function genVariablesMenu() {
+    // variables to include in the download
+    fmt = "";
+    fmt += "<select name='download_variables' onChange='setDataVariables(this.selectedIndex)'> ";
+    fmt += "<option value=0>Shown and location variables</option>";
+    fmt += "<option value=1 selected>Shown and all standard variables</option>";
+    fmt += "<option value=2>All available variables</option>";
+    fmt += "</select>";
+    document.getElementById("variables").innerHTML = fmt;
   }
 
   function genUI(){
@@ -146,33 +158,41 @@ $las_response.toString()
     //selected region
     var UIString = "<b><h2>Download Data</h2></b>";  
     UIString += "<table cellpadding='5'><tr><td valign=top><b>Selected Region</b></td>";
-    UIString += "<td>Longitude range: [" + initXLo+", "+initXHi+"]<br> ";
-    UIString += "Latitude range: [" + initYLo+", "+initYHi+"]";
+    UIString += "<td>Longitude range: [" + initXLo+", "+initXHi+"]";
+    UIString += "<br />Latitude range: [" + initYLo+", "+initYHi+"]";
     if(dataHasT){
       // As specified in the request. No widget will be built or used.
-      UIString +="<br>Time range: ["+ reqTLo + ", " + reqTHi+"]";
+      UIString += "<br />Time range: ["+ reqTLo + ", " + reqTHi+"]";
     }
     if(dataHasZ){
-      UIString += "<br>Depth range: [" + dataZLo + ", " + dataZHi + "]";
+      UIString += "<br />Depth range: [" + dataZLo + ", " + dataZHi + "]";
     }
     
     #set($cont = $las_request.getVariableConstraints())
     #foreach ($con in $cont)
        #set($con_var_name = $las_config.getVariableTitle($con.getVariableXPath()))
-       UIString += "<br>Constraint: [$con_var_name $con.getHTMLOp() $con.getValue()]"
+       UIString += "<br />Constraint: [$con_var_name $con.getHTMLOp() $con.getValue()]"
     #end
     
-    UIString +="<br></td></tr><br>";
-    
+    UIString += "</td></tr>";
+
     //data format menu
-    UIString +="<tr><td valign=top><b>Select Format</b></td><td><div id='format'></div></td></tr>";
+    UIString += "<tr><td></td><td></td></tr>";
+    UIString += "<tr><td valign=top><b>Data Format</b></td><td><div id='format'></div></td></tr>";
+
+    // data variables menu
+    UIString += "<tr><td></td><td></td></tr>";
+    UIString += "<tr><td valign=top><b>Data to download</b></td><td><div id='variables'></div></td></tr>";
+
+    // download and close button
+    UIString += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
+    UIString += "<tr><td>";
+    UIString += "<input type='button' name='download_submit' value='Download' onClick='submit()' />";
+    UIString += "</td><td>";
+    UIString += "<input type='button' value='Close' onClick='window.close()' />";
+    UIString += "</td></tr>";
+
     UIString += "</table>";
-
-    // Check for full data set.
-    UIString += "<br><INPUT ID='all' TYPE='checkbox' name='all_data' value='true'>Include all variables in the download.<br>";
-
-    //ok and reset button
-    UIString += "<br><INPUT TYPE='button' name='download_submit' Value='OK' onClick='submit()'> ";
 
     document.write(UIString);
   }
@@ -199,6 +219,11 @@ $las_response.toString()
       // if(dataHasT){genDateWidget();}
       // if(dataHasZ){genDepthWidget();}
     }
+  }
+
+  //set format of download data
+  function setDataVariables(index){
+    dataVariables = index;
   }
 
   function getWidgetState(){
@@ -242,7 +267,7 @@ $las_response.toString()
     //arcGrid: only for xy map
     if(dataFormat == 3 || dataFormat == 4){req.setProperty('ferret', 'view', 'xy');}
 
-    //set output format for ascii, 'tsv' for tab seperated
+    //set output format for TSV and CSV
     if(dataFormat == 1){
       req.setProperty('ferret','data_format','tsv');
     } else if(dataFormat == 2) {
@@ -253,13 +278,21 @@ $las_response.toString()
     if(dataFormat == 0) {
       req.setOperation('Trajectory_Data_Extract_netCDF');
     }else if(dataFormat == 1){
-      req.setOperation('Trajectory_Data_Extract_File');
+      req.setOperation('Trajectory_Data_Extract_TSV');
     }else if(dataFormat == 2){
-      req.setOperation('Trajectory_Data_Extract_File');
+      req.setOperation('Trajectory_Data_Extract_CSV');
     }else if(dataFormat == 3){
       req.setOperation('Trajectory_Data_Extract_ArcView');
     }else if(dataFormat == 4){
       req.setOperation('Shape_File');
+    }
+
+    if ( dataVariables == 0 ) {
+      req.setProperty("download", "data_variables", "minimal");
+    } else if ( dataVariables == 1 ) {
+      req.setProperty("download", "data_variables", "standard");
+    } else if ( dataVariables == 2 ) {
+      req.setProperty("download", "data_variables", "everything");
     }
 
     return req;
@@ -267,22 +300,17 @@ $las_response.toString()
 
   //open a new window with the request as URL
   function sendLASRequest(lasReq){
-    if ( document.getElementById('all').checked ) {
-      lasReq.setProperty("download", "all_data", "true");
-    }
     var prefix =  baseURL + '/ProductServer.do?xml=';
     var url = prefix+escape(lasReq.getXMLText());
-    //document.location = url;
     var OpenWindow=window.open(url, "newwindow", "height=450, width=650,toolbar=1,menubar=1,scrollbars=1,status=1");
-    //OpenWindow.document.close();
   }
 
   //generate the depth widget
   function genDepthWidget(){
     var dpWidget = document.getElementById("depthWidget");
 
-    var dpw = "<div id='DepthWidgetStart' ></div><br>";
-    if(dataFormat != 3){dpw += "<div id='DepthWidgetEnd' ></div><br>";}
+    var dpw = "<div id='DepthWidgetStart' ></div><br />";
+    if(dataFormat != 3){dpw += "<div id='DepthWidgetEnd' ></div><br />";}
     dpWidget.innerHTML = dpw;
 
     menu = Grid.getMenu('z');
@@ -316,11 +344,11 @@ $las_response.toString()
     
     var dtw="";
     if(tDisplayType == 'widget'){
-      dtw += "<br><div id='DateWidgetRange' ></div><br>";
+      dtw += "<br /><div id='DateWidgetRange' ></div><br />";
     }else if(tDisplayType == 'menu'){
       var dtw = "<div id='DateWidgetStart' ></div>";
       if(dataFormat != 3){//for arcGrid, no need of end date
-        dtw += "<div id='DateWidgetEnd' ></div><br>";
+        dtw += "<div id='DateWidgetEnd' ></div><br />";
       }
     }
     dtWidget.innerHTML = dtw;

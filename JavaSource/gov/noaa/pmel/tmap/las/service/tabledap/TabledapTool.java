@@ -121,7 +121,7 @@ public class TabledapTool extends TemplateTool {
     String zname;
     List<String> all = new ArrayList<String>();
     List<DataRow> datarows = new ArrayList<DataRow>();
-    boolean downloadall = false;
+    String downloadvars = "minimal";
     String decid;
     String id;
     boolean full = false;
@@ -191,7 +191,13 @@ public class TabledapTool extends TemplateTool {
         if ( download != null ) {
             String dall = download.get("all_data");
             if ( dall != null ) {
-                downloadall = true;
+                downloadvars = "standard";
+            }
+            String data_vars = download.get("data_variables");
+            if ( "minimal".equals(data_vars) ||
+                 "standard".equals(data_vars) ||
+                 "everything".equals(data_vars) ) {
+                downloadvars = data_vars;
             }
         }
         String full_option = ferret_prop.get("full_data");
@@ -434,7 +440,7 @@ public class TabledapTool extends TemplateTool {
             } else if (operationID != null && operationID.equals("Trajectgory_correlation")) {
                 String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
                 query.append(all);
-            }  else if ( downloadall ) {
+            }  else if ( "standard".equals(downloadvars) ) {
                 String all = getTabledapProperty(lasBackendRequest, "downloadall_variables").trim();
                 // If the custom download all is not set, use the default.
                 if ( all == null || all.equals("") ) {
@@ -449,12 +455,23 @@ public class TabledapTool extends TemplateTool {
 						query.append(","+v);
 					}
 				}
+            }  else if ( "everything".equals(downloadvars) ) {
+                String all = getTabledapProperty(lasBackendRequest, "all_variables").trim();
+                
+                query.append(all);
+                
+                for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+					String v = (String) varIt.next();
+					if ( !all.contains(v) && !v.equals(latname) && !v.equals(lonname) && !v.equals(zname) && !v.equals(time) ) {
+						query.append(","+v);
+					}
+				}
             }  else {
             	
                 // Apparently ERDDAP gets mad of you include lat, lon, z or time in the list of variables so just list the "data" variables.
                
                 
-                // Only add the extras if the variable list does not come from configuraiton.
+                // Only add the extras if the variable list does not come from configuration.
                 // Some things might need something besides x,y,z and t in the file so...
                 String extra_metadata = getTabledapProperty(lasBackendRequest, "extra_metadata").trim();
                 if ( extra_metadata != null && !extra_metadata.equals("") ) {

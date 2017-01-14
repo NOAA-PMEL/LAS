@@ -178,6 +178,8 @@
     <optiondef IDREF="Options_2D_image_contour_7"/>
   </operation>
   <!-- End of Profile specific operations -->
+
+  <!-- SOCAT-specific operations -->
     <operation name="Table of QC" ID="SOCAT_QC_table" output_template="SOCAT_QC_table" service_action="SOCAT_QC_table">
       <response ID="DBExtractResponse">
         <result type="debug" ID="db_debug"/>
@@ -186,7 +188,6 @@
       </response>
       <service>database</service>
     </operation>
-
     <operation name="SOCAT QC Input Form" ID="SOCAT_QC_input" output_template="SOCAT_QC_input" service_action="SOCAT_QC_input">
                 <response ID="DBExtractResponse">
                         <result type="debug" ID="db_debug" file_suffix=".txt" />
@@ -202,7 +203,7 @@
 		</response>
 		<service>template</service>
     </operation>
-
+  <!-- End of SOCAT-specific operations -->
 
   <operation name="Climate Analysis" ID="Climate_Analysis" private="true" service_action="" default="true" category="climate_analysis" output_template="Climate_Analysis">
     <response ID="PlotResp" type="HTML" index="1">
@@ -235,7 +236,7 @@
     </grid_types>
   </operation>
   <!-- BEGIN trajectory operations -->
-  <operation name="ASCII file" ID="Trajectory_Data_Extract_File" output_template="netcdf" service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
+  <operation name="ASCII file" ID="Trajectory_Data_Extract_TSV" output_template="netcdf" service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
     <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="Trajectory_interactive_plot">
       <response ID="DBExtractResponse">
         <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -251,7 +252,66 @@
       </args>
       <service>ferret</service>
       <response ID="Data_Extract_netCDF_Response">
-        <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+        <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".tsv"/>
+        <result type="debug" ID="debug" file_suffix=".txt"/>
+      </response>
+      <region>
+        <intervals name="x"/>
+        <intervals name="y"/>
+        <intervals name="z"/>
+        <intervals name="t"/>
+        <intervals name="e"/>
+        <intervals name="xy"/>
+        <intervals name="xz"/>
+        <intervals name="xt"/>
+        <intervals name="xe"/>
+        <intervals name="yz"/>
+        <intervals name="yt"/>
+        <intervals name="ye"/>
+        <intervals name="zt"/>
+        <intervals name="ze"/>
+        <intervals name="te"/>
+        <intervals name="xyz"/>
+        <intervals name="xyt"/>
+        <intervals name="xye"/>
+        <intervals name="xzt"/>
+        <intervals name="xze"/>
+        <intervals name="xte"/>
+        <intervals name="yzt"/>
+        <intervals name="yze"/>
+        <intervals name="yte"/>
+        <intervals name="zte"/>
+        <intervals name="xyzt"/>
+        <intervals name="xyze"/>
+        <intervals name="xyte"/>
+        <intervals name="xzte"/>
+        <intervals name="yzte"/>
+        <intervals name="xyzte"/>
+        <degenerate/>
+      </region>
+      <grid_types>
+        <grid_type name="trajectory"/>
+      </grid_types>
+      <optiondef IDREF="Options_Data"/>
+    </operation>
+  </operation>
+  <operation name="ASCII file" ID="Trajectory_Data_Extract_CSV" output_template="netcdf" service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
+    <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="Trajectory_interactive_plot">
+      <response ID="DBExtractResponse">
+        <result type="debug" ID="db_debug" file_suffix=".txt"/>
+        <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+        <result type="cancel" ID="cancel"/>
+      </response>
+      <service>tabledap</service>
+    </operation>
+    <operation name="ASCII file" chained="true" ID="Trajectory_Data_Extract_File" output_template="ascii" service_action="Trajectory_Data_Convert_File" order="0500" category="file">
+      <args>
+        <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+        <arg type="region" index="1" ID="in-situ-Region"/>
+      </args>
+      <service>ferret</service>
+      <response ID="Data_Extract_netCDF_Response">
+        <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".csv"/>
         <result type="debug" ID="debug" file_suffix=".txt"/>
       </response>
       <region>
