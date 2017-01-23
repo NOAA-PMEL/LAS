@@ -556,7 +556,10 @@ public class LASConfigPlugIn {
 	            log.error("Cannot write out new Version 7.0 las.xml file.", e);
 	        }
 
-	        context.setAttribute(LAS_CONFIG_KEY, lasConfig);  
+	        synchronized (context) {
+	        	context.setAttribute(LAS_CONFIG_KEY, lasConfig);
+			}
+	          
 	    }
 
 	    // Set it to false so it gets tested at least the first time...
