@@ -1,0 +1,163 @@
+! LAS_zt_as_points
+! When the Ferret property ferret_points_zt is defined, use the variable 
+! (e.g. pressure) that it points to, and draw the plot as a pressure as a
+! function of time colored by the data_var variable.
+!
+! The Ferret properties to set are
+! 
+!  <points_zt>PRES</points_zt>  The name of the vertical variable to use, e.g. pressure or depth
+!  <zt_down>1</zt_down>         Set to 1 if the vertical-direction variable is poisitive down, 0 otherwise
+
+! 2/6/2017 *acm
+
+! 
+IF `($ferret_view"0|zt>1|*>0")  EQ 0` THEN 
+   DEFINE SYMBOL error_string = "2D plot as points is implemented only for ZT plots"
+   GO LAS_error_msg
+ENDIF
+
+! The value of symbol ($ferret_points_zt) is the nama of a variable to use as the z-axis
+! variable, e.g. pressure, determining the range and the z axis.
+
+LET varnames = ..varnames
+IF `IS_ELEMENT_OF_STR_N(varnames, "($ferret_points_zt)") EQ 0` THEN 
+   DEFINE SYMBOL error_string = \
+   "Request for drawing ZT as points expects the variable ($ferret_points_zt), Not found"
+   GO LAS_error_msg
+ENDIF
+
+
+DEFINE SYMBOL zvvar = ($ferret_points_zt)
+
+! Check for valid data in pressure and the color-by variable
+
+LET var = ($ferret_var_0)
+LET nvpts = var[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
+
+LET zvar_reg = ($zvvar)[($region_full)]
+LET nppts = zvar_reg[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
+
+! If no data, just make a blank plot with a label and exit
+IF `nppts LE 1 OR nvpts lE 1` THEN 
+   PLOT/NOAX/NOLAB/VLIM=-1:1/HLIM=-1:1 {0,0}, {1,1}
+   LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+
+! Add any labels that have been defined  
+! Save the plot and results
+   GO labels_above_plot
+   GO LAS_results box
+   EXIT/SCRIPT
+ENDIF
+
+! Set up to draw the ZT plot
+
+! Set up the Ferret plot title
+DEFINE SYMBOL split_title = ($ferret_plot_title)
+GO LAS_split_title
+DEFINE SYMBOL ferret_plot_title = ($split_title)
+
+! Is the ($ferret_points_zt) variable describing pressure or depth, e.g. positive-down?
+
+DEFINE SYMBOL zunits = `($zvvar),return=units`
+LET attnames = ($zvvar).attnames
+
+DEFINE SYMBOL reverse_vert = 0
+
+IF `IS_ELEMENT_OF_STR_N(attnames, "positive")` THEN 
+   DEFINE SYMBOL posdirec = `($zvvar).positive`
+   DEFINE SYMBOL reverse_vert = ($posdirec"0|DOWN>1|down>1|*>0")
+ENDIF
+
+! Look for a standard_name of depth, or one of the sea_floor_depth_below names:
+IF `IS_ELEMENT_OF_STR_N(attnames, "standard_name")` THEN 
+   DEFINE SYMBOL posdirec = `($zvvar).standard_name`
+   DEFINE SYMBOL reverse_vert = ($posdirec"0|DEPTH>1|depth>1|*>0")
+   IF `STRINDEX("($posdirec)", "sea_floor_depth") GT 0` THEN DEFINE SYMBOL reverse_vert = 1
+ENDIF
+
+! Is there a property that tells us this is positive-down?
+IF ($ferret_zt_down"0|1|0|*>1") THEN DEFINE SYMBOL reverse_vert = 1
+
+! Get the vertical range to use and draw an underlay plot; Z-T
+
+LET zvar_reg = ($zvvar)[($region_full)]
+LET npts = zvar_reg[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
+IF `npts LE 1` THEN 
+   DEFINE SYMBOL error_string = "No valid data in ($zvvar). Cannot draw plot for ($zvvar) vs time"
+   GO LAS_error_msg
+ENDIF
+
+! Define nice vertical limits
+PPL %RANGE `zvar_reg[z=@min,t=@min]`, `zvar_reg[z=@max,t=@max]`, 10
+
+LET zvlo = ($PPL$RANGE_LOW)
+LET zvhi = ($PPL$RANGE_HIGH)
+
+IF `ABS(zvhi - zvlo) LT 0.1` THEN 
+   DEFINE SYMBOL error_string = "No variation in ($zvvar). Cannot draw plot for ($zvvar) vs time"
+   GO LAS_error_msg
+ENDIF
+
+IF ($reverse_vert) THEN
+   LET dum  = `zvlo,prec=7` 
+   LET zvlo = `zvhi,prec=7`
+   LET zvhi = dum
+ENDIF
+
+! Time-z underlay plot
+
+! define time variable and do a Z-T underlay plot
+
+! Get nice time limits
+LET tvar = t[gt=($zvvar)] + 0*($zvvar)
+
+LET ttvar = tvar[($region_full)]
+ppl %range `ttvar[z=@min,t=@min]`, `ttvar[z=@max,t=@max]`, 10
+
+LET tlo = ($PPL$RANGE_LOW)
+LET thi = ($PPL$RANGE_HIGH)
+
+PLOT/VLIM=`zvlo`:`zvhi`/hlim=`tlo`:`thi`/nolab/z=($region_z_lo"1") zvar_reg*0 + zvhi/0
+
+! Draw the 3-argument Ribbon plot
+
+! Set symbol characteristics, based on amount of data.
+LET fvar = xsequence(($ferret_var_0))
+LET sizsym = 0.14
+LET thicksym = 2
+
+IF `fvar[i=@ngd] GT 200` THEN 
+   LET sizsym = 0.06
+   LET thicksym = 1
+ENDIF
+IF `fvar[i=@ngd] GT 1000` THEN LET sizsym = 0.04
+
+
+DEFINE SYMBOL data_plozvvared_min = 0
+DEFINE SYMBOL data_plozvvared_max = 0
+
+
+PLOT/OVER/VS/NOLAB/RIBBON/SYM=25/thick=`thicksym`/siz=`sizsym`/AX=0,0,0,0\
+   ($qualifiers)/KEY=horiz ttvar ,zvar_reg, ($ferret_var_0)
+
+! Label the Z axis with units of the z-var
+ANNOTATE/NORM/XPOS=-0.05/YPOS=0.5/HALIGN=0/ANGLE=90/SIZ=0.14 "`($zvvar),RETURN=units`"
+
+! One of the results is the data min and max. Save those here.
+
+LET cminmax =  MINMAX(($ferret_var_0))
+
+DEFINE SYMBOL data_plozvvared_min = `cminmax[x=1],prec=7`
+DEFINE SYMBOL data_plotted_max = `cminmax[x=2],prec=7`
+
+! Add labels at the top for the location of overlaid lines
+! and for URLs if they exist  
+GO labels_above_plot
+
+
+! Save the results
+GO LAS_results box
+
+
+! End of file ------------ LAS_zt_as_points.jnl--------------------------
+
