@@ -3,6 +3,11 @@
 ! (e.g. pressure) that it points to, and draw the plot as a pressure as a
 ! function of time colored by the data_var variable.
 !
+! NOTE: **********
+! The Z region given is to be interpreted as pressure range. This only works if
+! the number of levels is similar to the depth range. 
+!       **********
+!
 ! The Ferret properties to set are
 ! 
 !  <points_zt>PRES</points_zt>  The name of the vertical variable to use, e.g. pressure or depth
@@ -34,8 +39,14 @@ DEFINE SYMBOL zvvar = ($ferret_points_zt)
 LET var = ($ferret_var_0)
 LET nvpts = var[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
 
-LET zvar_reg = ($zvvar)[($region_full)]
-LET nppts = zvar_reg[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
+
+! Get the vertical range to use and draw an underlay plot; Z-T
+! Apply the z-region as a constraint on pressure, not a grid limit.
+
+LET zvar_region = ($zvvar)[($region_xyt)]
+LET zvar_plim = IF zvar_region GE ($region_z_lo) AND zvar_region LT ($region_z_hi) THEN zvar_region
+
+LET nppts = zvar_plim[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
 
 ! If no data, just make a blank plot with a label and exit
 IF `nppts LE 1 OR nvpts lE 1` THEN 
@@ -78,17 +89,15 @@ ENDIF
 ! Is there a property that tells us this is positive-down?
 IF ($ferret_zt_down"0|1|0|*>1") THEN DEFINE SYMBOL reverse_vert = 1
 
-! Get the vertical range to use and draw an underlay plot; Z-T
 
-LET zvar_reg = ($zvvar)[($region_full)]
-LET npts = zvar_reg[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
+LET npts = zvar_plim[x=@ngd,y=@ngd,z=@ngd,t=@ngd]
 IF `npts LE 1` THEN 
    DEFINE SYMBOL error_string = "No valid data in ($zvvar). Cannot draw plot for ($zvvar) vs time"
    GO LAS_error_msg
 ENDIF
 
 ! Define nice vertical limits
-PPL %RANGE `zvar_reg[z=@min,t=@min]`, `zvar_reg[z=@max,t=@max]`, 10
+PPL %RANGE `zvar_plim[z=@min,t=@min]`, `zvar_plim[z=@max,t=@max]`, 10
 
 LET zvlo = ($PPL$RANGE_LOW)
 LET zvhi = ($PPL$RANGE_HIGH)
@@ -111,13 +120,13 @@ ENDIF
 ! Get nice time limits
 LET tvar = t[gt=($zvvar)] + 0*($zvvar)
 
-LET ttvar = tvar[($region_full)]
+LET ttvar = tvar[($region_xyt)]
 ppl %range `ttvar[z=@min,t=@min]`, `ttvar[z=@max,t=@max]`, 10
 
 LET tlo = ($PPL$RANGE_LOW)
 LET thi = ($PPL$RANGE_HIGH)
 
-PLOT/VLIM=`zvlo`:`zvhi`/hlim=`tlo`:`thi`/nolab/z=($region_z_lo"1") zvar_reg*0 + zvhi/0
+PLOT/VLIM=`zvlo`:`zvhi`/hlim=`tlo`:`thi`/nolab/z=($region_z_lo"1") zvar_plim*0 + zvhi/0
 
 ! Draw the 3-argument Ribbon plot
 
@@ -133,21 +142,28 @@ ENDIF
 IF `fvar[i=@ngd] GT 1000` THEN LET sizsym = 0.04
 
 
-DEFINE SYMBOL data_plozvvared_min = 0
-DEFINE SYMBOL data_plozvvared_max = 0
+DEFINE SYMBOL data_plotted_min = 0
+DEFINE SYMBOL data_plotted_max = 0
 
+! Define a mask on the color-by variable which is the pressure range
+! used in the plot.
+
+LET colorvar = ($ferret_plot_var_noregion)
+LET mask = IF zvar_plim THEN 1
+
+LET cvar = colorvar[($region_xyt)] * mask
 
 PLOT/OVER/VS/NOLAB/RIBBON/SYM=25/thick=`thicksym`/siz=`sizsym`/AX=0,0,0,0\
-   ($qualifiers)/KEY=horiz ttvar ,zvar_reg, ($ferret_var_0)
+   ($qualifiers)/KEY=horiz ttvar, zvar_plim, cvar
 
 ! Label the Z axis with units of the z-var
 ANNOTATE/NORM/XPOS=-0.05/YPOS=0.5/HALIGN=0/ANGLE=90/SIZ=0.14 "`($zvvar),RETURN=units`"
 
 ! One of the results is the data min and max. Save those here.
 
-LET cminmax =  MINMAX(($ferret_var_0))
+LET cminmax =  MINMAX(cvar)
 
-DEFINE SYMBOL data_plozvvared_min = `cminmax[x=1],prec=7`
+DEFINE SYMBOL data_plotted_min = `cminmax[x=1],prec=7`
 DEFINE SYMBOL data_plotted_max = `cminmax[x=2],prec=7`
 
 ! Add labels at the top for the location of overlaid lines
@@ -156,6 +172,7 @@ GO labels_above_plot
 
 
 ! Save the results
+
 GO LAS_results box
 
 
