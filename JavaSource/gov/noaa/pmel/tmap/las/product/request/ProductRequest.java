@@ -75,7 +75,7 @@ public class ProductRequest {
         this.cacheKey = lasRequest.getKey();
         this.operationElement = lasConfig.getElementByXPath(lasRequest.getOperationXPath());
         if ( operationElement == null ) {
-            throw new LASException ("No operation "+lasRequest.getOperationXPath()+" found.");
+            throw new LASException ("No such operation found.");
         }
         // Only make the backend requet objects if it's not a template request.
         

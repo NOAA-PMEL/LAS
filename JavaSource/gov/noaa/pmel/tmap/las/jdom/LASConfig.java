@@ -778,7 +778,7 @@ public class LASConfig extends LASDocument {
             }
 
             if ( !found ) {
-                throw new LASException("Time format for "+tlo+" could not be parsed.");
+                throw new LASException("Time format for could not be parsed.");
             }
 
             DateTimeFormatter longfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC);
