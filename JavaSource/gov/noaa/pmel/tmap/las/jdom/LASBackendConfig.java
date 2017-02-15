@@ -30,7 +30,7 @@ public class LASBackendConfig extends LASDocument {
 	        Element environment = this.getRootElement().getChild("environment");
 	        String base_dir = getBaseDir();
 	        if ( !base_dir.startsWith("/")) {
-	            throw new LASException("base_dir "+base_dir+" is not a full path.");
+	            throw new LASException("Configuration erorr: base_dir is not a full path.");
 	        }
 	        if ( environment != null ) {
 	            List variables = environment.getChildren("variable");

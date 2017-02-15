@@ -241,7 +241,7 @@ public class LASDocument extends Document {
             property = (Element) propsIt.next();
         }
         if ( propsIt.hasNext()) {
-            throw new LASException("More than one property with name = "+name);
+            throw new LASException("More than one property with same name.");
         }
         return property;  
     }
