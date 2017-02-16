@@ -167,7 +167,26 @@ DEFINE SYMBOL data_plotted_min = `cminmax[x=1],prec=7`
 DEFINE SYMBOL data_plotted_max = `cminmax[x=2],prec=7`
 
 ! Add labels at the top for the location of overlaid lines
-! and for URLs if they exist  
+! Include a url if it is specified. IF the letters url are
+! part of the note text, substitute the url for url. Otherwise,
+! if a URL is given, just use the entire note text in the link.
+
+IF ($ferret_add_a_note"0|*>1") THEN 
+   DEFINE SYMBOL new_note = ($ferret_add_a_note)
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   IF ($ferret_url_for_note"0|*>1") THEN
+      LET nl = STRLEN("($ferret_add_a_note)")
+      LET iu = MAX(1, STRINDEX("($ferret_add_a_note)", "url") )
+      IF `iu GT 1` THEN 
+         DEFINE SYMBOL new_note1 = `SUBSTRING("($ferret_add_a_note)", 1, iu-1)`
+         DEFINE SYMBOL new_note2 = `SUBSTRING("($ferret_add_a_note)", iu+4, nl)` 
+      ELSE
+         DEFINE SYMBOL new_note2 = ($ferret_add_a_note)
+      ENDIF
+      DEFINE SYMBOL new_note = ($new_note1) (<a target=&quot;_blank&quot; href=($ferret_url_for_note)>($new_note2)</a>)
+   ENDIF
+   DEFINE SYMBOL note_($note_num)_lab = ($new_note)
+ENDIF
 GO labels_above_plot
 
 
