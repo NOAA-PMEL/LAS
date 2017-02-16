@@ -166,7 +166,7 @@ LET cminmax =  MINMAX(cvar)
 DEFINE SYMBOL data_plotted_min = `cminmax[x=1],prec=7`
 DEFINE SYMBOL data_plotted_max = `cminmax[x=2],prec=7`
 
-! Add labels at the top for the location of overlaid lines
+! Add a note in the annotations box.
 ! Include a url if it is specified. IF the letters url are
 ! part of the note text, substitute the url for url. Otherwise,
 ! if a URL is given, just use the entire note text in the link.
