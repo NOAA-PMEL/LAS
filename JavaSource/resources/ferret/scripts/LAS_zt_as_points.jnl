@@ -126,8 +126,6 @@ ppl %range `ttvar[z=@min,t=@min]`, `ttvar[z=@max,t=@max]`, 10
 LET tlo = ($PPL$RANGE_LOW)
 LET thi = ($PPL$RANGE_HIGH)
 
-PLOT/VLIM=`zvlo`:`zvhi`/hlim=`tlo`:`thi`/nolab/z=($region_z_lo"1") zvar_plim*0 + zvhi/0
-
 ! Draw the 3-argument Ribbon plot
 
 ! Set symbol characteristics, based on amount of data.
@@ -152,6 +150,12 @@ LET colorvar = ($ferret_plot_var_noregion)
 LET mask = IF zvar_plim THEN 1
 
 LET cvar = colorvar[($region_xyt)] * mask
+
+! Do a PLOT/SET to load the colors so levels will be set
+PLOT/VS/RIBBON/SET ttvar, zvar_plim, cvar
+
+! Set the time axis on the horizontal plot
+PLOT/VLIM=`zvlo`:`zvhi`/hlim=`tlo`:`thi`/nolab/z=($region_z_lo"1") zvar_plim*0 + zvhi/0
 
 PLOT/OVER/VS/NOLAB/RIBBON/SYM=25/thick=`thicksym`/siz=`sizsym`/AX=0,0,0,0\
    ($qualifiers)/KEY=horiz ttvar, zvar_plim, cvar
