@@ -1326,7 +1326,11 @@ function DateWidget_parseDate(dateString,add_sub) {
         var HMS = String(dateTime[1]).split(':');
         YMDHMS[3] = HMS[0];
         YMDHMS[4] = HMS[1];
-        YMDHMS[5] = HMS[2];
+        if ( HMS[2] ) {
+           YMDHMS[5] = HMS[2];
+        } else {
+           YMDHMS[5] = '00';
+        }
       } else {
         YMDHMS[3] = '00';
         YMDHMS[4] = '00';
