@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
+import org.eclipse.jetty.util.log.Log;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -1732,6 +1733,8 @@ public class ADDXMLProcessor {
 			id = id.replace("/", ".");
 			id = id.replace(":", ".");
 			id = id.replace(",","");
+			id = id.replace(">","");
+			id = id.replace("<","");
 			if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
 			id = id.replaceAll(" ", "-"); 
 		}
@@ -2252,14 +2255,16 @@ public class ADDXMLProcessor {
 	private static List<ContributorBean> getContributors(InvDataset ThreddsDataset) {
 		List docs = ThreddsDataset.getDocumentation();
 		List<ContributorBean> contribs = new ArrayList<ContributorBean>();
-		for (Iterator dit = docs.iterator(); dit.hasNext(); ) {
-			InvDocumentation doc = (InvDocumentation) dit.next();
-			if (doc.hasXlink()) {
-				ContributorBean contributor = new ContributorBean();
-				contributor.setRole("THREDDS Metadata");
-				contributor.setUrl(doc.getXlinkHref());
-				contributor.setName(doc.getXlinkTitle());
-				contribs.add(contributor);
+		if ( docs != null ) {
+			for (Iterator dit = docs.iterator(); dit.hasNext(); ) {
+				InvDocumentation doc = (InvDocumentation) dit.next();
+				if (doc.hasXlink()) {
+					ContributorBean contributor = new ContributorBean();
+					contributor.setRole("THREDDS Metadata");
+					contributor.setUrl(doc.getXlinkHref());
+					contributor.setName(doc.getXlinkTitle());
+					contribs.add(contributor);
+				}
 			}
 		}
 		return contribs;
@@ -2354,7 +2359,6 @@ public class ADDXMLProcessor {
 		category.setName(name);
 		category.setID(id);
 
-
 		if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
 			String url = ThreddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName();
 			// If necessary fix the catalog name:
@@ -2374,6 +2378,7 @@ public class ADDXMLProcessor {
 				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
 				// Process the sub-categories
 				if (!subDataset.getName().contains("automated cleaning process") ) {
+					System.out.println("\tsub-cat is "+subDataset.getName());
 					CategoryBean subCat = processUAFCategories(subDataset);
 					if ( !subCat.equals(category) && (subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) ) {
 						subCats.add(subCat);
