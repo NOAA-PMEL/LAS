@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import org.eclipse.jetty.util.log.Log;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
