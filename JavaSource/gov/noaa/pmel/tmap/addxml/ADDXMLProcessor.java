@@ -1157,7 +1157,7 @@ public class ADDXMLProcessor {
 								!variable.getVocabularyName().equalsIgnoreCase("depth")) {
 							List<AxisBean> AxisBeans = new ArrayList<AxisBean>();
 							VariableBean las_var = new VariableBean();
-							las_var.setElement(id+"-"+variable.getName());
+							las_var.setElement(id+"-"+cleanId(variable.getName()));
 							String vocab = variable.getVocabularyName();
 							if ( vocab != null ) {
 								las_var.setName(vocab);
@@ -1175,7 +1175,7 @@ public class ADDXMLProcessor {
 							GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
 							DateRange dateRange = threddsDataset.getTimeCoverage();
 
-							StringBuilder grid_name = new StringBuilder(variable.getName()+"-"+id+"-grid");
+							StringBuilder grid_name = new StringBuilder(cleanId(variable.getName())+"-"+id+"-grid");
 							if (coverage != null ) {
 								int xsizei;
 								int ysizei;
@@ -1330,7 +1330,7 @@ public class ADDXMLProcessor {
 								String timeCoverageNumberOfPoints = threddsDataset.findProperty("timeCoverageNumberOfPoints");
 								String timeUnits = threddsDataset.findProperty("timeAxisUnits");
 
-								String elementName = variable.getName()+"-"+id+"-x-axis";
+								String elementName = cleanId(variable.getName())+"-"+id+"-x-axis";
 								AxisBean xAxis = new AxisBean();
 
 								// Get the X Axis information...
@@ -1352,7 +1352,7 @@ public class ADDXMLProcessor {
 								} else {
 									xAxis.setElement(getMatchingID(AxisBeans, xAxis));
 								}
-								elementName = variable.getName()+"-"+id+"-y-axis";
+								elementName = cleanId(variable.getName())+"-"+id+"-y-axis";
 								AxisBean yAxis = new AxisBean();
 
 								System.out.println("Loading Y from metadata: "+elementName);
@@ -1374,7 +1374,7 @@ public class ADDXMLProcessor {
 
 									yAxis.setElement(aaid);
 								}
-								elementName = variable.getName()+"-"+id+"-z-axis";
+								elementName = cleanId(variable.getName())+"-"+id+"-z-axis";
 								AxisBean zAxis = new AxisBean();
 								if ( hasZ ) {
 									grid_name.append("-z-axis");
@@ -1501,7 +1501,7 @@ public class ADDXMLProcessor {
 									if ( calendar != null ) {
 										tAxis.setCalendar(calendar);
 									}
-									tAxis.setElement(variable.getName()+"-"+id+"-t-axis");
+									tAxis.setElement((cleanId(variable.getName())+"-"+id+"-t-axis"));
 									System.out.println("Loading T from metadata: "+variable.getName()+"-"+id+"-t-axis");
 									grid_name.append("-t-axis");
 									tAxis.setType("t");
@@ -1729,14 +1729,18 @@ public class ADDXMLProcessor {
 		String id = null;
 		if ( tid != null ) {
 			id = tid;
-			id = id.replace("/", ".");
-			id = id.replace(":", ".");
-			id = id.replace(",","");
-			id = id.replace(">","");
-			id = id.replace("<","");
+			id = cleanId(id);
 			if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
 			id = id.replaceAll(" ", "-"); 
 		}
+		return id;
+	}
+	public static String cleanId(String id) {
+		id = id.replace("/", ".");
+		id = id.replace(":", ".");
+		id = id.replace(",","");
+		id = id.replace(">","");
+		id = id.replace("<","");
 		return id;
 	}
 	private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(Set<String> time_freqs, InvDataset threddsDataset, String url, List<GridBean> allGrids, List<AxisBean> allAxes) {
