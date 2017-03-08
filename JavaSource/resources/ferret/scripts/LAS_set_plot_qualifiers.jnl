@@ -44,32 +44,29 @@ IF `STRLEN("($fview)") EQ 2 AND STRINDEX("($fview)", "T") GT 0` THEN LET has_t =
 IF `has_t AND ($ferret_use_graticules"1|none>0|notic>0|white>0|*>1)` THEN
   DEFINE SYMBOL onegrat = HGRAT
   IF `STRLEN("($fview)") EQ 2 AND STRINDEX("($fview)", "X") GT 0` THEN DEFINE SYMBOL onegrat = VGRAT
-  IF ($ferret_use_graticules"0|black>1") THEN
+  IF ($ferret_use_graticules"0|black>1|*>0") THEN \
      DEFINE SYMBOL qualifiers = ($qualifiers)/($onegrat)=(DASH,COLOR=black)
-  ELSE
+  IF ($ferret_use_graticules"1|black>0|gray>1") THEN \
      DEFINE SYMBOL qualifiers = ($qualifiers)/($onegrat)=(DASH,COLOR=7)
-  ENDIF
   DEFINE SYMBOL ferret_use_graticules = none  ! done, so skip the next IF block
 ENDIF
 
 ! Otherwise turn them on only if requested 
 
-
 ! Either none or notic removes graticules from the plot 
-IF ($ferret_use_graticules"1|none>0|notic>0|*>1) THEN
+IF ($ferret_use_graticules"1|none>0|notic>0|*>1") THEN
   DEFINE SYMBOL graticuleColor = black
-  IF ($ferret_use_graticules"1|default>1|gray>1|*>0) THEN
+  IF ($ferret_use_graticules"1|default>1|gray>1|*>0") THEN
      DEFINE SYMBOL graticuleColor = 7
-  ELIF ($ferret_use_graticules"0|white>1|*>0) THEN
+  ELIF ($ferret_use_graticules"0|white>1|*>0") THEN
      DEFINE SYMBOL graticuleColor = 8
-  ELIF ($ferret_use_graticules"0|black>1|*>0) THEN
+  ELIF ($ferret_use_graticules"0|black>1|*>0") THEN
      DEFINE SYMBOL graticuleColor = 1
   ENDIF
   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
 ! If graticules are turned on, turn the tic marks off. (?)
 !  PPL TICS,0,0,0,0
 ENDIF
-
 
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.
@@ -102,6 +99,16 @@ IF ($twoDplot"0|*>1") THEN
 
    ! Set the plot type (SHADE or CONTOUR)
 
+   ! If ferret_contour_style is specified (from Plot Options on the UI), use that. 
+   ! Else if ferret_fill_type is specified, (comes from configuration), use that. 
+   ! Else use the default in the plot script
+
+   IF `($ferret_contour_style"0|*>1") EQ 0` THEN
+     IF ($ferret_fill_type"0|default>1|raster>1|shade>1|color_filled_contours>1|fill>1|color_filled_plus_lines>1|contour>1|contour_lines>1|raster_plus_lines>1|*>0") THEN\
+      DEFINE SYMBOL ferret_contour_style = ($ferret_fill_type"default|raster>raster|shade>raster|fill>default|contour>contour_lines|color_filled_plus_lines|*>default")
+   ENDIF
+
+
    DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|\
 color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
 
@@ -122,11 +129,16 @@ color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|ra
    IF ($ferret_palette"0|*>1") THEN DEFINE SYMBOL qualifiers = \
     ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
-   ! 2D fill style  (from las_initialize_variable
+   ! 2D fill style  (from las_initialize_variable)
 
    ! If ferret_contour_style is specified (from Plot Options on the UI), use that. 
    ! Else if ferret_fill_type is specified, (comes from configuration), use that. 
    ! Else use the default in the plot script
+
+   IF `($ferret_contour_style"0|*>1") EQ 0` THEN
+     IF ($ferret_fill_type"0|default>1|raster>1|shade>1|color_filled_contours>1|fill>1|color_filled_plus_lines>1|contour>1|contour_lines>1|raster_plus_lines>1|*>0") THEN\
+      DEFINE SYMBOL ferret_contour_style = ($ferret_fill_type"default|raster>raster|shade>raster|fill>default|contour>contour_lines|color_filled_plus_lines|*>default")
+   ENDIF
 
    IF `($ferret_contour_style"0|default>1|raster>1|shade>1|color_filled_contours>1|fill>1|color_filled_plus_lines>1|contour_lines>1|raster_plus_lines>1|*>0") EQ 0` THEN 
 
