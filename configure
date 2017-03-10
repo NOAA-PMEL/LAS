@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # $Id: configure,v 1.10 2002/09/14 17:45:38 sirott Exp $
 
 PATH="$PATH:/bin:/usr/bin:/usr/local/bin:/usr/sbin:/opt/bin:/opt/local/bin";
