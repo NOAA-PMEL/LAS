@@ -469,6 +469,7 @@ my @Scripts = qw(build.xml
                  JavaSource/resources/database/DatabaseBackendConfig.xml
                  WebContent/WEB-INF/web.xml
                  JavaSource/log4j.xml
+                 JavaSource/log4j2.xml
                  WebContent/TestLinks.html
                  );
 my $mode = 0644;
