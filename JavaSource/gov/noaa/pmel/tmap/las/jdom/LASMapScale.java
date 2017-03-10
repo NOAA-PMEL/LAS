@@ -11,8 +11,6 @@ import java.util.HashMap;
 
 import org.jdom.Element;
 
-import thredds.servlet.Log;
-
 public class LASMapScale extends LASDocument {
 
     private static final long serialVersionUID = 703675281298155235L;
