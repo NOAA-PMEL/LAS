@@ -55,6 +55,18 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_tim_min = ($constraint_($ic)_rhs) ;\
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_tim_max = ($constraint_($ic)_rhs) ;\
   )
+ 
+! Subsequent script expects constr_lon_max to be defined if constr_lon_min is, and 
+! constr_tim_max to be defined if constr_tim_min is.
+! If that constraint was not defined, use the data max
+
+IF `($constr_lon_min"-1.e34|*>1") NE -1.e34` THEN
+   IF `($constr_lon_max"-1.e34|*>1") EQ -1.e34` THEN DEFINE SYMBOL constr_lon_max = `longitude[x=@max,y=@max,z=@max,t=@max,e=@max,f=@max]`
+ENDIF
+
+IF `($constr_tim_min"-1.e34|*>1") NE -1.e34` THEN
+   IF `($constr_tim_max"-1.e34|*>1") EQ -1.e34` THEN DEFINE SYMBOL constr_tim_max = `time[x=@max,y=@max,z=@max,t=@max,e=@max,f=@max]`
+ENDIF
 
 IF `nmaskx GT 0` THEN LET var_mask = xsequence(($var_mask))
 
