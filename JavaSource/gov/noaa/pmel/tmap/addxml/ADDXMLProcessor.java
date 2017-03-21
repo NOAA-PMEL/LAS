@@ -1508,8 +1508,15 @@ public class ADDXMLProcessor {
 
 									ArangeBean tr = new ArangeBean();
 									DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+									DateTimeFormatter monthfmt = DateTimeFormat.forPattern("yyyy-MM-dd");
 									if ( metadata_sd != null && metadata_ed != null ) {
-										tr.setStart(hoursfmt.print(metadata_sd));
+										if ( tAxis.isModulo() ) {
+											String start = monthfmt.print(metadata_sd);
+											start = start.replace("0001", "0000");
+											tr.setStart(start);
+										} else {
+											tr.setStart(hoursfmt.print(metadata_sd));
+										}
 										double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
 										long delta_millis = (long) dm;
 										Duration duration = new Duration(delta_millis);
