@@ -26,7 +26,13 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
      * @see gov.noaa.pmel.tmap.las.util.TimeAxisInterface#isDayNeeded()
      */
     public boolean isClimatology() {
-        return Boolean.valueOf(element.getAttributeValue("climatology")).booleanValue();
+       	if ( element.getAttributeValue("climatology") != null ) {
+    		return Boolean.valueOf(element.getAttributeValue("climatology")).booleanValue();
+    	}
+    	if ( element.getAttributeValue("modulo") != null ) {
+    		return Boolean.valueOf(element.getAttributeValue("modulo")).booleanValue();
+    	}
+    	return false;
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.TimeAxisInterface#isDayNeeded()
