@@ -85,6 +85,10 @@ import opendap.dap.DAS;
 public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	private static final LASProxy lasProxy = new LASProxy();
 	private static Logger log = LoggerFactory.getLogger(RPCServiceImpl.class.getName());
+/*
+ * This might be necessary for our set up with the F5, but it messes up many other installations.
+ *
+ *
     @Override
     protected SerializationPolicy doGetSerializationPolicy(javax.servlet.http.HttpServletRequest request,
     		java.lang.String moduleBaseURL,
@@ -110,6 +114,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     	return serializationPolicy;
 
     }
+*/
 
 	/**
 	 * @return
