@@ -168,11 +168,6 @@
 				<include name="resources/iosp/**" />
 			</fileset>
 		</copy>
-		<copy todir="${jakarta.home}/webapps/thredds/WEB-INF/lib">
-			<fileset dir="WebContent/WEB-INF/lib">
-				<include name="log4j-*.jar" />
-			</fileset>
-		</copy>
 		<copy file="JavaSource/resources/ferret/FerretBackendConfig.xml"
 			tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml" />
 	</target>
@@ -193,11 +188,6 @@
 		</copy>
 		<copy file="JavaSource/resources/ferret/FerretBackendConfig.xml"
 			tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml" />
-		<copy todir="${jakarta.home}/webapps/thredds/WEB-INF/lib">
-			<fileset dir="WebContent/WEB-INF/lib">
-				<include name="log4j-*.jar" />
-			</fileset>
-		</copy>
 		<!-- remove any symbolic links because the delete task follows symbolic links -->
 		<exec executable="find">
 			<arg line="${deploy.home} -type l -delete" />
@@ -260,8 +250,8 @@
 		<mkdir dir="${addxml-build}" />
 	</target>
 	<target name="addxml-compile" depends="addxml-init">
-		<copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml"
-			tofile="${addxml-build}/log4j.xml" />
+		<copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j2.xml"
+			tofile="${addxml-build}/log4j2.xml" />
 		<javac
 			srcdir="${addxml-src}"
 			destdir="${addxml-build}">
