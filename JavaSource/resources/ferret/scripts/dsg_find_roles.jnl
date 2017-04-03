@@ -1,9 +1,11 @@
 ! DSG_find_roles.jnl
 ! Find the Profile or Trajectory dimension and get its size
 ! Find the Obs dimension and get its size
-
+! 4/3/2017 *acm* Additions for point data types
+! 4/3/2017 *acm* Handle datasets where dimensions are not also coordinate variables
 
 LET var_attnames = ($vname).attnames
+
 IF `IS_ELEMENT_OF_STR(var_attnames, "cf_role")` THEN 
    LET featureSize = `($vname),RETURN=msize`
    DEFINE SYMBOL feature_variable = ($vname)
@@ -22,12 +24,17 @@ ENDIF
 ! We probably want to concoct names based on the location and time.
 ! Write a function to return the list for best flexibility.
 
-IF `($feature_variable"0|*>1")` THEN
-LET feature_name = ($feature_variable)
 
+! Use ..coordnames for coordinate-variable namesinstead of ..dimnames. 
+! Some files have dimensions that are not coordinate variables.
+
+
+IF `($feature_variable"0|*>1")` THEN
+   LET feature_name = ($feature_variable)
+   LET cnames = ..coordnames
 
    IF `STRINDEX("($feature_variable)", "(") GT 0` THEN 
-      DEF SYM dname = `dimnames[i=($q)]`
+      DEF SYM dname = `cnames[i=($q)]`
 
       IF `($data_lon_var"0|*>1") + ($data_lat_var"0|*>1") + ($data_time_var"0|*>1") LT 3` THEN
          MESSAGE/ERROR **ERROR Did not find longitude, latitude and time variables in the dataset

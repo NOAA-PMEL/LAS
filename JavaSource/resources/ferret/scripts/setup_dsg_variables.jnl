@@ -8,6 +8,7 @@
 ! 8/2016 *acm* If the Ferret property traj_discrete has been set, check 
 ! whether the distance between points is large; if so plot as discrete 
 ! points connected with a thin line.
+! 4/3/2017 *acm* Additions for point data types
 
 IF `($rowvar"0|*>1") EQ 0` THEN EXIT/SCRIPT
 
@@ -17,8 +18,9 @@ IF `($data_y_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_y_var_in = ($data_y_va
 IF `($data_t_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_t_var_in = ($data_t_var)
 
 DEFINE SYMBOL nfeatures = `($rowvar),RETURN=msize`
+IF ($feature_type"0|point>1|*>0") THEN DEFINE SYMBOL nfeatures = 0
 
-IF ($nfeatures"0|*>1") THEN 
+IF ($nfeatures"0|0|*>1") THEN 
    LET mmax = `($rowvar)[m=1:($nfeatures)@sum]` ! 1st m cruises
    LET npts = mmax
 ELSE
@@ -49,6 +51,8 @@ LET varnames = ..varnames
 IF `IS_ELEMENT_OF_STR(varnames, "time") GT 0` THEN set att/like=time time_with_gaps
 
 IF ($data_z_var"0|*>1") THEN LET vert_with_gaps = ($data_z_var)
+
+IF ($feature_type"0|point>1|*>0") THEN EXIT/SCRIPT
 
 ! Function separate puts gaps between cruises and also removes jumps in longitude
 ! where it crosses the dateline. Set ngood and nbad before adding these gaps.

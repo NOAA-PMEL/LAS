@@ -5,6 +5,7 @@
 ! Author: ansley 
 ! 9/2012 (from Jons_initialize_data_insitu.jnl)
 ! 10/4/2016 fixes so init scripts still work
+!  4/3/2017 *acm* Additions for point data types
 !
 DEFINE SYMBOL num ($1"0")
 
@@ -123,6 +124,13 @@ ENDIF
 ! Use the _CoordinateAxisType to define data_x_var, data_y_var,
 ! data_t_var if there is a time variable, data_z_var if there is depth.
 
+IF ($feature_type"0|point>1|*>0") THEN 
+   LET rowvar = x[gx=($DATA_VAR)]
+   DEFINE SYMBOL rowvar = rowvar
+   CANCEL SYMBOL its_trajectory_map
+   DEFINE SYMBOL its_point_map = 1
+ENDIF   
+
 IF `($data_x_var"0|*>1") EQ 0` THEN GO feature_lon_lat_time_depth
 
 DEFINE SYMBOL mark_end = ($data_var)
@@ -144,8 +152,7 @@ IF `(($num)+1) eq ($data_count)` THEN
 ENDIF
 
 ! Make the RowSize and other metadata variables be on the E axis.
-
-IF ($rowvar"0|*>1") THEN 
+IF `($rowvar"0|*>1") AND ($feature_type"0|point>0|*>1")` THEN 
    DEFINE SYMBOL rdir = `($rowvar),RETURN=shape`
    DEFINE SYMBOL rind = ($rdir"|X>I|E>M|POINT>M")
    LET setnum = `($rowvar),RETURN=dsetnum`

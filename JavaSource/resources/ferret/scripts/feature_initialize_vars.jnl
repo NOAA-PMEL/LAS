@@ -49,7 +49,8 @@ IF `($numobs) EQ 1` THEN
    LET feature_mask = 1 + 0*feature_numbers
 
    LET longest = 1
-   LET data_var_c =  EXPNDI_BY_Z_COUNTS(($data_var), XSEQUENCE(($rowvar)),`longest`)
+   LET ccarg = XSEQUENCE(($data_var))
+   LET data_var_c =  EXPNDI_BY_Z_COUNTS(ccarg, XSEQUENCE(($rowvar)),`longest`)
 
    LET feature_n = x[i=1:1]
    LET subset_mask = x[i=1:1]
@@ -122,7 +123,8 @@ ELSE
    DEFINE SYMBOL feature_max = `nfeatures`
    LET longest = ($rowvar)[($rind)=@max]+2
 
-   LET data_var_c =  EXPNDI_BY_Z_COUNTS(($data_var), xsequence(($rowvar)),`longest`)
+   LET ccarg = XSEQUENCE(($data_var))
+   LET data_var_c =  EXPNDI_BY_Z_COUNTS(ccarg, xsequence(($rowvar)),`longest`)
 
 ! If  a subset of feature ids is given then plot only those on a Prop/Prop 
 ! plot, but using the symbols and colors as determined by the whole dataset.

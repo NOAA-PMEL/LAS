@@ -254,7 +254,12 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_plot_var_2 = ($($fer_sym)_var)
    DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
 
+
+
+
+
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+
 
 ! Is it a varible on the E axis of a DSG file?
 
@@ -283,7 +288,22 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
          LET zvar = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar),`($rowvar)[m=@sum]`)
       ENDIF
 
-   ENDIF
+   ELSE
+
+! Check the data type of other color-by variables.
+
+      LET gettype= ($ferret_plot_var_2)
+      DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
+
+      IF ($is_string) THEN
+         LET zvar = 1./0 + 0*xvar
+         DEFINE SYMBOL note_num = `($note_num"0") + 1`
+         DEFINE SYMBOL note_($note_num)_lab = ($data_2_title) is not numeric. Plot without color.
+         CANCEL SYMBOL ferret_plot_var
+     ENDIF
+
+
    ! what about woce flags??
 
    DEFINE SYMBOL zvar = zvar

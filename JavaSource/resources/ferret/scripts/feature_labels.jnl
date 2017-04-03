@@ -6,12 +6,22 @@
 ! and number of valid and missing points shown.
 ! On prop-prop plots, don't show missing. The count of missing-values in the
 ! data is not distinguishable from the missing data due to applying constraints. 
+! 4/3/2017 *acm* Additions for point data types
 
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
 ! If it is not a feature-type dataset, exit
 IF `($feature_type"0|*>1") EQ 0` THEN EXIT/SCRIPT
+
+
+IF ($feature_type"0|point>1|*>0") THEN
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($ngood_data) points shown 
+   DEFINE SYMBOL plusmissing = (($nbad_data) missing)
+   IF ($nbad_data"0|0|*>1") THEN  DEFINE SYMBOL note_($note_num)_lab = ($note_($note_num)_lab) ($plusmissing)
+   EXIT/SCRIPT
+ENDIf
 
 LET check_var = $1%XSEQUENCE(($ferret_plot_var))%
 DEFINE SYMBOL vtype = `check_var,return=dtype`
