@@ -1,5 +1,5 @@
 ! LAS_setup_dsg.jnl
-4/3/2017 *acm* Additions for point data types
+! 4/3/2017 *acm* Additions for point data types
 
 SAY _________________ START LAS_setup_dsg: clock seconds:                        ($clock_secs)
 
