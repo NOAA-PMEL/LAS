@@ -6,6 +6,8 @@
 ! colored by the ($ferret_plot_var) defined in LAS_initialize_data_insitu.
 ! Reads dsg files with the "point" feature type
 ! 3/31/2017 ACM
+! Add annotations for Z and T regions if they are defined
+! Draw the mising-data points separately with a simple PLOT/VS to speed things up
 
 IF `($ferret_memory"25.6") LT 200` THEN SET MEM/SIZ=200
 
@@ -199,25 +201,31 @@ GO feature_labels
 
 ! Ribbon plot
 
+DEFINE SYMBOL psize = 0.14
+
 DEFINE SYMBOL plot_command = PLOT/VS/RIBBON
-DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=19/siz=0.18/THICK=1
+DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=19/siz=($psize)/THICK=1/missing=blank
 
 ! Set the palette
-! If there is no variable, only locations, and if a palette is not 
-! defined by ferret_palette, use black.
 
-IF ($ferret_plot_var"0|*>1") THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
-ELSE
-   DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
-ENDIF
+DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
+
 
 SAY _________________ Start line plot: clock seconds:                            ($clock_secs)
 LET pre_plot = ($clock_secs)
 
 ! Draw the ribbon plot
 
-DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data 
+! First draw any missing-data in black as a simple symbols plot (not ribbon).
+
+IF `($nbad_data"0|0|*") GT 0 ` THEN 
+   LET bad_mask = IF var_data THEN 1/0 ELSE 1
+   let lon_where_bad = compressi_by (x_var_data, bad_mask)
+   let lat_where_bad = compressi_by (y_var_data, bad_mask)
+   plot/over/vs/nolab/color=black/SYM=19/siz=($psize) lon_where_bad, lat_where_bad
+ENDIF
+
+IF `($ngood_data"0|0|*") GT 0` THEN DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data
 ($plot_command)($qualifiers)/SET ($plot_plot_vars)
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
 PPL RIBBON/OVER
@@ -244,6 +252,16 @@ REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
 
 ! if constraints are shown via constraint_0_lhs etc, define labels for those
 GO set_constraint_labels
+
+! Set region labels for Z and T if regions are defined in those directions
+
+DEFINE SYMBOL idim = 3
+DEFINE SYMBOL dim3 = Z
+GO setup_pp_region_annotations
+
+DEFINE SYMBOL idim = 4
+DEFINE SYMBOL dim4 = T
+GO setup_pp_region_annotations
 
 ! restore key-annotation setting: keys not annotated
 KEYMARK 0
