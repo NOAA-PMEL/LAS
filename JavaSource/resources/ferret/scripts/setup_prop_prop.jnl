@@ -226,7 +226,6 @@ IF ($its_prop_plot"0|*>1") THEN
 ENDIF
 
 ENDIF   ! data_count ge 2
-
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
    ! Initialize the 3rd variable.
@@ -253,10 +252,6 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_2_var)")
    DEFINE SYMBOL ferret_plot_var_2 = ($($fer_sym)_var)
    DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
-
-
-
-
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
 
@@ -303,7 +298,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
          CANCEL SYMBOL ferret_plot_var
      ENDIF
 
-
+   ENDIF
    ! what about woce flags??
 
    DEFINE SYMBOL zvar = zvar
