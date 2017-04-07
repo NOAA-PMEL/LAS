@@ -37,11 +37,17 @@ clean-noant:
 	rm -rf build.xml
 	rm -rf test/LASTest/las_test_config.xml
 
+
 .PHONY: clean-more
 clean-more:
 	rm -f  bin/addXML.sh
 	rm -f  bin/addDiscrete.sh
 	rm -f  bin/lasTest.sh
+	rm -f  JavaSource/log4j.xml
+	rm -f  JavaSource/log4j2.xml
+	rm -f  JavaSource/resources/ferret/FerretBackendConfig.xml.pybase
+	rm -f  WebContent/productserver/templates/revision.vm
+	rm -f  WebContent/productserver/templates/svn.vm
 	rm -fr conf/server
 	rm -fr WebContent/JavaScript/gwt-unitCache
 	rm -fr WebContent/JavaScript/components/WEB-INF
