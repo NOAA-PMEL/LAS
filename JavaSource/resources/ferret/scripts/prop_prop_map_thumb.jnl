@@ -88,3 +88,4 @@ PALETTE=($ferret_palette"red")/LEVELS=($ferret_fill_levels"v") lon, lat, ($zvar)
 ELSE
    PLOT/VS/OVER/NOLAB/NOKEY/SYM=17($symquals)/COLOR=($lonlatcolor"red") lon, lat
 ENDIF
+

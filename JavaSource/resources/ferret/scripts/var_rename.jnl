@@ -9,4 +9,4 @@
  DEFINE SYMBOL data_($ivar)_var_in = ($vname)
  DEFINE SYMBOL data_($ivar)_var = ($vname)_
  DEFINE SYMBOL ($vname)_done = 1
- 
+

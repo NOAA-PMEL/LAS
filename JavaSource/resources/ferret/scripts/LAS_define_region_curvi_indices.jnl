@@ -34,4 +34,3 @@ IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
 IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
 
 ! ----- End of LAS_define_region_curvi_indices.jnl ------------------------------------------------
-

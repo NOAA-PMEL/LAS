@@ -23,3 +23,4 @@ REPEAT/I=1:`nvars` (DEFINE SYMBOL ivar = `all_varnames`;\
  IF `STRCMP(vartype,"Depth") EQ 0` THEN DEFINE SYMBOL data_z_var = ($ivar);\
  IF `($data_x_var"0|*>1")+($data_y_var"0|*>1")+($data_t_var"0|*>1")+($data_z_var"0|*>1") EQ 4` THEN EXIT/LOOP;\
  )
+

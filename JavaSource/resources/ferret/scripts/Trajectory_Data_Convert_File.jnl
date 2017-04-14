@@ -29,3 +29,4 @@ CANCEL MODE INTERPOLATE  ! important when evaluating the size limits
 SET LIST/FILE="($result_ferret_listing_filename)"
 
 GO list_traj_data
+

@@ -36,4 +36,3 @@ DEFINE SYMBOL its_trajectory_corr = 1
 GO prop_prop_plot
 
 ! ----- End of Trajectory_correlation.jnl ------------------------------------------------
-

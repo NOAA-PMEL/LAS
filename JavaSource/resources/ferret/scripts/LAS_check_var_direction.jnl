@@ -146,4 +146,3 @@ IF `STRLEN("($varshape)") GT 1` THEN
 ENDIF
       
 ! End of file ------------LAS_check_var_direction.jnl-------------------------------
-
