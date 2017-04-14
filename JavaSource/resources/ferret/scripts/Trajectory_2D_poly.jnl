@@ -314,13 +314,6 @@ ELSE
    PPL RIBBON/OVER
 ENDIF
 
-! Draw extra points, e.g. moorings as dots
-
-IF ($custom_dataset"0|*>1") THEN 
-    IF `($ferret_is_($custom_dataset)"0|*>1") AND ($custom_post_trajectory"0|*>1")` THEN \
-     GO ($custom_post_trajectory)
-ENDIF
-
 ! Hack: histogram levels
  IF `STRINDEX("($ferret_fill_levels)", "H") GT 0 OR STRINDEX("($ferret_fill_levels)", "h") GT 0` THEN \
 ($plot_command)($qualifiers)/missing=black/nokey  x_var_data, y_var_data, var_data 
@@ -401,6 +394,17 @@ GO set_constraint_labels
 
 ! restore key-annotation setting: keys not annotated
 KEYMARK 0
+
+
+! Draw extra points, e.g. moorings as dots. Do this after
+! annotations have been set up; if constraints are on platforms
+! the markings will be more prominent.
+
+IF ($custom_dataset"0|*>1") THEN 
+    IF `($ferret_is_($custom_dataset)"0|*>1") AND ($custom_post_trajectory"0|*>1")` THEN \
+     GO ($custom_post_trajectory)
+ENDIF
+
 
 ! Save the results
 
