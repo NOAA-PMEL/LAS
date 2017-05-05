@@ -3,6 +3,7 @@
 !
 !  1/2007 ACM
 ! 12/2013 ACM Extend to grids with E and F axes
+!  5/2017 ACM Fix for init scripts when doing F-TDS operations.
 !
 ! Issues a command to SAVE/FILE=$1/CLOBBER data from variable in dataset according 
 ! to indices and strides given as arguments. Assumes the dataset has already been opened.
@@ -160,9 +161,20 @@ IF `IS_ELEMENT_OF_STR_N(attnames, "ferret_datatype") NE 0` THEN
 ELIF `IS_ELEMENT_OF_STR_N(attnames, "infile_datatype") NE 0` THEN
   DEFINE SYMBOL data_type = `($varname).ferret_datatype`
 ELSE
+
+! Also check whether there was an init script that redefined the original
+! variable name to ($varname)_in. If so get the type from the file variable.
+
+   LET varnames = ..varnames
+   IF `IS_ELEMENT_OF_STR_N(varnames, "($varname)_in") NE 0` THEN
+      DEFINE SYMBOL data_type = `($varname)_in[($region_full)],return=dtype`
+   ELSE
+
 ! If those attributes dont exist then it's not an FTDS dataset, and 
 ! we can get the data type from the file safely.
-   DEFINE SYMBOL data_type = `($varname)[($region_full)],return=dtype`
+
+      DEFINE SYMBOL data_type = `($varname)[($region_full)],return=dtype`
+   ENDIF
 ENDIF
 
 ! A variable that we are defining for F-TDS will have the
