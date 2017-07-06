@@ -21,7 +21,9 @@ import java.util.Map;
 
 import opendap.dap.Attribute;
 import opendap.dap.AttributeTable;
+import opendap.dap.BaseType;
 import opendap.dap.DAS;
+import opendap.dap.DDS;
 import opendap.dap.NoSuchAttributeException;
 
 import org.jdom.Element;
@@ -98,6 +100,7 @@ public class ErddapProcessor {
 	 */
 	public ErddapReturn process(String url, String id, boolean append, boolean auto_display, boolean do_not_write_UNKNOWN, boolean hours, double hours_step, boolean minutes, boolean verbose, String[] properties, String[] varproperties, String[] display, String[] skip, boolean separate) {
 		DAS das = new DAS();
+		DDS dds = new DDS();
 		this.url = url;
 		this.id = id;
 		subsetNames = new ArrayList<String>();
@@ -134,6 +137,10 @@ public class ErddapProcessor {
 
 			input = lasProxy.executeGetMethodAndReturnStream(url+id+".das", null, timeout);
 			das.parse(input);
+			input.close();
+			input = lasProxy.executeGetMethodAndReturnStream(url+id+".dds", null, timeout);
+			dds.parse(input);
+			input.close();
 			AttributeTable global = das.getAttributeTable("NC_GLOBAL");
 			Attribute cdm_trajectory_variables_attribute = global.getAttribute(TRAJECTORY);
 			Attribute cdm_profile_variables_attribute = global.getAttribute(PROFILE);
@@ -830,6 +837,7 @@ public class ErddapProcessor {
 
 				
 				List<String> data_variable_ids = new ArrayList();
+				List<String> data_variable_types = new ArrayList();
 				for (Iterator subIt = data.keySet().iterator(); subIt.hasNext();) {
 					String key = (String) subIt.next();
 					vnames.append(key);
@@ -852,6 +860,9 @@ public class ErddapProcessor {
 						pairs.append(lonn+"-"+id+","+key+"-"+id+"\n");
 					}
 					data_variable_ids.add(key+"-"+id);
+					BaseType bt = dds.getVariable(key);
+					String type = bt.getTypeName();
+					data_variable_types.add(type);
 				}
 
 				// Pair up every data variable with every other.
@@ -861,7 +872,11 @@ public class ErddapProcessor {
 				for (int index = 0; index < data_variable_ids.size(); index++ ) {
 					for (int jindex = index; jindex < data_variable_ids.size(); jindex++ ) {
 						if ( index != jindex ) {
-							data_pairs.append(data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+"\n");
+							if ( !data_variable_types.get(jindex).equals("String") && !data_variable_types.get(index).equals("String")) {
+								data_pairs.append(data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+"\n");
+							} else {
+								System.out.println("Rejected pair "+ data_variable_ids.get(index)+","+data_variable_ids.get(jindex)+" with types "+data_variable_types.get(index)+","+data_variable_types.get(jindex));
+							}
 						}
 					}
 				}
