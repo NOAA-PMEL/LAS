@@ -6,6 +6,12 @@
 		subset="true" subset_queue_size="10000" meta="true"
 		meta_queue_size="10000" />
 	<environment>
+                <!-- ferret 7.2 and later -->
+                <variable>
+                        <name>FER_FONTS</name>
+                        <value>/home/porter/tmap/ferret/linux/ppl/fonts</value>
+                </variable>
+                <!-- before ferret 7.2 -->
                 <variable>
                         <name>PLOTFONTS</name>
                         <value>/home/porter/tmap/ferret/linux/ppl/fonts</value>

@@ -77,6 +77,12 @@
              <value>jnls/section</value>
              <value>scripts</value>
         </variable>
+        <!-- ferret 7.2 and later -->
+        <variable>
+            <name>FER_FONTS</name>
+             <value>/usr/local/ferret/ppl/fonts</value>
+        </variable>
+        <!-- before ferret 7.2 -->
         <variable>
             <name>PLOTFONTS</name>
              <value>/usr/local/ferret/ppl/fonts</value>
