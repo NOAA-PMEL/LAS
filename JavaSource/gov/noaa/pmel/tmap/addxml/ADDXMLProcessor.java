@@ -2666,7 +2666,7 @@ public class ADDXMLProcessor {
 
 				VariableBean variable = new VariableBean();
 				variable.setUrl("#" + geogrid.getName());
-				if (!geogrid.getDescription().equals(geogrid.getName())) {
+				if (geogrid.getDescription() != null && !geogrid.getDescription().equals(geogrid.getName())) {
 					variable.setName(geogrid.getDescription());
 				}
 				else {
@@ -3085,6 +3085,7 @@ public class ADDXMLProcessor {
 		if (unitsString.toLowerCase(Locale.ENGLISH).indexOf("since") < 0 && unitsString.indexOf(":") < 0  ) {
 			useV = true;
 		}
+		
 		// This if test checks to see if this units string ends in an alpha character
 		// If it does, we're thinking there is some time zone stuff at the end that
 		// should be chopped off.  It's probably a bug in SimpleUnit that should
@@ -3094,6 +3095,9 @@ public class ADDXMLProcessor {
 			unitsString = unitsString.substring(0, unitsString.length()-1).trim();
 		}
 
+		if ( unitsString.endsWith(".000") && !unitsString.contains("T") ) {
+			unitsString = unitsString.replace(".000", "");			
+		}
 
 
 		// Units string is one of the bogus "day", "month", etc and there
