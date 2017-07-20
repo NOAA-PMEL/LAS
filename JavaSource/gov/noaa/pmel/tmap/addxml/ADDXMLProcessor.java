@@ -3548,8 +3548,9 @@ public class ADDXMLProcessor {
 			arange.setSize(String.valueOf(axis.getSize()));
 			double delta = axis.getIncrement();
 			double start = axis.getStart();
-			// Flip so that the axis is South to North
-			if (delta < 0 && type.equals("y")) {
+			
+			// Flip so that the axis is South to North, or West to East
+			if (delta < 0) {
 				start = start + (axis.getSize() - 1) * delta;
 				delta = -delta;
 			}
