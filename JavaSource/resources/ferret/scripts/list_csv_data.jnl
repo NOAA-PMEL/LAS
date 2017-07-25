@@ -5,6 +5,7 @@
 ! Date: 2011/05/16
 !      4/2013 ACM Implement the Ferret property ferret_start_memory
 !     12/2013 ACM If the view includes an E direction, list the ensemble member. 
+!      7/20/2017 ACM -- See GitHub issue 3 fix below. 
 !
 ! Called by list_data.jnl 
 ! Write csv data: date/time, X, Y, Z, var1, var2, ...
@@ -17,7 +18,6 @@ DEFINE SYMBOL frmt = FORMAT=comma/NOROW
 
 LET its_curvi = `( ($ferret_curvi_coord_lat"0|*>1) + STRINDEX("($ferret_view)", "xy") ) GT 1`
 IF ($constraint_($num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi = 0
-
 
 ! Initialize data and define 1-d lists of variables to write out
 ! Save the original variable name and use it in the listing.
@@ -34,6 +34,19 @@ ENDIF
 ! otherwise.  Folks requesting data downloads don't want to have their their
 ! first data point (sometimes) repeated so we test for that here and switch 
 ! to index space.
+ 
+!-- See GitHub issue 3:
+! If this is an F-TDS transformed var, shape may be changed. Remove averaged-out region dependence
+
+IF `STRINDEX("($data_var)", "_TRANSFORMED") GT 0 OR STRINDEX("($data_var)", "_transformed") GT 0` THEN
+   DEFINE SYMBOL trans_shape = `($data_var),RETURN=shape`
+   IF `STRINDEX("($trans_shape)", "X") EQ 0` THEN cancel symbol region_x
+   IF `STRINDEX("($trans_shape)", "Y") EQ 0` THEN cancel symbol region_y
+   IF `STRINDEX("($trans_shape)", "Z") EQ 0` THEN cancel symbol region_z
+   IF `STRINDEX("($trans_shape)", "T") EQ 0` THEN cancel symbol region_t
+   DEFINE SYMBOL ferret_view `DNCASE("($trans_shape)")`
+ENDIF
+!-- 
 
 IF ($region_x"0|*>1") THEN
       LET the_coords = x[gx=($data_var),($region_x)]
