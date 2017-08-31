@@ -5,7 +5,8 @@
 ! Date: Nov 2014
 ! 10/2016   ACM Catch and issue an error for string variables
 ! 12/2016 fixes for case when first variable is all-missing
-!
+!  8/2017 *acm* Account for change to expndi_by_m_function
+
 ! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
 !
 
@@ -84,6 +85,7 @@ IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@N
 let nstations = `($rowvar),return=msize`
 let maxrow = `($rowvar)[m=@max]`
 
+let nobs = `time,return=isize`
 
 ! Open the window, apply size, scale options
 IF `nstations EQ 1 OR nstations GT max_separate_stations` THEN 
@@ -116,10 +118,13 @@ ENDIF
 LET tt = t[gt=taxis]
 LET tt_all = t[gt=taxis_all]
 
-let time2d = EXPNDI_BY_M_COUNTS (time, ($rowvar), maxrow)
-let var2d = EXPNDI_BY_M_COUNTS (($data_var), ($rowvar), maxrow)
+DEFINE AXIS/x=1:`maxrow`:1 xrow
+let xvar = x[gx=xrow]
 
-let id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)), maxrow)
+let time2d = EXPNDI_BY_M_COUNTS (time[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
+let var2d = EXPNDI_BY_M_COUNTS (($data_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
+
+let id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)[M=1:`nstations`]), maxrow)
 let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
 
 DEFINE SYMBOL axset = /axes=0,1,1,0
@@ -637,8 +642,8 @@ IF `nstations LE max_separate_stations` THEN
    set view vp_($q)_g;\
    shade/noax/nolab/nokey/pal=gray_pale/x=1:10/y=1:10 x+y;\
    set view vp_($q);\
-   let timem = time2d[m=($q)];\
-   let ntm = `timem[i=@ngd]`;\
+   let ntm = `($rowvar)[m=($q)]`;\
+   load time2d[m=($q)];\
    define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
    let tt = t[gt=taxis];\
    let tempx = var2d[m=($q)];\
@@ -665,7 +670,7 @@ ELSE  ! more than max_separate_stations stations
       LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    ELSE
 
-   let colrx = id2d[m=1]
+   let colrx = id2d[m=1]  
    def sym cshp = `colrx,return=shape`
 
    repeat/range=1:`nstations`/name=q (\
