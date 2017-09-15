@@ -4,9 +4,6 @@
 !  1/2007 ACM
 ! 12/2013 ACM Extend to grids with E and F axes
 !  5/2017 ACM Fix for init scripts when doing F-TDS operations.
-!  5/2017 ACM TESTING: Split the listing along the T axis, so data subsets 
-!             don't get so big we run out of memory. This could
-!             go along with automatic striding when the grid is fine.
 !
 ! Issues a command to SAVE/FILE=$1/CLOBBER data from variable in dataset according 
 ! to indices and strides given as arguments. Assumes the dataset has already been opened.
@@ -77,15 +74,15 @@ IF ($shape"0|NONE>1|*>0") THEN
 ENDIF
 
 LET count = 0
-DEFINE SYMBOL cdim = `count`
+DEFINE SYMBOL mdim = `count`
 
 IF `STRINDEX("($shape)", "I") GT 0` THEN
 !  There is an X axis. Add the I indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   DEFINE SYMBOL region_i i=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
+   DEFINE SYMBOL region_i i=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_i)
    DEFINE SYMBOL comma = ,
 ENDIF
@@ -94,9 +91,9 @@ IF `STRINDEX("($shape)", "J") GT 0` THEN
 !  There is a Y axis. Add the J indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   DEFINE SYMBOL region_j j=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
+   DEFINE SYMBOL region_j j=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_i)($comma)($region_j)
    DEFINE SYMBOL comma = ,
 ENDIF
@@ -105,9 +102,9 @@ IF `STRINDEX("($shape)", "K") GT 0` THEN
 !  There is a Z axis. Add the K indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   DEFINE SYMBOL region_k k=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
+   DEFINE SYMBOL region_k k=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_full)($comma)($region_k)
    DEFINE SYMBOL comma = ,
 ENDIF
@@ -116,27 +113,21 @@ IF `STRINDEX("($shape)", "L") GT 0` THEN
 !  There is a T axis. Add the T indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   ! Instead write one timestep at a time - unless there are E or F dimensions
-   IF `hi_index_($cdim) GT lo_index_($cdim)` THEN
-      CANCEL SYMBOL region_l
-      DEFINE SYMBOL append_time = 1
-      DEFINE SYMBOL tdim = ($cdim)
-   ELSE
-      DEFINE SYMBOL region_l l=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
-      DEFINE SYMBOL region_full = ($region_full)($comma)($region_l)
-      DEFINE SYMBOL comma = ,
-   ENDIF
+   DEFINE SYMBOL region_l l=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
+   DEFINE SYMBOL region_full = ($region_full)($comma)($region_l)
+   DEFINE SYMBOL comma = ,
+
 ENDIF
 
 IF `STRINDEX("($shape)", "M") GT 0` THEN
 !  There is an E axis. Add the E indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   DEFINE SYMBOL region_m m=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
+   DEFINE SYMBOL region_m m=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_full)($comma)($region_m)
    DEFINE SYMBOL comma = ,
 
@@ -146,9 +137,9 @@ IF `STRINDEX("($shape)", "N") GT 0` THEN
 !  There is an F axis. Add the F indices to the region spec.
 
    LET count = `count+1`
-   DEFINE SYMBOL cdim = `count`
+   DEFINE SYMBOL mdim = `count`
 
-   DEFINE SYMBOL region_n n=`lo_index_($cdim)`:`hi_index_($cdim)`:`stride_($cdim)`
+   DEFINE SYMBOL region_n n=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
    DEFINE SYMBOL region_full = ($region_full)($comma)($region_n)
    DEFINE SYMBOL comma = ,
 
@@ -215,13 +206,7 @@ ENDIF
 
 ! All the region information has been gathered. Now write the file.  
 
-IF ($append_time"0|*>1") THEN
-   SAVE/FILE="$1"/CLOBBER/l=`lo_index_($tdim)` ($varname)[($region_full)]
-   LET LOL = `lo_index_($tdim) + stride_($tdim)`
-   REPEAT/L=`LOL`:`hi_index_($tdim)`:`stride_($tdim)` (SAVE/FILE="$1"/APPEND ($varname)[($region_full)])
-ELSE
-   SAVE/FILE="$1"/CLOBBER ($varname)[($region_full)]
-ENDIF
+SAVE/FILE="$1"/CLOBBER ($varname)[($region_full)]
 
 ! Done writing data variable. Clean up.
 SET DATA/RESTORE
