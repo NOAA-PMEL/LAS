@@ -3,6 +3,7 @@
 ! 10/13 change X=0.06 to X=0.07 throughout. When the vertical
 ! axis labels need more than 2 digits, we need more space.
 ! 9/16 Set Y spacing to 0.07 throughout, needed for Time labels using PPLUS
+! 9/17 Tall skinny plots need a bit more left-margin space for axis labels
 
 ! Google Earth plots need no margins. This has already been set up.
 IF ($its_GE"0|*>1") THEN 
@@ -20,6 +21,12 @@ IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN LET y_up = 0
 
 DEFINE VIEW/AXES/X=0.08:0.99/y=0.07:`y_up` full_view
 DEFINE VIEW/AXES/X=0.08:0.99/y=0.07:`y_up` full_view2
+
+! tall skinny plots get the vertical axis labels chopped off.
+IF `($win_aspect) GT 2` THEN
+   DEFINE VIEW/AXES/X=0.11:0.99/y=0.07:`y_up` full_view
+   DEFINE VIEW/AXES/X=0.11:0.99/y=0.07:`y_up` full_view2
+ENDIF
 
 ! Give prop-prop plots a little more space at the left for labels.
 IF ($its_prop_prop_plot"0|*>1") THEN
