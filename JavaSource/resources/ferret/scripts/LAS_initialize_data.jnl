@@ -22,9 +22,9 @@ IF `($data_initialization_script"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL data_initialization_script LAS_initialize_data_std
 GO ($data_initialization_script) ($1)
 
-! If the configuration or initialization hasn't upped the memory a lot, do so.
-
-IF `($ferret_memory"25.6") LT 2000` THEN SET MEM/SIZ=2000
+! And if the configuration or initialization hasn't upped the memory,
+! increase it somewhat.
+IF `($ferret_memory"25.6") LT 100` THEN SET MEM/SIZ=100
 
 ! If a Ferret property ferret_add_a_note is set, define a note that will
 ! be added to the annotations box. The note may contain a URL.
