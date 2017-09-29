@@ -199,7 +199,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET/TITLE="Date" Date = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis],  "($ferret_timelab_res%($tunits)%)")
 
    LET nlist = 1
-   DEFINE SYMBOL vars_out = ($vars_out)($comma) Date
+   DEFINE SYMBOL vars_out = ($vars_out), Date
 
 ENDIF  ! dates, times
 
@@ -215,7 +215,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = SAMPLEI (latitude_, compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 2`
-   DEFINE SYMBOL vars_out = ($vars_out)($comma), Longitude, Latitude
+   DEFINE SYMBOL vars_out = ($vars_out), Longitude, Latitude
 
 ENDIF  ! longitude, latitude
 
@@ -250,7 +250,7 @@ IF `($feature_type%0|Trajectory>0|none>0|*>1%) AND (($have_depth) EQ 0) AND\
    LET/TITLE="`($depthvar),RETURN=title`"/UNITS="`($depthvar),RETURN=units`" Depth = SAMPLEI (($depthvar), compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out)($comma) Depth
+   DEFINE SYMBOL vars_out = ($vars_out), Depth
 
 ENDIF
 
@@ -281,7 +281,7 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
 
    LET nlist = `nlist + 1`
    IF `nlist LT 1` THEN LET nlist = 2
-   DEFINE SYMBOL vars_out = ($vars_out)($comma)  ($data_0_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out),  ($data_0_var_in)
 ENDIF
 
 IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
@@ -309,7 +309,7 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_1_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_1_var_in)
 ENDIF
 
 ! color-by variable on the prop-prop plot:
@@ -339,7 +339,7 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_2_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_2_var_in)
 ENDIF
 
 
@@ -369,7 +369,7 @@ IF ($ferret_plot_var_3"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_3_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out), ($data_3_var_in)
 ENDIF
 
 

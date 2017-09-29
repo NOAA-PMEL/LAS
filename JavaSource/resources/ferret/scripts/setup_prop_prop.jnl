@@ -302,7 +302,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
       DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
-      IF ($is_string) THEN
+      IF `($is_string) AND ($its_listing"0|*>1") EQ 0` THEN
          LET zvar = 1./0 + 0*xvar
          DEFINE SYMBOL note_num = `($note_num"0") + 1`
          DEFINE SYMBOL note_($note_num)_lab = ($data_2_title) is not numeric. Plot without color.
@@ -526,4 +526,3 @@ IF ($apply_region) THEN
 ENDIF
 
 ! End of  ------------- setup_prop_prop.jnl--------------------------
-
