@@ -7,11 +7,13 @@
 ! lists prop_prop_plot.jnl creates an ascii listing of the data from a 
 ! property-property plot, using the data variable in symbol ferret_plot_var_0,
 ! the second variable from ferret_plot_var_1 and optionally colored by ferret_plot_var_2.
-
+! If there is a ferret_plot_var_3 list that as well (e.g. two qc flags)
+!
 ! If the variables are strings, use SAMPLEI to apply any masks.
 ! Use the original variable name when expanding a feature_variable to list.
 
 ! 12/2016 set list precision to 7
+!  9/2017 If there is a fourth variable, list it too.
 
 set mode ver:always
 
@@ -28,8 +30,11 @@ SET LIST/PREC=7
 DEFINE SYMBOL its_listing = 1
 sh sym data_count
 IF ($data_2_var"0|*>1") THEN DEFINE SYMBOL data_count = 3
+IF ($data_3_var"0|*>1") THEN DEFINE SYMBOL data_count = 4
 
 GO setup_prop_prop
+
+sh sym ferret_plot_var*
 
 IF ($ferret_plot_var_2"0|($feature_variable"A")|*>0") THEN CANCEL SYMBOL ferret_plot_var_2
 
@@ -174,7 +179,8 @@ LET nlist = 0
 
 ! Always list the trajectory id, e.g. cruise_expocode
 
-IF ($feature_variable_in"0|*>1") THEN DEFINE SYMBOL vars_out = ($feature_variable_in),
+IF ($feature_variable_in"0|*>1") THEN DEFINE SYMBOL vars_out = ($feature_variable_in)
+DEFINE SYMBOl comma = ,
 
 IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 
@@ -193,7 +199,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET/TITLE="Date" Date = TAX_DATESTRING (Times[i=1:`size`], t[gt=haxis],  "($ferret_timelab_res%($tunits)%)")
 
    LET nlist = 1
-   DEFINE SYMBOL vars_out = ($vars_out) Date, 
+   DEFINE SYMBOL vars_out = ($vars_out)($comma) Date
 
 ENDIF  ! dates, times
 
@@ -209,7 +215,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
    LET/TITLE="`latitude_,RETURN=title`"/UNITS="`latitude_,RETURN=units`" Latitude = SAMPLEI (latitude_, compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 2`
-   DEFINE SYMBOL vars_out = ($vars_out) Longitude, Latitude,
+   DEFINE SYMBOL vars_out = ($vars_out)($comma), Longitude, Latitude
 
 ENDIF  ! longitude, latitude
 
@@ -244,7 +250,7 @@ IF `($feature_type%0|Trajectory>0|none>0|*>1%) AND (($have_depth) EQ 0) AND\
    LET/TITLE="`($depthvar),RETURN=title`"/UNITS="`($depthvar),RETURN=units`" Depth = SAMPLEI (($depthvar), compress_mask[i=1:`nok`])
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out) Depth,
+   DEFINE SYMBOL vars_out = ($vars_out)($comma) Depth
 
 ENDIF
 
@@ -275,7 +281,7 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
 
    LET nlist = `nlist + 1`
    IF `nlist LT 1` THEN LET nlist = 2
-   DEFINE SYMBOL vars_out = ($vars_out)  ($data_0_var_in),
+   DEFINE SYMBOL vars_out = ($vars_out)($comma)  ($data_0_var_in)
 ENDIF
 
 IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN
@@ -303,7 +309,7 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out) ($data_1_var_in),
+   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_1_var_in)
 ENDIF
 
 ! color-by variable on the prop-prop plot:
@@ -333,8 +339,39 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    ENDIF
 
    LET nlist = `nlist + 1`
-   DEFINE SYMBOL vars_out = ($vars_out) ($data_2_var_in)
+   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_2_var_in)
 ENDIF
+
+
+! List yet another variable
+IF ($ferret_plot_var_3"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN 
+   
+   LET gettype = ($ferret_plot_var_3)
+   DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+   IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
+
+   LET ii = i[g=($timevar)]
+   LET iindices = IF constraints_mask THEN ii
+   LET compress_mask = COMPRESSI(iindices)
+   LET nok = `compress_mask[i=@ngd]`
+   LET/TITLE="($data_3_title)"/UNITS="($data_3_units)" ($data_3_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
+
+! expand metadata variables onto the X axis
+   DEFINE SYMBOL zshape = `($ferret_plot_var_3),RETURN=shape`
+   IF `($zshape"0|E>1|POINT>1|*>0)` THEN
+      ! Expand all strings into obs axis
+      IF ($is_string"0|*>1") THEN 
+         LET ($ferret_plot_var_3)_xpnd = EXPND_BY_LEN_STR(($ferret_plot_var_3), ($rowvar), `($rowvar)[m=@sum]`)
+      ELSE
+         LET ($ferret_plot_var_3)_xpnd = EXPND_BY_LEN(($ferret_plot_var_3), ($rowvar), `($rowvar)[m=@sum]`)
+      ENDIFs
+      LET/TITLE="($data_3_title)"/UNITS="($data_3_units)" ($data_3_var_in) = SAMPLEI (($ferret_plot_var_3)_xpnd, compress_mask[i=1:`nok`])
+   ENDIF
+
+   LET nlist = `nlist + 1`
+   DEFINE SYMBOL vars_out = ($vars_out)($comma) ($data_3_var_in)
+ENDIF
+
 
 ! Make sure we havent ended the list with a comma.
 
