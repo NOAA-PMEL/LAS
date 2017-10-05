@@ -49,6 +49,11 @@ IF `fland_area LT fland_cutoff` THEN
    IF `($topo_url"0|*>1") EQ 0` THEN DEFINE SYMBOL topo_url = etopo5
 
    USE ($topo_url)
+
+   IF ($refinemap"0|0|*>1") then
+      SET VAR/NAME=rosein rose 
+      LET rose = rosein[GX=finerlon, GY=finerlat]
+   ENDIF
    SHADE/NOLAB/NOKEY/LEV=($land_levels)/PAL=($fland_palette)/OVERLAY rose($map_reg)
    DEFINE SYMBOL toponame = `rose,return=dset`
 
