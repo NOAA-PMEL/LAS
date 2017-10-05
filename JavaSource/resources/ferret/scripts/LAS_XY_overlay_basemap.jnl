@@ -52,6 +52,23 @@ ENDIF
 
 LET basevar = ($basemap_var)[d=($basemap_data_num),($map_region_x),($region_y),($basemap_region_z),($basemap_region_t)]
 
+! For smallest regions, refine using a small amount of regridding - 
+! too much makes the land look blocky, but just a factor of 2 
+! helps.
+
+LET basei = `basevar,RETURN=isize`
+LET basej = `basevar,RETURN=jsize`
+IF `basei LT 300 OR basej LT 300` THEN
+   DEFINE SYMBOL refinemap = 1
+   LET nfinex = MIN(300, 2*basei)
+   LET nfiney = MIN(300, 2*basej)
+   DEFINE AXIS/($map_region_x)/UNITS=`rose,RETURN=xunits`/NPOINTS=`nfinex` finerlon
+   DEFINE AXIS/($region_y)/UNITS=`rose,RETURN=yunits`/NPOINTS=`nfiney` finerlat
+   LET basevar = ($basemap_var)[d=($basemap_data_num),\
+   ($map_region_x),($region_y),($basemap_region_z),($basemap_region_t),\
+    GX=finerlon, gy=finerlat]
+ENDIF
+
 LET topo_dx = `xbox[GX=($basemap_var),I=1]`
 LET topo_dy = `ybox[GY=($basemap_var),J=1]`
 

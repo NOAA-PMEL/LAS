@@ -14,7 +14,9 @@ ELSE
 ENDIF
 
 IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo1.nc") EQ 0` THEN 
-   DEFINE SYMBOL topo1_url = http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo2.nc
+   DEFINE SYMBOL topo1_url = http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo1.nc
+ELIF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo01.nc") EQ 0` THEN 
+   DEFINE SYMBOL topo1_url = http://ferret.pmel.noaa.gov/pmel/thredds/dodsC/data/PMEL/etopo01.nc
 ELSE
    LET e1file = STRCAT(justpath, "etopo1.nc")
    IF `TEST_OPENDAP(e2file) EQ 0` THEN DEFINE SYMBOL topo1_url = `e1file`
