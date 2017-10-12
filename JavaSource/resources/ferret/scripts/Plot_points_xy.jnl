@@ -225,10 +225,15 @@ IF `($nbad_data"0|0|*") GT 0 ` THEN
    plot/over/vs/nolab/color=black/SYM=19/siz=($psize) lon_where_bad, lat_where_bad
 ENDIF
 
-IF `($ngood_data"0|0|*") GT 0` THEN DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data
-($plot_command)($qualifiers)/SET ($plot_plot_vars)
+IF `($ngood_data"0|0|*") GT 0` THEN 
+   DEFINE SYMBOL plot_plot_vars = x_var_data, y_var_data, var_data
+   ($plot_command)($qualifiers)/SET ($plot_plot_vars)
    IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-PPL RIBBON/OVER
+   PPL RIBBON/OVER
+ELSE
+   DEFINE SYMBOL plot_plot_vars = x_var_data,  y_var_data
+   PLOT/VS($qualifiers) ($plot_plot_vars)
+ENDIF
 
 SAY _________________ END line plot: clock seconds:                              ($clock_secs)
 SAY _________________ total time for line plot, seconds                                     ----- `($clock_secs) - pre_plot`
