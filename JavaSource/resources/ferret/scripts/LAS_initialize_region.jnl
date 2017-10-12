@@ -23,6 +23,8 @@
 ! The previous v6 UI as to how it worked in the old product server expects
 ! to inherit some or all region info from the first dataset for use by the 
 ! second in comparisons etc. Keep this behavior.
+!
+! 10/2017 Expand the map if the region is super skinny, only for insitu data
 
 DEFINE SYMBOL num ($1"0")
 DEFINE SYMBOL region_name data_($num)_region
@@ -33,6 +35,68 @@ DEFINE SYMBOL region ($($region_name)"region_0")
 ! data_0_var, etc.
 
 DEFINE SYMBOL region region_($num)
+
+
+! When it's a map plot, check the aspect ratio.  If it's too skinny a plot
+! in any direction.  This is pulled out of LAS_open_window, because
+! it may reset the incoming region definition.
+
+IF `($num) EQ 0 AND ($ferret_view"|xy>1|xyt>1|*>0") ` THEN
+
+DEFINE SYMBOL region_x_range = `ABS( ($region_0_x_hi) - ($region_0_x_lo) )`
+DEFINE SYMBOL region_y_range = `($region_0_y_hi) - ($region_0_y_lo)`
+
+DEFINE SYMBOL win_aspect = 0
+IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN
+  IF `($fview"1|t>0|*>1") AND ($region_x_range"0") NE 0` THEN \
+    DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
+ELSE
+   DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
+ENDIF
+
+! Set more reasonable aspect ratio if the region is extremely skinny.
+! Else axis labels etc get squashed
+
+IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 1
+
+! For insitu sample data, show the data on a larger map if the region
+! is skinny.  For gridded datasets, just show the requested region.
+
+SET DATA "($data_0_url)"
+LET global_attnames = ..attnames
+
+IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN
+
+IF `($win_aspect) LT 0.3` THEN 
+   DEFINE SYMBOL win_aspect = 0.3
+   LET need_y = ($region_X_range)* 0.3
+   DEFINE SYMBOL region_0_y_lo = `($region_0_y_lo) - need_y/2`
+   DEFINE SYMBOL region_0_y_hi = `($region_0_y_hi) + need_y/2`
+
+   IF `($region_0_y_lo) LT -90` THEN
+      DEFINE SYMBOL region_0_y_lo = -90
+      DEFINE SYMBOL region_0_y_hi = `-90 + ABS(need_y)`
+   ENDIF
+   IF `($region_0_y_hi) GT 90` THEN
+      DEFINE SYMBOL region_0_y_lo = `90 - ABS(need_y)`
+      DEFINE SYMBOL region_0_y_hi = 90 
+   ENDIF
+ENDIF
+
+IF `($win_aspect) GT 2.5` THEN 
+   DEFINE SYMBOL win_aspect = 2.5
+   LET need_x = ($region_Y_range)/2.5
+   DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - need_x/2`
+   DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + need_x/2`
+ENDIF
+
+ELSE 
+   IF `($win_aspect) LT 0.3` THEN DEFINE SYMBOL win_aspect = 0.3
+   IF `($win_aspect) GT 2.5` THEN DEFINE SYMBOL win_aspect = 2.5
+ENDIF
+
+CANCEL DATA "($data_0_url)"
+ENDIF  ! end of adjusting xy aspect ratio
 
 ! NOTE:  Occasionally the LAS applet will send in a longitude or latitude
 ! NOTE:  that looks like "24.400000000000002".  Such long, numerically
@@ -71,6 +135,8 @@ IF ($($region)_y_lo"0|*>1") THEN
     DEFINE SYMBOL region_y_range = `($region_y_lo) - ($region_y_hi)`
   ENDIF
 ENDIF
+
+
 
 IF ($($region)_z_lo"0|*>1") THEN
   DEFINE SYMBOL region_z_lo = ($($region)_z_lo)
