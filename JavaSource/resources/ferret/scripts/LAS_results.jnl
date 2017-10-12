@@ -42,12 +42,20 @@ ELSE
    ENDIF
 ENDIF
 
-! Annotate if the selection resulted in no data
-IF `($ferret_annotations"0|*>1") AND ($plotvar_is_basemap"0|*>1") EQ 0 AND ($no_novalid_lab"0|*>1") NE 1` THEN
-   stat the_plot_var
-   IF `($stat_ngood"0|0|*>1") EQ 0` THEN \
-     annotate/norm/x=0.02/y=0.92/halign=-1/siz=0.1 "No Valid Data in the selection"
+! Annotate if the selection resulted in no data  ngood_data is defined for insitu datasets
+
+IF `($ngood_data"-1|*>1") NE -1` THEN
+   IF `($ngood_data) EQ 0` THEN annotate/norm/x=0.02/y=0.92/halign=-1/siz=0.1 "No Valid Data in the selection"
+ELSE
+   IF `($ferret_annotations"0|*>1") AND ($plotvar_is_basemap"0|*>1") EQ 0 AND ($no_novalid_lab"0|*>1") NE 1` THEN
+      stat the_plot_var
+      IF `($stat_ngood"0|0|*>1") EQ 0` THEN \
+       annotate/norm/x=0.02/y=0.92/halign=-1/siz=0.1 "No Valid Data in the selection"
+  ENDIF
 ENDIF
+
+SAY _________________ Saving the image: clock seconds:                            ($clock_secs)
+LET pre_plot = ($clock_secs)
 
 
 ! Write the image file
@@ -67,6 +75,9 @@ IF ($program_name"0|PyFerret>1|*>0") THEN
 ELSE
    IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
 ENDIF
+
+SAY _________________ END Saving the image: clock seconds:                              ($clock_secs)
+SAY _________________ total time Saving the image, seconds                                  ----- `($clock_secs) - pre_plot`
 
 
 ! Result map_scale_file is output map scale file
