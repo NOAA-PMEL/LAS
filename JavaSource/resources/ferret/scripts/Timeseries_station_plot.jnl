@@ -89,13 +89,13 @@ let nobs = `time,return=isize`
 
 ! Open the window, apply size, scale options
 IF `nstations EQ 1 OR nstations GT max_separate_stations` THEN 
-   DEFINE SYMBOL win_aspect = 0.5
+   DEFINE SYMBOL win_aspect = 0.4
 ELSE
-   DEFINE SYMBOL win_aspect = `0.5 + nstations/max_separate_stations`
+   DEFINE SYMBOL win_aspect = `0.4 + nstations/max_separate_stations`
 ENDIF
 
 GO LAS_open_window
-define view/axes/x=0.08:0.99/ylim=0.06:0.96 full_view
+define view/axes/x=0.08:0.99/ylim=0.07:0.96 full_view
 cancel view 
 set view full_view
 
