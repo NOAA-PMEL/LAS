@@ -3,6 +3,9 @@
 ! 5/2014  Fixes to XY map plots
 ! 10/2016 Performance fixes. The underlay plot can be on a coarser grid 
 !         while the overlay will be done with full resolution data.
+! 10/2017 Writing a note when data selection results in no data
+!         Here, if we already make such a note, xx var is all-missing,
+!         set a symbol to skip the new annotation.
 !
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -653,9 +656,11 @@ IF ($put_label"0|*>1") THEN
       IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> is all-missing
          LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
+	 DEFINE SYMBOL no_novalid_lab = 1
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
          LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
+	 DEFINE SYMBOL no_novalid_lab = 1
       ENDIF
       DEFINE SYMBOL bad_pp_var = 1
    ENDIF
@@ -669,15 +674,18 @@ IF ($put_label"0|*>1") THEN
       IF ($ferret_thumb"0|0|*>1") THEN  
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> is all-missing
          LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
+	 DEFINE SYMBOL no_novalid_lab = 1
       ELSE
          LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
          LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
+	 DEFINE SYMBOL no_novalid_lab = 1
       ENDIF
       DEFINE SYMBOL bad_pp_var = 1
    ENDIF
 
    IF `($bad_pp_var"0") EQ 0` THEN 
       LABEL/NOUSER 0.2, `ylab_bad-($miss_lab_siz)`, -1, 0, 0.12, @ASConstraints result in no valid data
+      DEFINE SYMBOL no_novalid_lab = 1
    ENDIF
 
    DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results

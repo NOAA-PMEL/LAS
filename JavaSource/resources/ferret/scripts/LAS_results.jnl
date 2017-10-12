@@ -12,36 +12,12 @@
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
 ! 4/2014    ACM Add time units, origin and calendar to map scale file
+! 10/2017   Add an annotation on the plot when data selection results in no data
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
 !
 ! The argument is the refmap type "box", "xline", "yline", or "point"
-
-! Result "plot_image" is the the image file result_plot_image_filename
-
-! For Google Earth plots, use transparency for white background if the 
-! ferret version has that option available.
-
-IF `($its_GE"0|*>1")` THEN DEFINE SYMBOL trans = /TRANS
-
-IF ($program_name"0|PyFerret>1|*>0") THEN 
-   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
-!   IF ($result_plot_pdf_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_pdf_filename)"
-!   IF ($result_plot_ps_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
-!   IF ($result_plot_svg_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_svg_filename)"
-ELSE
-   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
-ENDIF
-
-! Result map_scale_file is output map scale file
-! Write the output immediately after drawing the plot; it uses symbols 
-! that are set when making the plot. If a colorbar is made, do that after the
-! map_scale file is written.
- 
-! X region for plot does not apply to the abstract axis for 
-! the variables SYMS_NAMES, SYMS_VALS, so cancel region
-! assume we are running Ferret v5.81 + with /NOROWLAB qualifier on LIST command
 
 cancel region 
 
@@ -61,9 +37,47 @@ ELSE
       IF ($basemap_url"0|0|*>1") THEN
          USE ($basemap_url)
          LET the_plot_var = ($basemap_var)
+	 DEFINE SYMBOL plotvar_is_basemap = 1
       ENDIF
    ENDIF
 ENDIF
+
+! Annotate if the selection resulted in no data
+IF `($ferret_annotations"0|*>1") AND ($plotvar_is_basemap"0|*>1") EQ 0 AND ($no_novalid_lab"0|*>1") NE 1` THEN
+   stat the_plot_var
+   IF `($stat_ngood"0|0|*>1") EQ 0` THEN \
+     annotate/norm/x=0.02/y=0.92/halign=-1/siz=0.1 "No Valid Data in the selection"
+ENDIF
+
+
+! Write the image file
+!
+! Result "plot_image" is the the image file result_plot_image_filename
+
+! For Google Earth plots, use transparency for white background if the 
+! ferret version has that option available.
+
+IF `($its_GE"0|*>1")` THEN DEFINE SYMBOL trans = /TRANS
+
+IF ($program_name"0|PyFerret>1|*>0") THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_image_filename)"
+!   IF ($result_plot_pdf_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_pdf_filename)"
+!   IF ($result_plot_ps_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_ps_filename)"
+!   IF ($result_plot_svg_filename%0|*>1%) THEN FRAME($trans)/FILE="($result_plot_svg_filename)"
+ELSE
+   IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
+ENDIF
+
+
+! Result map_scale_file is output map scale file
+! Write the output immediately after drawing the plot; it uses symbols 
+! that are set when making the plot. If a colorbar is made, do that after the
+! map_scale file is written.
+ 
+! X region for plot does not apply to the abstract axis for 
+! the variables SYMS_NAMES, SYMS_VALS, so cancel region
+! assume we are running Ferret v5.81 + with /NOROWLAB qualifier on LIST command
+
 
 ! First list the urls and variable names; the URLs can be so long they make the
 ! commands too long for the Ferret command-line buffer. 
