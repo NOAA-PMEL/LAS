@@ -14,6 +14,7 @@
 
 ! 12/2016 set list precision to 7
 !  9/2017 If there is a fourth variable, list it too.
+! 10/2017 Ensure that Time, Longitude, Latitude, Depth are written if available.
 
 set mode ver:always
 
@@ -182,7 +183,8 @@ LET nlist = 0
 IF ($feature_variable_in"0|*>1") THEN DEFINE SYMBOL vars_out = ($feature_variable_in)
 DEFINE SYMBOl comma = ,
 
-IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
+LET has_time = `($timevar),RETURN=isready`
+IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0 OR has_time GT 0` THEN
 
 ! Make a time axis from the time coordinates and use it to compute the date strings.
 ! Don't list the time variable itself. Hard to give it enough resolution to be useful.
@@ -204,8 +206,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 ENDIF  ! dates, times
 
 ! Define Longitude and Latitude variables at the masked locations
-
-IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
+IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0 OR has_time GT 0` THEN
 
    LET ii = i[g=($timevar)]
    LET iindices = IF constraints_mask THEN ii
@@ -219,7 +220,7 @@ IF `IS_ELEMENT_OF_STR_N(varnames, "($timevar)") GT 0` THEN
 
 ENDIF  ! longitude, latitude
 
-! If this is a Feature-type dataset of any type other than aTrajectory dataset, 
+! If this is a Feature-type dataset of any type other than a Trajectory dataset, 
 ! see if there is a Depth variable and list it too.
 
 ! Was depth already included in the input variables?
