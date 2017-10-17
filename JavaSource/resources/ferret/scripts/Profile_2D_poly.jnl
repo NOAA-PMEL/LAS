@@ -4,6 +4,7 @@
 ! Creates a 2D plot with a blank 'basemap' and an overlay of points
 ! drawn in the pie style from ($ferret_plot_var) defined in LAS_initialize_data_insitu.
 !
+! 10/17/17 Variables may be on the I or E direction; account for that getting @NGD or @NBD.
 
 ! Set the gif filename, changing it from .gif to the name from this request
 ! Set up to write info to the debug log so that FshowGO can be used
@@ -44,8 +45,9 @@ ENDIF
 GO LAS_url_label 0
 
 ! For the annotations
-IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
-IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+DEFINE SYMBOL dshape = `($data_var),RETURN=shape`
+IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_var)[($dshape"i")=@NGD]`
+IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[($dshape"i")=@NBD]`
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
