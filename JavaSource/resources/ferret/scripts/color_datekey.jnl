@@ -1,6 +1,9 @@
 ! color_datekey.jnl
 !
 ! set up date/time labels for the color key when a plot is colored by a time variable.
+!
+! 10/2017 Cosmetic changes to the ldate labels
+!
 ! Arguments 
 !  1 variable containing a variable on a time axis corresponding to the 
 !    colored-by-time data, e.g.  LET timepts = t[gt=timeaxis]
@@ -122,20 +125,23 @@ let keylen = `x2-x1`
 let keydel = keylen/4
 let keystart = x1 - ($ppl$xorg)
 
+LET barline = "l"
+IF ($program_name"0|PyFerret>1|*>0") THEN LET barline = "|"
+
 LABEL/NOUSER `keydel*0+keystart`,`key_hi`,0,0,($datesize),($day_0_fourth)
-LABEL/NOUSER `keydel*0+keystart`,`key_lo+key_inc`,0,0,.07,l
+LABEL/NOUSER `keydel*0+keystart`,`key_lo+.8*key_inc`,0,0,.07,`barline`
 
 LABEL/NOUSER `keydel*1+keystart`,`key_hi`,0,0,($datesize),($day_1_fourth)
-LABEL/NOUSER `keydel*1+keystart`,`key_lo+key_inc`,0,0,.07,l
+LABEL/NOUSER `keydel*1+keystart`,`key_lo+.8*key_inc`,0,0,.07,`barline`
 
 LABEL/NOUSER `keydel*2+keystart`,`key_hi`,0,0,($datesize),($day_2_fourth)
-LABEL/NOUSER `keydel*2+keystart`,`key_lo+key_inc`,0,0,.07,l
+LABEL/NOUSER `keydel*2+keystart`,`key_lo+.8*key_inc`,0,0,.07,`barline`
 
 LABEL/NOUSER `keydel*3+keystart`,`key_hi`,0,0,($datesize),($day_3_fourth)
-LABEL/NOUSER `keydel*3+keystart`,`key_lo+key_inc`,0,0,.07,l
+LABEL/NOUSER `keydel*3+keystart`,`key_lo+.8*key_inc`,0,0,.07,`barline`
 
 LABEL/NOUSER `keydel*4+keystart`,`key_hi`,0,0,($datesize),($day_4_fourth)
-LABEL/NOUSER `keydel*4+keystart`,`key_lo+key_inc`,0,0,.07,l
+LABEL/NOUSER `keydel*4+keystart`,`key_lo+.8*key_inc`,0,0,.07,`barline`
 
 ELSE ! vertical key
 
@@ -166,4 +172,4 @@ LABEL/NOUSER `key_hi`,`(($ppl$ylen)*3)/4-.05`,-1,0,($datesize),($day_3_fourth)
 LABEL/NOUSER `key_hi`,`(($ppl$ylen)*4)/4-.05`,-1,0,($datesize),($day_4_fourth)
 
 ENDIF
-
+! End of file ------------ color_datekey.jnl--------------------------

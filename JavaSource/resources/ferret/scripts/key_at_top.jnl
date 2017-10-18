@@ -1,6 +1,8 @@
 ! key_at_top
 ! for annotations plots (VizGal and LAS v8.) make the color key across the top of the plot
 ! 
+! 10/2017 Cosmetic changes, make the colorbar longer across the top
+! 
 ! Google Earth plots have their own, separate color bar image file.
 IF ($its_GE"0|*>1") THEN EXIT/SCRIPT
 IF `($ferret_plot_key"1|0|*>1") EQ 0` THEN EXIT/SCRIPT
@@ -11,8 +13,8 @@ LET key_label_size = 0.08
 
 ppl ylab
 ppl xlab
-let x1 = `($ppl$xorg)+0.8`
-let x2 = `($ppl$xorg)+($ppl$xlen)-0.8`
+let x1 = `($ppl$xorg)+0.5`
+let x2 = `($ppl$xorg)+($ppl$xlen)-0.5`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.04`
 let y2 = `y1+0.2`
