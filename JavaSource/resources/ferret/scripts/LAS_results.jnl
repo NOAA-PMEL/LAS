@@ -13,6 +13,7 @@
 ! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
 ! 4/2014    ACM Add time units, origin and calendar to map scale file
 ! 10/2017   Add an annotation on the plot when data selection results in no data
+! 10/2017   fixes for map-scale file, monthly time axis such as monthly_navy_winds
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
@@ -186,8 +187,14 @@ IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insit
       LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
       IF ($haxis_taxname"0|*>1") THEN 
          LET tt= t[GT=($haxis_taxname)]
-         LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
-         LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
+
+	 let tblo = tboxlo[gt=tt]
+	 let tbhi = tboxlo[gt=tt]
+	 LET tbl = MAX(tblo[L=1],($xaxis_min%($ppl$xmin1)%) )
+         LET t1 = tboxlo[gt=tt,t=`tbl`]
+	 LET tbh = MIN(tbhi[L=@max],($xaxis_max%($ppl$xmax1)%) )
+         LET t2 =  tboxhi[gt=tt,t=`tbh`]
+
          DEFINE SYMBOL haxis_tunits = `tt,RETURN=tunits`
          DEFINE SYMBOL haxis_torigin = `tt,RETURN=t0`
          DEFINE SYMBOL haxis_tcalendar = `tt,RETURN=calendar`
@@ -231,8 +238,14 @@ IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insit
       LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
       IF ($vaxis_taxname"0|*>1") THEN 
          LET tt= t[GT=($vaxis_taxname)]
-         LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
-         LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
+
+	 let tblo = tboxlo[gt=tt]
+	 let tbhi = tboxlo[gt=tt]
+	 LET tbl = MAX(tblo[L=1],($yaxis_min%($ppl$ymin1)%) )
+         LET t1 = tboxlo[gt=tt,t=`tbl`]
+	 LET tbh = MIN(tbhi[L=@max],($yaxis_max%($ppl$ymax1)%) )
+         LET t2 =  tboxhi[gt=tt,t=`tbh`]
+
          DEFINE SYMBOL vaxis_tunits = `tt,RETURN=tunits`
          DEFINE SYMBOL vaxis_torigin = `tt,RETURN=t0`
          DEFINE SYMBOL vaxis_tcalendar = `tt,RETURN=calendar`
@@ -244,9 +257,15 @@ IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insit
       IF ($ax_vert"0|T>1|*>0") THEN
          SET DATA 1
          LET tt= t[GT=($data_0_var),d=($dset0%1%)]
-         LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
-         LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
-         DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
+
+	 let tblo = tboxlo[gt=tt]
+	 let tbhi = tboxlo[gt=tt]
+	 LET tbl = MAX(tblo[L=1],($yaxis_min%($ppl$ymin1)%) )
+         LET t1 = tboxlo[gt=tt,t=`tbl`]
+	 LET tbh = MIN(tbhi[L=@max],($yaxis_max%($ppl$ymax1)%) )
+         LET t2 =  tboxhi[gt=tt,t=`tbh`]
+
+	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
          DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING(t2, tt, "seconds")`
          DEFINE SYMBOL vaxis_tunits = `($data_0_var),RETURN=tunits`
          DEFINE SYMBOL vaxis_torigin = `($data_0_var),RETURN=t0`
