@@ -6,6 +6,7 @@
 ! 9/2012 (from Jons_initialize_data_insitu.jnl)
 ! 10/4/2016 fixes so init scripts still work
 !  4/3/2017 *acm* Additions for point data types
+!   10/2017 *acm* Make a time-labeled color key for time variables not named "time".
 !
 DEFINE SYMBOL num ($1"0")
 
@@ -341,11 +342,23 @@ ELSE
    ENDIF
 ENDIF
 
-! Special setup for color-by-time on trajectory plot
+! Special setup for color-by-time 
 IF `($data_0_var"0|time>1|*>0") AND ($its_prop_plot"1|*>0")` THEN 
    DEFINE SYMBOL ferret_plot_key = date_key 
    SET VAR/TITLE="Time" ($data_var)[d=`data_num`] 
    SET VAR/TITLE="Time" ($ferret_plot_var)[d=`data_num`] 
+
+! Also check for other Time variables, e.g. Cast Time
+ELSE
+   LET attnames = ($data_0_var).attnames
+   IF `IS_ELEMENT_OF_STR_N(attnames, "units") GT 0 AND \
+    IS_ELEMENT_OF_STR_N(attnames, "time_origin") GT 0` THEN
+      IF `STRINDEX(($data_0_var).units, "since") GT 0` THEN
+         DEFINE SYMBOL ferret_plot_key = date_key 
+         SET VAR/TITLE="Time" ($data_var)[d=`data_num`] 
+         SET VAR/TITLE="Time" ($ferret_plot_var)[d=`data_num`] 
+      ENDIF
+   ENDIF
 ENDIF
 
 ! Mark whether there are color levels set on first entry. 
