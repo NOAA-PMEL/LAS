@@ -3,6 +3,7 @@
 ! insitu_waterfall_zt.jnl
 !
 ! Creates a ZT Waterfall plot 
+! 10/2017 Fix for different-shaped data. Check that variable time_units defined before using.
 !
 ! Set the gif filename, changing it from .gif to the name from this request
 ! Set up to write info to the debug log so that FshowGO can be used
@@ -92,6 +93,9 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 
 ! Adjust if start and end times are too close together
    LET oneday = 1
+
+   let time_unitsok =`time_units,return=isready` 
+   if `time_unitsok eq 0` then let time_units = tunits
    IF `STRINDEX(time_units, "sec") GT 0` THEN LET oneday = 24*60*60
    IF `STRINDEX(time_units, "min") GT 0` THEN LET oneday = 24*60
    IF `STRINDEX(time_units, "ho") GT 0` THEN LET oneday = 24
