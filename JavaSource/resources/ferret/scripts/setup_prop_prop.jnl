@@ -1,6 +1,7 @@
 ! setup_prop_prop.jnl
 ! 10/4/2016 fixes so init scripts still work
-!  9/  2017   Set up for listings that include a fourth variable, e.g. second qc flag.
+!  9/  2017  Set up for listings that include a fourth variable, e.g. second qc flag.
+! 10/2017    Set up to list up to a total of 10 variables, data_0_var through data_9_var.
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -38,10 +39,14 @@ IF `($data_count"0") GE 3` THEN
 ENDIF
 
 IF `($data_count"0") GE 4` THEN 
-   LET data_3_title = "($data_3_title)"
-   LET data_3_units = ""
-   IF ($data_3_units"0|text>0|none>0|*>1") THEN LET data_3_units = " (($data_3_units))"
-   IF `($data_3_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_3_var_in = ($data_3_var)
+
+   REPEAT/RANGE=3:`($data_count)-1`/NAME=c (\
+      DEFINE SYMBOL list_var = `c`; \
+      LET data_($list_var)_title = "($data_($list_var)_title)"; \
+      LET data_($list_var)_units = ""; \
+      IF ($data_($list_var)_units"0|text>0|none>0|*>1") THEN LET data_($list_var)_units = " (($data_($list_var)_units))"; \
+      IF `($data_($list_var)_var_in"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($list_var)_var_in = ($data_($list_var)_var); \
+      )
 ENDIF
 
 GO LAS_initialize_region 0
@@ -323,67 +328,12 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
 ENDIF
 
-!-------------
 IF `($data_count"0") GE 4` THEN ! 4th variable, for table listings
 
-   ! Initialize the 4th variable.
-   ! In fact the region and dataset will be the
-   ! same as for var 0 (for now anyway)
-   
-   ! Cancel the dataset so that another application of the
-   ! init script will work.
-
-   GO LAS_initialize_region 3
-   DEFINE SYMBOL data_3_url = ($data_0_url)
-
-   IF `($data_3_url"($data_0_url)|($data_0_url)>1|*>0") AND \
-    ($ferret_init_script"0|*>1")` THEN CANCEL DATA ($data_num)
-
-   GO LAS_initialize_data 3
-   
-   IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR **ERROR ($error_string)
-     EXIT/PROGRAM
-   ENDIF
-   
-   ! Here is variable 3 title 
-   DEFINE SYMBOL ferret_title_3 = ($ferret_plot_title"($data_3_var)")
-   DEFINE SYMBOL ferret_plot_var_3 = ($($fer_sym)_var)
-   DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
-
-   LET/TITLE="($ferret_title_3)" zvar = XSEQUENCE(($ferret_plot_var_3))
-
-
-! Is it a varible on the E axis of a DSG file?
-
-   DEFINE SYMBOL vshape = `($ferret_plot_var_3),RETURN=shape`
-   IF `($vshape"0|E>1|*>0)` THEN
-
-! Is it a Profile or Trajectory dataset?
-      IF `($rowvar"0|*>1") EQ 0` THEN GO LAS_setup_dsg
-      IF ($rowvar"0|*>1") THEN DEFINE SYMBOL rowvar = rowsize
-
-! Expand trajectory variable into obs axis
-      DEFINE SYMBOL vtype = 0
-      DEFINE SYMBOL vtype = `zvar,RETURN=dtype`
-      DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
-
-      IF ($is_string"0|0|*>1") THEN 
-         LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_3), ($rowvar),`($rowvar)[m=@sum]`)
-
-! Set string var to a sequence number, unless its the qc_flag or region id.
-
-	 IF `(($data_3_var_in"0|region_ID>1|qc_flag>1|*>0") EQ 0) AND ($its_prop_plot"0|*>1")` THEN 
-	    LET mvar_3 = _m[ge=($ferret_plot_var_3)]
-	    LET zvar = EXPND_BY_LEN(mvar_3, ($rowvar),`($rowvar)[m=@sum]`)
-	 ELSE
-	    LET zvar = EXPND_BY_LEN(($ferret_plot_var_3), ($rowvar),`($rowvar)[m=@sum]`)
-	 ENDIF
-      ELSE
-         LET zvar = EXPND_BY_LEN(($ferret_plot_var_3), ($rowvar),`($rowvar)[m=@sum]`)
-      ENDIF
-
-   ENDIF
+   REPEAT/RANGE=3:`($data_count)-1`/NAME=c (\
+      DEFINE SYMBOL list_var = `c`; \
+      GO LAS_initialize_extra_var \
+      )
 ENDIF
 
 IF ($custom_dataset"0|*>1") THEN 
@@ -416,22 +366,22 @@ IF  ($color_by"0") THEN
 ENDIF
 
 ! Special color-by-time key
-IF ($ferret_plot_key"0|date_key>1|*>0") THEN 
+IF `($its_listing"0|1|*>0") EQ 0 AND ($ferret_plot_key"0|date_key>1|*>0")` THEN 
 
 ! In this case we set up a time axis, and label the color key with dates
 ! If the units are seconds since, we don't need that much resolution for this. Make it hours.
 
-   LET tmin = ($data_var)[i=@MIN]
-   LET tmax = ($data_var)[i=@MAX]
+   LET tmin = ($ferret_plot_var_0)[i=@MIN]
+   LET tmax = ($ferret_plot_var_0)[i=@MAX]
 
-   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   LET since_loc = STRINDEX("`($ferret_plot_var_0).units`","since") - 2
    IF `since_loc GT 1` THEN 
-      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      LET tunits = SUBSTRING("`($ferret_plot_var_0).units`",1,`since_loc`)
       DEFINE SYMBOL tunits = `tunits`
    ENDIF
-   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($ferret_plot_var_0).time_origin`"/units=($tunits) time_axis 
    IF ($tunits"0|seconds>1|*>0") THEN \
-   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($ferret_plot_var_0).time_origin`"/units=($tunits) time_axis 
    DEFINE SYMBOL datekey = 1
 
    DEFINE SYMBOL ferret_key_annotate = 0
