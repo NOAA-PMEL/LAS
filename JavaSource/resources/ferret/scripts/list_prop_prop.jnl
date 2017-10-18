@@ -15,7 +15,7 @@
 ! 12/2016 set list precision to 7
 !  9/2017 If there is a fourth variable, list it too.
 ! 10/2017 Ensure that Time, Longitude, Latitude, Depth are written if available.
-! 10/2017 List up to a total of 10 variables, data_0_var through data_9_var.
+! 10/2017 List up to the total number of variables in the dataset data_0_var through data_xx_var.
 
 set mode verify:always
 
@@ -29,15 +29,16 @@ SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/PREC=7
 
 DEFINE SYMBOL its_listing = 1
-sh sym data_count
-IF ($data_2_var"0|*>1") THEN DEFINE SYMBOL data_count = 3
-IF ($data_3_var"0|*>1") THEN DEFINE SYMBOL data_count = 4
-IF ($data_4_var"0|*>1") THEN DEFINE SYMBOL data_count = 5
-IF ($data_5_var"0|*>1") THEN DEFINE SYMBOL data_count = 6
-IF ($data_6_var"0|*>1") THEN DEFINE SYMBOL data_count = 7
-IF ($data_7_var"0|*>1") THEN DEFINE SYMBOL data_count = 8
-IF ($data_8_var"0|*>1") THEN DEFINE SYMBOL data_count = 9
-IF ($data_9_var"0|*>1") THEN DEFINE SYMBOL data_count = 10
+
+! How many variables to list?
+SET DATA ($data_0_url)
+LET nvars = ..nvars
+REPEAT/i=2:`nvars` (\
+  DEFINE SYMBOL ii = `i`;\
+  IF ($data_($ii)_var"0|*>1") THEN DEFINE SYMBOL data_count = `($ii)+1` ELSE EXIT/LOOP )
+
+CANCEL DATA `($data_0_var),RETURN=dsetnum`
+
 
 GO setup_prop_prop
 

@@ -1,7 +1,7 @@
 ! setup_prop_prop.jnl
 ! 10/4/2016 fixes so init scripts still work
 !  9/  2017  Set up for listings that include a fourth variable, e.g. second qc flag.
-! 10/2017    Set up to list up to a total of 10 variables, data_0_var through data_9_var.
+! 10/2017    Set up to list any number of variables.
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
