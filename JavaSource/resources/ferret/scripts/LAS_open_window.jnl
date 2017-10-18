@@ -73,3 +73,6 @@ ENDIF
 ! If the annotations are going to be collected and sent back to LAS for presentation,
 ! set up the viewport for small margins around the edge.
 IF ($ferret_annotations"0|*>1") THEN GO set_full_margins
+
+!  ----------------- End of LAS_open_window.jnl ------------------------------------
+
