@@ -162,7 +162,8 @@ DEFINE SYMBOL t_units_string = `($timevar).units`
 LET nsince = `STRINDEX("($t_units_string)", "since")-1`
 IF `nsince GT 0` THEN DEFINE SYMBOL tunits = `SUBSTRING("($t_units_string)", 1, nsince)`
 
-IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
+IF `($data_0_units"-99|text>-99|*>1") NE -99 AND STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN \
+ DEFINE SYMBOL tunits = ($data_0_units)
 
 DEFINE SYMBOL plot_arg = ($xvar)
 IF `($data_count"0") GE 2` THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)  ! was ($xvar), ($xvar)  ??
