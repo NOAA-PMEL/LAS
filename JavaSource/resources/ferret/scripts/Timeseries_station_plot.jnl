@@ -647,7 +647,8 @@ IF `nstations LE max_separate_stations` THEN
    define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
    let tt = t[gt=taxis];\
    let tempx = var2d[m=($q)];\
-   let vart = reshape(tempx, tt);\
+   let vart_platform = reshape(tempx, tt);\
+   let vart = vart_platform[gt=taxis_all@bin];\
    plot/color=Blue($axset)/nolab($qualifiers)($vert) vart; \
    IF `nstations GT 1` THEN plot/over/vs/line/nolab/color=7 tpts,ypts;\
    IF `nstations GT 1` THEN plot/over/color=Blue/nolab($qualifiers) vart;\
