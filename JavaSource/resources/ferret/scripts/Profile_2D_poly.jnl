@@ -55,8 +55,13 @@ GO LAS_url_label 0
 
 ! For the annotations
 DEFINE SYMBOL dshape = `($data_x_var),RETURN=shape`
-IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_x_var)[($dshape"i")=@NGD]`
-IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_x_var)[($dshape"i")=@NBD]`
+IF ($dshape"0|POINT>1|*>0) THEN
+   IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_x_var)`
+   IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_x_var)`
+ELSE
+   IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_x_var)[($dshape"i")=@NGD]`
+   IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_x_var)[($dshape"i")=@NBD]`
+ENDIF
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
 
