@@ -70,8 +70,12 @@ ENDIF
 DEFINE SYMBOL viewsave = ($ferret_view)
 DEFINE SYMBOL ferret_view = aa  
 
-IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 0.8
+! This will be reset if its a map plot 
+DEFINE SYMBOL win_aspect = 1
+
+! or if its a time plot
 IF ($ferret_plot_var_0"|time>1|*>0") THEN DEFINE SYMBOL win_aspect = 0.3
+
 GO LAS_open_window
 
 DEFINE SYMBOL ferret_view = ($viewsave)

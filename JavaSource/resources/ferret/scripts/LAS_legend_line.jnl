@@ -18,18 +18,23 @@
 !                  $1 = x-value of line starting point (nouser units)         |
 !                  $2 = length of line                 (nouser units)         |
 !                  $3 = y-value of line                (nouser units)         |
-!                  $4 = line type (number 1-19)                               |
+!                  $4 = line type (number 1-19)         * see note below      |
 !                  $5 = text character height (negative for z pos down axes)  |
 !                  $6 = label text (in double-quotes if more than 1 word)     |
 !                  $7 = qualifiers for line style, incl the slash. e.g.       | 
 !                          /LINE/SYM=25	 (/color and /thick= are ignored.     |
 !                          They are described by the /LINE argument)          |
+!                  $8 = color palette, if $4 is negative
 !                                                                             |
 !                     ------<-$2->------  "$6($5)"  [< $3]                    |
 !                     ^                                                       |
 !                    [$1]                                                     |
 !                                                                             |
 !          ! this one handles either z pos up or down axes                    |
+!                                                                             |
+! * note:                                                                     |
+! If $4 is negative, then use a by-levels color palette given in arg 8 and    |
+! the color level given by ABS(($4))                                          |
 !-----------------------------------------------------------------------------+
 
 ! Make room for a 2-line time axis label, e.g. month and year.
@@ -58,9 +63,17 @@
   DEFINE SYMBOL xhalf = `(($x2) + ($x1)) / 2.`
   DEFINE SYMBOL y1 = `($yaxis_min) + ($yv) * ($yr)/($yl)`
 
+  IF `($4) LT 0` THEN 
+     DEFINE SYMBOL linequal = /RIBBON/LINE/THICK=2/levels=(0,9,1)/PALETTE=($8)
+     DEFINE SYMBOL clrnum = `-1* ($4)`
+     DEFINE SYMBOL arg3 = , {`($clrnum)`,`($clrnum)`,`($clrnum)`}
+  ELSE
+     DEFINE SYMBOl linequal = /COLOR=($4)
+  ENDIF
+
 ! use plot/vs rather than aline
   ppl window,off
-  plot/vs/over/nolab/color=($4)($7%/nolab%) {`($x1)`, `($xhalf)`, `($x2)`},{`($y1)`,`($y1)`,`($y1)`}
+  plot/vs/over/nolab($linequal)($7%/nolab%) {`($x1)`, `($xhalf)`, `($x2)`},{`($y1)`,`($y1)`,`($y1)`}($arg3)
   ppl window,on
 !TEXT : xy coordinates in nouser units
 ! note that these are relative to the beginning of the plot x-axis

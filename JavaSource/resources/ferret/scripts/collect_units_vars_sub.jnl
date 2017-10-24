@@ -1,0 +1,51 @@
+
+! Find the next unique units string
+! argument is the current variable number. 
+! comparing units_x and finding the next unique units_x+1
+
+DEFINE SYMBOL thisu = ($1)
+DEFINE SYMBOL nextu = `($thisu)+1`
+
+REPEAT/RANGE=2:($data_count)/name=v (\
+   DEFINE SYMBOL v = `v`;\
+   DEFINE SYMBOL vm = `v-1`;\
+   DEFINE SYMBOL in_units = ($units_($vm));\
+   DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
+   IF `IS_ELEMENT_OF_STR (strings_unique_($thisu), "($inunits_up)") EQ 0` THEN ;\
+      DEFINE SYMBOL inunits_($nextu) = ($inunits_up);\
+      DEFINE SYMBOL has_($nextu) = ($vm);\
+      EXIT/LOOP;\
+   ENDIF)
+
+! No further unique units.
+IF `($inunits_($nextu)"0|*>1") EQ 0` THEN
+   DEFINE SYMBOL no_more_unique = 1
+   EXIT/SCRIPT
+ENDIF
+
+! Another unique units string is found.
+
+LET nunique = `nunique+1`
+DEFINE SYMBOL unique_($nextu) = ($inunits_($nextu))
+DEFINE SYMBOL group_label_($nextu) = ($in_units)
+DEFINE SYMBOL plot_vars_($nextu) = ($ferret_plot_var_($vm))
+
+! List of unique upper-cased strings now found.
+LET strings_unique_($nextu) =  XCAT (strings_unique_($thisu), "($unique_($nextu))" )
+
+! Which variables match the units ($units_($nextu))
+
+REPEAT/RANGE=2:($data_count)/name=v (\
+   DEFINE SYMBOL v = `v`;\
+   DEFINE SYMBOL vm = `v-1`;\
+   DEFINE SYMBOL in_units = ($units_($vm));\
+   DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
+   IF `STRCMP("($inunits_up)", "($unique_($nextu))") EQ 0` THEN ;\
+     IF `STRINDEX("($has_($nextu))", "($vm)") EQ 0` THEN ;\
+        DEFINE SYMBOL has_($nextu) = ($has_($nextu)), ($vm);\
+        DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($cm));\
+     LET num_found = `num_found + 1`;\
+   ENDIF)
+
+
+!  ----------------- End of collect_units_vars_sub.jnl ------------------------------------

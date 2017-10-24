@@ -211,7 +211,6 @@ IF ($line_drawn) THEN
 
 ENDIF  ! end of options for plots drawn with lines
 
-
 ! ---------------- All oneD plots, settings for option to 
 !                  set dependent-axis scale.
 

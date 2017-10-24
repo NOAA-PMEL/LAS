@@ -15,18 +15,22 @@ SET MODE verify:always  ! allows for debugging
 ! Set the gif filename, changing it from .gif to the name from this request
 ! Set up to write info to the debug log so that FshowGO can be used
 GO LAS_initial_setup
-
-
 ! Add another color, light gray, to make a line through the middle of each plot
 ! for multiple timeseries, and for graticules.
 LET ncolors = 7
 SET MODE LINEC:`ncolors`
-   
+
 PPL COLOR,7,85,85,85    ! lt gray
 
 ! Do up to 8 separate stations as their own line plot on the page
 
 LET max_separate_stations = 8
+LET max_labeled_stations = 6
+
+! If they are plotting just one variable, plot the stations together
+! 
+
+IF `($data_count) EQ 1` THEN LET max_separate_stations = 1
 
 
 ! Initialize the region and data.
@@ -35,7 +39,7 @@ DEFINE SYMBOL data_initialization_script = feature_initialize_data_insitu
 
 DEFINE SYMBOL fview = T
 
-! Define symbols associated with the region and data and perform any
+! DEFINE SYMBOLs associated with the region and data and perform any
 ! initialization needed for this dataset.
 
 GO LAS_initialize_region 0
@@ -62,6 +66,7 @@ IF `($data_count) GT 5` THEN DEFINE SYMBOL data_var_5 = ($data_5_var)
 
 DEFINE SYMBOL its_insitu = 1
 DEFINE SYMBOL its_tsplot = 1
+DEFINE SYMBOL line_drawn = 1
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -80,12 +85,35 @@ GO LAS_url_label 0
 ! For the annotations
 IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `($data_var)[i=@NGD]`
 IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `($data_var)[i=@NBD]`
+LET nstations = `($rowvar),return=msize`
 
+LET maxrow = `($rowvar)[m=@max]`
 
-let nstations = `($rowvar),return=msize`
-let maxrow = `($rowvar)[m=@max]`
+LET nobs = `time,return=isize`
 
-let nobs = `time,return=isize`
+DEFINE SYMBOL nstations = `nstations`
+
+! when coloring multiple line plots, define a palette and color levels
+
+IF `nstations GT max_separate_stations` THEN
+   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = thirty_by_levels
+   IF `nstations LE max_labeled_stations` THEN \
+     DEFINE SYMBOL ferret_palette = nine_by_levels
+   DEFINE SYMBOL ferret_fill_levels = (0,`nstations+1`,1)
+ENDIF
+
+DEFINE SYMBOL margin_del = 0.08  ! If multiple axes for different units
+IF `($data_count) LE 2` THEN DEFINE SYMBOL margin_del = 0
+
+LET vxlo = 0.1 
+LET vxhi = 0.9
+
+let vylo = 0.16   ! 0.2 >> 0.16
+let vyhi = 0.98
+
+IF `($data_count) GT 1 OR ($nstations) GT 1` THEN DEFINE SYMBOL itsa_multi_lineplot = 1
+
+GO LAS_set_plot_qualifiers
 
 ! Open the window, apply size, scale options
 IF `nstations EQ 1 OR nstations GT max_separate_stations` THEN 
@@ -95,18 +123,16 @@ ELSE
 ENDIF
 
 GO LAS_open_window
-define view/axes/x=0.08:0.99/ylim=0.07:0.96 full_view
-cancel view 
-set view full_view
+
+DEFINE VIEW/AXES/X=0.08:0.99/YLIM=0.07:0.96 full_view
+SET VIEW full_view
 
 ! Use Ferret properties to set up the plot qualifiers
-
-
 ! Set up variables - multiple stations regrid to a common time axis
 
-let t1 = time[i=@min]
-let t2 = time[i=@max]
-let ntimes = min(2000,nstations *maxrow)
+LET t1 = time[i=@min]
+LET t2 = time[i=@max]
+LET ntimes = min(2000,nstations *maxrow)
 
 DEFINE AXIS/T=`t1,prec=15`:`t2,prec=15`/npoints=`ntimes`/UNITS=seconds/T0="`time.time_origin`" taxis_all
 
@@ -119,13 +145,13 @@ LET tt = t[gt=taxis]
 LET tt_all = t[gt=taxis_all]
 
 DEFINE AXIS/x=1:`maxrow`:1 xrow
-let xvar = x[gx=xrow]
+LET xvar = x[gx=xrow]
 
-let time2d = EXPNDI_BY_M_COUNTS (time[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
-let var2d = EXPNDI_BY_M_COUNTS (($data_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
+LET time2d = EXPNDI_BY_M_COUNTS (time[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
+LET var2d_0 = EXPNDI_BY_M_COUNTS (($data_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar)
 
-let id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)[M=1:`nstations`]), maxrow)
-let id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d)
+LET id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)[M=1:`nstations`]), maxrow)
+LET id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d_0)
 
 DEFINE SYMBOL axset = /axes=0,1,1,0
 
@@ -136,7 +162,7 @@ DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
    EXIT/PROGRAM
 ENDIF
 
-IF `($data_var)[i=@ngd] GT 0` THEN
+IF `($data_var)[i=@ngd] GE 1` THEN
    LET dmm = MINMAX (($data_var)) 
 
    ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
@@ -149,7 +175,7 @@ IF `($data_var)[i=@ngd] GT 0` THEN
    LET ymn = ($ppl$range_low)
    LET ymx = ($ppl$range_high)
    LET ydl = ($ppl$range_inc)
-   
+
    IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
        LET dmm = minmax(($data_var))
        LET ymn = `dmm[i=1]-1`
@@ -165,12 +191,12 @@ IF `($data_var)[i=@ngd] GT 0` THEN
    ENDIF
 
 ! Underlay plot with the time axis and the right vertical range
-   SET VIEW full_view
-   sh axis taxis_all
-
-   SET VIEW full_view
-   sh axis taxis_all
-   PLOT/NOLAB/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+   IF `nstations LE max_labeled_stations AND ($data_count) EQ 1` THEN \   
+      DEFINE VIEW/AXES/X=0.08:0.99/YLIM=`vylo+0.02`:0.96 full_view
+   IF `($data_count) EQ 1 AND nstations GT 1` THEN
+      SET VIEW full_view
+      PLOT/NOLAB($qualifiers)/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+   ENDIF
 
 ELSE  ! no valid data_var data
    LET ymn = -1
@@ -178,26 +204,28 @@ ELSE  ! no valid data_var data
    LET ydl = 0.5
 ENDIF
 
-IF `($data_var)[i=@ngd] EQ 0 AND ($data_count) eq 1` then
-   
-   PLOT/NOLAB/VLIM=-1:1 `-100` + 0*t[gt=taxis_all]
+IF `($data_var)[i=@ngd] EQ 0 AND ($data_count) eq 1` THEN
+
+   PLOT/NOLAB($qualifiers)/VLIM=-1:1 `-100` + 0*t[gt=taxis_all]
    LET nstations = 1
    LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    DEFINE SYMBOL allbad = 1
    CANCEL SYMBOL axset
-   DEFINE SYMBOL ferret_use_graticules = none
+!   DEFINE SYMBOL ferret_use_graticules = none
 ENDIF
 
-! For 1-station plots, turn on horizontal graticule lines, unless graticules 
+! For 1-variable, 1-station plots, turn on horizontal graticule lines, unless graticules 
 ! have been turned off explicitly. Ignore choice of white - its in the menu 
 ! but useless for line plots.
 
-IF `(nstations EQ 1) AND ($ferret_use_graticules"1|none>0|notic>0|white>0|*>1)` THEN
-  IF ($ferret_use_graticules"0|black>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=black)
-  ELSE
-     DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=7)
-  ENDIF
+IF `($data_count) EQ 1` THEN
+   IF `(nstations GE max_labeled_stations) AND ($ferret_use_graticules"1|none>0|notic>0|white>0|*>1)` THEN
+     IF ($ferret_use_graticules"0|black>1") THEN
+        DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=black)
+     ELSE
+        DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=7)
+     ENDIF
+   ENDIF
 ENDIF
 
 ! Otherwise turn them on only if requested 
@@ -209,492 +237,222 @@ IF `(nstations GT 1) AND ($ferret_use_graticules"0|none>0|notic>0|white>0|*>1)` 
      DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=7)
   ENDIF
 ENDIF
-
-! when coloring multiple line plots, define a palette and color levels
-
-IF `nstations GT max_separate_stations` THEN
-   IF `($ferret_palette"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_palette = thirty_by_levels
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (0,`nstations+1`,1)
-   GO LAS_set_plot_qualifiers
-ENDIF
-
 ! Change any line characteristics.  The above LAS_set_plot_qualifiers, doesnt get the right ones 
 ! because it depends on the view shape to determine plot type.  This has a multi=D shape for a 1-D line plot.
 
 IF ($ferret_line_or_sym"0|*>1") THEN DEFINE SYMBOL  plotsymbol = 25
 GO set_linesym
-IF ($ferret_line_color"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/color=($ferret_line_color)
+
+!IF ($ferret_line_color"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/color=($ferret_line_color)
 !IF ($ferret_line_thickness"0|*>1")  THEN DEFINE SYMBOL qualifiers = ($qualifiers)/thick=($ferret_line_thickness)
-
-
-! one station and multi-variables
+! Analyze the variables and units to group variables by unit.
 
 IF `nstations EQ 1` THEN
-
-
-! Use the ferret_dep_axis_scale setting only if same units on all variables
-   IF `($ferret_dep_axis_scale"0|*>1") AND ($data_count) GT 1` THEN
-      DEFINE SYMBOL units = ($data_0_units)
-      REPEAT/i=2:($data_count) (\
-         def sym ii = `i-1`;\
-         IF `STRCMP("($units)", "($data_($ii)_units)") NE 0` THEN \
-         CANCEL SYMBOL ferret_dep_axis_scale;\
-        )
-        
-   ENDIF
-
-
-   IF ($ferret_dep_axis_scale"0|*>1") THEN  ! set vert axis scale from a property or from the data
-
-      LET slen = `STRLEN("($ferret_dep_axis_scale)")`
-
-      LET c = STRINDEX ("($ferret_dep_axis_scale)", ",")
-      LET c2 = STRRINDEX ("($ferret_dep_axis_scale)", ",")
-      LET nc = 1
-      IF `c2 GT c` THEN LET nc = 2
-
-      LET slo = SUBSTRING("($ferret_dep_axis_scale)", 1, c-1)
-      LET vlim_lo = `STRFLOAT(slo)` 
-      IF `nc EQ 1` THEN
-         LET shi = SUBSTRING("($ferret_dep_axis_scale)", c+1, slen-c)
-      ELSE
-         LET shi = SUBSTRING("($ferret_dep_axis_scale)", c+1, slen-c2)
-         define symbol sdel = :`SUBSTRING("($ferret_dep_axis_scale)", c2+1, slen)`
-      ENDIF
-      LET vlim_hi = `STRFLOAT(shi)`
-  
-      DEFINE SYMBOL qualifiers = ($qualifiers)/vlim=`vlim_lo`:`vlim_hi`($sdel)
-
-   ELSE
-
-! Read the data and compute a common vertical range
-! Get data min and max overall; if plotting with positive-down, need
-! to specify lo:hi:-inc
-      CANCEL SYMBOL comma
-      
-      let ymx = -1.e10
-      let ymn =  1.e10
-
-      IF `($data_var)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($data_var)
-         LET dmm = MINMAX (($data_var)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-	 
-         DEFINE SYMBOL comma = ,
-      ENDIF  ! ngd GT 0
-   
-      IF `($data_count) GT 1` THEN
-      IF `($data_var_1)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_1)
-         
-         LET dmm = MINMAX (($data_var_1)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-   
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-         DEFINE SYMBOL comma = ,
-      ENDIF ! ngd GT 0
-      ENDIF ! data count
-
-      IF `($data_count) GT 2` THEN
-      IF `($data_var_2)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_2)
-         
-         LET dmm = MINMAX (($data_var_2)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-         DEFINE SYMBOL comma = ,
-      ENDIF ! ngd GT 0
-      ENDIF ! data count > 2
-
-      IF `($data_count) GT 3` THEN
-      IF `($data_var_3)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_3)
-         
-         LET dmm = MINMAX (($data_var_3)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-         DEFINE SYMBOL comma = ,
-      ENDIF ! ngd GT 0
-      ENDIF ! data count > 3
-
-      IF `($data_count) GT 4` THEN
-      IF `($data_var_4)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_4)
-         
-         LET dmm = MINMAX (($data_var_4)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-         DEFINE SYMBOL comma = ,
-      ENDIF ! ngd GT 0
-      ENDIF ! data count > 4
-
-      IF `($data_count) GT 5` THEN
-      IF `($data_var_5)[i=@ngd] GT 0` THEN 
-         DEFINE SYMBOL plot_all = ($plot_all)($comma) ($data_var_5)
-         
-         LET dmm = MINMAX (($data_var_5)) 
-         ppl %range `dmm[i=1],prec=15`,`dmm[i=2],prec=15`, 5
-	 LET y1 = ($ppl$range_low)
-	 LET y2 = ($ppl$range_high)
-	 LET yd = ($ppl$range_inc)
-         IF `STRINDEX(UPCASE("($data_units%0%)"), "COUNT") GT 0` THEN
-            LET y1 = `dmm[i=1]-1`
-            LET y2 = `dmm[i=2]+1`
-            LET yd = 0.5
-            IF `y2-y1 GT 10` THEN LET yd = 1
-            IF `y2-y1 GT 20` THEN LET yd = ($ppl$range_inc)
-         ENDIF
-   
-         IF `STRINDEX("($ppl$range_low)", "Infinity") GT 0` THEN DEFINE SYMBOL y1 = 1.e10
-         IF `STRINDEX("($ppl$range_high)", "Infinity") GT 0`  THEN DEFINE SYMBOL y2 = 1.e10
-         IF `STRINDEX("($ppl$range_low)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y1 = -1.e10
-         IF `STRINDEX("($ppl$range_high)", "-Infinity") GT 0`  THEN DEFINE SYMBOL y2 = -1.e10
-         let ymn = `MIN(ymn,y1)`
-         let ymx = `MAX(ymx,y2)`
-         let ydl = `MAX(ydl,yd)`
-      ENDIF ! ngd GT 0
-      ENDIF ! data count > =5
-   
-! if everything is all-missing, still define this symbol
-      IF `($plot_all"0|*>1") EQ 0` THEN DEFINE SYMBOL plot_all = ($data_var)
-
-      IF `ymn EQ ymx` THEN 
-         PLOT/NOLAB ($plot_all)
-      ELSE
-	 PLOT/NOLAB($vlims) ($plot_all)
-      ENDIF
-
-      IF ($plot_pos_down"0|0|1|*>1") THEN
-         ppl %range `ymn,prec=8`,`ymx,prec=8`, 5
-         DEFINE SYMBOL yax_range = `-1*($ppl$range_inc)`
-         DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($yaxis_min):($yaxis_max):($yax_range)
-      ELSE
-         DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($yaxis_min):($yaxis_max)
-      ENDIF
-   ENDIF  ! set vert axis scale
-
-   set win/clear
-   set view full_view
-
-! Plot the variables, first putting them on the time axis. Use @BIN regridding, so any long gaps will
-! not have a line drawn across them. 
-
-   LET vart = reshape(($data_var), tt)
-   LET vart_0 = vart[gt=tt_all@bin]
-
-   IF `($data_count) EQ 1` THEN 
-      PLOT/COLOR=Blue($axset)/nolab($qualifiers) vart_0
-      IF ($allbad"0|*>1") THEN LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
-   ENDIF
-
-  ! Plot further variables, set up their labels.
-
-   IF `($data_count) GT 1` THEN
-      DEFINE SYMBOL variable_lab = Blue: ($data_0_title) (($data_0_units))
-      IF `($data_0_units"0|none>0|*>1") EQ 0` THEN DEFINE SYMBOL variable_lab = Blue: ($data_0_title) 
-
-      LET vart1t = reshape(($data_1_var), tt)
-      LET vart_1 = vart1t[gt=tt_all@bin]
-      PLOT/NOLAB/COLOR=red($axset)/nolab($qualifiers) vart_1
-      IF `vart_1[L=@ngd] NE 0 ` THEN CANCEL SYMBOL allbad
-      DEFINE SYMBOL variable_lab = ($variable_lab), Red: ($data_1_title) 
-      IF `($data_1_units"0|none>0|*>1") NE 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_1_units))
-   ENDIF
-
-   IF `($data_count) GT 2` THEN 
-      LET vart2t = reshape(($data_2_var), tt)
-      LET vart_2 = vart2t[gt=tt_all@bin]
-      PLOT/NOLAB/OVER/COLOR=green vart_2
-      IF `vart_2[l=@ngd] NE 0 ` THEN CANCEL SYMBOL allbad
-
-      DEFINE SYMBOL variable_lab = ($variable_lab), Green: ($data_2_title) 
-      IF `($data_2_units"0|none>0|*>1") NE 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_2_units))
-   ENDIF
-   IF `($data_count) GT 3` THEN 
-      LET vart3t = reshape(($data_3_var), tt)
-      LET vart_3 = vart3t[gt=tt_all@bin]
-      PLOT/NOLAB/OVER/COLOR=purple vart_3
-      DEFINE SYMBOL variable_lab = ($variable_lab), Purple: ($data_3_title)
-      IF `($data_3_units"0|none>0|*>1") NE 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_3_units))
-   ENDIF
-   IF `($data_count) GT 4` THEN 
-      LET vart4t = reshape(($data_4_var), tt)
-      LET vart_4 = vart4t[gt=tt_all@bin]
-      PLOT/NOLAB/OVER/COLOR=lightblue vart_4
-      IF `vart_4[l=@ngd] NE 0 ` THEN CANCEL SYMBOL allbad
-      DEFINE SYMBOL variable_lab = ($variable_lab), LightBlue: ($data_4_title)
-      IF `($data_4_units"0|none>0|*>1") NE 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_4_units)) 
-   ENDIF
-   IF `($data_count) GT 5` THEN 
-      LET vart5t = reshape(($data_5_var), tt)
-      LET vart_5 = vart5t[gt=tt_all@bin]
-      PLOT/NOLAB/OVER/COLOR=black vart_5
-      IF `vart_5[l=@ngd] NE 0 ` THEN CANCEL SYMBOL allbad
-      DEFINE SYMBOL variable_lab = ($variable_lab), Black: ($data_5_title)
-      IF `($data_5_units"0|none>0|*>1") EQ 0` THEN DEFINE SYMBOL variable_lab = ($variable_lab) (($data_5_units))
-   ENDIF
-
-! Overlay the first variable, so it is not obscured by the remaining ones.
-   IF `($data_count) GT 1` THEN 
-      PLOT/OVER/NOLAB/COLOR=Blue vart_0
-      IF ($allbad"0|*>1") THEN LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
-   ENDIF
-   
+   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_in = time
 ELSE
+   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_in = time[i=1:`($rowvar)[m=1]`]
+ENDIF
+
+LET tt = t[gt=taxis_in]
+LET plot_var_tA = RESHAPE(($ferret_plot_var), tt)
+
+LET plot_var_t = plot_var_tA[gt=taxis_all@bin]
+DEFINE SYMBOL ferret_plot_var_0 = plot_var_t
+DEFINE SYMBOL ferret_title_0 = ($ferret_title_0)
+DEFINE SYMBOL units_0 = ($data_0_units"units")
+DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
+DEFINE SYMBOL all_units_same = 1
+
+REPEAT/RANGE=1:`($data_count)-1`/name=q (\
+ DEFINE SYMBOL q =`q`;\
+ LET data_($q)_var_tA = RESHAPE(($data_($q)_var), tt);\
+ LET data_($q)_var_t = data_($q)_var_tA[gt=taxis_all@bin];\
+ DEFINE SYMBOL ferret_plot_var_($q) = data_($q)_var_t;\
+ DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var_($q));\
+ DEFINE SYMBOL ferret_title_($q) = ($data_($q)_title) (($data_($q)_units));\
+ DEFINE SYMBOL units_($q) = `UPCASE("($data_($q)_units%units%)")`;\
+ DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($q))") EQ 0)`;\
+)
+
+DEFINE SYMBOL have_multiline_defs = 1
+GO collect_units_vars
+
+LET vxhi_g = `vxhi - ($margin_del)* (($nunit_grp)-2)`
+
+LET vart = plot_var_t
+
+IF `nstations EQ 1` THEN  ! one station multi var
+
+   DEFINE SYMBOL data_var = plot_var_t
+   DEFINE SYMBOL ferret_view = t
+
+   DEFINE SYMBOL itsa_multi_lineplot = 1
+   CANCEL SYMBOL ferret_trend_line
+
+! symbols and/or line
+   GO set_linesym
+
+   DEFINE SYMBOL do_legend = 1
+   go LAS_draw_multi_line_plot `vxlo` `vxhi` `vylo` `vyhi`
+
+   DEFINE SYMBOL ferret_plot_var = plot_var_t 
+   LET vart = plot_var_t
+
+! end one station multi var
+
+ELSE  ! more than 1 station
 
 ! Plot the lines. For up to max_separate_stations, make separate labeled 
 ! line plots. Otherwise make a cloud of colored lines, changing color
 ! with each line. Should have a UI choice between the two styles.
 
-IF `nstations LE max_separate_stations` THEN
+   IF `nstations LE max_separate_stations AND ($data_count) GT 1` THEN
 
 ! ? Do we want to adjust the aspect ratio to make the plots more uniformly
 !   shaped as there are more and more on the page?
 
-   let aspects = {0.3,0.45,0.575,0.7,0.825, 0.95, 0.075, 1.2}
+      LET aspects = {0.3,0.45,0.575,0.7,0.825, 0.95, 0.075, 1.2}
 
-   let aspects = {0.3,0.45,0.575,0.7,0.825, 0.95, 1.075, 1.2}
-   let use_aspect = aspects[i=`nstations`]
-   set win/asp=`use_aspect`
+      LET aspects = {0.3,0.45,0.575,0.7,0.825, 0.95, 1.075, 1.2}
+      LET use_aspect = aspects[i=`nstations`]
+      set win/asp=`use_aspect` 
 
 ! Make the time series axis along the bottom
-   
+
 ! This viewport will be used to draw the time axis at the bottom 
 ! and to label the z axes.
-   
-   def view/axes/xlim=0.06:0.99/ylim=0.002:0.98 tv
-   set view tv
-   
+      
+      def view/axes/xlim=`vxlo`:`vxhi`/ylim=0.002:`vyhi` tv
+      IF `($data_count) GT 1` THEN  DEFINE VIEW/AXES/XLIM=`vxlo`:`vxhi_g`/YLIM=`vylo`:`vyhi` tv
+      set view tv 
+
 ! Define variables for consistent vertical axes for all the time series
 
-   plot/set ($ferret_plot_var)
-   
-   LET plotmin = ($ppl$ymin1)
-   LET plotmax = ($ppl$ymax1)
-
-   IF `plotmin EQ PLOTMAX` THEN
-      LET plotmin = ($ppl$ymin1) - 1
-      LET plotmax = ($ppl$ymin1) + 1
-   ENDIF
-   
-   CAN SYM ppl$range*
-   PPL %RANGE `plotmin`, `plotmax`,5
-   let plotinc = ($ppl$range_inc)
-  
-   let plotmin = ($ppl$range_low)
-   let plotmax = ($ppl$range_high)
-
-   IF `plotmax EQ plotmin` THEN
-
-!  precision in pplus prevents enough accuracy for min,max,range symbols.
-
-      LET rng_offset = `plotmax`
-      let ferplotvar = ($ferret_plot_var)
-      LET rangemin = ferplotvar[x=@min,y=@min,z=@min,t=@min] - rng_offset
-      LET rangemax = ferplotvar[x=@max,y=@max,z=@max,t=@max] - rng_offset
-
-
-      IF `($data_count) GT 1` THEN
-         LET rangemin = dmin - rng_offset
-         LET rangemax = dmax + rng_offset
-      ENDIF
-
-      can sym ppl$range*
-      ppl %range `0.8*rangemin`,`1.2*rangemax`,5
-      let plotmin = ($ppl$range_low)  + rng_offset
-      let plotmax = ($ppl$range_high) + rng_offset
-      let plotinc = ($ppl$range_inc)
-      
-      IF `plotmin EQ plotmax` THEN
-         LET plotmin = `plotmin - 0.01*ABS(plotmin)`
-         LET plotmax = `plotmax + 0.01*ABS(plotmax)`
-      ENDIF
-   ENDIF
+      REPEAT/RANGE=1:`nunique`/name=g (\
+         DEFINE SYMBOL group = `g-1`;\
+         GO  set_vertical_range ($group) )
 
 ! Draw the time axis along the bottom of the page.
 ! If there is just one timeseries, we'll plot the time
-! axis along with the data so the plot axes line up.
+! axis along with the data so the plot axes line up.  
 
-   IF `nstations GT 1` THEN 
-      IF `nstations LE max_separate_stations` then go margins 0.1,0.6       
-      plot/nolab/sym=dot/axes=0,1,0,0/vlim=`plotmin`:`plotmax` t[gt=taxis_all]
+      IF `($data_count) GT 1` THEN GO margins 0.1,1.4  \
+	ELSE GO margins 0.1,0.6
+      PLOT/NOLAB/SYM=DOT/AXES=0,1,0,0/VLIM=`plotmin_0`:`plotmax_0` t[gt=taxis_all]
       DEFINE SYMBOL axset = /axes=0,0,1,0
-   ENDIF
 
 ! Define viewports for the time series plots
-   let y2 = 0.98
-   let del = 0.92/nstations
-   let y1 = `y2 - del` + 0.02
-   if `nstations le 3` then let y1 = `y1 + 0.02`
-   
-   repeat/range=1:`nstations`/NAME=q (def view/axes/xlim=0.06:0.99/ylim=`y1`:`y2` vp_`q`; \
-                             def view/axes/xlim=0.06:0.99/ylim=`y1`:`y2` vp_`q`_g; \
-			     let y1 = `y1 - del`; LET y2 = `y2 - del`)
+! If multiple data variables, leave room for the line-key at the bottom.
+      LET y2 = `vyhi`
+      LET del = 0.92/nstations
+      IF `($data_count) GT 1` THEN LET del = 0.8/nstations
+      LET y1 = `y2 - del` + 0.02
+      if `nstations le 3` then LET y1 = `y1 + 0.02`
+
+      repeat/range=1:`nstations`/NAME=s (\
+                                define symbol s = `s`;\
+                                def view/axes/xlim=`vxlo`:`vxhi`/ylim=`y1`:`y2` vp_`s`;\
+                                def view/axes/xlim=`vxlo`:`vxhi_g`/ylim=`y1`:`y2` vp_`s`_g;\
+   			     define symbol y1_($s) = `y1`;\
+   			     define symbol y2_($s) = `y2`;\
+   			     LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
 ! Set up to draw a gray horizontal line through the middle of each plot
-   let t_all = t[gt=taxis_all]
-   let tpts = {`t_all[L=@min]`, `t_all[L=@max]`}
-   let ymid = ( `plotmax` + `plotmin`)/2
-   let ypts = {`ymid`, `ymid`}
-   
+      LET t_all = t[gt=taxis_all]
+      LET tpts = {`t_all[L=@min]`, `t_all[L=@max]`}
+      LET ymid = ( `plotmax_0` + `plotmin_0`)/2
+      LET ypts = {`ymid`, `ymid`}
+      DEFINE SYMBOL draw_gray = `nstations GT 1 AND ($data_count) EQ 1`
+      
 ! Draw and label each timeseries. Define the time series from the
 ! time data in each individual feature, regrid to the overall time series
 ! so they will be positioned correctly.
-   
-   DEFINE SYMBOL vert = /vlim=`plotmin`:`plotmax`:`plotinc`
-   
-   IF `plotinc EQ 0` THEN CANCEL SYMBOL vert
 
-   define symbol axset = /axes=0,0,1,1
+      DEFINE SYMBOL vert = /vlim=`plotmin_0`:`plotmax_0`:`plotinc`
+      
+      IF `plotinc EQ 0` THEN CANCEL SYMBOL vert
 
-   IF ($allbad"0|*>1") THEN 
-      LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
-   ELSE
+      DEFINE SYMBOL axset = /axes=0,0,1,1
 
-   repeat/range=1:`nstations`/name=q (\
-   define symbol q = `q`; \
-   set view vp_($q)_g;\
-   shade/noax/nolab/nokey/pal=gray_pale/x=1:10/y=1:10 x+y;\
-   set view vp_($q);\
-   let ntm = `($rowvar)[m=($q)]`;\
-   load time2d[m=($q)];\
-   define axis/t/units=seconds/t0="`time.time_origin`" taxis = time2d[m=($q),i=1:`ntm`]; \
-   let tt = t[gt=taxis];\
-   let tempx = var2d[m=($q)];\
-   let vart_platform = reshape(tempx, tt);\
-   let vart = vart_platform[gt=taxis_all@bin];\
-   plot/color=Blue($axset)/nolab($qualifiers)($vert) vart; \
-   IF `nstations GT 1` THEN plot/over/vs/line/nolab/color=7 tpts,ypts;\
-   IF `nstations GT 1` THEN plot/over/color=Blue/nolab($qualifiers) vart;\
-   label/nouser 0.1, `($ppl$ylen)*0.9`, -1,0,0.12 @AS`($feature_variable)[m=($q)]`)
+      IF ($allbad"0|*>1") THEN 
+         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+      ELSE
+      
+         IF `($data_count) GT 1` THEN 
+            GO set_linesym
+            DEFINE SYMBOL do_legend = 0
+            DEFINE SYMBOL nohoriz = 1
+         ENDIF
+         REPEAT/RANGE=0:`($data_count)-1`/NAME=c (\
+          DEFINE SYMBOL c = `c`;\
+          LET data_($c)_var_tA = RESHAPE(($data_($c)_var), tt);\
+          LET data_($c)_var_t = data_($c)_var_tA[gt=taxis_all@bin];\
+          DEFINE SYMBOL ferret_plot_var_($c) = data_($c)_var_t)
 
-   ENDIF  ! allbad
+	 REPEAT/RANGE=1:`nstations`/name=s (\
+         DEFINE SYMBOL s = `s`;\
+         SET VIEW vp_($s)_g;\
+	 IF `($data_count) EQ 1` THEN shade/noax/nolab/nokey/pal=gray_pale/x=1:10/y=1:10 x+y;\
+         SET VIEW vp_($s);\
+         LET ntm = `($rowvar)[m=($s)]`;\
+         LOAD time2d[m=($s)];\
+         DEFINE AXIS/T/UNITS=SECONDS/T0="`time.time_origin`" taxis = time2d[m=($s),i=1:`ntm`];\
+         LET tt = t[gt=taxis];\
+         IF `($data_count) EQ 1` THEN;\
+            PLOT/COLOR=blue($axset)/NOLAB($qualifiers)($vert) vart;\
+            IF ($draw_gray) THEN PLOT/OVER/VS/LINE/NOLAB/COLOR=7 tpts,ypts;\
+            IF ($draw_gray) THEN PLOT/OVER/COLOR=blue/NOLAB($qualifiers) vart;\
+         ELSE;\
+	    IF `($s) EQ nstations` THEN DEFINE SYMBOL do_legend = 1;\ 
+	    DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
+            DEFINE SYMBOL vpname = ($s)_;\
+            GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
+         ENDIF)
 
-ELSE  ! more than max_separate_stations stations
+         LET vart = plot_var_t
+      ENDIF  ! allbad
+
+   ELSE  ! more than max_separate_stations stations, data_count is 1
 
 ! plot lines colored by index number, skipping any that are empty
-   
+      
 
 ! tt and vart are redefined in the loop if there is valid data in the
 ! individual series
 
-   let tt = t[gt=taxis_all]
-   let vart = 1./0 + 0* tt
+      LET tt = t[gt=taxis_all]
+      LET vart = 1./0 + 0* tt
 
-   IF ($allbad"0|*>1") THEN 
-      LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
-   ELSE
+      IF ($allbad"0|*>1") THEN 
+         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+      ELSE
+         LET colrx = id2d[m=1]  
+         DEFINE SYMBOL cshp = `colrx,RETURN=shape`
+      
+         REPEAT/RANGE=1:`nstations`/name=s (\
+         DEFINE SYMBOL s = `s`;\
+         LET ntt = rowsize[m=($s)];\ 
+         DEFINE AXIS/T=`time2d[m=($s),i=@min],PREC=15`:`time2d[m=($s),i=@max],prec=15`/\
+         NPOINTS=`ntt`/UNITS=seconds/T0="`time.time_origin`" taxis;\
+         LET tempx = var2d_0[m=($s)];\
+         LET colrx = id2d[m=($s)];\
+         IF `tempx[($cshp)=@ngd] eq 0` then exit/cycle;\
+         LET tt = t[gt=taxis];\
+         LET have_dat = 1;\
+         LET vart = reshape(tempx, tt);\
+         LET colort = reshape(colrx, tt);\
+         PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) vart,colort;\
+         DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
+	 )
+		 
+	 IF `nstations LE max_labeled_stations` THEN\
+	  GO LAS_lineplot_legend `nstations` ($ferret_palette) 
 
-   let colrx = id2d[m=1]  
-   def sym cshp = `colrx,return=shape`
+      ENDIF  ! allbad
+   ENDIF ! nstations LE max_separate_stations
 
-   repeat/range=1:`nstations`/name=q (\
-   define symbol q = `q`; \
-   let ntt = rowsize[m=($q)];\ 
-   define axis/t=`time2d[m=($q),i=@min],prec=15`:`time2d[m=($q),i=@max],prec=15`/\
-   npoints=`ntt`/units=seconds/t0="`time.time_origin`" taxis; \
-   show axis taxis;\
-   let tempx = var2d[m=($q)];\
-   let colrx = id2d[m=($q)];\
-   if `tempx[($cshp)=@ngd] eq 0` then exit/cycle;\
-   let tt = t[gt=taxis];\
-   let have_dat = 1;\
-   let vart = reshape(tempx, tt);\
-   let colort = reshape(colrx, tt);\
-   plot/over/line/nolab/thick=1/ribbon($qualifiers) vart,colort;\
-   ppl shaset reset; list/L=1 colort; sh grid vart)
-   
-   ENDIF  ! allbad
-ENDIF
-
-ENDIF  ! one station and multi-variables 
-
+ENDIF ! IF `nstations EQ 1`  ELSE ...
+pause
 ! for the results script
 DEFINE SYMBOL ferret_plot_var = vart
 

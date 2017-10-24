@@ -54,6 +54,7 @@ LET title_len = STRLEN("($ferret_title_0)")
 ! Also ignore any request for trend-line plots.
 IF `($data_count) GT 1` THEN 
    DEFINE SYMBOL itsa_multi_lineplot = 1
+   DEFINE SYMBOL do_legend = 1
    CANCEL SYMBOL ferret_trend_line
 ENDIF
 

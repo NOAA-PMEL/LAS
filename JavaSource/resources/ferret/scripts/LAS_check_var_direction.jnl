@@ -10,9 +10,10 @@
 
 IF `($do_curvi_xy"0") AND ($native_curvilinear_xy"0")` THEN EXIT/SCRIPT
 IF `($do_hybrid_z"0") AND ($native_Z_plot"0")` THEN EXIT/SCRIPT
-IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
+IF `($do_curvi_xy_and_hybrid_z"0")` THEN EXIT/SCRIPT
 
 ! See if there is an axis in this direction (may happen for a var in a multi-line plot)
+
 DEFINE SYMBOL ax1d = `($data_var),RETURN=($ferret_view)axis`
 
 IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN

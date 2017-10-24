@@ -1,13 +1,32 @@
 ! LAS_draw_multi_line_plot.jnl
 !  Do a multi-line 1-D plot. 
+! Arguments (optional) 1 throug 4: Viewport limits
+! for DEFINE VIEWPORT/AXES definitions, within which to draw
+! the set of lines.  Other viewports defined within this space
+!  xvp_lo, xvp_hi, yvp_lo, yvp_hi
+
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 
 set mode ver:always
 
 
+LET xvf = ($1%0.1%)
+LET xvl = ($2%0.9%)
+
+let yvf = ($3%0.16%)  ! 0.2 >> 0.16
+LET yvl = ($4%0.98%)
+
+IF `STRCMP("($vpname%AA%)", "AA") EQ 0` THEN DEFINE SYMBOL vpname = vp
+IF `($nstations"0|*>1") EQ 0` THEN DEFINE SYMBOL nstations = 1
+IF `($margin_del"0|*>1") EQ 0` THEN DEFINE SYMBOL margin_del = 0.08
+
+LET margin_del = ($margin_del)
+IF `($data_count) LE 2` then LET margin_del = 0
+
+
 CANCEL MODE GRATICULE
 DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
-IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
+IF `($ferret_use_graticules"1|none>0|notic>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
 
 GO LAS_pp_set_region_labels  ! for first dataset/variable
 
@@ -20,27 +39,38 @@ IF `($data_count"0") GT 6` THEN
    DEFINE SYMBOL reset_count = 1
 ENDIF
 
-DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
-DEFINE SYMBOL all_units_same = 1
+! Are these settings already done because this was called by Timeseries_station_plot?
+IF `($have_multiline_defs"0|*>1") EQ 0` THEN
+   
+   DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
+   DEFINE SYMBOL all_units_same = 1
+   
+   REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
+     DEFINE SYMBOL qdat = `qdat`; \
+     GO LAS_initialize_region ($qdat) ;  \
+     GO LAS_initialize_data  ($qdat) ; \
+     GO LAS_check_var_direction; \
+     IF ($error_status"0|*>1") THEN EXIT/LOOP; \
+     DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
+     DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
+     DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
+     LET tlen = STRLEN("($ferret_title_($qdat))"); \
+     LET title_len = `MAX(tlen, title_len)`; \
+     DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
+     DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)`; \
+     GO LAS_pp_set_region_labels \
+   )
+   DEFINE SYMBOL plot_vars_0 = ($plot_arg)
 
-DEFINE SYMBOL unique_units_0 = ($data_0_units)
-DEFINE SYMBOL nunique = 0
+ENDIF ! have_multiline_defs
 
-REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
-  DEFINE SYMBOL qdat = `qdat`; \
-  GO LAS_initialize_region ($qdat) ;  \
-  GO LAS_initialize_data  ($qdat) ; \
-  GO LAS_check_var_direction; \
-  IF ($error_status"0|*>1") THEN EXIT/LOOP; \
-  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
-  DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
-  DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
-  LET tlen = STRLEN("($ferret_title_($qdat))"); \
-  LET title_len = `MAX(tlen, title_len)`; \
-  DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
-  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)`; \
-  GO LAS_pp_set_region_labels \
-)
+IF `($all_units_same"0|0|1") AND ($ferret_use_graticules"1|none>0|notic>0|white>0|*>1)` THEN
+   IF ($ferret_use_graticules"0|black>1") THEN
+      DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=black)
+   ELSE
+      DEFINE SYMBOL qualifiers = ($qualifiers)/HGRAT=(DASH,COLOR=7)
+   ENDIF
+ENDIF
 
 ! If default graticules setting, and units are all the same, put
 ! graticules on both axes.
@@ -55,61 +85,7 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 ! If there are two variables with different units, scale each independently, putting
 ! one dependent axis on the left an the other on the right.
 
-LET xpl = 0.9
-LET yv = 0.13
-
-IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN 
-
-! Plot second variable in red, with its axis on the right.
-
-   PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
-
-   IF ($ferret_annotations"0|*>1") THEN
-      LET maxlablen = 0
-      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`
-      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`
-      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
-   ENDIF
-
-   DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
-   IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 right_axis_view
-   SET VIEW right_axis_view
-   SET VAR/UNITS="@P2@AC($data_1_units)" ($ferret_plot_var_1)
-   PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
-      GO remove_logo
-      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
-      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
-      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-      ppl txlsze,0.07
-      PPL xlab
-   PPL PLOT
-
-! Set up for plotting 1st variable, in black, with its axis on the left.
-
-   DEFINE SYMBOL qualifiers = ($qualifiers)/AXES=1,1,1,0
-   DEFINE SYMBOL data_count = 1
-   DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
-   DEFINE SYMBOL two_axes = 1
-   SET VAR/UNITS="@AC($data_0_units)" ($ferret_plot_var_0)
-
-   SET VIEW full
-   IF ($ferret_annotations"0|*>1") THEN 
-      DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 full_axes1
-      SET VIEW full_axes1
-   ENDIF
-
-ENDIF
-
 ! If line style is just symbols, we need to do lines separately to get different colors.
-
-! If 2 variables, label units on axis; otherwise dont
-IF `($data_count) GT 2 AND ($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB 
 
 DEFINE SYMBOL color0 = black
 DEFINE SYMBOL color1 = red
@@ -118,126 +94,86 @@ DEFINE SYMBOL color3 = blue
 DEFINE SYMBOL color4 = lightblue
 DEFINE SYMBOL color5 = purple
 
-IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
-   SET WIN/ASP=0.6
-   LET margin_del = 0.08
+IF `(($all_units_same"0|0|1") EQ 0) AND (($data_count) GE 2)` THEN
+! More than 1 variable and Units Not same
+
+!   SET WIN/ASP=0.4
    PPL AXLSZE,,0.08
    PPL AXNSIG,,2
 
-   DEFINE SYMBOL iplot = 0
-   DEFINE SYMBOL plot_vars_0 = ($ferret_plot_var_0)
-   DEFINE SYMBOL group_label_0 = ($data_0_units)
-   REPEAT/RANGE=1:($data_count)/name=m (\
-      DEFINE SYMBOL m = `m`; \
-      DEFINE SYMBOL mm = `m-1`; \
-      DEFINE SYMBOL in_units = ($units_($mm)); \
-      GO collect_units_vars )
+   IF `($ferret_use_graticules"0|none>0|notic>0*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
 
-   LET maxlablen = 0
-   REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
-      DEFINE SYMBOL vm = `m-1`; \
-      PLOT/SET ($plot_vars_($vm)) ;\
-      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`;\
-      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`)
+! Set up groups of variables with common units to plot together 
+! ($plot_vars_0) with units ($group_label_0)
+! ($plot_vars_1) with units ($group_label_1) etc.
 
-! Draw the other plot axes scaled for each set of variables with common units
+   IF `($nunit_grp"0|*>1") EQ 0` THEN GO collect_units_vars
+
+! Are the units really different?  May have differed only by case
+   IF `($nunit_grp) EQ 1 ` THEN DEFINE SYMBOL all_units_same = 1
+
+ENDIF 
+! Draw the plot
+
+LET maxlablen = 0
+REPEAT/RANGE=2:`($nunit_grp)`/NAME=m (\
+   DEFINE SYMBOL vm = `m-1`; \
+   PLOT/SET ($plot_vars_($vm)) ;\
+   LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`;\
+   LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`)
+
+! Draw any other plot axes scaled for each set of variables with common units
 ! Plot axis with first set of units will be on the left.
 ! Draw the plots for other sets of variables as /SYM=dot/COLOR=8 (COLOR=white) so that
 ! only the axis shows. The variables will be plotted individually below
 ! so that we can control the line color.
 
-   LET xpl = `1 - margin_del* (($iplot)-1)`
-   IF ($ferret_annotations"0|*>1") THEN 
-      LET xpl = `0.9 - margin_del* (($iplot)-1)`
-      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
-   ENDIF
- 
-   LET ypl = 1
+! Draw the sets of lines with common units, each in a viewport
+LET xvl = `xvl - margin_del* (($nunit_grp)-2)`
+IF `(($nstations) EQ 1) AND (maxlablen GT 6)` THEN LET xvl = `xvl - (0.012*(maxlablen-6)/2)`
 
-   REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
-      DEFINE SYMBOL vm = `m-1`; \
-      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
-      IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v($vm); \
-      SET VIEW v($vm); \
-      PLOT/AXES=0,0,0,1/SYM=dot/COLOR=8/NOLAB ($plot_vars_($vm));\
-      LABEL/NOUSER `($ppl$xlen) + 0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm)); \
-      LET xpl = `xpl + margin_del`)
+LET ypl = 1
 
-! Draw the lines each in its own viewport
+! First draw the vertical axes
 
-   LET xpl = `1 - margin_del* (($iplot)-1)`
-   IF ($ferret_annotations"0|*>1") THEN 
-      LET xpl = `0.9 - margin_del* (($iplot)-1)`
-      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
-   ENDIF
+DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` vg($vpname)
+SET VIEW vg($vpname)
+IF `($nstations) GT 1` THEN SHADE/NOAX/NOLAB/NOKEY/PAL=gray_pale/X=1:10/Y=1:10 x+y
+
+let xvlv = `xvl`
+REPEAT/RANGE=2:`($nunit_grp)`/NAME=m (\
+   DEFINE SYMBOL vm = `m-1`; \
+   DEFINE VIEWPORT/axes/x=`xvf`:`xvlv`/y=`yvf`:`yvl` v($vpname)($vm); \
+   SET VIEW v($vpname)($vm); \
+   PLOT/SET ($plot_vars_($vm));\
+   ppl %range (PPL$YMIN1), ($PPL$XMAX1);\
+   PLOT/AXES=0,0,0,1/VLIM=($ppl$range_low):($ppl$range_high)/SYM=dot/COLOR=8/NOLAB {0,1};\
+   LABEL/NOUSER `($ppl$xlen) + 0.85`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm)); \
+   LET xvlv = `xvlv + margin_del`)
 
 ! Draw the first variable
-   DEFINE SYMBOL vm = 0
-   DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm)
-   IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v0_($vm)
-   SET VIEW v0_0
-   PLOT($qualifiers)($qualifiers_0)/AXES=1,1,1,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm))
-   LABEL/NOUSER `-0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm))
+! If there is just one, draw the RH axis
 
-   REPEAT/RANGE=2:($data_count)/name=m (\
-      DEFINE SYMBOL vm = `m-1`; \
-      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
-      IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v0_($vm);\
-      SET VIEW v0_($vm);\
-      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)))
-      
-ELSE
+DEFINE SYMBOL axqual = /AXES=1,1,1,0
+IF ($nohoriz"0") THEN  DEFINE SYMBOL axqual = /AXES=0,0,1,0
 
-SET VIEW full
-
-IF ($ferret_annotations"0|*>1") THEN 
-   DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 full_axes2
-   SET VIEW full_axes2
+IF `($all_units_same"0|0|1") EQ 1` THEN 
+   DEFINE SYMBOL axqual = /AXES=1,1,1,1
+   IF ($nohoriz"0") THEN  DEFINE SYMBOL axqual = /AXES=0,0,1,1
 ENDIF
 
-IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
-   PLOT($qualifiers_0)/NOKEY/SET/COLOR=8 ($plot_arg)
-      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
-      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      ppl txlsze,0.07
-      PPL xlab
-      PPL ylab ($data_0_units)
-   PPL PLOT
+DEFINE SYMBOL vm = 0
+DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_v($vpname)($vm)
+SET VIEW v0_v($vpname)($vm)
 
-   PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
-   IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
-   IF `($data_count"0") GT 2` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=green ($ferret_plot_var_2)
-   IF `($data_count"0") GT 3` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=blue ($ferret_plot_var_3)
-   IF `($data_count"0") GT 4` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=lightblue ($ferret_plot_var_4)
-   IF `($data_count"0") GT 5` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=purple ($ferret_plot_var_5)
-ELSE
+PLOT($qualifiers)($qualifiers_0)($axqual)/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm))
+LABEL/NOUSER `-0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm))
 
-   PLOT($qualifiers)($qualifiers_0)/NOKEY/SET ($plot_arg)
-      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
-      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
-      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
-      ppl txlsze,0.07
-      PPL xlab
-      PPL ylab ($data_0_units)
-   PPL PLOT
-   
-ENDIF
-ENDIF ! same units for all 
+REPEAT/RANGE=2:($data_count)/name=m (\
+   DEFINE SYMBOL vm = `m-1`; \
+   DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_($vpname)($vm);\
+   SET VIEW v0_($vpname)($vm);\
+   PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
 
 IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
@@ -245,56 +181,16 @@ IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL calendar_lab = ($upper_left_($n_left_labels"0"))
 ENDIF
 
+IF ($station_label"0|*>1") THEN LABEL/NOUSER `vxlo`, `($ppl$ylen)*0.9`, -1,0,0.12 @AS($station_label)
+
 DEFINE SYMBOL ax_vert_save = ($ax_vert"D")
 DEFINE SYMBOL ax_horiz_save = ($ax_horiz"D")
 DEFINE SYMBOL xax_min_save = ($xaxis_min)
 DEFINE SYMBOL xax_max_save = ($xaxis_max)
 
 ! Draw the legend.
-sh view
-sh sym ppl$xorg, ppl$yorg
 
-! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
-IF `($two_axes"0") EQ 1` THEN DEFINE SYMBOL data_count = 2
-
-!DEFINE VIEWPORT/x=0:1/y=0:1 overview
-! IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=0.1:0.9/y=0.18:0.9 overview
-
-DEFINE VIEWPORT/x=0:1/y=0:1/axes overview
-SET VIEW overview
-PLOT/NOYADJUST/NOLAB/NOAX/I=1:2/VLIM=100:102 i
-
-LET titlesiz = 0.09
-
-! The start (x,y) position for each line drawn on the key
-
-!LET x1 = -0.2
-!LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
-
-!LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
-!IF `($data_count) EQ 2` THEN LET ykey = \
-!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
-
-
-LET x1 = 1.
-LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
-
-LET ykey = {0.7, 0.5, 0.3, 0.7, 0.5, 0.3, 0.1, 0.1}
-!IF `($data_count) EQ 2` THEN LET ykey = \
-!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
-
-
-REPEAT/range=1:`($data_count)`/NAME=m (; \
-   DEFINE SYMBOL m = `m`;  \
-   DEFINE SYMBOL lnum = `m-1` ; \
-   LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
-   GO LAS_legend_line \
-   `xpos-0.2` 0.3 `ypos` `m + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
-)
-
-! IF ($reset_count"0|*>1") THEN 
-!   LABEL/nouser `xkey[i=@ave]` `ykey[i=@min]-0.1` 0 0  `titlesiz` "Plot maximum of 6 lines"
-
+IF ($do_legend"0|0|*>1") THEN  GO LAS_lineplot_legend ($data_count) 
 
 ! The results script needs the actual axis directions. Restore them.
 

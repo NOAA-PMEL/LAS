@@ -1,56 +1,52 @@
 ! Build up plot_vars_n symbols, with sets of variables
 ! that have common units.
 
-! comma between variables
-CANCEL SYMBOL comma
-IF `($m) eq 1` THEN DEFINE SYMBOL comma = ,
+! Argument
+!   1 = Collect the unique units strings, and a list of which 
+!       variables has each units string.
+!   2 = 
 
-! symbol containing the units, in a form that can be used
-! to define a symbol to mark that these units have been done.
-! Remove various special characters from this internally-used string.
+LET n_ustrings = 0
+DEFINE SYMBOL inunits_0 = `UPCASE("($units_0)")`
+DEFINE SYMBOL group_label_0 = ($units_0)
 
-PPL SET inunits_collapse $EDIT(in_units,COLLAPSE)
-DEFINE SYMBOL inunits_up `UPCASE("($inunits_collapse)")`
+DEFINE SYMBOL has_0 = 0
+DEFINE SYMBOL plot_vars_0 = ($ferret_plot_var_0)
+LET num_found = 1
+LET nunique = 1
 
-IF `($n_ustrings"0|*>1") EQ 0` THEN 
-   DEFINE SYMBOL n_ustrings = 1
-   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)
-ENDIF
+! which variables match the units ($units_0)
 
-! If we already have a set of vars with these units then we are done
-IF ($done_($n_ustrings)"0|*>1") THEN
-   EXIT/SCRIPT
-ENDIF
+DEFINE SYMBOL unique_0 = ($inunits_0)
 
-LET new_string = 1
-REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
-   DEFINE SYMBOL g = `g`;\
-   sh sym n_ustrings, ustring_($g);\
-   IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN LET new_string = 0;\
-   IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN EXIT/LOOP;\
-)
+REPEAT/RANGE=2:($data_count)/name=c (\
+   DEFINE SYMBOL c = `c`;\
+   DEFINE SYMBOL cm = `c-1`;\
+   DEFINE SYMBOL in_units = ($units_($cm));\
+   DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
+   IF `STRCMP("($inunits_up)", "($unique_0)") EQ 0` THEN ;\
+     DEFINE SYMBOL has_0 = ($has_0), ($cm);\
+     DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), (ferret_plot_var_($cm));\
+     LET num_found = `num_found + 1`;\
+   ENDIF)
 
-IF `new_string EQ 0` THEN 
-   EXIT/SCRIPT
-ELSE
 
-! Mark this units string as being done and prepare for the next one
-   DEFINE SYMBOL done_($n_ustrings) = 1
-   DEFINE SYMBOL n_ustrings = `($n_ustrings)+1`
-   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)   
-   DEFINE SYMBOL iplot = `($iplot) + 1`
-   DEFINE SYMBOL group_label_($iplot) = ($in_units)
-ENDIF
+IF `num_found LT ($data_count)` THEN 
+   
+! Find the next unique units string, inunits_1 and which variables 
+! match the units inunits_1, etc.
 
-! For this units string, collect the variables.
-REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
-   DEFINE SYMBOL g = `g`;\
-   DEFINE SYMBOL gg = `g-1`;\
-   DEFINE SYMBOL this_units = `UPCASE("($data_($g)_units)")`; \
-   LET match_units = `STRCMP("($this_units)", "($in_units)") EQ 0`; \
-   IF `match_units` THEN DEFINE SYMBOL plot_vars_($iplot) = ($plot_vars_($iplot))($comma) ($ferret_plot_var_($g));\
-   IF `match_units` THEN DEFINE SYMBOL comma = , ;\
-   IF `match_units` THEN DEFINE SYMBOL group_label_($iplot) = ($data_($g)_units) \
- )
+let strings_unique_0 = {"($unique_0)"}
 
-!  ----------------- End of collect_units_var.jnl ------------------------------------
+   REPEAT/RANGE=0:($data_count)/name=c (\
+   DEFINE SYMBOL c = `c`;\
+   GO collect_units_vars_sub ($c);\
+   IF ($no_more_unique"0|*>1) THEN EXIT/LOOP;\
+   IF `num_found GE ($data_count)` THEN EXIT/LOOP)
+
+ENDIF  ! Find further unique units
+
+DEFINE SYMBOL nunit_grp = `nunique`
+LET strings_unique = strings_unique_`($nunit_grp)-1`
+
+!  ----------------- End of collect_units_vars.jnl ------------------------------------
