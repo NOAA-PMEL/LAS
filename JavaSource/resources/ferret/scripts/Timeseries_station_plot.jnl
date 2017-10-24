@@ -387,6 +387,7 @@ ELSE  ! more than 1 station
           DEFINE SYMBOL c = `c`;\
           LET data_($c)_var_tA = RESHAPE(($data_($c)_var), tt);\
           LET data_($c)_var_t = data_($c)_var_tA[gt=taxis_all@bin];\
+	  LET var2d_($c) = EXPNDI_BY_M_COUNTS (($data_($c)_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar);\
           DEFINE SYMBOL ferret_plot_var_($c) = data_($c)_var_t)
 
 	 REPEAT/RANGE=1:`nstations`/name=s (\
@@ -403,11 +404,17 @@ ELSE  ! more than 1 station
             IF ($draw_gray) THEN PLOT/OVER/VS/LINE/NOLAB/COLOR=7 tpts,ypts;\
             IF ($draw_gray) THEN PLOT/OVER/COLOR=blue/NOLAB($qualifiers) vart;\
          ELSE;\
+            REPEAT/RANGE=0:`($data_count)-1`/NAME=c (\
+             DEFINE SYMBOL c = `c`;\
+             LET tempx($c) = var2d_($c)[m=($s)];\
+             LET vart($c) = reshape(tempx($c), tt);\
+             DEFINE SYMBOL ferret_plot_var_($c) = vart($c));\
 	    IF `($s) EQ nstations` THEN DEFINE SYMBOL do_legend = 1;\ 
 	    DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
             DEFINE SYMBOL vpname = ($s)_;\
             GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
-         ENDIF)
+         ENDIF;\
+	 )
 
          LET vart = plot_var_t
       ENDIF  ! allbad
@@ -452,7 +459,7 @@ ELSE  ! more than 1 station
    ENDIF ! nstations LE max_separate_stations
 
 ENDIF ! IF `nstations EQ 1`  ELSE ...
-pause
+
 ! for the results script
 DEFINE SYMBOL ferret_plot_var = vart
 
