@@ -47,3 +47,8 @@ REPEAT/range=1:`legend_count`/NAME=m (; \
    GO LAS_legend_line \
    `xpos-0.2` 0.3 `ypos` `m + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
    )
+ENDIF
+
+
+! End of file ------------ LAS_lineplot_legend.jnl--------------------------
+
