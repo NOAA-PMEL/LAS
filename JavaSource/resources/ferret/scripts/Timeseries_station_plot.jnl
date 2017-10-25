@@ -384,37 +384,30 @@ ELSE  ! more than 1 station
             DEFINE SYMBOL do_legend = 0
             DEFINE SYMBOL nohoriz = 1
          ENDIF
+
+! Definitions for the different variables. The time axis taxis
+! and variable tt on that axis are redefined at each iteration 
+! of the stations loop below.
+
          REPEAT/RANGE=0:`($data_count)-1`/NAME=c (\
           DEFINE SYMBOL c = `c`;\
-          LET data_($c)_var_tA = RESHAPE(($data_($c)_var), tt);\
-          LET data_($c)_var_t = data_($c)_var_tA[gt=taxis_all@bin];\
 	  LET var2d_($c) = EXPNDI_BY_M_COUNTS (($data_($c)_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar);\
-          DEFINE SYMBOL ferret_plot_var_($c) = data_($c)_var_t)
+	  LET tempx($c) = var2d_($c)[m=($s)];\
+	  LET vart($c) = reshape(tempx($c), tt);\
+	  DEFINE SYMBOL ferret_plot_var_($c) = vart($c))
 
 	 REPEAT/RANGE=1:`nstations`/name=s (\
          DEFINE SYMBOL s = `s`;\
          SET VIEW vp_($s)_g;\
-	 IF `($data_count) EQ 1` THEN shade/noax/nolab/nokey/pal=gray_pale/x=1:10/y=1:10 x+y;\
          SET VIEW vp_($s);\
          LET ntm = `($rowvar)[m=($s)]`;\
          LOAD time2d[m=($s)];\
          DEFINE AXIS/T/UNITS=SECONDS/T0="`time.time_origin`" taxis = time2d[m=($s),i=1:`ntm`];\
          LET tt = t[gt=taxis];\
-         IF `($data_count) EQ 1` THEN;\
-            PLOT/COLOR=blue($axset)/NOLAB($qualifiers)($vert) vart;\
-            IF ($draw_gray) THEN PLOT/OVER/VS/LINE/NOLAB/COLOR=7 tpts,ypts;\
-            IF ($draw_gray) THEN PLOT/OVER/COLOR=blue/NOLAB($qualifiers) vart;\
-         ELSE;\
-            REPEAT/RANGE=0:`($data_count)-1`/NAME=c (\
-             DEFINE SYMBOL c = `c`;\
-             LET tempx($c) = var2d_($c)[m=($s)];\
-             LET vart($c) = reshape(tempx($c), tt);\
-             DEFINE SYMBOL ferret_plot_var_($c) = vart($c));\
-	    IF `($s) EQ nstations` THEN DEFINE SYMBOL do_legend = 1;\ 
-	    DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
-            DEFINE SYMBOL vpname = ($s)_;\
-            GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
-         ENDIF;\
+         IF `($s) EQ nstations` THEN DEFINE SYMBOL do_legend = 1;\ 
+         DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
+         DEFINE SYMBOL vpname = ($s)_;\
+         GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
 	 )
          LET vart = plot_var_t
       ENDIF  ! allbad
@@ -457,14 +450,14 @@ ELSE  ! more than 1 station
 	 IF `nstations LE max_labeled_stations` THEN\
 	  GO LAS_lineplot_legend `nstations` ($ferret_palette) 
 
-show view
-sh var vart
-set var/name=vart0 vart
+!  Setting up for the map-scale file to get the right info for time zooming
+	 SET VAR/NAME=vart0 vart
 
-let tt0 = tt[L=1]
-let ttn = tt[L=@max]
-let vart = if tt eq tt0 or tt eq ttn then vart0 
-plot/noax/nolab/sym=dot/ribbon/pal=white vart, vart
+	 LET tt0 = tt[L=1]
+	 LET ttn = tt[L=@max]
+	 LET vart = IF tt EQ tt0 OR tt EQ ttn THEN vart0 
+	 SET VIEW full_viewr
+	 PLOT/NOAX/NOLAB/SYM=dot/RIBBON/PALETTE=white vart, vart
 
       ENDIF  ! allbad
    ENDIF ! nstations LE max_separate_stations
