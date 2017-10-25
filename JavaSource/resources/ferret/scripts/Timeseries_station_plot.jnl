@@ -125,6 +125,7 @@ ENDIF
 GO LAS_open_window
 
 DEFINE VIEW/AXES/X=0.08:0.99/YLIM=0.07:0.96 full_view
+DEFINE VIEW/AXES/X=0.08:0.99/YLIM=0.07:0.96 full_viewr
 SET VIEW full_view
 
 ! Use Ferret properties to set up the plot qualifiers
@@ -415,7 +416,6 @@ ELSE  ! more than 1 station
             GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
          ENDIF;\
 	 )
-
          LET vart = plot_var_t
       ENDIF  ! allbad
 
@@ -452,8 +452,19 @@ ELSE  ! more than 1 station
          DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
 	 )
 		 
+	 LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
+
 	 IF `nstations LE max_labeled_stations` THEN\
 	  GO LAS_lineplot_legend `nstations` ($ferret_palette) 
+
+show view
+sh var vart
+set var/name=vart0 vart
+
+let tt0 = tt[L=1]
+let ttn = tt[L=@max]
+let vart = if tt eq tt0 or tt eq ttn then vart0 
+plot/noax/nolab/sym=dot/ribbon/pal=white vart, vart
 
       ENDIF  ! allbad
    ENDIF ! nstations LE max_separate_stations

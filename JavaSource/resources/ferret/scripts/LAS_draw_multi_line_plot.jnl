@@ -110,13 +110,13 @@ IF `(($all_units_same"0|0|1") EQ 0) AND (($data_count) GE 2)` THEN
    IF `($nunit_grp"0|*>1") EQ 0` THEN GO collect_units_vars
 
 ! Are the units really different?  May have differed only by case
-   IF `($nunit_grp) EQ 1 ` THEN DEFINE SYMBOL all_units_same = 1
+   IF `($nunit_grp"1") EQ 1 ` THEN DEFINE SYMBOL all_units_same = 1
 
 ENDIF 
 ! Draw the plot
 
 LET maxlablen = 0
-REPEAT/RANGE=2:`($nunit_grp)`/NAME=m (\
+REPEAT/RANGE=2:`($nunit_grp"1")`/NAME=m (\
    DEFINE SYMBOL vm = `m-1`; \
    PLOT/SET ($plot_vars_($vm)) ;\
    LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`;\
@@ -129,7 +129,7 @@ REPEAT/RANGE=2:`($nunit_grp)`/NAME=m (\
 ! so that we can control the line color.
 
 ! Draw the sets of lines with common units, each in a viewport
-LET xvl = `xvl - margin_del* (($nunit_grp)-2)`
+LET xvl = `xvl - margin_del* (($nunit_grp"1")-2)`
 IF `(($nstations) EQ 1) AND (maxlablen GT 6)` THEN LET xvl = `xvl - (0.012*(maxlablen-6)/2)`
 
 LET ypl = 1
@@ -141,7 +141,7 @@ SET VIEW vg($vpname)
 IF `($nstations) GT 1` THEN SHADE/NOAX/NOLAB/NOKEY/PAL=gray_pale/X=1:10/Y=1:10 x+y
 
 let xvlv = `xvl`
-REPEAT/RANGE=2:`($nunit_grp)`/NAME=m (\
+REPEAT/RANGE=2:`($nunit_grp"1")`/NAME=m (\
    DEFINE SYMBOL vm = `m-1`; \
    DEFINE VIEWPORT/axes/x=`xvf`:`xvlv`/y=`yvf`:`yvl` v($vpname)($vm); \
    SET VIEW v($vpname)($vm); \
@@ -203,3 +203,4 @@ DEFINE SYMBOL xaxis_min = ($xax_min_save)
 DEFINE SYMBOL xaxis_max = ($xax_max_save)
 
 ! --------------- End of LAS_draw_multi_line_plot  ---------------------------
+
