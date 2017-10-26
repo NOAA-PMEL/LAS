@@ -100,6 +100,7 @@ IF `nstations GT max_separate_stations` THEN
    IF `nstations LE max_labeled_stations` THEN \
      DEFINE SYMBOL ferret_palette = nine_by_levels
    DEFINE SYMBOL ferret_fill_levels = (0,`nstations+1`,1)
+   IF `nstations GT max_labeled_stations AND ($data_count) eq 1` THEN DEFINE SYMBOL ferret_palette = range_of_blues ! something less bold...
 ENDIF
 
 DEFINE SYMBOL margin_del = 0.08  ! If multiple axes for different units
@@ -153,7 +154,6 @@ LET var2d_0 = EXPNDI_BY_M_COUNTS (($data_var)[i=1:`nobs`], ($rowvar)[M=1:`nstati
 
 LET id2dz = EXPNDI_ID_BY_Z_COUNTS( XSEQUENCE(($rowvar)[M=1:`nstations`]), maxrow)
 LET id2d = RESHAPE(TRANSPOSE_XZ(id2dz), var2d_0)
-
 DEFINE SYMBOL axset = /axes=0,1,1,0
 
 DEFINE SYMBOL vtype = `($data_var),RETURN=dtype`
@@ -426,6 +426,9 @@ ELSE  ! more than 1 station
       IF ($allbad"0|*>1") THEN 
          LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
       ELSE
+
+         cancel symbol ferret_plot_var
+
          LET colrx = id2d[m=1]  
          DEFINE SYMBOL cshp = `colrx,RETURN=shape`
       
@@ -439,9 +442,9 @@ ELSE  ! more than 1 station
          IF `tempx[($cshp)=@ngd] eq 0` then exit/cycle;\
          LET tt = t[gt=taxis];\
          LET have_dat = 1;\
-         LET vart = reshape(tempx, tt);\
+         LET var_t = reshape(tempx, tt);\
          LET colort = reshape(colrx, tt);\
-         PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) vart,colort;\
+         PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) var_t,colort;\
          DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
 	 )
 		 
@@ -451,13 +454,14 @@ ELSE  ! more than 1 station
 	  GO LAS_lineplot_legend `nstations` ($ferret_palette) 
 
 !  Setting up for the map-scale file to get the right info for time zooming
-	 SET VAR/NAME=vart0 vart
+	 SET VAR/NAME=var_t0 var_t
 
 	 LET tt0 = tt[L=1]
 	 LET ttn = tt[L=@max]
-	 LET vart = IF tt EQ tt0 OR tt EQ ttn THEN vart0 
+	 LET var_t = IF tt EQ tt0 OR tt EQ ttn THEN var_t0 
 	 SET VIEW full_viewr
-	 PLOT/NOAX/NOLAB/SYM=dot/RIBBON/PALETTE=white vart, vart
+	 PLOT/NOAX/NOLAB/SYM=dot/RIBBON/PALETTE=white var_t, var_t
+	 let vart = var_t0
 
       ENDIF  ! allbad
    ENDIF ! nstations LE max_separate_stations
