@@ -2,6 +2,7 @@
 ! 10/4/2016 fixes so init scripts still work
 !  9/  2017  Set up for listings that include a fourth variable, e.g. second qc flag.
 ! 10/2017    Set up to list any number of variables.
+! 10/2017 Find direction variables based on attributes not just var name
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -354,7 +355,8 @@ IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN
 ENDIF
 
 IF  ($color_by"0") THEN 
-   IF ($data_2_var"0|time>1|*>0") THEN  DEFINE SYMBOL ferret_plot_key = date_key 
+   IF `($color_vnum"-99) EQ -99` THEN DEFINE SYMBOL color_vnum = 2
+   IF ($data_($color_vnum)_var"0|time>1|*>0") THEN  DEFINE SYMBOL ferret_plot_key = date_key 
 
    IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN 
       LET variable_2_lab = STRCAT(data_2_title, data_2_units)
@@ -371,17 +373,17 @@ IF `($its_listing"0|1|*>0") EQ 0 AND ($ferret_plot_key"0|date_key>1|*>0")` THEN
 ! In this case we set up a time axis, and label the color key with dates
 ! If the units are seconds since, we don't need that much resolution for this. Make it hours.
 
-   LET tmin = ($ferret_plot_var_0)[i=@MIN]
-   LET tmax = ($ferret_plot_var_0)[i=@MAX]
+   LET tmin = ($ferret_plot_var_($color_vnum))[i=@MIN]
+   LET tmax = ($ferret_plot_var_($color_vnum))[i=@MAX]
 
-   LET since_loc = STRINDEX("`($ferret_plot_var_0).units`","since") - 2
+   LET since_loc = STRINDEX("`($ferret_plot_var_($color_vnum)).units`","since") - 2
    IF `since_loc GT 1` THEN 
-      LET tunits = SUBSTRING("`($ferret_plot_var_0).units`",1,`since_loc`)
+      LET tunits = SUBSTRING("`($ferret_plot_var_($color_vnum)).units`",1,`since_loc`)
       DEFINE SYMBOL tunits = `tunits`
    ENDIF
-   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($ferret_plot_var_0).time_origin`"/units=($tunits) time_axis 
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($ferret_plot_var_($color_vnum)).time_origin`"/units=($tunits) time_axis 
    IF ($tunits"0|seconds>1|*>0") THEN \
-   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($ferret_plot_var_0).time_origin`"/units=($tunits) time_axis 
+   DEFINE AXIS/T=`tmin`:`tmax`:3600/T0="`($ferret_plot_var_($color_vnum)).time_origin`"/units=($tunits) time_axis 
    DEFINE SYMBOL datekey = 1
 
    DEFINE SYMBOL ferret_key_annotate = 0
@@ -393,7 +395,6 @@ IF `($its_listing"0|1|*>0") EQ 0 AND ($ferret_plot_key"0|date_key>1|*>0")` THEN
    DEFINE SYMBOL ferret_fill_levels = 30
 
 ENDIF
-
 
 DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar
