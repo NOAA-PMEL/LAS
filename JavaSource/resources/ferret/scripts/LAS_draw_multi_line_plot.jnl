@@ -169,7 +169,7 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
       PLOT/AXES=0,0,0,1($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
       LABEL/NOUSER `($ppl$xlen) + labloc`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm));\
       LET xvlv = `xvlv + margin_del`;\
-   ENDIF;\)
+   ENDIF)
 
 ! Draw the first variable
 ! If there is just one, draw the RH axis

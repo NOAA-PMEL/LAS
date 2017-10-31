@@ -68,7 +68,7 @@ IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with F
 
 ! Tic marks inside the plot box
 PPL TICS,,,,,1,1 
-
+pause
 ! Or, make short tics, on the outside of the axes
 ! PPL TICS,,,,,-1,-1 
 ! PPL TICS .6,.125,.6,.125
