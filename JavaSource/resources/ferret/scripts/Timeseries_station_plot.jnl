@@ -408,7 +408,7 @@ ELSE  ! more than 1 station
          DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
          DEFINE SYMBOL vpname = ($s)_;\
          GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
-	 show view; pause)
+	 )
          LET vart = plot_var_t
       ENDIF  ! allbad
 

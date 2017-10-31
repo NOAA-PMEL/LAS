@@ -154,8 +154,7 @@ LET labloc = 0.5 + 0.03*maxlablen
 DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` vg($vpname)
 SET VIEW vg($vpname)
 IF `($nstations) GT 1` THEN SHADE/NOAX/NOLAB/NOKEY/PAL=gray_pale/X=1:10/Y=1:10 x+y
-show view vg($vpname); pause
-let xvlv = `xvl`
+LET xvlv = `xvl`
 
 REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
    DEFINE SYMBOL vm = `m-1`;\
@@ -170,8 +169,7 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
       PLOT/AXES=0,0,0,1($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
       LABEL/NOUSER `($ppl$xlen) + labloc`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm));\
       LET xvlv = `xvlv + margin_del`;\
-   ENDIF;\
-   show view v($vpname)($vm); pause)
+   ENDIF;\)
 
 ! Draw the first variable
 ! If there is just one, draw the RH axis
@@ -188,7 +186,6 @@ DEFINE SYMBOL vm = 0
 DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_v($vpname)($vm)
 DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_dup
 SET VIEW v0_v($vpname)($vm)
-show view v0_v($vpname)($vm); pause
 
 IF ($ferret_view"1|t>0|*>1") THEN SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
 
@@ -201,7 +198,7 @@ REPEAT/RANGE=2:($data_count)/name=m (\
    SET VIEW v0_($vpname)($vm);\
    PLOT($qualifiers)($qualifiers_g($var_grp($vm)))/AXES=0,0,0,0/COLOR=($leg_color($vm))/NOLAB ($ferret_plot_var_($vm));\
    IF ($ferret_title_($vm)"0|*>1") THEN DEFINE SYMBOL variable_lab = ($variable_lab), ($ferret_title_($vm));\
-   show view v0_($vpname)($vm); pause)
+   )
 
 ! Grandfather in the style for Dart timeseries: Overlay the first variable again.
 IF `($data_count"0|2>1|*>0") AND ($nstations"0") EQ 1 AND ($all_units_same"0|0|1")` THEN 
