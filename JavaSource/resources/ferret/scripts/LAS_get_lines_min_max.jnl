@@ -1,0 +1,69 @@
+! LAS_get_lines_min_max.jnl
+! A PLOT/SET command has been issued , plotting one or more
+! variables.  Find the min and max of all the PPL$XMIN*, PPL$XMAX*,
+!  PPL$YMIN*, PPL$YMAX*
+! The argument it the number of variables plotted
+! sets variables vlimxlo, vlimxhi, vlimylo, vlimyhi
+
+LET vplotnum = ($1)
+
+LET vlimxlo = ($PPL$XMIN1"0")
+LET vlimxhi = ($PPL$XMAX1"0")
+
+IF `vplotnum  GT 1` THEN
+   LET vlimxlo = MIN(`vlimxlo`, ($PPL$XMIN2"`vlimxlo`"))
+   LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX2"`vlimxhi`"))
+ENDIF
+IF `vplotnum  GT 2` THEN
+   LET vlimxlo = MIN(`vlimxlo`, ($PPL$XMIN3"`vlimxlo`"))
+   LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX3"`vlimxhi`"))
+ENDIF
+IF `vplotnum  GT 3` THEN
+   LET vlimxlo = MIN(`vlimxlo`, ($PPL$XMIN4"`vlimxlo`"))
+   LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX4"`vlimxhi`"))
+ENDIF
+IF `vplotnum  GT 4` THEN
+   LET vlimxlo = MIN(`vlimxlo`, ($PPL$XMIN5"`vlimxlo`"))
+   LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX5"`vlimxhi`"))
+ENDIF
+IF `vplotnum  GT 5` THEN
+   LET vlimxlo = MIN(`vlimxlo`, ($PPL$XMIN6"`vlimxlo`"))
+   LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX6"`vlimxhi`"))
+ENDIF
+
+IF `vlimxlo EQ vlimxhi` THEN
+  LET vlimxlo = `vlimxlo - 0.5`
+  LET vlimxhi = `vlimxhi + 0.5`
+ENDIF
+
+LET vlimylo = ($PPL$YMIN1"0")
+LET vlimyhi = ($PPL$YMAX1"0")
+
+IF `vplotnum  GT 1` THEN
+   LET vlimylo = MIN(`vlimylo`, ($PPL$YMIN2"`vlimylo`"))
+   LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX2"`vlimyhi`"))
+ENDIF
+IF `vplotnum  GT 2` THEN
+   LET vlimylo = MIN(`vlimylo`, ($PPL$YMIN3"`vlimylo`"))
+   LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX3"`vlimyhi`"))
+ENDIF
+IF `vplotnum  GT 3` THEN
+   LET vlimylo = MIN(`vlimylo`, ($PPL$YMIN4"`vlimylo`"))
+   LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX4"`vlimyhi`"))
+ENDIF
+IF `vplotnum  GT 4` THEN
+   LET vlimylo = MIN(`vlimylo`, ($PPL$YMIN5"`vlimylo`"))
+   LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX5"`vlimyhi`"))
+ENDIF
+IF `vplotnum  GT 5` THEN
+   LET vlimylo = MIN(`vlimylo`, ($PPL$YMIN6"`vlimylo`"))
+   LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX6"`vlimyhi`"))
+ENDIF
+
+IF `vlimylo EQ vlimyhi` THEN
+  LET vlimylo = `vlimylo - 0.5`
+  LET vlimyhi = `vlimyhi + 0.5`
+ENDIF
+
+!  ----------------- End of LAS_get_lines_min_max.jnl ------------------------------------
+
