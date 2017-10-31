@@ -19,6 +19,7 @@ LET lle = `L[gt=tt,t="($region_t_hi)"]`
 LET nt = `lle - lls + 1`
 LET y2 = 0.88
 LET upper_vpx = 0.9
+LET lower_vpy = 0.095
 
 IF ($ferret_annotations"0|*>1") THEN 
    LET upper_vpx = 0.98
@@ -72,12 +73,12 @@ DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length)
 ! This viewport will be used to draw the axis at the bottom 
 ! and to label the t axis.
 
-DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview
-DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview2
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`lower_vpy`:0.85 bigview
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`lower_vpy`:0.85 bigview2
 
 ! This viewport will contain the key with the standard arrow length.
 
-DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
+DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:`lower_vpy` keyview
 
 ! Draw the horizontal axis by plotting a variable having no data in the vertical range.
 ! Label the vertical stacks of axes in the middle.
@@ -98,7 +99,12 @@ REPEAT/RANGE=`lls`:`lle`:`delta_t`/NAME=m (  \
    LET count = `count+1`;\
    IF `count GT ent` THEN EXIT/LOOP;  \
    DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` rt_`m`; \
+   LET ylo_vp = `y1`;\
    LET y1 = `y1 - del`; LET y2 = `y2 - del`)
+
+! Check whether the viewports leak out the bottom of the plot.
+IF `ylo_vp LT lower_vpy` THEN LET lle = `lle-1`
+
 
 ! Put on the title. If the title was split into two lines, move it up a bit.
 
@@ -120,8 +126,8 @@ GO labels_above_plot
 
 ! Set up to draw a light-gray line at zero.
 LET zerovar = 0*($ferret_vector_1)
-LET zero = MISSING(zerovar[L=1,k=1],0)
-IF ($ferret_view"0|zt>1|*>0") THEN LET zero = missing(zerovar[k=1],0)
+LET zero = MISSING(zerovar,0)
+!IF ($ferret_view"0|zt>1|*>0") THEN LET zero = missing(zerovar[k=1],0)
 
 PPL TICS,0,0,0,0
 PPL AXLSZE,0,0
@@ -142,7 +148,12 @@ PLOT/NOY/L=`lls`/AXES=0,0,1,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vect
 PPL PLOTUV 0 1
 LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
 LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"
-PLOT/OVER/NOLAB/COLOR=7 zero
+PLOT/OVER/NOLAB/COLOR=7/L=`lls` zero
+
+
+LET zerovar = 0*($ferret_vector_1)
+IF ($ferret_view"0|zt>1|*>0") THEN LET zero = missing(zerovar[k=1],0)
+
 
 LET count = 1
 REPEAT/RANGE=`lls+delta_t`:`lle`:`delta_t`/NAME=m (  \
@@ -158,7 +169,7 @@ REPEAT/RANGE=`lls+delta_t`:`lle`:`delta_t`/NAME=m (  \
      PPL YAXIS ($yaxis_setting);  PPL TICS,0,0,0,0; PPL AXLSZE,0,0; PPL PLOTUV 0 1; \
    LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
    LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.10, "`tlab`"; \
-   plot/over/nolab/color=7 zero) 
+   plot/over/nolab/color=7/L=`lls` zero) 
 
 ! Make a key: a stick of the length of half the vertical axis; labeled with
 ! the length of the corresponding vector.
@@ -173,7 +184,8 @@ SET VIEW keyview
 
 PLOT/I=1:10/HLIM=0:1/VLIM=0:1/NOAX/NOLAB 10*i
 LET ypos = 0.25
-PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"black")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+!PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"blue")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"blue")/NOAX/NOLAB {`xstart`, `xstart+sticklen`}, {`ypos`, `ypos`}
 
 ! Center the label on the line we just drew
 

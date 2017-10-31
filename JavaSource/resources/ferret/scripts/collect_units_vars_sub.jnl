@@ -14,6 +14,7 @@ REPEAT/RANGE=2:($data_count)/name=v (\
    IF `IS_ELEMENT_OF_STR (strings_unique_($thisu), "($inunits_up)") EQ 0` THEN ;\
       DEFINE SYMBOL inunits_($nextu) = ($inunits_up);\
       DEFINE SYMBOL has_($nextu) = ($vm);\
+      DEFINE SYMBOL var_grp($vm) = ($nextu);\
       EXIT/LOOP;\
    ENDIF)
 
@@ -42,7 +43,8 @@ REPEAT/RANGE=2:($data_count)/name=v (\
    DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
    IF `STRCMP("($inunits_up)", "($unique_($nextu))") EQ 0` THEN ;\
      IF `STRINDEX("($has_($nextu))", "($vm)") EQ 0` THEN ;\
-        DEFINE SYMBOL has_($nextu) = ($has_($nextu)), ($vm);\
+        DEFINE SYMBOL has_($nextu) = ($has_($nextu))($vm);\
+	DEFINE SYMBOL var_grp($vm) = ($nextu);\
         DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($cm));\
      LET num_found = `num_found + 1`;\
    ENDIF)

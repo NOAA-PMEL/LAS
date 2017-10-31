@@ -11,6 +11,7 @@ DEFINE SYMBOL inunits_0 = `UPCASE("($units_0)")`
 DEFINE SYMBOL group_label_0 = ($units_0)
 
 DEFINE SYMBOL has_0 = 0
+DEFINE SYMBOL var_grp0 = 0;\
 DEFINE SYMBOL plot_vars_0 = ($ferret_plot_var_0)
 LET num_found = 1
 LET nunique = 1
@@ -26,7 +27,8 @@ REPEAT/RANGE=2:($data_count)/name=c (\
    DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
    IF `STRCMP("($inunits_up)", "($unique_0)") EQ 0` THEN ;\
      DEFINE SYMBOL has_0 = ($has_0), ($cm);\
-     DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), (ferret_plot_var_($cm));\
+     DEFINE SYMBOL var_grp($cm) = 0;\
+     DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), ($ferret_plot_var_($cm));\
      LET num_found = `num_found + 1`;\
    ENDIF)
 

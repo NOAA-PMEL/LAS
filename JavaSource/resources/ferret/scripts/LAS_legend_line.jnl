@@ -64,8 +64,9 @@
   DEFINE SYMBOL y1 = `($yaxis_min) + ($yv) * ($yr)/($yl)`
 
   IF `($4) LT 0` THEN 
-     DEFINE SYMBOL linequal = /RIBBON/LINE/THICK=2/levels=(0,9,1)/PALETTE=($8)
-     DEFINE SYMBOL clrnum = `-1* ($4)`
+     IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = (1,`nstations`,1)
+     DEFINE SYMBOL linequal = /RIBBON/FAST/LINE/THICK=2/levels=($ferret_fill_levels)/PALETTE=($8)
+     DEFINE SYMBOL clrnum = `-1* ($4) - 0.1`
      DEFINE SYMBOL arg3 = , {`($clrnum)`,`($clrnum)`,`($clrnum)`}
   ELSE
      DEFINE SYMBOl linequal = /COLOR=($4)

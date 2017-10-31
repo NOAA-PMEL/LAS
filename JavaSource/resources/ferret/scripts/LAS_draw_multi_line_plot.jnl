@@ -17,7 +17,12 @@ let yvf = ($3%0.16%)  ! 0.2 >> 0.16
 LET yvl = ($4%0.98%)
 
 IF `STRCMP("($vpname%AA%)", "AA") EQ 0` THEN DEFINE SYMBOL vpname = vp
-IF `($nstations"0|*>1") EQ 0` THEN DEFINE SYMBOL nstations = 1
+
+IF `($nstations"0|*>1") EQ 0` THEN 
+   DEFINE SYMBOL nstations = 1
+   LET nstations = 1
+ENDIF
+
 IF `($margin_del"0|*>1") EQ 0` THEN DEFINE SYMBOL margin_del = 0.08
 
 LET margin_del = ($margin_del)
@@ -46,18 +51,18 @@ IF `($have_multiline_defs"0|*>1") EQ 0` THEN
    DEFINE SYMBOL all_units_same = 1
    
    REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
-     DEFINE SYMBOL qdat = `qdat`; \
+     DEFINE SYMBOL qdat = `qdat`;\
      GO LAS_initialize_region ($qdat) ;  \
-     GO LAS_initialize_data  ($qdat) ; \
-     GO LAS_check_var_direction; \
-     IF ($error_status"0|*>1") THEN EXIT/LOOP; \
-     DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
-     DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
-     DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
-     LET tlen = STRLEN("($ferret_title_($qdat))"); \
-     LET title_len = `MAX(tlen, title_len)`; \
-     DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
-     DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)`; \
+     GO LAS_initialize_data  ($qdat) ;\
+     GO LAS_check_var_direction;\
+     IF ($error_status"0|*>1") THEN EXIT/LOOP;\
+     DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var);\
+     DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var);\ 
+     DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title);\ 
+     LET tlen = STRLEN("($ferret_title_($qdat))");\
+     LET title_len = `MAX(tlen, title_len)`;\
+     DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`;\
+     DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)`;\
      GO LAS_pp_set_region_labels \
    )
    DEFINE SYMBOL plot_vars_0 = ($plot_arg)
@@ -86,21 +91,28 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 ! one dependent axis on the left an the other on the right.
 
 ! If line style is just symbols, we need to do lines separately to get different colors.
+! match the colors in the palette six_line_colors.spk which will be used to draw the legend
 
-DEFINE SYMBOL color0 = black
-DEFINE SYMBOL color1 = red
-DEFINE SYMBOL color2 = green
-DEFINE SYMBOL color3 = blue
-DEFINE SYMBOL color4 = lightblue
-DEFINE SYMBOL color5 = purple
+DEFINE SYMBOL ferret_palette = six_line_colors
+DEFINE SYMBOL ferret_fill_levels = (0,`nstations+1`,1)
+IF `($nstations) EQ 1` THEN DEFINE SYMBOL ferret_fill_levels = (0,`($data_count)+1`,1)
 
-IF `(($all_units_same"0|0|1") EQ 0) AND (($data_count) GE 2)` THEN
+
+DEFINE SYMBOL leg_color0 = blue
+DEFINE SYMBOL leg_color1 = red
+DEFINE SYMBOL leg_color2 = green
+DEFINE SYMBOL leg_color3 = lightblue
+DEFINE SYMBOL leg_color4 = purple
+DEFINE SYMBOL leg_color5 = black
+
+
+IF `(($data_count) GE 2)` THEN
+
 ! More than 1 variable and Units Not same
 
-!   SET WIN/ASP=0.4
    PPL AXLSZE,,0.08
    PPL AXNSIG,,2
-
+   
    IF `($ferret_use_graticules"0|none>0|notic>0*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
 
 ! Set up groups of variables with common units to plot together 
@@ -113,11 +125,12 @@ IF `(($all_units_same"0|0|1") EQ 0) AND (($data_count) GE 2)` THEN
    IF `($nunit_grp"1") EQ 1 ` THEN DEFINE SYMBOL all_units_same = 1
 
 ENDIF 
+
 ! Draw the plot
 
 LET maxlablen = 0
 REPEAT/RANGE=2:`($nunit_grp"1")`/NAME=m (\
-   DEFINE SYMBOL vm = `m-1`; \
+   DEFINE SYMBOL vm = `m-1`;\
    PLOT/SET ($plot_vars_($vm)) ;\
    LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`;\
    LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`)
@@ -132,24 +145,33 @@ REPEAT/RANGE=2:`($nunit_grp"1")`/NAME=m (\
 LET xvl = `xvl - margin_del* (($nunit_grp"1")-2)`
 IF `(($nstations) EQ 1) AND (maxlablen GT 6)` THEN LET xvl = `xvl - (0.012*(maxlablen-6)/2)`
 
-LET ypl = 1
+LET labloc = 0.5 + 0.03*maxlablen
 
-! First draw the vertical axes
+! First draw the vertical axes. 
+! Set up the vertical-range symbols (The PPL RANGE call with high #tics sets up 
+! for plots that take up most of the window)
 
-DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` vg($vpname)
+DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` vg($vpname)
 SET VIEW vg($vpname)
 IF `($nstations) GT 1` THEN SHADE/NOAX/NOLAB/NOKEY/PAL=gray_pale/X=1:10/Y=1:10 x+y
-
+show view vg($vpname); pause
 let xvlv = `xvl`
-REPEAT/RANGE=2:`($nunit_grp"1")`/NAME=m (\
-   DEFINE SYMBOL vm = `m-1`; \
-   DEFINE VIEWPORT/axes/x=`xvf`:`xvlv`/y=`yvf`:`yvl` v($vpname)($vm); \
-   SET VIEW v($vpname)($vm); \
+
+REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
+   DEFINE SYMBOL vm = `m-1`;\
+   DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvlv`/y=`yvf`:`yvl` v($vpname)($vm);\
+   SET VIEW v($vpname)($vm);\
    PLOT/SET ($plot_vars_($vm));\
-   ppl %range (PPL$YMIN1), ($PPL$XMAX1);\
-   PLOT/AXES=0,0,0,1/VLIM=($ppl$range_low):($ppl$range_high)/SYM=dot/COLOR=8/NOLAB {0,1};\
-   LABEL/NOUSER `($ppl$xlen) + 0.85`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm)); \
-   LET xvlv = `xvlv + margin_del`)
+   LET vplotnum = STRLEN("($has_($vm))");\
+   GO LAS_get_lines_min_max `vplotnum`;\
+   PPL %range `vlimylo`, `vlimyhi`, 10;\
+   DEFINE SYMBOL qualifiers_g($vm) = /VLIM=($ppl$range_low):($ppl$range_high);\
+   IF `($vm) GT 0` THEN;\
+      PLOT/AXES=0,0,0,1($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
+      LABEL/NOUSER `($ppl$xlen) + labloc`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm));\
+      LET xvlv = `xvlv + margin_del`;\
+   ENDIF;\
+   show view v($vpname)($vm); pause)
 
 ! Draw the first variable
 ! If there is just one, draw the RH axis
@@ -163,17 +185,29 @@ IF `($all_units_same"0|0|1") EQ 1` THEN
 ENDIF
 
 DEFINE SYMBOL vm = 0
-DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_v($vpname)($vm)
+DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_v($vpname)($vm)
+DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_dup
 SET VIEW v0_v($vpname)($vm)
+show view v0_v($vpname)($vm); pause
 
-PLOT($qualifiers)($qualifiers_0)($axqual)/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm))
-LABEL/NOUSER `-0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm))
+IF ($ferret_view"1|t>0|*>1") THEN SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+
+PLOT($qualifiers)($qualifiers_0)($qualifiers_g($vm))($axqual)/COLOR=($leg_color($vm))/NOLAB ($ferret_plot_var_($vm))
+LABEL/NOUSER `0 - labloc`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm))
 
 REPEAT/RANGE=2:($data_count)/name=m (\
-   DEFINE SYMBOL vm = `m-1`; \
-   DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_($vpname)($vm);\
+   DEFINE SYMBOL vm = `m-1`;\
+   DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_($vpname)($vm);\
    SET VIEW v0_($vpname)($vm);\
-   PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
+   PLOT($qualifiers)($qualifiers_g($var_grp($vm)))/AXES=0,0,0,0/COLOR=($leg_color($vm))/NOLAB ($ferret_plot_var_($vm));\
+   IF ($ferret_title_($vm)"0|*>1") THEN DEFINE SYMBOL variable_lab = ($variable_lab), ($ferret_title_($vm));\
+   show view v0_($vpname)($vm); pause)
+
+! Grandfather in the style for Dart timeseries: Overlay the first variable again.
+IF `($data_count"0|2>1|*>0") AND ($nstations"0") EQ 1 AND ($all_units_same"0|0|1")` THEN 
+    SET VIEW v0_dup
+    PLOT($qualifiers)($qualifiers_g0))/over/AXES=0,0,0,0/COLOR=blue/NOLAB ($ferret_plot_var_0)
+ENDIF
 
 IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
@@ -190,7 +224,12 @@ DEFINE SYMBOL xax_max_save = ($xaxis_max)
 
 ! Draw the legend.
 
-IF ($do_legend"0|0|*>1") THEN  GO LAS_lineplot_legend ($data_count) 
+
+DEFINE SYMBOL thicksave = ($thicknum)
+DEFINE SYMBOL thicknum = 2
+DEFINE SYMBOL legend_qual = /LINE/THICK=($thicknum)
+
+IF ($do_legend"0|0|*>1") THEN  GO LAS_lineplot_legend ($data_count) ($ferret_palette)
 
 ! The results script needs the actual axis directions. Restore them.
 
@@ -203,4 +242,3 @@ DEFINE SYMBOL xaxis_min = ($xax_min_save)
 DEFINE SYMBOL xaxis_max = ($xax_max_save)
 
 ! --------------- End of LAS_draw_multi_line_plot  ---------------------------
-

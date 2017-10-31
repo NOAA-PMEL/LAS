@@ -304,4 +304,8 @@ IF `($itsa_vector_plot"0|*>1") AND ($ferret_view"0|xy>1|*>0")` THEN
    ENDIF
 ENDIF  ! end of XY vector plot settings.
 
+IF `($graticuleColor"0|*>1") EQ 0` THEN DEFINE SYMBOL graticuleColor = 7
+
+
 !  ----------------- End of LAS_set_plot_qualifiers.jnl ------------------------------------
+

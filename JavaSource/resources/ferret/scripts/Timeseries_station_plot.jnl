@@ -323,9 +323,9 @@ ELSE  ! more than 1 station
 ! This viewport will be used to draw the time axis at the bottom 
 ! and to label the z axes.
       
-      def view/axes/xlim=`vxlo`:`vxhi`/ylim=0.002:`vyhi` tv
+      DEFINE VIEW/AXES/XLIM=`vxlo`:`vxhi`/YLIM=0.002:`vyhi` tv
       IF `($data_count) GT 1` THEN  DEFINE VIEW/AXES/XLIM=`vxlo`:`vxhi_g`/YLIM=`vylo`:`vyhi` tv
-      set view tv 
+      SET VIEW tv 
 
 ! Define variables for consistent vertical axes for all the time series
 
@@ -348,14 +348,14 @@ ELSE  ! more than 1 station
       LET del = 0.92/nstations
       IF `($data_count) GT 1` THEN LET del = 0.8/nstations
       LET y1 = `y2 - del` + 0.02
-      if `nstations le 3` then LET y1 = `y1 + 0.02`
+      IF `nstations LE 3` THEN LET y1 = `y1 + 0.02`
 
-      repeat/range=1:`nstations`/NAME=s (\
-                                define symbol s = `s`;\
-                                def view/axes/xlim=`vxlo`:`vxhi`/ylim=`y1`:`y2` vp_`s`;\
-                                def view/axes/xlim=`vxlo`:`vxhi_g`/ylim=`y1`:`y2` vp_`s`_g;\
-   			     define symbol y1_($s) = `y1`;\
-   			     define symbol y2_($s) = `y2`;\
+      REPEAT/RANGE=1:`nstations`/NAME=s (\
+                                DEFINE SYMBOL s = `s`;\
+                                DEFINE VIEW/axes/xlim=`vxlo`:`vxhi`/ylim=`y1`:`y2` vp_`s`;\
+                                DEFINE VIEW/axes/xlim=`vxlo`:`vxhi_g`/ylim=`y1`:`y2` vp_`s`_g;\
+   			     DEFINE SYMBOL y1_($s) = `y1`;\
+   			     DEFINE SYMBOL y2_($s) = `y2`;\
    			     LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
 ! Set up to draw a gray horizontal line through the middle of each plot
@@ -408,7 +408,7 @@ ELSE  ! more than 1 station
          DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
          DEFINE SYMBOL vpname = ($s)_;\
          GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
-	 )
+	 show view; pause)
          LET vart = plot_var_t
       ENDIF  ! allbad
 
@@ -443,7 +443,7 @@ ELSE  ! more than 1 station
          LET tt = t[gt=taxis];\
          LET have_dat = 1;\
          LET var_t = reshape(tempx, tt);\
-         LET colort = reshape(colrx, tt);\
+         LET colort = reshape(colrx, tt) - 0.1;\
          PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) var_t,colort;\
          DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
 	 )

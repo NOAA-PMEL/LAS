@@ -108,13 +108,15 @@ DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length)
 ! and to label the t axis.
 
 LET upper_vpx = 0.9
+LET lower_vpy = 0.095
 IF ($ferret_annotations"0|*>1") THEN LET upper_vpx = 0.98
-DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview
-DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview2
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`lower_vpy`:0.85 bigview
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`lower_vpy`:0.85 bigview2
+
 
 ! This viewport will contain the key with the standard arrow length.
 
-DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
+DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:`lower_vpy` keyview
 
 ! Define viewports for all the stacked plots.
 !
@@ -125,7 +127,11 @@ DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
 REPEAT/RANGE=`ks`:`ke`:`delta_z`/NAME=m (\
  IF `m GT ke` THEN EXIT/LOOP;  \
  DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` rt_`m`; \
+ LET ylo_vp = `y1`;\
  LET y1 = `y1 - del`; LET y2 = `y2 - del`)
+
+! Check whether the viewports leak out the bottom of the plot.
+IF `ylo_vp LT lower_vpy` THEN LET ke = `ke-1`
 
 ! Draw the horizontal axis by plotting a variable having no data in the vertical range.
 ! Label the vertical stacks of axes in the middle.
@@ -210,7 +216,8 @@ SET VIEW keyview
 
 PLOT/I=1:10/HLIM=0:1/VLIM=0:1/NOAX/NOLAB 10*i
 LET ypos = 0.25
-PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"black")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+!PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"blue")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"blue")/NOAX/NOLAB {`xstart`, `xstart+sticklen`}, {`ypos`, `ypos`}
 
 ! Center the label on the line we just drew
 
