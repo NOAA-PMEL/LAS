@@ -26,7 +26,7 @@ REPEAT/RANGE=2:($data_count)/name=c (\
    DEFINE SYMBOL in_units = ($units_($cm));\
    DEFINE SYMBOL inunits_up `UPCASE("($in_units)")`;\
    IF `STRCMP("($inunits_up)", "($unique_0)") EQ 0` THEN ;\
-     DEFINE SYMBOL has_0 = ($has_0), ($cm);\
+     DEFINE SYMBOL has_0 = ($has_0)($cm);\
      DEFINE SYMBOL var_grp($cm) = 0;\
      DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), ($ferret_plot_var_($cm));\
      LET num_found = `num_found + 1`;\

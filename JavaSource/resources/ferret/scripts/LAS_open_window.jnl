@@ -25,7 +25,10 @@ IF `($set_window_quals"0|*>1") EQ 0` THEN \
 CANCEL MODE LOGO
 
 
-IF ($program_name"0|PyFerret>1|*>0") THEN SET TEXT/FONT=verdana
+IF ($program_name"0|PyFerret>1|*>0") THEN 
+   SET TEXT/FONT=verdana
+   SET TEXT/isiz=-1 CBAR
+ENDIF
 
 IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 1
 

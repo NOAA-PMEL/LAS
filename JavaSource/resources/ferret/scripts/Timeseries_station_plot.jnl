@@ -129,6 +129,9 @@ DEFINE VIEW/AXES/X=0.08:0.99/YLIM=0.07:0.96 full_view
 DEFINE VIEW/AXES/X=0.08:0.99/YLIM=0.07:0.96 full_viewr
 SET VIEW full_view
 
+PPL TICS,.1,.125,,,0,1
+
+
 ! Use Ferret properties to set up the plot qualifiers
 ! Set up variables - multiple stations regrid to a common time axis
 
