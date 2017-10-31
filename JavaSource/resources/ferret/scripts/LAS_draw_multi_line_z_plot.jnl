@@ -149,8 +149,8 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
    DEFINE VIEWPORT/axes/x=`xvf`:`xvl`/y=`yvf`:`yvlv` v($vpname)($vm);\
    SET VIEW v($vpname)($vm);\
    PLOT/SET ($plot_vars_($vm));\
-   LET vplotnum = `STRLEN("($has_($vm))")`;\
-   GO LAS_get_lines_min_max;\
+   LET vplotnum = STRLEN("($has_($vm))");\
+   GO LAS_get_lines_min_max `vplotnum`;\
    PPL %range `vlimxlo`, `vlimxhi`, 10;\
    DEFINE SYMBOL qualifiers_g($vm) = /HLIM=($ppl$range_low):($ppl$range_high);\
    IF `($vm) GT 0` THEN;\
