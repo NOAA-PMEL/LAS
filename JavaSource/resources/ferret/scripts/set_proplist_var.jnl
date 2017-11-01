@@ -3,7 +3,7 @@
 !
 ! 10/18/2017 ACM
 ! setup for extra variables added to prop-prop style data listings
-!
+! making sure definitions are unique to each variable requested
 
 IF ($ferret_plot_var_($list_var)"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|*>1") THEN 
    
@@ -15,7 +15,7 @@ LET ii = i[g=($timevar)]
 LET iindices = IF constraints_mask THEN ii
 LET compress_mask = COMPRESSI(iindices)
 LET nok = `compress_mask[i=@ngd]`
-LET/TITLE="($data_($list_var)_title)"/UNITS="($data_($list_var)_units)" ($data_($list_var)_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
+LET/TITLE="($data_($list_var)_title)"/UNITS="($data_($list_var)_units)" ($data_($list_var)_var_in) = SAMPLEI (zvar($list_var), compress_mask[i=1:`nok`])
 
 ! expand metadata variables onto the X axis
 DEFINE SYMBOL zshape = `($ferret_plot_var_($list_var)),RETURN=shape`
