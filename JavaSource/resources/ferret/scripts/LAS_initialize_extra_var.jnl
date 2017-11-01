@@ -6,6 +6,9 @@
 !
 ! Cancel the dataset so that another application of the
 ! init script will work.
+!
+! 10/2017 For extra variables beyond 3, make the definitions of intermediate vars unique.
+
 
 GO LAS_initialize_region ($list_var)
 DEFINE SYMBOL data_($list_var)_url = ($data_0_url)
@@ -25,7 +28,7 @@ DEFINE SYMBOL ferret_title_($list_var) = ($ferret_plot_title"($data_($list_var)_
 DEFINE SYMBOL ferret_plot_var_($list_var) = ($($fer_sym)_var)
 DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
 
-LET/TITLE="($ferret_title_($list_var))" zvar = XSEQUENCE(($ferret_plot_var_($list_var)))
+LET/TITLE="($ferret_title_($list_var))" zvar($list_var) = XSEQUENCE(($ferret_plot_var_($list_var)))
 
 
 ! Is it a varible on the E axis of a DSG file?
@@ -39,22 +42,22 @@ IF `($vshape"0|E>1|*>0)` THEN
 
 ! Expand trajectory variable into obs axis
    DEFINE SYMBOL vtype = 0
-   DEFINE SYMBOL vtype = `zvar,RETURN=dtype`
+   DEFINE SYMBOL vtype = `zvar($list_var),RETURN=dtype`
    DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
    IF ($is_string"0|0|*>1") THEN 
-      LET zvar = EXPND_BY_LEN_STR(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
+      LET zvar($list_var) = EXPND_BY_LEN_STR(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
 
 ! Set string var to a sequence number, unless its the qc_flag or region id.
 
 	 IF `(($data_($list_var)_var_in"0|region_ID>1|qc_flag>1|*>0") EQ 0) AND ($its_prop_plot"0|*>1")` THEN 
 	    LET mvar_($list_var) = _m[ge=($ferret_plot_var_($list_var))]
-	    LET zvar = EXPND_BY_LEN(mvar_($list_var), ($rowvar),`($rowvar)[m=@sum]`)
+	    LET zvar($list_var) = EXPND_BY_LEN(mvar_($list_var), ($rowvar),`($rowvar)[m=@sum]`)
 	 ELSE
-	    LET zvar = EXPND_BY_LEN(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
+	    LET zvar($list_var) = EXPND_BY_LEN(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
 	 ENDIF
    ELSE
-      LET zvar = EXPND_BY_LEN(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
+      LET zvar($list_var) = EXPND_BY_LEN(($ferret_plot_var_($list_var)), ($rowvar),`($rowvar)[m=@sum]`)
    ENDIF
 
 ENDIF
