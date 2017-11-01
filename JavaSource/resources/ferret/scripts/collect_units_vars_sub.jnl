@@ -45,9 +45,8 @@ REPEAT/RANGE=2:($data_count)/name=v (\
      IF `STRINDEX("($has_($nextu))", "($vm)") EQ 0` THEN ;\
         DEFINE SYMBOL has_($nextu) = ($has_($nextu))($vm);\
 	DEFINE SYMBOL var_grp($vm) = ($nextu);\
-        DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($cm));\
+        DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($vm));\
      LET num_found = `num_found + 1`;\
    ENDIF)
-
-
+ 
 !  ----------------- End of collect_units_vars_sub.jnl ------------------------------------

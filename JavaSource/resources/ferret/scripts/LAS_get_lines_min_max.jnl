@@ -1,9 +1,9 @@
 ! LAS_get_lines_min_max.jnl
-! A PLOT/SET command has been issued , plotting one or more
+! A PLOT/SET command has been issued, plotting one or more
 ! variables.  Find the min and max of all the PPL$XMIN*, PPL$XMAX*,
-!  PPL$YMIN*, PPL$YMAX*
-! The argument it the number of variables plotted
-! sets variables vlimxlo, vlimxhi, vlimylo, vlimyhi
+!  PPL$YMIN*, PPL$YMAX*, to use in setting common independent axis
+! The argument is the number of variables plotted
+! This script sets variables vlimxlo, vlimxhi, vlimylo, vlimyhi
 
 LET vplotnum = ($1)
 
@@ -31,9 +31,12 @@ IF `vplotnum  GT 5` THEN
    LET vlimxhi = MAX(`vlimxhi`, ($PPL$XMAX6"`vlimxhi`"))
 ENDIF
 
-IF `vlimxlo EQ vlimxhi` THEN
-  LET vlimxlo = `vlimxlo - 0.5`
-  LET vlimxhi = `vlimxhi + 0.5`
+! If they are equal or nearly so, add and subtract a constant
+LET vlim_tol = MAX(ABS(vlimxlo), ABS(vlimxhi))* 0.01
+
+IF `vlimxhi - vlimxlo LT vlim_tol` THEN
+  LET vlimxlo = `vlimxlo - vlim_tol`
+  LET vlimxhi = `vlimxhi + vlim_tol`
 ENDIF
 
 LET vlimylo = ($PPL$YMIN1"0")
@@ -60,10 +63,13 @@ IF `vplotnum  GT 5` THEN
    LET vlimyhi = MAX(`vlimyhi`, ($PPL$YMAX6"`vlimyhi`"))
 ENDIF
 
-IF `vlimylo EQ vlimyhi` THEN
-  LET vlimylo = `vlimylo - 0.5`
-  LET vlimyhi = `vlimyhi + 0.5`
+
+! If they are equal or nearly so, add and subtract a constant
+LET vlim_tol = MAX(ABS(vlimylo), ABS(vlimyhi))* 0.01
+
+IF `vlimyhi - vlimylo LT vlim_tol` THEN
+  LET vlimylo = `vlimylo - vlim_tol`
+  LET vlimyhi = `vlimyhi + vlim_tol`
 ENDIF
 
 !  ----------------- End of LAS_get_lines_min_max.jnl ------------------------------------
-

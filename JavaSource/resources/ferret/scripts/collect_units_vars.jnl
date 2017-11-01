@@ -32,7 +32,6 @@ REPEAT/RANGE=2:($data_count)/name=c (\
      LET num_found = `num_found + 1`;\
    ENDIF)
 
-
 IF `num_found LT ($data_count)` THEN 
    
 ! Find the next unique units string, inunits_1 and which variables 

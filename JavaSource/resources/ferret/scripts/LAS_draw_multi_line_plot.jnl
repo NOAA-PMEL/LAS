@@ -197,7 +197,7 @@ REPEAT/RANGE=2:($data_count)/name=m (\
    DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` v0_($vpname)($vm);\
    SET VIEW v0_($vpname)($vm);\
    PLOT($qualifiers)($qualifiers_g($var_grp($vm)))/AXES=0,0,0,0/COLOR=($leg_color($vm))/NOLAB ($ferret_plot_var_($vm));\
-   IF ($ferret_title_($vm)"0|*>1") THEN DEFINE SYMBOL variable_lab = ($variable_lab), ($ferret_title_($vm));\
+   IF `($ferret_title_($vm)"0|*>1") AND ($do_legend"0|0|*>1")` THEN DEFINE SYMBOL variable_lab = ($variable_lab), ($ferret_title_($vm));\
    )
 
 ! Grandfather in the style for Dart timeseries: Overlay the first variable again.
@@ -239,3 +239,4 @@ DEFINE SYMBOL xaxis_min = ($xax_min_save)
 DEFINE SYMBOL xaxis_max = ($xax_max_save)
 
 ! --------------- End of LAS_draw_multi_line_plot  ---------------------------
+

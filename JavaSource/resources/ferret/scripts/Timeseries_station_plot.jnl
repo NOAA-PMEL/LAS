@@ -249,15 +249,20 @@ GO set_linesym
 
 !IF ($ferret_line_color"0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/color=($ferret_line_color)
 !IF ($ferret_line_thickness"0|*>1")  THEN DEFINE SYMBOL qualifiers = ($qualifiers)/thick=($ferret_line_thickness)
-! Analyze the variables and units to group variables by unit.
 
+! Analyze the variables and units to group variables by unit.
+! setting up definitions for station 1.  If more stations, this will be repeated below.
+
+LET row1 = 1
+LET rowm = `($rowvar)[m=1]`
 IF `nstations EQ 1` THEN
-   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_in = time
+   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_sta = time
 ELSE
-   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_in = time[i=1:`($rowvar)[m=1]`]
+   DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_sta = time[i=`row1`:`rowm`]
 ENDIF
 
-LET tt = t[gt=taxis_in]
+
+LET tt = t[gt=taxis_sta]
 LET plot_var_tA = RESHAPE(($ferret_plot_var), tt)
 
 LET plot_var_t = plot_var_tA[gt=taxis_all@bin]
@@ -267,9 +272,10 @@ DEFINE SYMBOL units_0 = ($data_0_units"units")
 DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
 DEFINE SYMBOL all_units_same = 1
 
+
 REPEAT/RANGE=1:`($data_count)-1`/name=q (\
  DEFINE SYMBOL q =`q`;\
- LET data_($q)_var_tA = RESHAPE(($data_($q)_var), tt);\
+ LET data_($q)_var_tA = RESHAPE(($data_($q)_var)[i=`row1`:`rowm`], tt);\
  LET data_($q)_var_t = data_($q)_var_tA[gt=taxis_all@bin];\
  DEFINE SYMBOL ferret_plot_var_($q) = data_($q)_var_t;\
  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var_($q));\
@@ -282,8 +288,6 @@ DEFINE SYMBOL have_multiline_defs = 1
 GO collect_units_vars
 
 LET vxhi_g = `vxhi - ($margin_del)* (($nunit_grp)-2)`
-
-LET vart = plot_var_t
 
 IF `nstations EQ 1` THEN  ! one station multi var
 
@@ -388,30 +392,31 @@ ELSE  ! more than 1 station
             DEFINE SYMBOL nohoriz = 1
          ENDIF
 
-! Definitions for the different variables. The time axis taxis
+! Definitions for the different variables. The time axis taxis_sta
 ! and variable tt on that axis are redefined at each iteration 
-! of the stations loop below.
+! of the stations loop below, other definitions made earlier
 
-         REPEAT/RANGE=0:`($data_count)-1`/NAME=c (\
-          DEFINE SYMBOL c = `c`;\
-	  LET var2d_($c) = EXPNDI_BY_M_COUNTS (($data_($c)_var)[i=1:`nobs`], ($rowvar)[M=1:`nstations`], xvar);\
-	  LET tempx($c) = var2d_($c)[m=($s)];\
-	  LET vart($c) = reshape(tempx($c), tt);\
-	  DEFINE SYMBOL ferret_plot_var_($c) = vart($c))
-
+	 LET row1 = 1
+	 LET rowm = `($rowvar)[m=1]`
+  
 	 REPEAT/RANGE=1:`nstations`/name=s (\
          DEFINE SYMBOL s = `s`;\
          SET VIEW vp_($s)_g;\
          SET VIEW vp_($s);\
-         LET ntm = `($rowvar)[m=($s)]`;\
-         LOAD time2d[m=($s)];\
-         DEFINE AXIS/T/UNITS=SECONDS/T0="`time.time_origin`" taxis = time2d[m=($s),i=1:`ntm`];\
-         LET tt = t[gt=taxis];\
+         LET rowm = `row1+rowsize[m=($s)]-1`;\
+	 DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis_sta = time[i=`row1`:`rowm`];\
+	 LET tt = t[gt=taxis_sta];\
+	 LET plot_var_tA = RESHAPE(($ferret_plot_var)[i=`row1`:`rowm`], tt);\
+	 REPEAT/RANGE=1:`($data_count)-1`/name=q (\
+	     DEFINE SYMBOL q =`q`;\
+	     LET data_($q)_var_tA = RESHAPE(($data_($q)_var)[i=`row1`:`rowm`], tt);\
+	   );\
          IF `($s) EQ nstations` THEN DEFINE SYMBOL do_legend = 1;\ 
          DEFINE SYMBOL station_label = `($feature_variable)[m=($s)]`;\
          DEFINE SYMBOL vpname = ($s)_;\
          GO  LAS_draw_multi_line_plot `vxlo` `vxhi` ($y1_($s)) ($y2_($s));\
-	 )
+	 let row1 = `rowm+1`)
+
          LET vart = plot_var_t
       ENDIF  ! allbad
 

@@ -197,8 +197,8 @@ ENDIF
 ! The variables must be the same size. Check and set up a nice message if not.
 
 IF ($add_to_var($num)"0|*>1") THEN 
-   LET dvar = ($data_var) + ($add_to_var($num))
-   DEFINE SYMBOL data_var = dvar
+   LET dvar($num) = ($data_($num)_var) + ($add_to_var($num))
+   DEFINE SYMBOL data_var = dvar($num)
 ENDIF
 
 ! Use the units passed in from the XML unless they are null; 
