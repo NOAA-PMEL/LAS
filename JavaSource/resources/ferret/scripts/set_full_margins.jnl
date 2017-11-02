@@ -67,11 +67,12 @@ keymark 1
 IF `($ferret_key_annotate"1") EQ 0` THEN KEYMARK 0  ! override annotation with Ferret property
 
 ! Tic marks inside the plot box
-PPL TICS,,,,,1,1 
 
-! Or, make short tics, on the outside of the axes
-! PPL TICS,,,,,-1,-1 
-! PPL TICS .6,.125,.6,.125
+IF `STRINDEX("($ferret_view)", "t") GT 0 AND STRLEN("($ferret_view)") LE 3` THEN
+   PPL TICS,.1,.125,,,0,1
+ELSE
+   PPL TICS,,,,,1,1 
+ENDIF
 
 ! No tics as an option
 IF ($ferret_use_graticules"0|notic>1|*>0) THEN 
