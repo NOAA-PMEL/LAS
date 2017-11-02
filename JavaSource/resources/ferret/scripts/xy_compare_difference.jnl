@@ -173,8 +173,8 @@ IF ($shade_underlay) THEN
       ENDIF
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-   ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
-   IF ($native_curvilinear_xy"0|*>1") THEN ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var_m360)
+   ($plot_type)($qualifiers)/OVER/NOKEY/NOLAB ($ferret_diff_var)
+   IF ($native_curvilinear_xy"0|*>1") THEN ($plot_type)($qualifiers)/OVER/NOKEY/NOLAB ($ferret_diff_var_m360)
 ELSE
    ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
