@@ -89,7 +89,7 @@ ENDIF
 	 DEFINE SYMBOL ensnum = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
          LET varnames = ..varnames
          IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN \
-	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=tas], "(F3.0)") )
+	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=($data_var)], "(I3.0)") )
 	 DEFINE SYMBOL enslab1 = `labels[e=($ensnum)]`
    ENDIF
    IF ($labnum_f"0|*>1") THEN
@@ -126,11 +126,11 @@ ENDIF
 	 LET nc = STRINDEX("($lab($labnum_e))", ":")
 	 LET llen = STRLEN("($lab($labnum_e))")
 	 DEFINE SYMBOL enslab2 = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
-	 
+	
 	 DEFINE SYMBOL ensnum = `SUBSTRING("($lab($labnum_e))", nc+1, llen-nc)`
          LET varnames = ..varnames
          IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN \
-	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=tas], "(F3.0)") )
+	   LET labels = STRCAT("EnsembleMember", FLOATSTR(_e[ge=($data_var)], "(I3.0)") )
 	 DEFINE SYMBOL enslab2 = `labels[e=($ensnum)]`
    ENDIF
    IF ($labnum_f"0|*>1") THEN
