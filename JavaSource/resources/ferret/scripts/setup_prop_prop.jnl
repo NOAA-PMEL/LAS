@@ -358,11 +358,12 @@ IF  ($color_by"0") THEN
    IF `($color_vnum"-99) EQ -99` THEN DEFINE SYMBOL color_vnum = 2
    IF ($data_($color_vnum)_var"0|time>1|*>0") THEN  DEFINE SYMBOL ferret_plot_key = date_key 
 
-   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN 
+   LET lcolor = STRINDEX("`UPCASE("($variable_lab%0%)")`", "COLORED")
+   IF `lcolor EQ 0` THEN
       LET variable_2_lab = STRCAT(data_2_title, data_2_units)
-      DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
+      DEFINE SYMBOL variable_lab = ($variable_lab) Colored by ($ferret_title_2)
       DEFINE SYMBOL variable_lab_var = 1
-      LET variable_lab_C = STRCAT (variable_lab_B, " colored by ")
+      LET variable_lab_C = STRCAT (variable_lab_B, " Colored by ")
       LET variable_lab = STRCAT (variable_lab_C, variable_2_lab)
    ENDIF
 ENDIF

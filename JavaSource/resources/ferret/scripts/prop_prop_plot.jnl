@@ -5,6 +5,8 @@
 ! $Date: 11-Jan-2008
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 ! 10/2017 Find direction variables based on attributes not just var name
+! 11/2017 Plot the missing data first, as a gray underlay, then the good data
+!         previously the underlay plotted all the data.
 
 ! prop_prop_plot.jnl creates a property-property plot, using the 
 ! data variable in symbol data_0_var and the second variable from
@@ -81,6 +83,8 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
+DEFINE SYMBOL under_mask = 1./0.
+DEFINE SYMBOL plot_arg_under = under_mask *($xvar), under_mask *($yvar)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
@@ -198,6 +202,9 @@ IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
+   LET ulmask = if ($zvar) THEN  1 ELSE 0
+   LET under_mask = IF ulmask LT 1 THEN  1
+   DEFINE SYMBOL plot_arg_under = under_mask*($xvar), under_mask*($yvar)
    LET compute_good =  ($xvar)* ($yvar)* ($zvar)
    IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
    IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@nbd]`
@@ -321,6 +328,9 @@ ELSE
 	    IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
 	    LET y_plot_var = ($yvar)
 	    DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
+	    LET ulmask = if ($data_var)* constraints_mask_var THEN  1 ELSE 0
+	    LET under_mask = IF ulmask LT 1 THEN 1
+	    DEFINE SYMBOL plot_arg_under = under_mask* x_plot_var, under_mask* y_plot_var
 	 ENDIF
 
          LET pvar = ($data_x_var)
@@ -370,6 +380,10 @@ ELSE
 	  IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
 		  LET y_plot_var = ($yvar)
 	  DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
+	  LET datavar_to_mask = ($data_var)* constraints_mask_var
+	  LET ulmask = IF datavar_to_mask THEN  1 ELSE 0
+	  LET under_mask = IF ulmask LT 1 THEN  1
+	  DEFINE SYMBOL plot_arg_under = under_mask* ($data_x_var), under_mask* ($data_x_var)
       ENDIF
 
    ENDIF   ! IF ($color_by)
@@ -382,8 +396,9 @@ ELSE
 ! on lat/lon plots, draw a gray line on the cruise tracks.
    IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/DASH=(0.1,0.04,0.1,0.04)/NOLAB  x_plot_var, y_plot_var
 
-! ?? show locations where the color-by variable is missing...
-   IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var
+! Show locations where the color-by variable is missing...
+
+   IF `($data_count"0") GT 2` THEN ($underlay_command) ($plot_arg_under)
 
    DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($qualifiers)
