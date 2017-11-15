@@ -6,6 +6,7 @@
 ! 10/2016   ACM Catch and issue an error for string variables
 ! 12/2016 fixes for case when first variable is all-missing
 !  8/2017 *acm* Account for change to expndi_by_m_function
+! 11/2017 *acm* Handle timeseries data returned with just one point
 
 ! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
 !
@@ -139,7 +140,31 @@ LET t1 = time[i=@min]
 LET t2 = time[i=@max]
 LET ntimes = min(2000,nstations *maxrow)
 
+
+! Dataset with just one point.  Make a nominal plot and exit
+
+IF `ntimes EQ 1 OR t1 EQ t2` THEN
+   LET t1 = time[i=@min] - 18000
+   LET t2 = time[i=@max] + 18000
+   LET ntimes = 5
+   DEFINE AXIS/T=`t1,prec=15`:`t2,prec=15`/npoints=`ntimes`/UNITS=seconds/T0="`time.time_origin`" taxis_all
+   LET var = {,,`($data_var)`,,}
+   
+   LET tt5 = t[gt=taxis_all]
+   LET plot_var = reshape(var,tt5)
+   PLOT/symbol=19/siz=0.12/color=blue/thick/nolab reshape(var,tt5)
+   DEFINE SYMBOL data_0_var = plot_var
+   DEFINE SYMBOL result_type = tline
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = Request includes just one time point
+   GO LAS_results ($result_type)
+   exit/program
+ENDIF
+
+
 DEFINE AXIS/T=`t1,prec=15`:`t2,prec=15`/npoints=`ntimes`/UNITS=seconds/T0="`time.time_origin`" taxis_all
+
+
 
 IF `nstations EQ 1` THEN 
    LET sloc = STRINDEX("`time.units`", " ")
@@ -331,7 +356,7 @@ ELSE  ! more than 1 station
 ! and to label the z axes.
       
       DEFINE VIEW/AXES/XLIM=`vxlo`:`vxhi`/YLIM=0.002:`vyhi` tv
-      IF `($data_count) GT 1` THEN  DEFINE VIEW/AXES/XLIM=`vxlo`:`vxhi_g`/YLIM=`vylo`:`vyhi` tv
+      IF `($data_count) GT 1` THEN  DEFINE VIEW/AXES/TEXT=0.85/XLIM=`vxlo`:`vxhi_g`/YLIM=`vylo`:`vyhi` tv
       SET VIEW tv 
 
 ! Define variables for consistent vertical axes for all the time series
@@ -359,8 +384,8 @@ ELSE  ! more than 1 station
 
       REPEAT/RANGE=1:`nstations`/NAME=s (\
                                 DEFINE SYMBOL s = `s`;\
-                                DEFINE VIEW/axes/xlim=`vxlo`:`vxhi`/ylim=`y1`:`y2` vp_`s`;\
-                                DEFINE VIEW/axes/xlim=`vxlo`:`vxhi_g`/ylim=`y1`:`y2` vp_`s`_g;\
+                                DEFINE VIEW/AXES/TEXT=0.85/xlim=`vxlo`:`vxhi`/ylim=`y1`:`y2` vp_`s`;\
+                                DEFINE VIEW/AXES/TEXT=0.85/xlim=`vxlo`:`vxhi_g`/ylim=`y1`:`y2` vp_`s`_g;\
    			     DEFINE SYMBOL y1_($s) = `y1`;\
    			     DEFINE SYMBOL y2_($s) = `y2`;\
    			     LET y1 = `y1 - del`; LET y2 = `y2 - del`)
@@ -447,13 +472,13 @@ ELSE  ! more than 1 station
          NPOINTS=`ntt`/UNITS=seconds/T0="`time.time_origin`" taxis;\
          LET tempx = var2d_0[m=($s)];\
          LET colrx = id2d[m=($s)];\
+         DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
          IF `tempx[($cshp)=@ngd] eq 0` then exit/cycle;\
          LET tt = t[gt=taxis];\
          LET have_dat = 1;\
          LET var_t = reshape(tempx, tt);\
          LET colort = reshape(colrx, tt) - 0.1;\
          PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) var_t,colort;\
-         DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
 	 )
 		 
 	 LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
@@ -475,6 +500,7 @@ ELSE  ! more than 1 station
    ENDIF ! nstations LE max_separate_stations
 
 ENDIF ! IF `nstations EQ 1`  ELSE ...
+pause
 
 ! for the results script
 DEFINE SYMBOL ferret_plot_var = vart

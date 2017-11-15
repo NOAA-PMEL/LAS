@@ -4,9 +4,10 @@
 ! $Author: ansley $
 ! $Date: 11-Jan-2008
 ! 7/2010    ACM updates for V7.2 multi-variable plots
-! 10/2017 Find direction variables based on attributes not just var name
 ! 11/2017 Plot the missing data first, as a gray underlay, then the good data
 !         previously the underlay plotted all the data.
+! 11/2017 back off finding direction variables based on attributes for now
+
 
 ! prop_prop_plot.jnl creates a property-property plot, using the 
 ! data variable in symbol data_0_var and the second variable from
@@ -66,6 +67,19 @@ IF ($error_string"0|*>1") THEN
    EXIT/PROGRAM
 ENDIF
 
+! Open the window, apply size, scale options
+
+! dont want to set the aspect ratio using xy region, so reset
+! ferret_view temporarily.
+DEFINE SYMBOL viewsave = ($ferret_view)
+DEFINE SYMBOL ferret_view = aa  
+
+IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 0.8
+IF ($ferret_plot_var_0"|time>1|*>0") THEN DEFINE SYMBOL win_aspect = 0.3
+GO LAS_open_window
+
+DEFINE SYMBOL ferret_view = ($viewsave)
+IF `STRLEN("($ferret_view)") EQ 1` THEN DEFINE SYMBOL ferret_view = xy
 
 ! Build up the plot qualifiers
 IF ($ferret_use_graticules"0|0|*>1) THEN
@@ -83,8 +97,6 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-DEFINE SYMBOL under_mask = 1./0.
-DEFINE SYMBOL plot_arg_under = under_mask *($xvar), under_mask *($yvar)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
@@ -116,41 +128,11 @@ LET q = ($yvar)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 
-! Check for lon,lat,time using attributes
-
-GO LAS_var_lon_lat_time ($ferret_prop_var)
-DEFINE SYMBOL prop_lon = ($var_is_lon)
-DEFINE SYMBOL prop_lat = ($var_is_lat)
-DEFINE SYMBOL prop_time = ($var_is_time)
-
-GO LAS_var_lon_lat_time ($ferret_plot_var)
-DEFINE SYMBOL plot_lon = ($var_is_lon)
-DEFINE SYMBOL plot_lat = ($var_is_lat)
-DEFINE SYMBOL plot_time = ($var_is_time)
-
-! Open the window, apply size, scale options
-
-! dont want to set the aspect ratio using xy region, so reset
-! ferret_view temporarily.
-DEFINE SYMBOL viewsave = ($ferret_view)
-DEFINE SYMBOL ferret_view = aa  
-
-! This will be reset if its a map plot 
-DEFINE SYMBOL win_aspect = 0.9
-
-! or if its a time plot a wider aspect ratio
-IF `($prop_time) AND ($ferret_thumb"0|0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 0.3
-
-GO LAS_open_window
-
-DEFINE SYMBOL ferret_view = ($viewsave)
-IF `STRLEN("($ferret_view)") EQ 1` THEN DEFINE SYMBOL ferret_view = xy
-
 ! For thumbnail plots, and if it's a lon-lat map, things are much simpler.
 ! Just draw the map plot and save the result.
 
-define symbol qualifiers = ($qualifiers)/noyadjust
-IF `($ferret_thumb"0|0|*>1") AND ($plot_lat) AND ($prop_lon)` THEN
+IF `($ferret_thumb"0|0|*>1") AND \
+ ($ferret_plot_var"0|latitude>1|*>0") AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
 
    DEFINE SYMBOL lonlatcolor = RED
    GO prop_prop_map_thumb
@@ -202,9 +184,6 @@ IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@
 IF ($ribbon"0") THEN DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 IF `($data_count"0") GT 2` THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
-   LET ulmask = if ($zvar) THEN  1 ELSE 0
-   LET under_mask = IF ulmask LT 1 THEN  1
-   DEFINE SYMBOL plot_arg_under = under_mask*($xvar), under_mask*($yvar)
    LET compute_good =  ($xvar)* ($yvar)* ($zvar)
    IF `($ngood_data"-10|*>1") LT 0` THEN DEFINE SYMBOL ngood_data = `compute_good[i=@ngd]`
    IF `($nbad_data"-10|*>1") LT 0` THEN DEFINE SYMBOL nbad_data = `compute_good[i=@nbd]`
@@ -328,9 +307,6 @@ ELSE
 	    IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
 	    LET y_plot_var = ($yvar)
 	    DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
-	    LET ulmask = if ($data_var)* constraints_mask_var THEN  1 ELSE 0
-	    LET under_mask = IF ulmask LT 1 THEN 1
-	    DEFINE SYMBOL plot_arg_under = under_mask* x_plot_var, under_mask* y_plot_var
 	 ENDIF
 
          LET pvar = ($data_x_var)
@@ -380,10 +356,6 @@ ELSE
 	  IF ($lon_units"0|*>1") THEN LET/units=($lon_units) x_plot_var = ($xvar)
 		  LET y_plot_var = ($yvar)
 	  DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, ($data_var)* constraints_mask_var
-	  LET datavar_to_mask = ($data_var)* constraints_mask_var
-	  LET ulmask = IF datavar_to_mask THEN  1 ELSE 0
-	  LET under_mask = IF ulmask LT 1 THEN  1
-	  DEFINE SYMBOL plot_arg_under = under_mask* ($data_x_var), under_mask* ($data_x_var)
       ENDIF
 
    ENDIF   ! IF ($color_by)
@@ -396,9 +368,8 @@ ELSE
 ! on lat/lon plots, draw a gray line on the cruise tracks.
    IF `($connect_dots"0|0|1|*>1")` THEN PLOT/NOAX/VS/OVER/LINE=6/DASH=(0.1,0.04,0.1,0.04)/NOLAB  x_plot_var, y_plot_var
 
-! Show locations where the color-by variable is missing...
-
-   IF `($data_count"0") GT 2` THEN ($underlay_command) ($plot_arg_under)
+! ?? show locations where the color-by variable is missing...
+   IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var
 
    DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/SET
    DEFINE SYMBOL poly_command POLYGON($qualifiers)
