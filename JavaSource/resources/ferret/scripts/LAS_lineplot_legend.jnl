@@ -36,7 +36,7 @@ REPEAT/range=1:`legend_count`/NAME=m (; \
    DEFINE SYMBOL lnum = `m-1` ; \
    LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
    GO LAS_legend_line \
-   `xpos-0.2` 0.3 `ypos` `-1*($m)` `titlesiz` "($ferret_title_($lnum))" "($legend_qual)" ($use_palette);\   
+   `xpos-0.2` 0.3 `ypos` `-1*($m)` `titlesiz` "($ferret_title_($lnum)%($lnum)%)" "($legend_qual)" ($use_palette);\   
    )
 
 ELSE
@@ -45,7 +45,7 @@ REPEAT/range=1:`legend_count`/NAME=m (; \
    DEFINE SYMBOL lnum = `m-1` ; \
    LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
    GO LAS_legend_line \
-   `xpos-0.2` 0.3 `ypos` `m + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
+   `xpos-0.2` 0.3 `ypos` `m + ($nlinecolors)*($thicknum)` `titlesiz` "($ferret_title_($lnum)%($lnum)%)" ($legend_qual);\   
    )
 ENDIF
 
