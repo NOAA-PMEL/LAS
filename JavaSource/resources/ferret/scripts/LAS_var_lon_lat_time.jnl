@@ -6,6 +6,8 @@
 ! Argument is a variable name
 ! Defines symbols var_is_lon, var_is_lat, var_is_time with values of 0 or 1.
 
+cancel symbol var_is_lon, var_is_lat, var_is_time
+
 DEFINE SYMBOL invarname = ($1)
 LET invarname = ($1)
 

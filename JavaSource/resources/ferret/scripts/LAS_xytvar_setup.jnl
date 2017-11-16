@@ -6,7 +6,8 @@
 ! 10/2017 Writing a note when data selection results in no data
 !         Here, if we already make such a note, xx var is all-missing,
 !         set a symbol to skip the new annotation.
-! 11/2017 back off finding direction variables based on attributes for now
+! 11/2017 find direction variables based on attributes instead of assuming
+!         longitude, latitude, and time are variable names
 
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -40,9 +41,21 @@ DEFINE SYMBOL propunits = none`($ferret_prop_var),return=units`
 DEFINE SYMBOL plotunits = none`($ferret_plot_var),return=units`
 IF `STRLEN("($propunits)") GT 4` THEN DEFINE SYMBOL propunits = `($ferret_prop_var),return=units`
 IF `STRLEN("($plotunits)") GT 4` THEN DEFINE SYMBOL plotunits = `($ferret_plot_var),return=units`
-
 LET itsa_lon_prop = `STRINDEX("($propunits)", "east") GT 0 OR STRINDEX("($data_0_units)", "east") GT 0`
 LET itsa_lat_plot = `STRINDEX("($plotunits)", "north") GT 0 OR STRINDEX("($data_1_units)", "north") GT 0` 
+
+GO LAS_var_lon_lat_time ($ferret_prop_var)
+
+LET itsa_lon_prop = ($var_is_lon"0")
+LET itsa_lat_prop = ($var_is_lat"0")
+LET itsa_tim_prop = ($var_is_time"0")
+
+GO LAS_var_lon_lat_time ($ferret_plot_var)
+
+LET itsa_lon_plot = ($var_is_lon"0")
+LET itsa_lat_plot = ($var_is_lat"0")
+LET itsa_tim_plot = ($var_is_time"0")
+
 
 IF `itsa_lon_prop + itsa_lat_plot EQ 2` THEN 
    DEFINE SYMBOL connect_dots = 1
@@ -56,22 +69,25 @@ CANCEL SYMBOL set_window_quals
 
 IF ($variable_0_lab"0|*>1") THEN 
    DEFINE SYMBOL ax_label_x PPL XLAB @AC($variable_0_lab)
-   IF ($ferret_prop_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_x
-   IF ($ferret_prop_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_x
-   IF ($ferret_prop_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_x
+   IF `itsa_tim_prop OR itsa_lon_prop OR itsa_lat_prop`  THEN CANCEL SYMBOL ax_label_x
 ENDIF
+
 IF ($variable_1_lab"0|*>1") THEN 
    DEFINE SYMBOL ax_label_y PPL YLAB @AC($variable_1_lab)
-   IF ($ferret_plot_var"0|time>1|*>0") THEN CANCEL SYMBOL ax_label_y
-   IF ($ferret_plot_var"0|longitude>1|*>0") THEN CANCEL SYMBOL ax_label_y
-   IF ($ferret_plot_var"0|latitude>1|*>0")  THEN CANCEL SYMBOL ax_label_y
+   IF `itsa_tim_plot OR itsa_lon_plot OR itsa_lat_plot` THEN  CANCEL SYMBOL ax_label_y
 ENDIF
+
 
 ! If the axis labels are long, make the text size smaller
 LET labfac = 1.
 if `(labwid("($ax_label_x)", 0.12) / ($ppl$xlen)) GT 1` THEN LET labfac = ($ppl$xlen)/labwid("($ax_label_x)",0.12)
 if `(labwid("($ax_label_y)", 0.12) / ($ppl$ylen)) GT 1` THEN LET labfac = MIN(`labfac`,`($ppl$ylen)/labwid("($ax_label_y)",0.12)`)
 IF `labfac LT 1 AND labfac GT 0.06` THEN DEFINE SYMBOL ax_label_resize PPL LABSET,,`0.12*labfac`,`0.12*labfac`
+
+! Do not label axes with the words LONGITUDE, LATITUDE
+IF `itsa_lon_prop OR itsa_lat_prop`  THEN DEFINE SYMBOL ax_label_x = ppl xlab
+IF `itsa_lon_plot OR itsa_lat_plot` THEN DEFINE SYMBOL ax_label_y = ppl ylab
+
 
 ! size for the label that says a variable is all-missing
 DEFINE SYMBOL miss_lab_siz = 0.14
@@ -95,27 +111,19 @@ IF ($ferret_thumb"0|0|*>1") THEN
 
 ENDIF
 
-! Do not label axes with the words LONGITUDE, LATITUDE
-IF ($ferret_prop_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_x = ppl xlab
-IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL ax_label_y = ppl ylab
-IF ($ferret_prop_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_x = ppl xlab
-IF ($ferret_plot_var"0|latitude>1|*>0")  THEN DEFINE SYMBOL ax_label_y = ppl ylab
 
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
 
-IF ($ferret_prop_var"0|time>1|TIME>1|*>0") THEN 
+IF `itsa_tim_prop` THEN 
 ! Open the window and set aspect ratio
    DEFINE SYMBOL win_asp = /ASPECT=0.75
    DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
 ENDIF
 
-
-IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0 ` THEN
-IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN 
+IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
    DEFINE SYMBOL win_asp = /ASPECT=1.5
    DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
-ENDIF
 ENDIF
 
 DEFINE VIEWPORT/XLIM=0:1/YLIM=0:1 vfull1
@@ -166,11 +174,10 @@ let q_var = q + pqmask
 ! Do this first, as the constraints are based on lon in 0-360. Then the
 ! constrained variable will be correct. (This fixes ticket 1623).
 
-IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN 
+IF `itsa_lon_prop` THEN 
 
    DEFINE SYMBOL is_lon = 1
-
-   DEFINE SYMBOL lon_units = `longitude,RETURN=units`
+   DEFINE SYMBOL lon_units = `($ferret_prop_var),RETURN=units`
 
 ! Get min and max longitudes and create a LON axis.
 ! All this lon360 stuff is to deal with cases where longitude data is on 
@@ -198,7 +205,7 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
    IF `IS_ELEMENT_OF_STR(varnames, "lon360") GT 0` THEN
       LET/UNITS="($lon_units)" xvar_360 = lon360
    ELSE
-      LET/UNITS="($lon_units)" xvar_360 = IF longitude LT 0 THEN longitude+360 ELSE longitude
+      LET/UNITS="($lon_units)" xvar_360 = IF ($ferret_prop_var) LT 0 THEN ($ferret_prop_var)+360 ELSE ($ferret_prop_var)
    ENDIF
    
    LET amin360 = xvar_360[i=@MIN]
@@ -220,10 +227,10 @@ IF `($ferret_prop_var"0|longitude>1|*>0") OR ($is_lon_prop"0|0|1|*>0")` THEN
       IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
          LET xvar = xvar_360
          DEFINE SYMBOL pvar_reset = xvar_360
-	 SET VAR/NAME=longitude_in longitude
-	 LET/UNITS="($lon_units)"/d=1 longitude = IF longitude_in LT 0 THEN longitude_in+360 ELSE longitude_in
-	 CANCEL SYMBOL pvar_reset
-	 LET/UNITS="($lon_units)" xvar_360 = longitude
+         SET VAR/NAME=($ferret_prop_var)_in ($ferret_prop_var)
+         LET/UNITS="($lon_units)"/d=1 ($ferret_prop_var) = IF ($ferret_prop_var)_in LT 0 THEN ($ferret_prop_var)_in+360 ELSE ($ferret_prop_var)_in
+         CANCEL SYMBOL pvar_reset
+         LET/UNITS="($lon_units)" xvar_360 = ($ferret_prop_var)
          LET ax_lo = p_var[i=@MIN]
          LET ax_hi = p_var[i=@MAX] 
          LET ax_lo = `ax_lo360`
@@ -294,9 +301,7 @@ ENDIF
 LET amin = p_var[i=@MIN]
 LET amax = p_var[i=@MAX]
 
-DEFINE SYMBOL is_time = ($ferret_prop_var"0|time>1|TIME>1|*>0") 
-IF ($is_time_prop"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
-
+IF `itsa_tim_prop` THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
@@ -309,8 +314,7 @@ LET dep_var1 = x[gx=haxis1]; sh var dep_var1
 
 LET amin = q_var[i=@MIN]
 LET amax = q_var[i=@MAX]
-DEFINE SYMBOL is_time = ($ferret_plot_var"0|time>1|TIME>1|*>0")
-IF ($is_time_plot"0|0|1|*>0") THEN DEFINE SYMBOL is_time = 1
+DEFINE SYMBOL is_time = `itsa_tim_plot`
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
@@ -324,11 +328,9 @@ LET indep_var1 = y[gy=vaxis1]
 ! See if the independent axis is longitude, latitude, or time
 ! If so redefine those axes
 
-IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN 
+IF `itsa_lat_prop` THEN 
 
-   DEFINE SYMBOL is_lat = 1
-
-! Get min and max longitudes and create a LAT axis.
+! Get min and max latitudes and create a LAT axis.
 
    LET amin = p_var[i=@MIN]
    LET amax = p_var[i=@MAX]
@@ -360,7 +362,7 @@ IF `($ferret_prop_var"0|latitude>1|*>0")  OR ($is_lat_prop"0|0|1|*>0")` THEN
 
 ENDIF
 
-IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN 
+IF `itsa_tim_prop` THEN 
 
 ! Get min and max times and create a time axis.
 ! use the result of LAS_is_range to determine the delta,
@@ -428,7 +430,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    IF ($haxis2k_defined"0|1") THEN LET dep_var2k = 0*t[gt=haxis2k]
 
    ! A time-lon plot would normally plot with time on the vertical
-   IF ($ferret_plot_var"0|longitude>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
+   IF `itsa_lon_plot` THEN DEFINE SYMBOL pqual = /TRANS 
 
    DEFINE SYMBOL connect_dots = 1
    DEFINE SYMBOL do_rsquare = 0
@@ -440,8 +442,7 @@ ENDIF
 ! See if the independent axis is longitude, latitude, or time
 ! If so redefine those axes
 
-IF `($ferret_prop_var"0|longitude>1|*>0") EQ 0` THEN 
-IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
+IF `itsa_lon_prop EQ 0 AND itsa_lon_plot` THEN 
 
    DEFINE SYMBOL is_lon = 1
 
@@ -464,7 +465,7 @@ IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN
 
    ! Then we need to redefine the other variable to have a y axis
 
-   IF `( ($ferret_prop_var"0|time>1|TIME>1|*>0") + ($ferret_prop_var"0|latitude>1|*>0") ) EQ 0` THEN 
+   IF `( itsa_tim_prop + itsa_lat_prop ) EQ 0` THEN 
       LET amin = p_var[i=@MIN]
       LET amax = p_var[i=@MAX]
       GO LAS_is_range amin amax
@@ -478,15 +479,11 @@ IF `($ferret_plot_var"0|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN
       DEFINE SYMBOL do_rsquare = 0
    ENDIF
 
-   IF ($ferret_plot_var"0|Longitude>1|*>0") THEN DEFINE SYMBOL do_rsquare = 0
+   DEFINE SYMBOL do_rsquare = 0
 
 ENDIF
-ENDIF
 
-IF `($ferret_prop_var"0|latitude>1|*>0") EQ 0` THEN 
-IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN 
-
-   DEFINE SYMBOL is_lat = 1
+IF `itsa_lat_prop EQ 0 AND itsa_lat_plot` THEN 
 
 ! Get min and max latitudes and create a LAT axis.
 ! Draw a blank plot to put formatted axis on the plot.
@@ -509,12 +506,9 @@ IF `($ferret_plot_var"0|latitude>1|*>0") OR ($is_lat_plot"0|0|1|*>0")` THEN
    CANCEL SYMBOL data_units
    CANCEL SYMBOL ferret_title_1  ! dont need a vertical axis label
    
-   IF ($ferret_plot_var"0|Latitude>1|*>0") THEN 
-      DEFINE SYMBOL do_rsquare = 0
-      DEFINE SYMBOL connect_dots = 1
-   ENDIF
+   DEFINE SYMBOL do_rsquare = 0
+   DEFINE SYMBOL connect_dots = 1
 
-ENDIF
 ENDIF
 
 ! Depth axis in vertical direction
@@ -534,8 +528,7 @@ IF ($reverse_vert"0") THEN
 
 ENDIF
 
-IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
-IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
+IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
 
 ! Get min and max times and create a time axis.
 ! Draw a blank plot to put formatted axis on the plot.
@@ -581,12 +574,11 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
    ENDIF
 
    LET indep_var = 0*t[gt=vaxis]
-   IF ($ferret_prop_var"0|latitude>1|*>0") THEN DEFINE SYMBOL pqual = /TRANS 
+   IF `itsa_lat_prop` THEN DEFINE SYMBOL pqual = /TRANS 
 
    DEFINE SYMBOL connect_dots = 1
    DEFINE SYMBOL do_rsquare = 0
 
-ENDIF
 ENDIF
 
 DEFINE SYMBOL axes_already_defined = 1
@@ -706,7 +698,7 @@ IF ($put_label"0|*>1") THEN
 ENDIF
 
 ! For time series, do a plot of the original variables to set the axis symbols
-IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
+IF `itsa_tim_prop` THEN
    SET VIEW ($view2)
    LET bvar = dep_var1 + indep_var1
    IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
@@ -716,23 +708,21 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
    EXIT/SCRIPT
 ENDIF
 
-IF `($ferret_prop_var"0|time>1|TIME>1|*>0") EQ 0` THEN
-   IF `($ferret_plot_var"0|time>1|TIME>1|hours_1970>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN 
-      SET VIEW ($view2)
-      LET bvar = dep_var1 + indep_var1
-      IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
-      LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
-      SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
-      SET MODE/LAST nodata_lab
+IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
+   SET VIEW ($view2)
+   LET bvar = dep_var1 + indep_var1
+   IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
+   LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
+   SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
+   SET MODE/LAST nodata_lab
 
-      EXIT/SCRIPT
-   ENDIF
+   EXIT/SCRIPT
 ENDIF
 
 ! For latitudes, do a plot of the original variables to set the axis symbols
 
-IF `($ferret_prop_var"0|latitude>1|*>0") OR ($is_lat_prop"0|0|1|*>0")` THEN
-   IF `($ferret_plot_var"|longitude>1|*>0") OR ($is_lon_plot"0|0|1|*>0")` THEN 
+IF `itsa_lat_prop` THEN
+   IF `itsa_lon_plot` THEN 
       SET MODE/LAST nodata_lab
       EXIT/SCRIPT
    ENDIF
@@ -747,8 +737,8 @@ ENDIF
 ! done on a map, but with light gray.
 ! Only if longitude is on the horizontal axis
 
-IF `($is_lon"0|1>1") + ($is_lat"0|1>1") EQ 2 AND ($ferret_prop_var"0|longitude>1|*>0")` THEN
-   DEFINE SYMBOL basemap_area = `( (($xaxis_max)-($xaxis_min)) * (($yaxis_max)-($yaxis_min)) )/ (360 * 180)`
+IF `itsa_lon_prop AND itsa_lat_plot` THEN
+
    DEFINE SYMBOL region_x_lo = ($ppl$xmin)
    DEFINE SYMBOL region_x_hi = ($ppl$xmax)
    DEFINE SYMBOL land_palette = gray_light
