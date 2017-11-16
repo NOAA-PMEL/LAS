@@ -6,6 +6,7 @@
 !  xvp_lo, xvp_hi, yvp_lo, yvp_hi
 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
+! 11/2017 *acm* Dont label plots with units of "units" or "none"
 
 set mode ver:always
 
@@ -155,7 +156,8 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
    DEFINE SYMBOL qualifiers_g($vm) = /HLIM=($ppl$range_low):($ppl$range_high);\
    IF `($vm) GT 0` THEN;\
       PLOT/AXES=1,0,0,0($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
-      LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen) + 0.35`, 0, 0, 0.12, @AC($group_label_($vm));\
+      LET do_lab = ($group_label_($vm)"0|NONE>0|none>0|units>0|*>1");\
+      IF `do_lab` THEN LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen) + 0.35`, 0, 0, 0.12, @AC($group_label_($vm));\
       LET yvlv = `yvlv + margin_del`;\
    ENDIF;\
    )
@@ -174,7 +176,9 @@ SET VIEW v0_v($vpname)($vm)
 IF ($ferret_view"1|t>0|*>1") THEN SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
 
 PLOT($qualifiers)($qualifiers_0)($qualifiers_g($vm))($axqual)/COLOR=($leg_color($vm))/NOLAB ($ferret_plot_var_($vm))
-LABEL/NOUSER `($ppl$xlen)/2`, `-0.35`, 0, 0, 0.12, @AC($group_label_($vm))
+
+LET do_lab = ($group_label_($vm)"0|NONE>0|none>0|units>0|*>1")
+IF `do_lab` THEN LABEL/NOUSER `($ppl$xlen)/2`, `-0.35`, 0, 0, 0.12, @AC($group_label_($vm))
 
 REPEAT/RANGE=2:($data_count)/name=m (\
    DEFINE SYMBOL vm = `m-1`;\

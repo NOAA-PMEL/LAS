@@ -7,6 +7,7 @@
 ! 12/2016 fixes for case when first variable is all-missing
 !  8/2017 *acm* Account for change to expndi_by_m_function
 ! 11/2017 *acm* Handle timeseries data returned with just one point
+! 11/2017 *acm* Dont label plots with units of "units" or "none"
 
 ! Plot sets of time series from a Discrete Sampling Geometries timeseries dataset
 !
@@ -481,7 +482,7 @@ ELSE  ! more than 1 station
          PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) var_t,colort;\
 	 )
 		 
-	 LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
+	 IF ($units_0"0|units>0|none>0|NONE>0|*>1") THEN LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
 
 	 IF `nstations LE max_labeled_stations` THEN\
 	  GO LAS_lineplot_legend `nstations` ($ferret_palette) 
