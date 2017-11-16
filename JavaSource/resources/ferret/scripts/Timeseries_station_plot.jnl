@@ -500,7 +500,6 @@ ELSE  ! more than 1 station
    ENDIF ! nstations LE max_separate_stations
 
 ENDIF ! IF `nstations EQ 1`  ELSE ...
-pause
 
 ! for the results script
 DEFINE SYMBOL ferret_plot_var = vart
