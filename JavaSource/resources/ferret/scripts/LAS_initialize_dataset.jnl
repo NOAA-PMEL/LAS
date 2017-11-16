@@ -217,11 +217,7 @@ ENDIF
 ! Check for single quotes and remove them. They are
 ! not needed on units strings
 
-LET inquote = `STRINDEX("($data_($num)_units)", "'")`
-IF `inquote GT 0` THEN
-   let slen = `STRLEN("($data_($num)_units)")`
-   DEFINE SYMBOL data_($num)_units = `SUBSTRING("($data_($num)_units)", 2, slen-2)`
-ENDIF
+GO LAS_unquote_string lhs data_($num)_units
 
 IF ($data_units"0|*>1") THEN 
    DEFINE SYMBOL data_units (($data_($num)_units))
@@ -235,7 +231,11 @@ ELSE
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_var)
 ENDIF
 
+! Remove any quotes surrounding data_title string
+GO LAS_unquote_string data_title
+
 IF `($num) GT 0` THEN DEFINE SYMBOL variable_($num)_lab = ($data_title)
+
 IF ($data_units"0|*>1") THEN 
    DEFINE SYMBOL units_lab = ($data_units)
    IF `($num) GT 0` THEN DEFINE SYMBOL units_($num)_lab = ($data_units)
@@ -255,14 +255,6 @@ IF `($ulen) LE 2` THEN
     IF  `($isquote1%0|"">1|*>0%) OR ($isquote2%0|"">1|*>0%)` THEN \
       DEFINE SYMBOL units_double_quotes = 1
 ENDIF
-
-IF `($units_double_quotes"0|*>1") EQ 0` THEN 
-   LET ulen = STRLEN ("($data_($num)_units)")
-   IF `(STRINDEX("($data_($num)_units)", "'") EQ 1) AND \
-    (STRRINDEX("($data_($num)_units)", "'") EQ ulen)` THEN \
-      DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
-ENDIF
-
 
 IF ($fer_last_error"0|0|1|*>1") THEN
   DEFINE SYMBOL error_status = ERROR

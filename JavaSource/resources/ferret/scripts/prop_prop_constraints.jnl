@@ -32,28 +32,38 @@ IF ($shape0"0|*>1") THEN
    IF `STRLEN("($shape0)") GT 1` THEN DEFINE SYMBOL apply_region = 1
 ENDIF
 
+! Define mask based on constraints. Check for variable constraints on 
+! a quoted variable e.g. 'K'
+
 REPEAT/RANGE=0:100/NAME=ic (\
   DEF SYM ic = `ic`;\
   IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
   DEF SYM cvar = ($constraint_($ic)_lhs);\
-  LET has_var = `(IS_ELEMENT_OF_STR_N(vnames, "($cvar)") GT 0) OR (IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0)`;\
+  DEF SYM cvarnq = ($constraint_($ic)_lhs);\
+  GO LAS_unquote_string cvarnq;\
+  LET has_var = `(IS_ELEMENT_OF_STR_N(vnames, "($cvarnq)") GT 0) OR (IS_ELEMENT_OF_STR_N(vnames, "($cvarnq)_") GT 0)`;\
   IF `has_var EQ 0` THEN EXIT/CYCLE;\
   IF `IS_ELEMENT_OF_STR_N(vnames, "($cvar)_") GT 0` THEN DEF SYM cvar = ($cvar)_;\
   IF `($constraint_($ic)_type"0|variable>1|*>0") EQ 0` THEN EXIT/CYCLE;\
   LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1; \
   LET nc = `($cvar),RETURN=isize`;\
-  IF `(nc NE npts) AND ($rowvar"0|*>1")` THEN DEFINE SYMBOL cvar = SEPARATE(($cvar), ($rowvar), 0); \
+  IF `(nc NE npts) AND ($rowvar"0|*>1")` THEN DEF SYM cvar = SEPARATE(($cvar), ($rowvar), 0); \
   LET var_mask_($ic) = IF ($cvar) ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1; \
   IF ($apply_region) THEN LET var_mask_($ic) = IF ($cvar)[($region_full)] ($constraint_($ic)_op) ($constraint_($ic)_rhs) THEN 1;\
   IF ($constraint_($ic)_rhs"0|NaN>1|*>0") THEN LET var_mask_($ic) = IF ($cvar) THEN 1;\
   LET nmaskx = `nmaskx+1`;\
-  IF `nmaskx GT 1` THEN DEFINE SYMBOL var_mask = ($var_mask)* var_mask_($ic) ;\
+  IF `nmaskx GT 1` THEN DEF SYM var_mask = ($var_mask)* var_mask_($ic) ;\
+  )
+  
+REPEAT/RANGE=0:100/NAME=ic (\
+  DEF SYM ic = `ic`;\
+  IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
   LET reset_lon = `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_rhs"0|NaN>0|*") GT 180 AND ($its_listing"0")` ;\
-  IF `reset_lon` THEN DEFINE SYMBOL constraint_($ic)_rhs = `($constraint_($ic)_rhs)-360` ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_lon_min = ($constraint_($ic)_rhs) ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_lon_max = ($constraint_($ic)_rhs) ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEFINE SYMBOL constr_tim_min = ($constraint_($ic)_rhs) ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEFINE SYMBOL constr_tim_max = ($constraint_($ic)_rhs) ;\
+  IF `reset_lon` THEN DEF SYM constraint_($ic)_rhs = `($constraint_($ic)_rhs)-360` ;\
+  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEF SYM constr_lon_min = ($constraint_($ic)_rhs) ;\
+  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEF SYM constr_lon_max = ($constraint_($ic)_rhs) ;\
+  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEF SYM constr_tim_min = ($constraint_($ic)_rhs) ;\
+  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEF SYM constr_tim_max = ($constraint_($ic)_rhs) ;\
   )
  
 ! Subsequent script expects constr_lon_max to be defined if constr_lon_min is, and 

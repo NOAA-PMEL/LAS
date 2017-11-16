@@ -1,0 +1,14 @@
+! LAS_unquote_string
+! Remove surrounding single-quotes from a string, e.g. 
+! a variable name 'K'
+
+! If the string had quotes, it is redefined
+
+! If the symbol is not defined, just exit
+IF `STRCMP("($($1)%AAA|*%)", "AAA") EQ 0` THEN EXIT/SCRIPT
+
+! Check for surrounding quotes
+IF `STRINDEX("($($1))", "'") EQ 1` THEN
+  LET nc = STRLEN("($($1))") - 2
+  DEFINE SYMBOL ($1) = `SUBSTRING("($($1))", 2, nc)`
+ENDIF

@@ -17,6 +17,9 @@ LET vnames = ..varnames
 
 ! Initialize
 
+
+GO LAS_unquote_string data_0_title
+
 LET data_0_title = "($data_0_title)"
 LET data_0_units = " (($data_0_units))"
 
@@ -25,6 +28,7 @@ IF ($data_0_units"0|none>1|text>1|*>0") THEN LET data_0_units = ""
 DEFINE SYMBOL data_0_var_in = ($data_0_var)
 
 IF `($data_count"0") GE 2` THEN 
+   GO LAS_unquote_string data_1_title
    LET data_1_title = "($data_1_title)"
    LET data_1_units = " (($data_1_units))"
    IF ($data_1_units"0|none>1|text>1|*>0") THEN LET data_1_units = ""
@@ -32,6 +36,7 @@ IF `($data_count"0") GE 2` THEN
 ENDIF
 
 IF `($data_count"0") GE 3` THEN 
+   GO LAS_unquote_string data_2_title
    LET data_2_title = "($data_2_title)"
    LET data_2_units = ""
    IF ($data_2_units"0|text>0|none>0|*>1") THEN LET data_2_units = " (($data_2_units))"
@@ -42,6 +47,7 @@ IF `($data_count"0") GE 4` THEN
 
    REPEAT/RANGE=3:`($data_count)-1`/NAME=c (\
       DEFINE SYMBOL list_var = `c`; \
+      GO LAS_unquote_string ($data_($list_var)_title);\
       LET data_($list_var)_title = "($data_($list_var)_title)"; \
       LET data_($list_var)_units = ""; \
       IF ($data_($list_var)_units"0|text>0|none>0|*>1") THEN LET data_($list_var)_units = " (($data_($list_var)_units))"; \

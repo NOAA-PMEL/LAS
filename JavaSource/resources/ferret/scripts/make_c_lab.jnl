@@ -10,6 +10,9 @@
 ! Is it where the data-var is not NaN? If so then don't try to make
 ! black sysmbols at missing-values, and no need for (0 missing) on labels
 
+! Remove single-quotes from around a variable title thats 
+! quoted because its a reserved name
+
 IF ($rhs_quoted) THEN 
    DEFINE SYMBOL ($lhs)_quoted = 1
    DEFINE SYMBOL rhs = ($lhs)_($v)_is_quoted
@@ -19,6 +22,9 @@ IF `($rhs"|NaN>1|*>0")+($op"|NE>1|*>0") EQ 2` THEN
    IF `($lhs"|($data_0_ID)>1|*>0")` THEN DEF SYM has_missing = 0
    DEFINE SYMBOL provisional_title = Where ($lhs) is valid  ! save this
 ENDIF
+
+! is lhs a variable in single quotes
+GO LAS_unquote_string lhs
 
 DEFINE SYMBOL translate_math = 1
 IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
