@@ -8,6 +8,7 @@
 !  4/3/2017 *acm* Additions for point data types
 !   10/2017 *acm* Make a time-labeled color key for time variables not named "time".
 !   10/2017 *acm* Set up color variable in a more consistent way
+!   11/2017 *acm* Remove any quotes from around variable title and units
 
 DEFINE SYMBOL num ($1"0")
 
@@ -20,12 +21,17 @@ IF `($data_($num)_dataset_id"0|*>1") EQ 0` THEN DEFINE SYMBOL data_($num)_datase
 
 IF ($data_($num)_var"0|1|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
 IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+! Remove any quotes surrounding data_title string
+GO LAS_unquote_string data_title
+
 
 IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
 IF ($data_($num)_units"0|1|text>0|none>0|*>1") THEN 
    DEFINE SYMBOL data_units ($data_($num)_units)
+   ! Remove any quotes surrounding data_title string
+   GO LAS_unquote_string data_unitss
 ELSE 
    CANCEL SYMBOL data_($num)_units
 ENDIF
