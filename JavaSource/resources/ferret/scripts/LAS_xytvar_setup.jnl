@@ -559,7 +559,7 @@ IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN
 	 LET ax_lo = `ax_lo - 7200,prec=15`
 	 LET del_ax = 30
       ENDIF
-      DEFINE AXIS/T=`ax_lo,prec=15`:`ax_hi,prec=15`:/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
+      DEFINE AXIS/T=`ax_lo,prec=15`:`ax_hi,prec=15`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
       DEFINE SYMBOL timeaxis = vaxis
       DEFINE AXIS/Y=`ax_lo`:`ax_hi`:`del_ax` vaxis1
       LET tt = t[gt=vaxis]
