@@ -44,12 +44,12 @@ EOF
     exit 1;
 }
 
-# If pyferret, check for FER_LIBS, PYTHONPATH and LD_LIBRARY_PATH
+# If pyferret, check for FER_DIR, PYTHONPATH and LD_LIBRARY_PATH
 if ( $ferrettype eq "pyferret" ) {
-    if (! $ENV{FER_LIBS} ){
+    if (! $ENV{FER_DIR} ){
     print <<EOF; 
   Your PYFERRET environment has not been properly set up.
-  (The environment variable FER_LIBS is not defined)
+  (The environment variable FER_DIR is not defined)
 
   Have you executed "source your_system_path/pyferret_paths" ?
   You need to do this before configuring LAS.
@@ -88,7 +88,7 @@ if ( $ferrettype eq "ferret" ) {
                  FER_GO FER_FONTS PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF);
 } else {
 @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
-                 FER_GO FER_FONTS PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF LD_LIBRARY_PATH FER_LIBS PYTHONPATH);
+                 FER_GO FER_FONTS PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF LD_LIBRARY_PATH PYTHONPATH);
 }
 
 #
@@ -882,7 +882,7 @@ sub printENV($ferretConfig, @EnvVars) {
 
         print CONFIGFILE '    <environment>',"\n";
         foreach my $var (@EnvVars){
-            $ENV{$var} = ". " . $ENV{$var} if ($var !~ /FER_FONTS/ && $var !~ /PLOTFONTS/ && $var !~ /PYTHONPATH/ && $var !~ /LD_LIBRARY_PATH/ && $var !~ /FER_LIBS/);
+            $ENV{$var} = ". " . $ENV{$var} if ($var !~ /FER_FONTS/ && $var !~ /PLOTFONTS/ && $var !~ /PYTHONPATH/ && $var !~ /LD_LIBRARY_PATH/);
             if ($var =~ /FER_GO|FER_PALETTE/){
                 $ENV{$var} = "scripts jnls jnls/insitu jnls/section " . $ENV{$var};
                 $ENV{$var} = $LasConfig{custom_name} . " " . $ENV{$var}
