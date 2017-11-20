@@ -55,13 +55,18 @@ REPEAT/RANGE=0:100/NAME=ic (\
   IF `nmaskx GT 1` THEN DEF SYM var_mask = ($var_mask)* var_mask_($ic) ;\
   )
   
+! Handle details for constraints in longitude and time
+
 REPEAT/RANGE=0:100/NAME=ic (\
   DEF SYM ic = `ic`;\
   IF `($constraint_($ic)_lhs"0|*>1") EQ 0` THEN EXIT/LOOP;\
-  LET reset_lon = `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_rhs"0|NaN>0|*") GT 180 AND ($its_listing"0")` ;\
-  IF `reset_lon` THEN DEF SYM constraint_($ic)_rhs = `($constraint_($ic)_rhs)-360` ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEF SYM constr_lon_min = ($constraint_($ic)_rhs) ;\
-  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEF SYM constr_lon_max = ($constraint_($ic)_rhs) ;\
+  LET reset_lon = 0;\
+  IF `STRINDEX("($constraint_($ic)_lhs%0%)", "longitude")` THEN;\
+    LET reset_lon = ` ($constraint_($ic)_rhs"0|NaN>0|*") GT 180 AND ($its_listing"0")` ;\
+    DEF SYM constraint_($ic)_rhs = `($constraint_($ic)_rhs)-360` ;\
+    IF `($constraint_($ic)_op"0|gt>1|*>0")` THEN DEF SYM constr_lon_min = ($constraint_($ic)_rhs) ;\
+    IF `($constraint_($ic)_op"0|le>1|*>0")` THEN DEF SYM constr_lon_max = ($constraint_($ic)_rhs) ;\
+  ENDIF;\  
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|gt>1|*>0")` THEN DEF SYM constr_tim_min = ($constraint_($ic)_rhs) ;\
   IF `STRINDEX("($constraint_($ic)_lhs%0%)", "time") AND ($constraint_($ic)_op"0|le>1|*>0")` THEN DEF SYM constr_tim_max = ($constraint_($ic)_rhs) ;\
   )
