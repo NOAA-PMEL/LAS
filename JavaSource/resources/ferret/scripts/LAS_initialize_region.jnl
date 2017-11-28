@@ -122,6 +122,8 @@ IF ($($region)_x_lo"0|*>1") THEN
   ELSE
     DEFINE SYMBOL region_x_range = `($region_x_lo) - ($region_x_hi)`
   ENDIF
+  DEFINE SYMBOL region_small = X=($region_x_lo)
+  DEFINE SYMBOL region_comma = ,
 ENDIF
 
 IF ($($region)_y_lo"0|*>1") THEN
@@ -134,6 +136,8 @@ IF ($($region)_y_lo"0|*>1") THEN
   ELSE
     DEFINE SYMBOL region_y_range = `($region_y_lo) - ($region_y_hi)`
   ENDIF
+  DEFINE SYMBOL region_small = ($region_small)($region_comma)Y=($region_y_lo)
+  DEFINE SYMBOL region_comma = ,
 ENDIF
 
 
@@ -148,6 +152,8 @@ IF ($($region)_z_lo"0|*>1") THEN
   ELSE
     DEFINE SYMBOL region_z_range = `($region_z_lo) - ($region_z_hi)`
   ENDIF
+  DEFINE SYMBOL region_small = ($region_small)($region_comma)Z=($region_z_lo)
+  DEFINE SYMBOL region_comma = ,
 ENDIF
 IF ($add_region_z"0|*>1") THEN
    IF ($($region)_z_lo"0|*>1") THEN DEFINE SYMBOL add_region_z = z=($($region)_z_lo)
@@ -164,6 +170,8 @@ IF ($($region)_t_lo"0|*>1") THEN
   DEFINE SYMBOL region_t_hi = ($($region)_t_hi)
   DEFINE SYMBOL limits_t \"($region_t_lo)\":\"($region_t_hi)\"
   DEFINE SYMBOL region_t T=\"($region_t_lo)\":\"($region_t_hi)\"
+  DEFINE SYMBOL region_small = ($region_small)($region_comma)T="($region_t_lo)"
+  DEFINE SYMBOL region_comma = ,
 ENDIF
 IF ($add_region_t"0|*>1") THEN
    IF ($($region)_t_lo"0|*>1") THEN DEFINE SYMBOL add_region_t = t=($($region)_t_lo)
@@ -176,6 +184,7 @@ IF ($($region)_e_lo"0|*>1") THEN
   DEFINE SYMBOL limits_e ($region_e_lo):($region_e_hi)
   DEFINE SYMBOL region_e E=($region_e_lo):($region_e_hi)
   DEFINE SYMBOL region_e M=($region_e_lo):($region_e_hi)
+  DEFINE SYMBOL region_small = ($region_small)($region_comma)M=($region_e_lo)
 ENDIF
 IF ($add_region_e"0|*>1") THEN
    IF ($($region)_e_lo"0|*>1") THEN DEFINE SYMBOL add_region_e = M=($($region)_e_lo)
@@ -344,7 +353,6 @@ ELSE
 ENDIF
 
 DEFINE SYMBOL region_full = ($region_xyzte)
-
 
 ! For sampling from a curvilinear variable, save the region definitions with
 ! the variable number.
