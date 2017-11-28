@@ -22,14 +22,14 @@ LET nc = `($data_count) - 1`
 ! Get the shape of all variables
 REPEAT/RANGE=0:`nc`/NAME=ivar (\
 DEFINE SYMBOL ivar = `ivar`; \
-DEFINE SYMBOL data_url \"($data_($ivar)_url)\"; \
-IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($ivar)_var); \
-IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var = `UPCASE("($data_var)")`; \
-SET DATA ($data_url); \
-LET ($data_var)_test = '($data_var)';\
-DEFINE SYMBOL shape($ivar) = `($data_var)_test,RETURN=shape`; \
-DEFINE SYMBOL dset($ivar) = `($data_var)_test,RETURN=dsetnum`;\
-)
+DEFINE SYMBOL test_url \"($data_($ivar)_url)\"; \
+IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL test_var ($data_($ivar)_var); \
+IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL test_var = `UPCASE("($test_var)")`; \
+SET DATA ($test_url); \
+LET ($test_var)_test = '($test_var)';\
+DEFINE SYMBOL shape($ivar) = `($test_var)_test,RETURN=shape`; \
+DEFINE SYMBOL dset($ivar) = `($test_var)_test,RETURN=dsetnum`;\
+CANCEL DATA ($test_url))
 
 ! Set up to add 0*var if needed
 REPEAT/RANGE=0:`nc`/NAME=ivar (GO set_add_for_region `ivar`)

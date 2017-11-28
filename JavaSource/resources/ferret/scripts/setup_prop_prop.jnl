@@ -2,6 +2,7 @@
 ! 10/4/2016 fixes so init scripts still work
 !  9/  2017  Set up for listings that include a fourth variable, e.g. second qc flag.
 ! 10/2017    Set up to list up to a total of 10 variables, data_0_var through data_9_var.
+! 11/2017    Allow for datasets where the variables come from different URLs.
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -139,7 +140,8 @@ ENDIF
 IF `($data_count"0") GE 2` THEN 
 
 GO LAS_initialize_region 1
-DEFINE SYMBOL data_1_url = ($data_0_url)  ! same data anyway...
+!! Variables need not be in same file or url
+!!DEFINE SYMBOL data_1_url = ($data_0_url)  ! same data anyway...
 
 IF `($data_1_url"($data_0_url)|($data_0_url)>1|*>0") AND \
 ($ferret_init_script"0|*>1")` THEN CANCEL DATA ($data_num)
@@ -256,7 +258,9 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    ! init script will work.
 
    GO LAS_initialize_region 2
-   DEFINE SYMBOL data_2_url = ($data_0_url)
+   
+!! Variables need not be in same file or url
+!!   DEFINE SYMBOL data_2_url = ($data_0_url)
 
    IF `($data_2_url"($data_0_url)|($data_0_url)>1|*>0") AND \
     ($ferret_init_script"0|*>1")` THEN CANCEL DATA ($data_num)

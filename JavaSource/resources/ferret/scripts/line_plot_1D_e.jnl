@@ -40,6 +40,7 @@ ENDIF
 ! (Region is a point)
 GO LAS_check_1d_region
 
+
 ! Check for errors 
 IF ($error_status"0|ERROR>1") THEN
   MESSAGE/ERROR **ERROR ($error_string)
@@ -48,13 +49,24 @@ ENDIF
 
 ! Here is variable 0 title
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+LET title_len = STRLEN("($ferret_title_0)")
 
 LET bracket = `STRINDEX("($ferret_plot_title)", "[")`
 IF `bracket EQ 1` THEN DEFINE SYMBOL ferret_plot_title = ($data_0_name)($ferret_plot_title)
 
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
-
 LET title_len = STRLEN("($ferret_title_0)")
+
+! Ignore line color if this is a multi-var plot.
+! Also ignore any request for trend-line plots.
+IF `($data_count) GT 1` THEN 
+   DEFINE SYMBOL itsa_multi_lineplot = 1
+   DEFINE SYMBOL do_legend = 1
+   CANCEL SYMBOL ferret_trend_line
+ENDIF
+
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
@@ -175,6 +187,7 @@ IF `its_mean AND (only_mean EQ 0)` THEN
    ENDIF
 
    ! Is this an ensemble dataset with a variable containing the ensemble lables?
+   LET is_ensemble = 0
    IF `($data_count"0") GT 0` THEN
       DEFINE SYMBOL itsa_multi_lineplot = 1
       DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
@@ -192,16 +205,15 @@ IF `its_mean AND (only_mean EQ 0)` THEN
    ENDIF
    
    ! Use Ferret properties to set up the plot qualifiers
-
-   GO LAS_set_plot_qualifiers
+   !GO LAS_set_plot_qualifiers
    
    REPEAT/range=1:`($data_count"0")-1`/NAME=qq (  \
      DEFINE SYMBOL qq = `qq`; \
-     IF `is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qq)]`; \
+     IF `is_ensemble` THEN DEFINE SYMBOL enslab = `labels_var[e=($qq)]` ELSE DEFINE SYMBOL enslab = Realization ($qq); \
      DEFINE SYMBOL ferret_plot_var = ($data_($qq)_var); \
      DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
      DEFINE SYMBOL ferret_plot_var_($qq) = ($ferret_plot_var); \ 
-     IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
+     DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
      LET tlen = STRLEN("($ferret_title_($qq))"); \
      LET title_len = `MAX(tlen, title_len)`; \
      DEFINE SYMBOL units_($qq) = `UPCASE("($data_($qq)_units)")`; \
@@ -213,12 +225,28 @@ IF `its_mean AND (only_mean EQ 0)` THEN
       SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
    ENDIF
    
-      IF ($ferret_view"0|z>1|*>0") THEN 
-         GO LAS_draw_multi_line_z_plot_e
-      ELSE
-         GO LAS_draw_multi_line_plot_e
-      ENDIF
-      GO LAS_url_label `($data_count)-1`
+   ! hack: edit out any /color=blue that was added at the start under a call to open_window
+   ! (Re-running the set-qualifiers script doesnt catch the right settings.)
+   IF `STRINDEX("($qualifiers)", "COLOR=blue") GT 0 AND ($ferret_line_color"0|*>1") EQ 0` THEN
+      LET qlen = STRLEN("($qualifiers)")
+      LET colorloc = STRINDEX("($qualifiers)", "/COLOR")
+      LET qual1 = SUBSTRING("($qualifiers)", 1, colorloc-1)
+      LET qual2 = SUBSTRING("($qualifiers)", colorloc+11, qlen)
+      list qual1, qual2
+      DEFINE SYMBOL qualifiers = `qual1``qual2`
+   ENDIF
+
+   DEFINE SYMBOL do_legend = 1
+
+   IF ($ferret_view"0|z>1|*>0") THEN 
+      GO LAS_draw_multi_line_z_plot_e
+   ELSE
+      DEFINE VIEWPORT/AXES/TEXT=1/x=0.1:0.9/y=0.16:0.98 vp_legend
+	 SET VIEW vp_legend
+      
+      GO LAS_draw_multi_line_plot_e
+   ENDIF
+   GO LAS_url_label `($data_count)-1`
 
 ELSE
 
@@ -231,7 +259,7 @@ ELSE
       DEFINE SYMBOL ens_lab = Realizations: averaged all
    ENDIF
 
-   GO LAS_set_plot_qualifiers
+   !GO LAS_set_plot_qualifiers
 
    DEFINE SYMBOL split_title = ($ferret_title_0)
    GO LAS_split_title
@@ -241,7 +269,8 @@ ELSE
       GO trend_line
 
    ELSE
-
+      
+      IF `($data_count"0") EQ 1` THEN
       PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
 
          IF ($ferret_dep_axis_scale"0|*>1") THEN 
@@ -255,6 +284,7 @@ ELSE
 
          GO reset_labels
       PPL PLOT
+      ENDIF
 
 ! For an ensemble-dataset plot in the E direction, label the horizontal axis with
 ! the labels, if available.
@@ -270,6 +300,16 @@ ELSE
             REPEAT/E=($region_e_lo):($region_e_hi) (\
 	      LABEL/USER `_e`, `yloc`,0,0,0.1, "`_E`")
 	 ENDIF
+      ELSE
+
+         IF `($data_count"0") GT 1` THEN
+	    CANCEL VIEW
+            IF ($ferret_view"0|z>1|*>0") THEN 
+               GO LAS_draw_multi_line_z_plot
+           ELSE
+               GO LAS_draw_multi_line_plot
+            ENDIF
+         ENDIF
       ENDIF
 
    ENDIF
@@ -284,15 +324,15 @@ ENDIF
 
 GO labels_above_plot
 
-
 ! Set up so zooming works on plots with trend lines.
 IF ($ferret_trend_line"0|1|2>1") THEN GO reset_after_trend
 
 ! Save the results
 
 DEFINE SYMBOL result_type = ($ferret_view)line
-IF `STRINDEX("($ferret_view)", "t") GT 0 OR STRINDEX("($ferret_view)", "z") GT 0` THEN\
-  DEFINE SYMBOL result_type = point
+! IF `STRINDEX("($ferret_view)", "t") GT 0 OR STRINDEX("($ferret_view)", "z") GT 0` THEN\
+!  DEFINE SYMBOL result_type = point
+
 GO LAS_results ($result_type)
 
 
