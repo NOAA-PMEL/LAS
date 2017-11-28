@@ -14,7 +14,6 @@
 ! 4/2014    ACM Add time units, origin and calendar to map scale file
 ! 10/2017   Add an annotation on the plot when data selection results in no data
 ! 10/2017   fixes for map-scale file, monthly time axis such as monthly_navy_winds
-! 11/2017   report on map resolution if this was a map plot
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
@@ -412,7 +411,9 @@ IF ($insitu_blankvar"0|*>1) THEN SHADE/PAL=white/NOLAB/NOKEY/LEV=(0,1,1) ($insit
 
 ! Done with map scale file
 
-IF ($ferret_annotations%0|*>1%) THEN GO LAS_annotations_xml
+IF ($ferret_annotations%0|*>1%) THEN
+   GO LAS_annotations_xml
+ENDIF 
 
 ! Result "colorbar" is the legend of the plot_image...only for Google Earth
 IF ($result_colorbar_filename%0|*>1%) THEN GO colorbar
@@ -427,12 +428,4 @@ IF  ($ferret_use_ref_map%0|false>0|*>1%) THEN
 
 ENDIF
 
-! If this was a map plot, report on the topo resolution used
-IF ($fland_area"0|*>1") THEN
-   SAY _________________Map plot:  Region and topo file used:
-   SAY _________________Map plot:    XY region      ($region_xy)
-   SAY _________________Map plot:    $fland_area    ($fland_area)
-   SAY _________________Map plot:    topo file      ($topo_url)
-ENDIF
 ! End of file ------------LAS_results.jnl--------------------------
-

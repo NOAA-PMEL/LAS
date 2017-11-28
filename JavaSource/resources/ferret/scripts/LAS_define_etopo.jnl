@@ -1,12 +1,5 @@
-! LAS_define_etopo.jnl
-! See if there are etopo2 and etopo1 in the same
+! see if there are etopo2 and etopo1 in the same
 ! directory as etopo5
-!      11/2017  Add topo015 as an option, define topo*url symbols
-
-
-DEFINE SYMBOL topo20_url = etopo20
-
-DEFINE SYMBOL topo5_url = etopo5
 
 USE etopo5
 LET epath = "`rose,RETURN=dsetpath`" 
@@ -29,11 +22,4 @@ ELSE
    IF `TEST_OPENDAP(e2file) EQ 0` THEN DEFINE SYMBOL topo1_url = `e1file`
 ENDIF
 
-
-IF `TEST_OPENDAP("/home/data/ansley/topography/topo15_compressed.nc") EQ 0` THEN 
-   DEFINE SYMBOL topo_015_url = /home/data/ansley/topography/topo15_compressed.nc
-ENDIF
-
 CANCEL DATA etopo5
-
-! --------------- End of LAS_define_etopo  ---------------------------

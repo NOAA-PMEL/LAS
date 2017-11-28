@@ -51,13 +51,14 @@ GO setup_prop_prop
 ! 3/16/17 Make this more robust, if there are regions etc on the ferret_plot_var_* 
 ! variables the RETURN=dtypemay fail.
 
-LET gettype = ($ferret_plot_var_0_small)
-DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+let ferret_plot_var_0 = ($ferret_plot_var_0)
+
+DEFINE SYMBOL vtype = `ferret_plot_var_0,RETURN=dtype`
 IF ($vtype"0|CHAR>1|*>0") THEN \
   DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_0). Choose another variable.
 
-LET gettype = ($ferret_plot_var_1_small)
-DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
+let ferret_plot_var_1 = ($ferret_plot_var_1)
+DEFINE SYMBOL vtype = `ferret_plot_var_1,RETURN=dtype`
 IF ($vtype"0|CHAR>1|*>0") THEN \
    DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_1). Choose another variable.
 

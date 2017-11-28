@@ -3,42 +3,28 @@
 !
 ! Overlays a basemap based on the data in ($basemap_url) and ($basemap_var).
 !
-!      11/2017  Add topo015 as an option
-!
 ! By default an appropriate etopo dataset is used to plot gray continents.
 
 ! Set defaults for any 'basemap_~' symbols that are not yet defined
 SET DATA/SAVE
 
-! assuming the topo_url was already defined, use it 
-! ( would we sometimes want to use a finer land-map url here? )
-
 DEFINE SYMBOL basemap_area = `( ($region_x_range) * ($region_y_range) )/ (360 * 180)`
 
-IF ($topo_url"0|*>1") THEN 
-   DEFINE SYMBOL basemap_url = ($topo_url) 
-ELSE
+DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
 
-   DEFINE SYMBOL basemap_url = ($basemap_url"etopo20")
+IF `($basemap_area) LT 0.08` THEN 
+  DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
 
-   IF `($basemap_area) LT 0.25` THEN 
-     DEFINE SYMBOL basemap_url = ($basemap_url"etopo5")
+  GO LAS_define_etopo
 
-     GO LAS_define_etopo
+  IF `($basemap_area) LT 0.02` THEN
+     IF ($topo2_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo2_url)"
+  ENDIF  
 
-     IF `($basemap_area) LT 0.05` THEN
-        IF ($topo2_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo2_url)"
-     ENDIF  
-
-     IF `($basemap_area) LT 0.01` THEN
-       IF ($topo1_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo1_url)"
-     ENDIF
-
-     IF `($basemap_area) LT 0.005` THEN
-      IF ($topo_015_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo_015_url)"
-     ENDIF
-
-   ENDIF
+  IF `($basemap_area) LT 0.001` THEN
+   IF ($topo1_url"0|*>1") THEN DEFINE SYMBOL basemap_url = "($topo1_url)"
+  ENDIF
+  
 ENDIF
 
 DEFINE SYMBOL basemap_fill_type = FILL
