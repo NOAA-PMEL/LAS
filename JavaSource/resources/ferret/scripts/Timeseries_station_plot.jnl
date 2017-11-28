@@ -238,7 +238,7 @@ IF `($data_var)[i=@ngd] EQ 0 AND ($data_count) eq 1` THEN
 
    PLOT/NOLAB($qualifiers)/VLIM=-1:1 `-100` + 0*t[gt=taxis_all]
    LET nstations = 1
-   LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+!   LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
    DEFINE SYMBOL allbad = 1
    CANCEL SYMBOL axset
 !   DEFINE SYMBOL ferret_use_graticules = none
@@ -326,8 +326,8 @@ IF `nstations EQ 1` THEN  ! one station multi var
 ! symbols and/or line
    GO set_linesym
 
-   DEFINE SYMBOL do_legend = 1
-   go LAS_draw_multi_line_plot `vxlo` `vxhi` `vylo` `vyhi`
+   DEFINE SYMBOL do_legend = `($data_count"0") GT 1`
+   IF `($allbad"0") EQ 0` THEN GO LAS_draw_multi_line_plot `vxlo` `vxhi` `vylo` `vyhi`
 
    DEFINE SYMBOL ferret_plot_var = plot_var_t 
    LET vart = plot_var_t
@@ -409,7 +409,7 @@ ELSE  ! more than 1 station
       DEFINE SYMBOL axset = /axes=0,0,1,1
 
       IF ($allbad"0|*>1") THEN 
-         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+!         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
       ELSE
       
          IF `($data_count) GT 1` THEN 
@@ -458,7 +458,7 @@ ELSE  ! more than 1 station
       LET vart = 1./0 + 0* tt
 
       IF ($allbad"0|*>1") THEN 
-         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
+!         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
       ELSE
 
          cancel symbol ferret_plot_var
