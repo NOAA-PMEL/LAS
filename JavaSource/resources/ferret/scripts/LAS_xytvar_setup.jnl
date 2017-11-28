@@ -115,16 +115,16 @@ ENDIF
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
 
-IF `itsa_tim_prop` THEN 
-! Open the window and set aspect ratio
-   DEFINE SYMBOL win_asp = /ASPECT=0.75
-   DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
-ENDIF
 
-IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
-   DEFINE SYMBOL win_asp = /ASPECT=1.5
-   DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
-ENDIF
+DEFINE SYMBOL win_asp = /ASPECT=.8
+
+IF `itsa_tim_prop` THEN DEFINE SYMBOL win_asp = /ASPECT=0.75
+
+IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN DEFINE SYMBOL win_asp = /ASPECT=1.5
+
+IF `itsa_lon_prop AND itsa_lat_plot` THEN DEFINE SYMBOL win_asp = /ASPECT=`($region_Y_range)/($region_X_range)`
+
+DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
 
 DEFINE VIEWPORT/XLIM=0:1/YLIM=0:1 vfull1
 DEFINE VIEWPORT/XLIM=0:1/YLIM=0:1 vfull2
@@ -490,13 +490,8 @@ IF `itsa_lat_prop EQ 0 AND itsa_lat_plot` THEN
 
    LET amin = q_var[i=@MIN]
    LET amax = q_var[i=@MAX]
-   
-   LET amin = MAX(q_var[i=@MIN]-5, -90)
-   LET amax = MIN(q_var[i=@MAX]+5,  90)
 
    GO LAS_is_range amin amax  ! get del_ax
-   LET ax_lo = `amin`
-   LET ax_hi = `amax`
    DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis
    DEFINE SYMBOL region_y_range = `ax_hi - ax_lo`  ! reset this so LAS_fland.jnl chooses the right resolution
 
