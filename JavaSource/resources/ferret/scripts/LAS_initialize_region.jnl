@@ -51,7 +51,7 @@ IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN
   IF `($fview"1|t>0|*>1") AND ($region_x_range"0") NE 0` THEN \
     DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
 ELSE
-   DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
+    DEFINE SYMBOL win_aspect = 0.8  ! prop-prop plots
 ENDIF
 
 ! Set more reasonable aspect ratio if the region is extremely skinny.
