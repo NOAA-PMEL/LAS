@@ -348,27 +348,41 @@ public class Inventory implements EntryPoint {
 				JSONArray rows = (JSONArray) table.get("rows");
 
 				MVCArray<LatLng> path = (MVCArray<LatLng>) MVCArray.createArray();
+				
+				List<MVCArray> paths = new ArrayList<MVCArray>();
 
+				String prevID = null;
 				int index = 0;
 				for(int i = 1; i < rows.size(); i++) {
 					JSONArray row = (JSONArray) rows.get(i);
-					String latitude = row.get(0).toString();
-					String longitude = row.get(1).toString();
+					String trajID = row.get(0).toString();
+					if ( i == 1 ) prevID = trajID;
+ 					String latitude = row.get(1).toString();
+					String longitude = row.get(2).toString();
 					if ( latitude != null && longitude != null & !latitude.equals("null") && !longitude.equals("null")) {
 						LatLng p = LatLng.newInstance(Double.valueOf(latitude), Double.valueOf(longitude));
 						path.push(p);
 					}
+					if ( !trajID.equals(prevID) ) {
+						// Start a new path
+						paths.add(path);
+						path = (MVCArray<LatLng>) MVCArray.createArray();
+						prevID = trajID;
+					}
 					index++;
 				}
 
-				PolylineOptions options = PolylineOptions.newInstance();
-				options.setStrokeColor(color(catid));
-				options.setStrokeOpacity(1.0d);
-				options.setPath(path);
-				options.setMap(mapUI.getMap());
-				Polyline polyline = Polyline.newInstance(options);
-				mapUI.getMap().getOverlayMapTypes().setAt(mapUI.getMap().getOverlayMapTypes().getLength()+1, polyline);
-				mapUI.addPolylineToPanel(catid, polyline);
+				for ( int pc = 0; pc < paths.size(); pc++ ) {
+					MVCArray<LatLng> pppath = paths.get(pc);
+					PolylineOptions options = PolylineOptions.newInstance();
+					options.setStrokeColor(color(catid));
+					options.setStrokeOpacity(1.0d);
+					options.setPath(pppath);
+					options.setMap(mapUI.getMap());
+					Polyline polyline = Polyline.newInstance(options);
+					mapUI.getMap().getOverlayMapTypes().setAt(mapUI.getMap().getOverlayMapTypes().getLength()+1, polyline);
+					mapUI.addPolylineToPanel(catid, polyline);
+				}
 			}
 		}
 	};

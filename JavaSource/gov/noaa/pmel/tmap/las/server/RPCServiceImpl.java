@@ -1006,10 +1006,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("timeseries_id");
             }
-            
+            if ( id_name != null ) {
+            	variables = id_name + "," + variables;
+            }
             url = url + id + ".json" + "?" + variables + "&distinct()";
             if ( variables.contains("time") ) {
             	url = url + "&orderBy(\"time\")";
+            } else if ( variables.contains("time") && id_name != null ) {
+            	url = url + "&orderBy(\"time,"+id_name+"\")";
             }
 
             jsonStream = new URL(url).openStream();

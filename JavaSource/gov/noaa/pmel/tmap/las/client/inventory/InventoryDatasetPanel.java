@@ -1,12 +1,10 @@
 package gov.noaa.pmel.tmap.las.client.inventory;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.Icon;
@@ -19,8 +17,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.mvc.MVCObject;
-import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.Rectangle;
 import com.google.gwt.maps.utility.markerclustererplus.client.MarkerClusterer;
