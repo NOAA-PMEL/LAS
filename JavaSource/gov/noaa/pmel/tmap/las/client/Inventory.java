@@ -134,7 +134,7 @@ public class Inventory implements EntryPoint {
 				InventoryDatasetPanel panel = null;
 				for ( int i = 0; i < cats.length; i++ ) {
 					CategorySerializable cat = cats[i];
-					if ( cat.getAttributes().get("children") != null && cat.getAttributes().get("children").equals("categories") ) {
+					if ( cat.isCategoryChildren() ) {
 						if ( i == 0 ) mapUI.clearItems();
 						final CategoryItem item = new CategoryItem(cat);
 
@@ -151,7 +151,7 @@ public class Inventory implements EntryPoint {
 						});
 						mapUI.addItem(item);
 
-					} else if ( cat.getAttributes().get("children") != null && cat.getAttributes().get("children").equals("variables") ) {
+					} else if ( cat.isVariableChildren() ) {
 
 						if ( i == 0 ) {
 							panel = new InventoryDatasetPanel();
