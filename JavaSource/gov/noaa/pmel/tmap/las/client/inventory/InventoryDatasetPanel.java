@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.inventory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class InventoryDatasetPanel extends Composite {
 	Map<String, CategorySerializable> categories = new HashMap<String, CategorySerializable>();
 	Map<String, Rectangle> rectangles = new HashMap<String, Rectangle>();
 // The Poly line needs to be a List<Polyline>
-	Map<String, Polyline> polylines = new HashMap<String, Polyline>();
+	Map<String, List<Polyline>> polylines = new HashMap<String, List<Polyline>>();
 	Map<String, MarkerClusterer> markerClusters = new HashMap<String, MarkerClusterer>();
 	Map<String, List<LatLng>> markerLocations = new HashMap<String, List<LatLng>>();
 	ClientFactory clientFactory = GWT.create(ClientFactory.class);
@@ -86,7 +87,12 @@ public class InventoryDatasetPanel extends Composite {
 		rectangles.put(id, rectangle);
 	}
 	public void addPolyline(String id, Polyline polyline) {
-		polylines.put(id, polyline);
+		List<Polyline> polys = polylines.get(id);
+		if ( polys == null ) {
+			polys = new ArrayList<Polyline>();
+		}
+		polys.add(polyline);
+		polylines.put(id, polys);
 	}
 	public void addMarkerClusterer(String id, MarkerClusterer clusterer) {
 		markerClusters.put(id, clusterer);
@@ -109,7 +115,7 @@ public class InventoryDatasetPanel extends Composite {
 	public MarkerClusterer getMarkerClusterer(String id) {
 		return markerClusters.get(id);
 	}
-	public Polyline getPolyline(String id) {
+	public List<Polyline> getPolyline(String id) {
 		return polylines.get(id);
 	}
 	public List<LatLng> getMarkerLocations(String id) {
