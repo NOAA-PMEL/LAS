@@ -355,10 +355,10 @@ public class Inventory implements EntryPoint {
 				int index = 0;
 				for(int i = 1; i < rows.size(); i++) {
 					JSONArray row = (JSONArray) rows.get(i);
-					String trajID = row.get(0).toString();
+ 					String latitude = row.get(0).toString();
+					String longitude = row.get(1).toString();
+					String trajID = row.get(2).toString();
 					if ( i == 1 ) prevID = trajID;
- 					String latitude = row.get(1).toString();
-					String longitude = row.get(2).toString();
 					if ( latitude != null && longitude != null & !latitude.equals("null") && !longitude.equals("null")) {
 						LatLng p = LatLng.newInstance(Double.valueOf(latitude), Double.valueOf(longitude));
 						path.push(p);
