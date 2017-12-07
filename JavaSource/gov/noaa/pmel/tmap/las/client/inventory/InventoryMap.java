@@ -342,9 +342,12 @@ public class InventoryMap extends Composite {
 					Rectangle rectangle = (Rectangle) panel.getRectangle(catid);
 					rectangle.setMap(map);
 
-					Polyline p = panel.getPolyline(catid);
+					List<Polyline> p = panel.getPolyline(catid);
 					if ( p != null ) {
-						p.setMap(map);
+						for ( int pp = 0; pp < p.size(); pp++ ) {
+							Polyline pl = p.get(pp);
+							pl.setMap(map);
+						}
 					}
 					MarkerClusterer clusterer = panel.getMarkerClusterer(catid);
 					
@@ -363,9 +366,12 @@ public class InventoryMap extends Composite {
 				} else {
 					Rectangle rectangle = (Rectangle) panel.getRectangle(catid);
 					rectangle.setMap(iAmNull);
-					Polyline poly = panel.getPolyline(catid);
+					List<Polyline> poly = panel.getPolyline(catid);
 					if ( poly != null ) {
-						poly.setMap(iAmNull);
+						for ( int p = 0; p < poly.size(); p++ ) {
+							Polyline pl = poly.get(p);
+							pl.setMap(iAmNull);
+						}
 					}
 					MarkerClusterer clusterer = panel.getMarkerClusterer(catid);
 					if ( clusterer != null ) {

@@ -75,9 +75,12 @@ public class Inventory implements EntryPoint {
 						String id = (String) keyIt.next();
 						Rectangle rectangle = (Rectangle) panel.getRectangle(id);
 						rectangle.setMap(null);
-						Polyline polyline = panel.getPolyline(id);
+						List<Polyline> polyline = panel.getPolyline(id);
 						if ( polyline != null) {
-							polyline.setMap(null);
+							for (int p = 0; p < polyline.size(); p++ ) {
+								Polyline ppp = polyline.get(p);
+								ppp.setMap(null);
+							}
 						}
 						MarkerClusterer clusterer = panel.getMarkerClusterer(id);
 						if ( clusterer !=  null ) {
