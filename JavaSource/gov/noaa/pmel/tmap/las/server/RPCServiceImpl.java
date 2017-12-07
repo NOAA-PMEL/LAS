@@ -1000,21 +1000,32 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             Map<String, Map<String, String>> props = dataset.getPropertiesAsMap();
             String id = props.get("tabledap_access").get("id");
             String id_name = props.get("tabledap_access").get("trajectory_id");
+            boolean trajectory = true;
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("profile_id");
+                trajectory = false;
             }
             if ( id_name == null || id_name.trim().length() == 0 ) {
                 id_name = props.get("tabledap_access").get("timeseries_id");
+                trajectory = false;
             }
-            if ( id_name != null ) {
-            	variables = id_name + "," + variables;
-            }
+            if ( trajectory ) {
+                variables = variables+","+id_name;
+            } 
             url = url + id + ".json" + "?" + variables + "&distinct()";
             if ( variables.contains("time") ) {
-            	url = url + "&orderBy(\"time\")";
+                String tq;
+                if ( trajectory ) {
+                    tq = URLEncoder.encode(id_name+",time,1 hours");
+                } else {
+                    tq = URLEncoder.encode("time,1 hours");
+                }
+            	url = url + "&orderByClosest(\""+tq+"\")";
             } else if ( variables.contains("time") && id_name != null ) {
             	url = url + "&orderBy(\"time,"+id_name+"\")";
             }
+
+            log.debug("ERDDAP GEOMETRY reqeust: " + url);
 
             jsonStream = new URL(url).openStream();
             String jsonText = IOUtils.toString(jsonStream);
