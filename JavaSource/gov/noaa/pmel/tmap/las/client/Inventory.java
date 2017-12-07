@@ -351,26 +351,37 @@ public class Inventory implements EntryPoint {
 				
 				List<MVCArray> paths = new ArrayList<MVCArray>();
 
+                                int plen = 0;
+
 				String prevID = null;
 				int index = 0;
 				for(int i = 1; i < rows.size(); i++) {
 					JSONArray row = (JSONArray) rows.get(i);
  					String latitude = row.get(0).toString();
 					String longitude = row.get(1).toString();
-					String trajID = row.get(2).toString();
+                                        // 2 is time
+					String trajID = row.get(3).toString();
 					if ( i == 1 ) prevID = trajID;
-					if ( latitude != null && longitude != null & !latitude.equals("null") && !longitude.equals("null")) {
-						LatLng p = LatLng.newInstance(Double.valueOf(latitude), Double.valueOf(longitude));
-						path.push(p);
-					}
 					if ( !trajID.equals(prevID) ) {
 						// Start a new path
-						paths.add(path);
+                                                MVCArray<LatLng> pc = (MVCArray<LatLng>) MVCArray.createArray();
+                                                for ( int u = 0; u < plen; u++ ) {
+                                                   pc.push(path.pop());
+                                                }
+                                                plen = 0;
+						paths.add(pc);
 						path = (MVCArray<LatLng>) MVCArray.createArray();
 						prevID = trajID;
+                                                
+					}
+					if ( latitude != null && longitude != null & !latitude.equals("null") && !longitude.equals("null")) {
+						LatLng p = LatLng.newInstance(Double.valueOf(latitude), Double.valueOf(longitude));
+						plen = path.push(p);
 					}
 					index++;
 				}
+                                // Add the path you were working on
+                                paths.add(path);
 
 				for ( int pc = 0; pc < paths.size(); pc++ ) {
 					MVCArray<LatLng> pppath = paths.get(pc);

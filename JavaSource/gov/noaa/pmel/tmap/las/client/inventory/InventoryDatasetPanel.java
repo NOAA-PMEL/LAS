@@ -45,6 +45,7 @@ public class InventoryDatasetPanel extends Composite {
 	
 	Map<String, CategorySerializable> categories = new HashMap<String, CategorySerializable>();
 	Map<String, Rectangle> rectangles = new HashMap<String, Rectangle>();
+// The Poly line needs to be a List<Polyline>
 	Map<String, Polyline> polylines = new HashMap<String, Polyline>();
 	Map<String, MarkerClusterer> markerClusters = new HashMap<String, MarkerClusterer>();
 	Map<String, List<LatLng>> markerLocations = new HashMap<String, List<LatLng>>();
