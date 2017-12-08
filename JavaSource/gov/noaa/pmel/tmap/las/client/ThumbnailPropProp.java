@@ -306,13 +306,16 @@ public class ThumbnailPropProp implements EntryPoint {
             lr0.setOperation("Trajectory_thumbnail_extract_and_plot", "V7");
             lr0.removeProperty("data_0", "url");
             lr0.removeProperty("data_1", "url");
+            lr0.removeProperty("data_2", "url");
             lr0.removeProperty("data_0", "file");
             lr0.removeProperty("data_1", "file");
+            lr0.removeProperty("data_2", "file");
         } else {
             // Set the netcdf file and operation for a plot from the cached file.
             lr0.setOperation("Trajectory_correlation_plot", "V7");
             lr0.setProperty("data_0", "url", netcdf);
             lr0.setProperty("data_1", "url", netcdf);
+            lr0.setProperty("data_2", "url", netcdf);
         }
         lr0.setProperty("ferret", "thumb", "1");
         lr0.removeVariables();
