@@ -435,6 +435,10 @@ public class ThumbnailPropProp implements EntryPoint {
                        r.removeProperty("data_1", "file");
                        r.removeProperty("data_2", "file");
                        r.removeProperty("data_3", "file");
+                       r.removeProperty("data_0", "url");
+                       r.removeProperty("data_1", "url");
+                       r.removeProperty("data_2", "url");
+                       r.removeProperty("data_3", "url");
                        final String nurl = Util.getProductServer() + "?xml=" + URL.encode(r.toString()) + "&catid="+catid;
                        nextplot.addClickHandler(new ClickHandler() {
 
