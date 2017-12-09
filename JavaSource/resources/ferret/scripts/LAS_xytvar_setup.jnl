@@ -8,6 +8,7 @@
 !         set a symbol to skip the new annotation.
 ! 11/2017 find direction variables based on attributes instead of assuming
 !         longitude, latitude, and time are variable names
+! 12/2017 Define varibles for min,max of p and q for efficiency
 
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -167,6 +168,10 @@ let pqmask = pq-pq
 let p_var = p + pqmask
 let q_var = q + pqmask
 
+! Define some variables used below
+LET pminmax = MINMAX(p_var)
+LET qminmax = MINMAX(q_var)
+
 ! Define axes for both variables using the range in the data
 
 !----------
@@ -183,11 +188,11 @@ IF `itsa_lon_prop` THEN
 ! All this lon360 stuff is to deal with cases where longitude data is on 
 ! both sides of the dateline.
 
-   LET amin = p_var[i=@MIN]
-   LET amax = p_var[i=@MAX]
-   LET amin = MIN(p_var[i=@MIN]-5, 180)
-   LET amax = MAX(p_var[i=@MAX]+5, -180)
-
+   LET amin = pminmax[i=1]
+   LET amax = pminmax[i=2]
+   let adel = `0.1*(amax-amin),prec=7`
+   LET amin = MIN(`amin` - adel, 180)
+   LET amax = MAX(`amax` + adel, -180)
 
 ! Initialize   
    LET ax_lo = ($region_x_lo)
@@ -208,10 +213,12 @@ IF `itsa_lon_prop` THEN
       LET/UNITS="($lon_units)" xvar_360 = IF ($ferret_prop_var) LT 0 THEN ($ferret_prop_var)+360 ELSE ($ferret_prop_var)
    ENDIF
    
-   LET amin360 = xvar_360[i=@MIN]
-   LET amax360 = xvar_360[i=@MAX]
-   LET amin = MIN(xvar_360[i=@MIN]-5, 360)
-   LET amax = MAX(xvar_360[i=@MAX]+5, 0)
+   LET xvminmax360 = MINMAX(xvar_360)
+   LET amin360 = xvminmax360[i=1]
+   LET amax360 = xvminmax360[i=2]
+   let adel = `0.1*(amax360-amin360),prec=7`
+   LET amin = MIN(`amin360 - adel`, 360)
+   LET amax = MAX(`amax360 + adel`, 0)
 
     DEFINE SYMBOL isbad =  `(amax - amin) `  ! a constraint on longitude may make amin,amax bad.
     LET adiff = amax - amin
@@ -219,10 +226,10 @@ IF `itsa_lon_prop` THEN
 
    IF `(amax360 - amin360) LT adiff` THEN 
 
-      LET ax_lo360 = `xvar_360[i=@MIN]`
-      LET ax_hi360 = `xvar_360[i=@MAX]`
-      LET ax_lo360 = `MIN(xvar_360[i=@MIN]-5, 360)` 
-      LET ax_hi360 = `MAX(xvar_360[i=@MAX]+5, 0)`
+      LET ax_lo360 = xvminmax360[i=1]
+      LET ax_hi360 = xvminmax360[i=2]
+      LET ax_lo360 = `MIN(ax_lo360-adel, 360)` 
+      LET ax_hi360 = `MAX(ax_hi360+adel, 0)`
 
       IF `(ax_hi360-ax_lo360) LT (ax_hi-ax_lo)` THEN 
          LET xvar = xvar_360
@@ -231,8 +238,6 @@ IF `itsa_lon_prop` THEN
          LET/UNITS="($lon_units)"/d=1 ($ferret_prop_var) = IF ($ferret_prop_var)_in LT 0 THEN ($ferret_prop_var)_in+360 ELSE ($ferret_prop_var)_in
          CANCEL SYMBOL pvar_reset
          LET/UNITS="($lon_units)" xvar_360 = ($ferret_prop_var)
-         LET ax_lo = p_var[i=@MIN]
-         LET ax_hi = p_var[i=@MAX] 
          LET ax_lo = `ax_lo360`
          LET ax_hi = `ax_hi360`
       ENDIF
@@ -298,8 +303,8 @@ IF `itsa_lon_prop` THEN
 ENDIF
 !---------- Redefining longitude
 
-LET amin = p_var[i=@MIN]
-LET amax = p_var[i=@MAX]
+LET amin = pminmax[i=1]
+LET amax = pminmax[i=2]
 
 IF `itsa_tim_prop` THEN DEFINE SYMBOL is_time = 1
 GO LAS_is_range amin amax
@@ -312,8 +317,10 @@ DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis1
 LET dep_var = x[gx=haxis]
 LET dep_var1 = x[gx=haxis1]; sh var dep_var1
 
-LET amin = q_var[i=@MIN]
-LET amax = q_var[i=@MAX]
+
+LET qminmax = MINMAX(q_var)
+LET amin = qminmax[i=1]
+LET amax = qminmax[i=2]
 DEFINE SYMBOL is_time = `itsa_tim_plot`
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
@@ -332,11 +339,12 @@ IF `itsa_lat_prop` THEN
 
 ! Get min and max latitudes and create a LAT axis.
 
-   LET amin = p_var[i=@MIN]
-   LET amax = p_var[i=@MAX]
+   LET amin = pminmax[i=1]
+   LET amax = pminmax[i=2]
+   LET pdel = 0.1*(amax-amin)
 
-   LET amin = MAX(p_var[i=@MIN]-5, -90)
-   LET amax = MIN(p_var[i=@MAX]+5,  90)
+   LET amin = MAX(`amin-pdel`, -90)
+   LET amax = MIN(`amax+pdel`,  90)
 
    GO LAS_is_range amin amax
 
@@ -352,8 +360,8 @@ IF `itsa_lat_prop` THEN
 
 ! In this case, a horizontal Latitude axis, the independent variable is q
 
-   LET amin = q_var[i=@MIN]
-   LET amax = q_var[i=@MAX]
+   LET amin = qminmax[i=1]
+   LET amax = qminmax[i=2]
    GO LAS_is_range amin amax
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" vaxis 
@@ -368,8 +376,8 @@ IF `itsa_tim_prop` THEN
 ! use the result of LAS_is_range to determine the delta,
 ! but use the limits from the data. 
 
-   LET amin = p_var[i=@MIN]
-   LET amax = p_var[i=@MAX]
+   LET amin = pminmax[i=1]
+   LET amax = pminmax[i=2]
    DEFINE SYMBOL is_time = 1
 
    IF ($constr_tim_min"0|*>1") THEN 
@@ -451,8 +459,8 @@ IF `itsa_lon_prop EQ 0 AND itsa_lon_plot` THEN
 
    DEFINE SYMBOL pqual = /TRANS  ! vertical longitude axis
 
-   LET amin = q_var[i=@MIN]
-   LET amax = q_var[i=@MAX]
+   LET amin = qminmax[i=1]
+   LET amax = qminmax[i=2]
    GO LAS_is_range amin amax
 
    DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis 
@@ -466,8 +474,8 @@ IF `itsa_lon_prop EQ 0 AND itsa_lon_plot` THEN
    ! Then we need to redefine the other variable to have a y axis
 
    IF `( itsa_tim_prop + itsa_lat_prop ) EQ 0` THEN 
-      LET amin = p_var[i=@MIN]
-      LET amax = p_var[i=@MAX]
+      LET amin = pminmax[i=1]
+      LET amax = pminmax[i=2]
       GO LAS_is_range amin amax
       DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units="`p,RETURN=units`" haxis
 
@@ -488,8 +496,8 @@ IF `itsa_lat_prop EQ 0 AND itsa_lat_plot` THEN
 ! Get min and max latitudes and create a LAT axis.
 ! Draw a blank plot to put formatted axis on the plot.
 
-   LET amin = q_var[i=@MIN]
-   LET amax = q_var[i=@MAX]
+   LET amin = qminmax[i=1]
+   LET amax = qminmax[i=2]
 
    GO LAS_is_range amin amax  ! get del_ax
    DEFINE AXIS/y=`ax_lo`:`ax_hi`:`del_ax`/units=deg vaxis
@@ -510,8 +518,8 @@ ENDIF
 
 IF ($reverse_vert"0") THEN
 
-   LET amin = q_var[i=@MIN]
-   LET amax = q_var[i=@MAX]
+   LET amin = qminmax[i=1]
+   LET amax = qminmax[i=2]
    GO LAS_is_range amin amax  ! get del_ax
    LET ax_lo = `amin`
    LET ax_hi = `amax`
@@ -528,8 +536,8 @@ IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN
 ! Get min and max times and create a time axis.
 ! Draw a blank plot to put formatted axis on the plot.
 
-   LET amin = q_var[i=@MIN]
-   LET amax = q_var[i=@MAX]
+   LET amin = qminmax[i=1]
+   LET amax = qminmax[i=2]
 
    CANCEL SYMBOL data_units
    DEFINE SYMBOL data_title Time
@@ -648,8 +656,9 @@ IF ($put_label"0|*>1") THEN
 ! add labels if a whole variable is all-bad
 ! p is masked XVAR
 
-   DEFINE SYMBOL ax_lo = `xvar[i=@MIN]`
-   DEFINE SYMBOL ax_hi = `xvar[i=@MAX]`
+   LET xvminmax = MINMAX(xvar)
+   LET amin = xvminmax[i=1]
+   LET amax = xvminmax[i=2]
 
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
@@ -667,8 +676,9 @@ IF ($put_label"0|*>1") THEN
 
 ! q is masked YVAR
 
-   DEFINE SYMBOL ax_lo = `yvar[i=@MIN]`
-   DEFINE SYMBOL ax_hi = `yvar[i=@MAX]`
+   LET yvminmax = MINMAX(xvar)
+   DEFINE SYMBOL ax_lo = `yvminmax[i=1]`
+   DEFINE SYMBOL ax_hi = `yvminmax[i=2]`
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
    
       IF ($ferret_thumb"0|0|*>1") THEN  

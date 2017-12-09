@@ -7,6 +7,7 @@
 ! 11/2017 Plot the missing data first, as a gray underlay, then the good data
 !         previously the underlay plotted all the data.
 ! 11/2017 back off finding direction variables based on attributes for now
+! 12/2017 changes for efficiency getting variable types
 
 
 ! prop_prop_plot.jnl creates a property-property plot, using the 
@@ -51,14 +52,13 @@ GO setup_prop_prop
 ! 3/16/17 Make this more robust, if there are regions etc on the ferret_plot_var_* 
 ! variables the RETURN=dtypemay fail.
 
-let ferret_plot_var_0 = ($ferret_plot_var_0)
-
-DEFINE SYMBOL vtype = `ferret_plot_var_0,RETURN=dtype`
+LET gettype = ($ferret_plot_var_0_small%($ferret_plot_var_0)%)
+DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
 IF ($vtype"0|CHAR>1|*>0") THEN \
   DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_0). Choose another variable.
 
-let ferret_plot_var_1 = ($ferret_plot_var_1)
-DEFINE SYMBOL vtype = `ferret_plot_var_1,RETURN=dtype`
+LET gettype = ($ferret_plot_var_1_small%($ferret_plot_var_1)%)
+DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
 IF ($vtype"0|CHAR>1|*>0") THEN \
    DEFINE SYMBOL error_string = Invalid data type for variable ($ferret_title_1). Choose another variable.
 
@@ -502,6 +502,15 @@ IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_
 IF ($color_by_feature"0|*>1") THEN GO feature_key
 
 ! Save the results
+
+IF ($note_num"0|*>1") THEN 
+   REPEAT/I=1:($note_num)  (\
+    DEF SYM ii = `i`;\
+    IF `STRINDEX("($note_($ii)_lab)", "Subsampled") GT 0` THEN \
+     DEFINE SYMBOL note_($ii)_lab = Subsampled for speed. Choose a smaller region or time range to see full resolution;\
+    )
+ENDIF
+
 
 GO LAS_results box
 
