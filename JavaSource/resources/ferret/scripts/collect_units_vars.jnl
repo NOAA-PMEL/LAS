@@ -4,7 +4,9 @@
 ! Argument
 !   1 = Collect the unique units strings, and a list of which 
 !       variables has each units string.
-!   2 = 
+
+! set up to reverse the vertical axis if all the variables in
+! a group have positive=down attributes
 
 LET n_ustrings = 0
 DEFINE SYMBOL inunits_0 = `UPCASE("($units_0)")`
@@ -20,6 +22,13 @@ LET nunique = 1
 
 DEFINE SYMBOL unique_0 = ($inunits_0)
 
+LET attnames = ($data_0_var).attnames
+LET has_positive = IS_ELEMENT_OF_STR_N(attnames, "positive")
+LET pos = ($data_0_var).positive
+IF `has_positive GT 0` THEN
+   IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_0 = 1
+ENDIF
+
 REPEAT/RANGE=2:($data_count)/name=c (\
    DEFINE SYMBOL c = `c`;\
    DEFINE SYMBOL cm = `c-1`;\
@@ -29,8 +38,17 @@ REPEAT/RANGE=2:($data_count)/name=c (\
      DEFINE SYMBOL has_0 = ($has_0)($cm);\
      DEFINE SYMBOL var_grp($cm) = 0;\
      DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), ($ferret_plot_var_($cm));\
-     LET num_found = `num_found + 1`;\
+     LET num_found = `num_found + 1`;\ 
+     LET attnames = ($data_($cm)_var).attnames;\
+     IF `has_positive GT 0` THEN;\
+       IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_0 = `($plot_pos_down_0"0") + 1`;\
+     ENDIF;\
    ENDIF)
+   IF `($plot_pos_down_0"0") LT num_found` THEN 
+      CANCEL SYMBOL plot_pos_down_0
+   ELSE
+      DEFINE SYMBOL plot_pos_down_0 = 1
+   ENDIF
 
 IF `num_found LT ($data_count)` THEN 
    

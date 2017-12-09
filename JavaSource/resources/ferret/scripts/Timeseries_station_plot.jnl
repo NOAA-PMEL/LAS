@@ -77,6 +77,19 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+! check that the variables are numeric
+
+REPEAT/RANGE=0:`($data_count)-1`/name=q (\
+  DEFINE SYMBOL q =`q`;\
+  LET gettype = ($data_($q)_var)[($vshape"x")=1];\
+  DEFINE SYMBOL vtype = `gettype,RETURN=dtype`;\
+  IF `($vtype"0|CHAR>1|*>0")` THEN ;\
+    MESSAGE/ERROR **ERROR Invalid data type for variable";\
+    EXIT/PROGRAM;\
+ENDIF;\
+)
+
+
 ! Here is variable 0 title
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 LET title_len = STRLEN("($ferret_title_0)")
@@ -221,11 +234,19 @@ IF `($data_var)[i=@ngd] GE 1` THEN
    ENDIF
 
 ! Underlay plot with the time axis and the right vertical range
+! check for the postitive=down attribute on the variable we're plotting 
+
    IF `nstations LE max_labeled_stations AND ($data_count) EQ 1` THEN \   
       DEFINE VIEW/AXES/X=0.08:0.99/YLIM=`vylo+0.02`:0.96 full_view
    IF `($data_count) EQ 1 AND nstations GT 1` THEN
       SET VIEW full_view
-      PLOT/NOLAB($qualifiers)/VLIM=`ymn`:`ymx`:`ydl` `ymn-100` + 0*t[gt=taxis_all]
+      IF ($plot_pos_down"0|0|1|*>1") THEN
+         DEFINE SYMBOL vert  = /VLIM=`ymx`:`ymn`:`ydl` 
+      ELSE
+         DEFINE SYMBOL vert  = /VLIM=`ymn`:`ymx`:`ydl` 
+      ENDIF
+      PLOT/NOLAB($qualifiers)($vert) `ymn-100` + 0*t[gt=taxis_all]
+
    ENDIF
 
 ELSE  ! no valid data_var data
@@ -293,7 +314,6 @@ LET plot_var_tA = RESHAPE(($ferret_plot_var), tt)
 
 LET plot_var_t = plot_var_tA[gt=taxis_all@bin]
 DEFINE SYMBOL ferret_plot_var_0 = plot_var_t
-DEFINE SYMBOL ferret_title_0 = ($ferret_title_0)
 DEFINE SYMBOL units_0 = ($data_0_units"units")
 DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
 DEFINE SYMBOL all_units_same = 1
@@ -402,7 +422,13 @@ ELSE  ! more than 1 station
 ! time data in each individual feature, regrid to the overall time series
 ! so they will be positioned correctly.
 
-      DEFINE SYMBOL vert = /vlim=`plotmin_0`:`plotmax_0`:`plotinc`
+! check for the postitive=down attribute on the variable we're plotting 
+
+      IF ($plot_pos_down"0|0|1|*>1") THEN
+         DEFINE SYMBOL vert  = /VLIM=`plotmax_0`:`plotmin_0`:`plotinc`
+      ELSE
+         DEFINE SYMBOL vert  = /VLIM=`plotmin_0`:`plotmax_0`:`plotinc`
+      ENDIF
       
       IF `plotinc EQ 0` THEN CANCEL SYMBOL vert
 

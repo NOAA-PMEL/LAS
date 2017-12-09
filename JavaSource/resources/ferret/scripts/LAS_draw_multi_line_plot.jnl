@@ -7,6 +7,8 @@
 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 ! 11/2017 *acm* Dont label plots with units of "units" or "none"
+! 12/2017 *acm* Apply positive=down attribute if all variables in a
+*               units-group have that setting.
 
 set mode ver:always
 
@@ -106,7 +108,6 @@ DEFINE SYMBOL leg_color3 = lightblue
 DEFINE SYMBOL leg_color4 = purple
 DEFINE SYMBOL leg_color5 = black
 
-
 IF `(($data_count) GE 2)` THEN
 
 ! More than 1 variable and Units Not same
@@ -151,6 +152,8 @@ LET labloc = 0.5 + 0.03*maxlablen
 ! First draw the vertical axes. 
 ! Set up the vertical-range symbols (The PPL RANGE call with high #tics sets up 
 ! for plots that take up most of the window)
+! IF postitive=down is set for all variables in the group, reverse the vertical axis 
+
 
 DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` vg($vpname)
 SET VIEW vg($vpname)
@@ -166,6 +169,7 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
    GO LAS_get_lines_min_max `vplotnum`;\
    PPL %range `vlimylo`, `vlimyhi`, 10;\
    DEFINE SYMBOL qualifiers_g($vm) = /VLIM=($ppl$range_low):($ppl$range_high);\
+   IF ($plot_pos_down"($vm)|0|1|*>1") THEN DEFINE SYMBOL qualifiers_g($vm) = /VLIM=($ppl$range_high):($ppl$range_low);\
    IF `($vm) GT 0` THEN;\
       PLOT/AXES=0,0,0,1($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
       LET do_lab = ($group_label_($vm)"0|NONE>0|none>0|units>0|*>1");\

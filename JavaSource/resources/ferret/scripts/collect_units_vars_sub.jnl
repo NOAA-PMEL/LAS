@@ -1,7 +1,12 @@
-
-! Find the next unique units string
+! collect_units_vars_sub
+!
+! Find the next unique units string and collect the variables
+! with this units
 ! argument is the current variable number. 
 ! comparing units_x and finding the next unique units_x+1
+
+! set up to reverse the vertical axis if all the variables in
+! a group have positive=down attributes
 
 DEFINE SYMBOL thisu = ($1)
 DEFINE SYMBOL nextu = `($thisu)+1`
@@ -31,6 +36,14 @@ DEFINE SYMBOL unique_($nextu) = ($inunits_($nextu))
 DEFINE SYMBOL group_label_($nextu) = ($in_units)
 DEFINE SYMBOL plot_vars_($nextu) = ($ferret_plot_var_($vm))
 
+
+LET attnames = ($data_($nextu)_var).attnames
+LET has_positive = IS_ELEMENT_OF_STR_N(attnames, "positive")
+LET pos = ($data_($nextu)_var).positive
+IF `has_positive GT 0` THEN
+   IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_($nextu) = 1
+ENDIF
+
 ! List of unique upper-cased strings now found.
 LET strings_unique_($nextu) =  XCAT (strings_unique_($thisu), "($unique_($nextu))" )
 
@@ -47,6 +60,16 @@ REPEAT/RANGE=2:($data_count)/name=v (\
 	DEFINE SYMBOL var_grp($vm) = ($nextu);\
         DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($vm));\
      LET num_found = `num_found + 1`;\
+     LET attnames = ($data_($vm)_var).attnames;\
+     IF `has_positive GT 0` THEN;\
+       IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_($nextu) = `($plot_pos_down_($nextu)"0") + 1`;\
+     ENDIF;\
    ENDIF)
+   
+   IF `($plot_pos_down_($nextu)"0") LT num_found` THEN 
+      CANCEL SYMBOL plot_pos_down_($nextu)
+   ELSE
+      DEFINE SYMBOL plot_pos_down_($nextu) = 1
+   ENDIF
  
 !  ----------------- End of collect_units_vars_sub.jnl ------------------------------------
