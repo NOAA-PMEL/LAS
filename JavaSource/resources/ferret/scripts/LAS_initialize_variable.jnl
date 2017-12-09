@@ -83,19 +83,8 @@ ELSE
 ENDIF
 
 IF ($check_for_pseudonames"0|*>1") THEN
-   LET pseudo_names = {\
-"'i'", "'j'", "'k'", "'l'", "'x'", "'y'", "'z'", "'t'", "'xbox'", "'ybox'", "'zbox'", "'tbox'", \
-"'xboxlo'", "'yboxlo'", "'zboxlo'", "'tboxlo'", "'xboxhi'", "'yboxhi'", "'zboxhi'", "'tboxhi'",  \
-"'I'", "'J'", "'K'", "'L'", "'X'", "'Y'", "'Z'", "'T'", "'XBOX'", "'YBOX'", "'ZBOX'", "'TBOX'", \
-"'XBOXLO'", "'YBOXLO'", "'ZBOXLO'", "'TBOXLO'", "'XBOXHI'", "'YBOXHI'", "'ZBOXHI'", "'TBOXHI'"}
-
-   IF `IS_ELEMENT_OF_STR("($data_var)",pseudo_names) `  THEN
-      LET slen = STRLEN("($data_var)")
-      DEFINE SYMBOL data_var_nq = `SUBSTRING("($data_var)", 2, slen-2)`
-      LET ($data_var_nq)_1 = ($data_var)
-      SET ATT/LIKE=($data_var) ($data_var_nq)_1
-      DEFINE SYMBOL data_var ($data_var_nq)_1
-   ENDIF
+   GO LAS_check_for_pseudoname ($data_var)
+   IF ($isit_pseudo"0|*>1") THEN DEFINE SYMBOL data_var ($isit_pseudo)
 ENDIF
 
 IF ($ferret_factor_label"0|*>1") THEN 

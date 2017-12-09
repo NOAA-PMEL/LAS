@@ -15,6 +15,9 @@ LET ii = i[g=($timevar)]
 LET iindices = IF constraints_mask THEN ii
 LET compress_mask = COMPRESSI(iindices)
 LET nok = `compress_mask[i=@ngd]`
+
+IF `STRINDEX("($data_($list_var)_var_in)", "'") EQ 1` THEN \
+        DEFINE SYMBOL data_($list_var)_var_in = ($data_($list_var)_var)1
 LET/TITLE="($data_($list_var)_title)"/UNITS="($data_($list_var)_units)" ($data_($list_var)_var_in) = SAMPLEI (zvar($list_var), compress_mask[i=1:`nok`])
 
 ! expand metadata variables onto the X axis
@@ -26,6 +29,9 @@ IF `($zshape"0|E>1|POINT>1|*>0)` THEN
    ELSE
       LET ($ferret_plot_var_($list_var))_xpnd = EXPND_BY_LEN(($ferret_plot_var_($list_var)), ($rowvar), `($rowvar)[m=@sum]`)
    ENDIF
+   
+   IF `STRINDEX("($data_($list_var)_var_in)", "'") EQ 1` THEN \
+        DEFINE SYMBOL data_($list_var)_var_in = ($data_($list_var)_var)1
    LET/TITLE="($data_($list_var)_title)"/UNITS="($data_($list_var)_units)" ($data_($list_var)_var_in) = SAMPLEI (($ferret_plot_var_($list_var))_xpnd, compress_mask[i=1:`nok`])
 ENDIF
 

@@ -5,8 +5,10 @@
     EXIT/script
  ENDIF
  DEFINE SYMBOL vname = ($data_($ivar)_var)
- IF `($($vname)_done"0|*>1") EQ 0` THEN SET VAR/NAME=($vname)_ ($vname)
+ DEFINE SYMBOL vnameNQ = ($data_($ivar)_var)
+ GO LAS_unquote_string vnameNQ
+ IF `($($vname)_done"0|*>1") EQ 0` THEN SET VAR/NAME=($vnameNQ)_ ($vname)
  DEFINE SYMBOL data_($ivar)_var_in = ($vname)
- DEFINE SYMBOL data_($ivar)_var = ($vname)_
- DEFINE SYMBOL ($vname)_done = 1
+ DEFINE SYMBOL data_($ivar)_var = ($vnameNQ)_
+ DEFINE SYMBOL ($vnameNQ)_done = 1
 

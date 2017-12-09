@@ -24,6 +24,13 @@ IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_tit
 ! Remove any quotes surrounding data_title string
 GO LAS_unquote_string data_title
 
+IF `($data_count"0") GT 1` THEN
+   REPEAT/RANGE=1:($data_count)/name=ivar (\
+    DEFINE SYMBOL ivar = `ivar`;\
+    GO LAS_unquote_string data_($ivar )_title;\
+   )
+ENDIF
+
 
 IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
 
@@ -61,8 +68,10 @@ IF `($1"0") EQ 0` THEN
 ENDIF
 
 ! SET DATA and check for errors
+!!!!  These are sometimes filled in with a tabledap address not the netCDF file.  Keep it using data_0_url.
+!!!! SET DATA "($data_($num)_url)"
 
-SET DATA "($data_($num)_url)"
+SET DATA "($data_0_url)"
 
 IF ($fer_last_error"0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR

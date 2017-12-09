@@ -9,7 +9,7 @@
 ! Called by Trajectory_Data_Convert_File.jnl 
 ! Write csv data: date/time, X, Y, Z, var1, var2, ...
 
-! Cannot list out a pseudo-variable, e.g. Z. In the initialization,
+! Cannot list out a pseudo-variable, e.g. Z. In the loop,
 ! check for pseutonames. If the variable name is a pseudo-var name, 
 ! write out name_1 e.g. Z_1 with all the same attributes.
 
@@ -31,6 +31,7 @@ LET nlist = 4
 ! make the list of variables to write. If lon/lat variables have been
 ! expanded onto the X axis they may have been redefined and the file
 ! variables included in skip_list_var.
+! Check here for pseudo-variable names such as K; replace with a Ferret-legal name.
 
 LET nvars = ..nvars
 LET varnames = ..varnames
@@ -38,6 +39,11 @@ repeat/range=1:`nvars`/name=ivar (\
   DEFINE SYMBOL ivar = `ivar`; \
   DEFINE SYMBOL vname = `varnames[i=($ivar)]`; \
   IF `STRINDEX("($skip_list_var%99%)", "($vname)") GT 0` THEN EXIT/CYCLE; \
+  GO LAS_check_for_pseudoname ($vname);\
+  IF ($isit_pseudo"0|*>1") THEN ;\
+     SET VAR/NAME=($isit_pseudo) '($vname)';\
+     DEFINE SYMBOL vname = ($isit_pseudo);\
+  ENDIF;\
   IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN GO reshape_list_var ($vname); \   
   IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN DEFINE SYMBOL vars_out = ($vars_out), ($vname); \
   IF `IS_ELEMENT_OF_STR_N("($vname)", skip_names) EQ 0` THEN LET nlist = `nlist+1`; \
