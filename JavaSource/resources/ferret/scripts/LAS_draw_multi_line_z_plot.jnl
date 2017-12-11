@@ -1,4 +1,4 @@
-! LAS_draw_multi_line_plot.jnl
+! LAS_draw_multi_line_z_plot.jnl
 !  Do a multi-line 1-D plot. 
 ! Arguments (optional) 1 throug 4: Viewport limits
 ! for DEFINE VIEWPORT/AXES definitions, within which to draw
@@ -14,8 +14,8 @@ set mode ver:always
 LET xvf = ($1%0.1%)
 LET xvl = ($2%0.9%)
 
-let yvf = ($3%0.13%)
-LET yvl = ($4%0.94%)
+let yvf = ($3%0.16%)  ! 0.2 >> 0.16
+LET yvl = ($4%0.98%)
 
 IF `STRCMP("($vpname%AA%)", "AA") EQ 0` THEN DEFINE SYMBOL vpname = vp
 IF `($nstations"0|*>1") EQ 0` THEN 
@@ -132,7 +132,7 @@ ENDIF
 ! so that we can control the line color.
 
 ! Draw the sets of lines with common units, each in a viewport
-LET yvl = `yvl - margin_del* (($nunit_grp"1")-2)`
+LET yvl = MIN(`yvl - margin_del* (($nunit_grp"1")-2)`, 1)
 
 ! First draw the horizontal axes
 ! Set up the horizontal-range symbols (The PPL RANGE call with high #tics sets up 
@@ -158,7 +158,7 @@ REPEAT/RANGE=1:`($nunit_grp"1")`/NAME=m (\
       PLOT/AXES=1,0,0,0($qualifiers_g($vm))/SYM=dot/COLOR=8/NOLAB {0,1};\
       LET do_lab = ($group_label_($vm)"0|NONE>0|none>0|units>0|*>1");\
       IF `do_lab` THEN LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen) + 0.35`, 0, 0, 0.12, @AC($group_label_($vm));\
-      LET yvlv = `yvlv + margin_del`;\
+      LET yvlv = MIN(`yvlv + margin_del`, 1);\
    ENDIF;\
    )
  
