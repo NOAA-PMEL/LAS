@@ -82,8 +82,9 @@ LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($($fer_sym)_var))
 IF ($its_trajectory_corr"0|*>1") THEN LET/TITLE="($ferret_title_0)" xvar = ($($fer_sym)_var)
 
 
-DEFINE SYMBOL vshape = `($($fer_sym)_var),return=SHAPE`
+DEFINE SYMBOL vshape = `($($fer_sym)_var),RETURN=SHAPE`
 IF `STRCMP("($vshape)", "E") EQ 0` THEN 
+   LET ne_var = `($($fer_sym)_var),RETURN=msize`
    DEFINE AXIS/x=1:`ne_var`:1 exaxis
    LET xxex = x[gx=exaxis]
    LET/TITLE="($ferret_title_0)" xvar = RESHAPE(($($fer_sym)_var), xxex)
@@ -214,6 +215,7 @@ ENDIF
 
 DEFINE SYMBOL vshape = `($($fer_sym)_var_1),return=SHAPE`
 IF `STRCMP("($vshape)", "E") EQ 0` THEN 
+   LET ne_var = `($($fer_sym)_var),RETURN=msize`
    DEFINE AXIS/x=1:`ne_var`:1 exaxis
    LET xxex = x[gx=exaxis]
    LET/TITLE="($ferret_title_0)" yvar = RESHAPE(($($fer_sym)_var_1), xxex)

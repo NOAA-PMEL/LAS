@@ -82,6 +82,8 @@ ENDIF
 ! Mean is black, thick. Other variables are thin, colors.
 ! If ferret_show_all_ensembles = no then plot only the mean
 
+LET is_ensemble = 0
+
 LET its_mean = `STRINDEX("($data_0_title)", "e=") GT 0` AND \
  `STRINDEX("($data_0_title)", "Ave") GT 0` AND \
  `STRINDEX("($data_0_var)", "_transformed") GT 0`
@@ -179,7 +181,8 @@ IF `its_mean AND (only_mean EQ 0)` THEN
       DEFINE SYMBOL itsa_multi_lineplot = 1
       DEFINE SYMBOL eaxis = (`($data_1_var),return=eaxis`)
       LET labels_var =  _m[m=($data_1_var)]
-   
+ 
+
       LET eattnames = ($eaxis).attnames
       IF `IS_ELEMENT_OF_STR(eattnames, "_CoordinateAxisType") GT 0 ` THEN 
          LET axtype = "`($eaxis)._CoordinateAxisType`"
@@ -201,6 +204,7 @@ IF `its_mean AND (only_mean EQ 0)` THEN
      DEFINE SYMBOL ferret_plot_var = ($data_($qq)_var); \
      DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
      DEFINE SYMBOL ferret_plot_var_($qq) = ($ferret_plot_var); \ 
+     DEFINE SYMBOL ferret_title_($qq) = Realization ($qq); \
      IF `is_ensemble` THEN DEFINE SYMBOL ferret_title_($qq) = ($enslab); \ 
      LET tlen = STRLEN("($ferret_title_($qq))"); \
      LET title_len = `MAX(tlen, title_len)`; \

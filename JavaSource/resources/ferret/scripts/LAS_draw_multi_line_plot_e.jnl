@@ -5,11 +5,19 @@
 !  4/06/13 Input is an averaged variable. Plot it with
 !          all of the member variables as colored lines.
 
+LET xvf = ($1%0.1%)
+LET xvl = ($2%0.9%)
+
+let yvf = ($3%0.16%)  ! 0.2 >> 0.16
+LET yvl = ($4%0.98%)
+
+! Open the window, apply size, scale options
 GO LAS_open_window
 
-LET margin_del = 0.08
-PPL AXLSZE,,0.08
-PPL AXNSIG,,2
+DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=`yvf`:`yvl` full1
+DEFINE VIEWPORT/AXES/TEXT=0.85/x=`xvf`:`xvl`/y=0:`yvl` full2
+
+SET VIEW full1
 
 LET save_count = ($data_count)
 PLOT($qualifiers)($qualifiers_0)/NOKEY/SET ($plot_arg)
@@ -42,9 +50,7 @@ DEFINE SYMBOL xax_max_save = ($xaxis_max)
 
 ! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
 
-DEFINE VIEWPORT/x=0:1/y=0:1/axes overview
-
-SET VIEW overview
+SET VIEW full2
 PLOT/NOYADJUST/NOLAB/NOAX/I=1:2/VLIM=100:102 i
 
 LET titlesiz = 0.09
