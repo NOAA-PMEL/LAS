@@ -9,6 +9,7 @@
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 !11/2011    ACM Consolidate line plots into one script.
+!12/11/2017 Fixes for datast configs with vars in different urls
 !
 ! line_plot_1D.jnl creates a line plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
@@ -50,9 +51,19 @@ ENDIF
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 LET title_len = STRLEN("($ferret_title_0)")
 
+! Initialize further variables
 ! Ignore line color if this is a multi-var plot.
 ! Also ignore any request for trend-line plots.
+
 IF `($data_count) GT 1` THEN 
+
+   REPEAT/RANGE=1:`($data_count)-1`/NAME=q (\
+     DEFINE SYMBOL q = `q`;\
+     GO LAS_initialize_region ($q);\
+     GO LAS_initialize_data  ($q);\
+    DEFINE SYMBOL ferret_plot_var_($q) = ($ferret_plot_var);\
+    )
+
    DEFINE SYMBOL itsa_multi_lineplot = 1
    DEFINE SYMBOL do_legend = 1
    CANCEL SYMBOL ferret_trend_line

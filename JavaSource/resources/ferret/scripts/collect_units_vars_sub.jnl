@@ -1,5 +1,7 @@
 ! collect_units_vars_sub
 !
+!12/11/2017 Fixes for datast configs with vars in different urls
+!
 ! Find the next unique units string and collect the variables
 ! with this units
 ! argument is the current variable number. 
@@ -37,7 +39,7 @@ DEFINE SYMBOL group_label_($nextu) = ($in_units)
 DEFINE SYMBOL plot_vars_($nextu) = ($ferret_plot_var_($vm))
 
 
-LET attnames = ($data_($nextu)_var).attnames
+LET attnames = ($data_($nextu)_var)[d=($data_($nextu)_num)].attnames
 LET has_positive = IS_ELEMENT_OF_STR_N(attnames, "positive")
 LET pos = ($data_($nextu)_var).positive
 IF `has_positive GT 0` THEN
@@ -60,7 +62,7 @@ REPEAT/RANGE=2:($data_count)/name=v (\
 	DEFINE SYMBOL var_grp($vm) = ($nextu);\
         DEFINE SYMBOL plot_vars_($nextu) = ($plot_vars_($nextu)), ($ferret_plot_var_($vm));\
      LET num_found = `num_found + 1`;\
-     LET attnames = ($data_($vm)_var).attnames;\
+     LET attnames = ($data_($vm)_var)[d=($data_($vm)_num)].attnames;\
      IF `has_positive GT 0` THEN;\
        IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_($nextu) = `($plot_pos_down_($nextu)"0") + 1`;\
      ENDIF;\

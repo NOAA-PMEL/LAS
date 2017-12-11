@@ -1,6 +1,10 @@
+! collect_unts_vars.jnl
+! Line plots with multiple variables possibly different units
+!
 ! Build up plot_vars_n symbols, with sets of variables
 ! that have common units.
-
+!12/11/2017 Fixes for datast configs with vars in different urls
+!
 ! Argument
 !   1 = Collect the unique units strings, and a list of which 
 !       variables has each units string.
@@ -22,7 +26,7 @@ LET nunique = 1
 
 DEFINE SYMBOL unique_0 = ($inunits_0)
 
-LET attnames = ($data_0_var).attnames
+LET attnames = ($data_0_var)[d=($data_0_num)].attnames
 LET has_positive = IS_ELEMENT_OF_STR_N(attnames, "positive")
 LET pos = ($data_0_var).positive
 IF `has_positive GT 0` THEN
@@ -39,7 +43,7 @@ REPEAT/RANGE=2:($data_count)/name=c (\
      DEFINE SYMBOL var_grp($cm) = 0;\
      DEFINE SYMBOL plot_vars_0 =  ($plot_vars_0), ($ferret_plot_var_($cm));\
      LET num_found = `num_found + 1`;\ 
-     LET attnames = ($data_($cm)_var).attnames;\
+     LET attnames = ($data_($cm)_var)[d=($data_($cm)_num)].attnames;\
      IF `has_positive GT 0` THEN;\
        IF ($pos"0|down>1|*>0") THEN DEFINE SYMBOL plot_pos_down_0 = `($plot_pos_down_0"0") + 1`;\
      ENDIF;\
