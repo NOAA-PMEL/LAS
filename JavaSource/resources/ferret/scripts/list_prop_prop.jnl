@@ -106,10 +106,19 @@ IF ($feature_variable"0|*>1") THEN
 	    LET iindices = IF constraints_mask THEN ii
 	    LET compress_mask = COMPRESSI(iindices)
 	    LET nok = `compress_mask[i=@ngd]`
+	    IF `STRINDEX("($feature_variable_in)", "'") EQ 1` THEN 
+	       GO LAS_unquote_string feature_variable_in
+	       DEFINE SYMBOL feature_variable_in = feature_variable_in1
+	    ENDIF
+
 	    LET/TITLE="($feature_variable_in)"  ($feature_variable_in) = SAMPLEI (($feature_variable)_xpnd, compress_mask[i=1:`nok`])
 
 	 ELSE
 	    LET traj_obs = EXPND_BY_LEN(($feature_variable), ($rowvar), `($rowvar)[m=@sum]`)
+	    IF `STRINDEX("($feature_variable_in)", "'") EQ 1` THEN 
+               GO LAS_unquote_string feature_variable_in
+	       DEFINE SYMBOL feature_variable_in = feature_variable_in1
+	    ENDIF
             LET/TITLE="($feature_variable_in)" ($feature_variable_in) = constraints_mask*traj_obs
          ENDIF
    ENDIF
@@ -271,6 +280,10 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET iindices = IF constraints_mask THEN ii
    LET compress_mask = COMPRESSI(iindices)
    LET nok = `compress_mask[i=@ngd]`
+   IF `STRINDEX("($data_0_var_in)", "'") EQ 1` THEN 
+      GO LAS_unquote_string data_0_var_in
+      DEFINE SYMBOL data_0_var_in = ($data_0_var_in)1
+   ENDIF
    LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0), compress_mask[i=1:`nok`])
 
 ! expand metadata variables onto the X axis
@@ -283,8 +296,10 @@ IF ($ferret_plot_var_0"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
       ELSE
          LET ($ferret_plot_var_0)_xpnd = EXPND_BY_LEN(($ferret_plot_var_0), ($rowvar), `($rowvar)[m=@sum]`)
       ENDIF
-      IF `STRINDEX("($data_0_var_in)", "'") EQ 1` THEN\
-        DEFINE SYMBOL data_0_var_in = ($data_0_var)1
+      IF `STRINDEX("($data_0_var_in)", "'") EQ 1` THEN 
+         GO LAS_unquote_string data_0_var_in
+         DEFINE SYMBOL data_0_var_in = ($data_0_var_in)1
+      ENDIF
       LET/TITLE="($data_0_title)"/UNITS="($data_0_units)" ($data_0_var_in) = SAMPLEI (($ferret_plot_var_0)_xpnd, compress_mask[i=1:`nok`])
    ENDIF
 
@@ -301,8 +316,10 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET iindices = IF constraints_mask THEN ii
    LET compress_mask = COMPRESSI(iindices)
    LET nok = `compress_mask[i=@ngd]`
-   IF `STRINDEX("($data_1_var_in)", "'") EQ 1` THEN\
-     DEFINE SYMBOL data_1_var_in = ($data_1_var)1
+   IF `STRINDEX("($data_1_var_in)", "'") EQ 1` THEN 
+      GO LAS_unquote_string data_1_var_in
+      DEFINE SYMBOL data_1_var_in = ($data_1_var_in)1
+   ENDIF
    LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1), compress_mask[i=1:`nok`])
 
    IF ($vtype"0|CHAR>1|*>0") THEN DEFINE SYMBOL is_string = 1
@@ -316,8 +333,10 @@ IF ($ferret_plot_var_1"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
       ELSE
          LET ($ferret_plot_var_1)_xpnd = EXPND_BY_LEN(($ferret_plot_var_1), ($rowvar), `($rowvar)[m=@sum]`)
       ENDIF
-      IF `STRINDEX("($data_1_var_in)", "'") EQ 1` THEN\
-        DEFINE SYMBOL data_1_var_in = ($data_1_var)1
+      IF `STRINDEX("($data_1_var_in)", "'") EQ 1` THEN 
+         GO LAS_unquote_string data_1_var_in
+         DEFINE SYMBOL data_1_var_in = ($data_1_var_in)1
+      ENDIF
       LET/TITLE="($data_1_title)"/UNITS="($data_1_units)" ($data_1_var_in) = SAMPLEI (($ferret_plot_var_1)_xpnd, compress_mask[i=1:`nok`])
    ENDIF
 
@@ -337,8 +356,10 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
    LET iindices = IF constraints_mask THEN ii
    LET compress_mask = COMPRESSI(iindices)
    LET nok = `compress_mask[i=@ngd]`
-   IF `STRINDEX("($data_2_var_in)", "'") EQ 1` THEN\
-     DEFINE SYMBOL data_2_var_in = ($data_2_var)1
+   IF `STRINDEX("($data_2_var_in)", "'") EQ 1` THEN 
+      GO LAS_unquote_string data_2_var_in
+      DEFINE SYMBOL data_2_var_in = ($data_2_var_in)1
+   ENDIF
    LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (zvar, compress_mask[i=1:`nok`])
 
 ! expand metadata variables onto the X axis
@@ -350,8 +371,10 @@ IF ($ferret_plot_var_2"0|time_>0|($feature_variable)>0|longitude_>0|latitude_>0|
       ELSE
          LET ($ferret_plot_var_2)_xpnd = EXPND_BY_LEN(($ferret_plot_var_2), ($rowvar), `($rowvar)[m=@sum]`)
       ENDIF
-      IF `STRINDEX("($data_2_var_in)", "'") EQ 1` THEN\
-        DEFINE SYMBOL data_2_var_in = ($data_2_var)1
+      IF `STRINDEX("($data_2_var_in)", "'") EQ 1` THEN 
+         GO LAS_unquote_string data_2_var_in
+         DEFINE SYMBOL data_2_var_in = ($data_2_var_in)1
+      ENDIF
       LET/TITLE="($data_2_title)"/UNITS="($data_2_units)" ($data_2_var_in) = SAMPLEI (($ferret_plot_var_2)_xpnd, compress_mask[i=1:`nok`])
    ENDIF
 
