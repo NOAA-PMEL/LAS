@@ -172,6 +172,22 @@ let q_var = q + pqmask
 LET pminmax = MINMAX(p_var)
 LET qminmax = MINMAX(q_var)
 
+! Check for all-bad data. pminmax and qminmax depend on both p and q.
+! If bad, figure out which variable is all-bad and set the label string. 
+
+DEFINE SYMBOL isbad =  `pminmax[i=2] - pminmax[i=1] `
+IF ($isbad"0|bad>1|*>0") THEN 
+   DEFINE SYMBOL qgood = `q[i=@ngd] GT 0`
+   DEFINE SYMBOL pgood = `p[i=@ngd] GT 0`
+   DEFINE SYMBOL bad_verb = is
+   IF `($pgood) EQ 0 AND ($qgood) NE 0` THEN DEFINE SYMBOL bad_title = ($ferret_title_0) 
+   IF `($pgood) NE 0 AND ($qgood) EQ 0` THEN DEFINE SYMBOL bad_title = ($ferret_title_1) 
+   IF `($pgood) EQ 0 AND ($qgood) EQ 0` THEN 
+      DEFINE SYMBOl bad_verb = are
+      DEFINE SYMBOL bad_title = ($ferret_title_0) and <nl>($ferret_title_1) 
+   ENDIF
+ENDIF
+
 ! Define axes for both variables using the range in the data
 
 !----------
@@ -663,13 +679,15 @@ IF ($put_label"0|*>1") THEN
    LET ylab_bad = ($ppl$ylen) - 1
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
       IF ($ferret_thumb"0|0|*>1") THEN  
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> is all-missing
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
          LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
 	 DEFINE SYMBOL no_novalid_lab = 1
+	 CANCEL SYMBOL bad_title
       ELSE
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0) is all-missing
+         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
          LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
 	 DEFINE SYMBOL no_novalid_lab = 1
+	 CANCEL SYMBOL bad_title
       ENDIF
       DEFINE SYMBOL bad_pp_var = 1
    ENDIF
@@ -682,11 +700,13 @@ IF ($put_label"0|*>1") THEN
    IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
    
       IF ($ferret_thumb"0|0|*>1") THEN  
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> is all-missing
+         IF ($bad_title"0|*>1") THEN \
+	  LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
          LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
 	 DEFINE SYMBOL no_novalid_lab = 1
       ELSE
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1) is all-missing
+         IF ($bad_title"0|*>1") THEN \
+	  LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
          LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
 	 DEFINE SYMBOL no_novalid_lab = 1
       ENDIF
