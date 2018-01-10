@@ -1,6 +1,6 @@
 # LAS
 The Live Access Server from NOAA/PMEL.  
-This repository is regularly synchronized with the trunk of the LAS repository at PMEL using git-svn.
+This is now the primary repository for LAS source code and releases.
 
 #### Legal Disclaimer
 *This repository is a software product and is not official communication 
