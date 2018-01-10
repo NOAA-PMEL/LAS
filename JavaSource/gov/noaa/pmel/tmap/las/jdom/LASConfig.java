@@ -31,6 +31,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.ERDDAPConstraintGroup;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -778,10 +779,22 @@ public class LASConfig extends LASDocument {
             }
 
             if ( !found ) {
+                // Try ISO formatting as a special case.
+                try {
+                    fmt = ISODateTimeFormat.dateTimeParser();
+                    lodt = fmt.parseDateTime(tlo);
+                    found = true;
+                } catch (IllegalArgumentException e ) {
+                    found = false;
+                }
+            }
+
+            if ( !found ) {
                 throw new LASException("Time format for could not be parsed.");
             }
 
             DateTimeFormatter longfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC);
+            DateTimeFormatter isoFmt = ISODateTimeFormat.dateTimeParser();
 
             axis.setAttribute("lo", lodt.toString(longfmt));
             DateTime hidt = new DateTime();
