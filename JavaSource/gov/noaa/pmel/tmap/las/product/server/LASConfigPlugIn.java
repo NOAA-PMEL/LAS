@@ -194,7 +194,6 @@ public class LASConfigPlugIn {
 			// Store in the servlet context for use by the reinit method
 			context.setAttribute(LAS_UI_CONFIG_FILENAME_KEY, lasUIFileName);
 		}
-
 		reinit_flag = false;
 		try {
 			go_init();
@@ -203,7 +202,7 @@ public class LASConfigPlugIn {
 		} catch (UnsupportedEncodingException e) {
 			log.error("Could not parse the las config file "+configFileName);
 		} catch (LASException e) {
-		    log.error("Could not parse the las config file "+configFileName);
+		    log.error("Could not parse the las config file "+configFileName + " " + e.getLocalizedMessage());
         } catch (IOException e) {
             log.error("Could not parse the las config file "+configFileName);
         }
