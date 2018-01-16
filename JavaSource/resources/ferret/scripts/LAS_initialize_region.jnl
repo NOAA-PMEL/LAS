@@ -95,7 +95,7 @@ ELSE
    IF `($win_aspect) GT 2.5` THEN DEFINE SYMBOL win_aspect = 2.5
 ENDIF
 
-CANCEL DATA "($data_0_url)"
+!CANCEL DATA "($data_0_url)"
 ENDIF  ! end of adjusting xy aspect ratio
 
 ! NOTE:  Occasionally the LAS applet will send in a longitude or latitude
