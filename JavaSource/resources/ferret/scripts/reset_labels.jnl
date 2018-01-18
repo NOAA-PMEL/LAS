@@ -1,6 +1,8 @@
 ! reset_labels.jnl
 ! remove lots of labels as they are relocated by the scripts
 ! Define symbols used by the annotations xml
+! 1/2018 issue 1854 Inside of a SHADE/SET, LET commands that redefine a variable can
+! cause curvi coord data to be wiped out. As a workaround, cancel any vars we define
 
 
 IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
@@ -52,6 +54,8 @@ IF `($data_count"1") EQ 1` THEN
    IF ($labnum_e%0|*>1%) THEN
 !      DEFINE SYMBOL ensemble_lab Ensemble Member ($region_e_lo)
       
+      IF `varnames,RETURN=defined` THEN CANCEL VAR varnames
+      IF `labels,RETURN=defined` THEN CANCEL VAR labels
       LET varnames = ..varnames
       IF `IS_ELEMENT_OF_STR_N(varnames, "labels") EQ 0` THEN LET labels = _m[ge=($data_var)]
 
@@ -89,8 +93,14 @@ ENDIF
 
 IF ($ferret_annotations"0|*>1") THEN GO key_at_top
 
-LET add_urls = 1
-IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0
+IF `add_urls,RETURN=defined` THEN CANCEL VAR add_urls
+
+IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN 
+   LET add_urls = 0
+ELSE 
+   LET add_urls = 1
+ENDIF
+
 DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
 
 

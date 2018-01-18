@@ -3,11 +3,20 @@
 ! 
 ! 10/2017 Cosmetic changes, make the colorbar longer across the top
 ! 
+! 1/2018 issue 1854 Inside of a SHADE/SET, LET commands that redefine a variable can
+! cause curvi coord data to be wiped out. As a workaround, cancel any vars we define
+
 ! Google Earth plots have their own, separate color bar image file.
 IF ($its_GE"0|*>1") THEN EXIT/SCRIPT
 IF `($ferret_plot_key"1|0|*>1") EQ 0` THEN EXIT/SCRIPT
 
 DEFINE SYMBOL horizontal_key = 1
+
+IF `key_label_size,RETURN=defined` THEN CANCEL VAR key_label_size
+IF `x1,RETURN=defined` THEN  THEN CANCEL VAR x1
+IF `x2,RETURN=defined` THEN  THEN CANCEL VAR x2
+IF `y1,RETURN=defined` THEN  THEN CANCEL VAR y1
+IF `y2,RETURN=defined` THEN  THEN CANCEL VAR y2
 
 LET key_label_size = 0.08
 
@@ -15,7 +24,7 @@ ppl ylab
 ppl xlab
 let x1 = `($ppl$xorg)+0.5`
 let x2 = `($ppl$xorg)+($ppl$xlen)-0.5`
-let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
+!let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.04`
 let y2 = `y1+0.2`
 
