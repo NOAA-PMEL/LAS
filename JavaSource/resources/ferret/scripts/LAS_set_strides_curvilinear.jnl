@@ -7,6 +7,7 @@
 ! When native striding is used for curvilinear data, be sure the range
 ! of index values requested wont go beyond the index range of the grid.
 
+! 1/18 Fixes for over-limiting the index range for strided curvilienar grids
 
 IF `($ferret_subsample_t"1|0|1|true>1|false>0|*>1") EQ 0 AND ($ferret_view"|t>1|T>1|*>0")` THEN EXIT/SCRIPT
 
@@ -177,8 +178,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	 LET x_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
          DEFINE SYMBOL clon_imax = `MIN (ixmax, INT(($clon_imax)/($xstride)) )`
-	 IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
-	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+!	 IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+!	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+         IF `($clon_imax) GT ixmax` THEN DEFINE SYMBOL clon_imax = `ixmax`
       ENDIF
 
 ! Use /HLIM and /VLIM to define the plot rectangle. If this is a native
@@ -201,8 +203,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	 LET y_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          DEFINE SYMBOL clat_jmax = `MIN(jymax, INT(($clat_jmax)/($ystride)) )`
-	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
-	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+!	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
+!	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+         IF `($clat_jmax) GT jymax` THEN DEFINE SYMBOL clat_jmax = `jymax`
 
       ENDIF
 
@@ -233,9 +236,10 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	      LET x_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
               DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
- 
-	      IF `(($clon_imin) + rem + ($clon_imax)*($xstride)) GT ixmax` THEN \
-	         DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+!	      IF `(($clon_imin) + rem + ($clon_imax)*($xstride)) GT ixmax` THEN \
+!	         DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+		 
+	      IF `($clon_imax) GT ixmax` THEN DEFINE SYMBOL clon_imax = `ixmax`
            ENDIF
 
         ENDIF
@@ -257,8 +261,10 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	      LET y_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
               DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
-	      IF `(($clat_jmin) + rem + ($clat_jmax)*($ystride)) GT ny` THEN \
-	         DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+!	      IF `(($clat_jmin) + rem + ($clat_jmax)*($ystride)) GT ny` THEN \
+!	         DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+              IF `($clat_jmax) GT jymax` THEN DEFINE SYMBOL clat_jmax = `jymax`
+    
            ENDIF
 
         ENDIF
