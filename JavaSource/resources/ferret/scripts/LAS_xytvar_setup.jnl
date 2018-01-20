@@ -459,6 +459,8 @@ IF `itsa_tim_prop` THEN
    DEFINE SYMBOL connect_dots = 1
    DEFINE SYMBOL do_rsquare = 0
 
+   LET timplotvar = t[gt=haxis2k]
+
 ENDIF
 
 ! Formatted vertical axes
@@ -598,6 +600,8 @@ IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN
    DEFINE SYMBOL connect_dots = 1
    DEFINE SYMBOL do_rsquare = 0
 
+   LET timplotvar = t[gt=vaxis]
+
 ENDIF
 
 DEFINE SYMBOL axes_already_defined = 1
@@ -617,10 +621,26 @@ IF ($ferret_thumb"0|0|*>1") THEN
    SET VIEW full_view
 ENDIF
 
+! Do time underlay as a line plot, so the overlays work consistently
+
+IF `itsa_tim_plot OR itsa_tim_prop` THEN
+
+   LET vert_minmax = MINMAX(indep_var)
+
+   LET amin = vert_minmax[i=1]
+   LET amax = vert_minmax[i=2]
+
+   LET is_time = 0
+   GO LAS_is_range amin amax
+
+   PLOT/NOLAB/VLIM=`amin`:`amax` timplotvar
+   EXIT/SCRIPT
+ENDIF
+
+
 LET bvar = dep_var + indep_var
-stat bvar
 IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var
-stat bvar
+
 
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
