@@ -3,6 +3,7 @@
 !  9/  2017  Set up for listings that include a fourth variable, e.g. second qc flag.
 ! 10/2017    Set up to list up to a total of 10 variables, data_0_var through data_9_var.
 ! 11/2017    Allow for datasets where the variables come from different URLs.
+!  1/2018 Time will only be the independent variable - no vertical time axis.
 
 IF `(($its_listing"0|*>1") EQ 0) AND (($data_count"0") LT 2)` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -400,7 +401,7 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
       DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
-! If string, set to all-missing. But custom scripts may do more, e.g. for SOCAT
+! If string, set to all-missing. (But custom scripts may do more later, e.g. for SOCAT)
       IF `($is_string) AND ($its_listing"0|*>1") EQ 0` THEN
          DEFINE SYMBOL zvar_is_string = 1  
          LET zvar = 1./0 + 0*xvar
