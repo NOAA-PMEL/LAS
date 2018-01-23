@@ -75,7 +75,18 @@ DEFINE SYMBOL viewsave = ($ferret_view)
 DEFINE SYMBOL ferret_view = aa  
 
 IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 0.8
-IF ($ferret_plot_var_0"|time>1|*>0") THEN DEFINE SYMBOL win_aspect = 0.3
+
+! Set aspect ratio for time plots
+GO LAS_var_lon_lat_time ($ferret_plot_var_0)
+LET itsa_tim_prop = ($var_is_time"0")
+
+GO LAS_var_lon_lat_time ($ferret_plot_var_1)
+LET itsa_lon_plot = ($var_is_lon"0")
+
+IF `itsa_tim_prop` THEN 
+   IF `itsa_lon_plot EQ 0` THEN DEFINE SYMBOL win_aspect = 0.3
+ENDIF
+
 GO LAS_open_window
 
 DEFINE SYMBOL ferret_view = ($viewsave)

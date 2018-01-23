@@ -19,6 +19,38 @@ LET vnames = ..varnames
 ! Initialize
 
 
+
+!!! Plot time only as the independent variable.  If they
+!!! have sent in time as the dependent var, swap it.
+
+GO LAS_var_lon_lat_time ($data_1_var)
+IF `($var_is_time"0") AND ($its_prop_plot"0|0|*>1")` THEN
+   
+   DEFINE SYMBOL data_sw_dataset_url = ($data_0_url)
+   DEFINE SYMBOL data_sw_region = ($data_0_region)
+   DEFINE SYMBOL data_sw_title = ($data_0_title)
+   DEFINE SYMBOL data_sw_units = ($data_0_units)
+   DEFINE SYMBOL data_sw_url = ($data_0_url)
+   DEFINE SYMBOL data_sw_var = ($data_0_var)
+   
+   DEFINE SYMBOL data_0_dataset_url = ($data_1_url)
+   DEFINE SYMBOL data_0_region = ($data_1_region)
+   DEFINE SYMBOL data_0_title = ($data_1_title)
+   DEFINE SYMBOL data_0_units = ($data_1_units)
+   DEFINE SYMBOL data_0_url = ($data_1_url)
+   DEFINE SYMBOL data_0_var = ($data_1_var)
+   
+   DEFINE SYMBOL data_1_dataset_url = ($data_sw_url)
+   DEFINE SYMBOL data_1_region = ($data_sw_region)
+   DEFINE SYMBOL data_1_title = ($data_sw_title)
+   DEFINE SYMBOL data_1_units = ($data_sw_units)
+   DEFINE SYMBOL data_1_url = ($data_sw_url)
+   DEFINE SYMBOL data_1_var = ($data_sw_var)
+
+   CANCEL SYMBOL data_sw*
+
+ENDIF
+
 GO LAS_unquote_string data_0_title
 
 LET data_0_title = "($data_0_title)"
@@ -299,6 +331,7 @@ ENDIF
 
 ENDIF   ! data_count ge 2
 
+
 IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
    ! Initialized the 3rd variable above, but do it again to set names up
@@ -329,7 +362,6 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_plot_var = ($($fer_sym)_var)
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
-
 
 ! Is it a varible on the E axis of a DSG file?
 
@@ -368,7 +400,9 @@ IF `($data_count"0") GE 3` THEN ! color by 3rd variable
       DEFINE SYMBOL vtype = `gettype,RETURN=dtype`
       DEFINE SYMBOL is_string = ($vtype"0|CHAR>1|*>0")
 
+! If string, set to all-missing. But custom scripts may do more, e.g. for SOCAT
       IF `($is_string) AND ($its_listing"0|*>1") EQ 0` THEN
+         DEFINE SYMBOL zvar_is_string = 1  
          LET zvar = 1./0 + 0*xvar
          DEFINE SYMBOL note_num = `($note_num"0") + 1`
          DEFINE SYMBOL note_($note_num)_lab = ($data_2_title) is not numeric. Plot without color.
