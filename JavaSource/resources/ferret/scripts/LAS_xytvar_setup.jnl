@@ -9,6 +9,7 @@
 ! 11/2017 find direction variables based on attributes instead of assuming
 !         longitude, latitude, and time are variable names
 ! 12/2017 Define varibles for min,max of p and q for efficiency
+!  1/2018 Time will only be the independent variable - no vertical time axis.
 
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -26,8 +27,6 @@
 PPL TICS .6,.125,.6,.125
 PPL TICS .125,.2,.125,.2
 PPL axlabp,-1,-1
-
-say AAAAAAAAA ($ferret_prop_var)   ($ferret_plot_var) AAAAAAAAA
 
 !! TESTING; do we want to only constrain the map for constraints, not for
 !! chosen trajectories?
