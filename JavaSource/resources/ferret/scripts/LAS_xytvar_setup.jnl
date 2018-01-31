@@ -9,6 +9,7 @@
 ! 11/2017 find direction variables based on attributes instead of assuming
 !         longitude, latitude, and time are variable names
 ! 12/2017 Define varibles for min,max of p and q for efficiency
+!  1/2018 Time will only be the independent variable - no vertical time axis.
 
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -75,7 +76,7 @@ ENDIF
 
 IF ($variable_1_lab"0|*>1") THEN 
    DEFINE SYMBOL ax_label_y PPL YLAB @AC($variable_1_lab)
-   IF `itsa_tim_plot OR itsa_lon_plot OR itsa_lat_plot` THEN  CANCEL SYMBOL ax_label_y
+   IF `itsa_lon_plot OR itsa_lat_plot` THEN  CANCEL SYMBOL ax_label_y
 ENDIF
 
 
@@ -120,9 +121,6 @@ IF `($axes_already_defined"0|*>1") EQ 0` THEN
 DEFINE SYMBOL win_asp = /ASPECT=.8
 
 IF `itsa_tim_prop` THEN DEFINE SYMBOL win_asp = /ASPECT=0.75
-
-IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN DEFINE SYMBOL win_asp = /ASPECT=1.5
-
 IF `itsa_lon_prop AND itsa_lat_plot` THEN DEFINE SYMBOL win_asp = /ASPECT=`($region_Y_range)/($region_X_range)`
 
 DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
@@ -337,7 +335,6 @@ LET dep_var1 = x[gx=haxis1]; sh var dep_var1
 LET qminmax = MINMAX(q_var)
 LET amin = qminmax[i=1]
 LET amax = qminmax[i=2]
-DEFINE SYMBOL is_time = `itsa_tim_plot`
 GO LAS_is_range amin amax
 CANCEL SYMBOL is_time
 
@@ -554,61 +551,6 @@ IF ($reverse_vert"0") THEN
 
 ENDIF
 
-IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
-
-! Get min and max times and create a time axis.
-! Draw a blank plot to put formatted axis on the plot.
-
-   LET amin = qminmax[i=1]
-   LET amax = qminmax[i=2]
-
-   CANCEL SYMBOL data_units
-   DEFINE SYMBOL data_title Time
-   DEFINE SYMBOL is_time = 1
-   GO LAS_is_range amin amax
-
-   IF `baddat EQ 1` THEN  ! plot the time axis with a label, no valid data
-      LET since_loc = STRINDEX("($tunits)","since") - 2
-      IF `since_loc GT 1` THEN 
-         LET tunits = SUBSTRING("($tunits)",1,`since_loc`)
-         DEFINE SYMBOL tunits = `tunits`
-      ENDIF
-
-      DEFINE AXIS/t/T0="`($data_t_var).time_origin`"/units=($tunits"seconds")  vaxis = ($ferret_plot_var)
-      DEFINE SYMBOL win_asp = /ASPECT=0.75
-      DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
-      LET tt = t[gt=vaxis]
-   ELSE
-!     short or zero time range
-      IF `ax_hi - ax_lo LT 3600 AND ($tunits%|seconds>1|*>0%)` THEN
-         LET ax_hi = `ax_hi + 7200,prec=15`
-	 LET ax_lo = `ax_lo - 7200,prec=15`
-	 LET del_ax = 30
-      ENDIF
-      DEFINE AXIS/T=`ax_lo,prec=15`:`ax_hi,prec=15`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
-      DEFINE SYMBOL timeaxis = vaxis
-      DEFINE AXIS/Y=`ax_lo`:`ax_hi`:`del_ax` vaxis1
-      LET tt = t[gt=vaxis]
-
-! Set symbols with the axis box ends to be written to the map-scale file.
-      LET nt = `tt,RETURN=size`
-      LET t1 = `tboxlo[gt=vaxis,L=1]`
-      LET tn = tboxhi[gt=vaxis,L=`nt`]
-      DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
-      DEFINE SYMBOL vaxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
-      DEFINE SYMBOL vaxis_taxname = vaxis
-   ENDIF
-
-   LET indep_var = 0*t[gt=vaxis]
-   IF `itsa_lat_prop` THEN DEFINE SYMBOL pqual = /TRANS 
-
-   DEFINE SYMBOL connect_dots = 1
-   DEFINE SYMBOL do_rsquare = 0
-
-   LET timplotvar = t[gt=vaxis]
-
-ENDIF
-
 DEFINE SYMBOL axes_already_defined = 1
 
 ENDIF  ! axes_already_defined, make the underlay plot.
@@ -628,7 +570,7 @@ ENDIF
 
 ! Do time underlay as a line plot, so the overlays work consistently
 
-IF `itsa_tim_plot OR itsa_tim_prop` THEN
+IF `itsa_tim_prop` THEN
 
    LET vert_minmax = MINMAX(indep_var)
 
@@ -756,17 +698,6 @@ IF `itsa_tim_prop` THEN
    LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
    SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
    SET MODE/LAST nodata_lab
-   EXIT/SCRIPT
-ENDIF
-
-IF `itsa_tim_prop EQ 0 AND itsa_tim_plot` THEN 
-   SET VIEW ($view2)
-   LET bvar = dep_var1 + indep_var1
-   IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var1
-   LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
-   SHADE/NOAX/NOKEY/PAL=white/title=" " allmiss
-   SET MODE/LAST nodata_lab
-
    EXIT/SCRIPT
 ENDIF
 
