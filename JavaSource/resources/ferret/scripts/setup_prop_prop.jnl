@@ -24,8 +24,7 @@ LET vnames = ..varnames
 !!! Plot time only as the independent variable.  If they
 !!! have sent in time as the dependent var, swap it.
 
-IF ($data_1_var"0|*>1") THEN GO LAS_var_lon_lat_time ($data_1_var)
-
+GO LAS_var_lon_lat_time ($data_1_var)
 IF `($var_is_time"0") AND ($its_prop_plot"0|0|*>1")` THEN
    
    DEFINE SYMBOL data_sw_dataset_url = ($data_0_url)
