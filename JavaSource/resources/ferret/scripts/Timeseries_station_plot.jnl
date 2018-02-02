@@ -487,16 +487,21 @@ ELSE  ! more than 1 station
 !         LABEL/NOUSER `0.5*($ppl$xlen)`,`0.5*($ppl$ylen)`,0,0,0.15 No Valid Data
       ELSE
 
+! Define correct time axis for each trajectory.  If there are large gaps in the
+! time axis itself detect that and pick up the pen.
+
          cancel symbol ferret_plot_var
 
          LET colrx = id2d[m=1]  
          DEFINE SYMBOL cshp = `colrx,RETURN=shape`
       
+	 LET row1 = 1
+	 LET rowm = `($rowvar)[m=1]`
+
          REPEAT/RANGE=1:`nstations`/name=s (\
          DEFINE SYMBOL s = `s`;\
-         LET ntt = rowsize[m=($s)];\ 
-         DEFINE AXIS/T=`time2d[m=($s),i=@min],PREC=15`:`time2d[m=($s),i=@max],prec=15`/\
-         NPOINTS=`ntt`/UNITS=seconds/T0="`time.time_origin`" taxis;\
+         LET rowm = `row1+rowsize[m=($s)]-1`;\
+         DEFINE AXIS/T/UNITS=seconds/T0="`time.time_origin`" taxis = time[i=`row1`:`rowm`];\
          LET tempx = var2d_0[m=($s)];\
          LET colrx = id2d[m=($s)];\
          DEFINE SYMBOL ferret_title_`($s)-1` `($feature_variable)[m=($s)]`;\
@@ -505,8 +510,11 @@ ELSE  ! more than 1 station
          LET have_dat = 1;\
          LET var_t = reshape(tempx, tt);\
          LET colort = reshape(colrx, tt) - 0.1;\
-         PLOT/OVER/LINE/NOLAB/THICK=1/RIBBON($qualifiers) var_t,colort;\
-	 )
+	 let delt = tbox[gt=taxis];\
+	 let maskvar = delt[L=@ave]*1.1;\
+	 let gap_mask = if delt LE `maskvar` then 1;\
+         PLOT/OVER/NOLAB/THICK=1/RIBBON($qualifiers) gap_mask*var_t,colort;\
+	 let row1 = `rowm+1`)
 		 
 	 IF ($units_0"0|units>0|none>0|NONE>0|*>1") THEN LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
 
