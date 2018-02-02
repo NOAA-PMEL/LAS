@@ -10,6 +10,7 @@
 !         longitude, latitude, and time are variable names
 ! 12/2017 Define varibles for min,max of p and q for efficiency
 !  1/2018 Time will only be the independent variable - no vertical time axis.
+!  2/2018 Make a blank plot and exit immediately on finding a var is all-bad.
 
 ! Draw the underlying axes of a property-property plot,
 ! formatted as a longitude, latitude or time axis.
@@ -174,7 +175,7 @@ LET qminmax = MINMAX(q_var)
 ! If bad, figure out which variable is all-bad and set the label string. 
 
 DEFINE SYMBOL isbad =  `pminmax[i=2] - pminmax[i=1] `
-IF ($isbad"0|bad>1|*>0") THEN 
+IF ($isbad"0|bad>1|*>0")  THEN 
    DEFINE SYMBOL qgood = `q[i=@ngd] GT 0`
    DEFINE SYMBOL pgood = `p[i=@ngd] GT 0`
    DEFINE SYMBOL bad_verb = is
@@ -184,6 +185,23 @@ IF ($isbad"0|bad>1|*>0") THEN
       DEFINE SYMBOl bad_verb = are
       DEFINE SYMBOL bad_title = ($ferret_title_0) and <nl>($ferret_title_1) 
    ENDIF
+ENDIF
+
+IF ($bad_title"0|*>1") THEN
+   PLOT/VS/NOLAB/SYM=dot {0,1}, {0,1}
+   IF ($ferret_thumb"0|0|*>1") THEN  
+      LABEL/NOUSER 0.2, `($ppl$ylen)-0.4`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
+      LET ylab_bad = `($ppl$ylen)-3*($miss_lab_siz)`
+      DEFINE SYMBOL no_novalid_lab = 1
+      CANCEL SYMBOL bad_title
+   ELSE
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
+      LET ylab_bad = `($ppl$ylen)-2*($miss_lab_siz)`
+      DEFINE SYMBOL no_novalid_lab = 1
+      CANCEL SYMBOL bad_title
+   ENDIF
+   DEFINE SYMBOL ngood_data = -1   ! Dont do another label in LAS_results.
+   EXIT/SCRIPT
 ENDIF
 
 ! Define axes for both variables using the range in the data
@@ -234,9 +252,7 @@ IF `itsa_lon_prop` THEN
    LET amin = MIN(`amin360 - adel`, 360)
    LET amax = MAX(`amax360 + adel`, 0)
 
-    DEFINE SYMBOL isbad =  `(amax - amin) `  ! a constraint on longitude may make amin,amax bad.
     LET adiff = amax - amin
-    IF ($isbad"0|bad>1|*>0") THEN LET adiff = 9000
 
    IF `(amax360 - amin360) LT adiff` THEN 
 
@@ -404,20 +420,6 @@ IF `itsa_tim_prop` THEN
    CANCEL SYMBOL data_1_units
    DEFINE SYMBOL data_1_title = Time
 
-   IF `baddat EQ 1` THEN  ! plot the time axis with a label, no valid data
-   
-      LET since_loc = STRINDEX("($tunits)","since") - 2
-      IF `since_loc GT 1` THEN 
-         LET tunits = SUBSTRING("($tunits)",1,`since_loc`)
-         DEFINE SYMBOL tunits = `tunits`
-      ENDIF
-
-      DEFINE AXIS/t/T0="`($data_t_var).time_origin`"/units="($tunits)" haxis = ($ferret_prop_var)
-      LET tt = t[gt=haxis]
-      DEFINE SYMBOL win_asp = /ASPECT=0.75
-      DEFINE SYMBOL set_window_quals = /SIZE=($ferret_size"0.5")($win_asp)
-      ppl axlabp,0,0
-   ELSE
 !     handling case where the time range is zero or very short
       IF `ax_hi - ax_lo LT 3600 AND ($tunits%|seconds>1|*>0%)` THEN
          LET ax_hi = `ax_hi + 7200,prec=15`
@@ -445,7 +447,6 @@ IF `itsa_tim_prop` THEN
       DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING (t1, tt, "minutes")`
       DEFINE SYMBOL haxis_tend = `TAX_DATESTRING (tn, tt, "minutes")`
       DEFINE SYMBOL haxis_taxname = haxis
-   ENDIF
 
    LET dep_var = 0*t[gt=haxis]
    IF ($haxis2k_defined"0|1") THEN 
@@ -589,7 +590,6 @@ ENDIF
 LET bvar = dep_var + indep_var
 IF `dep_var2k,RETURN=defined` then LET bvar = dep_var2k + indep_var
 
-
 LET allmiss = IF bvar THEN (`bvar,RETURN=bad`)
 CANCEL MODE nodata_lab
 IF `($special_label_x"0|*>1") OR ($special_label_y"0|*>1") OR\
@@ -618,77 +618,6 @@ IF ($lab1"0|*>1") THEN
    GO unlabel 1
 ENDIF
 PPL SHADE
-
-! If put_label was defined, something caused one or both variables to be all BAD.
-
-IF ($put_label"0|*>1") THEN 
-
-   DEFINE SYMBOL xvtype = `xvar,return=dtype`
-   IF ($vtype"0|CHAR>1|*>0") THEN 
-      LET ylab_bad = ($ppl$ylen) - 1
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_0)<NL> has an invalid data type. Choose another variable
-      EXIT/SCRIPT
-   ENDIF
-
-   DEFINE SYMBOL vtype = `yvar,return=dtype`
-   IF ($vtype"0|CHAR>1|*>0") THEN 
-      LET ylab_bad = ($ppl$ylen) - 1
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($ferret_title_1)<NL> has an invalid data type. Choose another variable
-      EXIT/SCRIPT
-   ENDIF
-
-! add labels if a whole variable is all-bad
-! p is masked XVAR
-
-   LET xvminmax = MINMAX(xvar)
-   LET amin = xvminmax[i=1]
-   LET amax = xvminmax[i=2]
-
-   LET ylab_bad = ($ppl$ylen) - 1
-   IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-      IF ($ferret_thumb"0|0|*>1") THEN  
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
-         LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
-	 DEFINE SYMBOL no_novalid_lab = 1
-	 CANCEL SYMBOL bad_title
-      ELSE
-         LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
-         LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
-	 DEFINE SYMBOL no_novalid_lab = 1
-	 CANCEL SYMBOL bad_title
-      ENDIF
-      DEFINE SYMBOL bad_pp_var = 1
-   ENDIF
-
-! q is masked YVAR
-
-   LET yvminmax = MINMAX(xvar)
-   DEFINE SYMBOL ax_lo = `yvminmax[i=1]`
-   DEFINE SYMBOL ax_hi = `yvminmax[i=2]`
-   IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
-   
-      IF ($ferret_thumb"0|0|*>1") THEN  
-         IF ($bad_title"0|*>1") THEN \
-	  LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
-         LET ylab_bad = `ylab_bad-3*($miss_lab_siz)`
-	 DEFINE SYMBOL no_novalid_lab = 1
-      ELSE
-         IF ($bad_title"0|*>1") THEN \
-	  LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
-         LET ylab_bad = `ylab_bad-2*($miss_lab_siz)`
-	 DEFINE SYMBOL no_novalid_lab = 1
-      ENDIF
-      DEFINE SYMBOL bad_pp_var = 1
-   ENDIF
-
-   IF `($bad_pp_var"0") EQ 0` THEN 
-      LABEL/NOUSER 0.2, `ylab_bad-($miss_lab_siz)`, -1, 0, 0.12, @ASConstraints result in no valid data
-      DEFINE SYMBOL no_novalid_lab = 1
-   ENDIF
-
-   DEFINE SYMBOL data_0_var = allmiss  ! for LAS_results
-   EXIT/SCRIPT
-ENDIF
 
 ! For time series, do a plot of the original variables to set the axis symbols
 IF `itsa_tim_prop` THEN
