@@ -190,13 +190,13 @@ ENDIF
 IF ($bad_title"0|*>1") THEN
    PLOT/VS/NOLAB/SYM=dot {0,1}, {0,1}
    IF ($ferret_thumb"0|0|*>1") THEN  
-      LABEL/NOUSER 0.2, `($ppl$ylen)-0.4`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
       LET ylab_bad = `($ppl$ylen)-3*($miss_lab_siz)`
+      LABEL/NOUSER 0.2, `ylab_bad-0.4`, -1, 0, ($miss_lab_siz), @AS($bad_title)<NL>($bad_verb) All-Missing
       DEFINE SYMBOL no_novalid_lab = 1
       CANCEL SYMBOL bad_title
    ELSE
-      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
       LET ylab_bad = `($ppl$ylen)-2*($miss_lab_siz)`
+      LABEL/NOUSER 0.2, `ylab_bad-0.2`, -1, 0, ($miss_lab_siz), @AS($bad_title) ($bad_verb) All-Missing
       DEFINE SYMBOL no_novalid_lab = 1
       CANCEL SYMBOL bad_title
    ENDIF
