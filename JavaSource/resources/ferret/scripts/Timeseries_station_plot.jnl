@@ -108,6 +108,14 @@ LET nobs = `time,return=isize`
 
 DEFINE SYMBOL nstations = `nstations`
 
+! Refuse to plot zillions of lines
+
+IF `nstations GT 30` THEN
+   MESSAGE/ERROR **ERROR Too many lines for Time plot. Choose 30 or fewer features to plot.
+   EXIT/PROGRAM
+ENDIF
+
+
 ! when coloring multiple line plots, define a palette and color levels
 
 IF `nstations GT max_separate_stations` THEN
