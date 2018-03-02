@@ -9,6 +9,7 @@
 !   10/2017 *acm* Make a time-labeled color key for time variables not named "time".
 !   10/2017 *acm* Set up color variable in a more consistent way
 !   11/2017 *acm* Remove any quotes from around variable title and units
+!    3/2018 *acm* If a feature-type plot has a color palette setting, set up to use it
 
 DEFINE SYMBOL num ($1"0")
 
@@ -85,6 +86,17 @@ LET global_attnames = ..attnames
 IF `IS_ELEMENT_OF_STR(global_attnames, "title") GT 0` THEN
   DEFINE SYMBOL dataset_title_att = `..title`
 ENDIF
+
+
+! Is there a custom palette?  This may be reset in custom_dataset_definitions.jnl below
+
+IF `($ferret_insitu_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_insitu_palette)
+IF `($ferret_Point_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_Point_palette)
+IF `($ferret_Profile_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_Profile_palette)
+IF `($ferret_Timeseries_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_Timeseries_palette)
+IF `($ferret_TrajectoryProfile_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_TrajectoryProfile_palette)
+IF `($ferret_Trajectory_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($ferret_Trajectory_palette)
+
 
 GO custom_dataset_definitions
 
