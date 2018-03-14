@@ -86,6 +86,7 @@ ELSE
    ENDIF
    
    PPL %RANGE `ax_lo`, `ax_hi`, 50
+   PPL %RANGE `ax_lo`, `ax_hi`, 30
    IF `($ppl$range_low) EQ ($ppl$range_high)` THEN
       LET del_ax = `(ax_hi - ax_lo)/10`
    ELSE
