@@ -281,7 +281,7 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
      IF `cn GT nfeatures` THEN LET cn = `nfeatures`;\
      LET ishape = `ishape+1`;\
      PPL shaset protect;\
-     )
+     pause)
 
 ! Note need to protect the colors from one set of 10 to the next
   
