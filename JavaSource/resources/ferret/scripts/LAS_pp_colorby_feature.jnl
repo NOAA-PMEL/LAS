@@ -224,6 +224,8 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
 ! See polyshape script for the list of available pre-defined shapes.
 
 ! Set the shapes with the same script as in the script 200symbols.jnl
+! Also sets the names of PyFerret symbols to match those shapes.
+
    GO LAS_pp_set_feature_shapes
 
    LET cmax = `MIN(($feature_max),ncolors)`
@@ -271,7 +273,7 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
      PLOT/NOAX/VS/OVER/LINE=6/DASH=(0.1,0.04,0.1,0.04)/NOLAB xpolydat, ypolydat ;\
      ;\
      DEFINE SYMBOL color_command = GO polymark ($poly_command) plot_x, plot_y, plot_d, ($shape($ishape)), ($poly_scale) ;\
-     IF ($py_syms"0") THEN DEFINE SYMBOL color_command = ($pysym_command)/sym=triufill plot_x, plot_y, plot_d;\
+     IF ($py_syms"0") THEN DEFINE SYMBOL color_command = ($pysym_command)/sym=($pyshape($ishape)) plot_x, plot_y, plot_d;\
     IF `do_it` THEN ($color_command); \
      ;\
      LET c1 = `c1 + ncolors`;\
@@ -279,7 +281,7 @@ IF `( ($feature_max) LE ($feature_max_labels) ) AND ( ($DATA_COUNT) eq 3 )` THEN
      IF `cn GT nfeatures` THEN LET cn = `nfeatures`;\
      LET ishape = `ishape+1`;\
      PPL shaset protect;\
-     )
+     pause)
 
 ! Note need to protect the colors from one set of 10 to the next
   
