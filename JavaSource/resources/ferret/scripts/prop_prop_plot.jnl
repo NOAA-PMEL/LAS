@@ -484,7 +484,7 @@ IF ($do_rsquare"1|0|*>1) THEN
    ENDIF  ! p1,p2,q1,q2 are ok
 
 ENDIF
-pause
+
 ENDIF  ! all_missing or not...
 
 ! notation with number of cruises, trajectories, or profiles and obs.
