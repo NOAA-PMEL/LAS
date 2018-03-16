@@ -2114,6 +2114,7 @@ public class OutputPanel extends Composite implements HasName {
         ngrid = null;
         setChangeDataset(changeDataset);
         if (nvar != null) {
+            panelAxesWidgets.restorePanels();
             String nvarDSID = nvar.getDSID();
             String nvarID = nvar.getID();
             String catID = nvar.getCATID();
