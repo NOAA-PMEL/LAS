@@ -632,8 +632,7 @@ public class ADDXMLProcessor {
 			}
 			if (!catalog.check(buff, show)) {
 				System.err.println("Invalid catalog <" + data + ">\n" + buff.toString());
-			}
-			else {
+			} else {
 				return createXMLfromTHREDDSCatalog(catalog);
 			}
 		}
@@ -1125,8 +1124,8 @@ public class ADDXMLProcessor {
 
 
 		DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
-		List<GridBean> allGrids = new ArrayList<>();
-		List<AxisBean> allAxes = new ArrayList<>();
+		Set<GridBean> allGrids = new HashSet<>();
+		Set<AxisBean> allAxes = new HashSet<>();
 		List<DatasetBean> allDatasets = new ArrayList<>();
 		String idurl = threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName();
 		String url = idurl;
@@ -1179,8 +1178,6 @@ public class ADDXMLProcessor {
 
 			AxisBean zAxis = new AxisBean();
 			zAxis.setType("z");
-			ArangeBean zArange = new ArangeBean();
-			zAxis.setArange(zArange);
 
 			AxisBean tAxis = new AxisBean();
 			tAxis.setType("t");
@@ -1194,6 +1191,7 @@ public class ADDXMLProcessor {
             JsonArray rows = table.getAsJsonArray("rows");
             System.out.println("ERDDAP Dataset from " + url + " has " + rows.size() + " rows.");
             for (int i = 0; i < rows.size(); i++) {
+
                 JsonArray first = rows.get(i).getAsJsonArray();
                 JsonElement idE = first.get(idIndex);
                 String erddapDatasetId = idE.getAsString();
@@ -1212,7 +1210,6 @@ public class ADDXMLProcessor {
 
                     List<AxisBean> axes = new ArrayList<>();
                     List<GridBean> grids = new ArrayList<>();
-                    List<DatasetBean> datasets = new ArrayList<>();
                     List<VariableBean> variables = new ArrayList<>();
 
                     // TODO deal with z axis
@@ -1300,17 +1297,23 @@ public class ADDXMLProcessor {
                                     } else if (dimName.equals("longitude")) {
                                         // Found a lon axis
                                         axes.add(xAxis);
-                                        String info = metaRow.get(4).getAsString();
-                                        String majorParts[] = info.split(",");
-                                        String[] parts = majorParts[0].split("=");
-                                        xAxis.getArange().setSize(parts[1]);
+                                        setAxisInfoFromDim(xAxis, metaRow);
+                                        //
                                         // Lat size
                                     } else if (dimName.equals("latitude")) {
                                         axes.add(yAxis);
-                                        String info = metaRow.get(4).getAsString();
-                                        String majorParts[] = info.split(",");
-                                        String[] parts = majorParts[0].split("=");
-                                        yAxis.getArange().setSize(parts[1]);
+										setAxisInfoFromDim(yAxis, metaRow);
+                                    } else if ( dimName.equals("depth") ) {
+                                        String zstring = lasProxy.executeGetMethodAndReturnResult("http://upwell.pfeg.noaa.gov/erddap/griddap/" + erddapDatasetId + ".json?depth");
+                                        JsonObject zobject = jsonParser.parse(zstring).getAsJsonObject();
+                                        JsonObject ztable = zobject.get("table").getAsJsonObject();
+                                        JsonArray zarray = ztable.getAsJsonArray("rows");
+                                        String[] v = new String[zarray.size()];
+                                        for (int zi = 0; zi < zarray.size(); zi++) {
+                                            v[zi] = zarray.get(zi).getAsString();
+                                        }
+                                        zAxis.setV(v);
+                                        axes.add(zAxis);
                                     }
                                 } else if (metaType.equalsIgnoreCase("attribute")) {
                                     String metaVar = metaRow.get(1).getAsString();
@@ -1390,7 +1393,7 @@ public class ADDXMLProcessor {
                         bean.setElement("axis-" + bean.getType() + "-" + datasetBean.getElement());
                     }
                     gridBean.setAxes(axes);
-                    gridBean.setElement("gridp-" + datasetBean.getElement());
+                    gridBean.setElement("grid-" + i + "-" + datasetBean.getElement());
                     for (int j = 0; j < variables.size(); j++) {
                         VariableBean bean = variables.get(j);
                         if ( bean.getUnits() == null || bean.getUnits().isEmpty() ) {
@@ -1405,11 +1408,21 @@ public class ADDXMLProcessor {
                     allDatasets.add(datasetBean);
                 } // Has WMS maps.
             }
-            dgab.setAxes(allAxes);
-            dgab.setGrids(allGrids);
+            dgab.setAxes(new ArrayList<>(allAxes));
+            dgab.setGrids(new ArrayList<>(allGrids));
             dgab.setDatasets(allDatasets);
         }
 		return dgab;
+	}
+	private static void setAxisInfoFromDim(AxisBean axis, JsonArray metaRow) {
+		String info = metaRow.get(4).getAsString();
+		String majorParts[] = info.split(",");
+		String[] parts = majorParts[0].split("=");
+		axis.getArange().setSize(parts[1]);
+		if ( majorParts.length == 3 ) {
+			parts = majorParts[2].split("=");
+			axis.getArange().setStep(parts[1]);
+		}
 	}
 	private static int findDatavar(List<VariableBean> variables, String metaVar) {
         for (int j = 0; j < variables.size(); j++) {
