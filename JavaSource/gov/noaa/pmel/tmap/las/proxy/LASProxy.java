@@ -50,8 +50,6 @@ public class LASProxy {
 		method.setConfig(config);
 		try {
 
-			log.info("method: " + method.getURI());
-
 			HttpResponse httpResponse = client.execute(method);
 			int rc = httpResponse.getStatusLine().getStatusCode();
 
@@ -85,8 +83,6 @@ public class LASProxy {
 		method.setConfig(config);
 		try {
 
-			log.info("method: " + method.getURI());
-
 			HttpResponse httpResponse = client.execute(method);
 			int rc = httpResponse.getStatusLine().getStatusCode();
 
@@ -118,14 +114,13 @@ public class LASProxy {
 
 		try {
 
-			log.info("method: " + method.getURI());
 
 			HttpResponse httpResponse = client.execute(method);
 			int rc = httpResponse.getStatusLine().getStatusCode();
 
 			if (rc != HttpStatus.SC_OK) {
 
-				log.error("HttpGet Error Code: "+rc);
+
                 if ( response == null ) {
                 	throw new IOException("Unable to execute method.  RC="+rc);
                 } else {
@@ -161,8 +156,6 @@ public class LASProxy {
 		
 
 	    method.setHeader("Connection", "close");
-
-	    log.info("method: " + method.getURI());
 
 	    HttpResponse httpResponse = client.execute(method);
 		int rc = httpResponse.getStatusLine().getStatusCode();
@@ -207,8 +200,6 @@ public class LASProxy {
 
 		try {
 
-			log.info("method: " + method.getURI());
-
 			HttpResponse httpResponse = client.execute(method);
 			int rc = httpResponse.getStatusLine().getStatusCode();
 			
@@ -245,8 +236,6 @@ public class LASProxy {
 
 		try {
 
-			log.info("method: " + method.getURI());
-
 			HttpResponse httpResponse = client.execute(method);
 			int rc = httpResponse.getStatusLine().getStatusCode();
 
@@ -266,7 +255,6 @@ public class LASProxy {
 			method.releaseConnection();
 		}
 
-		log.info("done: " + method.getURI());
 	}
 
 	public void streamGetMethodResponse(HttpResponse method, OutputStream output) throws IOException, HttpException {

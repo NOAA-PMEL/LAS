@@ -7,6 +7,10 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.filter.ElementFilter;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 public class IsoMetadata extends Document {
 
@@ -87,10 +91,20 @@ public class IsoMetadata extends Document {
 		return null;
 	}
 	public String getThi() {
+        String end = null;
 		if ( time != null ) {
-			return time.getChild("extent", gmd).getChild("TimePeriod", gml).getChild("endPosition", gml).getText();
+		    Element endContainer = time.getChild("extent", gmd).getChild("TimePeriod", gml).getChild("endPosition", gml);
+			end = endContainer.getText();
+			if ( end.isEmpty() ) {
+				String pos = endContainer.getAttributeValue("indeterminatePosition");
+				if ( pos.equals("now") ) {
+                    DateTime dt = new DateTime().withZone(DateTimeZone.UTC);
+                    DateTimeFormatter fmt = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
+                    end = fmt.print(dt);
+				}
+			}
 		}
-		return null;
+		return end;
 	}
 	public String getXlo() {
 		if ( geographic != null ) {
