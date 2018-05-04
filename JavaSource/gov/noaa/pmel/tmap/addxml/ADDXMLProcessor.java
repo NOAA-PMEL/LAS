@@ -1426,10 +1426,20 @@ public class ADDXMLProcessor {
 		String info = metaRow.get(4).getAsString();
 		String majorParts[] = info.split(",");
 		String[] parts = majorParts[0].split("=");
-		axis.getArange().setSize(parts[1]);
+		int size = Integer.valueOf(parts[1]);
+		size = size - 1;
+		axis.getArange().setSize(String.valueOf(size));
 		if ( majorParts.length == 3 ) {
 			parts = majorParts[2].split("=");
-			axis.getArange().setStep(parts[1]);
+			if ( axis.getType().equals("y") ) {
+			    double step = Math.abs(Double.valueOf(parts[1]).doubleValue());
+                NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+                DecimalFormat fmt = (DecimalFormat) nf;
+                fmt.applyPattern("####.####");
+			    axis.getArange().setStart(fmt.format(step));
+            } else {
+                axis.getArange().setStep(parts[1]);
+            }
 		}
 	}
 	private static int findDatavar(List<VariableBean> variables, String metaVar) {
