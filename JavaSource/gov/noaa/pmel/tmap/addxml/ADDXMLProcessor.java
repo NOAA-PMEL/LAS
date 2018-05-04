@@ -763,8 +763,14 @@ public class ADDXMLProcessor {
 
 		CategoryBean top = new CategoryBean();
 		String topName = catalog.getName();
+
 		if (topName != null) {
-			top.setName(catalog.getName());
+			if ( topName.startsWith("THREDDS Server Default Catalog : You must change") ) {
+
+				topName = "Data Catalog";
+
+			}
+			top.setName(topName);
 		}
 		else {
 			top.setName(catalog.getUriString());
