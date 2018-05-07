@@ -192,7 +192,8 @@ public class ADDXMLProcessor {
 	private static final SecureRandom random = new SecureRandom();
 
 	public static String nextID() {
-		return new BigInteger(130, random).toString(32);
+		String id = new BigInteger(130, random).toString(32);
+		return "id-"+id;
 	}
 
 
@@ -775,6 +776,7 @@ public class ADDXMLProcessor {
 		else {
 			top.setName(catalog.getUriString());
 		}
+		top.setID(nextID());
 		Set<DatasetBean> DatasetBeans = new HashSet<DatasetBean>();
 		Set<GridBean> GridBeans = new HashSet<GridBean>();
 		Set<AxisBean> AxisBeans = new HashSet<AxisBean>();
@@ -1441,7 +1443,7 @@ public class ADDXMLProcessor {
     }
 	private static String fixid(InvDataset t) {
 		String tid = t.getID();
-		String id = fixid(tid, t.getFullName());
+		String id = fixid(tid, t.getFullName())+nextID();
 		if ( id == null ) {
 			// This should never happen in the UAF case since the cleaner should have assigned the ID already.
 			try {
@@ -1453,13 +1455,15 @@ public class ADDXMLProcessor {
 		return id;
 	}
 	public static String fixid(String tid, String name) {
-		String id = null;
+		String id;
 		if ( tid != null ) {
 			id = tid;
 			id = cleanId(id);
 			if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
 			id = id.replaceAll(" ", "-"); 
-		}
+		} else {
+		    id = nextID();
+        }
 		return id;
 	}
 	public static String cleanId(String id) {
