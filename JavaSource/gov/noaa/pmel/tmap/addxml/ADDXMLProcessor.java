@@ -1436,7 +1436,7 @@ public class ADDXMLProcessor {
                 NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
                 DecimalFormat fmt = (DecimalFormat) nf;
                 fmt.applyPattern("####.####");
-			    axis.getArange().setStart(fmt.format(step));
+			    axis.getArange().setStep(fmt.format(step));
             } else {
                 axis.getArange().setStep(parts[1]);
             }
