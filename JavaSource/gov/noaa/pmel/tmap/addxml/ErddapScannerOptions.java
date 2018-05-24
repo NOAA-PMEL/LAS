@@ -25,10 +25,10 @@ public class ErddapScannerOptions extends Options {
         Option category = new Option("c", "category", true, "Read a category file and use it to organized the data sets.");
         addOption(category);
         
-        Option hours = new Option("h", "hours", true, "Use the value as the step in hours instead of the default step of a day");
+        Option hours = new Option("h", "hours", true, "Use the value as the step in hours instead of the default step in days");
         addOption(hours);
         
-        Option minutes = new Option("m", "minutes", false, "Use step of minutes instead of the default stop of a day");
+        Option minutes = new Option("m", "minutes", false, "Use the value as the step in minutes instead of the default step in days");
         addOption(minutes);
         
         Option property = new Option("p", "property", true, "A property to add to the data set of the form group:name:value, e.g. -p product_server:default_operation:Timeseries_station_plot");
