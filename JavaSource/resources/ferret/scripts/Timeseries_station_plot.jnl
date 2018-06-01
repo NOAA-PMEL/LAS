@@ -521,7 +521,7 @@ ELSE  ! more than 1 station
 	 let delt = tbox[gt=taxis];\
 	 let maskvar = delt[L=@ave]*1.1;\
 	 let gap_mask = if delt LE `maskvar` then 1;\
-         PLOT/OVER/NOLAB/THICK=1/RIBBON($qualifiers) gap_mask*var_t,colort;\
+         IF `rowsize[m=($s)] GT 1` THEN PLOT/OVER/NOLAB/THICK=1/RIBBON($qualifiers) gap_mask*var_t,colort;\
 	 let row1 = `rowm+1`)
 		 
 	 IF ($units_0"0|units>0|none>0|NONE>0|*>1") THEN LABEL/NOUSER `-0.6`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($units_0)
