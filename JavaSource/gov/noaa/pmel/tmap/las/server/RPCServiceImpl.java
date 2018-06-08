@@ -852,7 +852,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
     @Override
     public Map<String, String> getERDDAPOuterSequenceValues(String dsid, String varid, String key_variable, ERDDAPConstraint constraint, List<ConstraintSerializable> constriants) throws RPCException {
         Map<String, String> outerSequenceValues = new TreeMap<String, String>();
-        InputStream jsonStream;
+        ByteArrayOutputStream jsonStream = new ByteArrayOutputStream();
         try {
             LASConfig lasConfig = getLASConfig();
             Dataset dataset = lasConfig.getDataset(dsid);
@@ -930,8 +930,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             // Always to the first query.
                 String q1url = url + xquery1.toString();
 
-                jsonStream = new URL(q1url).openStream();
-                String jsonText = IOUtils.toString(jsonStream);
+                lasProxy.executeGetMethodAndStreamResult(q1url, jsonStream);
+                String jsonText = jsonStream.toString();
                 JSONObject json = new JSONObject(jsonText);
                 JSONArray v = json.getJSONObject("table").getJSONArray("rows");
                 for (int i = 0; i < v.length(); i++) {
@@ -960,8 +960,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
             if ( lonQ2 != null ) {
                 String q2url = url + xquery2.toString();
 
-                jsonStream = new URL(q2url).openStream();
-                String jsonText2 = IOUtils.toString(jsonStream);
+                lasProxy.executeGetMethodAndStreamResult(q2url, jsonStream);
+                String jsonText2 = jsonStream.toString();
                 JSONObject json2 = new JSONObject(jsonText2);
                 JSONArray v2 = json2.getJSONObject("table").getJSONArray("rows");
                 for (int i = 0; i < v2.length(); i++) {
@@ -984,6 +984,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
         } catch (JDOMException e) {
             throw new RPCException(e.getMessage());
         } catch (LASException e) {
+            throw new RPCException(e.getMessage());
+        } catch (HttpException e) {
             throw new RPCException(e.getMessage());
         }
         return outerSequenceValues;
