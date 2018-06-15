@@ -433,20 +433,19 @@ public class GetTrajectoryTable extends LASAction {
                                                 columnHeaders.append("\n<th>"+titles[i]+"</th>\n");
                                             }
                                             if ( socat ) {
-
                                                 columnHeaders.append("<th>documentation</th>\n");
                                             }
                                             columnHeaders.append("<th>download</th>\n");
-                                            columnHeaders.append("<th>start</th>\n");
-                                            columnHeaders.append("<th>end</th>\n");
-
-                                            if ( socat ) {
-
+                                            if ( ! socat ) {
+                                                // Do not bother adding start and end dates in SOCAT - makes the table too wide
+                                                columnHeaders.append("<th>start</th>\n");
+                                                columnHeaders.append("<th>end</th>\n");
+                                            }
+                                            else {
                                                 columnHeaders.append("<th>crossovers</th>\n");
                                                 columnHeaders.append("<th>qc flags</th>\n");
                                                 columnHeaders.append("<th>thumbnails</th>\n");
-
-                                            }	                                        
+                                            }
 
 
                                             columnHeaders.append("</tr>\n");
@@ -463,13 +462,15 @@ public class GetTrajectoryTable extends LASAction {
                                                 unitStrings.append("<th>"+units[i]+"</th>\n");
                                             }
                                             if ( socat ) {
-                                            	unitStrings.append("<th></th>\n");
+                                                unitStrings.append("<th></th>\n");
                                             }
                                             unitStrings.append("<th></th>\n");
-                                            unitStrings.append("<th></th>\n");
-                                            unitStrings.append("<th></th>\n");
-                                            if ( socat ) {
-                                               
+                                            if ( ! socat ) {
+                                                // Do not bother adding start and end dates in SOCAT - makes the table too wide
+                                                unitStrings.append("<th></th>\n");
+                                                unitStrings.append("<th></th>\n");
+                                            }
+                                            else {
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
                                                 unitStrings.append("<th></th>\n");
@@ -503,7 +504,7 @@ public class GetTrajectoryTable extends LASAction {
                                                     dsgQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
                                                     csvQuery.append("?&amp;"+cruise_id+"=\""+parts[0]+"\"");
                                                     if ( socat ) {
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"/"+parts[0]+"\">Documentation</a>"+"</td>\n");
+                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a target=\"_blank\" href=\""+document_base+parts[0].substring(0,4)+"/"+parts[0]+"/\">Documentation</a>"+"</td>\n");
                                                     }
 
                                                     LASUIRequest download = (LASUIRequest) lasUIRequest.clone();
@@ -521,40 +522,41 @@ public class GetTrajectoryTable extends LASAction {
 
                                                     //row.append("<td nowrap=\"nowrap\" colspan=\"1\"><a href='"+dsgurl+dsgQuery.toString()+"'>netcdf</a>"+" || "+"<a href='"+csvurl+csvQuery.toString()+"'>csv</a>"+"</td>\n");
 
-                                                    dsgQuery.setLength(0);
-                                                    csvQuery.setLength(0);
-                                                    InputStream stream = null;
-                                                    InputStreamReader reader = null;
-                                                    // Call out to ERDDAP for the lat/lon/time box.
-                                                    try {
+                                                    if ( ! socat ) {
+                                                        // Do not bother adding start and end dates in SOCAT - makes the table too wide
+                                                        dsgQuery.setLength(0);
+                                                        csvQuery.setLength(0);
+                                                        InputStream stream = null;
+                                                        InputStreamReader reader = null;
+                                                        // Call out to ERDDAP for the lat/lon/time box.
+                                                        try {
 
-                                                        JsonStreamParser jp = null;
+                                                            JsonStreamParser jp = null;
 
-                                                        String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
-                                                        stream = null;
+                                                            String timeurl = dataurl + ".json?"+URLEncoder.encode(titles[0]+",time,latitude,longitude&"+titles[0]+"=\""+parts[0]+"\"&distinct()&orderByMinMax(\"time\")", "UTF-8");
+                                                            stream = null;
 
-                                                        stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
+                                                            stream = lasProxy.executeGetMethodAndReturnStream(timeurl, response);
 
-                                                        reader = new InputStreamReader(stream);
-                                                        jp = new JsonStreamParser(reader);
-                                                        JsonObject timebounds = (JsonObject) jp.next();
-                                                        JsonArray timeminmax = getMinMax(timebounds);
-                                                        reader.close();
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
-                                                        // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
-                                                    } catch ( Exception e ) {
-                                                        if (reader != null ) 
+                                                            reader = new InputStreamReader(stream);
+                                                            jp = new JsonStreamParser(reader);
+                                                            JsonObject timebounds = (JsonObject) jp.next();
+                                                            JsonArray timeminmax = getMinMax(timebounds);
                                                             reader.close();
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
-                                                        row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
-                                                    } finally {
-                                                    	if ( stream != null )
-                                                    		stream.close();
+                                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(0).getAsString()+"</td>");
+                                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">"+timeminmax.get(1).getAsString()+"</td>");
+                                                            // Call out to ERDDAP for all the CRUISES in the same lat/lon/time box.
+                                                        } catch ( Exception e ) {
+                                                            if (reader != null ) 
+                                                                reader.close();
+                                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time min.</td>");
+                                                            row.append("<td nowrap=\"nowrap\" colspan=\"1\">Unable to load time max.</td>");
+                                                        } finally {
+                                                    	    if ( stream != null )
+                                                    		    stream.close();
+                                                        }
                                                     }
-
-                                                    if ( socat ) {
-
+                                                    else {
                                                     	row.append("\n<td id=\""+parts[0]+"\" nowrap=\"nowrap\" colspan=\"1\">");
                                                     	// Add the link to load a list of potential crosses to the table.
                                                     	row.append("<a href=\"javascript:$(\'#"+parts[0]+"\').html('&lt;div&gt;checking...&lt;/div&gt;');$(\'#"+parts[0]+"\').load(\'getCrossovers.do?catid="+catid+"&amp;dsid="+dsid+"&amp;tid="+parts[0]+"\');void(0);\">Check for crossovers</a>");
