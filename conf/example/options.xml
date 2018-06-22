@@ -314,6 +314,10 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
       <title>Palette</title>
       <menu type="options" name="palette">
         <item values="default">Default</item>
+        <item values="viridis">Viridis</item>
+        <item values="plasma">Plasma</item>
+        <item values="inferno">Inferno</item>
+        <item values="magma">magma</item>
         <item values="rainbow">default rainbow</item>
         <item values="rnb2">alternative rainbow</item>
         <item values="light_rainbow">pastel rainbow</item>
