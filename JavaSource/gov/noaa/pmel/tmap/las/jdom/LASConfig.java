@@ -260,8 +260,6 @@ public class LASConfig extends LASDocument {
             // The code below which is turned off by default allows data sets to be added dynamically to an LAS.
             // Uncommmet the code below to re-enable this capability
 
-//            return "";
-
             // Add the data sets via addXML, then get the ID map again
         	
         	// Force t to be regular.
