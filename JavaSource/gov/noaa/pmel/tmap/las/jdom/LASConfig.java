@@ -248,7 +248,7 @@ public class LASConfig extends LASDocument {
     		}
     	}
 
-    	return new HashMap<String, String>();
+   	    return new HashMap<String, String>();
     }
     public String getIDs(String data_url) throws JDOMException, LASException, HttpException, IOException {
         Map<String, String> ids = getIDMap(data_url);
@@ -260,55 +260,55 @@ public class LASConfig extends LASDocument {
             // The code below which is turned off by default allows data sets to be added dynamically to an LAS.
             // Uncommmet the code below to re-enable this capability
 
-            return "";
+//            return "";
 
             // Add the data sets via addXML, then get the ID map again
         	
         	// Force t to be regular.
-//        	HashMap<String, String> options = new HashMap<String, String>();
-//        	options.put("force", "t");
-//
-//        	Vector dagbs = updateSrc(data_url, "netcdf", null, null, options);
-//        	Element datasets = new Element("datasets");
-//        	Element grids = new Element("grids");
-//        	Element axes = new Element("axes");
-//        	for (Iterator dagIt = dagbs.iterator(); dagIt.hasNext();) {
-//				DatasetsGridsAxesBean bean = (DatasetsGridsAxesBean) dagIt.next();
-//				List<DatasetBean> d = bean.getDatasets();
-//				List<GridBean> g = bean.getGrids();
-//				List<AxisBean> a = bean.getAxes();
-//				for (Iterator dIt = d.iterator(); dIt.hasNext();) {
-//					DatasetBean dBean = (DatasetBean) dIt.next();
-//                    Element ds = dBean.toXml(true);
-//                    if ( !hasCategories() ) {
-//                    	ds.setAttribute("catid", dBean.getElement());
-//                    }
-//					datasets.addContent(ds);
-//				}
-//				for (Iterator gIt = g.iterator(); gIt.hasNext(); ) {
-//					GridBean gBean = (GridBean) gIt.next();
-//					grids.addContent(gBean.toXml(true));
-//				}
-//				for (Iterator aIt = a.iterator(); aIt.hasNext(); ) {
-//					AxisBean aBean = (AxisBean) aIt.next();
-//					axes.addContent(aBean.toXml(true));
-//				}
-//
-//			}
-//        	if ( dagbs.size() > 0 ) {
-//        		getRootElement().addContent(datasets);
-//        		getRootElement().addContent(grids);
-//        		getRootElement().addContent(axes);
-//        		convertToSeven(true);
-//                mergeProperites();
-//                addIntervalsAndPoints();
-//                addGridType();
-//        	}
-//        	Date now = new Date();
-//			File debug = new File(getOutputDir()+"/las_debug_add_"+now.getTime()+".xml");
-//			write(debug);
-//        	ids = getIDMap(data_url);
-//        	return "dsid="+ids.get("dsid")+"&varid="+ids.get("varid");
+        	HashMap<String, String> options = new HashMap<String, String>();
+        	options.put("force", "t");
+
+        	Vector dagbs = updateSrc(data_url, "netcdf", null, null, options);
+        	Element datasets = new Element("datasets");
+        	Element grids = new Element("grids");
+        	Element axes = new Element("axes");
+        	for (Iterator dagIt = dagbs.iterator(); dagIt.hasNext();) {
+				DatasetsGridsAxesBean bean = (DatasetsGridsAxesBean) dagIt.next();
+				List<DatasetBean> d = bean.getDatasets();
+				List<GridBean> g = bean.getGrids();
+				List<AxisBean> a = bean.getAxes();
+				for (Iterator dIt = d.iterator(); dIt.hasNext();) {
+					DatasetBean dBean = (DatasetBean) dIt.next();
+                    Element ds = dBean.toXml(true);
+                    if ( !hasCategories() ) {
+                    	ds.setAttribute("catid", dBean.getElement());
+                    }
+					datasets.addContent(ds);
+				}
+				for (Iterator gIt = g.iterator(); gIt.hasNext(); ) {
+					GridBean gBean = (GridBean) gIt.next();
+					grids.addContent(gBean.toXml(true));
+				}
+				for (Iterator aIt = a.iterator(); aIt.hasNext(); ) {
+					AxisBean aBean = (AxisBean) aIt.next();
+					axes.addContent(aBean.toXml(true));
+				}
+
+			}
+        	if ( dagbs.size() > 0 ) {
+        		getRootElement().addContent(datasets);
+        		getRootElement().addContent(grids);
+        		getRootElement().addContent(axes);
+        		convertToSeven(true);
+                mergeProperites();
+                addIntervalsAndPoints();
+                addGridType();
+        	}
+        	Date now = new Date();
+			File debug = new File(getOutputDir()+"/las_debug_add_"+now.getTime()+".xml");
+			write(debug);
+        	ids = getIDMap(data_url);
+        	return "dsid="+ids.get("dsid")+"&varid="+ids.get("varid");
         }
     }
     private Map<String, String> findDataURL(String data_url, Category category) throws JDOMException, LASException {
@@ -3829,10 +3829,21 @@ public class LASConfig extends LASDocument {
 	    return "";
 	}
     /**
-	 * Extract a property value from a variable given its XPath as an
-	 * Array List of NameValueBeans
+     * Extract a property value from a variable given its dsid and varid as an
+     * Array List of NameValueBeans
+     * @param dsid data set id
+     * @param varid the variable id
+     * @return value the property
+     *
+     */
+	public String getVariablePropertyValue(String dsid, String varid, String group, String property) throws JDOMException {
+	    String xpath = "/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']";
+	    return getVariablePropertyValue(xpath, group, property);
+    }
+    /**
+	 * Extract a property value from a variable given its XPath String
 	 * @param xpathValue The XPath of the variable to find.
-	 * @return value the property value
+	 * @return value the property
 	 *
 	 */
 	public String getVariablePropertyValue(String xpathValue, String group, String property) throws JDOMException {
