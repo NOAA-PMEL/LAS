@@ -205,7 +205,7 @@ public class BaseUI {
     FlexTable xDisplayControls = new FlexTable();
 
     String xCATID;
-    String xDSID;
+    String xDSID = null;
     ESGFSearchButton xESGFSearchButton;
     /**
      * Control widget that sets the size of the image in the panel. If set to
@@ -494,6 +494,11 @@ public class BaseUI {
         }
         if (xDataURL == null) {
             xDataURL = Util.getParameterString("data_url");
+        }
+
+        // When loading data sets with data_url, if they are not processed the value is the string "null" if it fails.
+        if ( xDSID != null && xDSID.equals("null") ) {
+            Window.alert("LAS was unable to load the data set you requested. There may be a problem with the CF conventions compliance.");
         }
 
         // Probably same here...
