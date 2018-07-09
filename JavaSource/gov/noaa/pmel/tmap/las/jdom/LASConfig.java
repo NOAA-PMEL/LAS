@@ -263,8 +263,9 @@ public class LASConfig extends LASDocument {
             return "";
 
             // Add the data sets via addXML, then get the ID map again
-        	
+
         	// Force t to be regular.
+
 //        	HashMap<String, String> options = new HashMap<String, String>();
 //        	options.put("force", "t");
 //
