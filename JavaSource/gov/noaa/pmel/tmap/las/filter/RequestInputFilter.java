@@ -261,12 +261,14 @@ public class RequestInputFilter implements Filter {
 	}
 	public boolean validateTemplates(HttpServletRequest request) {
 		String value[] = request.getParameterValues("template");
-		for (int i = 0; i < value.length; i++) {
-			String v = value[i];
-			if ( v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || v.toLowerCase().contains("script") ) {
-				return false;
-			}
-		}
+		if ( value != null ) {
+            for (int i = 0; i < value.length; i++) {
+                String v = value[i];
+                if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || v.toLowerCase().contains("script")) {
+                    return false;
+                }
+            }
+        }
 		return true;
 	}
 	public void init(FilterConfig arg0) throws ServletException {
