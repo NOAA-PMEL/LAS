@@ -313,50 +313,6 @@ public class ADDXMLProcessor {
 
 		uaf = command_parameters.getBoolean("metadata");
 
-		// Retrieve user credentials info.
-		String provider = command_parameters.getString("auth_provider");
-		String username = command_parameters.getString("username");
-		String password = command_parameters.getString("password");
-
-		// If credentials provider class was not given, then use the default implementation.
-		LASCredentialsProvider provider_obj = null;
-		if(provider == null){
-			provider_obj = new SimpleCredentialsProvider();
-
-			// Otherwise, use the given class.
-		}else{
-
-			// Load the credentials provider class.
-			java.lang.ClassLoader loader = java.lang.ClassLoader.getSystemClassLoader();
-			Class provider_class = null;
-			try{
-				provider_class = loader.loadClass(provider);
-			}catch(ClassNotFoundException ee){
-				System.err.println("Error loading authentication credentials provider class.");
-				System.err.println(ee.getMessage());
-				System.exit(1);
-			}
-
-			// Instantiate the credentials provider object.
-			try{
-				provider_obj = (LASCredentialsProvider)provider_class.newInstance();
-			}catch(Exception ee){
-				System.err.println("Error creating authentication credentials provider object.");
-				System.err.println(ee.getMessage());
-				System.exit(1);
-			}
-		}
-
-		// If given, set user credentials with the provider object.
-		if(username != null){
-			provider_obj.setUsername(username);
-		}
-		if(password != null){
-			provider_obj.setPassword(password);
-		}
-
-		// Register the credentials provider.
-		//      ucar.nc2.dataset.HttpClientManager.init(provider_obj,"addXML-" + version_string);   
 
 		int total = data.length + thredds.length;
 		if (!oneDataset && total > 1) {
