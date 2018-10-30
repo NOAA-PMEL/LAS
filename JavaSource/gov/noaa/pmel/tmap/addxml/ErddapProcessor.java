@@ -1058,6 +1058,7 @@ public class ErddapProcessor {
 					message = e.getMessage();
 			}
 			System.err.println("Error opening: "+url+id+" "+message);
+			e.printStackTrace(System.err);
 		} finally {
 			if ( stream != null ) {
 				try {
