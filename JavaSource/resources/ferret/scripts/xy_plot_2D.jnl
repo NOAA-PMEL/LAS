@@ -15,6 +15,8 @@
 ! 3/2008 ACM For native curvilinear plots use MODULO qualifier only on SHADE plots
 !10/2018 ACM For native curvilinear plots use MODULO qualifier on SHADE and FILL plots
 !            No need for plus360 or minus360 overlays
+! ACM 11/18 (Ferret v7.44) use new OVER/AXES behavior to draw axis and 
+!                          graticule lines on top of everything else
 
 ! XY_plot.jnl creates an XY plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
@@ -121,11 +123,11 @@ IF `($data_count"0") EQ 1` THEN
 	 GO reset_labels
       PPL SHADE
 
-      IF ($two_parter"0|*>1") THEN SHADE($qualifiers)($shade_qualifiers)/OVER/NOLAB ($ferret_plot_var_part2)
+      IF ($two_parter"0|*>1") THEN SHADE($qualifiers)($shade_qualifiers)/OVER/NOLAB($do_axes) ($ferret_plot_var_part2)
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
 
-      ($plot_type)/NOKEY($qualifiers)/OVER/NOLAB ($ferret_var_0)
-      IF ($two_parter"0|*>1") THEN ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_plot_var_part2)
+      ($plot_type)/NOKEY($qualifiers)/OVER($do_axes)/NOLAB ($ferret_var_0)
+      IF ($two_parter"0|*>1") THEN ($plot_type)($qualifiers)/OVER($do_axes)/NOLAB ($ferret_plot_var_part2)
 
    ELSE
    
