@@ -216,9 +216,18 @@ ELSE
 ! This simple method works fine for at least the tri-polar grid. 
 ! Maybe not for more elaborate grids
 
+LET is_tripolar = 0
 LET attnames = ..attnames
-IF `IS_ELEMENT_OF_STR_N (attnames, "grid") GT 0` THEN DEFINE SYMBOL grid_desc = `..grid`
-IF `STRINDEX("($grid_desc)", "tripolar") GT 0` THEN  
+IF `IS_ELEMENT_OF_STR_N (attnames, "grid") GT 0` THEN 
+   DEFINE SYMBOL grid_desc = `..grid`
+
+   LET is_tripolar = `STRINDEX("($grid_desc)", "tri") GT 0 AND STRINDEX("($grid_desc)", "polar") GT 0`
+   IF `is_tripolar GT 0` THEN \
+      LET is_tripolar = `STRINDEX("($grid_desc)", "tri") LT STRINDEX("($grid_desc)", "polar")`
+
+ENDIF
+
+IF `is_tripolar GT 0` THEN  
 
    LET x_region_mask = IF ($ferret_curvi_coord_lon) GE ($REGION_0_X_LO) AND ($ferret_curvi_coord_lon) LE ($REGION_0_X_HI) then 1
    LET y_region_mask = IF ($ferret_curvi_coord_lat) GE ($REGION_0_y_LO) AND ($ferret_curvi_coord_lat) LE ($REGION_0_y_HI) then 1
