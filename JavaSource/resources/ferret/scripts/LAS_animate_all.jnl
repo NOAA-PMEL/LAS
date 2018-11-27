@@ -2,29 +2,35 @@
 ! LAS_animate_all.jnl
 !
 ! Ansley Manke
-! 10/22/2018
+! 10/22/2018 !
 !
-! LAS_animate_all.jnl writes a set of images for an animation.
+! LAS_animate_all.jnl writes a set of frames for an animation.
+! The calling script is just like for Data_Extract_Frames.
 ! Given 
 ! - dataset, variable specifiers. If two variables, it's assumed to be a vector plot
 ! - the X-Y-Z-T-E region, with time range in Ferret time format
 ! - ferret_time_step = 1 to make a plot at each timestep, or > 1 to plot every nth
 ! - ferret_view xyt, xt, etc (we used to animate line plots, seems to be turned off.)
-! - name for image filenames, count will be appended for frame files
-! - name for debug output; each frame will also get its own debug output
+! - symbol $result_ferret_listing_filename with the directory location to write the frame
+!   files and debug output
+! - symbol $operation_key, used to make the frame image filenames and file names for debug 
+!   output; each frame will also get its own debug output
+! - Plot options properties
 !
-!  ferret_annotations symbol should NOT be set
-!
-! Compute these - 1st 4 of these can be preoset with ferret symbol
+! Compute these - 1st 4 of these can be preset with ferret properties
 ! - fill_levels      for 2D plots
 ! - contour_levels   for 2D plots
 ! - dep_axis_scale   for 1D plots
 ! - vector_length    for vector plots
-! - number of images to produce
+!
+! - number of frames to produce
 ! 
-! Draw
-! - set of image files, named so that they will sort consecutively
-! - What does the output xml need? Number of images, ...
+! Draw the set of image files, named so that they will sort consecutively
+! each image will have its own xxx_debug.txt file.
+!
+! Write the following to the file ($result_ferret_listing_filename)
+!  - the base-name, which is ($operation_key)_plot_image
+!  - the number of frames created
 
 
 ! setup for animation image-set generation
@@ -32,9 +38,18 @@
 DEFINE SYMBOL its_autolev_animate = 1
 DEFINE SYMBOL is_animation_frame = 1
 
-CANCEL SYMBOL ferret_annotations  ! shouldn't be set, anyway
+! These plots don't have annotations
+CANCEL SYMBOL ferret_annotations 
 
 ! For setting output image and debug filenames for each frame
+
+IF `($result_plot_image_filename"0|*>1") EQ 0`  THEN 
+  LET len = STRRINDEX("($result_ferret_listing_filename)", "/")
+  DEFINE SYMBOL pltext = png
+  IF ($PROGRAM_NAME"0|Ferret>1|*>0") THEN DEFINE SYMBOL pltext = gif
+  DEFINE SYMBOL result_base = `SUBSTRING("($result_ferret_listing_filename)", 1, len)`
+  DEFINE SYMBOL result_plot_image_filename = ($result_base)/($operation_key)_plot_image.($pltext)
+ENDIF
 
 LET dd = `STRINDEX("($result_plot_image_filename)", ".")`
 LET slen = `STRLEN("($result_plot_image_filename)")`
@@ -214,7 +229,6 @@ LET zeros = "00000000000000"
 
 LET tvar = t[gt=the_var]
 
-! Dras 
 ! The setup makes the plot-file name, sets the time step, and 
 ! cleans up between plots.
 
@@ -222,3 +236,42 @@ LET iplot = 0
 REPEAT/RANGE=($lmin):($lmax):($ferret_time_step"1")/name=lstep (\
 GO LAS_setup_next_frame;\
 GO ($LAS_plotting_script ))
+
+!----------------------------------------
+! Put out the base-name and the number of frames to the 
+! result_ferret_listing_filename.
+
+
+SET LIST/FILE="($result_ferret_listing_filename)"
+
+LET xmlhead = "<?xml version='1.0' encoding='UTF-8'?>"
+LET len = STRLEN(xmlhead)
+list/nohead/clobber/format=(A)/FILE xmlhead
+
+LET framesStart = "<lasAnimation>"
+LIST/NOHEAD/FORMAT=(A)/FILE/append framesStart
+
+LET f = "<base_image_name>"
+list/nohead/clobber/format=(A)/FILE/append f
+
+LET nlen = strlen ("($operation_key)_plot_image")
+LET a = "($operation_key)_plot_image"
+list/nohead/clobber/format=(A)/FILE/append a
+
+LET f = "</base_image_name>"
+list/nohead/clobber/format=(A)/FILE/append f
+
+LET f = "<number_frames>"
+list/nohead/clobber/format=(A)/FILE/append f
+
+LET a = "`iplot`"
+list/nohead/clobber/format=(A)/FILE/append a
+
+LET f = "</number_frames>"
+list/nohead/clobber/format=(A)/FILE/append f
+
+
+LET framesEnd = "</lasAnimation>"
+list/nohead/format=(A15)/FILE/append framesEnd
+
+! End of file ------------LAS_animate_all.jnl--------------------------
