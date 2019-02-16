@@ -263,7 +263,11 @@ public class SimplePropPropViewer implements EntryPoint {
     
     boolean outx = false;
     boolean outy = false;
-    
+
+    // Take into account if the window is scrolled
+    int yscroll;
+
+
     @Override
     public void onModuleLoad() {
         editDialog.setText("Flag Editor");
@@ -1113,6 +1117,10 @@ public class SimplePropPropViewer implements EntryPoint {
                                         
                                         startx = event.getX();
                                         starty = event.getY();
+
+                                        yscroll = Window.getScrollTop();
+                                        starty = starty - yscroll;
+
                                         if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size && starty < y_offset_from_top + y_plot_size) {
 
                                             draw = true;
@@ -1140,6 +1148,10 @@ public class SimplePropPropViewer implements EntryPoint {
                                     public void onMouseMove(MouseMoveEvent event) {
                                         int currentx = event.getX();
                                         int currenty = event.getY();
+
+                                        yscroll = Window.getScrollTop();
+                                        currenty = currenty - yscroll;
+
                                         // If you drag it out, we'll stop drawing.
 
                                         // To text everything has to be multiplied by the scale factor. Depend on Java to make the type promotions work right.
