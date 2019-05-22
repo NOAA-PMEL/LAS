@@ -315,11 +315,11 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
       <menu type="options" name="palette">
         <item values="default">Default</item>
 
-        <item values="rainbow">Rainbow (default)</item>
-        <item values="rnb2">Rainbow alternative</item>
-        <item values="light_rainbow">Rainbow pastel</item>
-        <item values="rainbow_by_levels">Rainbow (repeating by-level)</item>
-        <item values="light_bottom">Rainbow light bottom</item>
+        <item values="viridis">CM viridis (blue to green) -- default</item>
+        <item values="plasma">CM plasma (lighter purple to yellow)</item>
+        <item values="inferno">CM inferno (purple to orange to yellow)</item>
+        <item values="magma">CM magma (purple to yellow)</item>
+
 
         <item values="ocean_temp">Ocean temperature (consistent by-value)</item>
 
@@ -331,11 +331,12 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
         <item values="terrestrial">topo: land only</item>
         <item values="dark_terrestrial">topo: land only, dark</item>
 
-        <item values="inferno">CM inferno (purple to orange to yellow)</item>
-        <item values="magma">CM magma (purple to yellow)</item>
-        <item values="plasma">CM plasma (lighter purple to yellow)</item>
-        <item values="viridis">CM viridis (blue to green)</item>
 
+        <item values="rainbow">Rainbow</item>
+        <item values="rnb2">Rainbow alternative</item>
+        <item values="light_rainbow">Rainbow pastel</item>
+        <item values="rainbow_by_levels">Rainbow (repeating by-level)</item>
+        <item values="light_bottom">Rainbow light bottom</item>
 
         <item values="cmocean_algae">CMocean algae (light to dark greens)</item>
         <item values="cmocean_amp">CMocean amp (light to dark browns)</item>
@@ -553,21 +554,28 @@ http://ferret.pmel.noaa.gov/Ferret/documentation/users-guide/customizing-plots/C
       </help>
       <title>Palette (2nd variable)</title>
       <menu type="options" name="palette2">
-        <item values="default">Default</item>
-        <item values="rainbow">default rainbow</item>
-        <item values="rnb2">alternative rainbow</item>
-        <item values="light_rainbow">pastel rainbow</item>
-        <item values="rainbow_by_levels">rainbow (by-level)</item>
-        <item values="ocean_temp">ocean temperature (by-value)</item>
-        <item values="land_sea_values">topography/bathymetry (by-value)</item>
-        <item values="etop_values">ocean/terrestrial elevation (by-value)</item>
-        <item values="light_bottom">light bottom (by-value)</item>
-        <item values="light_centered">anomaly</item>
-        <item values="land_sea">topography/bathymetry</item>
-        <item values="dark_land_sea">dark topography/bathymetry</item>
-        <item values="ocean_blue">blue bathymetry</item>
-        <item values="terrestrial">topography</item>
-        <item values="dark_terrestrial">dark topography</item>
+
+        <item values="viridis">CM viridis (blue to green) -- default</item>
+        <item values="plasma">CM plasma (lighter purple to yellow)</item>
+        <item values="inferno">CM inferno (purple to orange to yellow)</item>
+        <item values="magma">CM magma (purple to yellow)</item>
+
+        <item values="ocean_temp">Ocean temperature (consistent by-value)</item>
+
+        <item values="land_sea">topo: land and sea</item>
+        <item values="dark_land_sea">topo: land and sea, dark </item>
+        <item values="land_sea_values">topo: (consistent by value)</item>
+        <item values="etop_values">topo: etopo land and sea (consistent by value)</item>
+        <item values="ocean_blue">topo: blue bathymetry</item>
+        <item values="terrestrial">topo: land only</item>
+        <item values="dark_terrestrial">topo: land only, dark</item>
+
+
+        <item values="rainbow">Rainbow</item>
+        <item values="rnb2">Rainbow alternative</item>
+        <item values="light_rainbow">Rainbow pastel</item>
+        <item values="rainbow_by_levels">Rainbow (repeating by-level)</item>
+        <item values="light_bottom">Rainbow light bottom</item>
 
         <item values="bluescale">range of blues</item>
         <item values="inverse_bluescale">inverse range of blues</item>
