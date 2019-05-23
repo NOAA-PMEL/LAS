@@ -18,5 +18,5 @@ be used in any manner to imply endorsement of any commercial product
 or activity by the DOC or the United States Government.*
 
 ## LAS Documentation
-Please see the [LAS Website at PMEL](http://ferret.pmel.noaa.gov/LAS/home) for more information at this time.
+Please see the [LAS Website at PMEL](https://ferret.pmel.noaa.gov/LAS/home) for more information at this time.
 

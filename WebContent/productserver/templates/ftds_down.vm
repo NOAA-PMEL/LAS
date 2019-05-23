@@ -11,8 +11,8 @@
    <p>A component needed for your request is down or was not installed.</p>
    <p>If you are the site administrator, verify that your F-TDS installation is working correctly, then 
       restart your servlet container (Tomcat) 
-      or <a href="http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/las-administration/reloading-the-las-configuration/">reinit your server</a> 
-      from the <a href="http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/las-administration/the-admin-page/">admin page</a>.</p>
+      or <a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/las-administration/reloading-the-las-configuration/">reinit your server</a> 
+      from the <a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/las-administration/the-admin-page/">admin page</a>.</p>
 
    </body>
 </html> 
