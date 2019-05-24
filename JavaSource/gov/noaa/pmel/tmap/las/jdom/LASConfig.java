@@ -391,8 +391,8 @@ public class LASConfig extends LASDocument {
      * @param fds_base the base URL of the F-TDS server http://server:port/thredds/dodsC
      * @param fds_dir the directory into which the F-TDS journal files will be written
      * @throws LASException
-     * @throws JDOMExcption
-     * @throws IOFoundException
+     * @throws JDOMException
+     * @throws IOException
      */
     public void addFDS(String fds_base, String fds_dir) throws LASException, JDOMException, IOException {
         File datadir = new File(fds_dir);
@@ -901,7 +901,7 @@ public class LASConfig extends LASDocument {
     } */
     /**
      * See if this config contains a grid with this ID
-     * @param data.getId() the id to check
+     * @param the id to check
      * @return true if found; false if not
      */
     private boolean containsGrid(String grid_id) {
@@ -924,7 +924,7 @@ public class LASConfig extends LASDocument {
     /**
      * Does this config contain this data set and variable?
      * @param dsid the data set
-     * @param data.getId() the variable
+     * @param var_id the variable
      * @return
      * @throws JDOMException
      */
@@ -1723,7 +1723,7 @@ public class LASConfig extends LASDocument {
             return url;
         }
         // If this is a local data set then fds must be set to true.
-        if ( !dataObjectURL.startsWith("http:")) {
+        if ( !dataObjectURL.startsWith("http")) {
             fds = true;
         }
         if (fds) {
@@ -2390,7 +2390,7 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Get the grid object with its axes filled by the grids ID.
-     * @param the ID
+     * @param ID the ID
      * @return the grid
      * @throws LASException 
      * @throws JDOMException 
@@ -2423,8 +2423,8 @@ public class LASConfig extends LASDocument {
     /**
      * Get grid for a particular dataset and variable.
      *
-     * @param dsid the id of the desired data set
-     * @param varid the id if the desired variable
+     * @param dsID the id of the desired data set
+     * @param varID the id if the desired variable
      * @return grid the Grid object with up to for Axes
      * @throws JDOMException
      */
