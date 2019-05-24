@@ -62,7 +62,7 @@
 		<TR>
 			<TD bgcolor="#7391AD"  height="10px" width="280px" align="left">
 				<div style="position: relative; width: 280px; height: 10px;margin-right:2px">
-					<a href="http://ferret.pmel.noaa.gov/LAS/" target="_new"><span class="top_link_title">Live Access Server</span></a>
+					<a href="https://ferret.pmel.noaa.gov/LAS/" target="_new"><span class="top_link_title">Live Access Server</span></a>
 					<span style="position: absolute; top: 0px; left: 150px; font-size:7pt; color:#FFFFFC;">
 				        
 					</span>
