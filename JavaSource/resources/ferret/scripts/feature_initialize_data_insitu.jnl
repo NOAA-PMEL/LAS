@@ -10,6 +10,8 @@
 !   10/2017 *acm* Set up color variable in a more consistent way
 !   11/2017 *acm* Remove any quotes from around variable title and units
 !    3/2018 *acm* If a feature-type plot has a color palette setting, set up to use it
+!    7/2019 *acm* If running DSG-enabled Ferret, set the dataset to ignore DSG type
+!                 for non-upgraded scripts
 
 DEFINE SYMBOL num ($1"0")
 
@@ -71,8 +73,12 @@ ENDIF
 ! SET DATA and check for errors
 !!!!  These are sometimes filled in with a tabledap address not the netCDF file.  Keep it using data_0_url.
 !!!! SET DATA "($data_($num)_url)"
+!!
+!!!! When running DSG-enabled Ferret/PyFerret, need the updated scripts to work with DSG files.
+!!!! These scripts are NOT updated
 
 SET DATA "($data_0_url)"
+IF `($ferret_version) GE 7.51` THEN USE/FEATURE=none "($data_0_url)"
 
 IF ($fer_last_error"0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
@@ -214,6 +220,8 @@ IF `color_by_index EQ 1` THEN let color_by_feature = 1
 IF `color_by_feature EQ 1` THEN
 
    USE "($data_($num)_url)"
+   IF `($ferret_version) GE 7.51` THEN USE/FEATURE=none "($data_($num)_url)"
+
 
    DEFINE SYMBOL data_($num)_var = `varnames[i=1]`
    DEFINE SYMBOL is_vid = 1
