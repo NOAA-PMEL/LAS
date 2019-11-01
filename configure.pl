@@ -118,6 +118,9 @@ while (! $java){
             if (/ version /){
                 $line = $_;
                 last;
+            } elif (/^OpenJDK/){
+                $line = $_;
+                last;
             }
         }
         close STATUS;
