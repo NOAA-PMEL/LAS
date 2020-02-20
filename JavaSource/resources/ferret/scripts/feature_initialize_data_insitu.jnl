@@ -15,6 +15,9 @@
 
 DEFINE SYMBOL num ($1"0")
 
+! Non-DSG scripts, using a DSG-enabled Ferret
+IF `($ferret_version"0") GT 7.504` THEN USE/FEATURE=none ($data_0_url)
+
 ! The dataset_id should be the ERDDAP dataset ID. Check that it's defined anf
 ! if not set it to the dataset_name
 
