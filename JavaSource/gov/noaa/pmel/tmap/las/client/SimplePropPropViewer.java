@@ -266,6 +266,7 @@ public class SimplePropPropViewer implements EntryPoint {
 
     // Take into account if the window is scrolled
     int yscroll;
+    int xscroll;
 
 
     @Override
@@ -1119,7 +1120,9 @@ public class SimplePropPropViewer implements EntryPoint {
                                         starty = event.getY();
 
                                         yscroll = Window.getScrollTop();
+                                        xscroll = Window.getScrollLeft();
                                         starty = starty - yscroll;
+                                        startx = startx - xscroll;
 
                                         if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size && starty < y_offset_from_top + y_plot_size) {
 
@@ -1150,7 +1153,9 @@ public class SimplePropPropViewer implements EntryPoint {
                                         int currenty = event.getY();
 
                                         yscroll = Window.getScrollTop();
+                                        xscroll = Window.getScrollLeft();
                                         currenty = currenty - yscroll;
+                                        currentx = currentx - xscroll;
 
                                         // If you drag it out, we'll stop drawing.
 

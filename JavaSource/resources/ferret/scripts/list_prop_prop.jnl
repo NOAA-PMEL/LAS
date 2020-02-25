@@ -16,6 +16,7 @@
 !  9/2017 If there is a fourth variable, list it too.
 ! 10/2017 Ensure that Time, Longitude, Latitude, Depth are written if available.
 ! 10/2017 List up to the total number of variables in the dataset data_0_var through data_xx_var.
+!  2/2020 Check for existence of global attributes before using global_attnames.
 
 set mode verify:always
 
@@ -250,8 +251,15 @@ IF `IS_ELEMENT_OF_STR_N(attnames, "depth") GE 1` THEN define symbol have_depth =
 
 LET global_attnames = ..attnames
 LET nglobal_atts = ..nattrs
+
+
+LET featr = 0
+IF `nglobal_atts GT 0` THEN
+  IF `IS_ELEMENT_OF_STR_N(global_attnames, "featureType") ` THEN LET featr = 1
+ENDIF
+
 DEFINE SYMBOL feature_type = none
-IF `IS_ELEMENT_OF_STR(global_attnames, "featureType") GT 0` THEN DEFINE SYMBOL feature_type = `..featureType`
+IF `featr GT 0` THEN DEFINE SYMBOL feature_type = `..featureType`
 
 DEFINE SYMBOL depthvar = depth
 IF ($depth_done"0|*>1") THEN DEFINE SYMBOL depthvar = depth_

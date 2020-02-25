@@ -12,6 +12,7 @@
 !    3/2018 *acm* If a feature-type plot has a color palette setting, set up to use it
 !    7/2019 *acm* If running DSG-enabled Ferret, set the dataset to ignore DSG type
 !                 for non-upgraded scripts
+!  2/2020 Check for existence of global attributes before using global_attnames.
 
 DEFINE SYMBOL num ($1"0")
 
@@ -90,10 +91,16 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-! Get the dataset title
+LET nglobal_atts = ..nattrs
 LET global_attnames = ..attnames
+
+
+! Get the dataset title
+DEFINE SYMBOL dataset_title_att = dataset title
+IF `nglobal_atts GT 0` THEN
 IF `IS_ELEMENT_OF_STR(global_attnames, "title") GT 0` THEN
   DEFINE SYMBOL dataset_title_att = `..title`
+ENDIF
 ENDIF
 
 
@@ -110,8 +117,7 @@ IF `($ferret_Trajectory_palette"0|*>1")` THEN DEFINE SYMBOL ferret_palette =  ($
 GO custom_dataset_definitions
 
 ! Did the request return the no-data flag?
-LET global_attnames = ..attnames
-LET nglobal_atts = ..nattrs
+
 IF `nglobal_atts GT 0` THEN
    IF `IS_ELEMENT_OF_STR(global_attnames, "query_result") GT 0` THEN
       DEFINE SYMBOL data_query_string = `..query_result`
