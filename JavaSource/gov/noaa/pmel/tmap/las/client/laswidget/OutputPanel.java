@@ -233,6 +233,7 @@ public class OutputPanel extends Composite implements HasName {
 
     // Take into account if the window is scrolled
     int yscroll;
+    int xscroll;
 
 
     ClickHandler datasetCloseHandler = new ClickHandler() {
@@ -317,7 +318,9 @@ public class OutputPanel extends Composite implements HasName {
                     startx = event.getX();
                     starty = event.getY();
                     yscroll = Window.getScrollTop();
+                    xscroll = Window.getScrollLeft();
                     starty = starty - yscroll;
+                    startx = startx - xscroll;
                     if (startx > x_offset_from_left && starty > y_offset_from_top && startx < x_offset_from_left + x_plot_size && starty < y_offset_from_top + y_plot_size) {
 
                         draw = true;
@@ -344,7 +347,9 @@ public class OutputPanel extends Composite implements HasName {
                     // If you drag it out, we'll stop drawing.
 
                     yscroll = Window.getScrollTop();
+                    xscroll = Window.getScrollLeft();
                     currenty = currenty - yscroll;
+                    currentx = currentx - xscroll;
 
                     if (currentx < x_offset_from_left* imageScaleRatio || currenty < y_offset_from_top * imageScaleRatio || currentx > x_offset_from_left * imageScaleRatio + x_plot_size * imageScaleRatio || currenty > y_offset_from_top * imageScaleRatio + y_plot_size * imageScaleRatio) {
 
