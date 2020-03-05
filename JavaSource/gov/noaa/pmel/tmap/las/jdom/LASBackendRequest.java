@@ -1221,7 +1221,7 @@ public class LASBackendRequest extends LASDocument {
             name = getDatabaseProperty("time");
             String time_type = getDatabaseProperty("time_type");
 
-            if ( time_type == null && time_type.equals("") ) {
+            if ( time_type == null || time_type.equals("") ) {
                 throw new LASException("Cannot find time_type database property");
             }
             if ( time_type.equalsIgnoreCase("string") ) {
@@ -1266,7 +1266,7 @@ public class LASBackendRequest extends LASDocument {
             name = getDatabaseProperty("time");
             String time_type = getDatabaseProperty("time_type");
 
-            if ( time_type == null && time_type.equals("") ) {
+            if ( time_type == null || time_type.equals("") ) {
                 throw new LASException("Cannot find time_type database property");
             }
             if ( time_type.equalsIgnoreCase("string") ) {
@@ -1299,7 +1299,7 @@ public class LASBackendRequest extends LASDocument {
         String time_type = getDatabaseProperty("time_type");
         boolean quotes = false;
 
-        if ( time_type == null && time_type.equals("") ) {
+        if ( time_type == null || time_type.equals("") ) {
             throw new LASException("Cannot find time_type database property");
         }
 
