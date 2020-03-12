@@ -5,7 +5,7 @@
 ! cause curvi coord data to be wiped out. As a workaround, cancel any vars we define
 ! 3/2020 Issue 1773 If the data is really monthly or yearly, can configure with the
 !        ferret property <timelab_res>month</timelab_res> or <timelab_res>year</timelab_res> 
-!        Here, implement a hack for MyNASAdata datasets with timesteps defined e.g. 
+!        Here, implement a hack for datasets with timesteps defined e.g. 
 !        as month-since 1-Jan-1990 so timesteps fall near the startor end of month 
 !        THEN a request for Nov-1990 gets the timestep at 31-Oct-1990:15:00
 
