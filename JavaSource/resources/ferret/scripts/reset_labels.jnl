@@ -60,8 +60,7 @@ IF `($data_count"1") EQ 1` THEN
 	 ENDIF
       ENDIF
    ENDIF
-   say reset_labels.jnl
-   pause
+
    IF ($labnum_calend"0|*>1") THEN
       DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
    ENDIF
