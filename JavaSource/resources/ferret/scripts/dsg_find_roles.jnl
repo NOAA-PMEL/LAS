@@ -44,7 +44,8 @@ IF `($feature_variable"0|*>1")` THEN
       let ee_siz = `ee_var,return=msize`
       IF `ee_var[m=@max] NE ee_siz` THEN
          LET nlen = INT(1+LOG(ee_var[m=@max]))
-	 LET/d=($dsetnum"1") feature_name = FLOATSTR(ee_var, "(i`nlen`)")
+!	 LET/d=($dsetnum"1") feature_name = FLOATSTR(ee_var, "(i`nlen`)")
+	 LET/title="($dname)" feature_name = FLOATSTR(ee_var, "(i`nlen`)")
 
 ! otherwise concoct id's based on the location/ time
       ELSE  

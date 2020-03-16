@@ -17,7 +17,11 @@
 DEFINE SYMBOL num ($1"0")
 
 ! Non-DSG scripts, using a DSG-enabled Ferret
-IF `($ferret_version"0") GT 7.504` THEN USE/FEATURE=none ($data_0_url)
+IF `($ferret_version"0") GE 7.6` THEN 
+  USE /FEATURE=none ($data_0_url)
+ELSE
+  USE ($data_0_url)
+ENDIF
 
 ! The dataset_id should be the ERDDAP dataset ID. Check that it's defined anf
 ! if not set it to the dataset_name
@@ -82,7 +86,11 @@ ENDIF
 !!!! These scripts are NOT updated
 
 SET DATA "($data_0_url)"
-IF `($ferret_version) GE 7.51` THEN USE/FEATURE=none "($data_0_url)"
+IF `($ferret_version) GE 7.6` THEN 
+  USE /FEATURE=none "($data_0_url)"
+ELSE
+  USE "($data_0_url)"
+ENDIF
 
 IF ($fer_last_error"0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
@@ -228,8 +236,11 @@ IF `color_by_index EQ 1` THEN let color_by_feature = 1
 
 IF `color_by_feature EQ 1` THEN
 
-   USE "($data_($num)_url)"
-   IF `($ferret_version) GE 7.51` THEN USE/FEATURE=none "($data_($num)_url)"
+   IF `($ferret_version) GE 7.6` THEN 
+     USE /FEATURE=none "($data_($num)_url)"
+   ELSE
+     USE "($data_($num)_url)"
+   ENDIF
 
 
    DEFINE SYMBOL data_($num)_var = `varnames[i=1]`
