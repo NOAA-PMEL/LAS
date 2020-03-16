@@ -2783,58 +2783,58 @@ public class OutputPanel extends Composite implements HasName {
                     y_axis_lower_left = y_axis_upper_right;
                     y_axis_upper_right = t;
                 }
-                if (image_ready) {
+                if (image_ready && !imageurl.isEmpty()) {
                     image_w = x_image_size;
                     image_h = y_image_size;
 
+                    currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
                     String urlfrag = URLUtil.getBaseURL() + "getAnnotations.do?template=image_w_annotations.vm&"+getPrintURL();
                     formatChooser.setPrintUrl(urlfrag);
-                    
+
                     // set the canvas with the image and get to drawin'
 
-                    if (!imageurl.equals("")) {
-                        currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                        plotImage = new IESafeImage(imageurl);
-                        x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
-                        y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
-                        if (imageCanvas != null) {
-                          
-                            
-                            
-                            plotImage.addLoadHandler(imageLoadHandler);
-                            plotImage.addErrorHandler(imageErrorHandler);
-                            plotImage.setUrl(imageurl);
-                            grid.setWidget(2, 0, plotImage);
-                            plotImage.setVisible(false);
-                            drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
+                    plotImage = new IESafeImage(imageurl);
+                    x_per_pixel = (x_axis_upper_right - x_axis_lower_left) / Double.valueOf(x_plot_size);
+                    y_per_pixel = (y_axis_upper_right - y_axis_lower_left) / Double.valueOf(y_plot_size);
 
-                                @Override
-                                public void onMouseUp(MouseUpEvent event) {
-                                    // If we're still drawing when the mouse
-                                    // goes up, record the position.
-                                    if (draw) {
-                                        endx = event.getX();
-                                        endy = event.getY();
-                                    }
-                                    draw = false;
-                                    outx = false;
-                                    outy = false;
-                                    for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
-                                        Mouse mouse = mouseIt.next();
-                                        mouse.applyNeeded();
-                                    }
+                    if (imageCanvas != null) {
+
+
+
+                        plotImage.addLoadHandler(imageLoadHandler);
+                        plotImage.addErrorHandler(imageErrorHandler);
+                        plotImage.setUrl(imageurl);
+                        grid.setWidget(2, 0, plotImage);
+                        plotImage.setVisible(false);
+                        drawingCanvas.addMouseUpHandler(new MouseUpHandler() {
+
+                            @Override
+                            public void onMouseUp(MouseUpEvent event) {
+                                // If we're still drawing when the mouse
+                                // goes up, record the position.
+                                if (draw) {
+                                    endx = event.getX();
+                                    endy = event.getY();
                                 }
-                            });
-                            lasAnnotationsPanel.setPopupWidth(getPlotWidth());
-                        } else {
-                            // Browser cannot handle a canvas tag, so just put
-                            // up the image.
-                            // The old stuff if there is no canvas...
-                            currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-                            setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-                        }
+                                draw = false;
+                                outx = false;
+                                outy = false;
+                                for (Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+                                    Mouse mouse = mouseIt.next();
+                                    mouse.applyNeeded();
+                                }
+                            }
+                        });
+                        lasAnnotationsPanel.setPopupWidth(getPlotWidth());
+                    } else {
+                        // Browser cannot handle a canvas tag, so just put
+                        // up the image.
+                        // The old stuff if there is no canvas...
+                        currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+                        setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
                     }
+
                     world_startx = x_axis_lower_left;
                     world_endx = x_axis_upper_right;
                     world_starty = y_axis_lower_left;
