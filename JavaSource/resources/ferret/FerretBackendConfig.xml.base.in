@@ -26,6 +26,12 @@
                 An error occurred in the service that was creating your product.
               </text>
            </message>
+           <message type="startsWith" level="error">
+                         <key>**ERROR Too many lines for Time plot. Choose 30 or fewer features to plot.</key>
+                         <text>
+                           Too many lines selected for Time plot. Use constraints to choose 30 or fewer features to plot..
+                         </text>
+                      </message>
 	   <message type="startsWith" level="error">
               <key>**ERROR Invalid data type for variable</key>
               <text>
