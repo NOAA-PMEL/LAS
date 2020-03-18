@@ -56,9 +56,15 @@ public class LASProxy {
 			if (rc != HttpStatus.SC_OK) {
 
 			        String message = EntityUtils.toString(httpResponse.getEntity());
-                                message = message.substring(message.indexOf("<h1>")+4, message.indexOf("</h1>"));
+			        if ( message.toLowerCase().contains("query produced no matching")) {
+			        	message = "query produced no matching";
+			        	throw new IOException(message);
+					} else {
+						message = message.substring(message.indexOf("<h1>") + 4, message.indexOf("</h1>"));
+					}
 
-                                if ( message == null || message.equals("") ) message = "HTTP Error code: "+rc;
+			        if ( message == null || message.equals("") ) message = "HTTP Error code: "+rc;
+
 				log.error(message);
 				if ( response == null ) {
 					throw new IOException(message);
