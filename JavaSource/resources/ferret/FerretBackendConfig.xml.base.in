@@ -51,6 +51,12 @@
               </text>
            </message>
            <message type="startsWith" level="error">
+              <key>**ERROR Failed setting up computation</key>
+              <text>
+                  Failed setting up computation for analyzed data. Try a smaller region or time range.
+              </text>
+           </message>
+           <message type="startsWith" level="error">
               <key>**ERROR Sorry. This server cannot yet perform a time analysis and a month-of-the-year constraint together.</key>
               <text>
                   Sorry. This server cannot yet perform a time analysis and a month-of-the-year constraint together.
