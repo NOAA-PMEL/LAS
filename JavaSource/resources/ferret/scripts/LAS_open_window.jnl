@@ -33,9 +33,9 @@ IF `($set_window_quals"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL set_window_quals = ($set_window_quals)/SIZE=($ferret_size"0.5")
 CANCEL MODE LOGO
 
-let wmark = 0
-IF ($ferret_wmark_image"0|*>1") THEN 
-   LET wmark = 1
+DEFINE SYMBOL wmark = 0
+IF `($ferret_wmark_image"0|*>1" AND ($ferret_version) GT 7.63` THEN 
+   DEFINE SYMBOL wmark = 1
    DEFINE SYMBOL set_window_quals = ($set_window_quals)/\
    wmark="($ferret_wmark_image)"/wmscale=0.5/wmopac=50 /wmxloc=5/wmyloc=5
 ENDIF
@@ -68,7 +68,7 @@ SET WINDOW($set_window_quals)
 
 IF `($ferret_margins"1|0|1|false>0|true>1") EQ 0` THEN
    DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 WMSview
-   IF `wmark` THEN DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:.8 WMSview
+   IF ($wmark"0|*>1") THEN DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:.8 WMSview
    SET VIEW WMSview
    IF `STRLEN("($ferret_view)") LT 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOYADJUST
 
@@ -76,8 +76,8 @@ ELSE
 ! For 2D plots, make room for the colorbar labels which sometimes get cut off.
    IF `STRLEN("($ferret_view)") GE 2` THEN 
       DEFINE VIEW/X=0:0.95/Y=0:1 xspace
-      IF `wmark` THEN DEFINE VIEW/X=0:0.95/Y=0:.8 xspace
-      IF `wmark` THEN DEFINE VIEW/X=0:0.95/Y=0:.5 xspace
+      IF ($wmark"0|*>1") THEN DEFINE VIEW/X=0:0.95/Y=0:.8 xspace
+      IF ($wmark"0|*>1") THEN DEFINE VIEW/X=0:0.95/Y=0:.5 xspace
       SET VIEW xspace
    ELSE
 ! For 1D plots we may be doing a line key in a new viewport, so set the initial viewport.
@@ -88,7 +88,7 @@ ELSE
 	 DEFINE SYMBOL win_aspect = 0.4
       ENDIF
       SET WIN/ASPECT=($win_aspect)/:axis
-      IF `wmark` THEN SET WIN/ASPECT=($win_aspect)/wmark="($ferret_wmark_image)"
+      IF ($wmark"0|*>1") THEN SET WIN/ASPECT=($win_aspect)/wmark="($ferret_wmark_image)"
    ENDIF
 
 ENDIF

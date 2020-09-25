@@ -23,7 +23,7 @@ IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN
    LET y_up_t = 0.99
 ENDIF
 
-IF `wmark` THEN 
+IF ($wmark"0|*>1") THEN 
    LET y_up = `y_up - 0.04`
    LET y_up_t = `y_up_t - 0.6`
 ENDIF
