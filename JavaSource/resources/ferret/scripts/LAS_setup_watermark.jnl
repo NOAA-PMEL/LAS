@@ -1,0 +1,26 @@
+! LAS_setup_watermark.jnl
+! Add the settings for a watermark image to the 
+! quqlifiers in symbol set_window_quals
+
+! How do we know what the size of the watermark image is?
+! Assume it's ~100 pixels; The LAS configurer creates the right size image?
+! The linux command returns the image info including size in pixels.
+!    identify -ping imagefile.png
+
+LET wmscale = 1		! scale factor: 
+LET wmopac = 50		! percent opacity
+
+! Watermark in the upper left
+IF ($wmark"0|ul>1|*>0") THEN 
+   LET wmxloc = 5   ! pixels from upper left corner
+   LET wmyloc = 5   ! pixels from upper left corner
+ENDIF
+
+! Watermark in the lower left
+IF ($wmark"0|ll>1|*>0") THEN 
+   LET wmxloc = 5		! pixels from upper left corner
+   LET wmyloc = pix_y - 100	! pixels from upper left corner
+ENDIF
+
+IF ($wmark"0|*>1") THEN DEFINE SYMBOL set_window_quals = ($set_window_quals)\
+ /wmark="($ferret_wmark_image)"/wmscale=`wmscale`/wmopac=`wmopac`/wmxloc=`wmxloc`/wmyloc=`wmyloc`
