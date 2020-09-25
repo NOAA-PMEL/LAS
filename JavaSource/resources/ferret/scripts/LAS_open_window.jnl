@@ -34,7 +34,7 @@ IF `($set_window_quals"0|*>1") EQ 0` THEN \
 CANCEL MODE LOGO
 
 DEFINE SYMBOL wmark = 0
-IF `($ferret_wmark_image"0|*>1" AND ($ferret_version) GT 7.63` THEN 
+IF `($ferret_wmark_image"0|*>1") AND ($ferret_version) GE 7.63` THEN 
    DEFINE SYMBOL wmark = 1
    DEFINE SYMBOL set_window_quals = ($set_window_quals)/\
    wmark="($ferret_wmark_image)"/wmscale=0.5/wmopac=50 /wmxloc=5/wmyloc=5
