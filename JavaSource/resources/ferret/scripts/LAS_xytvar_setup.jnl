@@ -57,6 +57,7 @@ IF ($variable_1_lab"0|*>1") THEN
    IF `itsa_lon_plot OR itsa_lat_plot` THEN  CANCEL SYMBOL ax_label_y
 ENDIF
 
+
 ! If the axis labels are long, make the text size smaller
 LET labfac = 1.
 if `(labwid("($ax_label_x)", 0.12) / ($ppl$xlen)) GT 1` THEN LET labfac = ($ppl$xlen)/labwid("($ax_label_x)",0.12)

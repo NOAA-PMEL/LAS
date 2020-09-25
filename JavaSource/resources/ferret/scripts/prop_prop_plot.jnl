@@ -9,7 +9,6 @@
 ! 11/2017 back off finding direction variables based on attributes for now
 ! 12/2017 changes for efficiency getting variable types
 !  1/2018 Time will only be the independent variable - no vertical time axis.
-!  8/2020 Updates for working with DSG datasets
 
 ! prop_prop_plot.jnl creates a property-property plot, using the 
 ! data variable in symbol data_0_var and the second variable from
@@ -38,10 +37,6 @@ LET color_by_feature = 0
 CANCEL SYMBOL ferret_fill_levels
 CANCEL SYMBOL ferret_contour_levels
 CANCEL SYMBOL ferret_palette
-
-! pale gray line for underlay
-SET MODE linecolors:7
-PPL color, 7, 90, 90, 90  !gray
 
 
 ! Initialize data and variables
@@ -89,9 +84,10 @@ IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH=(0.1,0.04,0.1,0.04),COLOR=black)
 ENDIF
 
+
 ! Set the plot argument. 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var
+
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
 IF `($ferret_thumb"0|*>1") AND ($data_count"0") LE 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=red
@@ -163,14 +159,6 @@ ENDIF
 ! If this is a Watch Circle plot, set that up. 
 ! This is a hack, which can be generalized with properties or attributes.
 
-LET itsa_lon_prop = 0
-LET itsa_lat_prop = 0
-LET itsa_tim_prop = 0
-LET itsa_lon_plot = 0
-LET itsa_lat_plot = 0
-LET itsa_tim_plot = 0
-LET itsa_map_plot = 0
-
 
 GO setup_watch_circle
 
@@ -182,55 +170,29 @@ IF `its_watch_circle EQ 0` THEN
    ENDIF
 ENDIF
 
-IF `($ngood_data"0|*") EQ -1` THEN 
-   GO LAS_results box
-   EXIT/SCRIPT
+IF `($ngood_data"0|*>1") EQ 0` THEN
+   LET allp = xsequence(($xvar))
+   DEFINE SYMBOL ngood_data = `allp[i=@ngd]`
 ENDIF
-
-DEFINE SYMBOL xvar = constraints_mask*xvar
-DEFINE SYMBOL yvar = constraints_mask*yvar
-LET x_plot_var = ($xvar)
-LET y_plot_var = ($yvar)
-IF `($data_count"0") GT 2` THEN 
-   DEFINE SYMBOL zvar = constraints_mask*zvar
-   LET z_plot_var = ($zvar)
-ENDIF
-
-
-! compute # points plotted after mask applied
-
-LET compute_good =  ($xvar)* ($yvar)
-
-
-IF `($data_count"0") GT 2` THEN 
-   DEFINE SYMBOL ztyp = `($zvar),return=dtype`
-   IF `($ztyp"0|FLOAT>1|*>0") AND ($zshape"0|POINT>0|($shape)>1|*>0")` THEN \
-      LET compute_good =  ($xvar)* ($yvar)* ($zvar)
-ENDIF
-STAT compute_good
-DEFINE SYMBOL shape = `compute_good,RETURN=shape`
-DEFINE SYMBOL ngood_data = ($stat_ngood)
-DEFINE SYMBOL nbad_data  = ($stat_nbad)
 
 IF ($put_label"0|*>1") THEN DEFINE SYMBOL all_missing = 1
-IF `($ngood_data) EQ 0` THEN DEFINE SYMBOL all_missing = 1
 
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
-DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var
-sh sym xvar, yvar, zvar
-sh var xvar,yvar
-
-IF `($data_count"0") GT 2` THEN DEFINE SYMBOL plot_arg = x_plot_var, y_plot_var, z_plot_var
+IF `($data_count"0") GT 2` THEN  DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($zvar)
 
 IF `($all_missing"0") EQ 0` THEN !!!! or all the way to the bottom of this script
 
 ! ... let symbol size gradually increase as no. of obs gets small
-DEFINE SYMBOL size_creep_factor `(($ngood_data)+300)/(($ngood_data)+100) - 1`  ! [0,1] range
+
+
+
+
+DEFINE SYMBOL size_creep_factor `(($ngood_data"0")+300)/(($ngood_data"0")+100) - 1`  ! [0,1] range
 LET sym_factr = 0.9 + 1.5*($size_creep_factor)
 
 DEFINE SYMBOL plot_command = PLOT/NOLAB/VS/sym=17/SIZE=`.12*sym_factr`
-DEFINE SYMBOL underlay_command = PLOT/NOLAB/RIBBON/VS/sym=17/palette=gray_light/NOKEY/SIZE=`.08*sym_factr`
-DEFINE SYMBOL underlay_vars = x_plot_var, y_plot_var, y_plot_var
+DEFINE SYMBOL underlay_command = PLOT/NOLAB/RIBBON/VS/sym=17/palette=gray_light/NOKEY/SIZE=`.08*sym_factr` 
+
 
 ! gray dashed line underlying trajectories or time series
 
@@ -239,18 +201,6 @@ IF `itsa_map_plot` THEN
    DEFINE SYMBOL under_line = /pal=gray_light/DASH=(0.1,0.04,0.1,0.04)/NOLAB($vlim) x_plot_var
    DEFINE SYMBOL underlay_command = ($underlay_command)/OVER
 ENDIF
-
-! Set up gray dash line and underly of gray symbols as simple line plots not ribbon plots
-! Make the time coordinate variable the first argument for the ribbon plot so the scaling is right.
-
-IF  `itsa_tim_prop AND ($connect_dots"0|0|1|*>1")` THEN  !! not a /VS plot.
-   DEFINE SYMBOL under_line = /COLOR=7/DASH=(0.1,0.04,0.1,0.04)/NOLAB($vlim) y_plot_var
-   DEFINE SYMBOL underlay_command = PLOT/NOLAB/sym=17/COLOR=7/NOKEY/SIZE=`.08*sym_factr`/THICK=1
-   DEFINE SYMBOL underlay_vars = y_plot_var
-   
-   DEFINE SYMBOL plot_arg = ($data_0_var), ($data_1_var), z_plot_var
-ENDIF
-
 
 ! Fewer and larger symbols, use thicker line
 IF `.12*sym_factr GT 0.3` THEN 
@@ -263,13 +213,12 @@ ENDIF
 DEFINE SYMBOL plot_end_command = PLOT
 IF `($data_count"0") GT 2` THEN 
    IF ($color_by_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($color_by_levels)
-   DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")
+   DEFINE SYMBOL plot_command = ($plot_command)/RIBBON/LEVELS=($ferret_fill_levels"v")/MISSING=blank
    DEFINE SYMBOL plot_end_command = RIBBON
 ENDIF
 
 LET x_plot_var = ($xvar)
 LET y_plot_var = ($yvar)
-IF `($data_count"0") GT 2` THEN LET z_plot_var = ($zvar)
 
 LET have_constr = `constraints_mask,RETURN=isready`
 IF `have_constr EQ 0` THEN LET constraints_mask = 1
@@ -278,43 +227,22 @@ IF `color_by_feature` THEN
    GO LAS_pp_colorby_feature
 
 !   put_label has been set if all data is missing or constraints return no data.
-ELIF ($ferret_thumb"0|*>1") THEN 
-   IF `itsa_tim_prop ` THEN
-      PLOT/color=red/sym=17/title=" "/set y_plot_var
-	 ppl ylab "($ferret_title_1)"
-	 go unlabel ($labnum_x)
-	 go unlabel ($labnum_e)
-	 go unlabel ($labnum_dset)
-	 go unlabel ($labnum_datitl)
-      PPL PLOT
-   ELSE
-      PLOT/VS/color=red/sym=17/title=" "/set x_plot_var, y_plot_var
-	 ppl xlab "($ferret_title_0)"
-	 ppl ylab "($ferret_title_1)"
-	 go unlabel ($labnum_x)
-	 go unlabel ($labnum_e)
-	 go unlabel ($labnum_dset)
-	 go unlabel ($labnum_datitl)
-      PPL PLOT
-   ENDIF
 ELSE
+
    IF ($color_by"0|*>1") THEN 
 
 ! Get color-plot qualifiers
      DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels"v")
    
-     IF `($ngood_data"0") GT 0` THEN
-        IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
-           DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-	   DEFINE SYMBOL dokey = 0
-        ELSE
-           IF `STRINDEX(UPCASE("($qualifiers)"), "/KEY") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
-	   DEFINE SYMBOL dokey = 1
-        ENDIF
-   
-        IF ($ferret_key_centerlab"0|0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT,CENT
-
+     IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
+        DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+	DEFINE SYMBOL dokey = 0
+     ELSE
+        IF `STRINDEX(UPCASE("($qualifiers)"), "/KEY") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+	DEFINE SYMBOL dokey = 1
      ENDIF
+   
+     IF ($ferret_key_centerlab"0|0|*>1") THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT,CENT
 
      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 
@@ -329,24 +257,15 @@ ELSE
    ENDIF
 
 ! on lat/lon plots, draw a gray line on the cruise tracks.
-   IF `itsa_map_plot OR ($watch_plot"0|*>1") AND ($connect_dots"0|0|1|*>1") ` THEN PLOT/OVER($under_line) 
-
-   if ($watch_plot"0|*>1") THEN DEFINE SYMBOL underlay_command = ($underlay_command)/over/nolab/noaxis
-
-! on time plots, draw a gray line. This is the first plot, drawing the time axis
-   IF `itsa_tim_prop ` THEN PLOT($under_line) 
+   IF `itsa_map_plot AND ($connect_dots"0|0|1|*>1")` THEN PLOT/OVER($under_line) 
 
 ! show locations where the color-by variable is missing.  This way all missing data
 ! is underneath good data but PLOT/RIBBON/MISSING=gray can plot lots of missing pts over
 ! valid ones from data already on the page
 
    PPL COLOR,6,60,60,60 ! grey
-   IF `($data_count"0") GT 2 AND itsa_map_plot EQ 0 AND ($watch_plot"0|*>1") EQ 0` THEN
-      ($underlay_command)/set ($underlay_vars)
-      IF ($ax_label_x"0|*>1") THEN PPL xlab ($ax_label_x)
-      IF ($ax_label_y"0|*>1") THEN PPL ylab ($ax_label_y)
-      PPL PLOT
-   ENDIF
+
+   IF `($data_count"0") GT 2` THEN ($underlay_command) x_plot_var, y_plot_var, y_plot_var
 
    DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/SET
 
@@ -367,9 +286,6 @@ ELSE
 	DEFINE SYMBOL qualifiers = ($qualifiers)/levels=($ferret_fill_levels)/KEY=CENTER/palette=($ferret_palette)
    ENDIF
 
-   IF `STRINDEX("($qualifiers)", "palette") EQ 0` THEN \
-    DEFINE SYMBOL qualifiers = ($qualifiers)/palette=($ferret_palette"default|*>*)
-
    IF `STRINDEX("($qualifiers)", "OVER") GT 0` THEN DEFINE SYMBOL plot_end_command ($plot_end_command)/OVER
    ($plot_command)($qualifiers) ($plot_arg)
    IF `($ferret_annotations%0|*>1%) AND ($dokey"0|1>1|*>1")` THEN GO key_at_top
@@ -380,10 +296,11 @@ ENDIF  ! color-by-feature or not...
 
 ! This allows for auto-levels on prop-prop plots.
 IF ($color_by"0|*>1") THEN
-   LET data_range = MINMAX(constraints_mask*zvar)
+   LET data_range = minmax(constraints_mask*zvar)
    DEFINE SYMBOL data_plotted_min = `data_range[i=1],prec=7`
    DEFINE SYMBOL data_plotted_max = `data_range[i=2],prec=7`
 ENDIF
+
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
@@ -400,25 +317,17 @@ LET q = ($yvar)
 
 IF `itsa_map_plot or itsa_tim_prop` THEN DEFINE SYMBOL do_rsquare = 0
 
-! ~ 85 points gives a confidence of 0.8
-
-IF `($do_rsquare"1|0|*>1) AND ($ngood_data"0") LT 85` THEN 
-   DEFINE SYMBOL do_rsquare = 0
-   IF ($program_name"0|PyFerret>1|*>0") THEN SET TEXT/COLOR=blue moveable
-   DEFINE SYMBOL rsqlab = Too few points to compute
-   LET wid = `LABWID("($rsqlab)", 0.1)`
-   LABEL/NOUSER -0.5,-0.42,-1, 0, 0.1, Too few points to compute
-   LABEL/NOUSER -0.5,-0.6,-1, 0, 0.1,  regression line
-ENDIF
-
 DEFINE SYMBOL  line_color = blue  ! regression line
 IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
+
+IF ($do_rsquare"1|0|*>1) THEN GO LAS_regressx
+
+IF `($ngood_data"0") eq 0` THEN DEFINE SYMBOL do_rsquare = 0
 
 ! Note do_rsquare is set in LAS_xytvar_setup, where plots with time, lon, or 
 ! lat axes are set to NOT draw the regression line.
 
 IF ($do_rsquare"1|0|*>1) THEN 
-   GO LAS_regressx
 
 ! Note that qhat in the regress script is defined as
 !   LET qhat = slope*p + intercep
@@ -475,13 +384,8 @@ IF ($do_rsquare"1|0|*>1) THEN
 
 ENDIF
 
-ELSE  ! all_missing, make a nominal plot so LAS_results has something to work with
+ENDIF  ! all_missing or not...
 
-   plot/vs/nolab/noax/sym=dot/vlim=-1:1/hlim=-1:1 {-2,2}, {-2,2}
-
-ENDIF
-
-show data/att; pause
 ! notation with number of cruises, trajectories, or profiles and obs.
 GO feature_labels
 
@@ -507,6 +411,7 @@ IF ($note_num"0|*>1") THEN
      DEFINE SYMBOL note_($ii)_lab = Subsampled for speed. Choose a smaller region or time range to see full resolution;\
     )
 ENDIF
+
 
 GO LAS_results box
 
