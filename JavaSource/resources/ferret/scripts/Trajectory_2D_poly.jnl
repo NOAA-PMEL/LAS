@@ -271,6 +271,9 @@ ENDIF
 
 GO labels_above_plot
 
+! if constraints are shown via constraint_0_lhs etc, define labels for those
+GO set_constraint_labels
+
 ! Draw extra points, e.g. moorings as dots. Do this last so these 
 ! marks will be on top of everything else.
 

@@ -19,47 +19,92 @@
 ! - If no margins (WMS style plot) is requested, set that up, 
 !   including the /NOYADJUST plot qualifier.
 
-! For watermarks:
-! If there is a Ferret property <ferret>wmark_image</ferret>
-! then add that to the plot.
-! Here I have made the nominal choice to use 50% opacity and place
-! it 5 pixels from the uppermost left-hand corner.  It can also be scaled
-! using the /wmscale= qualifier.
-!
-! If wmark is set, the viewports defined here and in set_full_margins.jnl
-! are changed to allow some extra spacing in the Y direction.
-
-IF `($set_window_quals"0|*>1") EQ 0` THEN \
- DEFINE SYMBOL set_window_quals = ($set_window_quals)/SIZE=($ferret_size"0.5")
 CANCEL MODE LOGO
 
-DEFINE SYMBOL wmark = 0
-IF `($ferret_wmark_image"0|*>1") AND ($ferret_version) GE 7.63` THEN 
-   DEFINE SYMBOL wmark = 1
-   DEFINE SYMBOL set_window_quals = ($set_window_quals)/\
-   wmark="($ferret_wmark_image)"/wmscale=0.5/wmopac=50 /wmxloc=5/wmyloc=5
-ENDIF
 
 IF ($program_name"0|PyFerret>1|*>0") THEN 
    SET TEXT/FONT=verdana
    SET TEXT/isiz=-1 CBAR
 ENDIF
 
-IF `($win_aspect"0|*>1") EQ 0` THEN DEFINE SYMBOL win_aspect = 1
 
 IF `($win_aspect"0|*>1") EQ 0 AND ($ferret_view"|xy>1|xyt>1|*>0") AND ($its_prop_prop_plot"0|*>1") EQ 0` THEN
   IF `($fview"1|t>0|*>1") AND ($region_x_range"0") NE 0` THEN \
     DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
 ENDIF
 
-IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
-   IF `($region_x_range"0") NE 0 AND ($region_y_range"0") NE 0` THEN \
-   DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = ($win_aspect):axis
+
+
+! Set the aspect ratio for 1D plots 
+IF `STRLEN("($ferret_view)") EQ 1` THEN 
+   IF ($ferret_view"0|z>1|*>0") THEN  
+      DEFINE SYMBOL win_aspect = 0.8
+   ELSE
+      DEFINE SYMBOL win_aspect = 0.4
+   ENDIF
 ENDIF
-IF `($win_aspect) GT 100` THEN \
-  DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = 1:axis
-IF `($win_aspect) LT 0.01` THEN \
-  DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = 1:axis
+
+IF `($win_aspect"0|*>1")  EQ 0` THEN DEFINE SYMBOL win_aspect = 1
+
+IF `($win_aspect) GT 100` THEN DEFINE SYMBOL win_aspect = 1
+IF `($win_aspect) LT 0.01` THEN DEFINE SYMBOL win_aspect = 1
+
+
+! Set up the window.  In PyFerret now use pixels to define the
+! size and aspect ratio which will make the optional watermark
+! easier to locate on the page.
+
+! Here the value of symbol wmark is "ul" for the upper right-hand corner
+! Settings for lower left is sketched out where this is used, in
+! LAS_setup_watermark.jnl and set_full_margins.jnl.
+
+
+DEFINE SYMBOL wmark = 0
+IF `($ferret_wmark_image"0|*>1") AND ($PROGRAM_NAME"|PyFerret>1|*>0) AND \
+ ($ferret_version) GE 7.63` THEN DEFINE SYMBOL wmark = ul
+
+! The set window/aspect= /size= of classic Ferret sets up PPLUS symbols 
+! WITDTH and HEIGHT of the window.  Here, set the window using pixel sizes
+! with the larger dimension of size 1000 for our typical setting of large plots,
+! and assuming 100 pixels width for plot margins. This approximates the sizes we see 
+
+IF `($set_window_quals"0|*>1") EQ 0` THEN
+
+   IF ($PROGRAM_NAME"|PyFerret>1|*>0) THEN
+
+! The sizes in ferret_size are 0.8333, 0.5, etc and are square roots of
+! the nominal set win/size= settings in classic Ferret.
+
+     LET win_base_size = ($ferret_size"0.5")^0.5 * 1000
+
+     LET pix_xtra = 0.1* win_base_size
+
+     IF `($win_aspect) LE 1` THEN
+        LET pix_x = win_base_size
+	LET pix_y = win_base_size* ($win_aspect) + pix_xtra
+     ELSE
+        LET pix_y = win_base_size
+	LET pix_x = (win_base_size + pix_xtra*($win_aspect)) / ($win_aspect)
+     ENDIF 
+   
+     DEFINE SYMBOL set_window_quals = ($set_window_quals)/XPIXEL=`pix_x`/YPIXEL=`pix_y`
+
+! Add any watermark settings added to set_window_quals
+
+     IF ($wmark"0|*>1") THEN GO LAS_setup_watermark
+
+   ELSE  ! not pyferret,
+
+      DEFINE SYMBOL set_window_quals = ($set_window_quals)/SIZE=($ferret_size"0.5")
+
+      IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
+         IF `($region_x_range"0") NE 0 AND ($region_y_range"0") NE 0` THEN \
+         DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = ($win_aspect):axis
+      ENDIF
+
+   ENDIF
+
+ENDIF
 
 ! Open the window. For PyFerret, use /OUTLINE to take care of the pesky white-line issue
 IF ($program_name"0|PyFerret>1|*>0") THEN DEFINE SYMBOL set_window_quals = ($set_window_quals)/OUTLINE=0.7 1
@@ -68,7 +113,6 @@ SET WINDOW($set_window_quals)
 
 IF `($ferret_margins"1|0|1|false>0|true>1") EQ 0` THEN
    DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 WMSview
-   IF ($wmark"0|*>1") THEN DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:.8 WMSview
    SET VIEW WMSview
    IF `STRLEN("($ferret_view)") LT 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOYADJUST
 
@@ -76,25 +120,18 @@ ELSE
 ! For 2D plots, make room for the colorbar labels which sometimes get cut off.
    IF `STRLEN("($ferret_view)") GE 2` THEN 
       DEFINE VIEW/X=0:0.95/Y=0:1 xspace
-      IF ($wmark"0|*>1") THEN DEFINE VIEW/X=0:0.95/Y=0:.8 xspace
-      IF ($wmark"0|*>1") THEN DEFINE VIEW/X=0:0.95/Y=0:.5 xspace
       SET VIEW xspace
    ELSE
 ! For 1D plots we may be doing a line key in a new viewport, so set the initial viewport.
       SET VIEW full
-      IF ($ferret_view"0|z>1|*>0") THEN  
-	 DEFINE SYMBOL win_aspect = 0.8
-      ELSE
-	 DEFINE SYMBOL win_aspect = 0.4
-      ENDIF
-      SET WIN/ASPECT=($win_aspect)/:axis
-      IF ($wmark"0|*>1") THEN SET WIN/ASPECT=($win_aspect)/wmark="($ferret_wmark_image)"
    ENDIF
-
 ENDIF
 
 ! If the annotations are going to be collected and sent back to LAS for presentation,
 ! set up the viewport for small margins around the edge.
+
 IF ($ferret_annotations"0|*>1") THEN GO set_full_margins
 
 !  ----------------- End of LAS_open_window.jnl ------------------------------------
+
+
