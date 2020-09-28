@@ -63,10 +63,15 @@ DEFINE SYMBOL wmark = 0
 IF `($ferret_wmark_image"0|*>1") AND ($PROGRAM_NAME"|PyFerret>1|*>0) AND \
  ($ferret_version) GE 7.63` THEN DEFINE SYMBOL wmark = ul
 
+! Watermark:
 ! The set window/aspect= /size= of classic Ferret sets up PPLUS symbols 
 ! WITDTH and HEIGHT of the window.  Here, set the window using pixel sizes
-! with the larger dimension of size 1000 for our typical setting of large plots,
+! with the larger dimension of size ~1000 pix for the typical setting of large plots,
 ! and assuming 100 pixels width for plot margins. This approximates the sizes we see 
+! in classic-Ferret and PyFerret using SET WINDOW/ASPECT.
+! Placing the watermark in locations other than the upper left needs work.  What
+! is shown here when setting wmark=ll, to put it in the lower right, instead puts 
+! it about a third of the way above the bottom of the plot.
 
 IF `($set_window_quals"0|*>1") EQ 0` THEN
 
