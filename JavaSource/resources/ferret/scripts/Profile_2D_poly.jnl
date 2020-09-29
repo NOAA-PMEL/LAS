@@ -48,7 +48,7 @@ IF `IS_ELEMENT_OF_STR(gattnames, "featureType") GE 1` THEN
 
 GO LAS_pp_set_feature_shapes
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/SIZ=0.12/SYM=($pyshape20)/HIGHLIGHT
+DEFINE SYMBOL qualifiers = ($qualifiers)/SIZ=0.15/SYM=($pyshape20)/HIGHLIGHT
 
 ! Degenerate datasets with just one point will not be seen by PyFerret as a DSG dataset 
 
