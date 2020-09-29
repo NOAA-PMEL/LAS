@@ -316,7 +316,7 @@ IF `STRINDEX("($qualifiers)", "ALONG") GT 0` THEN
    DEFINE SYMBOL note_num = `($note_num"0") + 1`
    Define symbol dat_direction = Z
    IF ($feature_type"0|Timeseries>1|*>0") THEN DEFINE SYMBOL dat_direction = T 
-   DEFINE SYMBOL note_($note_num)_lab = Colored by average of each ($feature_type) in ($dat_direction) region selected
+   DEFINE SYMBOL note_($note_num)_lab = Colored by data in each ($feature_type) averaged over the ($dat_direction) region selected
 ENDIF
 
 
