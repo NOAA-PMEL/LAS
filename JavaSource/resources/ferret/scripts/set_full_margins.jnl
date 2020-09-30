@@ -26,20 +26,20 @@ IF `STRLEN("($ferret_view)") GE 2 AND ($win_aspect"1") LT 0.2` THEN
    LET y_up_t = 0.99
 ENDIF
 
-IF ($wmark"0|*>1") THEN 
+IF ($wmark_loc"0|*>1") THEN 
 
 ! These settings to make space for a watermark.
 ! Give the margin some extra vertial space. Note the 
 ! viewport settings are in percentage of the window.
 
 ! These if putting it in the upper left corner.
-   IF ($wmark%|ul>1|*>0%) THEN
-      LET y_up = `y_up - 0.05`
+   IF ($wmark_loc%|ulc>1|*>0%) THEN
+      LET y_up = `y_up - 0.07`
       LET y_up_t = `y_up_t - 0.1`
    ENDIF
 
 ! These if putting it in the lower left
-   IF ($wmark%|ll>1|*>0%) THEN
+   IF ($wmark_loc%|llc>1|*>0%) THEN
       LET y_dn = 0.16
    ENDIF
 

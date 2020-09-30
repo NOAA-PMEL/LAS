@@ -50,66 +50,13 @@ IF `($win_aspect) GT 100` THEN DEFINE SYMBOL win_aspect = 1
 IF `($win_aspect) LT 0.01` THEN DEFINE SYMBOL win_aspect = 1
 
 
-! Set up the window.  In PyFerret now use pixels to define the
-! size and aspect ratio which will make the optional watermark
-! easier to locate on the page.
-
-! Here the value of symbol wmark is "ul" for the upper right-hand corner
-! Settings for lower left is sketched out where this is used, in
-! LAS_setup_watermark.jnl and set_full_margins.jnl.
+! Set up the window.  In PyFerret make the optional watermark
+! on the page.
 
 
 DEFINE SYMBOL wmark = 0
 IF `($ferret_wmark_image"0|*>1") AND ($PROGRAM_NAME"|PyFerret>1|*>0) AND \
- ($ferret_version) GE 7.63` THEN DEFINE SYMBOL wmark = ul
-
-! Watermark:
-! The set window/aspect= /size= of classic Ferret sets up PPLUS symbols 
-! WITDTH and HEIGHT of the window.  Here, set the window using pixel sizes
-! with the larger dimension of size ~1000 pix for the typical setting of large plots,
-! and assuming 100 pixels width for plot margins. This approximates the sizes we see 
-! in classic-Ferret and PyFerret using SET WINDOW/ASPECT.
-! Placing the watermark in locations other than the upper left needs work.  What
-! is shown here when setting wmark=ll, to put it in the lower right, instead puts 
-! it about a third of the way above the bottom of the plot.
-
-IF `($set_window_quals"0|*>1") EQ 0` THEN
-
-   IF ($PROGRAM_NAME"|PyFerret>1|*>0) THEN
-
-! The sizes in ferret_size are 0.8333, 0.5, etc and are square roots of
-! the nominal set win/size= settings in classic Ferret.
-
-     LET win_base_size = ($ferret_size"0.5")^0.5 * 1000
-
-     LET pix_xtra = 0.1* win_base_size
-
-     IF `($win_aspect) LE 1` THEN
-        LET pix_x = win_base_size
-	LET pix_y = win_base_size* ($win_aspect) + pix_xtra
-     ELSE
-        LET pix_y = win_base_size
-	LET pix_x = (win_base_size + pix_xtra*($win_aspect)) / ($win_aspect)
-     ENDIF 
-   
-     DEFINE SYMBOL set_window_quals = ($set_window_quals)/XPIXEL=`pix_x`/YPIXEL=`pix_y`
-
-! Add any watermark settings added to set_window_quals
-
-     IF ($wmark"0|*>1") THEN GO LAS_setup_watermark
-
-   ELSE  ! not pyferret,
-
-      DEFINE SYMBOL set_window_quals = ($set_window_quals)/SIZE=($ferret_size"0.5")
-
-      IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
-         IF `($region_x_range"0") NE 0 AND ($region_y_range"0") NE 0` THEN \
-         DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = ($win_aspect):axis
-      ENDIF
-
-   ENDIF
-
-ENDIF
+ ($ferret_version) GE 7.63` THEN GO LAS_setup_watermark
 
 ! Open the window. For PyFerret, use /OUTLINE to take care of the pesky white-line issue
 IF ($program_name"0|PyFerret>1|*>0") THEN DEFINE SYMBOL set_window_quals = ($set_window_quals)/OUTLINE=0.7 1
