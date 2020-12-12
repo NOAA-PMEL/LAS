@@ -75,6 +75,7 @@ public class RequestInputFilter implements Filter {
      */
     // All LAS query parameters.
     private final static String[] p = {
+            "newitemadded",
     	"auto",
 	    "auth_url",    
 	    "BBOX", 
@@ -93,8 +94,9 @@ public class RequestInputFilter implements Filter {
     	"dsid",
     	"dsID",
     	"email",
+		"embutton",
+		"progressBean.email",
     	"end",
-    	"embutton",
     	"format",
     	"file",
     	"image",
@@ -124,12 +126,12 @@ public class RequestInputFilter implements Filter {
 		"xlo",
 		"xhi",
 		"ylo",
-                "yhi",
-                "zlo",
-                "zhi",
-                "tlo",
-                "thi",
-                "tid",
+		"yhi",
+        "zlo",
+        "zhi",
+        "tlo",
+        "thi",
+        "tid",
 		"xpath",
 		"gwt.codesvr",
 		"provider",
@@ -181,6 +183,11 @@ public class RequestInputFilter implements Filter {
 		    }
 		    HttpServletRequest request = (HttpServletRequest) servletRequest;
 		    HttpServletResponse response = (HttpServletResponse) servletResponse;
+		    if ( ! validPath(request) ) {
+				LASAction.logerror(request, "Illegal request parameter value.", "Request contains a parameter value that is not allowed.");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal query parameter value.");
+				return;
+			}
             if ( ! validateParameters(request) ) {
             	LASAction.logerror(request, "Illegal request parameter.", "Request contains a parameter that is not allowed.");
             	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal query parameter.");
@@ -259,6 +266,15 @@ public class RequestInputFilter implements Filter {
 		    filterChain.doFilter( servletRequest, servletResponse );
 		    return;
 	}
+
+	private boolean validPath(HttpServletRequest request) {
+		String v = request.getRequestURI();
+		if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || (v.toLowerCase().contains("script") && !v.contains("JavaScript"))) {
+		    return false;
+		}
+		return true;
+	}
+
 	public boolean validateTemplates(HttpServletRequest request) {
 		String value[] = request.getParameterValues("template");
 		if ( value != null ) {
@@ -368,6 +384,17 @@ public class RequestInputFilter implements Filter {
 		Set<String> parameters = request.getParameterMap().keySet();
 		for (Iterator pIt = parameters.iterator(); pIt.hasNext();) {
 			String name = (String) pIt.next();
+			if ( !LAS_PARAMETERS.contains(name) ) {
+				log.info("Request contained illegal parameter with name " + name);
+			}
+			if ( name.equals("progressBean.email") ) {
+			    log.debug("The name equals progressBean.email");
+			    log.debug(" Contains on the string literal is " + LAS_PARAMETERS.contains("progressBean.email"));
+                for (Iterator<String> lpIt = LAS_PARAMETERS.iterator(); lpIt.hasNext(); ) {
+                    String next = lpIt.next();
+                    log.debug(next);
+                }
+            }
 			log.debug("Found parameter: "+name);
 		}
 		return LAS_PARAMETERS.containsAll(parameters);
