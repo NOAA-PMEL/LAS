@@ -163,6 +163,94 @@ public class RequestInputFilter implements Filter {
 		"cancel_button",
 		"varid"
     };
+    private static final String[] vm = {
+"admin.vm",
+"annotations.vm",
+"arcview.vm",
+"ascii.vm",
+"auth.vm",
+"batch_error.vm",
+"cache.vm",
+"cancel.vm",
+"categories_required.vm",
+"climate_analysis_plots.vm",
+"Climate_Analysis.vm",
+"ClimateAnalysis.vm",
+"Correlation_plot.vm",
+"Correlation_setup.vm",
+"Correlation.vm",
+"CVHeader.vm",
+"datatable.vm",
+"dbnetcdf.vm",
+"direct_output.vm",
+"draw_output.vm",
+"EditColumn_setup.vm",
+"EditColumn.vm",
+"edits.vm",
+"error.vm",
+"Error.vm",
+"fregrid.vm",
+"ftds_down.vm",
+"grid.vm",
+"images_w_annotations.vm",
+"image_w_annotations.vm",
+"info_tmp.vm",
+"info.vm",
+"interactive_download.vm",
+"InvHeader.vm",
+"kml_output.vm",
+"lazy_start.vm",
+"listvars.vm",
+"maintenance.vm",
+"metadata_opendap.vm",
+"metadata.vm",
+"netcdf.vm",
+"newImageInfo.vm",
+"output_animation_email.vm",
+"output_animation.vm",
+"output_colorkey.vm",
+"output_frames.vm",
+"output_GE_animation.vm",
+"output_GE_overlay.vm",
+"output_GE_pl.vm",
+"output_GE.vm",
+"output_response.vm",
+"output_shape_file.vm",
+"output.vm",
+"output_wms.vm",
+"PPT_setup.vm",
+"PPT.vm",
+"progress.vm",
+"progress.vm.verbose",
+"qc.vm",
+"reinit.vm",
+"revision.vm",
+"scripts.vm",
+"side_by_side.vm",
+"SlideSorter.vm",
+"SOCAT_QC_input.vm",
+"SOCAT_QC_setup.vm",
+"SOCAT_QC_submit.vm",
+"SOCAT_QC_table.vm",
+"SPPV_plot.vm",
+"SPPV_setup.vm",
+"SPPV.vm",
+"svn.vm",
+"table_GE_pl.vm",
+"table.vm",
+"testme.vm",
+"thredds.vm",
+"trajectory_interactive_download.vm",
+"TrajectoryTable.vm",
+"V7UIFooter.vm",
+"V7UIHeader.vm",
+"V7UI.vm",
+"vizGal.vm",
+"webrowset.vm",
+"zoom_2D.vm",
+"zoom_2D_XY.vm",
+"zoom.vm"
+	};
 	
     private final static Set<String> LAS_ID_PARAMETERS = new HashSet<String>(Arrays.asList(lp));
     private final static Pattern ID_PATTERN = Pattern.compile("[/A-Za-z0-9._-]+");
@@ -263,7 +351,8 @@ public class RequestInputFilter implements Filter {
             		return;
             	}
             }
-		    filterChain.doFilter( servletRequest, servletResponse );
+
+			filterChain.doFilter(servletRequest, servletResponse);
 		    return;
 	}
 
@@ -271,6 +360,15 @@ public class RequestInputFilter implements Filter {
 		String v = request.getRequestURI();
 		if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || (v.toLowerCase().contains("script") && !v.contains("JavaScript"))) {
 		    return false;
+		}
+		if ( v.endsWith(".vm") ) {
+			String template = v.substring(v.lastIndexOf("/")+1);
+			for (int i = 0; i < vm.length; i++) {
+				if ( template.equals(vm[i]) ) {
+					return true;
+				}
+			}
+			return false;
 		}
 		return true;
 	}
