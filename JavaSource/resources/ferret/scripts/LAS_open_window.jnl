@@ -27,7 +27,6 @@ IF ($program_name"0|PyFerret>1|*>0") THEN
    SET TEXT/isiz=-1 CBAR
 ENDIF
 
-
 IF `($win_aspect"0|*>1") EQ 0 AND ($ferret_view"|xy>1|xyt>1|*>0") AND ($its_prop_prop_plot"0|*>1") EQ 0` THEN
   IF `($fview"1|t>0|*>1") AND ($region_x_range"0") NE 0` THEN \
     DEFINE SYMBOL win_aspect =  `($region_Y_range)/($region_X_range)`
@@ -49,6 +48,10 @@ IF `($win_aspect"0|*>1")  EQ 0` THEN DEFINE SYMBOL win_aspect = 1
 IF `($win_aspect) GT 100` THEN DEFINE SYMBOL win_aspect = 1
 IF `($win_aspect) LT 0.01` THEN DEFINE SYMBOL win_aspect = 1
 
+IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN
+   IF `($region_x_range"0") NE 0 AND ($region_y_range"0") NE 0` THEN \
+   DEFINE SYMBOL set_window_quals = ($set_window_quals)/ASPECT = ($win_aspect):axis
+ENDIF
 
 ! Set up the window.  In PyFerret make the optional watermark
 ! on the page.
