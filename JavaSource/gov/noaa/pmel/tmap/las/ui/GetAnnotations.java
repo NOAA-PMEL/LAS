@@ -65,23 +65,6 @@ public class GetAnnotations extends ConfigService {
 		String[] files = request.getParameterValues("file");
 		String[] images = request.getParameterValues("image");
 
-		List<String> clean_images = new ArrayList<>();
-		if ( images != null ) {
-			for (int i = 0; i < images.length; i++) {
-				if ( !images[i].toLowerCase().contains("refresh") &&
-					 !images[i].contains("<") &&
-					 !images[i].toLowerCase().contains("meta") &&
-					 !images[i].toLowerCase().contains("equiv") &&
-					 !images[i].contains(">") &&
-				     !images[i].endsWith("plot_iamge.png")) {
-					clean_images.add(images[i]);
-				}
-			}
-		}
-		images = new String[clean_images.size()];
-		for (int i = 0; i < clean_images.size(); i++) {
-			images[i] = clean_images.get(i);
-		}
 		if ( files != null ) {
 			if ( files.length == 1 ) {			
 				LASAnnotations lasAnnotations = new LASAnnotations();
