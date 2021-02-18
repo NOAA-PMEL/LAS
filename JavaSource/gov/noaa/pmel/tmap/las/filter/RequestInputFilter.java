@@ -313,7 +313,7 @@ public class RequestInputFilter implements Filter {
             	response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal query parameter.");
             	return;
             }
-            if ( !validateTemplates(request) ) {
+            if ( !validateTemplateAndImage(request) ) {
 				LASAction.logerror(request, "Illegal request parameter value.", "Request contains a parameter value that is not allowed.");
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal query parameter value.");
 				return;
@@ -390,7 +390,12 @@ public class RequestInputFilter implements Filter {
 
 	private boolean validPath(HttpServletRequest request) {
 		String v = request.getRequestURI();
-		if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || (v.toLowerCase().contains("script") && !v.contains("JavaScript"))) {
+		if (v.toLowerCase().contains(">") ||
+                v.toLowerCase().contains("<") ||
+                v.toLowerCase().contains("meta") ||
+                v.toLowerCase().contains("refresh") ||
+                v.toLowerCase().contains("equiv") ||
+                (v.toLowerCase().contains("script") && !v.contains("JavaScript"))) {
 		    return false;
 		}
 		if ( v.endsWith(".vm") ) {
@@ -405,16 +410,43 @@ public class RequestInputFilter implements Filter {
 		return true;
 	}
 
-	public boolean validateTemplates(HttpServletRequest request) {
+	public boolean validateTemplateAndImage(HttpServletRequest request) {
 		String value[] = request.getParameterValues("template");
 		if ( value != null ) {
             for (int i = 0; i < value.length; i++) {
                 String v = value[i];
-                if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || v.toLowerCase().contains("script")) {
+                if ( v.equals(vm[i]) ) {
+                    return true;
+                }
+                if (v.toLowerCase().contains(">") ||
+						v.toLowerCase().contains("<") ||
+						v.toLowerCase().contains("script") ||
+						v.toLowerCase().contains("meta") ||
+						v.toLowerCase().contains("refresh") ||
+						v.toLowerCase().contains("equiv")
+				) {
                     return false;
                 }
             }
         }
+		String images[] = request.getParameterValues("image");
+		if ( images != null ) {
+			for (int i = 0; i < images.length; i++) {
+				String v = images[i];
+				if (v.toLowerCase().contains(">") ||
+						v.toLowerCase().contains("<") ||
+						v.toLowerCase().contains("script") ||
+						v.toLowerCase().contains("meta") ||
+						v.toLowerCase().contains("refresh") ||
+						v.toLowerCase().contains("equiv")
+				) {
+					return false;
+				}
+				if ( !v.endsWith("plot_image.png") ) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 	public void init(FilterConfig arg0) throws ServletException {
