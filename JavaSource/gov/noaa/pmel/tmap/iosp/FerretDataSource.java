@@ -57,6 +57,12 @@ public class FerretDataSource implements DatasetSource {
         	url = urlbuf.toString();
         }
 
+        // Are there still escaped curly braces?
+        // Sometimes the client encodes a URL that is already encoded.
+        while ( url.contains("%7B") || url.contains("%7D") ) {
+            url = URLDecoder.decode(url, "UTF-8");
+        }
+
         log.debug("building netcdf file from "+url);
         
         String base = getBaseURL(url);
