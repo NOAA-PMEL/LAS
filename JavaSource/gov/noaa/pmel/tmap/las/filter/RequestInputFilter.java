@@ -410,7 +410,10 @@ public class RequestInputFilter implements Filter {
 		if ( value != null ) {
             for (int i = 0; i < value.length; i++) {
                 String v = value[i];
-                if (v.toLowerCase().contains(">") || v.toLowerCase().contains("<") || v.toLowerCase().contains("script")) {
+                if (v.toLowerCase().contains(">") || 
+                    v.toLowerCase().contains("<") || 
+                    v.toLowerCase().contains("script") || 
+                    v.toLowerCase().contains("..") ) {
                     return false;
                 }
             }
