@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.ma2.Array;
 
 /** 
  * MyEclipse Struts
@@ -63,7 +64,7 @@ public class GetAnnotations extends ConfigService {
 		}
 		String[] files = request.getParameterValues("file");
 		String[] images = request.getParameterValues("image");
-		
+
 		if ( files != null ) {
 			if ( files.length == 1 ) {			
 				LASAnnotations lasAnnotations = new LASAnnotations();
