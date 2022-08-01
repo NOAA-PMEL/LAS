@@ -418,7 +418,11 @@ public class RequestInputFilter implements Filter {
                 if (v.toLowerCase().contains(">") || 
                     v.toLowerCase().contains("<") || 
                     v.toLowerCase().contains("script") || 
+                    v.toLowerCase().contains("/") || 
+                    v.toLowerCase().contains("%") || 
                     v.toLowerCase().contains("..") ) {
+                    return false;
+                }
                 if ( v.equals(vm[i]) ) {
                     return true;
                 }
@@ -429,7 +433,6 @@ public class RequestInputFilter implements Filter {
 						v.toLowerCase().contains("refresh") ||
 						v.toLowerCase().contains("equiv")
 				) {
->>>>>>> 9afbb8887c0051a06c31109e97022991c57db476
                     return false;
                 }
             }
