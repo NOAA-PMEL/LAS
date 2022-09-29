@@ -444,7 +444,8 @@ public class RequestInputFilter implements Filter {
 				if (v.toLowerCase().contains(">") ||
 						v.toLowerCase().contains("<") ||
 						v.toLowerCase().contains("script") ||
-						v.toLowerCase().contains("meta") ||
+						// Want Metadata, but not "meta".
+                                               (v.toLowerCase().contains("meta") && !v.contains("Metadata")) ||
 						v.toLowerCase().contains("refresh") ||
 						v.toLowerCase().contains("equiv")
 				) {
