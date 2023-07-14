@@ -1,0 +1,8 @@
+-p1 -D -a -p1 -O /Users/osborne/Projects/LAS_docs https://ferret.pmel.noaa.gov/LAS/
+File generated automatically on Thu, 15 Jun 2023 11:21:27, do NOT edit
+
+To update a mirror, just launch httrack without any parameters
+The existing cache will be used (and modified)
+To have other options, retype all parameters and launch HTTrack
+To continue an interrupted mirror, just launch httrack without any parameters
+

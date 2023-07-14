@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML+RDFa 1.1//EN">
+<html lang="en" dir="ltr" version="HTML+RDFa 1.1"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/terms/"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:og="http://ogp.me/ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:sioc="http://rdfs.org/sioc/ns#"
+  xmlns:sioct="http://rdfs.org/sioc/types#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xmlns:schema="http://schema.org/">
+
+<!-- Mirrored from ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/adding-scattered-data/dsg-data-served-by-erddap by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 15 Jun 2023 18:26:05 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head profile="http://www.w3.org/1999/xhtml/vocab">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Generator" content="Drupal 7 (http://drupal.org)" />
+<link rel="canonical" href="dsg-data-served-by-erddap.html" />
+<link rel="shortlink" href="dsg-data-served-by-erddap.html" />
+<link rel="shortcut icon" href="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/favicon-32.png" type="image/png" />
+<link rel="apple-touch-icon" href="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/apple-touch-icon-152x152.png" type="image/png" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+  <title>Discrete Geometry Data served by ERDDAP | Science Data Integration Group - Live Access Server</title>  
+  <style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/system/system.base.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/system/system.menus.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/system/system.messages.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/system/system.theme.css?rw9vm7");
+</style>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.core.min.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.theme.min.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.menu.min.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.autocomplete.min.css?rw9vm7");
+</style>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/calendar/css/calendar_multiday.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/field/theme/field.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/scald/modules/fields/mee/css/editor-global.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/node/node.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/scald_file/scald_file.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/search/search.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/modules/user/user.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/views/css/views.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/ckeditor/css/ckeditor.css?rw9vm7");
+</style>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/ctools/css/ctools.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/custom_search/custom_search.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/modules/search_autocomplete/css/themes/minimal.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/css/superfish.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/css/superfish-smallscreen.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/css/superfish-vertical.css?rw9vm7");
+</style>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/ckeditor_custom.css?rw9vm7");
+</style>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/alpha-reset.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/alpha-mobile.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/alpha-alpha.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/formalize.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/omega-text.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/omega-branding.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/omega-menu.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/omega-forms.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/css/omega-visuals.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/global.css?rw9vm7");
+</style>
+
+<!--[if (lt IE 9)&(!IEMobile)]>
+<style type="text/css" media="all">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default-normal.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/grid/alpha_default/normal/alpha-default-normal-12.css?rw9vm7");
+</style>
+<![endif]-->
+
+<!--[if gte IE 9]><!-->
+<style type="text/css" media="all and (min-width: 740px) and (min-device-width: 740px), (max-device-width: 800px) and (min-width: 740px) and (orientation:landscape)">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default-narrow.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/grid/alpha_default/narrow/alpha-default-narrow-12.css?rw9vm7");
+</style>
+<!--<![endif]-->
+
+<!--[if gte IE 9]><!-->
+<style type="text/css" media="all and (min-width: 980px) and (min-device-width: 980px), all and (max-device-width: 1024px) and (min-width: 1024px) and (orientation:landscape)">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default-normal.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/grid/alpha_default/normal/alpha-default-normal-12.css?rw9vm7");
+</style>
+<!--<![endif]-->
+
+<!--[if gte IE 9]><!-->
+<style type="text/css" media="all and (min-width: 1220px)">
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/css/pacific-marine-alpha-default-wide.css?rw9vm7");
+@import url("https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/alpha/css/grid/alpha_default/wide/alpha-default-wide-12.css?rw9vm7");
+</style>
+<!--<![endif]-->
+	
+	<script id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&amp;subagency=NOAA&amp;pua=UA-96513503-1"></script>
+	
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+window.jQuery || document.write("<script src='https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/jquery/1.12/jquery.min.js'>\x3C/script>")
+//--><!]]>
+</script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/misc/jquery-extend-3.4.0.js?v=1.12.4"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/misc/jquery-html-prefilter-3.5.0-backport.js?v=1.12.4"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/misc/jquery.once.js?v=1.2"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/misc/drupal.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/js/jquery_browser.js?v=0.0.1"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+window.jQuery.ui || document.write("<script src='https://ferret.pmel.noaa.gov/LAS/sites/all/modules/jquery_update/replace/ui/ui/minified/jquery-ui.min.js'>\x3C/script>")
+//--><!]]>
+</script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/misc/ui/jquery.ui.position-1.13.0-backport.js?v=1.10.2"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/entityreference/js/entityreference.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/custom_search/js/custom_search.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/scald_file/scald_file.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/scald/modules/providers/scald_image/scald_image.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/search_autocomplete/js/jquery.autocomplete.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/jquery.hoverIntent.minified.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/sfsmallscreen.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/supposition.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/superfish.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/libraries/superfish/supersubs.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/modules/superfish/superfish.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/js/pacific_marine.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/js/jquery.formalize.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/js/omega-mediaqueries.js?rw9vm7"></script>
+<script type="text/javascript" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/omega/omega/js/omega-equalheights.js?rw9vm7"></script>
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+jQuery.extend(Drupal.settings, {"basePath":"\/LAS\/","pathPrefix":"","setHasJsCookie":0,"ajaxPageState":{"theme":"pacific_marine","theme_token":"kcHc4wP72ZdAl0Mz8PGSvt0LJg2gd08gVRtmAyrZcLA","js":{"\/\/ajax.googleapis.com\/ajax\/libs\/jquery\/1.12.4\/jquery.min.js":1,"0":1,"misc\/jquery-extend-3.4.0.js":1,"misc\/jquery-html-prefilter-3.5.0-backport.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/modules\/jquery_update\/js\/jquery_browser.js":1,"\/\/ajax.googleapis.com\/ajax\/libs\/jqueryui\/1.10.2\/jquery-ui.min.js":1,"1":1,"misc\/ui\/jquery.ui.position-1.13.0-backport.js":1,"sites\/all\/modules\/entityreference\/js\/entityreference.js":1,"sites\/all\/modules\/custom_search\/js\/custom_search.js":1,"sites\/all\/modules\/scald_file\/scald_file.js":1,"sites\/all\/modules\/scald\/modules\/providers\/scald_image\/scald_image.js":1,"sites\/all\/modules\/search_autocomplete\/js\/jquery.autocomplete.js":1,"sites\/all\/libraries\/superfish\/jquery.hoverIntent.minified.js":1,"sites\/all\/libraries\/superfish\/sfsmallscreen.js":1,"sites\/all\/libraries\/superfish\/supposition.js":1,"sites\/all\/libraries\/superfish\/superfish.js":1,"sites\/all\/libraries\/superfish\/supersubs.js":1,"sites\/all\/modules\/superfish\/superfish.js":1,"sites\/all\/themes\/pacific_marine\/js\/pacific_marine.js":1,"sites\/all\/themes\/omega\/omega\/js\/jquery.formalize.js":1,"sites\/all\/themes\/omega\/omega\/js\/omega-mediaqueries.js":1,"sites\/all\/themes\/omega\/omega\/js\/omega-equalheights.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"misc\/ui\/jquery.ui.core.css":1,"misc\/ui\/jquery.ui.theme.css":1,"misc\/ui\/jquery.ui.menu.css":1,"misc\/ui\/jquery.ui.autocomplete.css":1,"sites\/all\/modules\/calendar\/css\/calendar_multiday.css":1,"modules\/field\/theme\/field.css":1,"sites\/all\/modules\/scald\/modules\/fields\/mee\/css\/editor-global.css":1,"modules\/node\/node.css":1,"sites\/all\/modules\/scald_file\/scald_file.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/modules\/ctools\/css\/ctools.css":1,"sites\/all\/modules\/custom_search\/custom_search.css":1,"sites\/all\/modules\/search_autocomplete\/css\/themes\/minimal.css":1,"sites\/all\/libraries\/superfish\/css\/superfish.css":1,"sites\/all\/libraries\/superfish\/css\/superfish-smallscreen.css":1,"sites\/all\/libraries\/superfish\/css\/superfish-vertical.css":1,"sites\/all\/themes\/pacific_marine\/css\/ckeditor_custom.css":1,"sites\/all\/themes\/omega\/alpha\/css\/alpha-reset.css":1,"sites\/all\/themes\/omega\/alpha\/css\/alpha-mobile.css":1,"sites\/all\/themes\/omega\/alpha\/css\/alpha-alpha.css":1,"sites\/all\/themes\/omega\/omega\/css\/formalize.css":1,"sites\/all\/themes\/omega\/omega\/css\/omega-text.css":1,"sites\/all\/themes\/omega\/omega\/css\/omega-branding.css":1,"sites\/all\/themes\/omega\/omega\/css\/omega-menu.css":1,"sites\/all\/themes\/omega\/omega\/css\/omega-forms.css":1,"sites\/all\/themes\/omega\/omega\/css\/omega-visuals.css":1,"sites\/all\/themes\/pacific_marine\/css\/global.css":1,"ie::normal::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default.css":1,"ie::normal::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default-normal.css":1,"ie::normal::sites\/all\/themes\/omega\/alpha\/css\/grid\/alpha_default\/normal\/alpha-default-normal-12.css":1,"narrow::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default.css":1,"narrow::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default-narrow.css":1,"sites\/all\/themes\/omega\/alpha\/css\/grid\/alpha_default\/narrow\/alpha-default-narrow-12.css":1,"normal::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default.css":1,"normal::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default-normal.css":1,"sites\/all\/themes\/omega\/alpha\/css\/grid\/alpha_default\/normal\/alpha-default-normal-12.css":1,"wide::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default.css":1,"wide::sites\/all\/themes\/pacific_marine\/css\/pacific-marine-alpha-default-wide.css":1,"sites\/all\/themes\/omega\/alpha\/css\/grid\/alpha_default\/wide\/alpha-default-wide-12.css":1}},"custom_search":{"form_target":"_self","solr":0},"scaldFile":{"path":"sites\/all\/modules\/scald_file\/scald_file.css"},"search_autocomplete":{"form3":{"selector":"#edit-search-block-form--2","minChars":"3","max_sug":"10","type":"internal","datas":"https:\/\/ferret.pmel.noaa.gov\/LAS\/search_autocomplete\/autocomplete\/3\/","fid":"3","theme":"minimal","auto_submit":"1","auto_redirect":"1"}},"urlIsAjaxTrusted":{"\/LAS\/documentation\/installer-documentation\/adding-scattered-data\/dsg-data-served-by-erddap":true},"superfish":{"1":{"id":"1","sf":{"animation":{"opacity":"show","height":"show"},"speed":"fast"},"plugins":{"smallscreen":{"mode":"window_width","breakpointUnit":"px","title":"Documentation"},"supposition":true,"supersubs":true}}},"omega":{"layouts":{"primary":"normal","order":["narrow","normal","wide"],"queries":{"narrow":"all and (min-width: 740px) and (min-device-width: 740px), (max-device-width: 800px) and (min-width: 740px) and (orientation:landscape)","normal":"all and (min-width: 980px) and (min-device-width: 980px), all and (max-device-width: 1024px) and (min-width: 1024px) and (orientation:landscape)","wide":"all and (min-width: 1220px)"}}}});
+//--><!]]>
+</script>
+  <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+</head>
+<body class="html not-front not-logged-in page-node page-node- page-node-905 node-type-documentation-page context-documentation">
+  <div id="body-bg-top"></div>
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible element-focusable">Skip to main content</a>
+  </div>
+    <div class="page clearfix" id="page">
+      <header id="section-header" class="section section-header">
+  <div id="zone-header-wrapper" class="zone-wrapper zone-header-wrapper clearfix">  
+  <div id="zone-header" class="zone zone-header clearfix container-12">
+    <div class="grid-7 region region-branding" id="region-branding">
+  <div class="region-inner region-branding-inner">
+        <div class="branding-data clearfix">
+            <div class="logo-img">
+        <a href="../../../index.html" rel="home" title=""><img src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/header-logo.png" alt="" id="logo" /></a>      </div>
+                </div>
+          </div>
+</div><div class="grid-5 region region-header-first" id="region-header-first">
+  <div class="region-inner region-header-first-inner">
+    <div class="block block-block block-4 block-block-4 odd block-without-title" id="block-block-4">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <div id="noaa-doc">
+<div class="logos">
+<div class="logo" id="doc-logo"><a href="https://www.commerce.gov/" target="_blank"><img alt="Department of Commerce logo" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/doc_logo.png" style="width: 40px; height: 40px;" /></a></div>
+<div class="logo" id="noaa-logo"><a href="https://www.noaa.gov/" target="_blank"><img alt="National Oceanic and Atmospheric Administration logo" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/noaa_logo.png" style="width: 40px; height: 40px;" /></a></div>
+</div>
+<div class="words">National Oceanic and<br />
+Atmospheric Administration<br /><span id="doc">United States Department of Commerce</span></div>
+</div>
+    </div>
+  </div>
+</div><div class="block block-search block-form block-search-form even block-without-title" id="block-search-form">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <form class="search-form" role="search" action="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/adding-scattered-data/dsg-data-served-by-erddap" method="post" id="search-block-form" accept-charset="UTF-8"><div><div class="container-inline">
+      <h2 class="element-invisible">Search form</h2>
+    <div class="form-item form-type-textfield form-item-search-block-form">
+  <label class="element-invisible" for="edit-search-block-form--2">Search PMEL </label>
+ <input title="Enter the terms you wish to search for." class="custom-search-box form-text" placeholder="Search LAS" type="text" id="edit-search-block-form--2" name="search_block_form" value="" size="15" maxlength="128" />
+</div>
+<div class="form-actions form-wrapper" id="edit-actions"><input style="display:none;" type="submit" id="edit-submit" name="op" value="" class="form-submit" /></div><input type="hidden" name="form_build_id" value="form-RdF5ZoRnJ4XffaSwFaAKbK3ba0VfdA6Ns-Nig5S8nUg" />
+<input type="hidden" name="form_id" value="search_block_form" />
+</div>
+</div></form>    </div>
+  </div>
+</div>  </div>
+</div>  </div>
+</div><div id="zone-menu-wrapper" class="zone-wrapper zone-menu-wrapper clearfix">  
+  <div id="zone-menu" class="zone zone-menu clearfix container-12">
+    <div class="grid-12 region region-menu" id="region-menu">
+  <div class="region-inner region-menu-inner">
+        <div class="block block-system block-menu block-main-menu block-system-main-menu odd block-without-title" id="block-system-main-menu">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <ul class="menu"><li class="first expanded"><a href="../../../index.html">Home</a><ul class="menu"><li class="first leaf"><a href="http://www.pmel.noaa.gov/project/science-data-integration">SDIG Home</a></li>
+<li class="leaf"><a href="http://ferret.pmel.noaa.gov/Ferret">Ferret/PyFerret Home</a></li>
+<li class="last leaf"><a href="../../../index.html">LAS Home</a></li>
+</ul></li>
+<li class="leaf"><a href="../../../documentation.html">Documentation</a></li>
+<li class="leaf"><a href="../../../faq.html">FAQ</a></li>
+<li class="expanded"><a href="../../../downloads.html">Downloads</a><ul class="menu"><li class="first last leaf"><a href="../../../las-legal.html">License Agreement</a></li>
+</ul></li>
+<li class="leaf"><a href="../../../email-users-group.html">eMail Users Group</a></li>
+<li class="last leaf"><a href="../../../contact-us.html">Contact Us</a></li>
+</ul>    </div>
+  </div>
+</div>  </div>
+</div>
+  </div>
+</div></header>    
+      <section id="section-content" class="section section-content">
+  <div id="zone-preface-wrapper" class="zone-wrapper zone-preface-wrapper clearfix">  
+  <div id="zone-preface" class="zone zone-preface clearfix equal-height-container container-12">
+    <div class="grid-3 region region-preface-first equal-height-element" id="region-preface-first">
+  <div class="region-inner region-preface-first-inner">
+      </div>
+</div><div class="grid-9 region region-preface-second equal-height-element" id="region-preface-second">
+  <div class="region-inner region-preface-second-inner">
+      </div>
+</div>  </div>
+</div><div id="zone-content-wrapper" class="zone-wrapper zone-content-wrapper clearfix sidebar">  
+  <div id="zone-content" class="zone zone-content clearfix equal-height-container container-12">    
+          <div id="breadcrumb" class="grid-12"><h2 class="element-invisible">You are here</h2><div class="breadcrumb"><a href="../../../index.html">Home</a> > <a href="../../../index.html">Documentation</a> > <a href="../../installer-documentation.html">Installer Documentation</a> > <a href="../adding-scattered-data.html">Adding Scattered Data</a> > Discrete Geometry Data served by ERDDAP</div></div>
+        
+        <aside class="grid-3 region region-sidebar-first equal-height-element" id="region-sidebar-first">
+  <div class="region-inner region-sidebar-first-inner">
+    <div class="block block-superfish block-1 block-superfish-1 odd block-without-title" id="block-superfish-1">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <ul  id="superfish-1" class="menu sf-menu sf-main-menu sf-vertical sf-style-none sf-total-items-11 sf-parent-items-8 sf-single-items-3"><li id="menu-2266-1" class="first odd sf-item-1 sf-depth-2 sf-no-children"><a href="../../release-notes-for-las-v8.html" class="sf-depth-2">Current Release Notes</a></li><li id="menu-2264-1" class="middle even sf-item-2 sf-depth-2 sf-no-children"><a href="../../typographical-conventions.html" class="sf-depth-2">Typographical conventions</a></li><li id="menu-2265-1" class="middle odd sf-item-3 sf-depth-2 sf-total-children-4 sf-parent-children-0 sf-single-children-4 menuparent"><a href="../../introduction.html" class="sf-depth-2 menuparent">Introduction</a><ul><li id="menu-2449-1" class="first odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../las-overview.html" class="sf-depth-3">LAS Overview</a></li><li id="menu-2275-1" class="middle even sf-item-2 sf-depth-3 sf-no-children"><a href="../../introduction/the-las-architecture.html" class="sf-depth-3">The LAS Architecture</a></li><li id="menu-2274-1" class="middle odd sf-item-3 sf-depth-3 sf-no-children"><a href="../../introduction/using-the-las-user-interface.html" class="sf-depth-3">Using the LAS User Interface</a></li><li id="menu-2276-1" class="last even sf-item-4 sf-depth-3 sf-no-children"><a href="../../introduction/las-v7-video-tutorials.html" class="sf-depth-3">LAS V7 Video Tutorials</a></li></ul></li><li id="menu-2267-1" class="middle even sf-item-4 sf-depth-2 sf-total-children-13 sf-parent-children-0 sf-single-children-13 menuparent"><a href="../../release-notes-for-previous-versions-1.html" class="sf-depth-2 menuparent">Release Notes for Previous LAS Versions</a><ul><li id="menu-2444-1" class="first odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../release-notes-for-las-v8-2.html" class="sf-depth-3">Release Notes for LAS v8.5.1</a></li><li id="menu-2277-1" class="middle even sf-item-2 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las-v8.html" class="sf-depth-3">Release Notes for LAS v8.4</a></li><li id="menu-2278-1" class="middle odd sf-item-3 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las-8.html" class="sf-depth-3">Release Notes for LAS 8.2</a></li><li id="menu-2279-1" class="middle even sf-item-4 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las-9.html" class="sf-depth-3">Release Notes for LAS 8.0</a></li><li id="menu-2280-1" class="middle odd sf-item-5 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-v8.html" class="sf-depth-3">Release Notes v8.0 Beta</a></li><li id="menu-2281-1" class="middle even sf-item-6 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-v7-3-august-2011.html" class="sf-depth-3">Release Notes v7.3 (August 2011)</a></li><li id="menu-2282-1" class="middle odd sf-item-7 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/las-release-notes-7-2.html" class="sf-depth-3">LAS Release Notes (7.2)</a></li><li id="menu-2443-1" class="middle even sf-item-8 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/las-release-notes-7.1.html" class="sf-depth-3">LAS Release Notes 7.1.2</a></li><li id="menu-2283-1" class="middle odd sf-item-9 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/las-release-notes-for-v7-1.html" class="sf-depth-3">LAS Release Notes for v7.1.1</a></li><li id="menu-2284-1" class="middle even sf-item-10 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las-v7.html" class="sf-depth-3">Release Notes for LAS v7.1</a></li><li id="menu-2285-1" class="middle odd sf-item-11 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las-version-7.html" class="sf-depth-3">Release Notes for LAS Version 7.0</a></li><li id="menu-2286-1" class="middle even sf-item-12 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-las.html" class="sf-depth-3">Release Notes for LAS V7.0 Beta</a></li><li id="menu-2287-1" class="last odd sf-item-13 sf-depth-3 sf-no-children"><a href="../../release-notes-for-previous-versions-1/release-notes-for-previous-versions.html" class="sf-depth-3">Release Notes for Previous Versions</a></li></ul></li><li id="menu-2268-1" class="middle odd sf-item-5 sf-depth-2 sf-total-children-4 sf-parent-children-3 sf-single-children-1 menuparent"><a href="../../end-user-documentation.html" class="sf-depth-2 menuparent">End User Documentation</a><ul><li id="menu-2288-1" class="first odd sf-item-1 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../../end-user-documentation/the-batch-response.html" class="sf-depth-3 menuparent">The Batch Response</a><ul><li id="menu-2292-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/the-batch-response/batch-response.html" class="sf-depth-4">&quot;Batch&quot; Response</a></li><li id="menu-2293-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/the-batch-response/batch-errors.html" class="sf-depth-4">&quot;Batch&quot; Errors</a></li></ul></li><li id="menu-2289-1" class="middle even sf-item-2 sf-depth-3 sf-no-children"><a href="../../introduction/using-the-las-user-interface.html" class="sf-depth-3">Using the LAS User Interface</a></li><li id="menu-2290-1" class="middle odd sf-item-3 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../../end-user-documentation/las-capabilities-for-working-with-ensembles-1.html" class="sf-depth-3 menuparent">LAS Capabilities for Working with Ensembles</a><ul><li id="menu-2294-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/las-capabilities-for-working-with-ensembles-1/basic-one-plot-ensemble-interface.html" class="sf-depth-4">The Basic One Plot Panel Interface</a></li><li id="menu-2295-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/las-capabilities-for-working-with-ensembles-1/comparisons-with-two-or-more-plot-panels.html" class="sf-depth-4">Comparisons with Two (or more) Plot Panels</a></li></ul></li><li id="menu-2291-1" class="last even sf-item-4 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../../end-user-documentation/google-earth-products.html" class="sf-depth-3 menuparent">Use WMS</a><ul><li id="menu-2296-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/google-earth-products/static-plot-overlay.html" class="sf-depth-4">Use Google Earth as a WMS client</a></li><li id="menu-2297-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../../end-user-documentation/google-earth-products/basic-wms-requests.html" class="sf-depth-4">Basic WMS Requests</a></li></ul></li></ul></li><li id="menu-2269-1" class="active-trail middle even sf-item-6 sf-depth-2 sf-total-children-14 sf-parent-children-12 sf-single-children-2 menuparent"><a href="../../installer-documentation.html" class="sf-depth-2 menuparent">Installer Documentation</a><ul><li id="menu-2298-1" class="first odd sf-item-1 sf-depth-3 sf-total-children-9 sf-parent-children-0 sf-single-children-9 menuparent"><a href="../installation.html" class="sf-depth-3 menuparent">Installation</a><ul><li id="menu-2311-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../installation/preliminaries.html" class="sf-depth-4">Prerequisites</a></li><li id="menu-2312-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../installation/installing-and-integrating-tds-with-las.html" class="sf-depth-4">Installing and integrating TDS with LAS</a></li><li id="menu-2313-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../installation/setting-up-the-example-in-situ-data-sets.html" class="sf-depth-4">Setting up the example in-situ data sets</a></li><li id="menu-2314-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../installation/installing-armstrong.html" class="sf-depth-4">Installing LAS v8.x</a></li><li id="menu-2315-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="../installation/start-the-server.html" class="sf-depth-4">Start the Server</a></li><li id="menu-2316-1" class="middle even sf-item-6 sf-depth-4 sf-no-children"><a href="../installation/check-installation.html" class="sf-depth-4">Check the Product Server Installation</a></li><li id="menu-2317-1" class="middle odd sf-item-7 sf-depth-4 sf-no-children"><a href="../installation/directory-layout.html" class="sf-depth-4">Directory Layout</a></li><li id="menu-2318-1" class="middle even sf-item-8 sf-depth-4 sf-no-children"><a href="../installation/applying-changes-to-the-configuration.html" class="sf-depth-4">Applying Changes to the Configuration</a></li><li id="menu-2319-1" class="last odd sf-item-9 sf-depth-4 sf-no-children"><a href="../installation/installation-session-for-the-v7-0-user-interface-only.html" class="sf-depth-4">Installation session for the v8.x</a></li></ul></li><li id="menu-2474-1" class="middle even sf-item-2 sf-depth-3 sf-no-children"><a href="../upgrading-existing-las-server.html" class="sf-depth-3">Upgrading</a></li><li id="menu-2299-1" class="middle odd sf-item-3 sf-depth-3 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="../las-administration.html" class="sf-depth-3 menuparent">LAS Administration</a><ul><li id="menu-2320-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../las-administration/the-admin-page.html" class="sf-depth-4">The Admin Page</a></li><li id="menu-2321-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../las-administration/reloading-the-las-configuration.html" class="sf-depth-4">Reloading the LAS Configuration</a></li><li id="menu-2322-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../las-administration/managing-the-las-cache.html" class="sf-depth-4">Managing the LAS Cache</a></li><li id="menu-2323-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../las-administration/configuring-a-default-data-set-variable-and-plot-for-an-las.html" class="sf-depth-4">Configuring a default data set, variable and plot for an LAS</a></li><li id="menu-2324-1" class="last odd sf-item-5 sf-depth-4 sf-no-children"><a href="../las-administration/configuring-the-base-map-in-the-reference-map.html" class="sf-depth-4">Configuring the base map in the reference map</a></li></ul></li><li id="menu-2300-1" class="middle even sf-item-4 sf-depth-3 sf-total-children-8 sf-parent-children-0 sf-single-children-8 menuparent"><a href="../adding-gridded-data.html" class="sf-depth-3 menuparent">Adding Gridded Data</a><ul><li id="menu-2325-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/the-addxml-utility.html" class="sf-depth-4">The addXML utility</a></li><li id="menu-2326-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/using-addxml-on-a-netcdf-data-source.html" class="sf-depth-4">Using addXML on a netCDF data source</a></li><li id="menu-2327-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/using-addxml-on-a-thredds-catalog.html" class="sf-depth-4">Using addXML on a THREDDS Catalog</a></li><li id="menu-2328-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/advanced-topics-for-adding-netcdf-data-sources-with-addxml.html" class="sf-depth-4">Advanced topics for adding netCDF data sources with addXML</a></li><li id="menu-2329-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/addxml-and-automatic-detection-of-vectors.html" class="sf-depth-4">addXML and automatic detection of Vectors</a></li><li id="menu-2330-1" class="middle even sf-item-6 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/the-xml-configuration-for-data-sets-and-variables.html" class="sf-depth-4">The XML Configuration for Data sets and Variables</a></li><li id="menu-2331-1" class="middle odd sf-item-7 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/the-xml-configuration-for-categories.html" class="sf-depth-4">Organizing your LAS using Categories and Sorting</a></li><li id="menu-2332-1" class="last even sf-item-8 sf-depth-4 sf-no-children"><a href="../adding-gridded-data/ferret-properties-for-customizing-datasets-and-variables.html" class="sf-depth-4">Ferret properties for customizing datasets and variables</a></li></ul></li><li id="menu-2301-1" class="active-trail middle odd sf-item-5 sf-depth-3 sf-total-children-6 sf-parent-children-3 sf-single-children-3 menuparent"><a href="../adding-scattered-data.html" class="sf-depth-3 menuparent">Adding Scattered Data</a><ul><li id="menu-2333-1" class="active-trail first odd sf-item-1 sf-depth-4 sf-no-children"><a href="dsg-data-served-by-erddap.html" class="sf-depth-4 active">Discrete Geometry Data served by ERDDAP</a></li><li id="menu-2334-1" class="middle even sf-item-2 sf-depth-4 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="using-a-database.html" class="sf-depth-4 menuparent">Using a database</a><ul><li id="menu-2339-1" class="first odd sf-item-1 sf-depth-5 sf-no-children"><a href="using-a-database/preparing-your-database.html" class="sf-depth-5">Preparing your database</a></li><li id="menu-2340-1" class="middle even sf-item-2 sf-depth-5 sf-no-children"><a href="using-a-database/templating-sql-commands.html" class="sf-depth-5">Templating SQL commands</a></li><li id="menu-2341-1" class="middle odd sf-item-3 sf-depth-5 sf-no-children"><a href="using-a-database/configuring-the-las-database-service.html" class="sf-depth-5">Configuring the LAS database service</a></li><li id="menu-2342-1" class="middle even sf-item-4 sf-depth-5 sf-no-children"><a href="using-a-database/creating-the-dataset-configuration-file.html" class="sf-depth-5">Creating the dataset configuration file using a database</a></li><li id="menu-2343-1" class="last odd sf-item-5 sf-depth-5 sf-no-children"><a href="using-a-database/setting-up-mysql.html" class="sf-depth-5">Setting up MySQL</a></li></ul></li><li id="menu-2335-1" class="middle odd sf-item-3 sf-depth-4 sf-total-children-3 sf-parent-children-0 sf-single-children-3 menuparent"><a href="using-a-drds-server.html" class="sf-depth-4 menuparent">Using a DRDS Server</a><ul><li id="menu-2344-1" class="first odd sf-item-1 sf-depth-5 sf-no-children"><a href="using-a-drds-server/configuring-the-las-drds-dods-relational-database-server-service.html" class="sf-depth-5">Configuring the LAS DRDS (DODS Relational Database Server) Service</a></li><li id="menu-2345-1" class="middle even sf-item-2 sf-depth-5 sf-no-children"><a href="using-a-drds-server/creating-the-dataset-configuration-file.html" class="sf-depth-5">Creating the dataset configuration file using DRDS Server</a></li><li id="menu-2346-1" class="last odd sf-item-3 sf-depth-5 sf-no-children"><a href="using-a-drds-server/templating-drds-constraint-expressions.html" class="sf-depth-5">How to make a template to process DRDS Constraint Expressions</a></li></ul></li><li id="menu-2336-1" class="middle even sf-item-4 sf-depth-4 sf-total-children-3 sf-parent-children-0 sf-single-children-3 menuparent"><a href="using-a-dapper-server.html" class="sf-depth-4 menuparent">Using a Dapper Server</a><ul><li id="menu-2347-1" class="first odd sf-item-1 sf-depth-5 sf-no-children"><a href="using-a-dapper-server/configuring-the-dapper-service-in-las.html" class="sf-depth-5">Configuring the Dapper Service in LAS</a></li><li id="menu-2348-1" class="middle even sf-item-2 sf-depth-5 sf-no-children"><a href="using-a-dapper-server/creating-the-dataset-configuration-file.html" class="sf-depth-5">Creating the dataset configuration file Dapper Server</a></li><li id="menu-2349-1" class="last odd sf-item-3 sf-depth-5 sf-no-children"><a href="using-a-dapper-server/how-to-make-a-template-to-process-dapper-constraint-expressions.html" class="sf-depth-5">How to make a template to process Dapper Constraint Expressions</a></li></ul></li><li id="menu-2337-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="configuring-user-interface-behavior.html" class="sf-depth-4">Configuring the &#039;Constraints&#039; page behavior</a></li><li id="menu-2338-1" class="last even sf-item-6 sf-depth-4 sf-no-children"><a href="the-intermediate-netcdf-file-format.html" class="sf-depth-4">The Intermediate netCDF file format</a></li></ul></li><li id="menu-2302-1" class="middle even sf-item-6 sf-depth-3 sf-total-children-4 sf-parent-children-0 sf-single-children-4 menuparent"><a href="../advanced-dataset-configuration.html" class="sf-depth-3 menuparent">Advanced Dataset Configuration</a><ul><li id="menu-2350-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../advanced-dataset-configuration/configuration-snippets.html" class="sf-depth-4">Configuration Snippets</a></li><li id="menu-2351-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../advanced-dataset-configuration/Using%20F-TDS%20to%20add%20virtual%20variables%20to%20datasets.html" class="sf-depth-4">Using F-TDS to add virtual variables to datasets</a></li><li id="menu-2352-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../advanced-dataset-configuration/fixing-the-z-axis-of-the-xml.html" class="sf-depth-4">Example: Using F-TDS to convert between sigma-levels and a depth axis</a></li><li id="menu-2353-1" class="last even sf-item-4 sf-depth-4 sf-no-children"><a href="../advanced-dataset-configuration/using-ncml-to-modify-datasets.html" class="sf-depth-4">Using NcML to modify datasets</a></li></ul></li><li id="menu-2303-1" class="middle odd sf-item-7 sf-depth-3 sf-total-children-6 sf-parent-children-0 sf-single-children-6 menuparent"><a href="../adding-curvilinear-data.html" class="sf-depth-3 menuparent">Adding Curvilinear Data</a><ul><li id="menu-2354-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/a-brief-explanation.html" class="sf-depth-4">A brief explanation of adding curvilinear data</a></li><li id="menu-2355-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/configuring-by-hand.html" class="sf-depth-4">Configuring by hand</a></li><li id="menu-2356-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/configuring-las-to-regrid-curvilinear-data-to-rectilinear-grids.html" class="sf-depth-4">Configuring LAS to regrid Curvilinear data to Rectilinear grids</a></li><li id="menu-2357-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/improving-performance.html" class="sf-depth-4">Improving performance</a></li><li id="menu-2358-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/special-setup-if-part-of-the-grid-is-rectilinear.html" class="sf-depth-4">Special setup if part of the grid is rectilinear</a></li><li id="menu-2359-1" class="last even sf-item-6 sf-depth-4 sf-no-children"><a href="../adding-curvilinear-data/creating-and-configuring-a-map-file-for-better-zooming.html" class="sf-depth-4">Creating and configuring a map file for better zooming</a></li></ul></li><li id="menu-2304-1" class="middle even sf-item-8 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../adding-ensemble-data.html" class="sf-depth-3 menuparent">Adding Ensemble Data</a><ul><li id="menu-2360-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../adding-ensemble-data/creating-an-ensemble-aggregation.html" class="sf-depth-4">Creating an Ensemble Aggregation</a></li><li id="menu-2361-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../adding-ensemble-data/configuring-las-to-use-an-ensemble.html" class="sf-depth-4">Configuring LAS to Use an Ensemble</a></li></ul></li><li id="menu-2305-1" class="middle odd sf-item-9 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../adding-data-with-hybrid-z-coordinates.html" class="sf-depth-3 menuparent">Adding data with Hybrid-Z coordinates</a><ul><li id="menu-2363-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../adding-data-with-hybrid-z-coordinates/a-brief-explanation.html" class="sf-depth-4">A brief explanation of adding hybrid-z grid</a></li><li id="menu-2364-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../adding-data-with-hybrid-z-coordinates/fixing-the-z-axis-of-the-xml.html" class="sf-depth-4">Using F-TDS to convert between sigma-levels and a depth axis</a></li></ul></li><li id="menu-2306-1" class="middle even sf-item-10 sf-depth-3 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../advanced-site-configuration.html" class="sf-depth-3 menuparent">Advanced Site Configuration</a><ul><li id="menu-2365-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../advanced-site-configuration/adding-tomcat-authentication.html" class="sf-depth-4">Adding Tomcat Authentication</a></li><li id="menu-2366-1" class="last even sf-item-2 sf-depth-4 sf-no-children"><a href="../advanced-site-configuration/adding-named-regions-to-the-map-widget.html" class="sf-depth-4">Adding Named Regions to the Map Widget</a></li></ul></li><li id="menu-2307-1" class="middle odd sf-item-11 sf-depth-3 sf-total-children-4 sf-parent-children-2 sf-single-children-2 menuparent"><a href="../extending-las.html" class="sf-depth-3 menuparent">Extending LAS</a><ul><li id="menu-2367-1" class="first odd sf-item-1 sf-depth-4 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="../extending-las/adding-a-new-operation.html" class="sf-depth-4 menuparent">Adding a new operation (that uses Ferret)</a><ul><li id="menu-2371-1" class="first odd sf-item-1 sf-depth-5 sf-no-children"><a href="../extending-las/adding-a-new-operation/adding-an-operation-to-the-product-server.html" class="sf-depth-5">Adding the Operation Definition</a></li><li id="menu-2372-1" class="middle even sf-item-2 sf-depth-5 sf-no-children"><a href="../extending-las/adding-a-new-operation/adding-options-for-the-new-operation.html" class="sf-depth-5">Adding Options for the new Operation</a></li><li id="menu-2373-1" class="middle odd sf-item-3 sf-depth-5 sf-no-children"><a href="../extending-las/adding-a-new-operation/create-the-ferret-script-that-makes-the-product.html" class="sf-depth-5">Create the Ferret Script that makes the product</a></li><li id="menu-2374-1" class="middle even sf-item-4 sf-depth-5 sf-no-children"><a href="../extending-las/adding-a-new-operation/create-an-output-template.html" class="sf-depth-5">Create an output template</a></li><li id="menu-2375-1" class="last odd sf-item-5 sf-depth-5 sf-no-children"><a href="../extending-las/adding-a-new-operation/setting-the-mime-type-of-your-output-template.html" class="sf-depth-5">Setting the MIME Type of your output template</a></li></ul></li><li id="menu-2368-1" class="middle even sf-item-2 sf-depth-4 sf-total-children-4 sf-parent-children-0 sf-single-children-4 menuparent"><a href="../extending-las/working-with-las-services.html" class="sf-depth-4 menuparent">Working with LAS &#039;services&#039;</a><ul><li id="menu-2376-1" class="first odd sf-item-1 sf-depth-5 sf-no-children"><a href="../extending-las/working-with-las-services/streamable-output.html" class="sf-depth-5">Streamable Output</a></li><li id="menu-2377-1" class="middle even sf-item-2 sf-depth-5 sf-no-children"><a href="../extending-las/working-with-las-services/the-template-service.html" class="sf-depth-5">The Template Service</a></li><li id="menu-2378-1" class="middle odd sf-item-3 sf-depth-5 sf-no-children"><a href="../extending-las/working-with-las-services/using-the-java-backend-service-with-google-earth-for-example.html" class="sf-depth-5">Using the Java Backend Service (with Google Earth for example)</a></li><li id="menu-2379-1" class="last even sf-item-4 sf-depth-5 sf-no-children"><a href="../extending-las/working-with-las-services/the-fregrid-service.html" class="sf-depth-5">The Fregrid Service</a></li></ul></li><li id="menu-2369-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../extending-las/the-operationsv7-xml-file-explained.html" class="sf-depth-4">The operations V7.xml file explained</a></li><li id="menu-2370-1" class="last even sf-item-4 sf-depth-4 sf-no-children"><a href="../extending-las/adding-a-new-operation-that-uses-a-database/database-only-operations.html" class="sf-depth-4">Adding Database-only operations</a></li></ul></li><li id="menu-2308-1" class="middle even sf-item-12 sf-depth-3 sf-total-children-3 sf-parent-children-0 sf-single-children-3 menuparent"><a href="../errors-and-debugging.html" class="sf-depth-3 menuparent">Errors and Debugging</a><ul><li id="menu-2380-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../errors-and-debugging/debugging.html" class="sf-depth-4">Logging Levels</a></li><li id="menu-2381-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../errors-and-debugging/debug-output.html" class="sf-depth-4">Debug Output</a></li><li id="menu-2382-1" class="last odd sf-item-3 sf-depth-4 sf-no-children"><a href="../errors-and-debugging/running-an-las-ferret-script-from-the-command-line.html" class="sf-depth-4">Running an LAS Ferret script from the command line</a></li></ul></li><li id="menu-2309-1" class="middle odd sf-item-13 sf-depth-3 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="../example-configuration-files-and-templates.html" class="sf-depth-3 menuparent">Example configuration files and templates</a><ul><li id="menu-2383-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/example-configuration-files-and-templates/productserver.xml" class="sf-depth-4">productserver.xml</a></li><li id="menu-2384-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/example-configuration-files-and-templates/operationsv7.xml" class="sf-depth-4">operationsV7.xml</a></li><li id="menu-2385-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/example-configuration-files-and-templates/las.xml" class="sf-depth-4">las.xml</a></li><li id="menu-2386-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/example-configuration-files-and-templates/documentation-page/ferretbackendconfig.xml" class="sf-depth-4">FerretBackendConfig.xml</a></li><li id="menu-2387-1" class="last odd sf-item-5 sf-depth-4 sf-no-children"><a href="https://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/example-configuration-files-and-templates/sturts-config.xml" class="sf-depth-4">struts-config.xml</a></li></ul></li><li id="menu-2310-1" class="last even sf-item-14 sf-depth-3 sf-no-children"><a href="../testing-las-on-the-command-line.html" class="sf-depth-3">Testing LAS on the command line</a></li></ul></li><li id="menu-2270-1" class="middle odd sf-item-7 sf-depth-2 sf-total-children-10 sf-parent-children-3 sf-single-children-7 menuparent"><a href="../../developer-documentation.html" class="sf-depth-2 menuparent">Developer Documentation</a><ul><li id="menu-2388-1" class="first odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../developer-documentation/the-javadoc.html" class="sf-depth-3">The JavaDoc</a></li><li id="menu-2389-1" class="middle even sf-item-2 sf-depth-3 sf-total-children-5 sf-parent-children-0 sf-single-children-5 menuparent"><a href="../../developer-documentation/the-xml-messages-used-by-las.html" class="sf-depth-3 menuparent">The XML and JSON Messages used by LAS</a><ul><li id="menu-2398-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-xml-messages-used-by-las/ui-request-xml-message.html" class="sf-depth-4">The UI Request XML Message</a></li><li id="menu-2399-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-xml-messages-used-by-las/the-las-backend-request.html" class="sf-depth-4">The LAS Backend Request</a></li><li id="menu-2400-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-xml-messages-used-by-las/the-las-backend-response.html" class="sf-depth-4">The LAS Backend Response</a></li><li id="menu-2403-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-xml-messages-used-by-las/examples/las-backend-request-examples/an-las-backend-request-with-constraints.html" class="sf-depth-4">Example: An LAS Backend Request with Constraints</a></li><li id="menu-2402-1" class="last odd sf-item-5 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-xml-messages-used-by-las/the-error-response-as-html-xml-or-json.html" class="sf-depth-4">The Error Response as HTML, XML or JSON</a></li></ul></li><li id="menu-2390-1" class="middle odd sf-item-3 sf-depth-3 sf-total-children-7 sf-parent-children-0 sf-single-children-7 menuparent"><a href="../../developer-documentation/the-rest-interface-for-gui-construction.html" class="sf-depth-3 menuparent">The REST Interface for GUI Construction</a><ul><li id="menu-2404-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/introduction.html" class="sf-depth-4">Introduction of GUI Construction</a></li><li id="menu-2405-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getcategories.html" class="sf-depth-4">getCategories</a></li><li id="menu-2406-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getviews.html" class="sf-depth-4">getViews</a></li><li id="menu-2407-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getgrid.html" class="sf-depth-4">getGrid</a></li><li id="menu-2408-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getoperations.html" class="sf-depth-4">getOperations</a></li><li id="menu-2409-1" class="middle even sf-item-6 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getoptions.html" class="sf-depth-4">getOptions</a></li><li id="menu-2410-1" class="last odd sf-item-7 sf-depth-4 sf-no-children"><a href="../../developer-documentation/the-rest-interface-for-gui-construction/getDataConstraints.html" class="sf-depth-4">getDataConstraints</a></li></ul></li><li id="menu-2411-1" class="middle even sf-item-4 sf-depth-3 sf-total-children-19 sf-parent-children-0 sf-single-children-19 menuparent"><a href="../../developer-documentation/javascript-components-v2.x/las-javascript-components-overview.html" class="sf-depth-3 menuparent">LAS Javascript Components Overview</a><ul><li id="menu-2418-1" class="first odd sf-item-1 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasrequest.html" class="sf-depth-4">LASRequest</a></li><li id="menu-2419-1" class="middle even sf-item-2 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasrequest-jsdoc.html" class="sf-depth-4">LASRequest JSDoc</a></li><li id="menu-2420-1" class="middle odd sf-item-3 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasresponse.html" class="sf-depth-4">LASResponse</a></li><li id="menu-2421-1" class="middle even sf-item-4 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasresponse-jsdoc.html" class="sf-depth-4">LASResponse JSDoc</a></li><li id="menu-2416-1" class="middle odd sf-item-5 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasgetgridresponse.html" class="sf-depth-4">LASGetGridResponse</a></li><li id="menu-2417-1" class="middle even sf-item-6 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasgetgridresponse-jsdoc.html" class="sf-depth-4">LASGetGridResponse JSDoc</a></li><li id="menu-2429-1" class="middle odd sf-item-7 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/menuwidget.html" class="sf-depth-4">MenuWidget</a></li><li id="menu-2430-1" class="middle even sf-item-8 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/menuwidget-jsdoc.html" class="sf-depth-4">MenuWidget JSDoc</a></li><li id="menu-2426-1" class="middle odd sf-item-9 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/latitudewidget.html" class="sf-depth-4">LatitudeWidget</a></li><li id="menu-2425-1" class="middle even sf-item-10 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/latitude-widget-jsdoc.html" class="sf-depth-4">Latitude Widget JSDoc</a></li><li id="menu-2427-1" class="middle odd sf-item-11 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/longitudewidget.html" class="sf-depth-4">LongitudeWidget</a></li><li id="menu-2428-1" class="middle even sf-item-12 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/longitudewidget-jsdoc.html" class="sf-depth-4">LongitudeWidget JSDoc</a></li><li id="menu-2412-1" class="middle odd sf-item-13 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/datewidget.html" class="sf-depth-4">DateWidget</a></li><li id="menu-2413-1" class="middle even sf-item-14 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/datewidget-jsdoc.html" class="sf-depth-4">DateWidget JSDoc</a></li><li id="menu-2414-1" class="middle odd sf-item-15 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lascontentcell.html" class="sf-depth-4">LASContentCell</a></li><li id="menu-2415-1" class="middle even sf-item-16 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lascontentcell-jsdoc.html" class="sf-depth-4">LASContentCell JSDoc</a></li><li id="menu-2422-1" class="middle odd sf-item-17 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasslidesorter.html" class="sf-depth-4">LASSlideSorter</a></li><li id="menu-2423-1" class="middle even sf-item-18 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasslidesorter-jsdoc.html" class="sf-depth-4">LASSlideSorter JSDoc</a></li><li id="menu-2424-1" class="last odd sf-item-19 sf-depth-4 sf-no-children"><a href="../../developer-documentation/javascript-components-v2.x/lasui-jsdoc.html" class="sf-depth-4">LASUI JSDoc</a></li></ul></li><li id="menu-2392-1" class="middle odd sf-item-5 sf-depth-3 sf-no-children"><a href="../../developer-documentation/las-error-message-from-the-ferret-backend-service.html" class="sf-depth-3">LAS Error Message from the Ferret Backend Service</a></li><li id="menu-2393-1" class="middle even sf-item-6 sf-depth-3 sf-no-children"><a href="../../developer-documentation/full-error-output.html" class="sf-depth-3">Full Error Output</a></li><li id="menu-2394-1" class="middle odd sf-item-7 sf-depth-3 sf-no-children"><a href="../../developer-documentation/map_scale-information.html" class="sf-depth-3">map_scale information</a></li><li id="menu-2395-1" class="middle even sf-item-8 sf-depth-3 sf-no-children"><a href="../../developer-documentation/getting-configuration-information-from-within-an-output-template.html" class="sf-depth-3">Getting Configuration Information From Within an Output Template</a></li><li id="menu-2396-1" class="middle odd sf-item-9 sf-depth-3 sf-no-children"><a href="../../developer-documentation/template-snippets.html" class="sf-depth-3">Template Snippets</a></li><li id="menu-2397-1" class="last even sf-item-10 sf-depth-3 sf-no-children"><a href="../../developer-documentation/animation-frames-xml.html" class="sf-depth-3">Animation Frames XML</a></li></ul></li><li id="menu-2271-1" class="middle even sf-item-8 sf-depth-2 sf-total-children-6 sf-parent-children-0 sf-single-children-6 menuparent"><a href="../../the-ferret-thredds-data-server-f-tds.html" class="sf-depth-2 menuparent">The Ferret-THREDDS Data Server (F-TDS)</a><ul><li id="menu-2431-1" class="first odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../the-ferret-thredds-data-server-f-tds/installation-instructions-for-f-tds.html" class="sf-depth-3">Installation instructions for F-TDS</a></li><li id="menu-2462-1" class="middle even sf-item-2 sf-depth-3 sf-no-children"><a href="../install-las-using-a-remote-tds/install-las-using-a-remote-tds.html" class="sf-depth-3">Installing LAS using a remote Tomcat for F-TDS</a></li><li id="menu-2432-1" class="middle odd sf-item-3 sf-depth-3 sf-no-children"><a href="../../the-ferret-thredds-data-server-f-tds/using-f-tds-and-the-server-side-analysis.html" class="sf-depth-3">Using F-TDS and the server-side analysis</a></li><li id="menu-2433-1" class="middle even sf-item-4 sf-depth-3 sf-no-children"><a href="../../the-ferret-thredds-data-server-f-tds/how-f-tds-is-used-in-las.html" class="sf-depth-3">How F-TDS is used in LAS</a></li><li id="menu-2434-1" class="middle odd sf-item-5 sf-depth-3 sf-no-children"><a href="../../the-ferret-thredds-data-server-f-tds/perl-script-build-ferret-environment-xml.html" class="sf-depth-3">Perl script to build the Ferret environment XML</a></li><li id="menu-2435-1" class="last even sf-item-6 sf-depth-3 sf-no-children"><a href="../../the-ferret-thredds-data-server-f-tds/debugging-your-f-tds-and-las-integration.html" class="sf-depth-3">Debugging Your F-TDS and LAS Integration</a></li></ul></li><li id="menu-2272-1" class="middle odd sf-item-9 sf-depth-2 sf-total-children-2 sf-parent-children-0 sf-single-children-2 menuparent"><a href="../../working-examples.html" class="sf-depth-2 menuparent">LAS working examples</a><ul><li id="menu-2451-1" class="first odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../las-servers.html" class="sf-depth-3">LAS Servers</a></li><li id="menu-2452-1" class="last even sf-item-2 sf-depth-3 sf-no-children"><a href="../../list-of-operational-servers.html" class="sf-depth-3">Short List of LAS Servers</a></li></ul></li><li id="menu-2273-1" class="middle even sf-item-10 sf-depth-2 sf-total-children-1 sf-parent-children-0 sf-single-children-1 menuparent"><a href="../../the-uaf-catalog-cleaner.html" class="sf-depth-2 menuparent">The UAF Catalog Cleaner</a><ul><li id="menu-2436-1" class="firstandlast odd sf-item-1 sf-depth-3 sf-no-children"><a href="../../the-uaf-catalog-cleaner/catalog-cleaner-documentatin.html" class="sf-depth-3">Catalog Cleaner documentation</a></li></ul></li><li id="menu-2455-1" class="last odd sf-item-11 sf-depth-2 sf-no-children"><a href="../../email-admin.html" class="sf-depth-2">Email Admin</a></li></ul>    </div>
+  </div>
+</div>  </div>
+</aside><div class="grid-9 region region-content equal-height-element" id="region-content">
+  <div class="region-inner region-content-inner">
+    <a id="main-content"></a>
+                <h1 class="title" id="page-title">Discrete Geometry Data served by ERDDAP</h1>
+                        <div class="block block-system block-main block-system-main odd block-without-title" id="block-system-main">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <article about="/LAS/documentation/installer-documentation/adding-scattered-data/dsg-data-served-by-erddap" typeof="sioc:Item foaf:Document" class="node node-documentation-page node-promoted node-published node-not-sticky author-kobrien odd clearfix" id="node-documentation-page-905">
+  
+  <!-- add the following line to print out updated date -->
+  <div class="modified-date">Last modified: Thu, 03/23/2017 - 20:12</div>
+  <!-- add the following line to print out the page description -->
+  
+<div class="field field-name-field-page-description field-type-text field-label-hidden">
+    <div class="field-items">
+          <div class="field-item even" property="schema:description">Starting with LAS v8.2 we have capabiliites to use LAS with trajectory data served by ERDDAP. And with later versions we have added capabilities for profile data and timeseries data. These capabiliites include fast plotting of trajectory paths colored by the data varaible, location and data plots for profiles and timeseries features and special selection widgets for picking individual features out of the data set and tools for configuring data sets in to LAS.</div>
+      </div>
+</div>
+  
+  <div class="content clearfix">
+                
+<div class="field field-name-body field-type-text-with-summary field-label-hidden">
+    <div class="field-items">
+          <div class="field-item even" property="content:encoded"><h3>Background</h3>
+<p>All the details for using the trajectory, profile and point (timeseries) data set capabilites available starting with v8.2. N.B. To use LAS with ERDDAP discrete geometry data you must arrange for your data to include two columns that specify the longitude of the observation. In the first such column, the values should range from -180 to 180 in the second column (called lon360) re-normalize the values so they range from 0 to 360. N.B. If you want to use the "season" selection widget you must introduce a column into your data set which identifies the month in which the observation was taken with one of the following 12 strings, "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", or "Dec".</p>
+<p>Data organized in various discrete geometries such as time along a path which is being served by ERDDAP can be configured into LAS and can take advantage of many special user interface elements and plot types.</p>
+<p><img alt="A trajectory plot from LAS v8.1" class="image-left" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/traj_plot.png" /></p>
+<p>This is an example of a plot of trajectories on a map.</p>
+<p>The path of the platform is colored by the value of the parameter being displayed.</p>
+<p>Point data, with or without a z-axis can also be configured into LAS and plotted. The map plot for these data places a disk at the location of the observation and colors segments of the disk according to the value of the parameter. For profile data, the segments around the disk show the value of the parameter long the vertical axis and for time series data the segments around the disk change with time.</p>
+<p><img alt="A location time plot for station data." class="image-left" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/timeseries.png" /></p>
+<p>In addition to the custom plot types available, the new capabilities for handling discrete geo-metries in LAS include custom constraint widgets that allow users to select sub-sets of the features based on metadata variables from the data set. The id, platform type, and the name of principal investigator are examples of the type of subsetting that might apply to discrete geometry data.</p>
+<p>When data are ingested into ERDDAP certain metadata associated with a collection can be designated as a ‚Äúsub-set‚Äù variable. This means that some sub-set of the features in the collection are associated with a single value of the sub-set variable. In some instances like the ID, the mapping is one-to-one, but in many other cases like the name of the ship taking the observations the mapping can be one value to many individual features.</p>
+<p>Each of these two types of sub-set variables is represented by its own widget in the user interface.</p>
+<p>The image at below shows the ‚ÄúSelect‚Äù widget which will select an individual trajectory using a sub-set variable, the trajectory ID, that has a one-to-one mapping to the data. The ‚Äúby Cruise Metadata‚Äù widget which can be opened by clicking on the title will expose a similar widget which contains variables, like the ship name, which are mapped to the data as one-to-many. Of course, in either widget more than one value can be selected and applied to an LAS product.</p>
+<h3><img alt="Example Profile Plot" class="image-inline" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/profile.png" /></h3>
+<h3><img alt="Timeseries Plot" class="image-inline" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/timeseriesCI.png" /></h3>
+<h3> </h3>
+<h3>Configuring the ERDDAP Access to the Collection</h3>
+<p>To begin, we developed a tool you can use to create a configuration. It's possible that the configuration will not be complete and you will have to edit the resulting file. But, editing the file should be much easier than starting from scratch. All of the details about the resulting configuration are given below.</p>
+<p>To build a sample configuration for each of the discrete geometry types we support, run the following commands:</p>
+<p>./bin/addDiscrete.sh -u <a href="http://upwell.pfeg.noaa.gov/erddap/tabledap">http://upwell.pfeg.noaa.gov/erddap/tabledap</a> -i NOAAShipTrackWTEC (A trajectory data set)<br />
+./bin/addDiscrete.sh -u <a href="http://coastwatch.pfeg.noaa.gov/erddap/tabledap">http://coastwatch.pfeg.noaa.gov/erddap/tabledap</a> -i erdCinpKfmT (A time series of SST at various stations)<br />
+./bin/addDiscrete.sh -u <a href="http://ferret.pmel.noaa.gov/erddap/tabledap">http://ferret.pmel.noaa.gov/erddap/tabledap</a> -i profiles_b1fc_d6f5_b401 (profile)</p>
+<p>
+Where the -u argument is the base URL of the tabledap section of the ERDDAP server and the -i argument is the ID of the data set that contains the discrete geometry data. Each command will create a file called las_from_scanerrdap.xml.</p>
+<p>The software will attempt to automatically find and configure the ‚Äúsub-set‚Äù variables, the variables that represent latitude, longitude, and time and the dependent variables. It will also make special configuration properties for a table of property-property plot thumbnails and for the property-property viewer.<br /><img alt="Example of selecting by trajectory ID." class="image-left" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/expo_widgets.png" style="width: 285px; height: 499px;" /><br />
+Finally, for large data sets you might want set up a display_lo and display_hi value. When the data set is selected in the UI, the time widget will be set to the display_lo and display_hi values. Choosing a small interval will prevent the UI from automatically requesting a large amount of data when the data set is first selected.The final result of the edit, will look something like this:</p>
+<p> </p>
+<pre>
+ &lt;time-OSMCV4_DUO_SURFACE_TRAJECTORY type="t" units="day" display_lo="01-APR-2013" display_hi="02-APR-2013"&gt;
+ &lt;arange start="2013-04-01 00:00:00" size="30" step="1" /&gt;
+ &lt;/time-OSMCV4_DUO_SURFACE_TRAJECTORY&gt;
+</pre><p>
+N.B. the "Ferret" format of the time specification in the display_lo and display_hi attributes.</p>
+<h3>Specify use of the discrete geometry UI</h3>
+<p>Here are the details about the configuration for a collection of discrete geometry files being served by ERDDAP so that they can be used in LAS and take advantage of the special features for discrete geometry data. All of this will be done for you automatically the addDiscrete.sh software.</p>
+<p>First you must add the following &lt;ui&gt; property which will load up the special UI features and LAS products whenever this data set is selected.</p>
+<pre>
+&lt;trajectory_dataset name="My Trajectory Data‚Äù url="http://dunkel.pmel.noaa.gov:8660/erddap/tabledap/"&gt;
+ &lt;properties&gt;
+ &lt;ui&gt;
+ &lt;default&gt;file:ui.xml#Trajectories&lt;/default&gt;
+ &lt;/ui&gt;
+
+...
+</pre><h3>Configure Access to the Data Set</h3>
+<p>Then there is a block of properties to described the data in ERDDAP. This block of XML appears as part of the definition of the data set under the &lt;properties&gt; element within an element called &lt;tabledap_access&gt;.<br />
+ </p>
+<pre>
+&lt;socat name="Surface Ocean CO‚ÇÇ Atlas" url="http://my.erddapserver.org/erddap/tabledap/"&gt;
+ &lt;properties&gt;
+ &lt;ui&gt;
+ &lt;default&gt;file:ui.xml#Trajectories&lt;/default&gt;
+ &lt;/ui&gt;
+ &lt;tabledap_access&gt;
+ &lt;server&gt;ERD TableDAP&lt;/server&gt;
+ &lt;id&gt;datasetID_04fd_e972_77c8&lt;/id&gt;
+ &lt;title&gt;My Trajectory Data&lt;/title&gt;
+ &lt;longitude&gt;longitude&lt;/longitude&gt;
+ &lt;lon_domain&gt;-180:180&lt;/lon_domain&gt;
+ &lt;latitude&gt;latitude&lt;/latitude&gt;
+ &lt;time&gt;time&lt;/time&gt;
+ &lt;time_units&gt;sec since 1970-01-01T00:00:00Z&lt;/time_units&gt;
+ &lt;time_type&gt;double&lt;/time_type&gt;
+ &lt;trajectory_id&gt;cruise_expocode&lt;/trajectory_id&gt;
+ &lt;orderby&gt;cruise_expocode,time&lt;/orderby&gt;
+ &lt;dummy&gt;temperature&lt;/dummy&gt;
+ &lt;/tabledap_access 
+</pre><p>There are about a dozen elements of information that you must fill out about your server</p>
+<p>After you have installed ERDDAP and configured you discrete geomertry data into the server, you can find an unique ID for the data set on the ‚Äútabledap‚Äù page of the ERDDAP server. This URL is also the URL that you should enter as the URL for the data set (set to <a href="http://my.erddapserver.org/erddap/tabledap">http://my.erddapserver.org/erddap/tabledap</a> in this example). The ID is the last column of the display labeled Dataset ID.</p>
+<p>Within the trajectory data set there must be columns that represent the time, longitude and latitude of each observation. These columns must be identified by name in the &lt;time&gt;, &lt;longitude&gt; and &lt;latitude&gt; elements respectively. In our example, these variables are called time, longitude and latitude respectively. You can find the names of these variables by looking at the data display for this data set in ERDDAP. The URL with the base URL you defined in the url attribute of the data set definition followed by the ERDDAP Dataset ID. (<a href="http://my.erddapserver.org/erddap/tabledap/datasetid_04fd_e972_77c8">http://my.erddapserver.org/erddap/tabledap/datasetid_04fd_e972_77c8</a> in our example).</p>
+<p>The &lt;lon_domain&gt; give the range of the longitude values found in the data set. This will always be set to -180 to 180 (see the note in bold at the top of the document).</p>
+<p>The &lt;time_units&gt; and the &lt;time_type&gt; give us information about how to translate back and forth between the number stored the ERDDAP time column and a standard calendar string like 1962-03-06 02:24:00. The time units are express as [Well Known Unit] since [DATE TIME STRING] (sec since 1970-01-1-T00:00:00Z in our example). And the values are of type double which is necessary to have enough precision to store the seconds since midnight 1970-01-01.</p>
+<p>One very important bit of information that must be specified is the variable that contains the ID for the data set. When working with discrete geometry data, there is at least one variable whose value is constant for all of the times and locations that constitute a single feature. This variable is used for organizing the data into a netCDF CF DSG file and for the user interface element that allows users to select an entire feature. For example, when looking at the data display for a tabledap trajectory data set, the trajectory_id variable is easy to identify by looking at the attributes at the bottom of the page and find the variable with the cf_role attribute of ‚Äútrajectory_id‚Äù. For example:</p>
+<p>Attributes {<br />
+s {<br />
+cruise_expocode {<br />
+String cf_role "<b>trajectory_id</b>";<br />
+String long_name "EXPO Code";<br />
+}<br />
+In this case, the variable named cruise_expocode plays the role of the trajectory_id for this data set.Similarly, the id variable for profile data will have a cf_role of profile_id and a timeseries point will have a variable with a cf_role marked as timeseries_id.</p>
+<p>Additional configuration elements must be specified to work with a discrete geometry data set in LAS. For some queries LAS wants to make it is only interested in the latitude, longitude and time variables, but ERDDAP expects at least one data variable to be present in each request. Pick one of the data variables from the data set and put its name in the &lt;dummy&gt; element. We used temperature in this example.</p>
+<p>You can also sort the the resulting features. By default they are sorted by id and time which is the order necessary make the plots work correctly. Ideally, the data come out sorted from ERDDAP because they were properly sorted when the data were loaded. We want the plots to work even if the data is not sorted so we ask for them to be sorted correctly in every request we make. But, if you want to use your LAS for quality control to look for unsorted data use &lt;orderby&gt;none&lt;/orderby&gt; to explicitly stop LAS from requesting the data be sorted.</p>
+<h3>The LAS Dataset Configuration for Discrete Geometries</h3>
+<p>After setting up the access to the ERDDAP server, the next configuration step is to create the standard LAS dataset and variable configuration. The majority of this configuration is identical to the configuration for data defined on a grid, but the section below highlights some important differences.</p>
+<p>First of all, independent variables like, latitude, longitude and time appear in a row of data along with their dependent variable counterparts. And it is sometimes interesting to make plots of an independent variable vs a dependent variable in the correlation viewer. In order to enable this capability, the independent variables must be defined not only in the axes and grid specification, but in the list of data set variables. For example:</p>
+<pre>
+&lt;variables&gt;
+ &lt;time grid_type="trajectory" units="sec since 1970-01-01T00:00:00Z" name="Time" url="#time"&gt;
+ &lt;link match="/lasdata/grids/socat_grid" /&gt; &lt;/time&gt; &lt;latitude grid_type="trajectory" units="degN" name="Latitude" url="#latitude"&gt;
+ &lt;link match="/lasdata/grids/socat_grid" /&gt; &lt;/latitude&gt; &lt;longitude grid_type="trajectory" units="degE" name="Longitude" url="#longitude"&gt;
+ &lt;link match="/lasdata/grids/socat_grid" /&gt;
+ &lt;/longitude&gt; &lt;fCO2_recomputed grid_type="trajectory" units="uatm" name="fCO‚ÇÇ Recomputed" url="#fCO2_recomputed"&gt;
+ &lt;link match="/lasdata/grids/socat_grid" /&gt;
+ &lt;/fCO2_recomputed&gt;
+ &lt;cruise_expocode color_by="true" trajectory_id="true" grid_type="trajectory" subset_variable="true" units="text" name="Cruise EXPOCODE" url="#cruise_expocode"&gt;
+ &lt;link match="/lasdata/grids/socat_grid" /&gt;
+ &lt;/cruise_expocode&gt;</pre><p> </p>
+<p>Note also that each of these variables is marked with the grid_type="trajectory" attribute. It is the presence of this attribute that triggers the loading of the special UI elements and operations when such a variable is selected. Similarly, grid_type="profile" and grid_type="timeseries" will be set for the other feature types currently supported.</p>
+<p> </p>
+<p>Also, take a close look at the cruise_expocode. Previously, we saw that this variable was identified in the properties as the trajectory ID. That fact should also be noted in the data set configuration with the trajectory_id="true" attribute. The &lt;cruise_expocode&gt; element also marked with the subset_variable="true" attribute. This prevents the variable from being listed as one of the variables for plotting on the map since the current backend scripts have not been enhanced to be figure out how to color the trajectories based on a variable that contains text as its value.Finally, the correlation viewer can plot the value of the property vs the value of the other where the each trajectory has a unique marker on the graph. To enable this capability, you must mark the variable with the color_by="true". This attribute is necessary for the special correlation plotting interface (Beta in v8.2) even though the variable is already identified as the trajectory ID.</p>
+<p>To make exploration of the data with the property-property plot viewer work as fast as possible, the set of constraints active when the viewer starts will remain active through out the session. And all of the data which can be used in the session is extracted from ERDDAP once at the beginning. The names of the variables that can be used in the property-property viewer are defined in the configuration by the &lt;all_variables&gt; element.</p>
+<p><img alt="The LAS Trajectory Correlation Viewer" class="image-left" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/correl.png" style="width: 1855px; height: 1056px;" /></p>
+<h3>Configure the UI Widgets</h3>
+<p>As discussed in the introduction, there are several new widgets that will appear in the LAS User Interface when a discrete geometry data set is selected. There is special configuration that is added to the LAS data set configuration to control the appearance and function of these widgets.</p>
+<pre>
+&lt;constraints&gt;
+ &lt;constraint_group type="selection" name="Individual Cruise(s)"&gt;
+ &lt;constraint name="Select By"&gt;
+ &lt;variable IDREF="cruise_expocode"/&gt;
+ &lt;variable IDREF="cruise_name"/&gt;
+ &lt;key&gt;cruise_expocode&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+ &lt;constraint_group type="subset" name="by Cruise Metadata"&gt;
+ &lt;constraint widget="list"&gt;
+ &lt;variable IDREF="PIs"/&gt;
+ &lt;key&gt;PIs&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="vessel_name"/&gt;
+ &lt;key&gt;vessel_name&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="QC_flag"/&gt;
+ &lt;key&gt;QC_flag&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+ &lt;constraint_group type="subset" name="by Region"&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="region_id"/&gt;
+ &lt;key&gt;region_id&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+ &lt;constraint_group type="season" name="by Season"&gt;
+ &lt;constraint widget="month"&gt;
+ &lt;variable IDREF="tmonth"/&gt;
+ &lt;key&gt;tmonth&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+ &lt;constraint_group type="variable" name="by Variable Range"/&gt;
+ &lt;constraint_group type="valid" name="by Valid Data"/&gt;
+&lt;/constraints&gt;</pre><p>These blocks of XML get translated into User Interface widgets that let users constrain the data that is included in a particular product result. The first two function similarly with some subtle differences in the semantics of what features are selected.</p>
+<p>The first group we will look at is will display a collection of variables which are mapped to the features in a data set one-to-one. The most obvious (and usually the only) such variable will be the ID. In this data set the trajectory ID is called cruise_expocode. As such we use the cruise_expocode as the ‚Äúkey‚Äù for all of the searches. Since the mapping for both variables is one-to-one, any other variable that maps one-to-one to the individual trajectories should map one-to-one to the trajectory id.</p>
+<pre>
+ &lt;constraint_group type="selection" name="Individual Cruise(s)"&gt;
+ &lt;constraint name="Select By"&gt;
+ &lt;variable IDREF="cruise_expocode"/&gt;
+ &lt;variable IDREF="cruise_name"/&gt;
+ &lt;key&gt;cruise_expocode&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+</pre><p>When a data set adds this configuration the resulting widget will display the values of the variable to the user and when the search is made the it will use the corresponding ‚Äúkey‚Äù to make the search. In the case of the curise_expocde these two values are the same, in the case of the criuse_name, the value displayed to the user is different from the ‚Äúkey‚Äù value that is used for the search.</p>
+<p>The second group functions the same, but selecting a value from this group might resulting the the selection of many features since the mapping for these variables can be one-to-many.</p>
+<pre>
+ &lt;constraint_group type="subset" name="by Cruise Metadata"&gt;
+ &lt;constraint widget="list"&gt;
+ &lt;variable IDREF="PIs"/&gt;
+ &lt;key&gt;PIs&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="vessel_name"/&gt;
+ &lt;key&gt;vessel_name&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="QC_flag"/&gt;
+ &lt;key&gt;QC_flag&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;</pre><p>
+In this case the variable and its key are the always the same.</p>
+<p>These constraint group are is exactly the same as the ‚Äúby Cruise Metadata‚Äù group above, but the semantics is special (a region of the earth) not a characteristic of the trajectory per se. So to be able to give the constraint widget its own title we simply add another constraint group with the same syntax as the previous with the title ‚Äúby Region‚Äù.</p>
+<pre>
+ &lt;constraint_group type="subset" name="by Region"&gt;
+ &lt;constraint type="subset" widget="list"&gt;
+ &lt;variable IDREF="region_id"/&gt;
+ &lt;key&gt;region_id&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+</pre><p>The next group has as special semantics and a unique display for specifying the values. The data set has a column which identifies the month of the year in which the data point was collected. By specifying a constraint group of type ‚Äúseason‚Äù we the user interface will show the season constraint and the user can select any sequence of consecutive months (like DJF for example) to extract data collected during those months only. This</p>
+<pre>
+ &lt;constraint_group type="season" name="by Season"&gt;
+ &lt;constraint widget="month"&gt;
+ &lt;variable IDREF="tmonth"/&gt;
+ &lt;key&gt;tmonth&lt;/key&gt;
+ &lt;/constraint&gt;
+ &lt;/constraint_group&gt;
+</pre><p>In the case of the region and season constraints the constraint applies to each data row, so it is possible that some of the selections made by applying such a constraint will result in only part of a trajectory being included in the LAS output product since the value changed part way through the cruise. This constraint will only work if you have a column in your data set which identifies the month in which the observation was taken using the appropriate string in the list: "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", or "Dec". We have a Ferret script that prepares this column for us and writes the result to a discrete geometry netCDF file before we import the data into ERDDAP. Using these strings we can do "OR" queries so that we can collect data from December, January and February. The sorting on the actual observation time keeps the trajectory geometry intact.</p>
+<p>The next two are easy to include and easy to explain.</p>
+<pre>
+ &lt;constraint_group type="variable" name="by Variable Range"/&gt;
+</pre><p>Including a constraint group of this type will make a widget appear in your user interface which lists each variable (those variables that are not marked with the subset=‚Äùtrue‚Äù attribute in the configuration) and will allow the user to enter a high and low value. The next product created will constrain the data to be in the range. When a product is created, the actual range of the data being displayed will automatically be filled in on the widget to make it easier to know what to enter.</p>
+<pre>
+ &lt;constraint_group type="valid" name="by Valid Data"/&gt;
+</pre><p>Including this type of constraint group will cause a UI element to appear that will select variable where the data must be valid for the row to be included in the result. If for example want to see a plot of temperature vs salinity only where these is valid measurement for FCO2, choose FCO2 from the ‚Äúby Valid Data‚Äù widget before requesting the product.</p>
+<h3>Configuration Properties for the Property-Property Viewer</h3>
+<p>In order to make exploring the data set with the property-property viewer as efficient as possible LAS will extract all of the data variables from ERDDAP instead of just the currently selected variable as it does with a map plot. This means that when a user wants to change one of the variables on the plot axis LAS can make the new plot without returning to ERDDAP to extract new data. Some data collections contain a massive number of variables, not all of which are suitable for use in the property-property viewer. The addDiscrete.sh software will create a list of variables and store the results in a property in the configuration.</p>
+<pre>
+ &lt;all_variables&gt;windSpeed_kts,platformCourse,waterDepth_f,airTemperature,windSpeed_m_s,relativeHumidity,windDirection,platformSpeed_m_s,platformSpeed_kts,waterDepth_m,salinity,seaTemperature,airPressure&lt;/all_variables&gt;
+</pre><p>You can modify the list by adding new variables from the data set or by removing those variables which are not interesting for property-property plots. The variables are listed by their ERDDAP short name which is shown on the <a href="http://coastwatch.pfeg.noaa.gov/erddap/tabledap/NOAAShipTrackWTEC.html">data page for the ERDDAP data set</a>.</p>
+<h3>Configuration Properties for the Table of Thumbnail Plots</h3>
+<p><img alt="The trajectory thumbnail page." class="image-left" src="https://ferret.pmel.noaa.gov/LAS/sites/default/files/documentation-images/LAS Property-property Thumbnails - Google Chrome_115.png" /></p>
+<p>Another feature of LAS for trajectory data sets is a product that will produce a grid of thumbnail images of property-property plots. The thumbnails are live links to the property-property viewer so the user can easily explore any interesting plots on the the page. By default, addDiscrete.sh will configure LAS to create a thumbnail a plot of the latitude and longitude (just a simple track of the trajectory) and then to pair each data variable with time. For a profile, each variable will be paired with depth and for a timeseries each variable will be paired with time in addition to the latitude/longitude location plot. This is an area where the installer might want to consider adding other pairs to the configuration for such common plots as salinity vs temperature. All of the properties that control the thumbnail page are in the &lt;thumbnail&gt; property group.</p>
+<p>The configuration of the plot pair are made by listing the <b>LAS ID</b> of the variables as shown below in the &lt;variable_pairs&gt; element.</p>
+<pre>
+&lt;thumbnails&gt;
+ &lt;variable_names&gt;windSpeed_kts,platformCourse,waterDepth_f,airTemperature,windSpeed_m_s,relativeHumidity,windDirection,platformSpeed_m_s,platformSpeed_kts,waterDepth_m,salinity,seaTemperature,airPressure&lt;/variable_names&gt;
+ &lt;variable_pairs&gt;longitude-NOAAShipTrackWTEC,latitude-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,windSpeed_kts-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,platformCourse-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,waterDepth_f-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,airTemperature-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,windSpeed_m_s-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,relativeHumidity-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,windDirection-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,platformSpeed_m_s-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,platformSpeed_kts-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,waterDepth_m-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,salinity-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,seaTemperature-NOAAShipTrackWTEC
+time-NOAAShipTrackWTEC,airPressure-NOAAShipTrackWTEC&lt;/variable_pairs&gt;
+ &lt;metadata&gt;ship_call_sign&lt;/metadata&gt;
+ &lt;/thumbnails&gt;
+</pre><p>At the top of the thumbnail page LAS will list some metadata to let the user know more about the feature being plotted. You can control which variables values are display at the top of the page by listing the ERDDAP variable names of the variables you want to include in the &lt;metadata&gt; element. In this case, the only metadata shown will be the trajectory ID, ship_call_sign which is added by default by addDiscrete.sh. An installer might want to add information like the principal investigator and the platform name to the list.</p>
+<p>Finally, to make the plots most efficiently, LAS will extract all the variables necessary to do all of the plots when it's making the first plot. In order to do that, all the variables LAS needs for the thumbnails must be listed in the &lt;variable_names&gt; element.</p>
+<h3>Configuration Hints</h3>
+<p>If you have to build or fix the configuration by hand on the tabledap data page for a data set there is a block of netCDF-like metadata for each variable at the bottom of the page which is helpful for building the configuration.</p>
+</div>
+      </div>
+</div>
+    
+  </div>
+  
+  <div class="clearfix">
+          <nav class="links node-links clearfix"></nav>
+    
+      </div>
+</article>
+    </div>
+  </div>
+</div>      </div>
+</div>  </div>
+</div></section>    
+  
+      <footer id="section-footer" class="section section-footer">
+  <div id="zone-footer-wrapper" class="zone-wrapper zone-footer-wrapper clearfix">  
+  <div id="zone-footer" class="zone zone-footer clearfix container-12">
+    <div class="grid-8 region region-footer-first" id="region-footer-first">
+  <div class="region-inner region-footer-first-inner">
+    <div class="block block-block block-1 block-block-1 odd block-without-title" id="block-block-1">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <p><a href="https://www.pmel.noaa.gov/"><img alt="PMEL logo" border="0" src="https://ferret.pmel.noaa.gov/LAS/sites/all/themes/pacific_marine/images/PMEL-meatball-logo-sm.png" style="width: 110px; height: 110px;" /></a></p>
+    </div>
+  </div>
+</div><div class="block block-block block-2 block-block-2 even block-without-title" id="block-block-2">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <p><a href="https://www.noaa.gov/">National Oceanic and Atmospheric Administration</a><br /><a href="https://www.pmel.noaa.gov/">Pacific Marine Environmental Laboratory</a> | <a href="https://ferret.pmel.noaa.gov/LAS">Live Access Server</a><br /><a href="mailto:oar.pmel.contact_las@noaa.gov">oar.pmel.contact_las@noaa.gov </a></p>
+    </div>
+  </div>
+</div><div class="block block-menu block-menu-footer-first-menu block-menu-menu-footer-first-menu odd block-without-title" id="block-menu-menu-footer-first-menu">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <ul class="menu"><li class="first leaf"><a href="https://www.commerce.gov/" title="The United States Department of Commerce">DOC</a></li>
+<li class="leaf"><a href="https://www.noaa.gov/" title="The National Oceanographic and Atmospheric Administration">NOAA</a></li>
+<li class="leaf"><a href="https://www.research.noaa.gov/" title="Department of Commerce &gt; NOAA &gt; Office of Oceanic and Atmospheric Research">OAR</a></li>
+<li class="leaf"><a href="https://www.pmel.noaa.gov/">PMEL</a></li>
+<li class="leaf"><a href="https://www.pmel.noaa.gov/project/science-data-integration" target="_blank">SDIG</a></li>
+<li class="leaf"><a href="https://www.noaa.gov/protecting-your-privacy" target="_blank">Privacy Policy</a></li>
+<li class="last leaf"><a href="https://www.noaa.gov/disclaimer" target="_blank">Disclaimer</a></li>
+</ul>    </div>
+  </div>
+</div>  </div>
+</div><div class="grid-4 region region-footer-second" id="region-footer-second">
+  <div class="region-inner region-footer-second-inner">
+    <div class="block block-menu block-menu-footer-second-menu block-menu-menu-footer-second-menu odd block-without-title" id="block-menu-menu-footer-second-menu">
+  <div class="block-inner clearfix">
+                
+    <div class="content clearfix">
+      <ul class="menu"><li class="first last leaf"><a href="../../../sitemap.html" title="Title of Site map page">LAS Sitemap</a></li>
+</ul>    </div>
+  </div>
+</div>  </div>
+</div>  </div>
+</div></footer>  </div>  <div class="region region-page-bottom" id="region-page-bottom">
+  <div class="region-inner region-page-bottom-inner">
+      </div>
+</div>  <div id="body-bg-bottom"></div>
+</body>
+
+<!-- Mirrored from ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/adding-scattered-data/dsg-data-served-by-erddap by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 15 Jun 2023 18:26:06 GMT -->
+</html>
