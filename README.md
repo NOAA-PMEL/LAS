@@ -1,5 +1,7 @@
 # LAS
 
+N.B. We are no longer doing any development or maintenace on this project.
+
 The Live Access Server from NOAA/PMEL.  
 The NOAA-PMEL/LAS GitHub repository is now the primary repository for LAS source code and releases.
 
