@@ -1,7 +1,7 @@
 # LAS
 
 # N.B. There is a serious vulnerabilty in this software (CVE #).
-# If you are still running a version of this, you should apply the following fix.
+# If you are still running LAS 8, you should apply the following fix.
 
 ## There are no release packages available. You should not be intalling new instances of the application.
 
