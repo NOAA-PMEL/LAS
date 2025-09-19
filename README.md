@@ -5,7 +5,7 @@
 
 ## There are no release packages available. You should not be intalling new instances of the application.
 
-If you have other options for providing similar services to you users, I recoomend you move to those tools and stop using LAS.
+If you have other options for providing similar services to you users, I suggest you move to those tools and stop using LAS.
 
 ### To fix the issue that was in the last publically available release.
 
