@@ -365,6 +365,12 @@ public class RequestInputFilter implements Filter {
             if ( (requestXML != null && !requestXML.equals("")) ) {
             	try {
             		requestXML = JDOMUtils.decode(requestXML, "UTF-8");
+					    String expression = lasRequest.getProperty("ferret", "expression");
+                        if (!expression.isEmpty()) {
+                            LASAction.logerror(request, "Ferret expressions are no longer allowed.", "");
+                            response.sendError(404, "Ferret expressions are no longer allowed.");
+                            return;
+                        }
             	} catch (UnsupportedEncodingException e) {
             		LASAction.logerror(request, "Error decoding the XML request query string.", e);
             		response.sendError(HttpServletResponse.SC_NOT_FOUND, "Request contains an illegal xml query parameter value.");
