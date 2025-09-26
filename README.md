@@ -9,7 +9,7 @@ If you have other options for providing similar services to you users, I suggest
 
 ### To fix the issue that was in the last publically available release.
 
-  1. Get the latest version of [gov.noaa.pmel.tmap.las.filter.RequestFilter.java](https://github.com/NOAA-PMEL/LAS/blob/main/JavaSource/gov/noaa/pmel/tmap/las/filter/RequestInputFilter.java) from here. It has the necessary fix.
+  1. Get the latest version of [gov.noaa.pmel.tmap.las.filter.RequestInputFilter.java](https://github.com/NOAA-PMEL/LAS/blob/main/JavaSource/gov/noaa/pmel/tmap/las/filter/RequestInputFilter.java) from here. It has the necessary fix.
   3. Compile it as appropriate for your local environment.From LAS directory from your original install:
       1. Put the new source in place, JavaSource/gov/noaa/pmel/tmap/las/filter/RequestInputFilter.java:
       2. ant compile
