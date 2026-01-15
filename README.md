@@ -1,6 +1,6 @@
 # LAS
 
-# N.B. There is a serious vulnerabilty in this software (CVE-2025-62193).
+# N.B. There is a serious vulnerabilty in this software ([CVE-2025-62193](https://www.cve.org/CVERecord?id=CVE-2025-62193)).
 # If you are still running LAS 8, you should apply the following fix.
 
 ## There are no release packages available. You should not be intalling new instances of the application.
